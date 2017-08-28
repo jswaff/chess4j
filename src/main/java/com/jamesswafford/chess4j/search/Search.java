@@ -70,10 +70,10 @@ public final class Search {
 			if (numMovesSearched==0) {
 				score = -searchHelper(pv,-beta,-alpha,board,depth-1+extend,1,true,givesCheck,false,stats);
 			} else {
-				//score = -searchHelper(pv,-(alpha+1),-alpha,board,depth-1+extend,1,false,givesCheck,(extend==0),stats);
-				//if (score > alpha && score < beta) {
+				score = -searchHelper(pv,-(alpha+1),-alpha,board,depth-1+extend,1,false,givesCheck,(extend==0),stats);
+				if (score > alpha && score < beta) {
 					score = -searchHelper(pv,-beta,-alpha,board,depth-1+extend,1,false,givesCheck,(extend==0),stats);
-				//}
+				}
 			}
 			numMovesSearched++;
 			board.undoLastMove();
