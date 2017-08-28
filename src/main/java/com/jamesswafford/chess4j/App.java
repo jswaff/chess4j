@@ -25,7 +25,7 @@ public final class App {
 	private static AbstractOpeningBook openingBook;
 	private static String bookPath = null;
 	private static String testSuiteFile = null;
-	private static int testSuiteTime = 5; // default to five seconds
+	private static int testSuiteTime = 10; // default to five seconds
 	
 	private App() { }
 
