@@ -1,3 +1,19 @@
 target
-log4j.log
+*.log
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.mvn
+.DS*
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
 
