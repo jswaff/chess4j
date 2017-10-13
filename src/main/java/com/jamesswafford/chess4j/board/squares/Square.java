@@ -92,7 +92,19 @@ public final class Square {
 	public static List<Square> allSquares() {
 		return Collections.unmodifiableList(SQUARES);
 	}
-	
+
+	public int rankDistance(Square sq) {
+		return Math.abs(this.rank.getValue()-sq.rank.getValue());
+	}
+
+	public int fileDistance(Square sq) {
+		return Math.abs(this.file.getValue()-sq.file.getValue());
+	}
+
+	public int distance(Square sq) {
+		return Math.max(rankDistance(sq),fileDistance(sq));
+	}
+
 	public Square flipVertical() {
 		return Square.valueOf(file, rank.flip());
 	}
@@ -100,7 +112,7 @@ public final class Square {
 	public Square flipHorizontal() {
 		return Square.valueOf(file.flip(), rank);
 	}
-	
+
 	public static List<Square> fileSquares(File file) {
 		return Collections.unmodifiableList(FILE_SQUARES.get(file));
 	}
@@ -108,8 +120,7 @@ public final class Square {
 	public static List<Square> rankSquares(Rank rank) {
 		return Collections.unmodifiableList(RANK_SQUARES.get(rank));
 	}
-	
-	
+
 	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof Square)) {

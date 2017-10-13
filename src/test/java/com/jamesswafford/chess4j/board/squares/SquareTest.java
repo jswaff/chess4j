@@ -100,4 +100,32 @@ public class SquareTest {
 		
 		Assert.assertEquals(64, hashCodes.size());
 	}
+
+	@Test
+	public void testFileDistance() {
+		Assert.assertEquals(1,Square.valueOf(File.FILE_A,Rank.RANK_1).fileDistance(Square.valueOf(File.FILE_B,Rank.RANK_1)));
+		Assert.assertEquals(7,Square.valueOf(File.FILE_A,Rank.RANK_1).fileDistance(Square.valueOf(File.FILE_H,Rank.RANK_8)));
+		Assert.assertEquals(7,Square.valueOf(File.FILE_A,Rank.RANK_1).fileDistance(Square.valueOf(File.FILE_H,Rank.RANK_4)));
+		Assert.assertEquals(1,Square.valueOf(File.FILE_B,Rank.RANK_3).fileDistance(Square.valueOf(File.FILE_C,Rank.RANK_7)));
+		Assert.assertEquals(7,Square.valueOf(File.FILE_H,Rank.RANK_2).fileDistance(Square.valueOf(File.FILE_A,Rank.RANK_3)));
+		Assert.assertEquals(4,Square.valueOf(File.FILE_F,Rank.RANK_3).fileDistance(Square.valueOf(File.FILE_B,Rank.RANK_8)));
+		Assert.assertEquals(0,Square.valueOf(File.FILE_E,Rank.RANK_1).fileDistance(Square.valueOf(File.FILE_E,Rank.RANK_2)));
+	}
+
+	@Test
+	public void testRankDistance() {
+		Assert.assertEquals(0,Square.valueOf(File.FILE_A,Rank.RANK_1).rankDistance(Square.valueOf(File.FILE_B,Rank.RANK_1)));
+		Assert.assertEquals(3,Square.valueOf(File.FILE_A,Rank.RANK_1).rankDistance(Square.valueOf(File.FILE_C,Rank.RANK_4)));
+		Assert.assertEquals(1,Square.valueOf(File.FILE_H,Rank.RANK_8).rankDistance(Square.valueOf(File.FILE_A,Rank.RANK_7)));
+		Assert.assertEquals(7,Square.valueOf(File.FILE_G,Rank.RANK_8).rankDistance(Square.valueOf(File.FILE_B,Rank.RANK_1)));
+	}
+
+
+	@Test
+	public void testDistance() {
+		Assert.assertEquals(0,Square.valueOf(File.FILE_E,Rank.RANK_4).distance(Square.valueOf(File.FILE_E,Rank.RANK_4)));
+		Assert.assertEquals(7,Square.valueOf(File.FILE_A,Rank.RANK_1).distance(Square.valueOf(File.FILE_A,Rank.RANK_8)));
+		Assert.assertEquals(3,Square.valueOf(File.FILE_H,Rank.RANK_1).distance(Square.valueOf(File.FILE_E,Rank.RANK_4)));
+		Assert.assertEquals(4,Square.valueOf(File.FILE_H,Rank.RANK_8).distance(Square.valueOf(File.FILE_E,Rank.RANK_4)));
+	}
 }

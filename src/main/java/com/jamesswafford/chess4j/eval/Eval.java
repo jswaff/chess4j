@@ -57,7 +57,9 @@ public final class Eval {
 	public static final int KING_SAFETY_PAWN_TWO_AWAY = -20;
 	public static final int KING_SAFETY_PAWN_FAR_AWAY = -30;
 	public static final int KING_SAFETY_MIDDLE_OPEN_FILE = -50;
-		
+
+	public static final int KNIGHT_TROPISM = 2;
+
 	private static Map<Class<?>,Integer> pieceValMap;
 	
 	static {
@@ -168,7 +170,7 @@ public final class Eval {
 			score += evalKings(board,matNPScore);
 		}
 		
-		return board.getPlayerToMove().equals(Color.WHITE)?score:-score;
+		return board.getPlayerToMove()==Color.WHITE?score:-score;
 	}
 
 	private static int evalBishops(Board board) {
@@ -204,7 +206,7 @@ public final class Eval {
 		while (knightsMap != 0) {
 			int knightSqVal = Bitboard.msb(knightsMap);
 			Square knightSq = Square.valueOf(knightSqVal);
-			score += evalKnight(true,knightSq);
+			score += evalKnight(board,true,knightSq);
 			knightsMap ^= Bitboard.squares[knightSqVal];
 		}
 
@@ -212,15 +214,23 @@ public final class Eval {
 		while (knightsMap != 0) {
 			int knightSqVal = Bitboard.lsb(knightsMap);
 			Square knightSq = Square.valueOf(knightSqVal);
-			score -= evalKnight(false,knightSq);
+			score -= evalKnight(board,false,knightSq);
 			knightsMap ^= Bitboard.squares[knightSqVal];
 		}
 
 		return score;
 	}
 	
-	private static int evalKnight(boolean isWhite,Square sq) {
-		return KNIGHT_PST[isWhite?sq.value():sq.flipVertical().value()];
+	private static int evalKnight(Board board,boolean isWhite,Square sq) {
+		int score = 0;
+		if (isWhite) {
+			score = KNIGHT_PST[sq.value()];
+			score += KNIGHT_TROPISM * sq.distance(board.getKingSquare(Color.BLACK));
+		} else {
+			score = KNIGHT_PST[sq.flipVertical().value()];
+			score += KNIGHT_TROPISM * sq.distance(board.getKingSquare(Color.WHITE));
+		}
+		return score;
 	}
 	
 	private static int evalPawns(Board board) {

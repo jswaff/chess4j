@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.eval;
 
+import com.jamesswafford.chess4j.Color;
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -8,7 +9,6 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.pieces.Bishop;
 import com.jamesswafford.chess4j.pieces.Knight;
@@ -263,6 +263,10 @@ public class EvalTest {
 		Assert.assertEquals(0,Eval.evalMaterial(board));
 		int score = Eval.eval(board);
 
+		int tropismDelta =
+				Eval.KNIGHT_TROPISM * Square.valueOf(File.FILE_F,Rank.RANK_3).distance(board.getKingSquare(Color.BLACK))
+				- Eval.KNIGHT_TROPISM * Square.valueOf(File.FILE_G,Rank.RANK_1).distance(board.getKingSquare(Color.BLACK));
+
 		Assert.assertEquals(Eval.PAWN_PST[Square.valueOf(File.FILE_D, Rank.RANK_4).value()]
 				- Eval.PAWN_PST[Square.valueOf(File.FILE_D, Rank.RANK_2).value()]
 				+ Eval.PAWN_PST[Square.valueOf(File.FILE_E, Rank.RANK_3).value()]
@@ -275,6 +279,7 @@ public class EvalTest {
 				- Eval.ROOK_PST[Square.valueOf(File.FILE_H, Rank.RANK_1).value()]
 				+ Eval.KING_PST[Square.valueOf(File.FILE_G, Rank.RANK_1).value()]
 				- Eval.KING_PST[Square.valueOf(File.FILE_E, Rank.RANK_1).value()]
+				+ tropismDelta
 				,score);
 	}
 
@@ -288,6 +293,7 @@ public class EvalTest {
 		int expected = expectedMaterial 
 				+ Eval.ROOK_OPEN_FILE
 				+ Eval.KNIGHT_PST[Square.valueOf(File.FILE_B, Rank.RANK_1).value()]
+				+ Eval.KNIGHT_TROPISM * Square.valueOf(File.FILE_B,Rank.RANK_1).distance(board.getKingSquare(Color.BLACK))
 				+ Eval.KING_ENDGAME_PST[Square.valueOf(File.FILE_F,Rank.RANK_1).value()]
 				- Eval.KING_PST[Square.valueOf(File.FILE_E, Rank.RANK_5).value()]
 				- Eval.scale(Eval.KING_SAFETY_MIDDLE_OPEN_FILE,Eval.ROOK_VAL+Eval.KNIGHT_VAL+Eval.BISHOP_VAL);
@@ -298,6 +304,7 @@ public class EvalTest {
 		expected = -Eval.ROOK_VAL - Eval.KNIGHT_VAL 
 				- Eval.ROOK_OPEN_FILE
 				- Eval.KNIGHT_PST[Square.valueOf(File.FILE_B, Rank.RANK_1).value()]
+				- Eval.KNIGHT_TROPISM * Square.valueOf(File.FILE_B,Rank.RANK_1).distance(board.getKingSquare(Color.BLACK))
 				- Eval.KING_ENDGAME_PST[Square.valueOf(File.FILE_F,Rank.RANK_1).value()]
 				+ Eval.KING_ENDGAME_PST[Square.valueOf(File.FILE_E, Rank.RANK_5).value()];
 		Assert.assertEquals(expected, Eval.eval(board));		
