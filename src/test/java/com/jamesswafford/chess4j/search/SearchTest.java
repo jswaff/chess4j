@@ -27,289 +27,289 @@ import com.jamesswafford.chess4j.search.SearchStats;
 
 
 public class SearchTest {
-	
-	@Before
-	public void setUp() {
-		TTHolder.getTransTable().clear();
-		TTHolder.getPawnTransTable().clear();
-	}
-	
-	@Test
-	public void testMateIn1() throws Exception {
-		Board b = Board.INSTANCE;
-		FenParser.setPos(b, "4k3/8/3Q4/2B5/8/8/1K6/8 w - -");
 
-		Search.abortSearch = false;
-		SearchStats searchStats = new SearchStats();
-		Search.startTime = System.currentTimeMillis();
-		Search.stopTime = Search.startTime + 10000;
+    @Before
+    public void setUp() {
+        TTHolder.getTransTable().clear();
+        TTHolder.getPawnTransTable().clear();
+    }
 
-		int score = Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY, 
-				b, 2, searchStats,false);
-		Assert.assertEquals(Constants.CHECKMATE-1, score);
-	}
-	
-	@Test
-	public void testMateIn1b() throws Exception {
-		Board b = Board.INSTANCE;
-		FenParser.setPos(b, "4K3/8/8/3n2q1/8/8/3k4/8 b - -");
+    @Test
+    public void testMateIn1() throws Exception {
+        Board b = Board.INSTANCE;
+        FenParser.setPos(b, "4k3/8/3Q4/2B5/8/8/1K6/8 w - -");
 
-		Search.abortSearch = false;
-		SearchStats searchStats = new SearchStats();
-		Search.startTime = System.currentTimeMillis();
-		Search.stopTime = Search.startTime + 10000;
-		
-		int score = Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY, 
-				b, 2,searchStats,false);
-		Assert.assertEquals(Constants.CHECKMATE-1, score);
-	}
+        Search.abortSearch = false;
+        SearchStats searchStats = new SearchStats();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
 
-	@Test
-	public void testMateIn2() throws Exception {
-		Board b = Board.INSTANCE;
-		FenParser.setPos(b, "r1bq2r1/b4pk1/p1pp1p2/1p2pP2/1P2P1PB/3P4/1PPQ2P1/R3K2R w - -");
+        int score = Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY,
+                b, 2, searchStats,false);
+        Assert.assertEquals(Constants.CHECKMATE-1, score);
+    }
 
-		Search.abortSearch = false;
-		SearchStats searchStats = new SearchStats();
-		Search.startTime = System.currentTimeMillis();
-		Search.stopTime = Search.startTime + 30000;
-		
-		int score = Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY, 
-				b, 4, searchStats,false);
-		Assert.assertEquals(Constants.CHECKMATE-3, score);
-	}
+    @Test
+    public void testMateIn1b() throws Exception {
+        Board b = Board.INSTANCE;
+        FenParser.setPos(b, "4K3/8/8/3n2q1/8/8/3k4/8 b - -");
 
-	@Test
-	public void testMateIn3() throws Exception {
-		Board b = Board.INSTANCE;
+        Search.abortSearch = false;
+        SearchStats searchStats = new SearchStats();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
 
-		Search.abortSearch = false;
-		FenParser.setPos(b, "r5rk/5p1p/5R2/4B3/8/8/7P/7K w - -");
-		SearchStats searchStats = new SearchStats();
-		Search.startTime = System.currentTimeMillis();
-		Search.stopTime = Search.startTime + 10000;
+        int score = Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY,
+                b, 2,searchStats,false);
+        Assert.assertEquals(Constants.CHECKMATE-1, score);
+    }
 
-		int score = Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY, 
-				b, 6, searchStats,false);
-		Assert.assertEquals(Constants.CHECKMATE-5, score);
-	}
-	
-	@Test
-	public void testStaleMate() throws Exception {
-		Board b = Board.INSTANCE;
-		FenParser.setPos(b, "8/6p1/5p2/5k1K/7P/8/8/8 w - -");
+    @Test
+    public void testMateIn2() throws Exception {
+        Board b = Board.INSTANCE;
+        FenParser.setPos(b, "r1bq2r1/b4pk1/p1pp1p2/1p2pP2/1P2P1PB/3P4/1PPQ2P1/R3K2R w - -");
 
-		Search.abortSearch = false;
-		SearchStats searchStats = new SearchStats();
-		List<Move> pv = new ArrayList<Move>();
-		Search.startTime = System.currentTimeMillis();
-		Search.stopTime = Search.startTime + 10000;
+        Search.abortSearch = false;
+        SearchStats searchStats = new SearchStats();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 30000;
 
-		int score = Search.search(pv, -Constants.INFINITY, Constants.INFINITY, 
-				b, 1, searchStats,false);
-		Assert.assertEquals(0, score);
-		Assert.assertEquals(0, pv.size());
-	}
+        int score = Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY,
+                b, 4, searchStats,false);
+        Assert.assertEquals(Constants.CHECKMATE-3, score);
+    }
 
-	@Test
-	public void testSearchLastPVFirst() throws Exception {
-		Board b = Board.INSTANCE;
-		b.resetBoard();
+    @Test
+    public void testMateIn3() throws Exception {
+        Board b = Board.INSTANCE;
 
-		Search.abortSearch = false;
+        Search.abortSearch = false;
+        FenParser.setPos(b, "r5rk/5p1p/5R2/4B3/8/8/7P/7K w - -");
+        SearchStats searchStats = new SearchStats();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
 
-		// create an artificial PV and ensure it is searched first.
-		Move c2c4 = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_C, Rank.RANK_2),Square.valueOf(File.FILE_C, Rank.RANK_4));
-		Move b7b5 = new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_B, Rank.RANK_7),Square.valueOf(File.FILE_B, Rank.RANK_5));
-		Move c4b5 = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_C, Rank.RANK_4),Square.valueOf(File.FILE_B, Rank.RANK_5),Pawn.BLACK_PAWN);
-		Move g8h6 = new Move(Knight.BLACK_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_8),Square.valueOf(File.FILE_H, Rank.RANK_6));
-		List<Move> lastPV = new ArrayList<Move>();
-		lastPV.add(c2c4);
-		lastPV.add(b7b5);
-		lastPV.add(c4b5);
-		lastPV.add(g8h6);
-		SearchStats searchStats = new SearchStats();
-		Search.startTime = System.currentTimeMillis();
-		Search.stopTime = Search.startTime + 10000;
-		searchStats.setLastPV(lastPV);
+        int score = Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY,
+                b, 6, searchStats,false);
+        Assert.assertEquals(Constants.CHECKMATE-5, score);
+    }
 
-		List<Move> pv = new ArrayList<Move>();
-		Search.search(pv, -Constants.INFINITY, Constants.INFINITY, 
-				b, 5, searchStats,false);
-		
-		Assert.assertEquals(5, searchStats.getFirstLine().size());
-		Assert.assertEquals(lastPV, searchStats.getFirstLine().subList(0, 4));
-	}
-	
-	@Ignore // PVS has changed node count... need to revisit
-	@Test
-	public void testAbortSearch() throws Exception {
-		Board b = Board.INSTANCE;
-		b.resetBoard();
+    @Test
+    public void testStaleMate() throws Exception {
+        Board b = Board.INSTANCE;
+        FenParser.setPos(b, "8/6p1/5p2/5k1K/7P/8/8/8 w - -");
 
-		Search.abortSearch = true;
+        Search.abortSearch = false;
+        SearchStats searchStats = new SearchStats();
+        List<Move> pv = new ArrayList<Move>();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
 
-		SearchStats searchStats = new SearchStats();
-		Search.startTime = System.currentTimeMillis();
-		Search.stopTime = Search.startTime + 10000;
-		Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY, 
-				b, 1, searchStats,false);
-		Assert.assertEquals(21, searchStats.getNodes());
+        int score = Search.search(pv, -Constants.INFINITY, Constants.INFINITY,
+                b, 1, searchStats,false);
+        Assert.assertEquals(0, score);
+        Assert.assertEquals(0, pv.size());
+    }
 
-		searchStats = new SearchStats();
-		Search.startTime = System.currentTimeMillis();
-		Search.stopTime = Search.startTime + 10000;
-		Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY, 
-				b, 3, searchStats,false);
-		Assert.assertEquals(4, searchStats.getNodes()); // 1 + 3 (down left side of the tree)
-		
-		Search.abortSearch = false;
-	}
-	
-	@Test
-	public void testTranspositionTable() throws Exception {
-		Board b = Board.INSTANCE;
-		b.resetBoard();
-		
-		Search.abortSearch = false;
-		
-		SearchStats searchStats = new SearchStats();
-		Search.startTime = System.currentTimeMillis();
-		Search.stopTime = Search.startTime + 10000;
-		// make a (ridiculous) entry up.  the program would never play 1. a4, UNLESS of course it would be a piece up!
-		// make 1. ... a5 a rook up for white, everything else a queen up, and verify PV is 1. a4 a5
-		Move a2a4 = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_A,Rank.RANK_2),Square.valueOf(File.FILE_A, Rank.RANK_4));
-		b.applyMove(a2a4);
-		List<Move> mvs = MoveGen.genLegalMoves(b);
-		Move a7a5 = new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_A,Rank.RANK_7),Square.valueOf(File.FILE_A, Rank.RANK_5));
-		Assert.assertTrue(mvs.contains(a7a5));
-		for (Move mv : mvs) {
-			b.applyMove(mv);
-			int score=900;
-			if (mv.equals(a7a5)) {
-				score=500;
-			}
-			TTHolder.getTransTable().store(
-					TranspositionTableEntryType.EXACT_MATCH, 
-					b.getZobristKey(), 
-					score, 1, mv);
-			b.undoLastMove();
-		}
-		b.undoLastMove();
-		
-		List<Move> pv = new ArrayList<Move>();
-		Search.search(pv, -Constants.INFINITY, Constants.INFINITY, b, 3, searchStats,false);
-		Assert.assertEquals(2, pv.size());
-		Assert.assertEquals(a2a4, pv.get(0));
-		Assert.assertEquals(a7a5, pv.get(1));
-	}
-	
-	@Test
-	public void testQSearchDoesNotExpandNodesFromInitialPos() {
-		Board b = Board.INSTANCE;
-		b.resetBoard();
-		
-		Search.abortSearch = false;
-		SearchStats searchStats = new SearchStats();
-		Search.startTime = System.currentTimeMillis();
-		Search.stopTime = Search.startTime + 10000;
-		
-		Search.quiescenceSearch(-Constants.INFINITY,Constants.INFINITY,false,b,searchStats);
-		Assert.assertEquals(0,searchStats.getNodes());
-		Assert.assertEquals(0, searchStats.getQNodes());
-	}
+    @Test
+    public void testSearchLastPVFirst() throws Exception {
+        Board b = Board.INSTANCE;
+        b.resetBoard();
 
-	@Test
-	public void testQSearchStandpatRaisesAlpha() {
-		Board b = Board.INSTANCE;
-		b.resetBoard();
-		
-		int score = Eval.eval(b);
-		
-		Search.abortSearch = false;
-		SearchStats searchStats = new SearchStats();
-		Search.startTime = System.currentTimeMillis();
-		Search.stopTime = Search.startTime + 10000;
-		
-		int qScore = Search.quiescenceSearch(-Constants.INFINITY, Constants.INFINITY,false,b,searchStats);
-		Assert.assertEquals(score, qScore);
-	}
+        Search.abortSearch = false;
 
-	@Test
-	public void testQSearchStandpatDoesNotRaiseAlpha() {
-		Board b = Board.INSTANCE;
-		b.resetBoard();
-				
-		Search.abortSearch = false;
-		SearchStats searchStats = new SearchStats();
-		Search.startTime = System.currentTimeMillis();
-		Search.stopTime = Search.startTime + 10000;
-		
-		int qScore = Search.quiescenceSearch(Eval.QUEEN_VAL,Constants.INFINITY,false, b,searchStats);
-		Assert.assertEquals(Eval.QUEEN_VAL,qScore);
-	}
+        // create an artificial PV and ensure it is searched first.
+        Move c2c4 = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_C, Rank.RANK_2),Square.valueOf(File.FILE_C, Rank.RANK_4));
+        Move b7b5 = new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_B, Rank.RANK_7),Square.valueOf(File.FILE_B, Rank.RANK_5));
+        Move c4b5 = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_C, Rank.RANK_4),Square.valueOf(File.FILE_B, Rank.RANK_5),Pawn.BLACK_PAWN);
+        Move g8h6 = new Move(Knight.BLACK_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_8),Square.valueOf(File.FILE_H, Rank.RANK_6));
+        List<Move> lastPV = new ArrayList<Move>();
+        lastPV.add(c2c4);
+        lastPV.add(b7b5);
+        lastPV.add(c4b5);
+        lastPV.add(g8h6);
+        SearchStats searchStats = new SearchStats();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
+        searchStats.setLastPV(lastPV);
 
-	@Test
-	public void testQSearchDoesExpandJustCaptures() throws Exception {
-		Board b = Board.INSTANCE;
-		FenParser.setPos(b, "7k/8/8/3b4/8/8/6P1/K7 b - -");
-		
-		List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
-		Assert.assertEquals(1, moves.size());
-		
-		Search.abortSearch = false;
-		
-		SearchStats searchStats = new SearchStats();
-		Search.startTime = System.currentTimeMillis();
-		Search.stopTime = Search.startTime + 10000;
+        List<Move> pv = new ArrayList<Move>();
+        Search.search(pv, -Constants.INFINITY, Constants.INFINITY,
+                b, 5, searchStats,false);
 
-		Search.quiescenceSearch(-Constants.INFINITY,Constants.INFINITY,false,b,searchStats);
+        Assert.assertEquals(5, searchStats.getFirstLine().size());
+        Assert.assertEquals(lastPV, searchStats.getFirstLine().subList(0, 4));
+    }
 
-		Assert.assertEquals(0,searchStats.getNodes());
-		Assert.assertEquals(1, searchStats.getQNodes());		
-	}
-	
-	@Test
-	public void testQSearchDoesExpandPromotions() throws Exception {
-		Board b = Board.INSTANCE;
-		FenParser.setPos(b,"8/P6k/8/8/8/8/7K/8 w - -");
-		
-		List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
-		Assert.assertEquals(4, moves.size()); // just promotions
-		
-		Search.abortSearch = false;
-		
-		SearchStats searchStats = new SearchStats();
-		Search.startTime = System.currentTimeMillis();
-		Search.stopTime = Search.startTime + 10000;
+    @Ignore // PVS has changed node count... need to revisit
+    @Test
+    public void testAbortSearch() throws Exception {
+        Board b = Board.INSTANCE;
+        b.resetBoard();
 
-		Search.quiescenceSearch(-Constants.INFINITY,Constants.INFINITY,false,b,searchStats);
+        Search.abortSearch = true;
 
-		Assert.assertEquals(0,searchStats.getNodes());
-		Assert.assertEquals(4, searchStats.getQNodes());	
-	}
-	
-	@Test
-	public void testQSearchBetaCutoff() throws Exception {
-		Board b = Board.INSTANCE;
-		
-		// this pos would be very good for white if searched
-		FenParser.setPos(b,"8/P6k/8/8/8/8/7K/8 w - -");
+        SearchStats searchStats = new SearchStats();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
+        Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY,
+                b, 1, searchStats,false);
+        Assert.assertEquals(21, searchStats.getNodes());
 
-		List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
-		Assert.assertEquals(4, moves.size()); // just promotions
+        searchStats = new SearchStats();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
+        Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY,
+                b, 3, searchStats,false);
+        Assert.assertEquals(4, searchStats.getNodes()); // 1 + 3 (down left side of the tree)
 
-		int score = Eval.eval(b);
-		Assert.assertTrue(Math.abs(score) < Eval.QUEEN_VAL);
-		
-		Search.abortSearch = false;
-		SearchStats searchStats = new SearchStats();
-		Search.startTime = System.currentTimeMillis();
-		Search.stopTime = Search.startTime + 10000;
+        Search.abortSearch = false;
+    }
 
-		Search.quiescenceSearch(-Constants.INFINITY,-Eval.QUEEN_VAL,false,b,searchStats);
+    @Test
+    public void testTranspositionTable() throws Exception {
+        Board b = Board.INSTANCE;
+        b.resetBoard();
 
-		Assert.assertEquals(0,searchStats.getNodes());
-		Assert.assertEquals(0, searchStats.getQNodes());	
-	}
+        Search.abortSearch = false;
+
+        SearchStats searchStats = new SearchStats();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
+        // make a (ridiculous) entry up.  the program would never play 1. a4, UNLESS of course it would be a piece up!
+        // make 1. ... a5 a rook up for white, everything else a queen up, and verify PV is 1. a4 a5
+        Move a2a4 = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_A,Rank.RANK_2),Square.valueOf(File.FILE_A, Rank.RANK_4));
+        b.applyMove(a2a4);
+        List<Move> mvs = MoveGen.genLegalMoves(b);
+        Move a7a5 = new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_A,Rank.RANK_7),Square.valueOf(File.FILE_A, Rank.RANK_5));
+        Assert.assertTrue(mvs.contains(a7a5));
+        for (Move mv : mvs) {
+            b.applyMove(mv);
+            int score=900;
+            if (mv.equals(a7a5)) {
+                score=500;
+            }
+            TTHolder.getTransTable().store(
+                    TranspositionTableEntryType.EXACT_MATCH,
+                    b.getZobristKey(),
+                    score, 1, mv);
+            b.undoLastMove();
+        }
+        b.undoLastMove();
+
+        List<Move> pv = new ArrayList<Move>();
+        Search.search(pv, -Constants.INFINITY, Constants.INFINITY, b, 3, searchStats,false);
+        Assert.assertEquals(2, pv.size());
+        Assert.assertEquals(a2a4, pv.get(0));
+        Assert.assertEquals(a7a5, pv.get(1));
+    }
+
+    @Test
+    public void testQSearchDoesNotExpandNodesFromInitialPos() {
+        Board b = Board.INSTANCE;
+        b.resetBoard();
+
+        Search.abortSearch = false;
+        SearchStats searchStats = new SearchStats();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
+
+        Search.quiescenceSearch(-Constants.INFINITY,Constants.INFINITY,false,b,searchStats);
+        Assert.assertEquals(0,searchStats.getNodes());
+        Assert.assertEquals(0, searchStats.getQNodes());
+    }
+
+    @Test
+    public void testQSearchStandpatRaisesAlpha() {
+        Board b = Board.INSTANCE;
+        b.resetBoard();
+
+        int score = Eval.eval(b);
+
+        Search.abortSearch = false;
+        SearchStats searchStats = new SearchStats();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
+
+        int qScore = Search.quiescenceSearch(-Constants.INFINITY, Constants.INFINITY,false,b,searchStats);
+        Assert.assertEquals(score, qScore);
+    }
+
+    @Test
+    public void testQSearchStandpatDoesNotRaiseAlpha() {
+        Board b = Board.INSTANCE;
+        b.resetBoard();
+
+        Search.abortSearch = false;
+        SearchStats searchStats = new SearchStats();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
+
+        int qScore = Search.quiescenceSearch(Eval.QUEEN_VAL,Constants.INFINITY,false, b,searchStats);
+        Assert.assertEquals(Eval.QUEEN_VAL,qScore);
+    }
+
+    @Test
+    public void testQSearchDoesExpandJustCaptures() throws Exception {
+        Board b = Board.INSTANCE;
+        FenParser.setPos(b, "7k/8/8/3b4/8/8/6P1/K7 b - -");
+
+        List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
+        Assert.assertEquals(1, moves.size());
+
+        Search.abortSearch = false;
+
+        SearchStats searchStats = new SearchStats();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
+
+        Search.quiescenceSearch(-Constants.INFINITY,Constants.INFINITY,false,b,searchStats);
+
+        Assert.assertEquals(0,searchStats.getNodes());
+        Assert.assertEquals(1, searchStats.getQNodes());
+    }
+
+    @Test
+    public void testQSearchDoesExpandPromotions() throws Exception {
+        Board b = Board.INSTANCE;
+        FenParser.setPos(b,"8/P6k/8/8/8/8/7K/8 w - -");
+
+        List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
+        Assert.assertEquals(4, moves.size()); // just promotions
+
+        Search.abortSearch = false;
+
+        SearchStats searchStats = new SearchStats();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
+
+        Search.quiescenceSearch(-Constants.INFINITY,Constants.INFINITY,false,b,searchStats);
+
+        Assert.assertEquals(0,searchStats.getNodes());
+        Assert.assertEquals(4, searchStats.getQNodes());
+    }
+
+    @Test
+    public void testQSearchBetaCutoff() throws Exception {
+        Board b = Board.INSTANCE;
+
+        // this pos would be very good for white if searched
+        FenParser.setPos(b,"8/P6k/8/8/8/8/7K/8 w - -");
+
+        List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
+        Assert.assertEquals(4, moves.size()); // just promotions
+
+        int score = Eval.eval(b);
+        Assert.assertTrue(Math.abs(score) < Eval.QUEEN_VAL);
+
+        Search.abortSearch = false;
+        SearchStats searchStats = new SearchStats();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
+
+        Search.quiescenceSearch(-Constants.INFINITY,-Eval.QUEEN_VAL,false,b,searchStats);
+
+        Assert.assertEquals(0,searchStats.getNodes());
+        Assert.assertEquals(0, searchStats.getQNodes());
+    }
 }
