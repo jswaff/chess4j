@@ -8,7 +8,7 @@ public abstract class Direction {
     public abstract Square next(Square sq);
     public abstract boolean isDiagonal();
     public abstract int value();
-    public static Direction directionTo[][] = new Direction[64][64];
+    private static Direction directionTo[][] = new Direction[64][64];
 
     static {
         for (int i=0;i<64;i++) {
