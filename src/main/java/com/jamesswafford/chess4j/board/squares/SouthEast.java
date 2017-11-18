@@ -3,27 +3,27 @@ package com.jamesswafford.chess4j.board.squares;
 
 public final class SouthEast extends Direction {
 
-	private static final SouthEast INSTANCE = new SouthEast();
-	
-	private SouthEast() {		
-	}
+    private static final SouthEast INSTANCE = new SouthEast();
 
-	@Override
-	public Square next(Square sq) {
-		return Square.valueOf(sq.file().east(), sq.rank().south());
-	}
-	
-	public static SouthEast getInstance() {
-		return INSTANCE;
-	}
+    private SouthEast() {
+    }
 
-	@Override
-	public boolean isDiagonal() {
-		return true;
-	}
+    @Override
+    public Square next(Square sq) {
+        return Square.valueOf(sq.file().east(), sq.rank().south());
+    }
 
-	@Override
-	public int value() {
-		return 3;
-	}
+    public static SouthEast getInstance() {
+        return INSTANCE;
+    }
+
+    @Override
+    public boolean isDiagonal() {
+        return true;
+    }
+
+    @Override
+    public int value() {
+        return 3;
+    }
 }

@@ -6,7 +6,7 @@ package com.jamesswafford.chess4j.utils;
  *
  */
 public final class BlankRemover {
-	  
+
     private BlankRemover () {}
 
     /* remove leading whitespace */

@@ -8,50 +8,50 @@ import com.jamesswafford.chess4j.board.Move;
 
 public class PGNGame {
 
-	private List<PGNTag> tags = new ArrayList<PGNTag>();
-	private List<Move> moves = new ArrayList<Move>();
-	private PGNResult result;
-	
-	public PGNGame(List<PGNTag> tags,List<Move> moves,PGNResult result) {
-		this.tags.addAll(tags);
-		this.moves.addAll(moves);
-		this.result = result;
-	}
+    private List<PGNTag> tags = new ArrayList<PGNTag>();
+    private List<Move> moves = new ArrayList<Move>();
+    private PGNResult result;
 
-	public List<PGNTag> getTags() {
-		return Collections.unmodifiableList(tags);
-	}
+    public PGNGame(List<PGNTag> tags,List<Move> moves,PGNResult result) {
+        this.tags.addAll(tags);
+        this.moves.addAll(moves);
+        this.result = result;
+    }
 
-	public List<Move> getMoves() {
-		return Collections.unmodifiableList(moves);
-	}
+    public List<PGNTag> getTags() {
+        return Collections.unmodifiableList(tags);
+    }
 
-	public PGNResult getResult() {
-		return result;
-	}
-	
-	@Override
-	public int hashCode() {
-		int hc = tags.hashCode();
-		hc *= 31 * moves.hashCode();
-		hc *= 17 * result.hashCode();
-		return hc;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof PGNGame)) {
-			return false;
-		}
-		
-		PGNGame that = (PGNGame)obj;
-		
-		if (!this.getTags().equals(that.getTags())) return false;
-		if (!this.getMoves().equals(that.getMoves())) return false;
-		if (!this.getResult().equals(that.getResult())) return false;
-		
-		return true;
-	}
-	
-	
+    public List<Move> getMoves() {
+        return Collections.unmodifiableList(moves);
+    }
+
+    public PGNResult getResult() {
+        return result;
+    }
+
+    @Override
+    public int hashCode() {
+        int hc = tags.hashCode();
+        hc *= 31 * moves.hashCode();
+        hc *= 17 * result.hashCode();
+        return hc;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof PGNGame)) {
+            return false;
+        }
+
+        PGNGame that = (PGNGame)obj;
+
+        if (!this.getTags().equals(that.getTags())) return false;
+        if (!this.getMoves().equals(that.getMoves())) return false;
+        if (!this.getResult().equals(that.getResult())) return false;
+
+        return true;
+    }
+
+
 }

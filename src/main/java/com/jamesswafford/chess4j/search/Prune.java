@@ -9,23 +9,23 @@ import com.jamesswafford.chess4j.pieces.Pawn;
 
 public class Prune {
 
-	public static boolean prune(Board b,Move lastMove,boolean inCheck,boolean givesCheck,
-			int extensions,int alpha,int beta,int depth) {
-		
-		if (depth < 3
-				&& alpha < (Constants.CHECKMATE-500) && beta < (Constants.CHECKMATE-500)
-				&& alpha > (-Constants.CHECKMATE+500) && beta > (-Constants.CHECKMATE+500)
-				&& extensions==0 && !inCheck && !givesCheck
-				&& lastMove.captured()==null && lastMove.promotion()==null
-				&& !(lastMove.piece()==Pawn.WHITE_PAWN && lastMove.to().rank()==Rank.RANK_7)
-				&& !(lastMove.piece()==Pawn.BLACK_PAWN && lastMove.to().rank()==Rank.RANK_2))
-		{
-			int evalMat = -Eval.eval(b,true); 
-		
-			return (depth < 2 && (evalMat + Eval.PAWN_VAL*2 <= alpha))   // futility pruning
-				|| (depth < 3 && (evalMat + Eval.PAWN_VAL*5 <= alpha)) ;  // extended futility pruning
-		}
+    public static boolean prune(Board b,Move lastMove,boolean inCheck,boolean givesCheck,
+            int extensions,int alpha,int beta,int depth) {
 
-		return false;
-	}
+        if (depth < 3
+                && alpha < (Constants.CHECKMATE-500) && beta < (Constants.CHECKMATE-500)
+                && alpha > (-Constants.CHECKMATE+500) && beta > (-Constants.CHECKMATE+500)
+                && extensions==0 && !inCheck && !givesCheck
+                && lastMove.captured()==null && lastMove.promotion()==null
+                && !(lastMove.piece()==Pawn.WHITE_PAWN && lastMove.to().rank()==Rank.RANK_7)
+                && !(lastMove.piece()==Pawn.BLACK_PAWN && lastMove.to().rank()==Rank.RANK_2))
+        {
+            int evalMat = -Eval.eval(b,true);
+
+            return (depth < 2 && (evalMat + Eval.PAWN_VAL*2 <= alpha))   // futility pruning
+                || (depth < 3 && (evalMat + Eval.PAWN_VAL*5 <= alpha)) ;  // extended futility pruning
+        }
+
+        return false;
+    }
 }

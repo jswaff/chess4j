@@ -23,301 +23,301 @@ import com.jamesswafford.chess4j.pieces.Rook;
 
 public final class MoveGen {
 
-	private static void addMoves(Board board,Piece piece,Square fromSq,long moveMap,List<Move> moves) {
-		while (moveMap != 0) {
-			int toVal = Bitboard.lsb(moveMap);
-			Square toSq = Square.valueOf(toVal);
-			Piece toPiece = board.getPiece(toSq);
-			moves.add(new Move(piece,fromSq,toSq,toPiece));
-			moveMap ^= Bitboard.squares[toVal];
-		}
-	}
-	
-	private static void addPawnMove(List<Move> moves,Pawn movingPawn,Square fromSq,Square toSq,Piece captured,boolean epCapture) {
-		if (toSq.rank()==Rank.RANK_1 || toSq.rank()==Rank.RANK_8) {
-			boolean isWhite = toSq.rank()==Rank.RANK_8;
-			assert((isWhite && movingPawn==Pawn.WHITE_PAWN) || (!isWhite && movingPawn==Pawn.BLACK_PAWN));
-			moves.add(new Move(movingPawn,fromSq,toSq,captured,isWhite?Queen.WHITE_QUEEN:Queen.BLACK_QUEEN));
-			moves.add(new Move(movingPawn,fromSq,toSq,captured,isWhite?Rook.WHITE_ROOK:Rook.BLACK_ROOK));
-			moves.add(new Move(movingPawn,fromSq,toSq,captured,isWhite?Bishop.WHITE_BISHOP:Bishop.BLACK_BISHOP));
-			moves.add(new Move(movingPawn,fromSq,toSq,captured,isWhite?Knight.WHITE_KNIGHT:Knight.BLACK_KNIGHT));
-		} else {
-			moves.add(new Move(movingPawn,fromSq,toSq,captured,epCapture));
-		}
-	}
-	
-	public static void genBishopMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
-		Piece piece;
-		long pieceMap;
+    private static void addMoves(Board board,Piece piece,Square fromSq,long moveMap,List<Move> moves) {
+        while (moveMap != 0) {
+            int toVal = Bitboard.lsb(moveMap);
+            Square toSq = Square.valueOf(toVal);
+            Piece toPiece = board.getPiece(toSq);
+            moves.add(new Move(piece,fromSq,toSq,toPiece));
+            moveMap ^= Bitboard.squares[toVal];
+        }
+    }
 
-		if (board.getPlayerToMove()==Color.WHITE) {
-			piece = Bishop.WHITE_BISHOP;
-			pieceMap = board.getWhiteBishops();
-		} else {
-			piece = Bishop.BLACK_BISHOP;
-			pieceMap = board.getBlackBishops();
-		}
-		
-		while (pieceMap != 0) {
-			int sqVal = Bitboard.msb(pieceMap);
-			long moveMap = Magic.getBishopMoves(board,sqVal,getTargetSquares(board,caps,noncaps));
-			addMoves(board,piece,Square.valueOf(sqVal),moveMap,moves);
-			pieceMap ^= Bitboard.squares[sqVal];
-		}
-	}
-	
-	private static void genCastlingMoves(Board board,List<Move> moves) {
-		Color player = board.getPlayerToMove();
+    private static void addPawnMove(List<Move> moves,Pawn movingPawn,Square fromSq,Square toSq,Piece captured,boolean epCapture) {
+        if (toSq.rank()==Rank.RANK_1 || toSq.rank()==Rank.RANK_8) {
+            boolean isWhite = toSq.rank()==Rank.RANK_8;
+            assert((isWhite && movingPawn==Pawn.WHITE_PAWN) || (!isWhite && movingPawn==Pawn.BLACK_PAWN));
+            moves.add(new Move(movingPawn,fromSq,toSq,captured,isWhite?Queen.WHITE_QUEEN:Queen.BLACK_QUEEN));
+            moves.add(new Move(movingPawn,fromSq,toSq,captured,isWhite?Rook.WHITE_ROOK:Rook.BLACK_ROOK));
+            moves.add(new Move(movingPawn,fromSq,toSq,captured,isWhite?Bishop.WHITE_BISHOP:Bishop.BLACK_BISHOP));
+            moves.add(new Move(movingPawn,fromSq,toSq,captured,isWhite?Knight.WHITE_KNIGHT:Knight.BLACK_KNIGHT));
+        } else {
+            moves.add(new Move(movingPawn,fromSq,toSq,captured,epCapture));
+        }
+    }
 
-		if (player.isWhite()) {
-			Square fromSq = Square.valueOf(File.FILE_E, Rank.RANK_1);
-			if (board.canCastle(CastlingRights.WHITE_KINGSIDE)) {
-				moves.add(new Move(King.WHITE_KING,fromSq,Square.valueOf(File.FILE_G, Rank.RANK_1),true));
-			}
-			if (board.canCastle(CastlingRights.WHITE_QUEENSIDE)) {
-				moves.add(new Move(King.WHITE_KING,fromSq,Square.valueOf(File.FILE_C,Rank.RANK_1),true));
-			}
-		} else {
-			Square fromSq = Square.valueOf(File.FILE_E, Rank.RANK_8);
-			if (board.canCastle(CastlingRights.BLACK_KINGSIDE)) {
-				moves.add(new Move(King.BLACK_KING,fromSq,Square.valueOf(File.FILE_G, Rank.RANK_8),true));
-			}
-			if (board.canCastle(CastlingRights.BLACK_QUEENSIDE)) {
-				moves.add(new Move(King.BLACK_KING,fromSq,Square.valueOf(File.FILE_C,Rank.RANK_8),true));
-			}
-		}
-	}
-	
-	public static void genKingMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
-		Piece piece;
-		
-		if (board.getPlayerToMove()==Color.WHITE) {
-			piece = King.WHITE_KING;
-		} else {
-			piece = King.BLACK_KING;
-		}
+    public static void genBishopMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
+        Piece piece;
+        long pieceMap;
 
-		Square fromSq = board.getKingSquare(board.getPlayerToMove());
-		
-		long moveMap = Bitboard.kingMoves[fromSq.value()] & getTargetSquares(board,caps,noncaps);
-		addMoves(board,piece,fromSq,moveMap,moves);
-		
-		if (noncaps) {
-			genCastlingMoves(board,moves);
-		}
-	}
-	
-	public static void genKnightMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
-		Piece piece;
-		long pieceMap;
+        if (board.getPlayerToMove()==Color.WHITE) {
+            piece = Bishop.WHITE_BISHOP;
+            pieceMap = board.getWhiteBishops();
+        } else {
+            piece = Bishop.BLACK_BISHOP;
+            pieceMap = board.getBlackBishops();
+        }
 
-		if (board.getPlayerToMove()==Color.WHITE) {
-			piece = Knight.WHITE_KNIGHT;
-			pieceMap = board.getWhiteKnights();
-		} else {
-			piece = Knight.BLACK_KNIGHT;
-			pieceMap = board.getBlackKnights();
-		}
-		
-		while (pieceMap != 0) {
-			int sqVal = Bitboard.msb(pieceMap);
-			long moveMap = Bitboard.knightMoves[sqVal] & getTargetSquares(board,caps,noncaps);
-			addMoves(board,piece,Square.valueOf(sqVal),moveMap,moves);
-			pieceMap ^= Bitboard.squares[sqVal];
-		}
-	}
-	
-	public static List<Move> genLegalMoves(Board board) {
-		List<Move> pseudoLegalMoves = genPseudoLegalMoves(board);
-		List<Move> legalMoves = new ArrayList<Move>();
-		
-		for (Move m : pseudoLegalMoves) {
-			board.applyMove(m);
+        while (pieceMap != 0) {
+            int sqVal = Bitboard.msb(pieceMap);
+            long moveMap = Magic.getBishopMoves(board,sqVal,getTargetSquares(board,caps,noncaps));
+            addMoves(board,piece,Square.valueOf(sqVal),moveMap,moves);
+            pieceMap ^= Bitboard.squares[sqVal];
+        }
+    }
 
-			if (!board.isOpponentInCheck()) {
-				legalMoves.add(m);
-			}
-			board.undoLastMove();
-		}
+    private static void genCastlingMoves(Board board,List<Move> moves) {
+        Color player = board.getPlayerToMove();
 
-		return legalMoves;
-	}
+        if (player.isWhite()) {
+            Square fromSq = Square.valueOf(File.FILE_E, Rank.RANK_1);
+            if (board.canCastle(CastlingRights.WHITE_KINGSIDE)) {
+                moves.add(new Move(King.WHITE_KING,fromSq,Square.valueOf(File.FILE_G, Rank.RANK_1),true));
+            }
+            if (board.canCastle(CastlingRights.WHITE_QUEENSIDE)) {
+                moves.add(new Move(King.WHITE_KING,fromSq,Square.valueOf(File.FILE_C,Rank.RANK_1),true));
+            }
+        } else {
+            Square fromSq = Square.valueOf(File.FILE_E, Rank.RANK_8);
+            if (board.canCastle(CastlingRights.BLACK_KINGSIDE)) {
+                moves.add(new Move(King.BLACK_KING,fromSq,Square.valueOf(File.FILE_G, Rank.RANK_8),true));
+            }
+            if (board.canCastle(CastlingRights.BLACK_QUEENSIDE)) {
+                moves.add(new Move(King.BLACK_KING,fromSq,Square.valueOf(File.FILE_C,Rank.RANK_8),true));
+            }
+        }
+    }
 
-	public static void genPawnMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
-		
-		long allPieces = board.getWhitePieces() | board.getBlackPieces();
-		long pmap;
-		
-		if (board.getPlayerToMove()==Color.WHITE) {
-			if (caps) {
-				long targets = board.getBlackPieces();
-				if (board.getEPSquare() != null) targets |= Bitboard.squares[board.getEPSquare().value()];
-				
-				// attacks west
-				pmap = ((board.getWhitePawns() & ~Bitboard.files[File.FILE_A.getValue()]) >> 9) & targets;
-				while (pmap != 0) {
-					int toSqVal = Bitboard.msb(pmap);
-					Square toSq = Square.valueOf(toSqVal);
-					Piece captured = toSq==board.getEPSquare() ? Pawn.BLACK_PAWN : board.getPiece(toSq);
-					addPawnMove(moves,Pawn.WHITE_PAWN,SouthEast.getInstance().next(toSq),toSq,captured,toSq==board.getEPSquare());
-					pmap ^= Bitboard.squares[toSqVal];
-				}
-				
-				// attacks east
-				pmap = ((board.getWhitePawns() & ~Bitboard.files[File.FILE_H.getValue()]) >> 7) & targets;
-				while (pmap != 0) {
-					int toSqVal = Bitboard.msb(pmap);
-					Square toSq = Square.valueOf(toSqVal);
-					Piece captured = toSq==board.getEPSquare() ? Pawn.BLACK_PAWN : board.getPiece(toSq);
-					addPawnMove(moves,Pawn.WHITE_PAWN,SouthWest.getInstance().next(toSq),toSq,captured,toSq==board.getEPSquare());
-					pmap ^= Bitboard.squares[toSqVal];
-				}
-				
-				// push promotions
-				pmap = ((board.getWhitePawns() & Bitboard.ranks[Rank.RANK_7.getValue()]) >> 8) & ~allPieces;
-				while (pmap != 0) {
-					int toSqVal = Bitboard.msb(pmap);
-					Square toSq = Square.valueOf(toSqVal);
-					addPawnMove(moves,Pawn.WHITE_PAWN,South.getInstance().next(toSq),toSq,null,false);
-					pmap ^= Bitboard.squares[toSqVal];
-				}
-			}
-			
-			// pawn pushes less promotions
-			if (noncaps) {
-				pmap = ((board.getWhitePawns() & ~Bitboard.ranks[Rank.RANK_7.getValue()]) >> 8) & ~allPieces;
-				while (pmap != 0) {
-					int toSqVal = Bitboard.msb(pmap);
-					Square toSq = Square.valueOf(toSqVal);
-					moves.add(new Move(Pawn.WHITE_PAWN,South.getInstance().next(toSq),toSq,null));
-					if (toSq.rank()==Rank.RANK_3 && board.getPiece(North.getInstance().next(toSq))==null) {
-						moves.add(new Move(Pawn.WHITE_PAWN,South.getInstance().next(toSq),North.getInstance().next(toSq),null));
-					}
-					pmap ^= Bitboard.squares[toSqVal];
-				}
-			}
-		} else {
-			if (caps) {
-				long targets = board.getWhitePieces();
-				if (board.getEPSquare() != null) targets |= Bitboard.squares[board.getEPSquare().value()];
-				
-				// attacks west
-				pmap = ((board.getBlackPawns() & ~Bitboard.files[File.FILE_A.getValue()]) << 7) & targets;
-				while (pmap != 0) {
-					int toSqVal = Bitboard.lsb(pmap);
-					Square toSq = Square.valueOf(toSqVal);
-					Piece captured = toSq==board.getEPSquare() ? Pawn.WHITE_PAWN : board.getPiece(toSq);
-					addPawnMove(moves,Pawn.BLACK_PAWN,NorthEast.getInstance().next(toSq),toSq,captured,toSq==board.getEPSquare());
-					pmap ^= Bitboard.squares[toSqVal];
-				}
-				
-				// attacks east
-				pmap = ((board.getBlackPawns() & ~Bitboard.files[File.FILE_H.getValue()]) << 9) & targets;
-				while (pmap != 0) {
-					int toSqVal = Bitboard.lsb(pmap);
-					Square toSq = Square.valueOf(toSqVal);
-					Piece captured = toSq==board.getEPSquare() ? Pawn.WHITE_PAWN : board.getPiece(toSq);
-					addPawnMove(moves,Pawn.BLACK_PAWN,NorthWest.getInstance().next(toSq),toSq,captured,toSq==board.getEPSquare());
-					pmap ^= Bitboard.squares[toSqVal];
-				}
-				
-				// push promotions
-				pmap = ((board.getBlackPawns() & Bitboard.ranks[Rank.RANK_2.getValue()]) << 8) & ~allPieces;
-				while (pmap != 0) {
-					int toSqVal = Bitboard.lsb(pmap);
-					Square toSq = Square.valueOf(toSqVal);
-					addPawnMove(moves,Pawn.BLACK_PAWN,North.getInstance().next(toSq),toSq,null,false);
-					pmap ^= Bitboard.squares[toSqVal];
-				}			
-			}
-			
-			// pawn pushes less promotions
-			if (noncaps) {
-				pmap = ((board.getBlackPawns() & ~Bitboard.ranks[Rank.RANK_2.getValue()]) << 8) & ~allPieces;
-				while (pmap != 0) {
-					int toSqVal = Bitboard.lsb(pmap);
-					Square toSq = Square.valueOf(toSqVal);
-					moves.add(new Move(Pawn.BLACK_PAWN,North.getInstance().next(toSq),toSq,null));
-					if (toSq.rank()==Rank.RANK_6 && board.getPiece(South.getInstance().next(toSq))==null) {
-						moves.add(new Move(Pawn.BLACK_PAWN,North.getInstance().next(toSq),South.getInstance().next(toSq),null));
-					}
-					pmap ^= Bitboard.squares[toSqVal];
-				}
-			}
-		}
-				
-	}
-	
-	public static List<Move> genPseudoLegalMoves(Board board) {
-		return genPseudoLegalMoves(board,true,true);
-	}
-	
-	public static List<Move> genPseudoLegalMoves(Board board,boolean caps,boolean noncaps) {
-		List<Move> moves = new ArrayList<Move>(100);
-		
-		genPawnMoves(board,moves,caps,noncaps);
-		genKnightMoves(board,moves,caps,noncaps);
-		genBishopMoves(board,moves,caps,noncaps);
-		genRookMoves(board,moves,caps,noncaps);
-		genQueenMoves(board,moves,caps,noncaps);
-		genKingMoves(board,moves,caps,noncaps);
-		
-		return moves;
-	}
-	
-	public static void genQueenMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
-		Piece piece;
-		long pieceMap;
+    public static void genKingMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
+        Piece piece;
 
-		if (board.getPlayerToMove()==Color.WHITE) {
-			piece = Queen.WHITE_QUEEN;
-			pieceMap = board.getWhiteQueens();
-		} else {
-			piece = Queen.BLACK_QUEEN;
-			pieceMap = board.getBlackQueens();
-		}
+        if (board.getPlayerToMove()==Color.WHITE) {
+            piece = King.WHITE_KING;
+        } else {
+            piece = King.BLACK_KING;
+        }
 
-		while (pieceMap != 0) {
-			int sqVal = Bitboard.msb(pieceMap);
-			long moveMap = Magic.getQueenMoves(board,sqVal,getTargetSquares(board,caps,noncaps));
-			addMoves(board,piece,Square.valueOf(sqVal),moveMap,moves);
-			pieceMap ^= Bitboard.squares[sqVal];
-		}
-	}
-	
-	public static void genRookMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
-		Piece piece;
-		long pieceMap;
+        Square fromSq = board.getKingSquare(board.getPlayerToMove());
 
-		if (board.getPlayerToMove()==Color.WHITE) {
-			piece = Rook.WHITE_ROOK;
-			pieceMap = board.getWhiteRooks();
-		} else {
-			piece = Rook.BLACK_ROOK;
-			pieceMap = board.getBlackRooks();
-		}
-		
-		while (pieceMap != 0) {
-			int sqVal = Bitboard.msb(pieceMap);
-			long moveMap = Magic.getRookMoves(board,sqVal,getTargetSquares(board,caps,noncaps));
-			addMoves(board,piece,Square.valueOf(sqVal),moveMap,moves);
-			pieceMap ^= Bitboard.squares[sqVal];
-		}
-	}
+        long moveMap = Bitboard.kingMoves[fromSq.value()] & getTargetSquares(board,caps,noncaps);
+        addMoves(board,piece,fromSq,moveMap,moves);
 
-	private static long getTargetSquares(Board board,boolean caps,boolean noncaps) {
-		long targets = 0;
-		
-		if (caps) {
-			targets = board.getPlayerToMove()==Color.WHITE ? board.getBlackPieces() : board.getWhitePieces();
-		}
-		
-		if (noncaps) {
-			targets |= ~(board.getWhitePieces() | board.getBlackPieces());
-		}
-		
-		return targets;
-	}
+        if (noncaps) {
+            genCastlingMoves(board,moves);
+        }
+    }
 
-	private MoveGen() {}
+    public static void genKnightMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
+        Piece piece;
+        long pieceMap;
+
+        if (board.getPlayerToMove()==Color.WHITE) {
+            piece = Knight.WHITE_KNIGHT;
+            pieceMap = board.getWhiteKnights();
+        } else {
+            piece = Knight.BLACK_KNIGHT;
+            pieceMap = board.getBlackKnights();
+        }
+
+        while (pieceMap != 0) {
+            int sqVal = Bitboard.msb(pieceMap);
+            long moveMap = Bitboard.knightMoves[sqVal] & getTargetSquares(board,caps,noncaps);
+            addMoves(board,piece,Square.valueOf(sqVal),moveMap,moves);
+            pieceMap ^= Bitboard.squares[sqVal];
+        }
+    }
+
+    public static List<Move> genLegalMoves(Board board) {
+        List<Move> pseudoLegalMoves = genPseudoLegalMoves(board);
+        List<Move> legalMoves = new ArrayList<Move>();
+
+        for (Move m : pseudoLegalMoves) {
+            board.applyMove(m);
+
+            if (!board.isOpponentInCheck()) {
+                legalMoves.add(m);
+            }
+            board.undoLastMove();
+        }
+
+        return legalMoves;
+    }
+
+    public static void genPawnMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
+
+        long allPieces = board.getWhitePieces() | board.getBlackPieces();
+        long pmap;
+
+        if (board.getPlayerToMove()==Color.WHITE) {
+            if (caps) {
+                long targets = board.getBlackPieces();
+                if (board.getEPSquare() != null) targets |= Bitboard.squares[board.getEPSquare().value()];
+
+                // attacks west
+                pmap = ((board.getWhitePawns() & ~Bitboard.files[File.FILE_A.getValue()]) >> 9) & targets;
+                while (pmap != 0) {
+                    int toSqVal = Bitboard.msb(pmap);
+                    Square toSq = Square.valueOf(toSqVal);
+                    Piece captured = toSq==board.getEPSquare() ? Pawn.BLACK_PAWN : board.getPiece(toSq);
+                    addPawnMove(moves,Pawn.WHITE_PAWN,SouthEast.getInstance().next(toSq),toSq,captured,toSq==board.getEPSquare());
+                    pmap ^= Bitboard.squares[toSqVal];
+                }
+
+                // attacks east
+                pmap = ((board.getWhitePawns() & ~Bitboard.files[File.FILE_H.getValue()]) >> 7) & targets;
+                while (pmap != 0) {
+                    int toSqVal = Bitboard.msb(pmap);
+                    Square toSq = Square.valueOf(toSqVal);
+                    Piece captured = toSq==board.getEPSquare() ? Pawn.BLACK_PAWN : board.getPiece(toSq);
+                    addPawnMove(moves,Pawn.WHITE_PAWN,SouthWest.getInstance().next(toSq),toSq,captured,toSq==board.getEPSquare());
+                    pmap ^= Bitboard.squares[toSqVal];
+                }
+
+                // push promotions
+                pmap = ((board.getWhitePawns() & Bitboard.ranks[Rank.RANK_7.getValue()]) >> 8) & ~allPieces;
+                while (pmap != 0) {
+                    int toSqVal = Bitboard.msb(pmap);
+                    Square toSq = Square.valueOf(toSqVal);
+                    addPawnMove(moves,Pawn.WHITE_PAWN,South.getInstance().next(toSq),toSq,null,false);
+                    pmap ^= Bitboard.squares[toSqVal];
+                }
+            }
+
+            // pawn pushes less promotions
+            if (noncaps) {
+                pmap = ((board.getWhitePawns() & ~Bitboard.ranks[Rank.RANK_7.getValue()]) >> 8) & ~allPieces;
+                while (pmap != 0) {
+                    int toSqVal = Bitboard.msb(pmap);
+                    Square toSq = Square.valueOf(toSqVal);
+                    moves.add(new Move(Pawn.WHITE_PAWN,South.getInstance().next(toSq),toSq,null));
+                    if (toSq.rank()==Rank.RANK_3 && board.getPiece(North.getInstance().next(toSq))==null) {
+                        moves.add(new Move(Pawn.WHITE_PAWN,South.getInstance().next(toSq),North.getInstance().next(toSq),null));
+                    }
+                    pmap ^= Bitboard.squares[toSqVal];
+                }
+            }
+        } else {
+            if (caps) {
+                long targets = board.getWhitePieces();
+                if (board.getEPSquare() != null) targets |= Bitboard.squares[board.getEPSquare().value()];
+
+                // attacks west
+                pmap = ((board.getBlackPawns() & ~Bitboard.files[File.FILE_A.getValue()]) << 7) & targets;
+                while (pmap != 0) {
+                    int toSqVal = Bitboard.lsb(pmap);
+                    Square toSq = Square.valueOf(toSqVal);
+                    Piece captured = toSq==board.getEPSquare() ? Pawn.WHITE_PAWN : board.getPiece(toSq);
+                    addPawnMove(moves,Pawn.BLACK_PAWN,NorthEast.getInstance().next(toSq),toSq,captured,toSq==board.getEPSquare());
+                    pmap ^= Bitboard.squares[toSqVal];
+                }
+
+                // attacks east
+                pmap = ((board.getBlackPawns() & ~Bitboard.files[File.FILE_H.getValue()]) << 9) & targets;
+                while (pmap != 0) {
+                    int toSqVal = Bitboard.lsb(pmap);
+                    Square toSq = Square.valueOf(toSqVal);
+                    Piece captured = toSq==board.getEPSquare() ? Pawn.WHITE_PAWN : board.getPiece(toSq);
+                    addPawnMove(moves,Pawn.BLACK_PAWN,NorthWest.getInstance().next(toSq),toSq,captured,toSq==board.getEPSquare());
+                    pmap ^= Bitboard.squares[toSqVal];
+                }
+
+                // push promotions
+                pmap = ((board.getBlackPawns() & Bitboard.ranks[Rank.RANK_2.getValue()]) << 8) & ~allPieces;
+                while (pmap != 0) {
+                    int toSqVal = Bitboard.lsb(pmap);
+                    Square toSq = Square.valueOf(toSqVal);
+                    addPawnMove(moves,Pawn.BLACK_PAWN,North.getInstance().next(toSq),toSq,null,false);
+                    pmap ^= Bitboard.squares[toSqVal];
+                }
+            }
+
+            // pawn pushes less promotions
+            if (noncaps) {
+                pmap = ((board.getBlackPawns() & ~Bitboard.ranks[Rank.RANK_2.getValue()]) << 8) & ~allPieces;
+                while (pmap != 0) {
+                    int toSqVal = Bitboard.lsb(pmap);
+                    Square toSq = Square.valueOf(toSqVal);
+                    moves.add(new Move(Pawn.BLACK_PAWN,North.getInstance().next(toSq),toSq,null));
+                    if (toSq.rank()==Rank.RANK_6 && board.getPiece(South.getInstance().next(toSq))==null) {
+                        moves.add(new Move(Pawn.BLACK_PAWN,North.getInstance().next(toSq),South.getInstance().next(toSq),null));
+                    }
+                    pmap ^= Bitboard.squares[toSqVal];
+                }
+            }
+        }
+
+    }
+
+    public static List<Move> genPseudoLegalMoves(Board board) {
+        return genPseudoLegalMoves(board,true,true);
+    }
+
+    public static List<Move> genPseudoLegalMoves(Board board,boolean caps,boolean noncaps) {
+        List<Move> moves = new ArrayList<Move>(100);
+
+        genPawnMoves(board,moves,caps,noncaps);
+        genKnightMoves(board,moves,caps,noncaps);
+        genBishopMoves(board,moves,caps,noncaps);
+        genRookMoves(board,moves,caps,noncaps);
+        genQueenMoves(board,moves,caps,noncaps);
+        genKingMoves(board,moves,caps,noncaps);
+
+        return moves;
+    }
+
+    public static void genQueenMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
+        Piece piece;
+        long pieceMap;
+
+        if (board.getPlayerToMove()==Color.WHITE) {
+            piece = Queen.WHITE_QUEEN;
+            pieceMap = board.getWhiteQueens();
+        } else {
+            piece = Queen.BLACK_QUEEN;
+            pieceMap = board.getBlackQueens();
+        }
+
+        while (pieceMap != 0) {
+            int sqVal = Bitboard.msb(pieceMap);
+            long moveMap = Magic.getQueenMoves(board,sqVal,getTargetSquares(board,caps,noncaps));
+            addMoves(board,piece,Square.valueOf(sqVal),moveMap,moves);
+            pieceMap ^= Bitboard.squares[sqVal];
+        }
+    }
+
+    public static void genRookMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
+        Piece piece;
+        long pieceMap;
+
+        if (board.getPlayerToMove()==Color.WHITE) {
+            piece = Rook.WHITE_ROOK;
+            pieceMap = board.getWhiteRooks();
+        } else {
+            piece = Rook.BLACK_ROOK;
+            pieceMap = board.getBlackRooks();
+        }
+
+        while (pieceMap != 0) {
+            int sqVal = Bitboard.msb(pieceMap);
+            long moveMap = Magic.getRookMoves(board,sqVal,getTargetSquares(board,caps,noncaps));
+            addMoves(board,piece,Square.valueOf(sqVal),moveMap,moves);
+            pieceMap ^= Bitboard.squares[sqVal];
+        }
+    }
+
+    private static long getTargetSquares(Board board,boolean caps,boolean noncaps) {
+        long targets = 0;
+
+        if (caps) {
+            targets = board.getPlayerToMove()==Color.WHITE ? board.getBlackPieces() : board.getWhitePieces();
+        }
+
+        if (noncaps) {
+            targets |= ~(board.getWhitePieces() | board.getBlackPieces());
+        }
+
+        return targets;
+    }
+
+    private MoveGen() {}
 }

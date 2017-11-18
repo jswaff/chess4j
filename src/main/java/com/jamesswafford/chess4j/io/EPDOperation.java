@@ -6,28 +6,28 @@ import java.util.List;
 
 public class EPDOperation {
 
-	private String epdOpcode;
-	private List<String> epdOperands = new ArrayList<String>();
+    private String epdOpcode;
+    private List<String> epdOperands = new ArrayList<String>();
 
-	public EPDOperation(String epdOpCode) {
-		this.epdOpcode=epdOpCode;
-	}
-	
-	public EPDOperation(String epdOpCode,String epdOperand) {
-		this(epdOpCode);
-		this.epdOperands.add(epdOperand);
-	}
+    public EPDOperation(String epdOpCode) {
+        this.epdOpcode=epdOpCode;
+    }
 
-	public void addOperand(String epdOperand) {
-		epdOperands.add(epdOperand);
-	}
-	
-	public String getEpdOpcode() {
-		return epdOpcode;
-	}
+    public EPDOperation(String epdOpCode,String epdOperand) {
+        this(epdOpCode);
+        this.epdOperands.add(epdOperand);
+    }
 
-	public List<String> getEpdOperands() {
-		return Collections.unmodifiableList(epdOperands);
-	}
-	
+    public void addOperand(String epdOperand) {
+        epdOperands.add(epdOperand);
+    }
+
+    public String getEpdOpcode() {
+        return epdOpcode;
+    }
+
+    public List<String> getEpdOperands() {
+        return Collections.unmodifiableList(epdOperands);
+    }
+
 }

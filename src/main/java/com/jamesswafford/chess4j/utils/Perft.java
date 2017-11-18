@@ -40,72 +40,72 @@ Note: this exceeds 32 bits 	8,229,523,927
 
 class PerftCallable implements Callable<Long> {
 
-	private Board board;
-	private int depth;
-	
-	public PerftCallable(Board board,int depth) {
-		this.board=board;
-		this.depth=depth;
-	}
+    private Board board;
+    private int depth;
 
-	private long perft(int myDepth) {
-		if (myDepth <= 0) {
-			return 1;
-		}
+    public PerftCallable(Board board,int depth) {
+        this.board=board;
+        this.depth=depth;
+    }
 
-		List<Move> moves = MoveGen.genLegalMoves(board);
-		long n=0;
+    private long perft(int myDepth) {
+        if (myDepth <= 0) {
+            return 1;
+        }
 
-		for (Move m : moves) {
-			board.applyMove(m);
-			n += perft(myDepth-1);
-			board.undoLastMove();
-		}
+        List<Move> moves = MoveGen.genLegalMoves(board);
+        long n=0;
 
-		return n;
-	}
+        for (Move m : moves) {
+            board.applyMove(m);
+            n += perft(myDepth-1);
+            board.undoLastMove();
+        }
 
-	@Override
-	public Long call() throws Exception {
-		return perft(depth);
-	}
-	
+        return n;
+    }
+
+    @Override
+    public Long call() throws Exception {
+        return perft(depth);
+    }
+
 }
 
 public final class Perft {
-	private static final Log LOGGER = LogFactory.getLog(Perft.class);
-	
-	private Perft() { }
-	
-	public static long perft(Board b,int depth) {
-		if (depth <= 0) {
-			return 1;
-		}
-		
-		int processors = Runtime.getRuntime().availableProcessors();
-		LOGGER.info("detected " + processors + " processors.");
-		ExecutorService executor = Executors.newFixedThreadPool(processors);
-		List<Future<Long>> futures = new ArrayList<Future<Long>>();
-		List<Move> moves = MoveGen.genLegalMoves(b);
-		
-		for (Move m : moves) {
-			Board b2 = b.deepCopy();
-			b2.applyMove(m);
-			PerftCallable pc = new PerftCallable(b2,depth-1);
-			futures.add(executor.submit(pc));
-		}
+    private static final Log LOGGER = LogFactory.getLog(Perft.class);
 
-		long n = 0;
-		
-		for (Future<Long> future : futures) {
-			try {
-				n += future.get();
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		return n;
-	}
+    private Perft() { }
+
+    public static long perft(Board b,int depth) {
+        if (depth <= 0) {
+            return 1;
+        }
+
+        int processors = Runtime.getRuntime().availableProcessors();
+        LOGGER.info("detected " + processors + " processors.");
+        ExecutorService executor = Executors.newFixedThreadPool(processors);
+        List<Future<Long>> futures = new ArrayList<Future<Long>>();
+        List<Move> moves = MoveGen.genLegalMoves(b);
+
+        for (Move m : moves) {
+            Board b2 = b.deepCopy();
+            b2.applyMove(m);
+            PerftCallable pc = new PerftCallable(b2,depth-1);
+            futures.add(executor.submit(pc));
+        }
+
+        long n = 0;
+
+        for (Future<Long> future : futures) {
+            try {
+                n += future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return n;
+    }
 
 }

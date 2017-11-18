@@ -4,24 +4,24 @@ import com.jamesswafford.chess4j.Color;
 
 public final class Rook extends Piece {
 
-	public static final Rook WHITE_ROOK = new Rook(Color.WHITE);
-	public static final Rook BLACK_ROOK = new Rook(Color.BLACK);
-	
-	private Rook(Color color) {
-		super(color);
-	}
-	
-	public String toString() {
-		return isWhite()?"R":"r";
-	}
+    public static final Rook WHITE_ROOK = new Rook(Color.WHITE);
+    public static final Rook BLACK_ROOK = new Rook(Color.BLACK);
 
-	@Override
-	public Piece getOppositeColorPiece() {
-		if (Color.WHITE.equals(getColor())) {
-			return BLACK_ROOK;
-		} else {
-			return WHITE_ROOK;
-		}
-	}
-	
+    private Rook(Color color) {
+        super(color);
+    }
+
+    public String toString() {
+        return isWhite()?"R":"r";
+    }
+
+    @Override
+    public Piece getOppositeColorPiece() {
+        if (Color.WHITE.equals(getColor())) {
+            return BLACK_ROOK;
+        } else {
+            return WHITE_ROOK;
+        }
+    }
+
 }

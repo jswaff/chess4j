@@ -16,92 +16,92 @@ import com.jamesswafford.chess4j.pieces.Rook;
 
 
 public final class GameStatusChecker {
-	
-	private GameStatusChecker() { }
-	
-	public static GameStatus getGameStatus() {
-		Board b = Board.INSTANCE;
-		List<Move> moves = MoveGen.genLegalMoves(b);
-		if (moves.size()==0) {
-			if (b.isPlayerInCheck()) {
-				return GameStatus.CHECKMATED;
-			} else {
-				return GameStatus.STALEMATED;
-			}
-		}
-		
-		if (isLackOfMatingMaterial(b)) {
-			return GameStatus.DRAW_MATERIAL;
-		}
 
-		if (isDrawByRep(b)) {
-			return GameStatus.DRAW_REP;
-		}
-		
-		if (b.getFiftyCounter() >= 100) {
-			return GameStatus.DRAW_BY_50;
-		}
-		
-		return GameStatus.INPROGRESS;
-	}
-	
-	private static boolean isLackOfMatingMaterial(Board b) {
-		
-		int numKnights=0,numWhiteSqBishops=0,numBlackSqBishops=0;
-		List<Square> squares = Square.allSquares();
-		for (Square sq : squares) {
-			Piece p = b.getPiece(sq);
-			if (p instanceof Pawn || p instanceof Rook || p instanceof Queen) { return false; }
-			if (p instanceof Knight) {
-				numKnights++;
-			}
-			
-			if (p instanceof Bishop) {
-				if (sq.isLight()) {
-					numWhiteSqBishops++;
-				} else {
-					numBlackSqBishops++;
-				}
-			}
-		}
+    private GameStatusChecker() { }
 
-		return !canMateWithMinors(numKnights,numWhiteSqBishops,numBlackSqBishops);
-	}
-	
-	private static boolean canMateWithMinors(int numKnights,int numWhiteSqBishops,int numDarkSqBishops) {
-		if (numKnights > 0) {
-			if (numKnights > 1) {
-				return true;
-			}
-			if (numWhiteSqBishops > 0 || numDarkSqBishops > 0) {
-				return true;
-			}
-		}
-		
-		if (numWhiteSqBishops > 0 && numDarkSqBishops > 0) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	public static int getNumberPreviousVisits(Board b) {
-		int visits=0;
+    public static GameStatus getGameStatus() {
+        Board b = Board.INSTANCE;
+        List<Move> moves = MoveGen.genLegalMoves(b);
+        if (moves.size()==0) {
+            if (b.isPlayerInCheck()) {
+                return GameStatus.CHECKMATED;
+            } else {
+                return GameStatus.STALEMATED;
+            }
+        }
 
-		long currentZobristKey = b.getZobristKey();
-		List<Undo> undos = b.getUndos();
-		for (Undo undo : undos) {
-			if (undo.getZobristKey()==currentZobristKey) {
-				visits++;
-			}
-		}
+        if (isLackOfMatingMaterial(b)) {
+            return GameStatus.DRAW_MATERIAL;
+        }
 
-		return visits;
-	}
+        if (isDrawByRep(b)) {
+            return GameStatus.DRAW_REP;
+        }
 
-	public static boolean isDrawByRep(Board b) {
-		int numPrevVisits = getNumberPreviousVisits(b);
-		return numPrevVisits >= 2;
-	}
-	
+        if (b.getFiftyCounter() >= 100) {
+            return GameStatus.DRAW_BY_50;
+        }
+
+        return GameStatus.INPROGRESS;
+    }
+
+    private static boolean isLackOfMatingMaterial(Board b) {
+
+        int numKnights=0,numWhiteSqBishops=0,numBlackSqBishops=0;
+        List<Square> squares = Square.allSquares();
+        for (Square sq : squares) {
+            Piece p = b.getPiece(sq);
+            if (p instanceof Pawn || p instanceof Rook || p instanceof Queen) { return false; }
+            if (p instanceof Knight) {
+                numKnights++;
+            }
+
+            if (p instanceof Bishop) {
+                if (sq.isLight()) {
+                    numWhiteSqBishops++;
+                } else {
+                    numBlackSqBishops++;
+                }
+            }
+        }
+
+        return !canMateWithMinors(numKnights,numWhiteSqBishops,numBlackSqBishops);
+    }
+
+    private static boolean canMateWithMinors(int numKnights,int numWhiteSqBishops,int numDarkSqBishops) {
+        if (numKnights > 0) {
+            if (numKnights > 1) {
+                return true;
+            }
+            if (numWhiteSqBishops > 0 || numDarkSqBishops > 0) {
+                return true;
+            }
+        }
+
+        if (numWhiteSqBishops > 0 && numDarkSqBishops > 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static int getNumberPreviousVisits(Board b) {
+        int visits=0;
+
+        long currentZobristKey = b.getZobristKey();
+        List<Undo> undos = b.getUndos();
+        for (Undo undo : undos) {
+            if (undo.getZobristKey()==currentZobristKey) {
+                visits++;
+            }
+        }
+
+        return visits;
+    }
+
+    public static boolean isDrawByRep(Board b) {
+        int numPrevVisits = getNumberPreviousVisits(b);
+        return numPrevVisits >= 2;
+    }
+
 }

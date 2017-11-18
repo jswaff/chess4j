@@ -16,17 +16,17 @@ import com.jamesswafford.chess4j.utils.BoardUtils;
  */
 public class ZugzwangDetector {
 
-	public static boolean isZugzwang(Board board) {
-		
-		int numWhite = board.getNumPieces(Queen.WHITE_QUEEN) + board.getNumPieces(Rook.WHITE_ROOK)
-				+ board.getNumPieces(Knight.WHITE_KNIGHT) + board.getNumPieces(Bishop.WHITE_BISHOP);
-		int numBlack = board.getNumPieces(Queen.BLACK_QUEEN) + board.getNumPieces(Rook.BLACK_ROOK)
-				+ board.getNumPieces(Knight.BLACK_KNIGHT) + board.getNumPieces(Bishop.BLACK_BISHOP);
-		
-		assert(numWhite == BoardUtils.getNumNonPawns(board, Color.WHITE));
-		assert(numBlack == BoardUtils.getNumNonPawns(board, Color.BLACK));
-		
-		return (numWhite==0 || numBlack==0);
-	}
-	
+    public static boolean isZugzwang(Board board) {
+
+        int numWhite = board.getNumPieces(Queen.WHITE_QUEEN) + board.getNumPieces(Rook.WHITE_ROOK)
+                + board.getNumPieces(Knight.WHITE_KNIGHT) + board.getNumPieces(Bishop.WHITE_BISHOP);
+        int numBlack = board.getNumPieces(Queen.BLACK_QUEEN) + board.getNumPieces(Rook.BLACK_ROOK)
+                + board.getNumPieces(Knight.BLACK_KNIGHT) + board.getNumPieces(Bishop.BLACK_BISHOP);
+
+        assert(numWhite == BoardUtils.getNumNonPawns(board, Color.WHITE));
+        assert(numBlack == BoardUtils.getNumNonPawns(board, Color.BLACK));
+
+        return (numWhite==0 || numBlack==0);
+    }
+
 }
