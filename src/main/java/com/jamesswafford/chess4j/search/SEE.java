@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.search;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.AttackDetector;
@@ -76,13 +77,13 @@ public class SEE {
 			// add any x-ray attackers back in, behind currentPiece in
 			// the direction of m.to -> currentSq
 			if (!(currentPiece instanceof Knight) && !(currentPiece instanceof King)) {
-				Direction dir = Direction.directionTo[m.to().value()][currentSq.value()];
+				Optional<Direction> dir = Direction.getDirectionTo(m.to(),currentSq);
 				
-				assert(dir != null);
-				long targetSquares = Bitboard.rays[currentSq.value()][dir.value()];
+				assert(dir.isPresent());
+				long targetSquares = Bitboard.rays[currentSq.value()][dir.get().value()];
 				
 				long xrays;
-				if (dir.isDiagonal()) {
+				if (dir.get().isDiagonal()) {
 					xrays = Magic.getBishopMoves(b,currentSq.value(),targetSquares)
 						& (b.getWhiteBishops() | b.getWhiteQueens() | b.getBlackBishops() | b.getBlackQueens());
 				} else {

@@ -13,7 +13,7 @@ class DirectionSpec extends FlatSpec with GivenWhenThen with Matchers {
     val e4 = Square.valueOf(File.FILE_E,Rank.RANK_4)
 
     Then("e6 should be north of e4")
-    Direction.directionTo(e4.value)(e6.value) shouldEqual North.getInstance()
+    Direction.getDirectionTo(e4,e6).get() shouldEqual North.getInstance()
   }
 
   "e4 square" should "be south of e6" in {
@@ -24,7 +24,7 @@ class DirectionSpec extends FlatSpec with GivenWhenThen with Matchers {
     val e6 = Square.valueOf(File.FILE_E,Rank.RANK_6)
 
     Then("e4 should be south of e6")
-    Direction.directionTo(e6.value)(e4.value) shouldEqual South.getInstance()
+    Direction.getDirectionTo(e6,e4).get() shouldEqual South.getInstance()
   }
 
   "e4 square" should "be west of h4" in {
@@ -35,7 +35,7 @@ class DirectionSpec extends FlatSpec with GivenWhenThen with Matchers {
     val h4 = Square.valueOf(File.FILE_H,Rank.RANK_4)
 
     Then("e4 should be west of h4")
-    Direction.directionTo(h4.value)(e4.value) shouldEqual West.getInstance()
+    Direction.getDirectionTo(h4,e4).get() shouldEqual West.getInstance()
   }
 
   "e4 square" should "be east of a4" in {
@@ -46,7 +46,7 @@ class DirectionSpec extends FlatSpec with GivenWhenThen with Matchers {
     val a4 = Square.valueOf(File.FILE_A,Rank.RANK_4)
 
     Then("e4 should be east of h4")
-    Direction.directionTo(a4.value)(e4.value) shouldEqual East.getInstance()
+    Direction.getDirectionTo(a4,e4).get() shouldEqual East.getInstance()
   }
 
   "e4 square" should "be southwest of h7" in {
@@ -57,7 +57,7 @@ class DirectionSpec extends FlatSpec with GivenWhenThen with Matchers {
     val h7 = Square.valueOf(File.FILE_H,Rank.RANK_7)
 
     Then("e4 should be southwest of h7")
-    Direction.directionTo(h7.value)(e4.value) shouldEqual SouthWest.getInstance()
+    Direction.getDirectionTo(h7,e4).get() shouldEqual SouthWest.getInstance()
   }
 
   "e4 square" should "be southeast of c6" in {
@@ -68,7 +68,7 @@ class DirectionSpec extends FlatSpec with GivenWhenThen with Matchers {
     val c6 = Square.valueOf(File.FILE_C,Rank.RANK_6)
 
     Then("e4 should be southeast of c6")
-    Direction.directionTo(c6.value)(e4.value) shouldEqual SouthEast.getInstance()
+    Direction.getDirectionTo(c6,e4).get() shouldEqual SouthEast.getInstance()
   }
 
   "e4 square" should "be northwest of h1" in {
@@ -79,7 +79,7 @@ class DirectionSpec extends FlatSpec with GivenWhenThen with Matchers {
     val h1 = Square.valueOf(File.FILE_H,Rank.RANK_1)
 
     Then("e4 should be northwest of h1")
-    Direction.directionTo(h1.value)(e4.value) shouldEqual NorthWest.getInstance()
+    Direction.getDirectionTo(h1,e4).get() shouldEqual NorthWest.getInstance()
   }
 
   "e4 square" should "be northeast of b1" in {
@@ -90,7 +90,7 @@ class DirectionSpec extends FlatSpec with GivenWhenThen with Matchers {
     val b1 = Square.valueOf(File.FILE_B,Rank.RANK_1)
 
     Then("e4 should be northeast of b1")
-    Direction.directionTo(b1.value)(e4.value) shouldEqual NorthEast.getInstance()
+    Direction.getDirectionTo(b1,e4).get() shouldEqual NorthEast.getInstance()
   }
 
   "e4 square" should "have no direction to a1" in {
@@ -101,7 +101,7 @@ class DirectionSpec extends FlatSpec with GivenWhenThen with Matchers {
     val a1 = Square.valueOf(File.FILE_A,Rank.RANK_1)
 
     Then("e4 should not have a direction to a1")
-    Direction.directionTo(a1.value)(e4.value) should be(null)
+    Direction.getDirectionTo(a1,e4).isPresent should be(false)
   }
 
 }

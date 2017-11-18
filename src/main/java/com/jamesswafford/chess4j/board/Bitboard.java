@@ -14,6 +14,8 @@ import com.jamesswafford.chess4j.board.squares.SouthWest;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.board.squares.West;
 
+import java.util.Optional;
+
 public class Bitboard {
 
 	public static long[] squares = new long[64];
@@ -47,17 +49,15 @@ public class Bitboard {
 	// initialize rays
 	static {
 		for (int i=0;i<64;i++) {
-			Square sq = Square.valueOf(i);
 			for (int j=0;j<8;j++) {
 				rays[i][j] = 0;
 			}
 			
 			for (int j=0;j<64;j++) {
-				Square sq2 = Square.valueOf(j);
-				if (sq2 != sq) {
-					Direction dir = Direction.directionTo[sq.value()][sq2.value()];
-					if (dir != null) {
-						rays[i][dir.value()] |= Bitboard.squares[j];
+				if (i != j) {
+					Optional<Direction> dir = Direction.getDirectionTo(i,j);
+					if (dir.isPresent()) {
+						rays[i][dir.get().value()] |= Bitboard.squares[j];
 					}
 				}
 			}
