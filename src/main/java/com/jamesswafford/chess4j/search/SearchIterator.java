@@ -231,12 +231,12 @@ public final class SearchIterator {
         assert(pv.size()>0);
         assert(MoveUtils.isLineValid(pv, board));
 
-        printSearchSummary(stats);
+        printSearchSummary(depth,stats);
 
         return pv;
     }
 
-    private static void printSearchSummary(SearchStats stats) {
+    private static void printSearchSummary(int lastDepth,SearchStats stats) {
         DecimalFormat df = new DecimalFormat("0.00");
         DecimalFormat df2 = new DecimalFormat("#,###,##0");
 
@@ -245,6 +245,7 @@ public final class SearchIterator {
         double qnodePct = stats.getQNodes() / (totalNodes/100.0);
 
         LOGGER.info("\n");
+        LOGGER.info("# depth: " + lastDepth);
         LOGGER.info("# nodes: " + df2.format(totalNodes) + ", interior: "
                 + df2.format(stats.getNodes()) + " (" + df.format(interiorPct) + "%)"
                 + ", quiescense: " + df2.format(stats.getQNodes()) + " (" + df.format(qnodePct) + "%)");
