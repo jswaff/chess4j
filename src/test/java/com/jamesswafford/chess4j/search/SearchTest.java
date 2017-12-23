@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.search;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jamesswafford.chess4j.hash.TranspositionTable;
 import junit.framework.Assert;
 
 import org.junit.Before;
@@ -44,7 +45,7 @@ public class SearchTest {
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
 
-        int score = Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY,
+        int score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 2, searchStats,false);
         Assert.assertEquals(Constants.CHECKMATE-1, score);
     }
@@ -59,7 +60,7 @@ public class SearchTest {
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
 
-        int score = Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY,
+        int score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 2,searchStats,false);
         Assert.assertEquals(Constants.CHECKMATE-1, score);
     }
@@ -89,7 +90,7 @@ public class SearchTest {
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
 
-        int score = Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY,
+        int score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 6, searchStats,false);
         Assert.assertEquals(Constants.CHECKMATE-5, score);
     }
@@ -101,7 +102,7 @@ public class SearchTest {
 
         Search.abortSearch = false;
         SearchStats searchStats = new SearchStats();
-        List<Move> pv = new ArrayList<Move>();
+        List<Move> pv = new ArrayList<>();
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
 
@@ -123,7 +124,7 @@ public class SearchTest {
         Move b7b5 = new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_B, Rank.RANK_7),Square.valueOf(File.FILE_B, Rank.RANK_5));
         Move c4b5 = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_C, Rank.RANK_4),Square.valueOf(File.FILE_B, Rank.RANK_5),Pawn.BLACK_PAWN);
         Move g8h6 = new Move(Knight.BLACK_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_8),Square.valueOf(File.FILE_H, Rank.RANK_6));
-        List<Move> lastPV = new ArrayList<Move>();
+        List<Move> lastPV = new ArrayList<>();
         lastPV.add(c2c4);
         lastPV.add(b7b5);
         lastPV.add(c4b5);
@@ -133,7 +134,7 @@ public class SearchTest {
         Search.stopTime = Search.startTime + 10000;
         searchStats.setLastPV(lastPV);
 
-        List<Move> pv = new ArrayList<Move>();
+        List<Move> pv = new ArrayList<>();
         Search.search(pv, -Constants.INFINITY, Constants.INFINITY,
                 b, 5, searchStats,false);
 
@@ -152,7 +153,7 @@ public class SearchTest {
         SearchStats searchStats = new SearchStats();
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
-        Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY,
+        Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 1, searchStats,false);
         Assert.assertEquals(21, searchStats.getNodes());
 
@@ -197,11 +198,44 @@ public class SearchTest {
         }
         b.undoLastMove();
 
-        List<Move> pv = new ArrayList<Move>();
+        List<Move> pv = new ArrayList<>();
         Search.search(pv, -Constants.INFINITY, Constants.INFINITY, b, 3, searchStats,false);
         Assert.assertEquals(2, pv.size());
         Assert.assertEquals(a2a4, pv.get(0));
         Assert.assertEquals(a7a5, pv.get(1));
+    }
+
+    @Test
+    public void testDraw50() throws Exception {
+        Board b = Board.INSTANCE;
+        FenParser.setPos(b, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/1NBQKBNR w Kkq - 0 1");
+        TTHolder.getTransTable().clear();
+
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
+        int score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
+                b, 2, new SearchStats(),false);
+        Assert.assertTrue(score != 0);
+
+        // up to 99 (half) moves ... the extra comes from the root search
+        b.setFiftyCounter(98);
+        b.setMoveCounter(98);
+        TTHolder.getTransTable().clear();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
+        score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
+                b, 2, new SearchStats(),false);
+        Assert.assertTrue(score != 0);
+
+        // trigger 50 move rule
+        b.setFiftyCounter(99);
+        b.setMoveCounter(99);
+        TTHolder.getTransTable().clear();
+        Search.startTime = System.currentTimeMillis();
+        Search.stopTime = Search.startTime + 10000;
+        score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
+                b, 2, new SearchStats(),false);
+        Assert.assertTrue(score == 0);
     }
 
     @Test
