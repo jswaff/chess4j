@@ -26,7 +26,7 @@ public class SEE {
     private static Map<Class<?>,Integer> pieceMap;
 
     static {
-        pieceMap = new HashMap<Class<?>,Integer>();
+        pieceMap = new HashMap<>();
         pieceMap.put(King.class, 6);
         pieceMap.put(Queen.class, 5);
         pieceMap.put(Rook.class, 4);

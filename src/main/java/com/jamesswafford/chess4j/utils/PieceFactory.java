@@ -20,7 +20,7 @@ public final class PieceFactory {
     }
 
     static {
-        charToPieceMap = new HashMap<String,Piece>();
+        charToPieceMap = new HashMap<>();
         charToPieceMap.put("R", Rook.WHITE_ROOK);
         charToPieceMap.put("r", Rook.BLACK_ROOK);
         charToPieceMap.put("N", Knight.WHITE_KNIGHT);

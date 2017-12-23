@@ -8,8 +8,8 @@ import com.jamesswafford.chess4j.board.Move;
 
 public class PGNGame {
 
-    private List<PGNTag> tags = new ArrayList<PGNTag>();
-    private List<Move> moves = new ArrayList<Move>();
+    private List<PGNTag> tags = new ArrayList<>();
+    private List<Move> moves = new ArrayList<>();
     private PGNResult result;
 
     public PGNGame(List<PGNTag> tags,List<Move> moves,PGNResult result) {

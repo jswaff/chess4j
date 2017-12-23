@@ -63,7 +63,7 @@ public final class Eval {
     private static Map<Class<?>,Integer> pieceValMap;
 
     static {
-        pieceValMap = new HashMap<Class<?>,Integer>();
+        pieceValMap = new HashMap<>();
         pieceValMap.put(King.class, Integer.MAX_VALUE);
         pieceValMap.put(Queen.class, QUEEN_VAL);
         pieceValMap.put(Rook.class, ROOK_VAL);

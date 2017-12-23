@@ -61,10 +61,6 @@ public enum Rank {
         return value;
     }
 
-    public boolean isPromotionRank() {
-        return value==RANK_1.getValue() || value==RANK_8.getValue();
-    }
-
     public Rank north() {
         if (value==0) {
             return null;

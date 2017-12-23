@@ -44,7 +44,7 @@ public final class Search {
 
         TranspositionTableEntry te = TTHolder.getTransTable().probe(board.getZobristKey());
 
-        List<Move> pv = new ArrayList<Move>();
+        List<Move> pv = new ArrayList<>();
         int numMovesSearched = 0;
         Move pvMove = stats.getLastPV().size()>0 ? stats.getLastPV().get(0) : null;
         Move hashMove = te==null ? null : te.getMove();
@@ -137,7 +137,8 @@ public final class Search {
         // Draw check
         // Note we don't do insufficient material here -- too expensive without piece counters.
         if (GameStatusChecker.isDrawByRep(board) || board.getFiftyCounter() >= 100) {
-            return 0;		}
+            return 0;
+        }
 
         // probe the hash table.  maybe we won't have to do any work at all!
         TranspositionTableEntry te = TTHolder.getTransTable().probe(board.getZobristKey());
@@ -187,7 +188,7 @@ public final class Search {
         ////////////////////// End Null Move
 
         // Generate moves
-        List<Move> pv = new ArrayList<Move>(50);
+        List<Move> pv = new ArrayList<>(50);
         int numMovesSearched = 0;
         int numMovesPruned = 0;
         Move pvMove = (pvNode && stats.getLastPV().size()>ply) ? stats.getLastPV().get(ply) : null;

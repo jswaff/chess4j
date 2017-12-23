@@ -61,6 +61,7 @@ public class PawnTranspositionTableTest {
     @Test
     public void testClear() throws Exception {
         EPDParser.setPos(board, "3qrrk1/1pp2pp1/1p2bn1p/5N2/2P5/P1P3B1/1P4PP/2Q1RRK1 w - - bm Nxg7; id \"WAC.090\";");
+
         long key = Zobrist.getPawnKey(board);
 
         List<Move> moves = MoveGen.genLegalMoves(board);

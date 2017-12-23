@@ -76,7 +76,7 @@ public final class MoveUtils {
         return true;
     }
 
-    public static boolean isLegalMove(Move move,Board board) {
+    private static boolean isLegalMove(Move move,Board board) {
         List<Move> legalMoves = MoveGen.genLegalMoves(board);
         return legalMoves.contains(move);
     }

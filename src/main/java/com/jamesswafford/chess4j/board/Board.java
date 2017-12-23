@@ -28,9 +28,9 @@ public final class Board {
 
     public static final Board INSTANCE = new Board();
 
-    private List<Undo> undoStack = new ArrayList<Undo>();
-    private Map<Square,Piece> pieceMap = new HashMap<Square,Piece>();
-    private Map<Piece,Integer> pieceCountsMap = new HashMap<Piece,Integer>();
+    private List<Undo> undoStack = new ArrayList<>();
+    private Map<Square,Piece> pieceMap = new HashMap<>();
+    private Map<Piece,Integer> pieceCountsMap = new HashMap<>();
     private MyCastlingRights castlingRights = new MyCastlingRights();
     private Color playerToMove;
     private Square epSquare;
@@ -448,23 +448,17 @@ public final class Board {
     }
 
     private Square findKingSquare(King kingSquare) {
-        Square ksq=null;
-        List<Square> squares = Square.allSquares();
-        for (Square sq : squares) {
-            Piece p = getPiece(sq);
-            if (kingSquare.equals(p)) {
-                ksq=sq;
-                break;
-            }
-        }
-        assert(ksq!=null);
-        return ksq;
+        return Square.allSquares()
+                .stream()
+                .filter(sq -> getPiece(sq)==kingSquare)
+                .findFirst()
+                .get();
     }
 
     public void flipVertical() {
-
         List<Square> squares = Square.allSquares();
-        Map<Square,Piece> myPieceMap = new HashMap<Square,Piece>();
+        Map<Square,Piece> myPieceMap = new HashMap<>();
+
         // remove pieces, remembering where they were
         for (Square sq : squares) {
             Piece p = getPiece(sq);
@@ -491,7 +485,21 @@ public final class Board {
 
         // flip castling rights
         MyCastlingRights myCastlingRights = new MyCastlingRights(castlingRights.getValue());
-        castlingRights.clear();
+
+        // first remove existing rights
+        if (castlingRights.isWhiteKingside()) {
+            clearCastlingRight(CastlingRights.WHITE_KINGSIDE);
+        }
+        if (castlingRights.isWhiteQueenside()) {
+            clearCastlingRight(CastlingRights.WHITE_QUEENSIDE);
+        }
+        if (castlingRights.isBlackKingside()) {
+            clearCastlingRight(CastlingRights.BLACK_KINGSIDE);
+        }
+        if (castlingRights.isBlackQueenside()) {
+            clearCastlingRight(CastlingRights.BLACK_QUEENSIDE);
+        }
+
         if (myCastlingRights.isWhiteKingside()) {
             addCastlingRight(CastlingRights.BLACK_KINGSIDE);
         }
@@ -506,6 +514,7 @@ public final class Board {
         }
 
         resetKingSquares();
+        assert(verify());
     }
 
     private Square getBlackKingSquare() {
@@ -776,14 +785,10 @@ public final class Board {
         addPiece(Bishop.BLACK_BISHOP,Square.valueOf(File.FILE_F, Rank.RANK_8));
         addPiece(Knight.BLACK_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_8));
         addPiece(Rook.BLACK_ROOK,Square.valueOf(File.FILE_H, Rank.RANK_8));
-        List<Square> squares = Square.rankSquares(Rank.RANK_7);
-        for (Square sq : squares) {
-            addPiece(Pawn.BLACK_PAWN,sq);
-        }
-        squares = Square.rankSquares(Rank.RANK_2);
-        for (Square sq : squares) {
-            addPiece(Pawn.WHITE_PAWN,sq);
-        }
+
+        Square.rankSquares(Rank.RANK_7).stream().forEach(sq -> addPiece(Pawn.BLACK_PAWN,sq));
+        Square.rankSquares(Rank.RANK_2).stream().forEach(sq -> addPiece(Pawn.WHITE_PAWN,sq));
+
         addPiece(Rook.WHITE_ROOK,Square.valueOf(File.FILE_A, Rank.RANK_1));
         addPiece(Knight.WHITE_KNIGHT,Square.valueOf(File.FILE_B, Rank.RANK_1));
         addPiece(Bishop.WHITE_BISHOP,Square.valueOf(File.FILE_C, Rank.RANK_1));
@@ -793,12 +798,8 @@ public final class Board {
         addPiece(Knight.WHITE_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_1));
         addPiece(Rook.WHITE_ROOK,Square.valueOf(File.FILE_H, Rank.RANK_1));
 
-
         castlingRights.clear();
-        Set<CastlingRights> crs = EnumSet.allOf(CastlingRights.class);
-        for (CastlingRights cr : crs) {
-            addCastlingRight(cr);
-        }
+        EnumSet.allOf(CastlingRights.class).stream().forEach(cr -> addCastlingRight(cr));
 
         playerToMove = Color.WHITE;
         zobristKey ^= Zobrist.getPlayerKey(Color.WHITE);
@@ -1049,6 +1050,24 @@ public final class Board {
         assert(pieceCountsMap.get(Rook.BLACK_ROOK)==numBlackRooks);
         assert(pieceCountsMap.get(Queen.WHITE_QUEEN)==numWhiteQueens);
         assert(pieceCountsMap.get(Queen.BLACK_QUEEN)==numBlackQueens);
+
+        // assert castling rights make sense
+        if (hasCastlingRight(CastlingRights.BLACK_QUEENSIDE)) {
+            assert(getPiece(Square.valueOf(File.FILE_E,Rank.RANK_8))==King.BLACK_KING);
+            assert(getPiece(Square.valueOf(File.FILE_A,Rank.RANK_8))==Rook.BLACK_ROOK);
+        }
+        if (hasCastlingRight(CastlingRights.BLACK_KINGSIDE)) {
+            assert(getPiece(Square.valueOf(File.FILE_E,Rank.RANK_8))==King.BLACK_KING);
+            assert(getPiece(Square.valueOf(File.FILE_H,Rank.RANK_8))==Rook.BLACK_ROOK);
+        }
+        if (hasCastlingRight(CastlingRights.WHITE_QUEENSIDE)) {
+            assert(getPiece(Square.valueOf(File.FILE_E,Rank.RANK_1))==King.WHITE_KING);
+            assert(getPiece(Square.valueOf(File.FILE_A,Rank.RANK_1))==Rook.WHITE_ROOK);
+        }
+        if (hasCastlingRight(CastlingRights.WHITE_KINGSIDE)) {
+            assert(getPiece(Square.valueOf(File.FILE_E,Rank.RANK_1))==King.WHITE_KING);
+            assert(getPiece(Square.valueOf(File.FILE_H,Rank.RANK_1))==Rook.WHITE_ROOK);
+        }
 
         assert(zobristKey==Zobrist.getBoardKey(this));
         assert(pawnKey==Zobrist.getPawnKey(this));

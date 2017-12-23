@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
@@ -14,7 +13,7 @@ public class OpeningBookInMemoryImpl extends AbstractOpeningBook {
 
     private static final OpeningBookInMemoryImpl INSTANCE = new OpeningBookInMemoryImpl();
 
-    private Map<Long,List<BookMove>> movesMap = new HashMap<Long,List<BookMove>>();
+    private Map<Long,List<BookMove>> movesMap = new HashMap<>();
 
     private OpeningBookInMemoryImpl() {
     }
@@ -31,7 +30,7 @@ public class OpeningBookInMemoryImpl extends AbstractOpeningBook {
     private void addToMap(Long key,Move move) {
         List<BookMove> bms = movesMap.get(key);
         if (bms==null) {
-            bms = new ArrayList<BookMove>();
+            bms = new ArrayList<>();
             movesMap.put(key, bms);
         }
 
@@ -49,7 +48,7 @@ public class OpeningBookInMemoryImpl extends AbstractOpeningBook {
 
     @Override
     public List<BookMove> getMoves(Board board) {
-        List<BookMove> legalMoves = new ArrayList<BookMove>();
+        List<BookMove> legalMoves = new ArrayList<>();
 
         List<BookMove> bookMoves = movesMap.get(board.getZobristKey());
 
@@ -67,14 +66,7 @@ public class OpeningBookInMemoryImpl extends AbstractOpeningBook {
 
     @Override
     public long getTotalMoveCount() {
-        long cnt = 0;
-
-        Set<Long> keys = movesMap.keySet();
-        for (Long key : keys) {
-            cnt += movesMap.get(key).size();
-        }
-
-        return cnt;
+        return movesMap.keySet().stream().mapToLong(key -> movesMap.get(key).size()).sum();
     }
 
     @Override

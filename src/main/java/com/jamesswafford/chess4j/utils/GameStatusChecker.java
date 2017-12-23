@@ -5,7 +5,6 @@ import java.util.List;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.MoveGen;
-import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.pieces.Bishop;
 import com.jamesswafford.chess4j.pieces.Knight;
@@ -86,17 +85,10 @@ public final class GameStatusChecker {
     }
 
     public static int getNumberPreviousVisits(Board b) {
-        int visits=0;
-
         long currentZobristKey = b.getZobristKey();
-        List<Undo> undos = b.getUndos();
-        for (Undo undo : undos) {
-            if (undo.getZobristKey()==currentZobristKey) {
-                visits++;
-            }
-        }
-
-        return visits;
+        return (int) b.getUndos().stream()
+                .filter(u -> u.getZobristKey()==currentZobristKey)
+                .count();
     }
 
     public static boolean isDrawByRep(Board b) {

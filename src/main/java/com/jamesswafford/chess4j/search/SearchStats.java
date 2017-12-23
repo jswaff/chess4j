@@ -14,8 +14,8 @@ public class SearchStats {
 
     private long nodes=0;
     private long qnodes=0;
-    private List<Move> lastPV = new ArrayList<Move>();
-    private List<Move> firstLine = new ArrayList<Move>();
+    private List<Move> lastPV = new ArrayList<>();
+    private List<Move> firstLine = new ArrayList<>();
 
     public long getFailHighs() {
         return failHighs;

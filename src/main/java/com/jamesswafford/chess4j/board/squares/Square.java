@@ -1,21 +1,14 @@
 package com.jamesswafford.chess4j.board.squares;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.*;
 
 public final class Square {
 
     public static final int NUM_SQUARES = 64;
 
-    private static final List<Square> SQUARES = new ArrayList<Square>();
-    private static final Map<File,List<Square>> FILE_SQUARES = new HashMap<File,List<Square>>();
-    private static final Map<Rank,List<Square>> RANK_SQUARES = new HashMap<Rank,List<Square>>();
+    private static final List<Square> SQUARES = new ArrayList<>();
+    private static final Map<File,List<Square>> FILE_SQUARES = new HashMap<>();
+    private static final Map<Rank,List<Square>> RANK_SQUARES = new HashMap<>();
 
     private final Rank rank;
     private final File file;
@@ -29,7 +22,7 @@ public final class Square {
 
     static {
         for (File file : File.values()) {
-            List<Square> mySquares = new ArrayList<Square>();
+            List<Square> mySquares = new ArrayList<>();
             for (Rank rank : Rank.values()) {
                 mySquares.add(new Square(file,rank));
             }
@@ -37,7 +30,7 @@ public final class Square {
         }
 
         for (Rank rank : Rank.values()) {
-            List<Square> mySquares = new ArrayList<Square>();
+            List<Square> mySquares = new ArrayList<>();
             for (File file : File.values()) {
                 mySquares.add(new Square(file,rank));
             }
@@ -48,7 +41,7 @@ public final class Square {
     static {
         for (Rank rank : Rank.values()) {
             for (File file : File.values()) {
-                Set<Square> intersection = new HashSet<Square>(FILE_SQUARES.get(file));
+                Set<Square> intersection = new HashSet<>(FILE_SQUARES.get(file));
                 intersection.retainAll(RANK_SQUARES.get(rank));
                 assert(intersection.size()==1);
                 Square sq = intersection.iterator().next();
@@ -68,9 +61,7 @@ public final class Square {
     }
 
     public boolean isLight() {
-        int r = rank.getValue();
-        int f = file.getValue();
-        return (r%2) == (f%2);
+        return (rank.getValue() % 2) == (file.getValue() % 2);
     }
 
     public int value() {

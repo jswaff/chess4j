@@ -21,6 +21,8 @@ import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.pieces.Queen;
 import com.jamesswafford.chess4j.pieces.Rook;
 
+import static java.util.stream.Collectors.toList;
+
 public final class MoveGen {
 
     private static void addMoves(Board board,Piece piece,Square fromSq,long moveMap,List<Move> moves) {
@@ -128,19 +130,17 @@ public final class MoveGen {
     }
 
     public static List<Move> genLegalMoves(Board board) {
-        List<Move> pseudoLegalMoves = genPseudoLegalMoves(board);
-        List<Move> legalMoves = new ArrayList<Move>();
+        return genPseudoLegalMoves(board)
+                .stream()
+                .filter(m -> isMoveLegal(board,m))
+                .collect(toList());
+    }
 
-        for (Move m : pseudoLegalMoves) {
-            board.applyMove(m);
-
-            if (!board.isOpponentInCheck()) {
-                legalMoves.add(m);
-            }
-            board.undoLastMove();
-        }
-
-        return legalMoves;
+    private static boolean isMoveLegal(Board board,Move m) {
+        board.applyMove(m);
+        boolean legal = !board.isOpponentInCheck();
+        board.undoLastMove();
+        return legal;
     }
 
     public static void genPawnMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
@@ -253,7 +253,7 @@ public final class MoveGen {
     }
 
     public static List<Move> genPseudoLegalMoves(Board board,boolean caps,boolean noncaps) {
-        List<Move> moves = new ArrayList<Move>(100);
+        List<Move> moves = new ArrayList<>(100);
 
         genPawnMoves(board,moves,caps,noncaps);
         genKnightMoves(board,moves,caps,noncaps);

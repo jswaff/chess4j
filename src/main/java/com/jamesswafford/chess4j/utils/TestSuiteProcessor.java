@@ -26,7 +26,7 @@ public class TestSuiteProcessor {
     private static final Log LOGGER = LogFactory.getLog(TestSuiteProcessor.class);
 
     private List<Move> getBestMoves(Board b,List<EPDOperation> ops) throws ParseException, IllegalMoveException {
-        List<Move> bms = new ArrayList<Move>();
+        List<Move> bms = new ArrayList<>();
 
         MoveParser parser = new MoveParser();
         for (EPDOperation op : ops) {

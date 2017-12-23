@@ -52,10 +52,7 @@ public abstract class AbstractOpeningBook {
 
         if (bms.size()==0) return null;
 
-        int totalWeight = 0;
-        for (BookMove bm : bms) {
-            totalWeight += bm.getFrequency();
-        }
+        int totalWeight = bms.stream().mapToInt(bm -> bm.getFrequency()).sum();
 
         int val = r.nextInt(totalWeight)+1;  // e.g. if totalWeight is 10, then 0-9 ==> 1-10
 

@@ -85,7 +85,7 @@ public final class Perft {
         int processors = Runtime.getRuntime().availableProcessors();
         LOGGER.info("detected " + processors + " processors.");
         ExecutorService executor = Executors.newFixedThreadPool(processors);
-        List<Future<Long>> futures = new ArrayList<Future<Long>>();
+        List<Future<Long>> futures = new ArrayList<>();
         List<Move> moves = MoveGen.genLegalMoves(b);
 
         for (Move m : moves) {

@@ -14,7 +14,7 @@ public final class EPDParser {
     // Note the EPD grammar can be found here:
     // http://chessprogramming.wikispaces.com/Extended+Position+Description
     public static List<EPDOperation> setPos(Board b,String epd) throws ParseException {
-        List<EPDOperation> opsList = new ArrayList<EPDOperation>();
+        List<EPDOperation> opsList = new ArrayList<>();
 
         // want the string up to the 4th space.
         int ind=0;
@@ -54,7 +54,7 @@ public final class EPDParser {
     }
 
     private static List<String> getOperands(String strOperands) {
-        List<String> operands = new ArrayList<String>();
+        List<String> operands = new ArrayList<>();
 
         strOperands = strOperands.trim();
         if ("".equals(strOperands)) {

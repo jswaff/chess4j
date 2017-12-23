@@ -61,7 +61,7 @@ public final class PGNParser {
     }
 
     private List<PGNTag> getPGNTags(String pgn) {
-        List<PGNTag> tags = new ArrayList<PGNTag>();
+        List<PGNTag> tags = new ArrayList<>();
 
         Pattern r = Pattern.compile(tagPattern);
         Matcher m = r.matcher(pgn);

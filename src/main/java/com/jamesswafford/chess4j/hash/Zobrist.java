@@ -23,10 +23,10 @@ import com.jamesswafford.chess4j.utils.PieceFactory;
 
 public final class Zobrist {
 
-    private static Map<Piece,Long[]> pieceMap = new HashMap<Piece,Long[]>();
-    private static Map<Color,Long> playerMap = new HashMap<Color,Long>();
-    private static Map<CastlingRights,Long> castlingMap = new HashMap<CastlingRights,Long>();
-    private static Map<Square,Long> epMap = new HashMap<Square,Long>();
+    private static Map<Piece,Long[]> pieceMap = new HashMap<>();
+    private static Map<Color,Long> playerMap = new HashMap<>();
+    private static Map<CastlingRights,Long> castlingMap = new HashMap<>();
+    private static Map<Square,Long> epMap = new HashMap<>();
 
     private Zobrist() {	}
 
