@@ -190,9 +190,8 @@ public class SearchTest {
             if (mv.equals(a7a5)) {
                 score=500;
             }
-            TTHolder.getTransTable().store(
+            TTHolder.getTransTable().store(b.getZobristKey(),
                     TranspositionTableEntryType.EXACT_MATCH,
-                    b.getZobristKey(),
                     score, 1, mv);
             b.undoLastMove();
         }

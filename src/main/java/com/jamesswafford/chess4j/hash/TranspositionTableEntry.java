@@ -4,16 +4,17 @@ import com.jamesswafford.chess4j.board.Move;
 
 public class TranspositionTableEntry {
 
-    private TranspositionTableEntryType type;
     private long zobristKey;
+
+    private TranspositionTableEntryType type;
     private int score;
     private int depth;
     private Move move;
 
-    public TranspositionTableEntry(TranspositionTableEntryType type,
-            long zobristKey,int score,int depth,Move move) {
-        this.type=type;
+    public TranspositionTableEntry(long zobristKey,
+            TranspositionTableEntryType type,int score,int depth,Move move) {
         this.zobristKey=zobristKey;
+        this.type=type;
         this.score=score;
         this.depth=depth;
         this.move=move;

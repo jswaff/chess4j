@@ -263,8 +263,8 @@ public final class Search {
 
             if (score > alpha) {
                 if (score >= beta) {
-                    TTHolder.getTransTable().store(TranspositionTableEntryType.LOWER_BOUND,
-                            board.getZobristKey(),beta,depth,move);
+                    TTHolder.getTransTable().store(board.getZobristKey(),
+                            TranspositionTableEntryType.LOWER_BOUND,beta,depth,move);
                     if (move.captured()==null && move.promotion()==null) {
                         KillerMoves.getInstance().addKiller(ply, move);
                     }
@@ -283,7 +283,7 @@ public final class Search {
         TranspositionTableEntryType tet = bestMove == null ?
                 TranspositionTableEntryType.UPPER_BOUND : // fail low node - we didn't find a move > alpha
                 TranspositionTableEntryType.EXACT_MATCH;
-        TTHolder.getTransTable().store(tet, board.getZobristKey(), alpha, depth, bestMove);
+        TTHolder.getTransTable().store(board.getZobristKey(),tet, alpha, depth, bestMove);
 
         return alpha;
     }
