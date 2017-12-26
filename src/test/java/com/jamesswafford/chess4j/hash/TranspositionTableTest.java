@@ -1,5 +1,7 @@
 package com.jamesswafford.chess4j.hash;
 
+import com.jamesswafford.chess4j.board.MoveGen;
+import com.jamesswafford.chess4j.io.FenParser;
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -46,7 +48,7 @@ public class TranspositionTableTest {
     }
 
     @Test
-    public void test1() {
+    public void testStoreAndProbeWithNegativeScore() {
         ttable.clear();
         board.resetBoard();
         long key = Zobrist.getBoardKey(board);
@@ -56,11 +58,15 @@ public class TranspositionTableTest {
 
         // now store and reload
         Move m = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_2),Square.valueOf(File.FILE_E,Rank.RANK_4));
-        ttable.store(key,TranspositionTableEntryType.LOWER_BOUND, 100, 3, m);
+        ttable.store(key,TranspositionTableEntryType.LOWER_BOUND, -100, 3, m);
         tte = ttable.probe(key);
         Assert.assertNotNull(tte);
+        Assert.assertEquals(TranspositionTableEntryType.LOWER_BOUND,tte.getType());
+        Assert.assertEquals(-100,tte.getScore());
+        Assert.assertEquals(3,tte.getDepth());
+        Assert.assertEquals(m,tte.getMove());
 
-        TranspositionTableEntry lbe = new TranspositionTableEntry(key,TranspositionTableEntryType.LOWER_BOUND,100,3,m);
+        TranspositionTableEntry lbe = new TranspositionTableEntry(key,TranspositionTableEntryType.LOWER_BOUND,-100,3,m);
         Assert.assertEquals(lbe, tte);
 
         // now make move and reprobe
@@ -75,6 +81,72 @@ public class TranspositionTableTest {
         tte = ttable.probe(key);
         Assert.assertNotNull(tte);
         Assert.assertEquals(lbe, tte);
+    }
+
+    @Test
+    public void testStoreCapture() throws Exception {
+        ttable.clear();
+        EPDParser.setPos(board,"5k2/6pp/p1qN4/1p1p4/3P4/2PKP2Q/PP3r2/3R4 b - - bm Qc4+; id \"WAC.005\";");
+        Move capture = MoveGen.genLegalMoves(board).stream()
+                .filter(m -> m.captured() != null)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("expected capture"));
+
+        long key = Zobrist.getBoardKey(board);
+        Assert.assertNull(ttable.probe(key));
+
+        ttable.store(key,TranspositionTableEntryType.EXACT_MATCH,100,3,capture);
+        Move capture2 = ttable.probe(key).getMove();
+        Assert.assertTrue(capture2.captured() != null);
+        Assert.assertEquals(capture,capture2);
+    }
+
+    @Test
+    public void testStorePromotion() throws Exception {
+        ttable.clear();
+        EPDParser.setPos(board,"8/4Pk1p/6p1/1r6/8/5N2/2B2PPP/b5K1 w - - bm e8=Q+; id \"position 0631\";");
+        Move promotion = MoveGen.genLegalMoves(board).stream()
+                .filter(m -> m.promotion() != null)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("expected promotion"));
+
+        long key = Zobrist.getBoardKey(board);
+        Assert.assertNull(ttable.probe(key));
+
+        ttable.store(key,TranspositionTableEntryType.EXACT_MATCH,100,3,promotion);
+        Assert.assertEquals(promotion,ttable.probe(key).getMove());
+    }
+
+    @Test
+    public void testStoreCastle() throws Exception {
+        ttable.clear();
+        FenParser.setPos(board, "4k2r/8/8/8/8/8/8/R3K3 b Qk - 0 1");
+        Move castle = MoveGen.genLegalMoves(board).stream()
+                .filter(m -> m.isCastle())
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("expected castle"));
+
+        long key = Zobrist.getBoardKey(board);
+        Assert.assertNull(ttable.probe(key));
+
+        ttable.store(key,TranspositionTableEntryType.EXACT_MATCH,100,3,castle);
+        Assert.assertEquals(castle,ttable.probe(key).getMove());
+    }
+
+    @Test
+    public void testStoreEPCapture() throws Exception {
+        ttable.clear();
+        FenParser.setPos(board, "rnbk1bnr/pp1ppppp/8/8/1Pp1P3/5N2/P1PNBPPP/R1BQ1RK1 b - b3 0 6");
+        Move epCapture = MoveGen.genLegalMoves(board).stream()
+                .filter(m -> m.isEpCapture())
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("expected ep capture"));
+
+        long key = Zobrist.getBoardKey(board);
+        Assert.assertNull(ttable.probe(key));
+
+        ttable.store(key,TranspositionTableEntryType.EXACT_MATCH,100,3,epCapture);
+        Assert.assertEquals(epCapture,ttable.probe(key).getMove());
     }
 
     @Test
@@ -129,6 +201,7 @@ public class TranspositionTableTest {
         TranspositionTableEntry tte = ttable.probe(key);
         Assert.assertEquals(TranspositionTableEntryType.MOVE_ONLY, tte.getType());
         Assert.assertEquals(8, tte.getDepth());
+        Assert.assertEquals(-29990,tte.getScore()); // note the negative score
     }
 
     @Test

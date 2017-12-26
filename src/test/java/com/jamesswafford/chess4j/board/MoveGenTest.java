@@ -460,7 +460,7 @@ public class MoveGenTest {
     public void testPawnMoves2() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
-        List<Move> moves = new ArrayList<Move>();
+        List<Move> moves = new ArrayList<>();
         MoveGen.genPawnMoves(b, moves, true, true);
 
         Assert.assertEquals(16, moves.size());

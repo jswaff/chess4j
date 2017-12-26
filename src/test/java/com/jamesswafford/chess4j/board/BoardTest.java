@@ -3,7 +3,6 @@ package com.jamesswafford.chess4j.board;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jamesswafford.chess4j.io.DrawBoard;
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -293,7 +292,6 @@ public class BoardTest {
 
         // test castling
         FenParser.setPos(b, "4k2r/8/8/8/8/8/8/R3K3 b Qk - 0 1");
-        DrawBoard.drawBoard(b);
         FenParser.setPos(b2, "r3k3/8/8/8/8/8/8/4K2R w qK - 0 1");
         b.flipVertical();
         b.setMoveCounter(b2.getMoveCounter());

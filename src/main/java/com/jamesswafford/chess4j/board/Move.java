@@ -36,6 +36,14 @@ public class Move {
         this.promotion = promotion;
     }
 
+    public Move(Piece piece,Square from,Square to,Piece captured,Piece promotion,
+        boolean castle,boolean epCapture) {
+
+        this(piece,from,to,captured,promotion);
+        this.castle = castle;
+        this.epCapture = epCapture;
+    }
+
     public Piece piece() {
         return piece;
     }
