@@ -12,11 +12,6 @@ public class TranspositionTableEntry {
     private long zobristKey;
     private long val;
 
-    private TranspositionTableEntryType entryType;
-    private int score;
-    private int depth;
-    private Move move;
-
     private static Map<Piece,Long> pieceToLongMap;
     private static Map<Long,Piece> longToPieceMap;
 
@@ -53,10 +48,6 @@ public class TranspositionTableEntry {
     public TranspositionTableEntry(long zobristKey,
             TranspositionTableEntryType entryType,int score,int depth,Move move) {
         this.zobristKey=zobristKey;
-        this.entryType=entryType;
-        this.score=score;
-        this.depth=depth;
-        this.move=move;
         buildStoredValue(entryType,score,depth,move);
     }
 
@@ -97,7 +88,6 @@ public class TranspositionTableEntry {
     }
 
     public TranspositionTableEntryType getType() {
-        assert(entryType == TranspositionTableEntryType.values[(int)(val & 3)]);
         return TranspositionTableEntryType.values[(int)(val & 3)];
     }
 
@@ -106,56 +96,41 @@ public class TranspositionTableEntry {
     }
 
     public int getScore() {
-        int myScore = (int)((val >> 18) & 0xFFFF);
+        int score = (int)((val >> 18) & 0xFFFF);
         if (((val >> 34) & 1) == 1) {
-            myScore = -myScore;
+            score = -score;
         }
-        assert(myScore == score);
-        return myScore;
+        return score;
     }
 
     public Move getMove() {
-        Move myMove = null;
+        Move move = null;
 
         if (((val >> 35) & 67108863) > 0) { // 2^26 - 1
             Square fromSq = Square.valueOf((int)(val >> 35) & 63);
-            assert(fromSq==move.from());
-
             Square toSq = Square.valueOf((int)(val >> 41) & 63);
-            assert(toSq==move.to());
-
             Piece piece = longToPieceMap.get((val >> 47) & 15L);
-            assert(piece==move.piece());
-
             Piece captured = null;
             if (((val >> 51) & 1) == 1) {
                 captured = longToPieceMap.get((val >> 52) & 15L);
-                assert(captured==move.captured());
             }
 
             Piece promotion = null;
             if (((val >> 56) & 1) == 1) {
                 promotion = longToPieceMap.get((val >> 57) & 15L);
-                assert(promotion==move.promotion());
             }
 
             boolean castle = ((val >> 61) & 1)==1;
-            assert(castle==move.isCastle());
-
             boolean epCapture = ((val >> 62) & 1)==1;
-            assert(epCapture==move.isEpCapture());
 
-            myMove = new Move(piece,fromSq,toSq,captured,promotion,castle,epCapture);
-
-            assert(move.equals(myMove));
+            move = new Move(piece,fromSq,toSq,captured,promotion,castle,epCapture);
         }
 
-        return myMove;
+        return move;
     }
 
     public int getDepth() {
-        assert(depth == (int)((val >> 2) & 0xFFFF));
-        return depth;
+        return (int)((val >> 2) & 0xFFFF);
     }
 
     @Override
@@ -164,31 +139,14 @@ public class TranspositionTableEntry {
             return false;
         }
         TranspositionTableEntry that = (TranspositionTableEntry)obj;
-        if (this.getZobristKey() != that.getZobristKey())
-            return false;
-        if (this.getScore() != that.getScore())
-            return false;
-        if (this.getDepth() != that.getDepth())
-            return false;
-        if (this.getMove()==null) {
-            if (that.getMove() != null) {
-                return false;
-            }
-        } else {
-            if (!this.getMove().equals(that.getMove())) {
-                return false;
-            }
-        }
 
-        return true;
+        return (this.zobristKey == that.zobristKey) && (this.val == that.val);
     }
 
     @Override
     public int hashCode() {
-        int hc = (int)this.getZobristKey();
-        hc = hc * 31 + this.getScore();
-        hc = hc * 17 + this.getDepth();
-        hc = hc * 31 + (this.getMove()==null ? 0 : this.getMove().hashCode());
+        int hc = (int)this.zobristKey;
+        hc = hc * (int)this.val;
 
         return hc;
     }
