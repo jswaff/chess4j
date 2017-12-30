@@ -78,7 +78,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
      * @param depth
      * @param move
      */
-    public void store(TranspositionTableEntryType entryType,long zobristKey,int score,int depth,Move move) {
+    public void store(long zobristKey,TranspositionTableEntryType entryType,int score,int depth,Move move) {
         if (isMateScore(score)) {
             if (entryType==TranspositionTableEntryType.UPPER_BOUND) {
                 // failing low on mate.  don't allow a cutoff, just store any associated move
@@ -99,7 +99,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
             }
         }
 
-        TranspositionTableEntry te = new TranspositionTableEntry(entryType,zobristKey,score,depth,move);
+        TranspositionTableEntry te = new TranspositionTableEntry(zobristKey,entryType,score,depth,move);
         table[getMaskedKey(zobristKey)] = te;
     }
 
