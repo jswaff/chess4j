@@ -85,40 +85,27 @@ public final class Zobrist {
     }
 
     public static long getPawnKey(Board b) {
-        long key = 0;
 
-        List<Square> sqs = Square.allSquares();
-        for (Square sq : sqs) {
-            Piece p = b.getPiece(sq);
-            if (p instanceof Pawn) {
-                key ^= getPieceKey(sq,p);
-            }
-        }
-
-        return key;
+        return Square.allSquares().stream()
+                .filter(sq -> b.getPiece(sq) instanceof Pawn)
+                .map(sq -> getPieceKey(sq,b.getPiece(sq)))
+                .reduce(0L,(x,y) -> x ^ y);
     }
 
     public static long getBoardKey(Board b) {
-        long key = 0;
 
-        List<Square> sqs = Square.allSquares();
-        for (Square sq : sqs) {
-            Piece p = b.getPiece(sq);
-            if (p != null) {
-                key ^= getPieceKey(sq,p);
-            }
-        }
+        long key = Square.allSquares().stream()
+                .filter(sq -> b.getPiece(sq) != null)
+                .map(sq -> getPieceKey(sq,b.getPiece(sq)))
+                .reduce(0L,(x,y) -> x ^ y);
 
-        Set<CastlingRights> crs = EnumSet.allOf(CastlingRights.class);
-        for (CastlingRights cr : crs) {
-            if (b.hasCastlingRight(cr)) {
-                key ^= castlingMap.get(cr);
-            }
-        }
+        key = EnumSet.allOf(CastlingRights.class).stream()
+                .filter(cr -> b.hasCastlingRight(cr))
+                .map(cr -> castlingMap.get(cr))
+                .reduce(key, (x,y) -> x ^ y);
 
-        Square epSquare = b.getEPSquare();
-        if (epSquare != null) {
-            key ^= epMap.get(epSquare);
+        if (b.getEPSquare() != null) {
+            key ^= epMap.get(b.getEPSquare());
         }
 
         key ^= playerMap.get(b.getPlayerToMove());
