@@ -56,9 +56,8 @@ public class Bitboard {
             for (int j=0;j<64;j++) {
                 if (i != j) {
                     Optional<Direction> dir = Direction.getDirectionTo(i,j);
-                    if (dir.isPresent()) {
-                        rays[i][dir.get().value()] |= Bitboard.squares[j];
-                    }
+                    int finalI = i; int finalJ = j;
+                    dir.ifPresent(d -> rays[finalI][d.value()] |= Bitboard.squares[finalJ]);
                 }
             }
         }
