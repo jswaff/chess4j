@@ -2,19 +2,13 @@ package com.jamesswafford.chess4j.board;
 
 import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.squares.Direction;
-import com.jamesswafford.chess4j.board.squares.East;
 import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.North;
-import com.jamesswafford.chess4j.board.squares.NorthEast;
-import com.jamesswafford.chess4j.board.squares.NorthWest;
 import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.board.squares.South;
-import com.jamesswafford.chess4j.board.squares.SouthEast;
-import com.jamesswafford.chess4j.board.squares.SouthWest;
 import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.board.squares.West;
 
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class Bitboard {
 
@@ -65,93 +59,57 @@ public class Bitboard {
 
     // initialize knight moves
     static {
-        for (int i=0;i<64;i++) {
-            knightMoves[i]=0;
-            Square sq = Square.valueOf(i);
-            if (sq.file().eastOf(File.FILE_A)) {
-                if (sq.rank().southOf(Rank.RANK_7)) {
-                    knightMoves[i] |= squares[North.getInstance().next(NorthWest.getInstance().next(sq)).value()];
-                }
-                if (sq.rank().northOf(Rank.RANK_2)) {
-                    knightMoves[i] |= squares[South.getInstance().next(SouthWest.getInstance().next(sq)).value()];
-                }
-            }
-            if (sq.file().eastOf(File.FILE_B)) {
-                if (sq.rank().southOf(Rank.RANK_8)) {
-                    knightMoves[i] |= squares[NorthWest.getInstance().next(West.getInstance().next(sq)).value()];
-                }
-                if (sq.rank().northOf(Rank.RANK_1)) {
-                    knightMoves[i] |= squares[SouthWest.getInstance().next(West.getInstance().next(sq)).value()];
-                }
-            }
-            if (sq.file().westOf(File.FILE_G)) {
-                if (sq.rank().southOf(Rank.RANK_8)) {
-                    knightMoves[i] |= squares[NorthEast.getInstance().next(East.getInstance().next(sq)).value()];
-                }
-                if (sq.rank().northOf(Rank.RANK_1)) {
-                    knightMoves[i] |= squares[SouthEast.getInstance().next(East.getInstance().next(sq)).value()];
-                }
-            }
-            if (sq.file().westOf(File.FILE_H)) {
-                if (sq.rank().southOf(Rank.RANK_7)) {
-                    knightMoves[i] |= squares[North.getInstance().next(NorthEast.getInstance().next(sq)).value()];
-                }
-                if (sq.rank().northOf(Rank.RANK_2)) {
-                    knightMoves[i] |= squares[South.getInstance().next(SouthEast.getInstance().next(sq)).value()];
-                }
-            }
-        }
+        Square.allSquares().forEach(sq -> {
+            knightMoves[sq.value()] = 0;
+
+            Consumer<Square> addKnightTarget = targetSq -> knightMoves[sq.value()] |= squares[targetSq.value()];
+
+            sq.north().flatMap(Square::northWest).ifPresent(addKnightTarget);
+            sq.north().flatMap(Square::northEast).ifPresent(addKnightTarget);
+            sq.east().flatMap(Square::northEast).ifPresent(addKnightTarget);
+            sq.east().flatMap(Square::southEast).ifPresent(addKnightTarget);
+            sq.south().flatMap(Square::southEast).ifPresent(addKnightTarget);
+            sq.south().flatMap(Square::southWest).ifPresent(addKnightTarget);
+            sq.west().flatMap(Square::southWest).ifPresent(addKnightTarget);
+            sq.west().flatMap(Square::northWest).ifPresent(addKnightTarget);
+        });
     }
 
     // initialize king moves
     static {
-        for (int i=0;i<64;i++) {
-            kingMoves[i] = 0;
-            Square sq = Square.valueOf(i);
-            if (sq.rank().southOf(Rank.RANK_8)) {
-                if (sq.file().eastOf(File.FILE_A)) {
-                    kingMoves[i] |= squares[NorthWest.getInstance().next(sq).value()];
-                }
-                kingMoves[i] |= squares[North.getInstance().next(sq).value()];
-                if (sq.file().westOf(File.FILE_H)) {
-                    kingMoves[i] |= squares[NorthEast.getInstance().next(sq).value()];
-                }
-            }
-            if (sq.file().westOf(File.FILE_H)) {
-                kingMoves[i] |= squares[East.getInstance().next(sq).value()];
-            }
-            if (sq.rank().northOf(Rank.RANK_1)) {
-                if (sq.file().westOf(File.FILE_H)) {
-                    kingMoves[i] |= squares[SouthEast.getInstance().next(sq).value()];
-                }
-                kingMoves[i] |= squares[South.getInstance().next(sq).value()];
-                if (sq.file().eastOf(File.FILE_A)) {
-                    kingMoves[i] |= squares[SouthWest.getInstance().next(sq).value()];
-                }
-            }
-            if (sq.file().eastOf(File.FILE_A)) {
-                kingMoves[i] |= squares[West.getInstance().next(sq).value()];
-            }
-        }
+        Square.allSquares().forEach(sq -> {
+            kingMoves[sq.value()] = 0;
+
+            Consumer<Square> addKingTarget = targetSq -> kingMoves[sq.value()] |= squares[targetSq.value()];
+
+            sq.north().ifPresent(addKingTarget);
+            sq.northEast().ifPresent(addKingTarget);
+            sq.east().ifPresent(addKingTarget);
+            sq.southEast().ifPresent(addKingTarget);
+            sq.south().ifPresent(addKingTarget);
+            sq.southWest().ifPresent(addKingTarget);
+            sq.west().ifPresent(addKingTarget);
+            sq.northWest().ifPresent(addKingTarget);
+        });
     }
 
     // initialize pawn attacks
     static {
-        for (int i=0;i<64;i++) {
-            Square sq = Square.valueOf(i);
+        Square.allSquares().forEach(sq -> {
+            pawnAttacks[sq.value()][Color.BLACK.getColor()] = 0;
+            pawnAttacks[sq.value()][Color.WHITE.getColor()] = 0;
 
-            pawnAttacks[i][0] = pawnAttacks[i][1] = 0;
-            if (sq.rank() != Rank.RANK_1 && sq.rank() != Rank.RANK_8) {
-                if (sq.file().eastOf(File.FILE_A)) {
-                    pawnAttacks[i][Color.WHITE.getColor()] |= squares[NorthWest.getInstance().next(sq).value()];
-                    pawnAttacks[i][Color.BLACK.getColor()] |= squares[SouthWest.getInstance().next(sq).value()];
-                }
-                if (sq.file().westOf(File.FILE_H)) {
-                    pawnAttacks[i][Color.WHITE.getColor()] |= squares[NorthEast.getInstance().next(sq).value()];
-                    pawnAttacks[i][Color.BLACK.getColor()] |= squares[SouthEast.getInstance().next(sq).value()];
-                }
-            }
-        }
+            BiConsumer<Square,Color> addPawnTarget = (targetSq,pawnColor) ->
+                    pawnAttacks[sq.value()][pawnColor.getColor()] |= squares[targetSq.value()];
+
+            Consumer<Square> addWhitePawnTarget = targetSq -> addPawnTarget.accept(targetSq,Color.WHITE);
+            Consumer<Square> addBlackPawnTarget = targetSq -> addPawnTarget.accept(targetSq,Color.BLACK);
+
+            sq.northWest().ifPresent(addWhitePawnTarget);
+            sq.northEast().ifPresent(addWhitePawnTarget);
+            sq.southWest().ifPresent(addBlackPawnTarget);
+            sq.southEast().ifPresent(addBlackPawnTarget);
+        });
     }
 
     private long val;

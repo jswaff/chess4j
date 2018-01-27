@@ -14,14 +14,14 @@ public class WestTest {
 
     @Test
     public void testNext() {
-        Assert.assertNull(West.getInstance().next(Square.valueOf(File.FILE_A, Rank.RANK_8)));
+        Assert.assertFalse(West.getInstance().next(Square.valueOf(File.FILE_A, Rank.RANK_8)).isPresent());
 
         Assert.assertEquals(West.getInstance().next(
-                Square.valueOf(File.FILE_C, Rank.RANK_6)),
+                Square.valueOf(File.FILE_C, Rank.RANK_6)).get(),
                 Square.valueOf(File.FILE_B, Rank.RANK_6));
 
         Assert.assertEquals(West.getInstance().next(
-                Square.valueOf(File.FILE_G, Rank.RANK_3)),
+                Square.valueOf(File.FILE_G, Rank.RANK_3)).get(),
                 Square.valueOf(File.FILE_F, Rank.RANK_3));
     }
 

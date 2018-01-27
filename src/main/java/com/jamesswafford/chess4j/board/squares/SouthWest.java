@@ -1,6 +1,8 @@
 package com.jamesswafford.chess4j.board.squares;
 
 
+import java.util.Optional;
+
 public final class SouthWest extends Direction {
 
     private static final SouthWest INSTANCE = new SouthWest();
@@ -9,7 +11,7 @@ public final class SouthWest extends Direction {
     }
 
     @Override
-    public Square next(Square sq) {
+    public Optional<Square> next(Square sq) {
         return Square.valueOf(sq.file().west(), sq.rank().south());
     }
 

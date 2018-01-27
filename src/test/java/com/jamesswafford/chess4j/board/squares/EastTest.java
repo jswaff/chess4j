@@ -14,14 +14,14 @@ public class EastTest {
 
     @Test
     public void testNext() {
-        Assert.assertNull(East.getInstance().next(Square.valueOf(File.FILE_H, Rank.RANK_8)));
+        Assert.assertFalse(East.getInstance().next(Square.valueOf(File.FILE_H, Rank.RANK_8)).isPresent());
 
         Assert.assertEquals(East.getInstance().next(
-                Square.valueOf(File.FILE_C, Rank.RANK_6)),
+                Square.valueOf(File.FILE_C, Rank.RANK_6)).get(),
                 Square.valueOf(File.FILE_D, Rank.RANK_6));
 
         Assert.assertEquals(East.getInstance().next(
-                Square.valueOf(File.FILE_A, Rank.RANK_3)),
+                Square.valueOf(File.FILE_A, Rank.RANK_3)).get(),
                 Square.valueOf(File.FILE_B, Rank.RANK_3));
     }
 

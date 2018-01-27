@@ -14,15 +14,15 @@ public class NorthWestTest {
 
     @Test
     public void testNext() {
-        Assert.assertNull(NorthWest.getInstance().next(Square.valueOf(File.FILE_A, Rank.RANK_7)));
-        Assert.assertNull(NorthWest.getInstance().next(Square.valueOf(File.FILE_B, Rank.RANK_8)));
+        Assert.assertFalse(NorthWest.getInstance().next(Square.valueOf(File.FILE_A, Rank.RANK_7)).isPresent());
+        Assert.assertFalse(NorthWest.getInstance().next(Square.valueOf(File.FILE_B, Rank.RANK_8)).isPresent());
 
         Assert.assertEquals(NorthWest.getInstance().next(
-                Square.valueOf(File.FILE_C, Rank.RANK_6)),
+                Square.valueOf(File.FILE_C, Rank.RANK_6)).get(),
                 Square.valueOf(File.FILE_B, Rank.RANK_7));
 
         Assert.assertEquals(NorthWest.getInstance().next(
-                Square.valueOf(File.FILE_D, Rank.RANK_3)),
+                Square.valueOf(File.FILE_D, Rank.RANK_3)).get(),
                 Square.valueOf(File.FILE_C, Rank.RANK_4));
     }
 

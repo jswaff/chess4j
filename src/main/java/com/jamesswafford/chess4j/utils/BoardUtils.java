@@ -7,9 +7,7 @@ import com.jamesswafford.chess4j.board.CastlingRights;
 import com.jamesswafford.chess4j.board.Magic;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.North;
 import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.board.squares.South;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.pieces.Bishop;
 import com.jamesswafford.chess4j.pieces.King;
@@ -18,6 +16,8 @@ import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.pieces.Queen;
 import com.jamesswafford.chess4j.pieces.Rook;
+
+import java.util.Optional;
 
 public class BoardUtils {
 
@@ -49,13 +49,19 @@ public class BoardUtils {
         if (m.captured()==null) {
             if (board.getPiece(m.to()) != null) return false;
             if (board.getPlayerToMove()==Color.WHITE) {
-                Square nsq = North.getInstance().next(m.from());
-                Square nnsq = North.getInstance().next(nsq);
-                if (m.to()==nsq || (m.to()==nnsq && board.getPiece(nsq)==null)) return true;
+                Square nsq = m.from().north().get();
+                if (m.to()==nsq) return true;
+                Optional<Square> nnsq = nsq.north();
+                if (nnsq.isPresent()) {
+                    if (m.to()==nnsq.get() && board.getPiece(nsq)==null) return true;
+                }
             } else {
-                Square ssq = South.getInstance().next(m.from());
-                Square sssq = South.getInstance().next(ssq);
-                if (m.to()==ssq || (m.to()==sssq && board.getPiece(ssq)==null)) return true;
+                Square ssq = m.from().south().get();
+                if (m.to()==ssq) return true;
+                Optional<Square> sssq = ssq.south();
+                if (sssq.isPresent()) {
+                    if (m.to()==sssq.get() && board.getPiece(ssq)==null) return true;
+                }
             }
         } else {
             if ((Bitboard.pawnAttacks[m.from().value()][board.getPlayerToMove().getColor()]
@@ -63,14 +69,14 @@ public class BoardUtils {
 
             if (board.getPlayerToMove()==Color.WHITE) {
                 if (m.isEpCapture()) {
-                    if (m.to()==board.getEPSquare() && board.getPiece(South.getInstance().next(m.to()))==Pawn.BLACK_PAWN)
+                    if (m.to()==board.getEPSquare() && board.getPiece(m.to().south().get())==Pawn.BLACK_PAWN)
                         return true;
                 } else {
                     if (board.getPiece(m.to())==m.captured()) return true;
                 }
             } else {
                 if (m.isEpCapture()) {
-                    if (m.to()==board.getEPSquare() && board.getPiece(North.getInstance().next(m.to()))==Pawn.WHITE_PAWN)
+                    if (m.to()==board.getEPSquare() && board.getPiece(m.to().north().get())==Pawn.WHITE_PAWN)
                         return true;
                 } else {
                     if (board.getPiece(m.to())==m.captured()) return true;

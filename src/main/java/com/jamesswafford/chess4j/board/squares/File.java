@@ -1,5 +1,7 @@
 package com.jamesswafford.chess4j.board.squares;
 
+import java.util.Optional;
+
 public enum File {
     FILE_A(0,"a"),
     FILE_B(1,"b"),
@@ -54,18 +56,18 @@ public enum File {
         return this.getValue() < f.getValue();
     }
 
-    public File east() {
+    public Optional<File> east() {
         if (value==7) {
-            return null;
+            return Optional.empty();
         }
-        return file(value+1);
+        return Optional.of(file(value+1));
     }
 
-    public File west() {
+    public Optional<File> west() {
         if (value==0) {
-            return null;
+            return Optional.empty();
         }
-        return file(value-1);
+        return Optional.of(file(value-1));
     }
 
     public static File file(int value) {
