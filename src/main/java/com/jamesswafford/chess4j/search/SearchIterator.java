@@ -163,7 +163,7 @@ public final class SearchIterator {
             return Arrays.asList(moves.get(0));
         }
 
-        TTHolder.getTransTable().clear();
+        TTHolder.getAlwaysReplaceTransTable().clear();
         List<Move> pv = new ArrayList<Move>();
         SearchStats stats = new SearchStats();
         Search.analysisMode = pondering;
@@ -254,9 +254,9 @@ public final class SearchIterator {
         LOGGER.info("# search time: " + totalSearchTime/1000.0 + " seconds"
                 + ", rate: " + df2.format(totalNodes / (totalSearchTime/1000.0)) + " nodes per second");
 
-        long hashHits = TTHolder.getTransTable().getNumHits();
-        long hashProbes = TTHolder.getTransTable().getNumProbes();
-        long hashCollisions = TTHolder.getTransTable().getNumCollisions();
+        long hashHits = TTHolder.getAlwaysReplaceTransTable().getNumHits();
+        long hashProbes = TTHolder.getAlwaysReplaceTransTable().getNumProbes();
+        long hashCollisions = TTHolder.getAlwaysReplaceTransTable().getNumCollisions();
         double hashHitPct = hashHits / (hashProbes/100.0);
         double hashCollisionPct = hashCollisions / (hashProbes/100.0);
 

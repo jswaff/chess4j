@@ -20,24 +20,25 @@ import com.jamesswafford.chess4j.pieces.Rook;
 
 public class TranspositionTableTest {
 
-    TranspositionTable ttable = new TranspositionTable();
+    TranspositionTable ttable = new TranspositionTable(false);
+    TranspositionTable ttDPtable = new TranspositionTable(true);
     Board board = Board.INSTANCE;
 
     @Test
     public void testNumEntriesIsPowerOf2() {
-        TranspositionTable tt = new TranspositionTable();
+        TranspositionTable tt = new TranspositionTable(false);
         assertIsPowerOf2(tt.getNumEntries());
 
-        tt = new TranspositionTable(1000000);
+        tt = new TranspositionTable(false,1000000);
         assertIsPowerOf2(tt.getNumEntries());
         Assert.assertEquals(524288, tt.getNumEntries());
 
 
-        tt = new TranspositionTable(32000);
+        tt = new TranspositionTable(false,32000);
         assertIsPowerOf2(tt.getNumEntries());
         Assert.assertEquals(16384, tt.getNumEntries());
 
-        tt = new TranspositionTable(65536);
+        tt = new TranspositionTable(false,65536);
         assertIsPowerOf2(tt.getNumEntries());
         Assert.assertEquals(65536, tt.getNumEntries());
 
@@ -279,4 +280,27 @@ public class TranspositionTableTest {
         tte = ttable.probe(key2);
         Assert.assertEquals(lbe2, tte);
     }
+
+    @Test
+    public void testOverwriteDepthPreferred() throws Exception {
+        ttDPtable.clear();
+        EPDParser.setPos(board, "8/k7/p7/3Qp2P/n1P5/3KP3/1q6/8 b - - bm e4+; id \"WAC.094\";");
+        long key = Zobrist.getBoardKey(board);
+        Move m = new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_5),Square.valueOf(File.FILE_E,Rank.RANK_4));
+        ttDPtable.store(key,TranspositionTableEntryType.LOWER_BOUND,1001, 5, m);
+        TranspositionTableEntry tte = ttDPtable.probe(key);
+        TranspositionTableEntry origEntry = new TranspositionTableEntry(key,TranspositionTableEntryType.LOWER_BOUND,1001,5,m);
+        Assert.assertEquals(origEntry, tte);
+
+        // overwrite with a different score and shallower depth
+        ttDPtable.store(key,TranspositionTableEntryType.LOWER_BOUND,900, 4, m);
+        tte = ttDPtable.probe(key);
+        Assert.assertEquals(origEntry, tte);
+
+        // overwrite with yet another score but a deeper depth
+        ttDPtable.store(key,TranspositionTableEntryType.LOWER_BOUND,800, 6, m);
+        tte = ttDPtable.probe(key);
+        Assert.assertEquals(6,tte.getDepth());
+    }
+
 }

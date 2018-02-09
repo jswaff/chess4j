@@ -42,7 +42,7 @@ public final class Search {
         stats.incNodes();
         stats.getFirstLine().clear();
 
-        TranspositionTableEntry te = TTHolder.getTransTable().probe(board.getZobristKey());
+        TranspositionTableEntry te = TTHolder.getAlwaysReplaceTransTable().probe(board.getZobristKey());
 
         List<Move> pv = new ArrayList<>();
         int numMovesSearched = 0;
@@ -141,7 +141,7 @@ public final class Search {
         }
 
         // probe the hash table.  maybe we won't have to do any work at all!
-        TranspositionTableEntry te = TTHolder.getTransTable().probe(board.getZobristKey());
+        TranspositionTableEntry te = TTHolder.getAlwaysReplaceTransTable().probe(board.getZobristKey());
         if (te != null && te.getDepth() >= depth) {
             if (te.getType()==TranspositionTableEntryType.LOWER_BOUND) {
                 if (te.getScore() >= beta) {
@@ -263,7 +263,7 @@ public final class Search {
 
             if (score > alpha) {
                 if (score >= beta) {
-                    TTHolder.getTransTable().store(board.getZobristKey(),
+                    TTHolder.getAlwaysReplaceTransTable().store(board.getZobristKey(),
                             TranspositionTableEntryType.LOWER_BOUND,beta,depth,move);
                     if (move.captured()==null && move.promotion()==null) {
                         KillerMoves.getInstance().addKiller(ply, move);
@@ -283,7 +283,7 @@ public final class Search {
         TranspositionTableEntryType tet = bestMove == null ?
                 TranspositionTableEntryType.UPPER_BOUND : // fail low node - we didn't find a move > alpha
                 TranspositionTableEntryType.EXACT_MATCH;
-        TTHolder.getTransTable().store(board.getZobristKey(),tet, alpha, depth, bestMove);
+        TTHolder.getAlwaysReplaceTransTable().store(board.getZobristKey(),tet, alpha, depth, bestMove);
 
         return alpha;
     }

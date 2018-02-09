@@ -67,7 +67,7 @@ public class TestSuiteProcessor {
         for (Move bm : bms) {
             LOGGER.info("\t" + bm);
         }
-        TTHolder.getTransTable().clear();
+        TTHolder.getAlwaysReplaceTransTable().clear();
         TTHolder.getPawnTransTable().clear();
         List<Move> pv = SearchIterator.iterate(b,true);
 
