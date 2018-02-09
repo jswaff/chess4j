@@ -2,19 +2,11 @@ package com.jamesswafford.chess4j.board;
 
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Function;
 
-import com.jamesswafford.chess4j.board.squares.Direction;
-import com.jamesswafford.chess4j.board.squares.East;
 import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.North;
-import com.jamesswafford.chess4j.board.squares.NorthEast;
-import com.jamesswafford.chess4j.board.squares.NorthWest;
 import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.board.squares.South;
-import com.jamesswafford.chess4j.board.squares.SouthEast;
-import com.jamesswafford.chess4j.board.squares.SouthWest;
 import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.board.squares.West;
 import com.jamesswafford.chess4j.utils.BoardUtils;
 
 public class Magic {
@@ -293,10 +285,10 @@ public class Magic {
             for (int i=0;i<numVariations;i++) {
                 int magicInd = (int)((rookOcc[sqVal][i] * magicNumbersRooks[sqVal]) >>> magicNumbersShiftRooks[sqVal]);
                 magicRookMoves[sqVal][magicInd] =
-                        genMovesMask(sq,rookOcc[sqVal][i],North.getInstance())
-                      | genMovesMask(sq,rookOcc[sqVal][i],South.getInstance())
-                      | genMovesMask(sq,rookOcc[sqVal][i],East.getInstance())
-                      | genMovesMask(sq,rookOcc[sqVal][i],West.getInstance());
+                        genMovesMask(sq,rookOcc[sqVal][i],Square::north)
+                      | genMovesMask(sq,rookOcc[sqVal][i],Square::south)
+                      | genMovesMask(sq,rookOcc[sqVal][i],Square::east)
+                      | genMovesMask(sq,rookOcc[sqVal][i],Square::west);
             }
         }
 
@@ -308,25 +300,24 @@ public class Magic {
             for (int i=0;i<numVariations;i++) {
                 int magicInd = (int)((bishopOcc[sqVal][i] * magicNumbersBishops[sqVal]) >>> magicNumbersShiftBishops[sqVal]);
                 magicBishopMoves[sqVal][magicInd] =
-                        genMovesMask(sq,bishopOcc[sqVal][i],NorthEast.getInstance())
-                      | genMovesMask(sq,bishopOcc[sqVal][i],SouthEast.getInstance())
-                      | genMovesMask(sq,bishopOcc[sqVal][i],SouthWest.getInstance())
-                      | genMovesMask(sq,bishopOcc[sqVal][i],NorthWest.getInstance());
+                        genMovesMask(sq,bishopOcc[sqVal][i],Square::northEast)
+                      | genMovesMask(sq,bishopOcc[sqVal][i],Square::southEast)
+                      | genMovesMask(sq,bishopOcc[sqVal][i],Square::southWest)
+                      | genMovesMask(sq,bishopOcc[sqVal][i],Square::northWest);
             }
         }
     }
 
-
-    private static long genMovesMask(Square sq,long occupied,Direction direction) {
+    private static long genMovesMask(Square sq, long occupied, Function<Square,Optional<Square>> next) {
         long mask = 0;
 
-        Optional<Square> to = direction.next(sq);
+        Optional<Square> to = next.apply(sq);
         while (to.isPresent()) {
             mask |= Bitboard.squares[to.get().value()];
             if ((Bitboard.squares[to.get().value()] & occupied) != 0) {
                 break;
             }
-            to = direction.next(to.get());
+            to = next.apply(to.get());
         }
 
         return mask;
