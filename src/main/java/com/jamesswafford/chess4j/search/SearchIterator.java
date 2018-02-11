@@ -163,7 +163,7 @@ public final class SearchIterator {
             return Arrays.asList(moves.get(0));
         }
 
-        TTHolder.getAlwaysReplaceTransTable().clear();
+        TTHolder.clearAllTables();
         List<Move> pv = new ArrayList<Move>();
         SearchStats stats = new SearchStats();
         Search.analysisMode = pondering;

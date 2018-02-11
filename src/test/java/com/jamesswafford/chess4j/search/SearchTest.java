@@ -28,8 +28,7 @@ public class SearchTest {
 
     @Before
     public void setUp() {
-        TTHolder.getAlwaysReplaceTransTable().clear();
-        TTHolder.getPawnTransTable().clear();
+        TTHolder.clearAllTables();
     }
 
     @Test
@@ -205,7 +204,7 @@ public class SearchTest {
     public void testDraw50() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/1NBQKBNR w Kkq - 0 1");
-        TTHolder.getAlwaysReplaceTransTable().clear();
+        TTHolder.clearAllTables();
 
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
@@ -216,7 +215,7 @@ public class SearchTest {
         // up to 99 (half) moves ... the extra comes from the root search
         b.setFiftyCounter(98);
         b.setMoveCounter(98);
-        TTHolder.getAlwaysReplaceTransTable().clear();
+        TTHolder.clearAllTables();
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
         score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
@@ -226,7 +225,7 @@ public class SearchTest {
         // trigger 50 move rule
         b.setFiftyCounter(99);
         b.setMoveCounter(99);
-        TTHolder.getAlwaysReplaceTransTable().clear();
+        TTHolder.clearAllTables();
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
         score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,

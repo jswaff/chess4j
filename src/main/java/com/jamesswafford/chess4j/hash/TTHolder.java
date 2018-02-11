@@ -30,6 +30,12 @@ public class TTHolder {
         return pawnTransTable;
     }
 
+    public static void clearAllTables() {
+        getAlwaysReplaceTransTable().clear();
+        getDepthPreferredTransTable().clear();
+        getPawnTransTable().clear();
+    }
+
     public static void initTables() {
         alwaysReplaceTransTable = new TranspositionTable(false,maxEntries);
         depthPreferredTransTable = new TranspositionTable(true,maxEntries);

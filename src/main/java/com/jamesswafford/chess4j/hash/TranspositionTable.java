@@ -6,6 +6,8 @@ import org.apache.commons.logging.LogFactory;
 import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Move;
 
+import java.util.Optional;
+
 public class TranspositionTable extends AbstractTranspositionTable {
 
     private static final Log LOGGER = LogFactory.getLog(TranspositionTable.class);
@@ -53,15 +55,15 @@ public class TranspositionTable extends AbstractTranspositionTable {
         return score >= getCheckMateBound();
     }
 
-    public TranspositionTableEntry probe(long zobristKey) {
+    public Optional<TranspositionTableEntry> probe(long zobristKey) {
         numProbes++;
-        TranspositionTableEntry te = table[getMaskedKey(zobristKey)];
+        Optional<TranspositionTableEntry> te = Optional.ofNullable(table[getMaskedKey(zobristKey)]);
 
-        if (te != null) {
+        if (te.isPresent()) {
             // compare full signature to avoid collisions
-            if (te.getZobristKey() != zobristKey) {
+            if (te.get().getZobristKey() != zobristKey) {
                 numCollisions++;
-                return null;
+                return Optional.empty();
             } else {
                 numHits++;
             }
