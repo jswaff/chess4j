@@ -5,7 +5,6 @@ import java.util.Optional;
 
 public abstract class Direction {
 
-    public abstract Square next(Square sq);
     public abstract boolean isDiagonal();
     public abstract int value();
     private static Direction directionTo[][] = new Direction[64][64];

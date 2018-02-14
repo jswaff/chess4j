@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.search;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import junit.framework.Assert;
 
@@ -22,7 +23,7 @@ public class MoveOrdererTest {
         Board b = Board.INSTANCE;
         EPDParser.setPos(b, "b2b1r1k/3R1ppp/4qP2/4p1PQ/4P3/5B2/4N1K1/8 w - - bm g6; id \"WAC.300\";");
 
-        MoveOrderer mo = new MoveOrderer(b,null,null, null, null);
+        MoveOrderer mo = new MoveOrderer(b,null,Optional.empty(), null, null);
         mo.selectNextMove();
         Assert.assertEquals(MoveOrderStage.CAPTURES_PROMOS, mo.getNextMoveOrderStage());
     }
@@ -36,17 +37,17 @@ public class MoveOrdererTest {
         Assert.assertEquals(moves, moves2);
 
         Move pvMove = moves.get(5);
-        MoveOrderer mo = new MoveOrderer(b,pvMove, null, null, null);
+        MoveOrderer mo = new MoveOrderer(b,pvMove, Optional.empty(), null, null);
         mo.selectNextMove();
         Assert.assertEquals(MoveOrderStage.HASH_MOVE, mo.getNextMoveOrderStage());
 
-        mo = new MoveOrderer(b,null, null, null, null);
+        mo = new MoveOrderer(b,null, Optional.empty(), null, null);
         mo.selectNextMove();
         Assert.assertEquals(MoveOrderStage.CAPTURES_PROMOS, mo.getNextMoveOrderStage());
 
 
         // should be PV move if ply is 0 and numMovesSearched=0 and is pv node
-        mo = new MoveOrderer(b,pvMove, null, null, null);
+        mo = new MoveOrderer(b,pvMove, Optional.empty(), null, null);
         Move nextMv = mo.selectNextMove();
         Assert.assertEquals(MoveOrderStage.HASH_MOVE, mo.getNextMoveOrderStage());
         Assert.assertEquals(pvMove,nextMv);
@@ -61,7 +62,7 @@ public class MoveOrdererTest {
 
         // randomly make the 5th move the hash move
         Move hashMove = moves.get(4);
-        MoveOrderer mo = new MoveOrderer(b,null, hashMove, null, null);
+        MoveOrderer mo = new MoveOrderer(b,null, Optional.of(hashMove), null, null);
         Move nextMv = mo.selectNextMove();
         Assert.assertEquals(MoveOrderStage.GENCAPS, mo.getNextMoveOrderStage());
         Assert.assertEquals(hashMove, nextMv);
@@ -77,7 +78,7 @@ public class MoveOrdererTest {
         Move pvMove = moves.get(4);
         Move hashMove = moves.get(2);
 
-        MoveOrderer mo = new MoveOrderer(b,pvMove, hashMove,null,null);
+        MoveOrderer mo = new MoveOrderer(b,pvMove, Optional.of(hashMove),null,null);
         Move nextMv = mo.selectNextMove();
         Assert.assertEquals(MoveOrderStage.HASH_MOVE, mo.getNextMoveOrderStage());
         Assert.assertEquals(pvMove, nextMv);
@@ -102,7 +103,7 @@ public class MoveOrdererTest {
         Collections.shuffle(moves);
 
         Move pv = moves.get(9);
-        MoveOrderer mo = new MoveOrderer(b,pv,pv,null,null);
+        MoveOrderer mo = new MoveOrderer(b,pv,Optional.of(pv),null,null);
         Move nextMv = mo.selectNextMove();
         Assert.assertEquals(pv, nextMv);
 
@@ -131,7 +132,7 @@ public class MoveOrdererTest {
         Assert.assertTrue(moves.contains(e7e8n));
         Assert.assertTrue(moves.contains(c2g6));
 
-        MoveOrderer mo = new MoveOrderer(b,null,null, null, null);
+        MoveOrderer mo = new MoveOrderer(b,null,Optional.empty(), null, null);
         Assert.assertTrue(mo.selectNextMove().equals(e7e8q));
         Assert.assertTrue(mo.selectNextMove().equals(e7e8r));
         Assert.assertTrue(mo.selectNextMove().equals(e7e8b));
@@ -156,7 +157,7 @@ public class MoveOrdererTest {
 
         // without a PV or hash the order shouldn't change, since there are no captures
         List<Move> moves2 = new ArrayList<Move>();
-        MoveOrderer mo = new MoveOrderer(b,null,null,null,null);
+        MoveOrderer mo = new MoveOrderer(b,null,Optional.empty(),null,null);
         for (int i=0;i<20;i++) {
             moves2.add(mo.selectNextMove());
         }
@@ -166,7 +167,7 @@ public class MoveOrdererTest {
         List<Move> moves3 = new ArrayList<Move>();
         Move pvMove = moves.get(18);
         Move hashMove = moves.get(19);
-        mo = new MoveOrderer(b,pvMove,hashMove,null,null);
+        mo = new MoveOrderer(b,pvMove,Optional.of(hashMove),null,null);
         for (int i=0;i<20;i++) {
             moves3.add(mo.selectNextMove());
         }
@@ -193,7 +194,7 @@ public class MoveOrdererTest {
         Assert.assertTrue(moves.contains(g1c5));
         Assert.assertTrue(moves.contains(g8g7));
 
-        MoveOrderer mo = new MoveOrderer(b,g8g7,d5c6,null,null);
+        MoveOrderer mo = new MoveOrderer(b,g8g7,Optional.of(d5c6),null,null);
         Move nextMv = mo.selectNextMove();
         Assert.assertEquals(g8g7, nextMv);
         nextMv = mo.selectNextMove();
@@ -234,7 +235,7 @@ public class MoveOrdererTest {
         Assert.assertTrue(moves.contains(b3a3));
         Assert.assertTrue(moves.contains(b3c3));
 
-        MoveOrderer mo = new MoveOrderer(b,b3f3,b3a3,b3f3,b3c3);
+        MoveOrderer mo = new MoveOrderer(b,b3f3,Optional.of(b3a3),b3f3,b3c3);
 
         // pv move
         Move nextMv = mo.selectNextMove();
@@ -283,7 +284,7 @@ public class MoveOrdererTest {
 
         Assert.assertTrue(moves.contains(b3f3));
 
-        MoveOrderer mo = new MoveOrderer(b,b3f3,b3f3,null,null);
+        MoveOrderer mo = new MoveOrderer(b,b3f3,Optional.of(b3f3),null,null);
 
         // pv move
         Assert.assertEquals(b3f3, mo.selectNextMove());
@@ -305,7 +306,7 @@ public class MoveOrdererTest {
             }
         }
 
-        MoveOrderer mo = new MoveOrderer(b,null,null,null,null);
+        MoveOrderer mo = new MoveOrderer(b,null,Optional.empty(),null,null);
         MoveParser mp = new MoveParser();
 
         Assert.assertEquals(mp.parseMove("e4d5", b), mo.selectNextMove());
@@ -327,7 +328,7 @@ public class MoveOrdererTest {
             }
         }
 
-        MoveOrderer mo = new MoveOrderer(b,null,null,null,null);
+        MoveOrderer mo = new MoveOrderer(b,null,Optional.empty(),null,null);
         MoveParser mp = new MoveParser();
 
         Assert.assertEquals(mp.parseMove("e6d5", b), mo.selectNextMove());
@@ -350,7 +351,7 @@ public class MoveOrdererTest {
         Move epCap = mp.parseMove("e5d6", b);
         Assert.assertTrue(moves.contains(epCap));
 
-        MoveOrderer mo = new MoveOrderer(b,null,null,null,null);
+        MoveOrderer mo = new MoveOrderer(b,null,Optional.empty(),null,null);
         Assert.assertEquals(epCap, mo.selectNextMove());
     }
 
@@ -364,7 +365,7 @@ public class MoveOrdererTest {
         Move m = mp.parseMove("h2h3", b);
         Assert.assertTrue(moves.contains(m));
 
-        MoveOrderer mo = new MoveOrderer(b,null,null,m,null);
+        MoveOrderer mo = new MoveOrderer(b,null,Optional.empty(),m,null);
         Assert.assertEquals(m, mo.selectNextMove());
     }
 
@@ -378,7 +379,7 @@ public class MoveOrdererTest {
         Move m = mp.parseMove("h2h3", b);
         Assert.assertTrue(moves.contains(m));
 
-        MoveOrderer mo = new MoveOrderer(b,null,null,null,m);
+        MoveOrderer mo = new MoveOrderer(b,null,Optional.empty(),null,m);
         Assert.assertEquals(m, mo.selectNextMove());
     }
 
@@ -396,7 +397,7 @@ public class MoveOrdererTest {
         Move m2 = mp.parseMove("h2h4", b);
         Assert.assertTrue(moves.contains(m));
 
-        MoveOrderer mo = new MoveOrderer(b,null,null,m,m2);
+        MoveOrderer mo = new MoveOrderer(b,null,Optional.empty(),m,m2);
         Assert.assertEquals(m, mo.selectNextMove());
         Assert.assertEquals(m2, mo.selectNextMove());
     }

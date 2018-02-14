@@ -159,7 +159,7 @@ public final class MoveGen {
                     int toSqVal = Bitboard.msb(pmap);
                     Square toSq = Square.valueOf(toSqVal);
                     Piece captured = toSq==board.getEPSquare() ? Pawn.BLACK_PAWN : board.getPiece(toSq);
-                    addPawnMove(moves,Pawn.WHITE_PAWN,SouthEast.getInstance().next(toSq),toSq,captured,toSq==board.getEPSquare());
+                    addPawnMove(moves,Pawn.WHITE_PAWN,toSq.southEast().get(),toSq,captured,toSq==board.getEPSquare());
                     pmap ^= Bitboard.squares[toSqVal];
                 }
 
@@ -169,7 +169,7 @@ public final class MoveGen {
                     int toSqVal = Bitboard.msb(pmap);
                     Square toSq = Square.valueOf(toSqVal);
                     Piece captured = toSq==board.getEPSquare() ? Pawn.BLACK_PAWN : board.getPiece(toSq);
-                    addPawnMove(moves,Pawn.WHITE_PAWN,SouthWest.getInstance().next(toSq),toSq,captured,toSq==board.getEPSquare());
+                    addPawnMove(moves,Pawn.WHITE_PAWN,toSq.southWest().get(),toSq,captured,toSq==board.getEPSquare());
                     pmap ^= Bitboard.squares[toSqVal];
                 }
 
@@ -178,7 +178,7 @@ public final class MoveGen {
                 while (pmap != 0) {
                     int toSqVal = Bitboard.msb(pmap);
                     Square toSq = Square.valueOf(toSqVal);
-                    addPawnMove(moves,Pawn.WHITE_PAWN,South.getInstance().next(toSq),toSq,null,false);
+                    addPawnMove(moves,Pawn.WHITE_PAWN,toSq.south().get(),toSq,null,false);
                     pmap ^= Bitboard.squares[toSqVal];
                 }
             }
@@ -189,9 +189,9 @@ public final class MoveGen {
                 while (pmap != 0) {
                     int toSqVal = Bitboard.msb(pmap);
                     Square toSq = Square.valueOf(toSqVal);
-                    moves.add(new Move(Pawn.WHITE_PAWN,South.getInstance().next(toSq),toSq,null));
-                    if (toSq.rank()==Rank.RANK_3 && board.getPiece(North.getInstance().next(toSq))==null) {
-                        moves.add(new Move(Pawn.WHITE_PAWN,South.getInstance().next(toSq),North.getInstance().next(toSq),null));
+                    moves.add(new Move(Pawn.WHITE_PAWN,toSq.south().get(),toSq,null));
+                    if (toSq.rank()==Rank.RANK_3 && board.getPiece(toSq.north().get())==null) {
+                        moves.add(new Move(Pawn.WHITE_PAWN,toSq.south().get(),toSq.north().get(),null));
                     }
                     pmap ^= Bitboard.squares[toSqVal];
                 }
@@ -207,7 +207,7 @@ public final class MoveGen {
                     int toSqVal = Bitboard.lsb(pmap);
                     Square toSq = Square.valueOf(toSqVal);
                     Piece captured = toSq==board.getEPSquare() ? Pawn.WHITE_PAWN : board.getPiece(toSq);
-                    addPawnMove(moves,Pawn.BLACK_PAWN,NorthEast.getInstance().next(toSq),toSq,captured,toSq==board.getEPSquare());
+                    addPawnMove(moves,Pawn.BLACK_PAWN,toSq.northEast().get(),toSq,captured,toSq==board.getEPSquare());
                     pmap ^= Bitboard.squares[toSqVal];
                 }
 
@@ -217,7 +217,7 @@ public final class MoveGen {
                     int toSqVal = Bitboard.lsb(pmap);
                     Square toSq = Square.valueOf(toSqVal);
                     Piece captured = toSq==board.getEPSquare() ? Pawn.WHITE_PAWN : board.getPiece(toSq);
-                    addPawnMove(moves,Pawn.BLACK_PAWN,NorthWest.getInstance().next(toSq),toSq,captured,toSq==board.getEPSquare());
+                    addPawnMove(moves,Pawn.BLACK_PAWN,toSq.northWest().get(),toSq,captured,toSq==board.getEPSquare());
                     pmap ^= Bitboard.squares[toSqVal];
                 }
 
@@ -226,7 +226,7 @@ public final class MoveGen {
                 while (pmap != 0) {
                     int toSqVal = Bitboard.lsb(pmap);
                     Square toSq = Square.valueOf(toSqVal);
-                    addPawnMove(moves,Pawn.BLACK_PAWN,North.getInstance().next(toSq),toSq,null,false);
+                    addPawnMove(moves,Pawn.BLACK_PAWN,toSq.north().get(),toSq,null,false);
                     pmap ^= Bitboard.squares[toSqVal];
                 }
             }
@@ -237,9 +237,9 @@ public final class MoveGen {
                 while (pmap != 0) {
                     int toSqVal = Bitboard.lsb(pmap);
                     Square toSq = Square.valueOf(toSqVal);
-                    moves.add(new Move(Pawn.BLACK_PAWN,North.getInstance().next(toSq),toSq,null));
-                    if (toSq.rank()==Rank.RANK_6 && board.getPiece(South.getInstance().next(toSq))==null) {
-                        moves.add(new Move(Pawn.BLACK_PAWN,North.getInstance().next(toSq),South.getInstance().next(toSq),null));
+                    moves.add(new Move(Pawn.BLACK_PAWN,toSq.north().get(),toSq,null));
+                    if (toSq.rank()==Rank.RANK_6 && board.getPiece(toSq.south().get())==null) {
+                        moves.add(new Move(Pawn.BLACK_PAWN,toSq.north().get(),toSq.south().get(),null));
                     }
                     pmap ^= Bitboard.squares[toSqVal];
                 }

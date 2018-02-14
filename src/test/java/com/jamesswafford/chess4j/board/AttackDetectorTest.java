@@ -16,10 +16,7 @@ public class AttackDetectorTest {
     public void testGetAttackers1() throws Exception {
         Board board = Board.INSTANCE;
         FenParser.setPos(board, "1k1r3q/1ppn3p/p4b2/4p3/8/P2N2P1/1PP1R1BP/2K1Q3 w - -");
-
-        long attackers = AttackDetector.getAttackers(board,
-                Square.valueOf(File.FILE_E, Rank.RANK_5), Color.WHITE);
-
+        long attackers = AttackDetector.getAttackers(board,Square.valueOf(File.FILE_E, Rank.RANK_5), Color.WHITE);
         Assert.assertTrue((attackers & Bitboard.squares[Square.valueOf(File.FILE_D,Rank.RANK_3).value()]) != 0);
         Assert.assertTrue((attackers & Bitboard.squares[Square.valueOf(File.FILE_E,Rank.RANK_2).value()]) != 0);
         Assert.assertEquals(2,Long.bitCount(attackers));

@@ -3,16 +3,24 @@ package com.jamesswafford.chess4j.hash;
 public class TTHolder {
 
     public static int maxEntries = 1048576; // = 0x100000
-    private static TranspositionTable transTable;
+    private static TranspositionTable alwaysReplaceTransTable;
+    private static TranspositionTable depthPreferredTransTable;
 
     public static int maxPawnEntries = 1048576;
     private static PawnTranspositionTable pawnTransTable;
 
-    public static TranspositionTable getTransTable() {
-        if (transTable==null) {
-            transTable = new TranspositionTable(maxEntries);
+    public static TranspositionTable getAlwaysReplaceTransTable() {
+        if (alwaysReplaceTransTable ==null) {
+            alwaysReplaceTransTable = new TranspositionTable(false,maxEntries);
         }
-        return transTable;
+        return alwaysReplaceTransTable;
+    }
+
+    public static TranspositionTable getDepthPreferredTransTable() {
+        if (depthPreferredTransTable==null) {
+            depthPreferredTransTable = new TranspositionTable(true,maxEntries);
+        }
+        return depthPreferredTransTable;
     }
 
     public static PawnTranspositionTable getPawnTransTable() {
@@ -22,8 +30,15 @@ public class TTHolder {
         return pawnTransTable;
     }
 
+    public static void clearAllTables() {
+        getAlwaysReplaceTransTable().clear();
+        getDepthPreferredTransTable().clear();
+        getPawnTransTable().clear();
+    }
+
     public static void initTables() {
-        transTable = new TranspositionTable(maxEntries);
+        alwaysReplaceTransTable = new TranspositionTable(false,maxEntries);
+        depthPreferredTransTable = new TranspositionTable(true,maxEntries);
         pawnTransTable = new PawnTranspositionTable(maxPawnEntries);
     }
 }

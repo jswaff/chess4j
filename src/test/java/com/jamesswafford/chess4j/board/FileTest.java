@@ -52,26 +52,26 @@ public class FileTest {
 
     @Test
     public void testWest() {
-        Assert.assertNull(File.FILE_A.west());
-        Assert.assertEquals(File.FILE_A, File.FILE_B.west());
-        Assert.assertEquals(File.FILE_B, File.FILE_C.west());
-        Assert.assertEquals(File.FILE_C, File.FILE_D.west());
-        Assert.assertEquals(File.FILE_D, File.FILE_E.west());
-        Assert.assertEquals(File.FILE_E, File.FILE_F.west());
-        Assert.assertEquals(File.FILE_F, File.FILE_G.west());
-        Assert.assertEquals(File.FILE_G, File.FILE_H.west());
+        Assert.assertFalse(File.FILE_A.west().isPresent());
+        Assert.assertEquals(File.FILE_A, File.FILE_B.west().get());
+        Assert.assertEquals(File.FILE_B, File.FILE_C.west().get());
+        Assert.assertEquals(File.FILE_C, File.FILE_D.west().get());
+        Assert.assertEquals(File.FILE_D, File.FILE_E.west().get());
+        Assert.assertEquals(File.FILE_E, File.FILE_F.west().get());
+        Assert.assertEquals(File.FILE_F, File.FILE_G.west().get());
+        Assert.assertEquals(File.FILE_G, File.FILE_H.west().get());
     }
 
     @Test
     public void testEast() {
-        Assert.assertEquals(File.FILE_B, File.FILE_A.east());
-        Assert.assertEquals(File.FILE_C, File.FILE_B.east());
-        Assert.assertEquals(File.FILE_D, File.FILE_C.east());
-        Assert.assertEquals(File.FILE_E, File.FILE_D.east());
-        Assert.assertEquals(File.FILE_F, File.FILE_E.east());
-        Assert.assertEquals(File.FILE_G, File.FILE_F.east());
-        Assert.assertEquals(File.FILE_H, File.FILE_G.east());
-        Assert.assertNull(File.FILE_H.east());
+        Assert.assertEquals(File.FILE_B, File.FILE_A.east().get());
+        Assert.assertEquals(File.FILE_C, File.FILE_B.east().get());
+        Assert.assertEquals(File.FILE_D, File.FILE_C.east().get());
+        Assert.assertEquals(File.FILE_E, File.FILE_D.east().get());
+        Assert.assertEquals(File.FILE_F, File.FILE_E.east().get());
+        Assert.assertEquals(File.FILE_G, File.FILE_F.east().get());
+        Assert.assertEquals(File.FILE_H, File.FILE_G.east().get());
+        Assert.assertFalse(File.FILE_H.east().isPresent());
     }
 
     @Test

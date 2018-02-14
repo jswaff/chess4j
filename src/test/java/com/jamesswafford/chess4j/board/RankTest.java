@@ -52,26 +52,26 @@ public class RankTest {
 
     @Test
     public void testNorth() {
-        Assert.assertNull(Rank.RANK_8.north());
-        Assert.assertEquals(Rank.RANK_8, Rank.RANK_7.north());
-        Assert.assertEquals(Rank.RANK_7, Rank.RANK_6.north());
-        Assert.assertEquals(Rank.RANK_6, Rank.RANK_5.north());
-        Assert.assertEquals(Rank.RANK_5, Rank.RANK_4.north());
-        Assert.assertEquals(Rank.RANK_4, Rank.RANK_3.north());
-        Assert.assertEquals(Rank.RANK_3, Rank.RANK_2.north());
-        Assert.assertEquals(Rank.RANK_2, Rank.RANK_1.north());
+        Assert.assertFalse(Rank.RANK_8.north().isPresent());
+        Assert.assertEquals(Rank.RANK_8, Rank.RANK_7.north().get());
+        Assert.assertEquals(Rank.RANK_7, Rank.RANK_6.north().get());
+        Assert.assertEquals(Rank.RANK_6, Rank.RANK_5.north().get());
+        Assert.assertEquals(Rank.RANK_5, Rank.RANK_4.north().get());
+        Assert.assertEquals(Rank.RANK_4, Rank.RANK_3.north().get());
+        Assert.assertEquals(Rank.RANK_3, Rank.RANK_2.north().get());
+        Assert.assertEquals(Rank.RANK_2, Rank.RANK_1.north().get());
     }
 
     @Test
     public void testSouth() {
-        Assert.assertEquals(Rank.RANK_7, Rank.RANK_8.south());
-        Assert.assertEquals(Rank.RANK_6, Rank.RANK_7.south());
-        Assert.assertEquals(Rank.RANK_5, Rank.RANK_6.south());
-        Assert.assertEquals(Rank.RANK_4, Rank.RANK_5.south());
-        Assert.assertEquals(Rank.RANK_3, Rank.RANK_4.south());
-        Assert.assertEquals(Rank.RANK_2, Rank.RANK_3.south());
-        Assert.assertEquals(Rank.RANK_1, Rank.RANK_2.south());
-        Assert.assertNull(Rank.RANK_1.south());
+        Assert.assertEquals(Rank.RANK_7, Rank.RANK_8.south().get());
+        Assert.assertEquals(Rank.RANK_6, Rank.RANK_7.south().get());
+        Assert.assertEquals(Rank.RANK_5, Rank.RANK_6.south().get());
+        Assert.assertEquals(Rank.RANK_4, Rank.RANK_5.south().get());
+        Assert.assertEquals(Rank.RANK_3, Rank.RANK_4.south().get());
+        Assert.assertEquals(Rank.RANK_2, Rank.RANK_3.south().get());
+        Assert.assertEquals(Rank.RANK_1, Rank.RANK_2.south().get());
+        Assert.assertFalse(Rank.RANK_1.south().isPresent());
     }
 
     @Test

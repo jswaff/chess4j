@@ -82,11 +82,12 @@ public final class AttackDetector {
     }
 
     public static long getAttackers(Board board,Square sq,Color color) {
-
         int sqVal = sq.value();
         long attackers = Bitboard.knightMoves[sqVal] & (color==Color.WHITE ? board.getWhiteKnights() : board.getBlackKnights());
         attackers |= Bitboard.kingMoves[sqVal] & Bitboard.squares[board.getKingSquare(color).value()];
+
         attackers |= Magic.getRookMoves(board, sqVal, (color==Color.WHITE ? board.getWhiteRooks() : board.getBlackRooks()));
+
         attackers |= Magic.getBishopMoves(board, sqVal, (color==Color.WHITE ? board.getWhiteBishops() : board.getBlackBishops()));
         attackers |= Magic.getQueenMoves(board, sqVal, (color==Color.WHITE ? board.getWhiteQueens() : board.getBlackQueens()));
 

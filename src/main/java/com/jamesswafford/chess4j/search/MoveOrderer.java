@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.search;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
@@ -19,16 +20,17 @@ public class MoveOrderer {
     private Move[] noncaptures;
     private int noncaptureIndex;
     private Move pvMove;
-    private Move hashMove;
+    private Optional<Move> hashMove;
     private Move killer1,killer2;
 
-    public MoveOrderer(Board board,Move pvMove,Move hashMove,
-            Move killer1,Move killer2) {
+    public MoveOrderer(Board board,Move pvMove,Optional<Move> hashMove,Move killer1,Move killer2) {
         this.board = board;
         this.pvMove = pvMove;
         this.hashMove = hashMove;
         this.killer1 = killer1;
         this.killer2 = killer2;
+
+        assert(hashMove!=null);
     }
 
     public Move selectNextMove() {
@@ -50,10 +52,11 @@ public class MoveOrderer {
         // try hash move
         if (nextMoveOrderStage == MoveOrderStage.HASH_MOVE) {
             nextMoveOrderStage = MoveOrderStage.GENCAPS;
-            if (hashMove != null && !hashMove.equals(pvMove)
-                    && BoardUtils.isGoodMove(board, hashMove)) {
-                assert(testGoodMove(board,hashMove));
-                return hashMove;
+            // TODO: try to express using filter and isPresent
+            if (hashMove.isPresent() && !hashMove.get().equals(pvMove)
+                    && BoardUtils.isGoodMove(board, hashMove.get())) {
+                assert(testGoodMove(board,hashMove.get()));
+                return hashMove.get();
             }
         }
 
@@ -65,7 +68,8 @@ public class MoveOrderer {
             captureIndex = 0;
             captureScores = new Integer[myCaptures.size()];
             for (int i=0;i<captures.length;i++) {
-                if (captures[i].equals(pvMove) || captures[i].equals(hashMove)) {
+                final int finalI = i;
+                if (captures[i].equals(pvMove) || hashMove.filter(hm -> hm.equals(captures[finalI])).isPresent()) {
                     captures[i] = null;
                 } else {
                     captureScores[i] = MVVLVA.score(board, captures[i]);
@@ -88,8 +92,9 @@ public class MoveOrderer {
             // killer1
             if (nextMoveOrderStage == MoveOrderStage.KILLER1) {
                 nextMoveOrderStage = MoveOrderStage.KILLER2;
-                if (killer1 != null && !killer1.equals(pvMove) && !killer1.equals(hashMove)
-                    && BoardUtils.isGoodMove(board, killer1)) {
+                if (killer1 != null && !killer1.equals(pvMove)
+                        && !hashMove.filter(hm -> hm.equals(killer1)).isPresent()
+                        && BoardUtils.isGoodMove(board, killer1)) {
 
                     assert(killer1.captured()==null);
                     assert(testGoodMove(board,killer1));
@@ -101,7 +106,7 @@ public class MoveOrderer {
             if (nextMoveOrderStage == MoveOrderStage.KILLER2) {
                 nextMoveOrderStage = MoveOrderStage.GENNONCAPS;
                 if (killer2 != null
-                    && !killer2.equals(pvMove) && !killer2.equals(hashMove)
+                    && !killer2.equals(pvMove) && !hashMove.filter(hm -> hm.equals(killer2)).isPresent()
                     && BoardUtils.isGoodMove(board, killer2)) {
 
                     assert(killer2.captured()==null);
@@ -116,7 +121,8 @@ public class MoveOrderer {
                 List<Move> myNoncaps = MoveGen.genPseudoLegalMoves(board,false,true);
                 noncaptures =  myNoncaps.toArray(new Move[myNoncaps.size()]);
                 for (int i=0;i<noncaptures.length;i++) {
-                    if (noncaptures[i].equals(pvMove) || noncaptures[i].equals(hashMove)
+                    final int finalI = i;
+                    if (noncaptures[i].equals(pvMove) || hashMove.filter(hm -> hm.equals(noncaptures[finalI])).isPresent()
                             || noncaptures[i].equals(killer1) || noncaptures[i].equals(killer2)) {
                         noncaptures[i] = null;
                     }

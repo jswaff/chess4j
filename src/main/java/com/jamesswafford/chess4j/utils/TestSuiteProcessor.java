@@ -67,15 +67,14 @@ public class TestSuiteProcessor {
         for (Move bm : bms) {
             LOGGER.info("\t" + bm);
         }
-        TTHolder.getTransTable().clear();
-        TTHolder.getPawnTransTable().clear();
+        TTHolder.clearAllTables();
         List<Move> pv = SearchIterator.iterate(b,true);
 
         return bms.contains(pv.get(0));
     }
 
     public void processTestSuite(String testSuite,int secondsPerProblem) throws Exception {
-        LOGGER.info("processing test suite: " + testSuite);
+        LOGGER.info("processing. test suite: " + testSuite);
         LOGGER.info("seconds per problem: " + secondsPerProblem);
 
         SearchIterator.maxTime = secondsPerProblem * 1000;

@@ -1,5 +1,7 @@
 package com.jamesswafford.chess4j.board.squares;
 
+import java.util.Optional;
+
 public enum Rank {
     RANK_8(0,"8"),
     RANK_7(1,"7"),
@@ -61,22 +63,22 @@ public enum Rank {
         return value;
     }
 
-    public Rank north() {
+    public Optional<Rank> north() {
         if (value==0) {
-            return null;
+            return Optional.empty();
         }
-        return rank(value-1);
+        return Optional.of(rank(value-1));
     }
 
     public boolean northOf(Rank r) {
         return this.getValue() < r.getValue();
     }
 
-    public Rank south() {
+    public Optional<Rank> south() {
         if (value==7) {
-            return null;
+            return Optional.empty();
         }
-        return rank(value+1);
+        return Optional.of(rank(value+1));
     }
 
     public boolean southOf(Rank r) {

@@ -3,7 +3,6 @@ package com.jamesswafford.chess4j.search;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jamesswafford.chess4j.hash.TranspositionTable;
 import junit.framework.Assert;
 
 import org.junit.Before;
@@ -23,16 +22,13 @@ import com.jamesswafford.chess4j.hash.TranspositionTableEntryType;
 import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.pieces.Knight;
 import com.jamesswafford.chess4j.pieces.Pawn;
-import com.jamesswafford.chess4j.search.Search;
-import com.jamesswafford.chess4j.search.SearchStats;
 
 
 public class SearchTest {
 
     @Before
     public void setUp() {
-        TTHolder.getTransTable().clear();
-        TTHolder.getPawnTransTable().clear();
+        TTHolder.clearAllTables();
     }
 
     @Test
@@ -190,7 +186,7 @@ public class SearchTest {
             if (mv.equals(a7a5)) {
                 score=500;
             }
-            TTHolder.getTransTable().store(b.getZobristKey(),
+            TTHolder.getAlwaysReplaceTransTable().store(b.getZobristKey(),
                     TranspositionTableEntryType.EXACT_MATCH,
                     score, 1, mv);
             b.undoLastMove();
@@ -208,7 +204,7 @@ public class SearchTest {
     public void testDraw50() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/1NBQKBNR w Kkq - 0 1");
-        TTHolder.getTransTable().clear();
+        TTHolder.clearAllTables();
 
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
@@ -219,7 +215,7 @@ public class SearchTest {
         // up to 99 (half) moves ... the extra comes from the root search
         b.setFiftyCounter(98);
         b.setMoveCounter(98);
-        TTHolder.getTransTable().clear();
+        TTHolder.clearAllTables();
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
         score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
@@ -229,7 +225,7 @@ public class SearchTest {
         // trigger 50 move rule
         b.setFiftyCounter(99);
         b.setMoveCounter(99);
-        TTHolder.getTransTable().clear();
+        TTHolder.clearAllTables();
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
         score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,

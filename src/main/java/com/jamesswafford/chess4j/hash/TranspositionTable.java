@@ -6,21 +6,25 @@ import org.apache.commons.logging.LogFactory;
 import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Move;
 
+import java.util.Optional;
+
 public class TranspositionTable extends AbstractTranspositionTable {
 
     private static final Log LOGGER = LogFactory.getLog(TranspositionTable.class);
 
     private static int DEFAULT_ENTRIES = 1048576; // = 0x100000   ~1 million entries
 
+    private boolean depthPreferred;
     private TranspositionTableEntry[] table;
 
-    public TranspositionTable() {
-        this(DEFAULT_ENTRIES);
+    public TranspositionTable(boolean depthPreferred) {
+        this(depthPreferred,DEFAULT_ENTRIES);
     }
 
-    public TranspositionTable(int maxEntries) {
+    public TranspositionTable(boolean depthPreferred,int maxEntries) {
         LOGGER.info("# initializing transposition table.  maxEntries=" + maxEntries);
 
+        this.depthPreferred = depthPreferred;
         setNumEntries(maxEntries);
         table = new TranspositionTableEntry[numEntries];
         clear();
@@ -51,15 +55,15 @@ public class TranspositionTable extends AbstractTranspositionTable {
         return score >= getCheckMateBound();
     }
 
-    public TranspositionTableEntry probe(long zobristKey) {
+    public Optional<TranspositionTableEntry> probe(long zobristKey) {
         numProbes++;
-        TranspositionTableEntry te = table[getMaskedKey(zobristKey)];
+        Optional<TranspositionTableEntry> te = Optional.ofNullable(table[getMaskedKey(zobristKey)]);
 
-        if (te != null) {
+        if (te.isPresent()) {
             // compare full signature to avoid collisions
-            if (te.getZobristKey() != zobristKey) {
+            if (te.get().getZobristKey() != zobristKey) {
                 numCollisions++;
-                return null;
+                return Optional.empty();
             } else {
                 numHits++;
             }
@@ -78,7 +82,16 @@ public class TranspositionTable extends AbstractTranspositionTable {
      * @param depth
      * @param move
      */
-    public void store(long zobristKey,TranspositionTableEntryType entryType,int score,int depth,Move move) {
+    public boolean store(long zobristKey,TranspositionTableEntryType entryType,int score,int depth,Move move) {
+
+        // if this is a depth preferred table, we don't overwrite entries stored from a deeper search
+        if (depthPreferred) {
+            TranspositionTableEntry currentEntry = table[getMaskedKey(zobristKey)];
+            if (currentEntry != null && currentEntry.getDepth() > depth) {
+                return false;
+            }
+        }
+
         if (isMateScore(score)) {
             if (entryType==TranspositionTableEntryType.UPPER_BOUND) {
                 // failing low on mate.  don't allow a cutoff, just store any associated move
@@ -101,6 +114,8 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
         TranspositionTableEntry te = new TranspositionTableEntry(zobristKey,entryType,score,depth,move);
         table[getMaskedKey(zobristKey)] = te;
+
+        return true;
     }
 
 }

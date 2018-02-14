@@ -1,18 +1,10 @@
 package com.jamesswafford.chess4j.board;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.North;
 import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.board.squares.South;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.Zobrist;
 import com.jamesswafford.chess4j.pieces.Bishop;
@@ -81,8 +73,9 @@ public final class Board {
         addPiece(p,m.to());
         if (p==Pawn.WHITE_PAWN) {
             fiftyCounter = 0;
-            if (m.to()==North.getInstance().next(North.getInstance().next(m.from()))) {
-                setEP(North.getInstance().next(m.from()));
+            Optional<Square> nnSq = m.from().north().flatMap(Square::north);
+            if (nnSq.isPresent() && m.to()==nnSq.get()) {
+                setEP(m.from().north().get());
             } else if (m.to().rank()==Rank.RANK_8) {
                 assert(m.promotion()!=null);
                 removePiece(m.to());
@@ -90,8 +83,9 @@ public final class Board {
             }
         } else if (p==Pawn.BLACK_PAWN) {
             fiftyCounter = 0;
-            if (m.to()==South.getInstance().next(South.getInstance().next(m.from()))) {
-                setEP(South.getInstance().next(m.from()));
+            Optional<Square> ssSq = m.from().south().flatMap(Square::south);
+            if (ssSq.isPresent() && m.to()==ssSq.get()) {
+                setEP(m.from().south().get());
             } else if (m.to().rank()==Rank.RANK_1) {
                 assert(m.promotion()!=null);
                 removePiece(m.to());
@@ -695,10 +689,10 @@ public final class Board {
             assert(m.to()==epSquare);
             // remove pawn
             if (getPlayerToMove()==Color.WHITE) { // black WAS on move
-                captured = removePiece(North.getInstance().next(epSquare));
+                captured = removePiece(epSquare.north().get());
                 assert(captured==Pawn.WHITE_PAWN);
             } else {
-                captured = removePiece(South.getInstance().next(epSquare));
+                captured = removePiece(epSquare.south().get());
                 assert(captured==Pawn.BLACK_PAWN);
             }
         } else {
@@ -865,9 +859,9 @@ public final class Board {
         if (u.getMove().captured()!=null) {
             if (u.getMove().isEpCapture()) {
                 if (getPlayerToMove()==Color.BLACK) {
-                    addPiece(Pawn.WHITE_PAWN,North.getInstance().next(epSquare));
+                    addPiece(Pawn.WHITE_PAWN,epSquare.north().get());
                 } else {
-                    addPiece(Pawn.BLACK_PAWN,South.getInstance().next(epSquare));
+                    addPiece(Pawn.BLACK_PAWN,epSquare.south().get());
                 }
             } else {
                 addPiece(u.getMove().captured(),u.getMove().to());
@@ -962,10 +956,10 @@ public final class Board {
         if (epSquare != null) {
             if (playerToMove==Color.BLACK) {
                 assert(epSquare.rank()==Rank.RANK_3);
-                assert(getPiece(North.getInstance().next(epSquare))==Pawn.WHITE_PAWN);
+                assert(getPiece(epSquare.north().get())==Pawn.WHITE_PAWN);
             } else {
                 assert(epSquare.rank()==Rank.RANK_6);
-                assert(getPiece(South.getInstance().next(epSquare))==Pawn.BLACK_PAWN);
+                assert(getPiece(epSquare.south().get())==Pawn.BLACK_PAWN);
             }
         }
 

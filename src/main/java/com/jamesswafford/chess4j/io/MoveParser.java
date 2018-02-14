@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.io;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Board;
@@ -91,25 +92,29 @@ public final class MoveParser {
             if (dst.rank().equals(Rank.RANK_8) && promotion==null) {
                 throw new ParseException("white pawn promotion with no promotion piece.");
             }
-            Square sq = Square.valueOf(dst.file(), dst.rank().south());
+            Square sq = dst.south().orElseThrow(() -> new ParseException("expected square south of dst"));
             if (Pawn.WHITE_PAWN.equals(board.getPiece(sq))) {
-                return new Move(Pawn.WHITE_PAWN,sq,dst,null,promotion);
+                return new Move(Pawn.WHITE_PAWN, sq, dst, null, promotion);
             }
-            sq = Square.valueOf(dst.file(), dst.rank().south().south());
-            if (Pawn.WHITE_PAWN.equals(board.getPiece(sq))) {
-                return new Move(Pawn.WHITE_PAWN,sq,dst);
+            Optional<Square> optSsq = sq.south();
+            if (optSsq.isPresent()) {
+                if (Pawn.WHITE_PAWN.equals(board.getPiece(optSsq.get()))) {
+                    return new Move(Pawn.WHITE_PAWN, optSsq.get(), dst);
+                }
             }
         } else {
             if (dst.rank().equals(Rank.RANK_1) && promotion==null) {
                 throw new ParseException("black pawn promotion with no promotion piece.");
             }
-            Square sq = Square.valueOf(dst.file(), dst.rank().north());
+            Square sq = dst.north().orElseThrow(() -> new ParseException("expected square north of dst"));
             if (Pawn.BLACK_PAWN.equals(board.getPiece(sq))) {
                 return new Move(Pawn.BLACK_PAWN,sq,dst,null,promotion);
             }
-            sq = Square.valueOf(dst.file(), dst.rank().north().north());
-            if (Pawn.BLACK_PAWN.equals(board.getPiece(sq))) {
-                return new Move(Pawn.BLACK_PAWN,sq,dst);
+            Optional<Square> optNsq = sq.north();
+            if (optNsq.isPresent()) {
+                if (Pawn.BLACK_PAWN.equals(board.getPiece(optNsq.get()))) {
+                    return new Move(Pawn.BLACK_PAWN, optNsq.get(), dst);
+                }
             }
         }
         throw new ParseException("length==0 and no source is set.");

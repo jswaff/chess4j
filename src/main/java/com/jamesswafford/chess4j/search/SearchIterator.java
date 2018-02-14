@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.jamesswafford.chess4j.hash.TranspositionTable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -163,7 +164,7 @@ public final class SearchIterator {
             return Arrays.asList(moves.get(0));
         }
 
-        TTHolder.getTransTable().clear();
+        TTHolder.clearAllTables();
         List<Move> pv = new ArrayList<Move>();
         SearchStats stats = new SearchStats();
         Search.analysisMode = pondering;
@@ -254,9 +255,9 @@ public final class SearchIterator {
         LOGGER.info("# search time: " + totalSearchTime/1000.0 + " seconds"
                 + ", rate: " + df2.format(totalNodes / (totalSearchTime/1000.0)) + " nodes per second");
 
-        long hashHits = TTHolder.getTransTable().getNumHits();
-        long hashProbes = TTHolder.getTransTable().getNumProbes();
-        long hashCollisions = TTHolder.getTransTable().getNumCollisions();
+        long hashHits = TTHolder.getDepthPreferredTransTable().getNumHits();
+        long hashProbes = TTHolder.getDepthPreferredTransTable().getNumProbes();
+        long hashCollisions = TTHolder.getDepthPreferredTransTable().getNumCollisions();
         double hashHitPct = hashHits / (hashProbes/100.0);
         double hashCollisionPct = hashCollisions / (hashProbes/100.0);
 
@@ -280,6 +281,10 @@ public final class SearchIterator {
         LOGGER.info("# pawn hash probes: " + df2.format(pawnHashProbes)
                 + ", hits: " + df2.format(pawnHashHits) + " (" + df.format(pawnHashHitPct) + "%)"
                 + ", collisions: " + df2.format(pawnHashCollisions) + " (" + df.format(pawnHashCollisionPct) + "%)");
+    }
+
+    private static void printHashStats(TranspositionTable ttable,String tableName) {
+
     }
 
     public static Move getPonderMove() {

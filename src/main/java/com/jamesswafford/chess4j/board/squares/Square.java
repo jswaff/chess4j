@@ -68,20 +68,24 @@ public final class Square {
         return rank.getValue()*8 + file.getValue();
     }
 
-    public static Square valueOf(File file,Rank rank) {
-        if (file==null || rank==null) {
-            return null;
-        }
+    public static Optional<Square> valueOf(Optional<File> file,Optional<Rank> rank) {
+        return file.flatMap(f -> rank.map(r -> valueOf(f,r)));
+    }
 
+    public static Optional<Square> valueOf(Optional<File> file,Rank rank) {
+        return file.map(f -> valueOf(f,rank));
+    }
+
+    public static Optional<Square> valueOf(File file, Optional<Rank> rank) {
+        return rank.map(r -> valueOf(file,r));
+    }
+
+    public static Square valueOf(File file,Rank rank) {
         return squares_arr[file.getValue()][rank.getValue()];
     }
 
     public static Square valueOf(int sq) {
         return squares_arr[sq&7][sq/8];
-    }
-
-    public static List<Square> allSquares() {
-        return Collections.unmodifiableList(SQUARES);
     }
 
     public int rankDistance(Square sq) {
@@ -104,12 +108,48 @@ public final class Square {
         return Square.valueOf(file.flip(), rank);
     }
 
+    public static List<Square> allSquares() {
+        return Collections.unmodifiableList(SQUARES);
+    }
+
     public static List<Square> fileSquares(File file) {
         return Collections.unmodifiableList(FILE_SQUARES.get(file));
     }
 
     public static List<Square> rankSquares(Rank rank) {
         return Collections.unmodifiableList(RANK_SQUARES.get(rank));
+    }
+
+    public Optional<Square> north() {
+        return Square.valueOf(file,rank().north());
+    }
+
+    public Optional<Square> northEast() {
+        return Square.valueOf(file.east(), rank.north());
+    }
+
+    public Optional<Square> east() {
+        return Square.valueOf(file.east(), rank);
+    }
+
+    public Optional<Square> southEast() {
+        return Square.valueOf(file.east(), rank.south());
+    }
+
+    public Optional<Square> south() {
+        return Square.valueOf(file, rank.south());
+    }
+
+    public Optional<Square> southWest() {
+        return Square.valueOf(file.west(), rank.south());
+    }
+
+    public Optional<Square> west() {
+        return Square.valueOf(file.west(), rank);
+    }
+
+    public Optional<Square> northWest() {
+        return Square.valueOf(file.west(), rank().north());
     }
 
     @Override

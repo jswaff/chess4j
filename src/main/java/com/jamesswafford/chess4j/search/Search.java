@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.search;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,13 +43,18 @@ public final class Search {
         stats.incNodes();
         stats.getFirstLine().clear();
 
-        TranspositionTableEntry te = TTHolder.getTransTable().probe(board.getZobristKey());
+        // TODO: think we want Java9 "or" here
+        Optional<TranspositionTableEntry> te = TTHolder.getDepthPreferredTransTable().probe(board.getZobristKey());
+        if (!te.isPresent()) {
+            te = TTHolder.getAlwaysReplaceTransTable().probe(board.getZobristKey());
+        }
 
         List<Move> pv = new ArrayList<>();
         int numMovesSearched = 0;
         Move pvMove = stats.getLastPV().size()>0 ? stats.getLastPV().get(0) : null;
-        Move hashMove = te==null ? null : te.getMove();
-        MoveOrderer mo = new MoveOrderer(board,pvMove,hashMove,null,null);
+        MoveOrderer mo = new MoveOrderer(board,pvMove,
+                te.map(TranspositionTableEntry::getMove),
+                null,null);
 
         Move move;
         while ((move = mo.selectNextMove()) != null) {
@@ -141,21 +147,26 @@ public final class Search {
         }
 
         // probe the hash table.  maybe we won't have to do any work at all!
-        TranspositionTableEntry te = TTHolder.getTransTable().probe(board.getZobristKey());
-        if (te != null && te.getDepth() >= depth) {
-            if (te.getType()==TranspositionTableEntryType.LOWER_BOUND) {
-                if (te.getScore() >= beta) {
+        // TODO: think we want Java9 "or" here
+        Optional<TranspositionTableEntry> te = TTHolder.getDepthPreferredTransTable().probe(board.getZobristKey());
+        if (!te.isPresent()) {
+            te = TTHolder.getAlwaysReplaceTransTable().probe(board.getZobristKey());
+        }
+        // TODO: is there a more functional approach to this?
+        if (te.isPresent() && te.get().getDepth() >= depth) {
+            if (te.get().getType()==TranspositionTableEntryType.LOWER_BOUND) {
+                if (te.get().getScore() >= beta) {
                     stats.incFailHighs();
                     return beta;
                 }
-            } else if (te.getType()==TranspositionTableEntryType.UPPER_BOUND) {
-                if (te.getScore() <= alpha) {
+            } else if (te.get().getType()==TranspositionTableEntryType.UPPER_BOUND) {
+                if (te.get().getScore() <= alpha) {
                     stats.incFailLows();
                     return alpha;
                 }
-            } else if (te.getType()==TranspositionTableEntryType.EXACT_MATCH) {
+            } else if (te.get().getType()==TranspositionTableEntryType.EXACT_MATCH) {
                 stats.incHashExactScores();
-                return te.getScore();
+                return te.get().getScore();
             }
         }
 
@@ -192,8 +203,8 @@ public final class Search {
         int numMovesSearched = 0;
         int numMovesPruned = 0;
         Move pvMove = (pvNode && stats.getLastPV().size()>ply) ? stats.getLastPV().get(ply) : null;
-        Move hashMove = te==null ? null : te.getMove();
-        MoveOrderer mo = new MoveOrderer(board,pvMove,hashMove,
+        MoveOrderer mo = new MoveOrderer(board,pvMove,
+                te.map(TranspositionTableEntry::getMove),
                 KillerMoves.getInstance().getKiller1(ply),
                 KillerMoves.getInstance().getKiller2(ply));
         Move bestMove = null;
@@ -263,8 +274,12 @@ public final class Search {
 
             if (score > alpha) {
                 if (score >= beta) {
-                    TTHolder.getTransTable().store(board.getZobristKey(),
+                    boolean stored =  TTHolder.getDepthPreferredTransTable().store(board.getZobristKey(),
                             TranspositionTableEntryType.LOWER_BOUND,beta,depth,move);
+                    if (!stored) {
+                        TTHolder.getAlwaysReplaceTransTable().store(board.getZobristKey(),
+                                TranspositionTableEntryType.LOWER_BOUND,beta,depth,move);
+                    }
                     if (move.captured()==null && move.promotion()==null) {
                         KillerMoves.getInstance().addKiller(ply, move);
                     }
@@ -283,7 +298,11 @@ public final class Search {
         TranspositionTableEntryType tet = bestMove == null ?
                 TranspositionTableEntryType.UPPER_BOUND : // fail low node - we didn't find a move > alpha
                 TranspositionTableEntryType.EXACT_MATCH;
-        TTHolder.getTransTable().store(board.getZobristKey(),tet, alpha, depth, bestMove);
+
+        boolean stored = TTHolder.getDepthPreferredTransTable().store(board.getZobristKey(),tet, alpha, depth, bestMove);
+        if (!stored) {
+            TTHolder.getAlwaysReplaceTransTable().store(board.getZobristKey(), tet, alpha, depth, bestMove);
+        }
 
         return alpha;
     }
@@ -312,7 +331,7 @@ public final class Search {
             alpha = standPat;
         }
 
-        MoveOrderer mo = new MoveOrderer(board,null,null,null,null);
+        MoveOrderer mo = new MoveOrderer(board,null,Optional.empty(),null,null);
 
         Move mv;
         while ((mv = mo.selectNextMove(true)) != null) {
