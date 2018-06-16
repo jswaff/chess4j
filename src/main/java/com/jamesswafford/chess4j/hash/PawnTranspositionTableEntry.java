@@ -40,4 +40,8 @@ public class PawnTranspositionTableEntry {
         return hc;
     }
 
+    public static int sizeOf() {
+        return (Long.SIZE + Integer.SIZE) / Byte.SIZE;
+    }
+
 }

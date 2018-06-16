@@ -48,4 +48,5 @@ public abstract class AbstractTranspositionTable {
         mask = numEntries - 1;
     }
 
+    public abstract int sizeOfEntry();
 }

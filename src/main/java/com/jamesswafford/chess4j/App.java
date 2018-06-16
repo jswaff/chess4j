@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
+import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
+import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -37,9 +39,11 @@ public final class App {
         } else if (arg.startsWith("-book=")) {
             bookPath = arg.substring(6);
         } else if (arg.startsWith("-hash=")) {
-            TTHolder.maxEntries = Integer.valueOf(arg.substring(6));
+            int maxMemBytes = Integer.valueOf(arg.substring(6)) * 1024 * 1024;
+            TTHolder.maxEntries = maxMemBytes / TranspositionTableEntry.sizeOf();
         } else if (arg.startsWith("-phash=")) {
-            TTHolder.maxPawnEntries = Integer.valueOf(arg.substring(7));
+            int maxMemBytes = Integer.valueOf(arg.substring(7)) * 1024 * 1024;
+            TTHolder.maxPawnEntries = maxMemBytes / PawnTranspositionTableEntry.sizeOf();
         }
     }
 
