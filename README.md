@@ -1,11 +1,23 @@
 # chess4j
+
 a Java based chess engine
+
+## Introduction 
 
 chess4j is a chess program written using Java technologies. It is not meant to be super competitive, but just a test bed of sorts for various interests. Those interests include experimenting with different JVM based languages, parallel and distributed computing, and machine learning.
 
-To build chess4j, you'll need a Java SDK and Maven.  Once you've downloaded the code just do 'mvn clean install'.  If you just want binaries, you can download them from http://jamesswafford.com/chess4j.
-
 chess4j is a Winboard compatible chess engine.  See http://www.gnu.org/software/xboard for details on installing Winboard or Xboard.
+
+You can read more about chess4j at http://www.jamesswafford.com/chess4j/ .
+
+## Installing
+
+To build chess4j, you'll need a Java SDK and Maven.  
+
+If you have the proper build tools, just do:
+ 
+ ```mvn clean install```  
+
 
 ## Opening Book
 
@@ -23,8 +35,8 @@ chess4j here is some important information.
 chess4j currently employs three transposition tables.  Two are used in the main 
 search (with different replacement strategies), and one in the pawn evaluation. 
  
-You can specify the maximum memory allocated to each table via a command line
-parameter, but you would really only want to do this if you were running the program 
+You can specify the maximum memory allocated to each table via command line
+parameters, but you would really only want to do this if you were running the program 
 directly from the command line, and not using a Winboard compatible GUI or test harness. 
 (I do this when running test suites but that's about it.)  
 
@@ -32,7 +44,7 @@ directly from the command line, and not using a Winboard compatible GUI or test 
 -hash=256 -phash=256
 ``` 
 
-The above command would allocate 256 MB to each of the two tables used in the main search,
+The above arguments would allocate 256 MB to each of the two tables used in the main search,
 and 256 MB to the pawn hash table, for a total of 256 MB * 3 = 768 MB.  
  
 Winboard / XBoard has an option to specify the maximum memory usage, and chess4j does
