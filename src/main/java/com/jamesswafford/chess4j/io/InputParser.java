@@ -5,6 +5,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jamesswafford.chess4j.hash.TTHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -68,6 +69,8 @@ public class InputParser {
         } else if ("ics".equals(cmd)) {
         } else if ("level".equals(cmd)) {
             level(input);
+        } else if ("memory".equals(cmd)) {
+            memory(input);
         } else if ("name".equals(cmd)) {
             logger.info("# opponent is: " + input[1]);
         } else if ("new".equals(cmd)) {
@@ -169,6 +172,40 @@ public class InputParser {
         increment *= 1000;
         logger.debug("# increment: " + increment + " ms.");
         SearchIterator.incrementMS = increment.intValue();
+    }
+
+    /**
+     * memory N
+     *
+     * This command informs the engine on how much memory it is allowed to use maximally, in MegaBytes.
+     * On receipt of this command, the engine should adapt the size of its hash tables accordingly.
+     * This command does only fix the total memory use, the engine has to decide for itself (or be
+     * configured by the user by other means) how to divide up the available memory between the various
+     * tables it wants to use (e.g. main hash, pawn hash, tablebase cache, bitbases). This command will
+     * only be sent to engines that have requested it through the memory feature, and only at the start
+     * of a game, as the first of the commands to relay engine option settings just before each "new"
+     * command.
+     */
+    int prevMaxMB = 0;
+    private void memory(String[] input) {
+        int maxMemMB = Integer.valueOf(input[1]);
+
+        logger.debug("# received memory command, N=" + maxMemMB);
+
+        if (maxMemMB != prevMaxMB) {
+            int maxMemPerTable = maxMemMB * 1024 * 1024 / 3; // DP, AR and pawn
+
+            TTHolder.maxEntries = maxMemPerTable / TTHolder.getAlwaysReplaceTransTable().sizeOfEntry(); // note DP and AR are the same
+            TTHolder.maxPawnEntries = maxMemPerTable / TTHolder.getPawnTransTable().sizeOfEntry();
+
+            TTHolder.initTables();
+            prevMaxMB = maxMemMB;
+
+            // suggest to the JVM that now is good time to garbage collect the previous tables
+            System.gc();
+        } else {
+            logger.debug("# memory usage unchanged, skipping new table instantiation.");
+        }
     }
 
     /**
@@ -292,7 +329,7 @@ public class InputParser {
             System.exit(1);
         }
         logger.info("feature analyze=0 black=0 colors=0 ping=1 draw=0 debug=1 edit=0 ics=1");
-        logger.info("feature level=0 name=1 nps=0 memory=0 playother=0 pause=0 resume=0 reuse=1 san=0");
+        logger.info("feature level=0 name=1 nps=0 memory=1 playother=0 pause=0 resume=0 reuse=1 san=0");
         logger.info("feature setboard=1 sigint=0 sigterm=0 smp=0 st=0 time=1 usermove=1");
         logger.info("feature white=0 variants=\"normal\" myname=\"chess4j\"");
         logger.info("feature done=1"); // must be last

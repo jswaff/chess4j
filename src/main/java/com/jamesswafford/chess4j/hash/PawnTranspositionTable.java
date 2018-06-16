@@ -54,4 +54,9 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         table[getMaskedKey(zobristKey)] = te;
     }
 
+    @Override
+    public int sizeOfEntry() {
+        return PawnTranspositionTableEntry.sizeOf();
+    }
+
 }

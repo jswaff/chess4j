@@ -151,4 +151,7 @@ public class TranspositionTableEntry {
         return hc;
     }
 
+    public static int sizeOf() {
+        return Long.SIZE * 2 / Byte.SIZE;
+    }
 }

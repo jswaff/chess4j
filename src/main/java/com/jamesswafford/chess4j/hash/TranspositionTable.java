@@ -118,4 +118,8 @@ public class TranspositionTable extends AbstractTranspositionTable {
         return true;
     }
 
+    @Override
+    public int sizeOfEntry() {
+        return TranspositionTableEntry.sizeOf();
+    }
 }
