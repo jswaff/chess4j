@@ -582,6 +582,7 @@ public final class Eval {
                 board.getNumPieces(Pawn.BLACK_PAWN) * PAWN_VAL);
     }
 
+    // TODO: use Tuple?
     public static OrderedPair<Integer,Integer> getNonPawnMaterialScore(Board board) {
         int wScore = board.getNumPieces(Queen.WHITE_QUEEN) * QUEEN_VAL
                 + board.getNumPieces(Rook.WHITE_ROOK) * ROOK_VAL
