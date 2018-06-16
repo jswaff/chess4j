@@ -23,7 +23,7 @@ chess4j here is some important information.
 chess4j currently employs three transposition tables.  Two are used in the main 
 search (with different replacement strategies), and one in the pawn evaluation. 
  
-You can specify the maximum memory allocated for each table via a command line
+You can specify the maximum memory allocated to each table via a command line
 parameter, but you would really only want to do this if you were running the program 
 directly from the command line, and not using a Winboard compatible GUI or test harness. 
 (I do this when running test suites but that's about it.)  
@@ -33,8 +33,7 @@ directly from the command line, and not using a Winboard compatible GUI or test 
 ``` 
 
 The above command would allocate 256 MB to each of the two tables used in the main search,
-and 256 MB to the pawn hash table, for a total of 256 MB * 3 = 768 MB.  (And execute
-the wac.epd test suite.)
+and 256 MB to the pawn hash table, for a total of 256 MB * 3 = 768 MB.  
  
 Winboard / XBoard has an option to specify the maximum memory usage, and chess4j does
 respect that.  The allocation strategy is to give each of the three tables equal share.
