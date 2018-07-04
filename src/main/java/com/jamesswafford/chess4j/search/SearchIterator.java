@@ -149,7 +149,7 @@ public final class SearchIterator {
      */
     public static List<Move> iterate(Board board,boolean testSuiteMode) {
 
-        if (!testSuiteMode && !pondering && useOpeningBook && App.getOpeningBook() != null) {
+        if (!testSuiteMode && !pondering && useOpeningBook && App.getOpeningBook() != null && board.getMoveCounter() <= 30) {
             BookMove bookMove = App.getOpeningBook().getMoveWeightedRandomByFrequency(board);
             if (bookMove != null) {
                 LOGGER.debug("# book move: " + bookMove);
