@@ -44,13 +44,12 @@ public class InputParser {
 
         String[] input = command.split("\\s+");
         String cmd = input[0];
+        // TODO: replace this with a map of cmd -> Consumer
         if ("accepted".equals(cmd)) {
         } else if ("analyze".equals(cmd)) {
         } else if ("black".equals(cmd)) {
         } else if ("bk".equals(cmd)) {
             bk();
-        } else if ("bkmoves".equals(cmd)) {
-            bkmoves();
         } else if ("computer".equals(cmd)) {
         } else if ("db".equals(cmd)) {
             db();
@@ -122,20 +121,20 @@ public class InputParser {
     }
 
     private void bk() {
-        SearchIterator.useOpeningBook = !SearchIterator.useOpeningBook;
-        if (SearchIterator.useOpeningBook) {
-            logger.info("\topening book on.\n\n");
-        } else {
-            logger.info("\topening book off.\n\n");
-        }
-    }
+        if (App.getOpeningBook() != null) {
+            List<BookMove> bookMoves = App.getOpeningBook().getMoves(Board.INSTANCE);
+            bookMoves.sort((BookMove bm1, BookMove bm2) -> bm2.getFrequency() - bm1.getFrequency());
 
-    private void bkmoves() {
-        List<BookMove> bookMoves = App.getOpeningBook().getMoves(Board.INSTANCE);
-        logger.info("book moves:");
-        for (BookMove bookMove : bookMoves) {
-            logger.info("\t" + bookMove);
+            logger.info("# book moves:");
+            for (BookMove bookMove : bookMoves) {
+                logger.info("\t" + bookMove.getMove() + " - freq: " + bookMove.getFrequency()
+                        + ", w/l/d: " + bookMove.getWins() + " / " + bookMove.getLosses()
+                        + " / " + bookMove.getDraws());
+            }
+        } else {
+            logger.info("\tbook not enabled");
         }
+        logger.info(""); // blank line required by protocol
     }
 
     private void db() {

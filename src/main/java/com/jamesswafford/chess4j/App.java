@@ -18,7 +18,6 @@ import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.io.InputParser;
-import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.utils.TestSuiteProcessor;
 
 public final class App {
@@ -99,7 +98,6 @@ public final class App {
 
         if (bookPath != null) {
             initBook();
-            SearchIterator.useOpeningBook = true;
         }
 
         repl();

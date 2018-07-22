@@ -35,8 +35,6 @@ public final class SearchIterator {
 
     private static final SearchIterator INSTANCE = new SearchIterator();
 
-    public static boolean useOpeningBook = false;
-
     public static boolean ponderEnabled;
     private static boolean pondering;
     private static Move ponderMove;
@@ -149,7 +147,7 @@ public final class SearchIterator {
      */
     public static List<Move> iterate(Board board,boolean testSuiteMode) {
 
-        if (!testSuiteMode && !pondering && useOpeningBook && App.getOpeningBook() != null && board.getMoveCounter() <= 30) {
+        if (!testSuiteMode && !pondering && App.getOpeningBook() != null && board.getMoveCounter() <= 30) {
             BookMove bookMove = App.getOpeningBook().getMoveWeightedRandomByFrequency(board);
             if (bookMove != null) {
                 LOGGER.debug("# book move: " + bookMove);
