@@ -235,6 +235,7 @@ public final class Search {
                 // if this position is looking unpromising, just skip it
                 if (Prune.prune(board, move, inCheck, givesCheck, extend, alpha, beta, depth)) {
                     board.undoLastMove();
+                    stats.incPrunes();
                     numMovesPruned++;
                     continue;
                 }

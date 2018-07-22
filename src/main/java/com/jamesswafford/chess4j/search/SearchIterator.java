@@ -263,13 +263,6 @@ public final class SearchIterator {
                 + ", hits: " + df2.format(hashHits) + " (" + df.format(hashHitPct) + "%)"
                 + ", collisions: " + df2.format(hashCollisions) + " (" + df.format(hashCollisionPct) + "%)");
 
-        double failHighPct = stats.getFailHighs() / (hashProbes/100.0);
-        double failLowPct = stats.getFailLows() / (hashProbes/100.0);
-        double exactScorePct = stats.getHashExactScores() / (hashProbes/100.0);
-        LOGGER.info("# fail highs: " + df2.format(stats.getFailHighs()) + " (" + df.format(failHighPct) + "%)"
-                + ", fail lows: " + df2.format(stats.getFailLows()) + " (" + df.format(failLowPct) + "%)"
-                + ", exact scores: " + df2.format(stats.getHashExactScores()) + " (" + df.format(exactScorePct) + "%)");
-
         long pawnHashHits = TTHolder.getPawnTransTable().getNumHits();
         long pawnHashProbes = TTHolder.getPawnTransTable().getNumProbes();
         long pawnHashCollisions = TTHolder.getPawnTransTable().getNumCollisions();
@@ -279,6 +272,15 @@ public final class SearchIterator {
         LOGGER.info("# pawn hash probes: " + df2.format(pawnHashProbes)
                 + ", hits: " + df2.format(pawnHashHits) + " (" + df.format(pawnHashHitPct) + "%)"
                 + ", collisions: " + df2.format(pawnHashCollisions) + " (" + df.format(pawnHashCollisionPct) + "%)");
+
+        double failHighPct = stats.getFailHighs() / (hashProbes/100.0);
+        double failLowPct = stats.getFailLows() / (hashProbes/100.0);
+        double exactScorePct = stats.getHashExactScores() / (hashProbes/100.0);
+        LOGGER.info("# fail highs: " + df2.format(stats.getFailHighs()) + " (" + df.format(failHighPct) + "%)"
+                + ", fail lows: " + df2.format(stats.getFailLows()) + " (" + df.format(failLowPct) + "%)"
+                + ", exact scores: " + df2.format(stats.getHashExactScores()) + " (" + df.format(exactScorePct) + "%)");
+
+        LOGGER.info("# prunes: " + stats.getPrunes());
     }
 
     private static void printHashStats(TranspositionTable ttable,String tableName) {

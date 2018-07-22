@@ -16,6 +16,7 @@ public class SearchStats {
     private long qnodes=0;
     private List<Move> lastPV = new ArrayList<>();
     private List<Move> firstLine = new ArrayList<>();
+    private long prunes=0;
 
     public long getFailHighs() {
         return failHighs;
@@ -75,4 +76,11 @@ public class SearchStats {
         this.lastPV.addAll(lastPV);
     }
 
+    public long getPrunes() {
+        return prunes;
+    }
+
+    public void incPrunes() {
+        prunes++;
+    }
 }
