@@ -87,7 +87,7 @@ public final class SearchIterator {
                 while (!abortIterator && gs==GameStatus.INPROGRESS
                         && ponderEnabled && pv.size() > 1 && ponderSuccess) {
                     ponderMove = pv.get(1);
-                    LOGGER.info("### START PONDERING: " + ponderMove);
+                    LOGGER.debug("### START PONDERING: " + ponderMove);
                     pondering = true;
                     searchPos.applyMove(pv.get(0)); // apply the move just made so we're in sync
                     searchPos.applyMove(ponderMove); // apply the predicted move
@@ -99,7 +99,7 @@ public final class SearchIterator {
                     // the thread.
 
                     pv = iterate(searchPos,false);
-                    LOGGER.info("# ponder search terminated.  analysis mode?: " + Search.analysisMode);
+                    LOGGER.debug("# ponder search terminated.  analysis mode?: " + Search.analysisMode);
 
                     synchronized (ponderMutex) {
                         if (!pondering) {
@@ -114,7 +114,7 @@ public final class SearchIterator {
                     }
                 }
 
-                LOGGER.info("### exiting search thread");
+                LOGGER.debug("### exiting search thread");
 
                 if (gs != GameStatus.INPROGRESS) {
                     PrintGameResult.printResult(gs);

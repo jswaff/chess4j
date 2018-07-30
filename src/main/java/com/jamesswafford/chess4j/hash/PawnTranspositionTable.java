@@ -16,13 +16,13 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     }
 
     public PawnTranspositionTable(int maxEntries) {
-        LOGGER.info("# initializing pawn transposition table.  maxEntries=" + maxEntries);
+        LOGGER.debug("# initializing pawn transposition table.  maxEntries=" + maxEntries);
 
         setNumEntries(maxEntries);
         table = new PawnTranspositionTableEntry[numEntries];
         clear();
 
-        LOGGER.info("# pawn transposition table initialized with  " + numEntries + " entries.");
+        LOGGER.debug("# pawn transposition table initialized with  " + numEntries + " entries.");
     }
 
     public void clear() {

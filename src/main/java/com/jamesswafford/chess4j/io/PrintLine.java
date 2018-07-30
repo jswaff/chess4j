@@ -10,19 +10,6 @@ import com.jamesswafford.chess4j.board.Move;
 public class PrintLine {
     private static final Log logger = LogFactory.getLog(PrintLine.class);
 
-    public static void printLine(List<Move> moves) {
-        printLine(moves,false);
-    }
-
-    public static void printLine(List<Move> moves,boolean debug) {
-        String ms = getMoveString(moves);
-        if (debug) {
-            logger.debug(ms + "\n");
-        } else {
-            logger.info(ms + "\n");
-        }
-    }
-
     public static void printLine(List<Move> moves,int depth,int score,long startTime,long nodes) {
         long timeInCentis = (System.currentTimeMillis() - startTime) / 10;
         String line = getMoveString(moves);

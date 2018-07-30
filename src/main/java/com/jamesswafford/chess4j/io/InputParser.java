@@ -40,7 +40,7 @@ public class InputParser {
     }
 
     public void parseCommand(String command) throws IllegalMoveException,ParseException {
-        logger.info("# parsing: " + command);
+        logger.debug("# parsing: " + command);
 
         String[] input = command.split("\\s+");
         String cmd = input[0];
@@ -401,7 +401,7 @@ public class InputParser {
      */
     private void sd(String[] input) {
         Integer depth = Integer.valueOf(input[1]);
-        logger.info("# setting depth to : " + depth);
+        logger.debug("# setting depth to : " + depth);
         SearchIterator.maxDepth = depth;
     }
 
@@ -427,7 +427,7 @@ public class InputParser {
     private void time(String[] input) {
         Integer time = Integer.valueOf(input[1]);
         time *= 10; // centiseconds to milliseconds
-        logger.info("# MY TIME: " + time);
+        logger.debug("# MY TIME: " + time);
         SearchIterator.remainingTimeMS = time;
     }
 
@@ -451,7 +451,7 @@ public class InputParser {
 
         if (!forceMode) {
             boolean predicted = mv.equals(SearchIterator.getPonderMove());
-            logger.info("# pondering?: " + SearchIterator.isPondering() + ", predicted?: " + predicted);
+            logger.debug("# pondering?: " + SearchIterator.isPondering() + ", predicted?: " + predicted);
 
             boolean startNewSearch;
             synchronized (SearchIterator.ponderMutex) {

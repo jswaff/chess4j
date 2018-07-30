@@ -22,14 +22,14 @@ public class TranspositionTable extends AbstractTranspositionTable {
     }
 
     public TranspositionTable(boolean depthPreferred,int maxEntries) {
-        LOGGER.info("# initializing transposition table.  maxEntries=" + maxEntries);
+        LOGGER.debug("# initializing transposition table.  maxEntries=" + maxEntries);
 
         this.depthPreferred = depthPreferred;
         setNumEntries(maxEntries);
         table = new TranspositionTableEntry[numEntries];
         clear();
 
-        LOGGER.info("# transposition table initialized with  " + numEntries + " entries.");
+        LOGGER.debug("# transposition table initialized with  " + numEntries + " entries.");
     }
 
     public void clear() {

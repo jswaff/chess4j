@@ -56,18 +56,18 @@ public final class App {
             try {
                 input = bin.readLine();
             } catch (IOException e1) {
-                LOGGER.debug("Caught nonrecoverable I/O exception: " + e1.getMessage());
+                LOGGER.error("Caught nonrecoverable I/O exception: " + e1.getMessage());
                 System.exit(1);
             }
 
             try {
                 InputParser.getInstance().parseCommand(input);
             } catch (IllegalMoveException ime) {
-                LOGGER.error("Illegal move");
+                LOGGER.info("Illegal move");
             } catch (ParseException pe) {
-                LOGGER.error("Parse error: " + pe.getMessage());
+                LOGGER.warn("Parse error: " + pe.getMessage());
             } catch (Exception e) {
-                LOGGER.debug("Caught (hopefully recoverable) exception: " + e.getMessage());
+                LOGGER.warn("Caught (hopefully recoverable) exception: " + e.getMessage());
             }
         }
     }
