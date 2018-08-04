@@ -247,13 +247,13 @@ public class TranspositionTableTest {
         long key = Zobrist.getBoardKey(board);
         Move m = new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_5),Square.valueOf(File.FILE_E,Rank.RANK_4));
         ttable.store(key,TranspositionTableEntryType.LOWER_BOUND,1001, 5, m);
-        TranspositionTableEntry tte = ttable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
+        TranspositionTableEntry tte = ttable.probe(key).get();
         TranspositionTableEntry lbe = new TranspositionTableEntry(key,TranspositionTableEntryType.LOWER_BOUND,1001,5,m);
         Assert.assertEquals(lbe, tte);
 
         // overwrite with different score/depth
         ttable.store(key,TranspositionTableEntryType.LOWER_BOUND,900, 6, m);
-        tte = ttable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
+        tte = ttable.probe(key).get();
         Assert.assertFalse(lbe.equals(tte));
         lbe = new TranspositionTableEntry(key,TranspositionTableEntryType.LOWER_BOUND,900,6,m);
         Assert.assertTrue(lbe.equals(tte));
@@ -268,7 +268,7 @@ public class TranspositionTableTest {
         Assert.assertEquals(lbe, tte);
 
         TranspositionTableEntry lbe2 = new TranspositionTableEntry(key2,TranspositionTableEntryType.LOWER_BOUND,800,7,m);
-        tte = ttable.probe(key2).orElseThrow(() -> new RuntimeException("Expected Move"));
+        tte = ttable.probe(key2).get();
         Assert.assertEquals(lbe2, tte);
     }
 
@@ -279,18 +279,18 @@ public class TranspositionTableTest {
         long key = Zobrist.getBoardKey(board);
         Move m = new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_5),Square.valueOf(File.FILE_E,Rank.RANK_4));
         ttDPtable.store(key,TranspositionTableEntryType.LOWER_BOUND,1001, 5, m);
-        TranspositionTableEntry tte = ttDPtable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
+        TranspositionTableEntry tte = ttDPtable.probe(key).get();
         TranspositionTableEntry origEntry = new TranspositionTableEntry(key,TranspositionTableEntryType.LOWER_BOUND,1001,5,m);
         Assert.assertEquals(origEntry, tte);
 
         // overwrite with a different score and shallower depth
         ttDPtable.store(key,TranspositionTableEntryType.LOWER_BOUND,900, 4, m);
-        tte = ttDPtable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
+        tte = ttDPtable.probe(key).get();
         Assert.assertEquals(origEntry, tte);
 
         // overwrite with yet another score but a deeper depth
         ttDPtable.store(key,TranspositionTableEntryType.LOWER_BOUND,800, 6, m);
-        tte = ttDPtable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
+        tte = ttDPtable.probe(key).get();
         Assert.assertEquals(6,tte.getDepth());
     }
 

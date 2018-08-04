@@ -87,7 +87,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
         // if this is a depth preferred table, we don't overwrite entries stored from a deeper search
         if (depthPreferred) {
             TranspositionTableEntry currentEntry = table[getMaskedKey(zobristKey)];
-            if (currentEntry != null && currentEntry.getDepth() > depth) {
+            if (currentEntry != null &&  currentEntry.getDepth() > depth) {
                 return false;
             }
         }
