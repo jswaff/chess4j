@@ -136,12 +136,7 @@ public final class SearchIterator {
 
     /**
      * Iterate over the given position and return the principal variation.
-     * <maxSearchTime> is the time to search in milliseconds.  If 0 it is ignored.
-     * <maxSearchDepth> is the depth to search.  If 0 it is ignored.
-     *
      * The returned line (PV) is guaranteed to have at least one move.
-     *
-     * abortSearch should be set before calling this method.
      *
      * @return
      */
@@ -253,9 +248,12 @@ public final class SearchIterator {
         LOGGER.info("# search time: " + totalSearchTime/1000.0 + " seconds"
                 + ", rate: " + df2.format(totalNodes / (totalSearchTime/1000.0)) + " nodes per second");
 
-        long hashHits = TTHolder.getDepthPreferredTransTable().getNumHits();
-        long hashProbes = TTHolder.getDepthPreferredTransTable().getNumProbes();
-        long hashCollisions = TTHolder.getDepthPreferredTransTable().getNumCollisions();
+        long hashHits = TTHolder.getDepthPreferredTransTable().getNumHits()
+                + TTHolder.getAlwaysReplaceTransTable().getNumHits();
+        long hashProbes = TTHolder.getDepthPreferredTransTable().getNumProbes()
+                + TTHolder.getAlwaysReplaceTransTable().getNumProbes();
+        long hashCollisions = TTHolder.getDepthPreferredTransTable().getNumCollisions()
+                + TTHolder.getAlwaysReplaceTransTable().getNumCollisions();
         double hashHitPct = hashHits / (hashProbes/100.0);
         double hashCollisionPct = hashCollisions / (hashProbes/100.0);
 

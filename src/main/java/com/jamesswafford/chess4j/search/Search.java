@@ -27,7 +27,7 @@ public final class Search {
 
     public static long startTime=0;
     public static long stopTime=0;
-    public static long lastTimeCheck=0;
+    private static long lastTimeCheck=0;
 
     public static boolean analysisMode=false;
     public static boolean abortSearch=false;
