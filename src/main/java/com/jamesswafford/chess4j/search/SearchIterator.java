@@ -49,6 +49,8 @@ public final class SearchIterator {
     public static boolean showThinking = true;
     public static boolean abortIterator = false;
 
+    private static Board searchPos;
+
     private SearchIterator() {	}
 
     public static SearchIterator getInstance() {
@@ -69,63 +71,60 @@ public final class SearchIterator {
         // make a copy of the current position.  note that just because we are operating
         // of a copy of the global position, the global position itself should remain
         // unchanged until our search is complete.
-        Board searchPos = Board.INSTANCE.deepCopy();
+        searchPos = Board.INSTANCE.deepCopy();
 
-        class Thinker implements Runnable {
-            @Override
-            public void run() {
-                pondering = false;
-                List<Move> pv = iterate(searchPos,false);
-                assert(Board.INSTANCE.equals(searchPos));
-                Board.INSTANCE.applyMove(pv.get(0));
-                LOGGER.info("move " + pv.get(0));
-                GameStatus gs = GameStatusChecker.getGameStatus();
+        Thread thinkThread = new Thread(() -> threadHelper());
+        thinkThread.start();
 
-                // pondering loop.  as long as we guess correctly we'll loop back around
-                // if we don't predict correctly this thread is terminated
-                boolean ponderSuccess = true;
-                while (!abortIterator && gs==GameStatus.INPROGRESS
-                        && ponderEnabled && pv.size() > 1 && ponderSuccess) {
-                    ponderMove = pv.get(1);
-                    LOGGER.debug("### START PONDERING: " + ponderMove);
-                    pondering = true;
-                    searchPos.applyMove(pv.get(0)); // apply the move just made so we're in sync
-                    searchPos.applyMove(ponderMove); // apply the predicted move
+        return thinkThread;
+    }
 
-                    // start an iterative search in ponder mode.  When the iterative search completes,
-                    // if we're not in pondering mode, then a user move was received and we predicted
-                    // correctly so we should play our response.  Otherwise, either the search fully
-                    // resolved and exited early or the search was aborted.  In either case just terminate
-                    // the thread.
+    private static void threadHelper() {
+        pondering = false;
+        List<Move> pv = iterate(searchPos,false);
+        assert(Board.INSTANCE.equals(searchPos));
+        Board.INSTANCE.applyMove(pv.get(0));
+        LOGGER.info("move " + pv.get(0));
+        GameStatus gs = GameStatusChecker.getGameStatus();
 
-                    pv = iterate(searchPos,false);
-                    LOGGER.debug("# ponder search terminated.  analysis mode?: " + Search.analysisMode);
+        // pondering loop.  as long as we guess correctly we'll loop back around
+        // if we don't predict correctly this thread is terminated
+        boolean ponderSuccess = true;
+        while (!abortIterator && gs==GameStatus.INPROGRESS
+                && ponderEnabled && pv.size() > 1 && ponderSuccess) {
+            ponderMove = pv.get(1);
+            LOGGER.debug("### START PONDERING: " + ponderMove);
+            pondering = true;
+            searchPos.applyMove(pv.get(0)); // apply the move just made so we're in sync
+            searchPos.applyMove(ponderMove); // apply the predicted move
 
-                    synchronized (ponderMutex) {
-                        if (!pondering) {
-                            assert(Board.INSTANCE.equals(searchPos));
-                            Board.INSTANCE.applyMove(pv.get(0));
-                            LOGGER.info("move " + pv.get(0));
-                            gs = GameStatusChecker.getGameStatus();
-                        } else {
-                            pondering = false;
-                            ponderSuccess = false;
-                        }
-                    }
-                }
+            // start an iterative search in ponder mode.  When the iterative search completes,
+            // if we're not in pondering mode, then a user move was received and we predicted
+            // correctly so we should play our response.  Otherwise, either the search fully
+            // resolved and exited early or the search was aborted.  In either case just terminate
+            // the thread.
 
-                LOGGER.debug("### exiting search thread");
+            pv = iterate(searchPos,false);
+            LOGGER.debug("# ponder search terminated.  analysis mode?: " + Search.analysisMode);
 
-                if (gs != GameStatus.INPROGRESS) {
-                    PrintGameResult.printResult(gs);
+            synchronized (ponderMutex) {
+                if (!pondering) {
+                    assert(Board.INSTANCE.equals(searchPos));
+                    Board.INSTANCE.applyMove(pv.get(0));
+                    LOGGER.info("move " + pv.get(0));
+                    gs = GameStatusChecker.getGameStatus();
+                } else {
+                    pondering = false;
+                    ponderSuccess = false;
                 }
             }
         }
 
-        Thread thinkThread = new Thread(new Thinker());
-        thinkThread.start();
+        LOGGER.debug("### exiting search thread");
 
-        return thinkThread;
+        if (gs != GameStatus.INPROGRESS) {
+            PrintGameResult.printResult(gs);
+        }
     }
 
     public static void calculateSearchTimes() {
