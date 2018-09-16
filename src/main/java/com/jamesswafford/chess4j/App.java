@@ -26,7 +26,7 @@ public final class App {
     private static AbstractOpeningBook openingBook;
     private static String bookPath = null;
     private static String testSuiteFile = null;
-    private static int testSuiteTime = 10; // default to five seconds
+    private static int testSuiteTime = 10; // default to ten seconds
 
     private App() { }
 
@@ -108,7 +108,7 @@ public final class App {
     }
 
     private static void initBook() throws Exception {
-        LOGGER.info("# initializing book: " + bookPath);
+        LOGGER.debug("# initializing book: " + bookPath);
 
         File bookFile = new File(bookPath);
         boolean initBook = !bookFile.exists();

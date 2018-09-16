@@ -171,7 +171,7 @@ public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
     }
 
     public void loadZobristKeys() throws SQLException {
-        List<Long> keys = new ArrayList<Long>();
+        List<Long> keys = new ArrayList<>();
 
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery("select key from zobrist_keys order by id");

@@ -22,7 +22,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         table = new PawnTranspositionTableEntry[numEntries];
         clear();
 
-        LOGGER.debug("# pawn transposition table initialized with  " + numEntries + " entries.");
+        LOGGER.info("# pawn transposition table initialized with " + numEntries + " entries.");
     }
 
     public void clear() {
