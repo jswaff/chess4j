@@ -4,8 +4,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
-import com.jamesswafford.chess4j.hash.TranspositionTable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -35,19 +35,36 @@ public final class SearchIterator {
 
     private static final SearchIterator INSTANCE = new SearchIterator();
 
+    public static int remainingTimeMS;
+    public static int incrementMS;
+    public static int maxDepth;
+    public static int maxTime;
+    public static boolean post = true;
     public static boolean ponderEnabled;
     private static boolean pondering;
     private static Move ponderMove;
-    public static final Object ponderMutex = new Object();
+    private static boolean abortIterator = false;
 
-    public static int maxDepth;
+    private static Board searchPos;
+    public static final ReentrantLock ponderMutex = new ReentrantLock();
 
-    public static int remainingTimeMS;
-    public static int incrementMS;
-    public static int maxTime;
+    public static boolean isPondering() {
+        return pondering;
+    }
+    public static Move getPonderMove() {
+        return ponderMove;
+    }
 
-    public static boolean showThinking = true;
-    public static boolean abortIterator = false;
+    public static void setAbortIterator(boolean abort) {
+        abortIterator = abort;
+        Search.abortSearch = abort;
+    }
+
+    public static void setPonderMode(boolean ponderMode) {
+        pondering = ponderMode;
+        Search.analysisMode = ponderMode;
+    }
+
 
     private SearchIterator() {	}
 
@@ -55,6 +72,11 @@ public final class SearchIterator {
         return INSTANCE;
     }
 
+    public static void calculateSearchTimes() {
+        maxTime = TimeUtils.getSearchTime(remainingTimeMS, incrementMS);
+        Search.stopTime = Search.startTime + maxTime;
+        LOGGER.debug("# calculated search time: " + maxTime);
+    }
 
     /**
      * Kick off the iterative deepening search in its own thread.
@@ -64,74 +86,85 @@ public final class SearchIterator {
      */
     public static Thread think() {
 
-        abortIterator = false;
-
         // make a copy of the current position.  note that just because we are operating
         // of a copy of the global position, the global position itself should remain
         // unchanged until our search is complete.
-        Board searchPos = Board.INSTANCE.deepCopy();
+        searchPos = Board.INSTANCE.deepCopy();
 
-        class Thinker implements Runnable {
-            @Override
-            public void run() {
-                pondering = false;
-                List<Move> pv = iterate(searchPos,false);
-                assert(Board.INSTANCE.equals(searchPos));
-                Board.INSTANCE.applyMove(pv.get(0));
-                LOGGER.info("move " + pv.get(0));
-                GameStatus gs = GameStatusChecker.getGameStatus();
-
-                // pondering loop.  as long as we guess correctly we'll loop back around
-                // if we don't predict correctly this thread is terminated
-                boolean ponderSuccess = true;
-                while (!abortIterator && gs==GameStatus.INPROGRESS
-                        && ponderEnabled && pv.size() > 1 && ponderSuccess) {
-                    ponderMove = pv.get(1);
-                    LOGGER.debug("### START PONDERING: " + ponderMove);
-                    pondering = true;
-                    searchPos.applyMove(pv.get(0)); // apply the move just made so we're in sync
-                    searchPos.applyMove(ponderMove); // apply the predicted move
-
-                    // start an iterative search in ponder mode.  When the iterative search completes,
-                    // if we're not in pondering mode, then a user move was received and we predicted
-                    // correctly so we should play our response.  Otherwise, either the search fully
-                    // resolved and exited early or the search was aborted.  In either case just terminate
-                    // the thread.
-
-                    pv = iterate(searchPos,false);
-                    LOGGER.debug("# ponder search terminated.  analysis mode?: " + Search.analysisMode);
-
-                    synchronized (ponderMutex) {
-                        if (!pondering) {
-                            assert(Board.INSTANCE.equals(searchPos));
-                            Board.INSTANCE.applyMove(pv.get(0));
-                            LOGGER.info("move " + pv.get(0));
-                            gs = GameStatusChecker.getGameStatus();
-                        } else {
-                            pondering = false;
-                            ponderSuccess = false;
-                        }
-                    }
-                }
-
-                LOGGER.debug("### exiting search thread");
-
-                if (gs != GameStatus.INPROGRESS) {
-                    PrintGameResult.printResult(gs);
-                }
-            }
-        }
-
-        Thread thinkThread = new Thread(new Thinker());
+        setPonderMode(false);
+        setAbortIterator(false);
+        
+        Thread thinkThread = new Thread(() -> threadHelper());
         thinkThread.start();
 
         return thinkThread;
     }
 
-    public static void calculateSearchTimes() {
-        maxTime = TimeUtils.getSearchTime(remainingTimeMS, incrementMS);
-        Search.stopTime = Search.startTime + maxTime;
-        LOGGER.debug("# calculated search time: " + maxTime);
+    private static void threadHelper() {
+
+        List<Move> pv = iterate(searchPos,false);
+
+        // sanity check - the global position shouldn't have changed
+        assert(Board.INSTANCE.equals(searchPos));
+
+        Board.INSTANCE.applyMove(pv.get(0));
+        LOGGER.info("move " + pv.get(0));
+        GameStatus gs = GameStatusChecker.getGameStatus();
+
+        // pondering loop.  as long as we guess correctly we'll loop back around
+        // if we don't predict correctly this thread is terminated
+        boolean ponderFailure = false;
+        while (gs==GameStatus.INPROGRESS && ponderEnabled && pv.size() > 1 && !ponderFailure && !abortIterator) {
+
+            ponderMutex.lock();
+            LOGGER.debug("# thinkHelper acquired lock #1 on ponderMutex");
+
+            if (!abortIterator) {
+                ponderMove = pv.get(1);
+                searchPos.applyMove(pv.get(0)); // apply the move just made so we're in sync
+                searchPos.applyMove(ponderMove); // apply the predicted move
+
+                LOGGER.debug("### START PONDERING: " + ponderMove);
+
+                setPonderMode(true);
+                Search.abortSearch = false;
+
+                ponderMutex.unlock();
+                LOGGER.debug("thinkHelper released lock #1 on ponderMutex");
+
+                pv = iterate(searchPos,false);
+                LOGGER.debug("# ponder search terminated");
+
+                ponderMutex.lock();
+                LOGGER.debug("thinkHelper acquired lock #2 on ponderMutex");
+
+                ponderMove = null;
+
+                // if we're not in ponder mode, it's because the usermove was correctly predicted and the main
+                // thread transitioned the search into "normal mode."
+                if (!pondering) {
+                    assert(Board.INSTANCE.equals(searchPos));
+                    Board.INSTANCE.applyMove(pv.get(0));
+                    LOGGER.info("move " + pv.get(0));
+                    gs = GameStatusChecker.getGameStatus();
+                } else {
+                    // we're still in ponder mode.  this means the search terminated on its own.
+                    // in this case just bail out.
+                    ponderFailure = true;
+                }
+
+                setPonderMode(false);
+            }
+
+            ponderMutex.unlock();
+            LOGGER.debug("thinkHelper released lock #2 on ponderMutex");
+        }
+
+        LOGGER.debug("### exiting search thread");
+
+        if (gs != GameStatus.INPROGRESS) {
+            PrintGameResult.printResult(gs);
+        }
     }
 
     /**
@@ -159,15 +192,15 @@ public final class SearchIterator {
 
         TTHolder.clearAllTables();
         List<Move> pv = new ArrayList<Move>();
-        SearchStats stats = new SearchStats();
-        Search.analysisMode = pondering;
-        Search.abortSearch = false;
         Search.startTime = System.currentTimeMillis();
         if (testSuiteMode) {
             Search.stopTime = Search.startTime + maxTime;
         } else {
             calculateSearchTimes();
         }
+
+        SearchStats stats = new SearchStats();
+
         int depth = 0;
         boolean stopSearching = false;
 
@@ -195,7 +228,7 @@ public final class SearchIterator {
                 break;
             }
 
-            if (showThinking) {
+            if (post) {
                 PrintLine.printLine(pv,depth,score,Search.startTime,stats.getNodes());
             }
 
@@ -281,21 +314,5 @@ public final class SearchIterator {
         LOGGER.info("# prunes: " + stats.getPrunes());
     }
 
-    private static void printHashStats(TranspositionTable ttable,String tableName) {
-
-    }
-
-    public static Move getPonderMove() {
-        return ponderMove;
-    }
-
-    public static boolean isPondering() {
-        return pondering;
-    }
-
-    public static void stopPondering() {
-        pondering = false;
-        Search.analysisMode = false;
-    }
 
 }

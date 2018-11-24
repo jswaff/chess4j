@@ -57,7 +57,7 @@ public class TestSuiteProcessor {
         }
     }
 
-    private boolean processProblem(String epd) throws ParseException, IllegalMoveException {
+    private boolean processProblem(String epd,int secondsPerProblem) throws ParseException, IllegalMoveException {
         LOGGER.info("\n\nprocessing epd: " + epd);
         Board b = Board.INSTANCE;
         List<EPDOperation> ops = EPDParser.setPos(b, epd);
@@ -68,6 +68,9 @@ public class TestSuiteProcessor {
             LOGGER.info("\t" + bm);
         }
         TTHolder.clearAllTables();
+        SearchIterator.setAbortIterator(false);
+        SearchIterator.setPonderMode(false);
+        SearchIterator.maxTime = secondsPerProblem * 1000;
         List<Move> pv = SearchIterator.iterate(b,true);
 
         return bms.contains(pv.get(0));
@@ -78,7 +81,7 @@ public class TestSuiteProcessor {
         LOGGER.info("seconds per problem: " + secondsPerProblem);
 
         SearchIterator.maxTime = secondsPerProblem * 1000;
-        List<String> wrongProblems = new ArrayList<String>();
+        List<String> wrongProblems = new ArrayList<>();
         int numProblems = 0;
 
         Path path = FileSystems.getDefault().getPath(testSuite);
@@ -86,7 +89,7 @@ public class TestSuiteProcessor {
         for (String line : lines) {
             numProblems++;
             boolean correct = true;
-            if (!processProblem(line)) {
+            if (!processProblem(line,secondsPerProblem)) {
                 correct = false;
                 wrongProblems.add(line);
             }

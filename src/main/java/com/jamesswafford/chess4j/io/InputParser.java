@@ -29,7 +29,7 @@ public class InputParser {
 
     private static final Log logger = LogFactory.getLog(InputParser.class);
     private static final InputParser INSTANCE = new InputParser();
-    private boolean forceMode;
+    private boolean forceMode = true;
     private Thread searchThread;
     private Color engineColor;
 
@@ -75,7 +75,7 @@ public class InputParser {
         } else if ("new".equals(cmd)) {
             newGame();
         } else if ("nopost".equals(cmd)) {
-            SearchIterator.showThinking = false;
+            SearchIterator.post = false;
         } else if ("otim".equals(cmd)) {
         } else if ("perft".equals(cmd)) {
             perft(input);
@@ -86,7 +86,7 @@ public class InputParser {
         } else if ("ping".equals(cmd)) {
             ping(input);
         } else if ("post".equals(cmd)) {
-            SearchIterator.showThinking = true;
+            SearchIterator.post = true;
         } else if ("protover".equals(cmd)) {
             protover(input);
         } else if ("quit".equals(cmd)) {
@@ -450,19 +450,27 @@ public class InputParser {
         Board.INSTANCE.applyMove(mv);
 
         if (!forceMode) {
+
+            // we might be in a ponder search
+            SearchIterator.ponderMutex.lock();
+            logger.debug("# usermove acquired lock on ponderMutex");
+
+            boolean pondering = SearchIterator.isPondering();
             boolean predicted = mv.equals(SearchIterator.getPonderMove());
             logger.debug("# pondering?: " + SearchIterator.isPondering() + ", predicted?: " + predicted);
 
             boolean startNewSearch;
-            synchronized (SearchIterator.ponderMutex) {
-                if (SearchIterator.isPondering() && predicted) {
-                    SearchIterator.calculateSearchTimes();
-                    SearchIterator.stopPondering();
-                    startNewSearch = false;
-                } else {
-                    startNewSearch = true;
-                }
+            if (pondering && predicted) {
+                SearchIterator.calculateSearchTimes();
+                SearchIterator.setPonderMode(false);
+                startNewSearch = false;
+            } else {
+                SearchIterator.setAbortIterator(true);
+                startNewSearch = true;
             }
+
+            SearchIterator.ponderMutex.unlock();
+            logger.debug("# usermove released lock on ponderMutex");
 
             if (startNewSearch) {
                 stopSearchThread();
@@ -486,8 +494,7 @@ public class InputParser {
             return;
         }
         try {
-            SearchIterator.abortIterator = true;
-            Search.abortSearch = true;
+            SearchIterator.setAbortIterator(true);
             searchThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();

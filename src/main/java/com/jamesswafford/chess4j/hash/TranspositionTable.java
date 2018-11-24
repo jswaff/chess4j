@@ -29,7 +29,8 @@ public class TranspositionTable extends AbstractTranspositionTable {
         table = new TranspositionTableEntry[numEntries];
         clear();
 
-        LOGGER.debug("# transposition table initialized with  " + numEntries + " entries.");
+        LOGGER.info("# " + (depthPreferred?"depth preferred":"always replace")
+                + " transposition table initialized with " + numEntries + " entries.");
     }
 
     public void clear() {
