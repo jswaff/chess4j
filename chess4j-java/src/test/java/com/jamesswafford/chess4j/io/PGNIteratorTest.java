@@ -12,7 +12,9 @@ public class PGNIteratorTest {
 
     @Test
     public void test1() throws Exception {
-        FileInputStream fis = new FileInputStream(new File("src/test/resources/pgn/sample.pgn"));
+        FileInputStream fis = new FileInputStream(
+                new File(PGNIteratorTest.class.getResource("/pgn/sample.pgn").getFile())
+        );
         PGNIterator it = new PGNIterator(fis);
 
         PGNGame game1 = it.next();
@@ -41,7 +43,8 @@ public class PGNIteratorTest {
 
     @Test
     public void test2() throws Exception {
-        FileInputStream fis = new FileInputStream(new File("src/test/resources/pgn/small.pgn"));
+        FileInputStream fis = new FileInputStream(
+                new File(PGNIteratorTest.class.getResource("/pgn/small.pgn").getFile()));
         PGNIterator it = new PGNIterator(fis);
 
         int c=0;
@@ -56,7 +59,8 @@ public class PGNIteratorTest {
     @Ignore
     @Test
     public void test3() throws Exception {
-        FileInputStream fis = new FileInputStream(new File("src/test/resources/pgn/normbk03.pgn"));
+        FileInputStream fis = new FileInputStream(
+                new File(PGNIteratorTest.class.getResource("/pgn/normbk03.pgn").getFile()));
         PGNIterator it = new PGNIterator(fis);
 
         int c=0;
@@ -70,7 +74,8 @@ public class PGNIteratorTest {
 
     @Test
     public void testKasporov() throws Exception {
-        FileInputStream fis = new FileInputStream(new File("src/test/resources/pgn/Kasparov.pgn"));
+        FileInputStream fis = new FileInputStream(
+                new File(PGNIteratorTest.class.getResource("/pgn/Kasparov.pgn").getFile()));
         PGNIterator it = new PGNIterator(fis);
 
         int c=0;

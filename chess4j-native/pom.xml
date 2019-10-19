@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>chess4j-native</artifactId>
+    <packaging>so</packaging>
+
+    <parent>
+        <groupId>com.jamesswafford.chess4j</groupId>
+        <artifactId>chess4j-parent</artifactId>
+        <version>4.0</version>
+    </parent>
+
+    <properties>
+        <P4_DIR>${project.basedir}/../lib/prophet4</P4_DIR>
+        <P4_INCLUDE_PATH>${P4_DIR}/include</P4_INCLUDE_PATH>
+        <P4_CFLAGS>-I ${P4_INCLUDE_PATH}</P4_CFLAGS>
+        <P4_RELEASE_LIB_DIR>${P4_DIR}</P4_RELEASE_LIB_DIR>
+        <P4_RELEASE_LINK>-L ${P4_RELEASE_LIB_DIR} -lprophet4lib</P4_RELEASE_LINK>
+
+        <CHESS4J_CFLAGS>-I ${project.build.directory}/jni-headers</CHESS4J_CFLAGS>
+
+        <!-- include flags for javah, overriden by profile -->
+        <JAVAH_INCLUDE_CFLAGS></JAVAH_INCLUDE_CFLAGS>
+    </properties>
+
+
+    <profiles>
+        <profile>
+            <id>linux</id>
+            <activation>
+                <os>
+                    <family>linux</family>
+                </os>
+            </activation>
+            <properties>
+                <JAVAH_INCLUDE_CFLAGS> -I ${env.JAVA_HOME}/include -I ${env.JAVA_HOME}/include/linux</JAVAH_INCLUDE_CFLAGS>
+            </properties>
+        </profile>
+    </profiles>
+
+    <!-- TODO: are these needed?  -->
+    <dependencies>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.basedir}/../chess4j-java/src/main/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration> 
+                <executions>
+                    <execution>
+                        <id>jni</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <forceJavacCompilerUse>true</forceJavacCompilerUse>
+                            <compilerArgs>
+                                <arg>-h</arg>
+                                <arg>${project.build.directory}/jni-headers</arg>
+                            </compilerArgs>
+                        </configuration>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <version>1.0-alpha-9</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <javahOS>linux</javahOS>
+                    <compilerProvider>generic-classic</compilerProvider>
+                    <compilerExecutable>gcc</compilerExecutable>
+                    <compilerStartOptions>
+                        <compilerStartOption>
+                            ${P4_CFLAGS} ${CHESS4J_CFLAGS} ${JAVAH_INCLUDE_CFLAGS}
+                            -fPIC -Wall -Werror -Wextra -O2
+                        </compilerStartOption>
+                    </compilerStartOptions>
+
+                    <sources>
+                        <source>
+                            <directory>src/main/native</directory>
+                            <includes>**/*.c</includes>
+                        </source>
+                    </sources>
+
+                    <linkerExecutable>gcc</linkerExecutable>
+                    <linkerStartOptions>
+                        <linkerStartOption>
+                            -shared
+                        </linkerStartOption>
+                    </linkerStartOptions>
+                    <linkerEndOptions>
+                        <linkerEndOption>
+                            ${P4_RELEASE_LINK}
+                        </linkerEndOption>
+                    </linkerEndOptions>
+                    <linkerFinalName>libchess4j-native</linkerFinalName>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

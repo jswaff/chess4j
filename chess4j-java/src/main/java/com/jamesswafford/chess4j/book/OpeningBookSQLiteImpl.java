@@ -71,7 +71,7 @@ public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
     @Override
     public List<BookMove> getMoves(Board board) {
 
-        List<BookMove> bookMoves = new ArrayList<BookMove>();
+        List<BookMove> bookMoves = new ArrayList<>();
 
         List<Move> legalMoves = MoveGen.genLegalMoves(board);
 

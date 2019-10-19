@@ -8,14 +8,11 @@
     <groupId>com.jamesswafford.chess4j</groupId>
     <artifactId>chess4j-parent</artifactId>
     <packaging>pom</packaging>
-    <version>${chess4j.version}</version>
+    <version>4.0</version>
 
     <modules>
         <module>chess4j-java</module>
+		<module>chess4j-native</module>
     </modules>
-
-    <properties>
-        <chess4j.version>4.0</chess4j.version>
-    </properties>
 
 </project>

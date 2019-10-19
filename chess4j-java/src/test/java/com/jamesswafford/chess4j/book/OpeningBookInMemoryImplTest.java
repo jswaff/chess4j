@@ -22,7 +22,10 @@ public class OpeningBookInMemoryImplTest {
     @BeforeClass
     public static void setUp() throws Exception {
         book = OpeningBookInMemoryImpl.getInstance();
-        FileInputStream fis = new FileInputStream(new File("src/test/resources/pgn/small.pgn"));
+        FileInputStream fis = new FileInputStream(
+                //new File("src/test/resources/pgn/small.pgn")
+                new File(OpeningBookInMemoryImplTest.class.getResource("/pgn/small.pgn").getFile())
+        );
         PGNIterator it = new PGNIterator(fis);
 
         PGNGame pgnGame;
