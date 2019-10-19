@@ -14,6 +14,7 @@ import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
+import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.pieces.Bishop;
 import com.jamesswafford.chess4j.pieces.King;
 import com.jamesswafford.chess4j.pieces.Knight;
@@ -146,6 +147,10 @@ public final class Eval {
         -1,  0,  1,  1,  1,  1,  0, -1,
         -1,  0,  0,  0,  0,  0,  0, -1,
         -1, -1, -1, -1, -1, -1, -1, -1 };
+
+    static {
+        Initializer.init();
+    }
 
     private Eval() { }
 
@@ -618,4 +623,11 @@ public final class Eval {
 
         return score * material / ALL_NONPAWN_PIECES_VAL;
     }
+
+    // TODO: JUST TESTING
+    public static int get5() {
+        return always5();
+    }
+
+    private static native int always5();
 }

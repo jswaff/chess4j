@@ -72,6 +72,7 @@ public class PGNIteratorTest {
         fis.close();
     }
 
+    @Ignore
     @Test
     public void testKasporov() throws Exception {
         FileInputStream fis = new FileInputStream(

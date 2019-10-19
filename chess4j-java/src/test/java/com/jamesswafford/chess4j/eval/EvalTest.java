@@ -23,6 +23,11 @@ public class EvalTest {
     Board board = Board.INSTANCE;
 
     @Test
+    public void testAlways5() {
+        Assert.assertEquals(5, Eval.get5());
+    }
+
+    @Test
     public void testStartPosIs0() {
         board.resetBoard();
         int eval = Eval.eval(board);
