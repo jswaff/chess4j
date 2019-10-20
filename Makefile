@@ -19,7 +19,7 @@ prophet4-clean: mvn-clean
 	(cd lib/prophet4 && $(MAKE) clean)
 
 prophet4-test: prophet4-build
-	(cd lib/prophet4 && $(MAKE) test)
+	(cd lib/prophet4 && $(MAKE) test && ./prophet4_test)
 
 prophet4-build:
 	(cd lib/prophet4 && $(MAKE))

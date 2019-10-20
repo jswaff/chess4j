@@ -1,0 +1,11 @@
+log4j issue
+
+extend "always5" test to invoke something from prophet4lib.  perhaps create a simple function for
+knight pst value
+
+create JNI function that requires a position structure
+
+conditionally load: see https://gist.github.com/amcclosky/2997867
+
+cannot execute Eval tests within IDE in Windows - would require running IntelliJ using X-server
+(or just do mvn -Dtest=EvalTest#testAlways5 test)

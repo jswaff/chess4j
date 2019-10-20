@@ -42,18 +42,15 @@
         </profile>
     </profiles>
 
-    <!-- TODO: are these needed?  -->
     <dependencies>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
         </dependency>
 
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
-            <version>1.1.1</version>
         </dependency>
     </dependencies>
 
