@@ -167,6 +167,9 @@
 
         <resources>
             <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
                 <directory>${project.basedir}/../chess4j-native/target</directory>
                 <includes>
                     <include>*.so</include>
