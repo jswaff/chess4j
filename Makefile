@@ -1,5 +1,5 @@
 .PHONY: ALL prophet4-build prophet4-test prophet4-clean
-.PHONY: mvn-compile mvn-install mvn-package mvn-clean clean
+.PHONY: mvn-compile mvn-install mvn-clean clean
 
 ALL: mvn-install
 
@@ -7,10 +7,7 @@ ALL: mvn-install
 mvn-install: mvn-package
 	(cd chess4j-java && mvn install)
 
-mvn-package: mvn-compile
-	mvn package
-
-mvn-compile: prophet4-test
+mvn-package: prophet4-test
 	mvn compile
 
 mvn-clean:
