@@ -28,6 +28,14 @@ public class EvalTest {
     }
 
     @Test
+    public void evalPstEquality() {
+        for (Square sq : Square.allSquares()) {
+            Assert.assertEquals(Eval.KNIGHT_PST[sq.value()],
+                    Eval.evalKnightPstNative(sq.value()));
+        }
+    }
+
+    @Test
     public void testStartPosIs0() {
         board.resetBoard();
         int eval = Eval.eval(board);

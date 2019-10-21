@@ -92,10 +92,10 @@ public final class Eval {
         -5,  0, 10, 10, 10, 10,  0, -5,
         -5,  0, 15, 20, 20, 15,  0, -5,
         -5,  5, 10, 15, 15, 10,  5, -5,
-        -5,  5, 10, 15, 15, 10,  5, -5,
+        -5,  0, 10, 15, 15, 10,  5, -5,
         -5,  0,  8,  0,  0,  8,  0, -5,
         -5,  0,  0,  5,  5,  0,  0, -5,
-        -10,-10, -5, -5, -5, -5,-10,-10 };
+        -10,-10,-5, -5, -5, -5,-10,-10 };
 
     public static final int[] PAWN_PST = {
          0,  0,  0,  0,  0,  0,  0,  0,
@@ -228,6 +228,7 @@ public final class Eval {
 
     private static int evalKnight(Board board,boolean isWhite,Square sq) {
         int score = 0;
+        assert(evalKnightPstNative(sq.value()) == KNIGHT_PST[sq.value()]);
         if (isWhite) {
             score = KNIGHT_PST[sq.value()];
             score += KNIGHT_TROPISM * sq.distance(board.getKingSquare(Color.BLACK));
@@ -237,6 +238,8 @@ public final class Eval {
         }
         return score;
     }
+
+
 
     private static int evalPawns(Board board) {
 
@@ -630,4 +633,6 @@ public final class Eval {
     }
 
     private static native int always5();
+
+    public static native int evalKnightPstNative(int sq);
 }
