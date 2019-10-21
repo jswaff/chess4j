@@ -1,5 +1,3 @@
-simple function for knight pst value
-
 function that requires a position structure
 
 implement eval comparison
