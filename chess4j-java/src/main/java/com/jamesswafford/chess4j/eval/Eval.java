@@ -635,4 +635,7 @@ public final class Eval {
     private static native int always5();
 
     public static native int evalKnightPstNative(int sq);
+
+    public static native int evalNative(Board board);
+
 }

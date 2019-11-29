@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.Color;
+import com.jamesswafford.chess4j.board.Move;
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -33,6 +34,20 @@ public class EvalTest {
             Assert.assertEquals(Eval.KNIGHT_PST[sq.value()],
                     Eval.evalKnightPstNative(sq.value()));
         }
+    }
+
+    @Test
+    public void evalEquality() {
+        board.resetBoard();
+
+        Assert.assertEquals(
+                Eval.eval(board), Eval.evalNative(board));
+
+        board.applyMove(new Move(Pawn.WHITE_PAWN, Square.valueOf(File.FILE_E, Rank.RANK_2),
+                Square.valueOf(File.FILE_E, Rank.RANK_4)));
+
+        Assert.assertEquals(
+                Eval.eval(board), Eval.evalNative(board));
     }
 
     @Test
