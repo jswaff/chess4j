@@ -15,6 +15,7 @@ import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.pieces.Bishop;
 import com.jamesswafford.chess4j.pieces.King;
 import com.jamesswafford.chess4j.pieces.Knight;
@@ -24,8 +25,12 @@ import com.jamesswafford.chess4j.pieces.Queen;
 import com.jamesswafford.chess4j.pieces.Rook;
 import com.jamesswafford.chess4j.utils.OrderedPair;
 import com.jamesswafford.chess4j.utils.PawnUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public final class Eval {
+
+    private static final Log LOGGER = LogFactory.getLog(Eval.class);
 
     public static final int QUEEN_VAL  = 900;
     public static final int ROOK_VAL   = 500;
@@ -59,7 +64,7 @@ public final class Eval {
     public static final int KING_SAFETY_PAWN_FAR_AWAY = -30;
     public static final int KING_SAFETY_MIDDLE_OPEN_FILE = -50;
 
-    public static final int KNIGHT_TROPISM = 2;
+    public static final int KNIGHT_TROPISM = -2;
 
     private static Map<Class<?>,Integer> pieceValMap;
 
@@ -158,13 +163,13 @@ public final class Eval {
         return eval(board,false);
     }
 
-    public static int eval(Board board,boolean materialOnly) {
+    public static int eval(Board board, boolean materialOnly) {
 
-        OrderedPair<Integer,Integer> matNPScore = getNonPawnMaterialScore(board);
-        OrderedPair<Integer,Integer> matPScore = getPawnMaterialScore(board);
+        OrderedPair<Integer, Integer> matNPScore = getNonPawnMaterialScore(board);
+        OrderedPair<Integer, Integer> matPScore = getPawnMaterialScore(board);
 
         int score = matNPScore.getE1() - matNPScore.getE2() + matPScore.getE1() - matPScore.getE2();
-        assert((board.getPlayerToMove()==Color.WHITE ? score : -score) == evalMaterial(board));
+        assert ((board.getPlayerToMove() == Color.WHITE ? score : -score) == evalMaterial(board));
 
         if (!materialOnly) {
             score += evalPawns(board);
@@ -172,11 +177,37 @@ public final class Eval {
             score += evalBishops(board);
             score += evalRooks(board);
             score += evalQueens(board);
-            score += evalKings(board,matNPScore);
+            score += evalKings(board, matNPScore);
         }
 
-        return board.getPlayerToMove()==Color.WHITE?score:-score;
+        int retVal = board.getPlayerToMove() == Color.WHITE ? score : -score;
+
+        // if we are running with assertions enabled and the native library is loaded, verify equality
+        assert(evalsAreEqual(retVal, board, materialOnly));
+
+        return retVal;
     }
+
+    private static boolean evalsAreEqual(int javaScore, Board board, boolean materialOnly) {
+        if (Initializer.useNative()) {
+            String fen = FenParser.getFen(board, false);
+            try {
+                int nativeSccore = evalNative(fen, materialOnly);
+                if (javaScore != nativeSccore) {
+                    LOGGER.error("evals not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeSccore +
+                            ", materialOnly: " + materialOnly + ", fen: " + fen);
+                    return false;
+                }
+                return true;
+            } catch (IllegalStateException e) {
+                LOGGER.error(e);
+                throw e;
+            }
+        } else {
+            return true;
+        }
+    }
+
 
     private static int evalBishops(Board board) {
         int score = 0;
@@ -228,7 +259,6 @@ public final class Eval {
 
     private static int evalKnight(Board board,boolean isWhite,Square sq) {
         int score = 0;
-        assert(evalKnightPstNative(sq.value()) == KNIGHT_PST[sq.value()]);
         if (isWhite) {
             score = KNIGHT_PST[sq.value()];
             score += KNIGHT_TROPISM * sq.distance(board.getKingSquare(Color.BLACK));
@@ -238,8 +268,6 @@ public final class Eval {
         }
         return score;
     }
-
-
 
     private static int evalPawns(Board board) {
 
@@ -602,7 +630,7 @@ public final class Eval {
                 + board.getNumPieces(Knight.BLACK_KNIGHT) * KNIGHT_VAL
                 + board.getNumPieces(Bishop.BLACK_BISHOP) * BISHOP_VAL;
 
-        return new OrderedPair<Integer,Integer>(wScore,bScore);
+        return new OrderedPair<>(wScore,bScore);
     }
 
     public static int evalMaterial(Board board) {
@@ -627,15 +655,6 @@ public final class Eval {
         return score * material / ALL_NONPAWN_PIECES_VAL;
     }
 
-    // TODO: JUST TESTING
-    public static int get5() {
-        return always5();
-    }
-
-    private static native int always5();
-
-    public static native int evalKnightPstNative(int sq);
-
-    public static native int evalNative(Board board);
+    public static native int evalNative(String boardFen, boolean materialOnly);
 
 }

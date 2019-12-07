@@ -1,5 +1,0 @@
-function that requires a position structure
-
-implement eval comparison
-
-conditionally load: see https://gist.github.com/amcclosky/2997867

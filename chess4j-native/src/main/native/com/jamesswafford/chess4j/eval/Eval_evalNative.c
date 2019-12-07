@@ -2,23 +2,47 @@
 #include <prophet/parameters.h>
 
 #include <com_jamesswafford_chess4j_eval_Eval.h>
+#include "../init/p4_init.h"
+
+#include <stdlib.h>
+#include <string.h>
+
 
 /*
  * Class:     com_jamesswafford_chess4j_eval_Eval
  * Method:    evalNative
- * Signature: (Lcom/jamesswafford/chess4j/board/Board;)I
+ * Signature: (Ljava/lang/String;Z)I
  */
 JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_eval_Eval_evalNative
-  (JNIEnv* UNUSED(env), jclass UNUSED(clazz), jobject UNUSED(board))
+  (JNIEnv* env, jclass UNUSED(clazz), jstring board_fen, jboolean material_only)
 {
     jint retval = 0;
 
+    if (!p4_initialized) 
+    {
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
+            "Prophet4 not initialized!");
+        return 0;
+    }
 
+    const char* fen = (*env)->GetStringUTFChars(env, board_fen, 0);
+    
     position_t pos;
-    set_pos(&pos, "8/7p/5k2/5p2/p1p2P2/Pr1pPK2/1P1R3P/8 b - - 12 47");
+    if (!set_pos(&pos, fen))
+    {
+        char error_buffer[255];
+        sprintf(error_buffer, "Could not set position: %s\n", fen);
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
+            error_buffer);
+        goto cleanup;
+    }
 
-    // int32_t native_score = eval(&pos);
-    // retval = (jint) native_score;
+
+    int32_t native_score = eval2(&pos, (bool)material_only);
+    retval = (jint) native_score;
+
+cleanup:
+    (*env)->ReleaseStringUTFChars(env, board_fen, fen);
 
     return retval;
 }

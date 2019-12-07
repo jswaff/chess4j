@@ -4,7 +4,8 @@ import java.io.*;
 
 public final class Initializer {
 
-    private static boolean loaded = false;
+    private static boolean initialized = false;
+    private static boolean useNative = false;
 
     private Initializer() { }
 
@@ -53,12 +54,32 @@ public final class Initializer {
 
     public static synchronized void init() {
 
-        if (!loaded) {
-            File libFile = copyLibraryToFile();
+        if (!initialized) {
+            // which OS are we running on?
 
-            System.load(libFile.getPath());
+            String os = System.getProperty("os.name");
+            System.out.println("Detected OS: " + os);
 
-            loaded = true;
+            if ("Linux".equals(os)) {
+                System.out.println("Loading Prophet4 native library.");
+                File libFile = copyLibraryToFile();
+
+                System.load(libFile.getPath());
+
+                if (!p4Init()) {
+                    throw new IllegalStateException("Could not initialize p4!");
+                }
+
+                useNative = true;
+            }
+
+            initialized = true;
         }
+    }
+
+    private static native boolean p4Init();
+
+    public static boolean useNative() {
+        return useNative;
     }
 }

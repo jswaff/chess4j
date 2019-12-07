@@ -7,6 +7,8 @@ import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.Zobrist;
+import com.jamesswafford.chess4j.io.DrawBoard;
+import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.pieces.Bishop;
 import com.jamesswafford.chess4j.pieces.King;
 import com.jamesswafford.chess4j.pieces.Knight;

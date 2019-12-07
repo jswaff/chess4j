@@ -17,7 +17,7 @@ public class FenParserTest {
     Board board = Board.INSTANCE;
 
     @Test
-    public void test1() throws Exception {
+    public void setPosTest1() throws Exception {
         String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
         FenParser.setPos(board, fen);
 
@@ -32,7 +32,7 @@ public class FenParserTest {
     }
 
     @Test
-    public void test2() throws Exception {
+    public void setPosTest2() throws Exception {
         String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq -";
         FenParser.setPos(board, fen);
 
@@ -47,7 +47,7 @@ public class FenParserTest {
     }
 
     @Test
-    public void test3() throws Exception {
+    public void setPosTest3() throws Exception {
         String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2";
         FenParser.setPos(board, fen);
 
@@ -59,6 +59,44 @@ public class FenParserTest {
         Assert.assertEquals(2,board.getMoveCounter());
         Assert.assertEquals(0, board.getFiftyCounter());
         Assert.assertEquals(Square.valueOf(File.FILE_C, Rank.RANK_6), board.getEPSquare());
+    }
+
+    @Test
+    public void getFen_InitialPos() {
+
+        Board b = Board.INSTANCE;
+        b.resetBoard();
+
+        String fen = FenParser.getFen(b, true);
+
+        Assert.assertEquals("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", fen);
+    }
+
+    @Test
+    public void getFenTest1() throws Exception {
+
+        String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
+        FenParser.setPos(board, fen);
+
+        Assert.assertEquals(fen, FenParser.getFen(board, true));
+    }
+
+    @Test
+    public void getFenTest2() throws Exception {
+
+        String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq -";
+        FenParser.setPos(board, fen);
+
+        Assert.assertEquals(fen, FenParser.getFen(board, false));
+    }
+
+    @Test
+    public void getFenTest3() throws Exception {
+
+        String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2";
+        FenParser.setPos(board, fen);
+
+        Assert.assertEquals(fen, FenParser.getFen(board, true));
     }
 
 }

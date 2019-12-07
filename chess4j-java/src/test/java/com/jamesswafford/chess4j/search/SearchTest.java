@@ -223,14 +223,14 @@ public class SearchTest {
         Assert.assertTrue(score != 0);
 
         // trigger 50 move rule
-        b.setFiftyCounter(99);
-        b.setMoveCounter(99);
+        b.setFiftyCounter(100);
+        b.setMoveCounter(100);
         TTHolder.clearAllTables();
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
         score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 2, new SearchStats(),false);
-        Assert.assertTrue(score == 0);
+        Assert.assertEquals(0, score);
     }
 
     @Test
