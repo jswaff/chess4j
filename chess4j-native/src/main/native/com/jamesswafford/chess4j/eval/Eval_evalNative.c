@@ -38,7 +38,7 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_eval_Eval_evalNative
     }
 
 
-    int32_t native_score = eval2(&pos, (bool)material_only);
+    int32_t native_score = eval(&pos, (bool)material_only);
     retval = (jint) native_score;
 
 cleanup:

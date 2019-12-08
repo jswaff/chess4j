@@ -58,10 +58,10 @@ public final class Initializer {
             // which OS are we running on?
 
             String os = System.getProperty("os.name");
-            System.out.println("Detected OS: " + os);
+            System.out.println("# Detected OS: " + os);
 
             if ("Linux".equals(os)) {
-                System.out.println("Loading Prophet4 native library.");
+                System.out.println("# Loading Prophet4 native library.");
                 File libFile = copyLibraryToFile();
 
                 System.load(libFile.getPath());
