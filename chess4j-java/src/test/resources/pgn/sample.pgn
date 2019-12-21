@@ -1,0 +1,74 @@
+[Event "ICC 5 3"]
+[Site "Internet Chess Club"]
+[Date "2014.09.02"]
+[Round "-"]
+[White "LesserProphet"]
+[Black "lostit"]
+[Result "1-0"]
+[ICCResult "Black resigns"]
+[WhiteElo "1932"]
+[BlackElo "1462"]
+[Opening "Pirc: Austrian attack, dragon formation"]
+[ECO "B09"]
+[NIC "PU.05"]
+[Time "09:37:31"]
+[TimeControl "300+3"]
+
+1. Nc3 d6 2. d4 Nf6 3. f4 g6 4. e4 Bg7 5. Nf3 c5 6. dxc5 Qa5 7. Bb5+ Bd7 8.
+Bd3 Qxc5 9. e5 dxe5 10. Nxe5 Nc6 11. Nxd7 Nxd7 12. Qd2 O-O 13. a4 Rfe8 14.
+Ne4 Qb6 15. a5 Qc7 16. g4 Rad8 17. h4 e5 18. f5 Nf6 19. Nxf6+ Bxf6 20. Qf2
+e4 21. Bb5 a6 22. Bxc6 Qxc6 23. fxg6 hxg6 24. Rh3 Bg7 25. Qe2 Bd4 26. h5 e3
+27. hxg6 Qxg6 28. Bxe3 Bxe3 29. Rxe3 Rxe3 30. Qxe3 Qxc2 31. Qg5+ {Black
+resigns} 1-0
+
+[Event "ICC 5 3"]
+[Site "Internet Chess Club"]
+[Date "2014.09.02"]
+[Round "-"]
+[White "lostit"]
+[Black "LesserProphet"]
+[Result "0-1"]
+[ICCResult "White resigns"]
+[WhiteElo "1464"]
+[BlackElo "1930"]
+[Opening "KP: Nimzovich defense"]
+[ECO "B00"]
+[NIC "VO.04"]
+[Time "09:23:32"]
+[TimeControl "300+3"]
+
+1. e4 Nc6 2. d4 Nf6 3. e5 Nd5 4. Nf3 e6 5. Bc4 d6 6. O-O dxe5 7. dxe5 f6 8.
+exf6 gxf6 9. Re1 Nce7 10. Nd4 e5 11. Nb3 c6 12. Qe2 h5 13. Bd2 b5 14. Bd3 b4
+15. f4 Nxf4 16. Bxf4 exf4 17. N1d2 Kf7 18. Rad1 a5 19. a4 Nd5 20. Bc4 Qb6+
+21. Kh1 Kg7 22. Ne4 Bg4 23. Qd2 Ne3 24. Nd4 Nxd1 25. Rxd1 Bxd1 26. Qxd1 Kg6
+27. Nf3 Ra7 28. Qd3 Kg7 29. Nh4 c5 30. Nf5+ Kh7 31. Nh4 f5 32. Nxf5 Kg6 33.
+Nh4+ Kh6 34. Nf5+ Kg6 35. Nh4+ Kh6 36. Nf5+ Kh7 37. Nh4 Kg7 38. Nf5+ Kh7 39.
+Nh4 Rg7 40. Ng5+ Kh6 41. Nf5+ Kxg5 42. h4+ Kf6 43. Nxg7 Bxg7 44. Qf3 Qd6 45.
+c3 Qe5 46. cxb4 Qe1+ 47. Kh2 Qxh4+ 48. Kg1 cxb4 49. Qc6+ Kg5 50. Qd5+ Kh6
+51. Qd6+ Qf6 52. Qd2 Qd4+ {White resigns} 0-1
+
+[Event "ICC 5 3"]
+[Site "Internet Chess Club"]
+[Date "2014.09.02"]
+[Round "-"]
+[White "LesserProphet"]
+[Black "Nabob"]
+[Result "1-0"]
+[ICCResult "Black checkmated"]
+[WhiteElo "1826"]
+[BlackElo "1566"]
+[Opening "Dunst (Sleipner, Heinrichsen) opening"]
+[ECO "A00"]
+[NIC "VO.15"]
+[Time "02:52:10"]
+[TimeControl "300+3"]
+
+1. Nc3 d5 2. d3 c5 3. Nf3 e6 4. g4 Nc6 5. e3 e5 6. h3 Be7 7. g5 Bxg5 8. Nxg5
+h6 9. Nf3 Nf6 10. d4 cxd4 11. exd4 exd4 12. Nxd4 O-O 13. a4 Re8+ 14. Be2 Ne4
+15. Nxc6 bxc6 16. Nxe4 Rxe4 17. b3 Ba6 18. c4 d4 19. Qd3 Qe8 20. Kd1 Rd8 21.
+Bf3 Re7 22. h4 c5 23. h5 Rdd7 24. Bc6 Bb7 25. Bxd7 Qxd7 26. f3 Qe6 27. Bd2
+Qf6 28. Rh3 Kh8 29. a5 a6 30. f4 Qe6 31. Qg3 Qe4 32. Qd3 Qxd3 33. Rxd3 Be4
+34. Rh3 f5 35. b4 Rb7 36. bxc5 Rc7 37. Bb4 Rb7 38. Be1 Rc7 39. Bb4 Rb7 40.
+Ba3 Kg8 41. Kd2 Kf7 42. Rg1 Kf6 43. c6 Rc7 44. Rhg3 Rxc6 45. Rxg7 Rxc4 46.
+R1g6# {Black checkmated} 1-0
+
