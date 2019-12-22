@@ -6,126 +6,127 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.board.squares.Square;
-
 import junit.framework.Assert;
+
+import static junit.framework.Assert.*;
+
+import static com.jamesswafford.chess4j.board.squares.File.*;
+import static com.jamesswafford.chess4j.board.squares.Rank.*;
 
 public class SquareTest {
 
     @Test
     public void getValue() {
-        Assert.assertEquals(0, Square.valueOf(File.FILE_A, Rank.RANK_8).value());
-        Assert.assertEquals(7, Square.valueOf(File.FILE_H, Rank.RANK_8).value());
-        Assert.assertEquals(56, Square.valueOf(File.FILE_A, Rank.RANK_1).value());
-        Assert.assertEquals(63, Square.valueOf(File.FILE_H, Rank.RANK_1).value());
-        Assert.assertEquals(42, Square.valueOf(File.FILE_C, Rank.RANK_3).value());
-        Assert.assertEquals(36, Square.valueOf(File.FILE_E, Rank.RANK_4).value());
+        assertEquals(0, Square.valueOf(FILE_A, RANK_8).value());
+        assertEquals(7, Square.valueOf(FILE_H, RANK_8).value());
+        assertEquals(56, Square.valueOf(FILE_A, RANK_1).value());
+        assertEquals(63, Square.valueOf(FILE_H, RANK_1).value());
+        assertEquals(42, Square.valueOf(FILE_C, RANK_3).value());
+        assertEquals(36, Square.valueOf(FILE_E, RANK_4).value());
     }
 
     @Test
     public void testToString() {
-        Assert.assertEquals("a8", Square.valueOf(File.FILE_A, Rank.RANK_8).toString());
-        Assert.assertEquals("h8", Square.valueOf(File.FILE_H, Rank.RANK_8).toString());
-        Assert.assertEquals("a1", Square.valueOf(File.FILE_A, Rank.RANK_1).toString());
-        Assert.assertEquals("h1", Square.valueOf(File.FILE_H, Rank.RANK_1).toString());
-        Assert.assertEquals("c3", Square.valueOf(File.FILE_C, Rank.RANK_3).toString());
-        Assert.assertEquals("e4", Square.valueOf(File.FILE_E, Rank.RANK_4).toString());
+        assertEquals("a8", Square.valueOf(FILE_A, RANK_8).toString());
+        assertEquals("h8", Square.valueOf(FILE_H, RANK_8).toString());
+        assertEquals("a1", Square.valueOf(FILE_A, RANK_1).toString());
+        assertEquals("h1", Square.valueOf(FILE_H, RANK_1).toString());
+        assertEquals("c3", Square.valueOf(FILE_C, RANK_3).toString());
+        assertEquals("e4", Square.valueOf(FILE_E, RANK_4).toString());
     }
 
     @Test
     public void testFileSquares() {
-        Assert.assertTrue(Square.fileSquares(File.FILE_B).contains(Square.valueOf(File.FILE_B, Rank.RANK_2)));
-        Assert.assertFalse(Square.fileSquares(File.FILE_B).contains(Square.valueOf(File.FILE_C, Rank.RANK_2)));
+        assertTrue(Square.fileSquares(FILE_B).contains(Square.valueOf(FILE_B, RANK_2)));
+        assertFalse(Square.fileSquares(FILE_B).contains(Square.valueOf(FILE_C, RANK_2)));
     }
 
     @Test
     public void testRankSquares() {
-        Assert.assertTrue(Square.rankSquares(Rank.RANK_2).contains(Square.valueOf(File.FILE_B, Rank.RANK_2)));
-        Assert.assertFalse(Square.rankSquares(Rank.RANK_2).contains(Square.valueOf(File.FILE_B, Rank.RANK_3)));
+        Assert.assertTrue(Square.rankSquares(RANK_2).contains(Square.valueOf(FILE_B, RANK_2)));
+        Assert.assertFalse(Square.rankSquares(RANK_2).contains(Square.valueOf(FILE_B, RANK_3)));
     }
 
     @Test
     public void testFlipVertical() {
-        Assert.assertEquals(Square.valueOf(File.FILE_A, Rank.RANK_8), Square.valueOf(File.FILE_A, Rank.RANK_1).flipVertical());
-        Assert.assertEquals(Square.valueOf(File.FILE_E, Rank.RANK_2), Square.valueOf(File.FILE_E, Rank.RANK_7).flipVertical());
-        Assert.assertEquals(Square.valueOf(File.FILE_C, Rank.RANK_6), Square.valueOf(File.FILE_C, Rank.RANK_3).flipVertical());
-        Assert.assertEquals(Square.valueOf(File.FILE_B, Rank.RANK_5), Square.valueOf(File.FILE_B, Rank.RANK_4).flipVertical());
-        Assert.assertEquals(Square.valueOf(File.FILE_H, Rank.RANK_7), Square.valueOf(File.FILE_H, Rank.RANK_2).flipVertical());
+        assertEquals(Square.valueOf(FILE_A, RANK_8), Square.valueOf(FILE_A, RANK_1).flipVertical());
+        assertEquals(Square.valueOf(FILE_E, RANK_2), Square.valueOf(FILE_E, RANK_7).flipVertical());
+        assertEquals(Square.valueOf(FILE_C, RANK_6), Square.valueOf(FILE_C, RANK_3).flipVertical());
+        assertEquals(Square.valueOf(FILE_B, RANK_5), Square.valueOf(FILE_B, RANK_4).flipVertical());
+        assertEquals(Square.valueOf(FILE_H, RANK_7), Square.valueOf(FILE_H, RANK_2).flipVertical());
     }
 
     @Test
     public void testFlipHorizontal() {
-        Assert.assertEquals(Square.valueOf(File.FILE_A, Rank.RANK_8), Square.valueOf(File.FILE_H, Rank.RANK_8).flipHorizontal());
-        Assert.assertEquals(Square.valueOf(File.FILE_E, Rank.RANK_2), Square.valueOf(File.FILE_D, Rank.RANK_2).flipHorizontal());
-        Assert.assertEquals(Square.valueOf(File.FILE_C, Rank.RANK_6), Square.valueOf(File.FILE_F, Rank.RANK_6).flipHorizontal());
-        Assert.assertEquals(Square.valueOf(File.FILE_B, Rank.RANK_5), Square.valueOf(File.FILE_G, Rank.RANK_5).flipHorizontal());
-        Assert.assertEquals(Square.valueOf(File.FILE_H, Rank.RANK_7), Square.valueOf(File.FILE_A, Rank.RANK_7).flipHorizontal());
+        assertEquals(Square.valueOf(FILE_A, RANK_8), Square.valueOf(FILE_H, RANK_8).flipHorizontal());
+        assertEquals(Square.valueOf(FILE_E, RANK_2), Square.valueOf(FILE_D, RANK_2).flipHorizontal());
+        assertEquals(Square.valueOf(FILE_C, RANK_6), Square.valueOf(FILE_F, RANK_6).flipHorizontal());
+        assertEquals(Square.valueOf(FILE_B, RANK_5), Square.valueOf(FILE_G, RANK_5).flipHorizontal());
+        assertEquals(Square.valueOf(FILE_H, RANK_7), Square.valueOf(FILE_A, RANK_7).flipHorizontal());
     }
 
     @Test
     public void testIsLightSquare() {
-        Assert.assertTrue(Square.valueOf(File.FILE_A, Rank.RANK_8).isLight());
-        Assert.assertFalse(Square.valueOf(File.FILE_B, Rank.RANK_8).isLight());
-        Assert.assertTrue(Square.valueOf(File.FILE_C, Rank.RANK_8).isLight());
-        Assert.assertFalse(Square.valueOf(File.FILE_A, Rank.RANK_7).isLight());
-        Assert.assertTrue(Square.valueOf(File.FILE_B, Rank.RANK_7).isLight());
-        Assert.assertFalse(Square.valueOf(File.FILE_C, Rank.RANK_7).isLight());
-        Assert.assertTrue(Square.valueOf(File.FILE_A, Rank.RANK_6).isLight());
-        Assert.assertFalse(Square.valueOf(File.FILE_B, Rank.RANK_6).isLight());
-        Assert.assertTrue(Square.valueOf(File.FILE_C, Rank.RANK_6).isLight());
+        assertTrue(Square.valueOf(FILE_A, RANK_8).isLight());
+        assertFalse(Square.valueOf(FILE_B, RANK_8).isLight());
+        assertTrue(Square.valueOf(FILE_C, RANK_8).isLight());
+        assertFalse(Square.valueOf(FILE_A, RANK_7).isLight());
+        assertTrue(Square.valueOf(FILE_B, RANK_7).isLight());
+        assertFalse(Square.valueOf(FILE_C, RANK_7).isLight());
+        assertTrue(Square.valueOf(FILE_A, RANK_6).isLight());
+        assertFalse(Square.valueOf(FILE_B, RANK_6).isLight());
+        assertTrue(Square.valueOf(FILE_C, RANK_6).isLight());
     }
 
     @Test
     public void testValueOf() {
-        Assert.assertEquals(Square.valueOf(File.FILE_A, Rank.RANK_8), Square.valueOf(0));
-        Assert.assertEquals(Square.valueOf(File.FILE_H, Rank.RANK_8), Square.valueOf(7));
-        Assert.assertEquals(Square.valueOf(File.FILE_A, Rank.RANK_1), Square.valueOf(56));
-        Assert.assertEquals(Square.valueOf(File.FILE_H, Rank.RANK_1), Square.valueOf(63));
-        Assert.assertEquals(Square.valueOf(File.FILE_C, Rank.RANK_3), Square.valueOf(42));
-        Assert.assertEquals(Square.valueOf(File.FILE_E, Rank.RANK_4), Square.valueOf(36));
+        assertEquals(Square.valueOf(FILE_A, RANK_8), Square.valueOf(0));
+        assertEquals(Square.valueOf(FILE_H, RANK_8), Square.valueOf(7));
+        assertEquals(Square.valueOf(FILE_A, RANK_1), Square.valueOf(56));
+        assertEquals(Square.valueOf(FILE_H, RANK_1), Square.valueOf(63));
+        assertEquals(Square.valueOf(FILE_C, RANK_3), Square.valueOf(42));
+        assertEquals(Square.valueOf(FILE_E, RANK_4), Square.valueOf(36));
     }
 
     @Test
     public void testHashCodes() {
-        Set<Integer> hashCodes = new HashSet<Integer>();
+        Set<Integer> hashCodes = new HashSet<>();
 
         List<Square> squares = Square.allSquares();
-        Assert.assertEquals(64, squares.size());
+        assertEquals(64, squares.size());
 
         for (Square sq : squares) {
             hashCodes.add(sq.hashCode());
         }
 
-        Assert.assertEquals(64, hashCodes.size());
+        assertEquals(64, hashCodes.size());
     }
 
     @Test
     public void testFileDistance() {
-        Assert.assertEquals(1,Square.valueOf(File.FILE_A,Rank.RANK_1).fileDistance(Square.valueOf(File.FILE_B,Rank.RANK_1)));
-        Assert.assertEquals(7,Square.valueOf(File.FILE_A,Rank.RANK_1).fileDistance(Square.valueOf(File.FILE_H,Rank.RANK_8)));
-        Assert.assertEquals(7,Square.valueOf(File.FILE_A,Rank.RANK_1).fileDistance(Square.valueOf(File.FILE_H,Rank.RANK_4)));
-        Assert.assertEquals(1,Square.valueOf(File.FILE_B,Rank.RANK_3).fileDistance(Square.valueOf(File.FILE_C,Rank.RANK_7)));
-        Assert.assertEquals(7,Square.valueOf(File.FILE_H,Rank.RANK_2).fileDistance(Square.valueOf(File.FILE_A,Rank.RANK_3)));
-        Assert.assertEquals(4,Square.valueOf(File.FILE_F,Rank.RANK_3).fileDistance(Square.valueOf(File.FILE_B,Rank.RANK_8)));
-        Assert.assertEquals(0,Square.valueOf(File.FILE_E,Rank.RANK_1).fileDistance(Square.valueOf(File.FILE_E,Rank.RANK_2)));
+        assertEquals(1,Square.valueOf(FILE_A, RANK_1).fileDistance(Square.valueOf(FILE_B, RANK_1)));
+        assertEquals(7,Square.valueOf(FILE_A, RANK_1).fileDistance(Square.valueOf(FILE_H, RANK_8)));
+        assertEquals(7,Square.valueOf(FILE_A, RANK_1).fileDistance(Square.valueOf(FILE_H, RANK_4)));
+        assertEquals(1,Square.valueOf(FILE_B, RANK_3).fileDistance(Square.valueOf(FILE_C, RANK_7)));
+        assertEquals(7,Square.valueOf(FILE_H, RANK_2).fileDistance(Square.valueOf(FILE_A, RANK_3)));
+        assertEquals(4,Square.valueOf(FILE_F, RANK_3).fileDistance(Square.valueOf(FILE_B, RANK_8)));
+        assertEquals(0,Square.valueOf(FILE_E, RANK_1).fileDistance(Square.valueOf(FILE_E, RANK_2)));
     }
 
     @Test
     public void testRankDistance() {
-        Assert.assertEquals(0,Square.valueOf(File.FILE_A,Rank.RANK_1).rankDistance(Square.valueOf(File.FILE_B,Rank.RANK_1)));
-        Assert.assertEquals(3,Square.valueOf(File.FILE_A,Rank.RANK_1).rankDistance(Square.valueOf(File.FILE_C,Rank.RANK_4)));
-        Assert.assertEquals(1,Square.valueOf(File.FILE_H,Rank.RANK_8).rankDistance(Square.valueOf(File.FILE_A,Rank.RANK_7)));
-        Assert.assertEquals(7,Square.valueOf(File.FILE_G,Rank.RANK_8).rankDistance(Square.valueOf(File.FILE_B,Rank.RANK_1)));
+        assertEquals(0,Square.valueOf(FILE_A, RANK_1).rankDistance(Square.valueOf(FILE_B, RANK_1)));
+        assertEquals(3,Square.valueOf(FILE_A, RANK_1).rankDistance(Square.valueOf(FILE_C, RANK_4)));
+        assertEquals(1,Square.valueOf(FILE_H, RANK_8).rankDistance(Square.valueOf(FILE_A, RANK_7)));
+        assertEquals(7,Square.valueOf(FILE_G, RANK_8).rankDistance(Square.valueOf(FILE_B, RANK_1)));
     }
 
 
     @Test
     public void testDistance() {
-        Assert.assertEquals(0,Square.valueOf(File.FILE_E,Rank.RANK_4).distance(Square.valueOf(File.FILE_E,Rank.RANK_4)));
-        Assert.assertEquals(7,Square.valueOf(File.FILE_A,Rank.RANK_1).distance(Square.valueOf(File.FILE_A,Rank.RANK_8)));
-        Assert.assertEquals(3,Square.valueOf(File.FILE_H,Rank.RANK_1).distance(Square.valueOf(File.FILE_E,Rank.RANK_4)));
-        Assert.assertEquals(4,Square.valueOf(File.FILE_H,Rank.RANK_8).distance(Square.valueOf(File.FILE_E,Rank.RANK_4)));
+        assertEquals(0,Square.valueOf(FILE_E, RANK_4).distance(Square.valueOf(FILE_E, RANK_4)));
+        assertEquals(7,Square.valueOf(FILE_A, RANK_1).distance(Square.valueOf(FILE_A, RANK_8)));
+        assertEquals(3,Square.valueOf(FILE_H, RANK_1).distance(Square.valueOf(FILE_E, RANK_4)));
+        assertEquals(4,Square.valueOf(FILE_H, RANK_8).distance(Square.valueOf(FILE_E, RANK_4)));
     }
 }

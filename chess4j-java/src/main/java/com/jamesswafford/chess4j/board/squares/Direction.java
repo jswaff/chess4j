@@ -7,20 +7,20 @@ public abstract class Direction {
 
     public abstract boolean isDiagonal();
     public abstract int value();
-    private static Direction directionTo[][] = new Direction[64][64];
+    private static Direction[][] directionTo = new Direction[64][64];
 
     static {
-        for (int i=0;i<64;i++) {
+        for (int i=0; i<64; i++) {
             Square sq = Square.valueOf(i);
-            for (int j=0;j<64;j++) {
+            for (int j=0; j<64; j++) {
                 Square sq2 = Square.valueOf(j);
                 directionTo[i][j] = calculateDirectionTo(sq,sq2);
             }
         }
     }
 
-    public static Optional<Direction> getDirectionTo(Square sq1,Square sq2) {
-        return getDirectionTo(sq1.value(),sq2.value());
+    public static Optional<Direction> getDirectionTo(Square sq1, Square sq2) {
+        return getDirectionTo(sq1.value(), sq2.value());
     }
 
     public static Optional<Direction> getDirectionTo(int sq1, int sq2) {

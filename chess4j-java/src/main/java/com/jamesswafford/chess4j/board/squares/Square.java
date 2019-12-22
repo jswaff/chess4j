@@ -15,16 +15,16 @@ public final class Square {
 
     private static Square[][] squares_arr = new Square[8][8];
 
-    private Square(File file,Rank rank) {
-        this.file=file;
-        this.rank=rank;
+    private Square(File file, Rank rank) {
+        this.file = file;
+        this.rank = rank;
     }
 
     static {
         for (File file : File.values()) {
             List<Square> mySquares = new ArrayList<>();
             for (Rank rank : Rank.values()) {
-                mySquares.add(new Square(file,rank));
+                mySquares.add(new Square(file, rank));
             }
             FILE_SQUARES.put(file, mySquares);
         }
@@ -32,7 +32,7 @@ public final class Square {
         for (Rank rank : Rank.values()) {
             List<Square> mySquares = new ArrayList<>();
             for (File file : File.values()) {
-                mySquares.add(new Square(file,rank));
+                mySquares.add(new Square(file, rank));
             }
             RANK_SQUARES.put(rank, mySquares);
         }
@@ -43,7 +43,7 @@ public final class Square {
             for (File file : File.values()) {
                 Set<Square> intersection = new HashSet<>(FILE_SQUARES.get(file));
                 intersection.retainAll(RANK_SQUARES.get(rank));
-                assert(intersection.size()==1);
+                assert(intersection.size() == 1);
                 Square sq = intersection.iterator().next();
 
                 SQUARES.add(sq);
