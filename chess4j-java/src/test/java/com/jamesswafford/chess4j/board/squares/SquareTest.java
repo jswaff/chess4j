@@ -6,8 +6,6 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import junit.framework.Assert;
-
 import static junit.framework.Assert.*;
 
 import static com.jamesswafford.chess4j.board.squares.File.*;
@@ -43,8 +41,8 @@ public class SquareTest {
 
     @Test
     public void testRankSquares() {
-        Assert.assertTrue(Square.rankSquares(RANK_2).contains(Square.valueOf(FILE_B, RANK_2)));
-        Assert.assertFalse(Square.rankSquares(RANK_2).contains(Square.valueOf(FILE_B, RANK_3)));
+        assertTrue(Square.rankSquares(RANK_2).contains(Square.valueOf(FILE_B, RANK_2)));
+        assertFalse(Square.rankSquares(RANK_2).contains(Square.valueOf(FILE_B, RANK_3)));
     }
 
     @Test

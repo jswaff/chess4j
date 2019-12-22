@@ -11,8 +11,6 @@ import com.jamesswafford.chess4j.utils.BoardUtils;
  * Detects if zugzwang is likely, for either side.   Zugzwang is the condition in which making
  * any move will weaken your position.  
  * 
- * @author James
- *
  */
 public class ZugzwangDetector {
 

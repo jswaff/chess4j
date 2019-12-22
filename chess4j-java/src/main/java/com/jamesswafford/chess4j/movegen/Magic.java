@@ -1,9 +1,11 @@
-package com.jamesswafford.chess4j.board;
+package com.jamesswafford.chess4j.movegen;
 
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
 
+import com.jamesswafford.chess4j.board.Bitboard;
+import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
@@ -323,7 +325,7 @@ public class Magic {
         return mask;
     }
 
-    public static long getBishopMoves(Board board,int fromSq,long targets) {
+    public static long getBishopMoves(Board board, int fromSq, long targets) {
         long blockers = (board.getBlackPieces() | board.getWhitePieces()) & bishopMasks[fromSq];
         int magicInd = (int)((blockers * magicNumbersBishops[fromSq]) >>> magicNumbersShiftBishops[fromSq]);
         return magicBishopMoves[fromSq][magicInd] & targets;

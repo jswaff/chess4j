@@ -5,10 +5,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.jamesswafford.chess4j.Color;
-import com.jamesswafford.chess4j.board.AttackDetector;
+import com.jamesswafford.chess4j.movegen.AttackDetector;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Magic;
+import com.jamesswafford.chess4j.movegen.Magic;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.squares.Direction;
 import com.jamesswafford.chess4j.board.squares.Square;

@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.io.DrawBoard;
 import com.jamesswafford.chess4j.utils.BoardUtils;
 import com.jamesswafford.chess4j.utils.MoveUtils;
@@ -185,9 +185,9 @@ public class MoveOrderer {
         List<Move> moves = MoveGen.genPseudoLegalMoves(b);
         if (!moves.contains(m)) {
             DrawBoard.drawBoard(b);
-            System.out.println("not good!: " + m.toString2());
+            System.out.println("not good!: " + m.toString());
             for (Move mv : moves) {
-                System.out.println(mv.toString2());
+                System.out.println(mv.toString());
             }
         }
         return moves.contains(m);

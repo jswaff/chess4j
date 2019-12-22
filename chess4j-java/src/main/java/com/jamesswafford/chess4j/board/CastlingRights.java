@@ -8,7 +8,7 @@ public enum CastlingRights {
 
     private String label;
 
-    private CastlingRights(String label) {
+    CastlingRights(String label) {
         this.label=label;
     }
 

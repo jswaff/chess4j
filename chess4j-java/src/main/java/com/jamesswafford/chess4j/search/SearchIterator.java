@@ -13,7 +13,7 @@ import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.book.BookMove;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.hash.TTHolder;

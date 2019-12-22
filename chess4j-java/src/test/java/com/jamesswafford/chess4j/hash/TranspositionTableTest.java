@@ -1,6 +1,6 @@
 package com.jamesswafford.chess4j.hash;
 
-import com.jamesswafford.chess4j.board.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.io.FenParser;
 import junit.framework.Assert;
 

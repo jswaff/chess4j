@@ -1,15 +1,15 @@
-package com.jamesswafford.chess4j.board;
+package com.jamesswafford.chess4j.movegen;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Move;
 import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;

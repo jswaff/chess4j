@@ -1,5 +1,8 @@
-package com.jamesswafford.chess4j.board;
+package com.jamesswafford.chess4j.movegen;
 
+import com.jamesswafford.chess4j.board.Bitboard;
+import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.movegen.Magic;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.squares.File;
