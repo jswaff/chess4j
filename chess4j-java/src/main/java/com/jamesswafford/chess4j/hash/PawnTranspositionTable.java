@@ -27,7 +27,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     public void clear() {
         clearStats();
-        for (int i=0;i<numEntries;i++) {
+        for (int i=0; i<numEntries; i++) {
             table[i] = null;
         }
     }

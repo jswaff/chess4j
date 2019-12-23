@@ -20,6 +20,8 @@ import com.jamesswafford.chess4j.pieces.Knight;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Queen;
 
+import static org.junit.Assert.*;
+
 public class BoardUtilsTest {
 
     @Test

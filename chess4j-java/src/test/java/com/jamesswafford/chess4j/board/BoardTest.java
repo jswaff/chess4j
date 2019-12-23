@@ -15,7 +15,7 @@ import com.jamesswafford.chess4j.hash.Zobrist;
 import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.io.MoveParser;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 
 import static com.jamesswafford.chess4j.pieces.Pawn.*;
 import static com.jamesswafford.chess4j.pieces.Knight.*;
@@ -103,35 +103,7 @@ public class BoardTest {
     }
 
     @Test
-    public void applyMoves1() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
-
-        Move m = new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2), Square.valueOf(FILE_E, RANK_4));
-        b.applyMove(m);
-        assertNull(b.getPiece(Square.valueOf(FILE_E, RANK_2)));
-        assertEquals(WHITE_PAWN,b.getPiece(Square.valueOf(FILE_E, RANK_4)));
-        assertEquals(Square.valueOf(FILE_E, RANK_3), b.getEPSquare());
-        assertEquals(Color.BLACK, b.getPlayerToMove());
-        assertEquals(1, b.getMoveCounter());
-        assertEquals(0, b.getFiftyCounter());
-
-        Move m2 = new Move(BLACK_KNIGHT,Square.valueOf(FILE_B, RANK_8), Square.valueOf(FILE_C, RANK_6));
-        b.applyMove(m2);
-        assertNull(b.getPiece(Square.valueOf(FILE_B, RANK_8)));
-        assertTrue(b.isEmpty(Square.valueOf(FILE_B, RANK_8)));
-        assertEquals(BLACK_KNIGHT,b.getPiece(Square.valueOf(FILE_C, RANK_6)));
-        assertNull(b.getEPSquare());
-        assertEquals(2, b.getMoveCounter());
-        assertEquals(1, b.getFiftyCounter());
-
-        b.undoLastMove();
-        b.undoLastMove();
-        testResetBoard(b);
-    }
-
-    @Test
-    public void applyMoves2() throws Exception {
+    public void applyMoveSequence1() throws Exception {
         Board b = Board.INSTANCE;
         b.resetBoard();
         Board b2 = b.deepCopy();
@@ -233,14 +205,16 @@ public class BoardTest {
     }
 
     @Test
-    public void testDeepCopy() {
+    public void deepCopy() {
         Board b = Board.INSTANCE;
         Board b2 = b.deepCopy();
 
+        assertNotSame(b, b2);
         assertEquals(b, b2);
 
         b.swapPlayer();
-        assertFalse(b.equals(b2));
+        assertNotEquals(b, b2);
+
         b.swapPlayer();
         assertEquals(b, b2);
     }
@@ -251,6 +225,7 @@ public class BoardTest {
         b.resetBoard();
         b.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2),Square.valueOf(FILE_E, RANK_4)));
         Board b2 = b.deepCopy();
+        assertNotSame(b, b2);
         assertEquals(b, b2);
 
         b.undoLastMove();
@@ -264,6 +239,7 @@ public class BoardTest {
         Board b = Board.INSTANCE;
         b.resetBoard();
         Board b2 = b.deepCopy();
+        assertNotSame(b, b2);
         b.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2),Square.valueOf(FILE_E, RANK_4)));
         b.undoLastMove();
         assertEquals(b, b2);
@@ -277,14 +253,14 @@ public class BoardTest {
 
         b.flipVertical();
         b.flipVertical();
-        assertTrue(b.equals(b2));
+        assertEquals(b2, b);
 
         FenParser.setPos(b, "7r/R6p/2K4P/5k1P/2p4n/5p2/8/8 w - - 0 1");
         FenParser.setPos(b2, "8/8/5P2/2P4N/5K1p/2k4p/r6P/7R b - - 0 1");
         b.flipVertical();
         // move counter doesn't need to be part of this test
         b.setMoveCounter(b2.getMoveCounter());
-        assertTrue(b.equals(b2));
+        assertEquals(b2, b);
 
         // test EP
         FenParser.setPos(b, "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
@@ -292,23 +268,23 @@ public class BoardTest {
 
         b.flipVertical();
         b.setMoveCounter(b2.getMoveCounter());
-        assertTrue(b.equals(b2));
+        assertEquals(b2, b);
 
         // test castling
         FenParser.setPos(b, "4k2r/8/8/8/8/8/8/R3K3 b Qk - 0 1");
         FenParser.setPos(b2, "r3k3/8/8/8/8/8/8/4K2R w qK - 0 1");
         b.flipVertical();
         b.setMoveCounter(b2.getMoveCounter());
-        assertTrue(b.equals(b2));
+        assertEquals(b2, b);
     }
 
     @Test
     /*
      * Should be able to obtain an equal position using the French Defense and Petrov Defense
      */
-    public void testHash() throws Exception {
-        List<Integer> hashCodes1 = new ArrayList<Integer>();
-        List<Integer> hashCodes2 = new ArrayList<Integer>();
+    public void testHash() {
+        List<Integer> hashCodes1 = new ArrayList<>();
+        List<Integer> hashCodes2 = new ArrayList<>();
 
         Board b1 = Board.INSTANCE;
         b1.resetBoard();
@@ -364,7 +340,7 @@ public class BoardTest {
 
 
         // Positions would be equal at this point, except for move history and fifty counter
-        assertFalse(b1.equals(b2));
+        assertNotEquals(b1, b2);
         assertTrue(b1.equalExceptMoveHistory(b2, false));
         assertFalse(b1.equalExceptMoveHistory(b2, true));
 
@@ -372,19 +348,19 @@ public class BoardTest {
         b1.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_G, RANK_2),Square.valueOf(FILE_G, RANK_3)));
         b2.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_G, RANK_2),Square.valueOf(FILE_G, RANK_3)));
 
-        assertFalse(b1.equals(b2));
+        assertNotEquals(b1, b2);
         assertFalse(b1.equalExceptMoveHistory(b2, true));
         assertTrue(b1.equalExceptMoveHistory(b2, false));
-        assertFalse(b1.hashCode()==b2.hashCode());
+        assertNotEquals(b1.hashCode(), b2.hashCode());
 
-        assertTrue(b1.hashCodeWithoutMoveHistory(false)==b2.hashCodeWithoutMoveHistory(false));
-        assertFalse(b1.hashCodeWithoutMoveHistory(true)==b2.hashCodeWithoutMoveHistory(true));
+        assertEquals(b1.hashCodeWithoutMoveHistory(false), b2.hashCodeWithoutMoveHistory(false));
+        assertNotEquals(b1.hashCodeWithoutMoveHistory(true), b2.hashCodeWithoutMoveHistory(true));
 
         // hash codes should be equal at beginning, move 1, move 7 and end only.
         for (int i=0;i<hashCodes1.size();i++) {
             int hc1 = hashCodes1.get(i);
             if (i==0) {
-                assertTrue(hashCodes2.get(0).equals(hc1));
+                assertEquals((int) hashCodes2.get(0), hc1);
                 assertFalse(hashCodes2.subList(1, hashCodes2.size()).contains(hc1));
             } else if (i==7) {
                 assertEquals(hc1, (int) hashCodes2.get(11));
@@ -400,9 +376,9 @@ public class BoardTest {
      * Should be able to obtain an equal position using the Queen's Gambit (d4,d5,c4,e6,Nc3,Nf6) and
      * the English Opening (c4,Nf6,Nc3,e6,d4,d5).
      */
-    public void testHash2() throws Exception {
-        List<Integer> hashCodes1 = new ArrayList<Integer>();
-        List<Integer> hashCodes2 = new ArrayList<Integer>();
+    public void testHash2() {
+        List<Integer> hashCodes1 = new ArrayList<>();
+        List<Integer> hashCodes2 = new ArrayList<>();
 
         Board b1 = Board.INSTANCE;
         b1.resetBoard();
@@ -440,23 +416,22 @@ public class BoardTest {
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
 
         // Positions would be equal at this point, except for move history, fifty counter and ep square
-        assertFalse(b1.equals(b2));
+        assertNotEquals(b1, b2);
         assertFalse(b1.equalExceptMoveHistory(b2, false));
 
         // by adding a pawn move we should be equal except move history
         b1.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_G, RANK_2),Square.valueOf(FILE_G, RANK_3)));
         b2.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_G, RANK_2),Square.valueOf(FILE_G, RANK_3)));
-        assertFalse(b1.equals(b2));
+        assertNotEquals(b1, b2);
         assertTrue(b1.equalExceptMoveHistory(b2, true));
-        assertFalse(b1.hashCode()==b2.hashCode());
-        assertTrue(b1.hashCodeWithoutMoveHistory(true)==b2.hashCodeWithoutMoveHistory(true));
+        assertNotEquals(b1.hashCode(), b2.hashCode());
+        assertEquals(b1.hashCodeWithoutMoveHistory(true), b2.hashCodeWithoutMoveHistory(true));
 
         // hash codes should be equal at beginning and end only.  Neither were
         // saved in list so lists should contain completely different codes
         for (int hc1 : hashCodes1) {
             assertFalse(hashCodes2.contains(hc1));
         }
-
     }
 
     @Test
@@ -472,8 +447,8 @@ public class BoardTest {
         List<Move> legalMoves = MoveGen.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
         b1.applyMove(m);
-        assertFalse(b1.equals(b2));
-        assertFalse(b1.hashCode()==b2.hashCode());
+        assertNotEquals(b1, b2);
+        assertNotEquals(b1.hashCode(), b2.hashCode());
 
         b1.undoLastMove();
         assertEquals(b1, b2);
@@ -493,8 +468,8 @@ public class BoardTest {
         List<Move> legalMoves = MoveGen.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
         b1.applyMove(m);
-        assertFalse(b1.equals(b2));
-        assertFalse(b1.hashCode()==b2.hashCode());
+        assertNotEquals(b1, b2);
+        assertNotEquals(b1.hashCode(), b2.hashCode());
 
         b1.undoLastMove();
         assertEquals(b1, b2);
@@ -513,8 +488,8 @@ public class BoardTest {
         List<Move> legalMoves = MoveGen.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
         b1.applyMove(m);
-        assertFalse(b1.equals(b2));
-        assertFalse(b1.hashCode()==b2.hashCode());
+        assertNotEquals(b1, b2);
+        assertNotEquals(b1.hashCode(), b2.hashCode());
 
         b1.undoLastMove();
         assertEquals(b1, b2);
@@ -534,8 +509,8 @@ public class BoardTest {
         List<Move> legalMoves = MoveGen.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
         b1.applyMove(m);
-        assertFalse(b1.equals(b2));
-        assertFalse(b1.hashCode()==b2.hashCode());
+        assertNotEquals(b1, b2);
+        assertNotEquals(b1.hashCode(), b2.hashCode());
 
         b1.undoLastMove();
         assertEquals(b1, b2);
@@ -555,8 +530,8 @@ public class BoardTest {
         List<Move> legalMoves = MoveGen.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
         b1.applyMove(m);
-        assertFalse(b1.equals(b2));
-        assertFalse(b1.hashCode()==b2.hashCode());
+        assertNotEquals(b1, b2);
+        assertNotEquals(b1.hashCode(), b2.hashCode());
 
         b1.undoLastMove();
         assertEquals(b1, b2);

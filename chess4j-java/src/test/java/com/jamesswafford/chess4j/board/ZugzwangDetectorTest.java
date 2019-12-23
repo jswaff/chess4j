@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import com.jamesswafford.chess4j.io.FenParser;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 
 import static com.jamesswafford.chess4j.board.ZugzwangDetector.*;
 

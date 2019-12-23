@@ -1,36 +1,34 @@
 package com.jamesswafford.chess4j.pieces;
 
-
 import org.junit.Test;
 
-import com.jamesswafford.chess4j.Color;
-import com.jamesswafford.chess4j.pieces.Pawn;
+import static com.jamesswafford.chess4j.Color.*;
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
 
-
-import junit.framework.Assert;
+import static org.junit.Assert.*;
 
 public class PawnTest {
 
     @Test
     public void testColor() {
-        Assert.assertEquals(Color.WHITE, Pawn.WHITE_PAWN.getColor());
-        Assert.assertEquals(Color.BLACK, Pawn.BLACK_PAWN.getColor());
-        Assert.assertTrue(Pawn.WHITE_PAWN.isWhite());
-        Assert.assertFalse(Pawn.BLACK_PAWN.isWhite());
-        Assert.assertFalse(Pawn.WHITE_PAWN.isBlack());
-        Assert.assertTrue(Pawn.BLACK_PAWN.isBlack());
+        assertEquals(WHITE, WHITE_PAWN.getColor());
+        assertEquals(BLACK, BLACK_PAWN.getColor());
+        assertTrue(WHITE_PAWN.isWhite());
+        assertFalse(BLACK_PAWN.isWhite());
+        assertFalse(WHITE_PAWN.isBlack());
+        assertTrue(BLACK_PAWN.isBlack());
     }
 
     @Test
     public void testToString() {
-        Assert.assertEquals("P", Pawn.WHITE_PAWN.toString());
-        Assert.assertEquals("p", Pawn.BLACK_PAWN.toString());
+        assertEquals("P", WHITE_PAWN.toString());
+        assertEquals("p", BLACK_PAWN.toString());
     }
 
     @Test
     public void testGetOppositeColorPiece() {
-        Assert.assertEquals(Pawn.WHITE_PAWN, Pawn.BLACK_PAWN.getOppositeColorPiece());
-        Assert.assertEquals(Pawn.BLACK_PAWN, Pawn.WHITE_PAWN.getOppositeColorPiece());
+        assertEquals(WHITE_PAWN, BLACK_PAWN.getOppositeColorPiece());
+        assertEquals(BLACK_PAWN, WHITE_PAWN.getOppositeColorPiece());
     }
 
 }

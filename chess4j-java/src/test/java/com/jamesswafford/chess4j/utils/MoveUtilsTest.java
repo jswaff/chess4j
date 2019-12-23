@@ -15,6 +15,8 @@ import com.jamesswafford.chess4j.pieces.Knight;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.utils.MoveUtils;
 
+import static org.junit.Assert.*;
+
 
 public class MoveUtilsTest {
 

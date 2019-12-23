@@ -20,6 +20,8 @@ import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Queen;
 import com.jamesswafford.chess4j.pieces.Rook;
 
+import static org.junit.Assert.*;
+
 public class SEETest {
 
     @Test

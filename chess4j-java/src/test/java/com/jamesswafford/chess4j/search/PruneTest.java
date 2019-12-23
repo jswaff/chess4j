@@ -12,6 +12,8 @@ import com.jamesswafford.chess4j.eval.Eval;
 
 import junit.framework.Assert;
 
+import static org.junit.Assert.*;
+
 public class PruneTest {
 
     @Test

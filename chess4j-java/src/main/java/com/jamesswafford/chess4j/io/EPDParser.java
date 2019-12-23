@@ -37,7 +37,7 @@ public final class EPDParser {
             int opsInd = ops.indexOf(' ');
             if (opsInd==-1) {
                 opCode = ops;
-                operands = new ArrayList<String>();
+                operands = new ArrayList<>();
             } else {
                 opCode = ops.substring(0, opsInd);
                 operands = getOperands(ops.substring(opsInd+1));

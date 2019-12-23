@@ -2,6 +2,9 @@ package com.jamesswafford.chess4j.board.squares;
 
 import java.util.*;
 
+import static com.jamesswafford.chess4j.board.squares.File.*;
+import static com.jamesswafford.chess4j.board.squares.Rank.*;
+
 public final class Square {
 
     public static final int NUM_SQUARES = 64;
@@ -10,10 +13,12 @@ public final class Square {
     private static final Map<File,List<Square>> FILE_SQUARES = new HashMap<>();
     private static final Map<Rank,List<Square>> RANK_SQUARES = new HashMap<>();
 
+    private static Square[][] squares_arr = new Square[8][8];
+
+//    private Square A1 = new Square(FILE_A, RANK_1);
+
     private final Rank rank;
     private final File file;
-
-    private static Square[][] squares_arr = new Square[8][8];
 
     private Square(File file, Rank rank) {
         this.file = file;

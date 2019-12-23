@@ -16,6 +16,8 @@ import com.jamesswafford.chess4j.io.EPDParser;
 import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.io.MoveParser;
 
+import static org.junit.Assert.*;
+
 public class MoveOrdererTest {
 
     @Test

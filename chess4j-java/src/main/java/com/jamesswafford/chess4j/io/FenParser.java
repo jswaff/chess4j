@@ -11,12 +11,6 @@ import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.utils.BlankRemover;
 import com.jamesswafford.chess4j.utils.PieceFactory;
 
-/**
- * FenParser
- * 
- * @author James
- *
- */
 public final class FenParser {
 
     private static final int MINIMUM_FEN_PARTS = 4;

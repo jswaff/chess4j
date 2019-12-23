@@ -21,14 +21,14 @@ public class Bitboard {
     public static long[][] pawnAttacks = new long[64][2];
 
     static {
-        for (int i=0;i<64;i++) {
+        for (int i=0; i<64; i++) {
             squares[i] = 1L << i;
         }
-        for (int i=0;i<8;i++) {
+        for (int i=0; i<8; i++) {
             files[i] = ranks[i] = 0;
             File f = File.file(i);
             Rank r = Rank.rank(i);
-            for (int j=0;j<64;j++) {
+            for (int j=0 ;j<64; j++) {
                 Square sq = Square.valueOf(j);
                 if (sq.file()==f) {
                     files[i] |= squares[j];
@@ -42,12 +42,12 @@ public class Bitboard {
 
     // initialize rays
     static {
-        for (int i=0;i<64;i++) {
-            for (int j=0;j<8;j++) {
+        for (int i=0; i<64; i++) {
+            for (int j=0; j<8; j++) {
                 rays[i][j] = 0;
             }
 
-            for (int j=0;j<64;j++) {
+            for (int j=0; j<64; j++) {
                 if (i != j) {
                     Optional<Direction> dir = Direction.getDirectionTo(i,j);
                     int finalI = i; int finalJ = j;
@@ -122,10 +122,10 @@ public class Bitboard {
         this.val = val;
     }
 
-    public static long isolateLSB(long mask,int index) {
+    public static long isolateLSB(long mask, int index) {
         int n=0;
 
-        for (int i=0;i<64;i++) {
+        for (int i=0; i<64; i++) {
             if ((squares[i] & mask) != 0) {
                 if (n==index) {
                     return squares[i];

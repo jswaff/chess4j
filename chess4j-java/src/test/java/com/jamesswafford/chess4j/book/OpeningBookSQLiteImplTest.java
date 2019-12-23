@@ -1,7 +1,5 @@
 package com.jamesswafford.chess4j.book;
 
-import static org.junit.Assert.*;
-
 import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,12 +7,12 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Board;
@@ -31,9 +29,9 @@ import com.jamesswafford.chess4j.utils.GameResult;
 
 public class OpeningBookSQLiteImplTest {
 
-    private final static String smallPGN = "src/test/resources/pgn/small.pgn";
-    private final static String tinyPGN = "src/test/resources/pgn/tiny.pgn";
-    private final static String testDB = "src/test//resources/sql/test.db";
+    private final static String smallPGN = "pgn/small.pgn";
+    private final static String tinyPGN = "pgn/tiny.pgn";
+    private final static String testDB = "test.db";
 
     static OpeningBookSQLiteImpl book;
     static Connection conn;
@@ -59,7 +57,7 @@ public class OpeningBookSQLiteImplTest {
     }
 
     @Test
-    public void testAddMove() throws Exception {
+    public void addMove() throws Exception {
         Board board = Board.INSTANCE;
         board.resetBoard();
 
@@ -79,7 +77,7 @@ public class OpeningBookSQLiteImplTest {
     }
 
     @Test
-    public void testAddMoveTwice() throws Exception {
+    public void addMoveTwice() throws Exception {
         Board board = Board.INSTANCE;
         board.resetBoard();
 
@@ -100,7 +98,7 @@ public class OpeningBookSQLiteImplTest {
     }
 
     @Test
-    public void testAddMultipleMoves() throws Exception {
+    public void addMultipleMoves() throws Exception {
         Board board = Board.INSTANCE;
         board.resetBoard();
 
@@ -125,7 +123,7 @@ public class OpeningBookSQLiteImplTest {
     }
 
     @Test
-    public void testAddIllegalMove() throws Exception {
+    public void addIllegalMove() {
         Board board = Board.INSTANCE;
         board.resetBoard();
 
@@ -140,7 +138,7 @@ public class OpeningBookSQLiteImplTest {
     }
 
     @Test
-    public void testAddSmallPGN() throws Exception {
+    public void addSmallPGN() throws Exception {
         populateBook(smallPGN);
 
         assertEquals(125, book.getTotalMoveCount()); // 850 for entire PGN
@@ -168,7 +166,7 @@ public class OpeningBookSQLiteImplTest {
     }
 
     @Test
-    public void testAddReallySmallPGN() throws Exception {
+    public void addReallySmallPGN() throws Exception {
         populateBook(tinyPGN);
         assertEquals(15, book.getTotalMoveCount()); // 85 for entire game
 
@@ -214,7 +212,7 @@ Be5 41.Rd2 Bc6 42.b5 Bf3 43.Bf4 1-0
     }
 
     @Test
-    public void testWriteAndLoadZobristKeys() throws Exception {
+    public void writeAndLoadZobristKeys() throws Exception {
         List<Long> keys1 = Zobrist.getAllKeys();
 
         book.writeZobristKeys();
@@ -226,7 +224,7 @@ Be5 41.Rd2 Bc6 42.b5 Bf3 43.Bf4 1-0
     }
 
     @Test
-    public void testLearnMultipleTimes() throws Exception {
+    public void learnMultipleTimes() throws Exception {
         populateBook(tinyPGN);
 
         Board board = Board.INSTANCE;
@@ -246,25 +244,25 @@ Be5 41.Rd2 Bc6 42.b5 Bf3 43.Bf4 1-0
 
         board.resetBoard();
         List<BookMove> bookMoves = book.getMoves(board);
-        Assert.assertEquals(1, bookMoves.size());
-        Assert.assertEquals(f4, bookMoves.get(0).getMove());
-        Assert.assertEquals(1, bookMoves.get(0).getFrequency());
-        Assert.assertEquals(0, bookMoves.get(0).getWins());
-        Assert.assertEquals(0, bookMoves.get(0).getLosses());
-        Assert.assertEquals(0, bookMoves.get(0).getDraws());
+        assertEquals(1, bookMoves.size());
+        assertEquals(f4, bookMoves.get(0).getMove());
+        assertEquals(1, bookMoves.get(0).getFrequency());
+        assertEquals(0, bookMoves.get(0).getWins());
+        assertEquals(0, bookMoves.get(0).getLosses());
+        assertEquals(0, bookMoves.get(0).getDraws());
 
         board.applyMove(f4);
         bookMoves = book.getMoves(board);
-        Assert.assertEquals(1, bookMoves.size());
-        Assert.assertEquals(e5, bookMoves.get(0).getMove());
-        Assert.assertEquals(1, bookMoves.get(0).getFrequency());
-        Assert.assertEquals(0, bookMoves.get(0).getWins());
-        Assert.assertEquals(2, bookMoves.get(0).getLosses());
-        Assert.assertEquals(1, bookMoves.get(0).getDraws());
+        assertEquals(1, bookMoves.size());
+        assertEquals(e5, bookMoves.get(0).getMove());
+        assertEquals(1, bookMoves.get(0).getFrequency());
+        assertEquals(0, bookMoves.get(0).getWins());
+        assertEquals(2, bookMoves.get(0).getLosses());
+        assertEquals(1, bookMoves.get(0).getDraws());
     }
 
     @Test
-    public void testLearn() throws Exception {
+    public void learn() throws Exception {
         populateBook(tinyPGN);
 
         Board board = Board.INSTANCE;
@@ -294,50 +292,50 @@ Be5 41.Rd2 Bc6 42.b5 Bf3 43.Bf4 1-0
         // ... and that the other moves have not been learned
         board.resetBoard();
         List<BookMove> bookMoves = book.getMoves(board);
-        Assert.assertEquals(1, bookMoves.size());
-        Assert.assertEquals(f4, bookMoves.get(0).getMove());
-        Assert.assertEquals(1, bookMoves.get(0).getFrequency());
-        Assert.assertEquals(1, bookMoves.get(0).getWins());
-        Assert.assertEquals(0, bookMoves.get(0).getLosses());
-        Assert.assertEquals(0, bookMoves.get(0).getDraws());
+        assertEquals(1, bookMoves.size());
+        assertEquals(f4, bookMoves.get(0).getMove());
+        assertEquals(1, bookMoves.get(0).getFrequency());
+        assertEquals(1, bookMoves.get(0).getWins());
+        assertEquals(0, bookMoves.get(0).getLosses());
+        assertEquals(0, bookMoves.get(0).getDraws());
 
         board.applyMove(f4);
         bookMoves = book.getMoves(board);
-        Assert.assertEquals(1, bookMoves.size());
-        Assert.assertEquals(e5, bookMoves.get(0).getMove());
-        Assert.assertEquals(1, bookMoves.get(0).getFrequency());
-        Assert.assertEquals(0, bookMoves.get(0).getWins());
-        Assert.assertEquals(0, bookMoves.get(0).getLosses());
-        Assert.assertEquals(0, bookMoves.get(0).getDraws());
+        assertEquals(1, bookMoves.size());
+        assertEquals(e5, bookMoves.get(0).getMove());
+        assertEquals(1, bookMoves.get(0).getFrequency());
+        assertEquals(0, bookMoves.get(0).getWins());
+        assertEquals(0, bookMoves.get(0).getLosses());
+        assertEquals(0, bookMoves.get(0).getDraws());
 
         board.applyMove(e5);
         bookMoves = book.getMoves(board);
-        Assert.assertEquals(1, bookMoves.size());
-        Assert.assertEquals(fe5, bookMoves.get(0).getMove());
-        Assert.assertEquals(1, bookMoves.get(0).getFrequency());
-        Assert.assertEquals(1, bookMoves.get(0).getWins());
-        Assert.assertEquals(0, bookMoves.get(0).getLosses());
-        Assert.assertEquals(0, bookMoves.get(0).getDraws());
+        assertEquals(1, bookMoves.size());
+        assertEquals(fe5, bookMoves.get(0).getMove());
+        assertEquals(1, bookMoves.get(0).getFrequency());
+        assertEquals(1, bookMoves.get(0).getWins());
+        assertEquals(0, bookMoves.get(0).getLosses());
+        assertEquals(0, bookMoves.get(0).getDraws());
 
         board.applyMove(fe5);
         bookMoves = book.getMoves(board);
-        Assert.assertEquals(1, bookMoves.size());
+        assertEquals(1, bookMoves.size());
         Move d6 = mp.parseMove("d6", board);
-        Assert.assertEquals(d6, bookMoves.get(0).getMove());
-        Assert.assertEquals(1, bookMoves.get(0).getFrequency());
-        Assert.assertEquals(0, bookMoves.get(0).getWins());
-        Assert.assertEquals(0, bookMoves.get(0).getLosses());
-        Assert.assertEquals(0, bookMoves.get(0).getDraws());
+        assertEquals(d6, bookMoves.get(0).getMove());
+        assertEquals(1, bookMoves.get(0).getFrequency());
+        assertEquals(0, bookMoves.get(0).getWins());
+        assertEquals(0, bookMoves.get(0).getLosses());
+        assertEquals(0, bookMoves.get(0).getDraws());
 
         board.applyMove(d6);
         bookMoves = book.getMoves(board);
-        Assert.assertEquals(1, bookMoves.size());
+        assertEquals(1, bookMoves.size());
         Move ed6 = mp.parseMove("exd6", board);
-        Assert.assertEquals(ed6, bookMoves.get(0).getMove());
-        Assert.assertEquals(1, bookMoves.get(0).getFrequency());
-        Assert.assertEquals(0, bookMoves.get(0).getWins());
-        Assert.assertEquals(0, bookMoves.get(0).getLosses());
-        Assert.assertEquals(0, bookMoves.get(0).getDraws());
+        assertEquals(ed6, bookMoves.get(0).getMove());
+        assertEquals(1, bookMoves.get(0).getFrequency());
+        assertEquals(0, bookMoves.get(0).getWins());
+        assertEquals(0, bookMoves.get(0).getLosses());
+        assertEquals(0, bookMoves.get(0).getDraws());
     }
 
     private void populateBook(String pgn) throws Exception {
@@ -345,7 +343,11 @@ Be5 41.Rd2 Bc6 42.b5 Bf3 43.Bf4 1-0
 
         book.dropIndexes();
         long start = System.currentTimeMillis();
-        FileInputStream fis = new FileInputStream(new java.io.File(pgn));
+
+        ClassLoader classLoader = getClass().getClassLoader();
+        java.io.File pgnFile = new java.io.File(classLoader.getResource(pgn).getFile());
+
+        FileInputStream fis = new FileInputStream(pgnFile);
         PGNIterator it = new PGNIterator(fis);
 
         PGNGame pgnGame;

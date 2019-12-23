@@ -8,6 +8,8 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.utils.Perft;
 
+import static org.junit.Assert.*;
+
 public class PerfTest {
 
 

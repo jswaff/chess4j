@@ -13,7 +13,7 @@ import com.jamesswafford.chess4j.board.squares.SouthWest;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.board.squares.West;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 
 import static com.jamesswafford.chess4j.board.squares.File.*;
 import static com.jamesswafford.chess4j.board.squares.Rank.*;

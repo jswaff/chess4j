@@ -15,6 +15,7 @@ import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.utils.GameStatus;
 import com.jamesswafford.chess4j.utils.GameStatusChecker;
 
+import static org.junit.Assert.*;
 
 public class GameStatusCheckerTest {
 

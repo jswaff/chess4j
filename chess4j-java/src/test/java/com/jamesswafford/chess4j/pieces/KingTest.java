@@ -1,35 +1,34 @@
 package com.jamesswafford.chess4j.pieces;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
-import com.jamesswafford.chess4j.Color;
-import com.jamesswafford.chess4j.pieces.King;
+import static com.jamesswafford.chess4j.Color.*;
+import static com.jamesswafford.chess4j.pieces.King.*;
 
+import static org.junit.Assert.*;
 
 public class KingTest {
 
     @Test
     public void testColor() {
-        Assert.assertEquals(Color.WHITE, King.WHITE_KING.getColor());
-        Assert.assertEquals(Color.BLACK, King.BLACK_KING.getColor());
-        Assert.assertTrue(King.WHITE_KING.isWhite());
-        Assert.assertFalse(King.BLACK_KING.isWhite());
-        Assert.assertFalse(King.WHITE_KING.isBlack());
-        Assert.assertTrue(King.BLACK_KING.isBlack());
+        assertEquals(WHITE, WHITE_KING.getColor());
+        assertEquals(BLACK, BLACK_KING.getColor());
+        assertTrue(WHITE_KING.isWhite());
+        assertFalse(BLACK_KING.isWhite());
+        assertFalse(WHITE_KING.isBlack());
+        assertTrue(BLACK_KING.isBlack());
     }
 
     @Test
     public void testToString() {
-        Assert.assertEquals("K", King.WHITE_KING.toString());
-        Assert.assertEquals("k", King.BLACK_KING.toString());
+        assertEquals("K", WHITE_KING.toString());
+        assertEquals("k", BLACK_KING.toString());
     }
 
     @Test
     public void testGetOppositeColorPiece() {
-        Assert.assertEquals(King.WHITE_KING, King.BLACK_KING.getOppositeColorPiece());
-        Assert.assertEquals(King.BLACK_KING, King.WHITE_KING.getOppositeColorPiece());
+        assertEquals(WHITE_KING, BLACK_KING.getOppositeColorPiece());
+        assertEquals(BLACK_KING, WHITE_KING.getOppositeColorPiece());
     }
 
 }

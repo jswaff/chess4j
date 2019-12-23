@@ -12,6 +12,8 @@ import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Piece;
 
+import static org.junit.Assert.*;
+
 public class PawnUtilsTest {
 
     @Test

@@ -11,6 +11,8 @@ import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.io.MoveParser;
 
+import static org.junit.Assert.*;
+
 public class ExtendTest {
 
     @Test

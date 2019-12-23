@@ -1,16 +1,17 @@
 package com.jamesswafford.chess4j.io;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.CastlingRights;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.pieces.Knight;
 import com.jamesswafford.chess4j.pieces.Pawn;
+
+import static com.jamesswafford.chess4j.board.CastlingRights.*;
+
+import static org.junit.Assert.*;
 
 public class FenParserTest {
 
@@ -21,14 +22,14 @@ public class FenParserTest {
         String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
         FenParser.setPos(board, fen);
 
-        Assert.assertEquals(Knight.WHITE_KNIGHT, board.getPiece(Square.valueOf(File.FILE_F, Rank.RANK_3)));
-        Assert.assertFalse(board.canCastle(CastlingRights.BLACK_KINGSIDE));
-        Assert.assertFalse(board.canCastle(CastlingRights.BLACK_QUEENSIDE));
-        Assert.assertFalse(board.canCastle(CastlingRights.WHITE_KINGSIDE));
-        Assert.assertFalse(board.canCastle(CastlingRights.WHITE_QUEENSIDE));
-        Assert.assertEquals(3,board.getMoveCounter());
-        Assert.assertEquals(1, board.getFiftyCounter());
-        Assert.assertEquals(null, board.getEPSquare());
+        assertEquals(Knight.WHITE_KNIGHT, board.getPiece(Square.valueOf(File.FILE_F, Rank.RANK_3)));
+        assertFalse(board.canCastle(BLACK_KINGSIDE));
+        assertFalse(board.canCastle(BLACK_QUEENSIDE));
+        assertFalse(board.canCastle(WHITE_KINGSIDE));
+        assertFalse(board.canCastle(WHITE_QUEENSIDE));
+        assertEquals(3,board.getMoveCounter());
+        assertEquals(1, board.getFiftyCounter());
+        assertEquals(null, board.getEPSquare());
     }
 
     @Test
@@ -36,14 +37,14 @@ public class FenParserTest {
         String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq -";
         FenParser.setPos(board, fen);
 
-        Assert.assertEquals(Knight.WHITE_KNIGHT, board.getPiece(Square.valueOf(File.FILE_F, Rank.RANK_3)));
-        Assert.assertFalse(board.canCastle(CastlingRights.BLACK_KINGSIDE));
-        Assert.assertFalse(board.canCastle(CastlingRights.BLACK_QUEENSIDE));
-        Assert.assertFalse(board.canCastle(CastlingRights.WHITE_KINGSIDE));
-        Assert.assertFalse(board.canCastle(CastlingRights.WHITE_QUEENSIDE));
-        Assert.assertEquals(1,board.getMoveCounter());
-        Assert.assertEquals(0, board.getFiftyCounter());
-        Assert.assertEquals(null, board.getEPSquare());
+        assertEquals(Knight.WHITE_KNIGHT, board.getPiece(Square.valueOf(File.FILE_F, Rank.RANK_3)));
+        assertFalse(board.canCastle(BLACK_KINGSIDE));
+        assertFalse(board.canCastle(BLACK_QUEENSIDE));
+        assertFalse(board.canCastle(WHITE_KINGSIDE));
+        assertFalse(board.canCastle(WHITE_QUEENSIDE));
+        assertEquals(1,board.getMoveCounter());
+        assertEquals(0, board.getFiftyCounter());
+        assertNull(board.getEPSquare());
     }
 
     @Test
@@ -51,14 +52,14 @@ public class FenParserTest {
         String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2";
         FenParser.setPos(board, fen);
 
-        Assert.assertEquals(Pawn.BLACK_PAWN, board.getPiece(Square.valueOf(File.FILE_C, Rank.RANK_5)));
-        Assert.assertFalse(board.canCastle(CastlingRights.BLACK_KINGSIDE));
-        Assert.assertFalse(board.canCastle(CastlingRights.BLACK_QUEENSIDE));
-        Assert.assertFalse(board.canCastle(CastlingRights.WHITE_KINGSIDE));
-        Assert.assertFalse(board.canCastle(CastlingRights.WHITE_QUEENSIDE));
-        Assert.assertEquals(2,board.getMoveCounter());
-        Assert.assertEquals(0, board.getFiftyCounter());
-        Assert.assertEquals(Square.valueOf(File.FILE_C, Rank.RANK_6), board.getEPSquare());
+        assertEquals(Pawn.BLACK_PAWN, board.getPiece(Square.valueOf(File.FILE_C, Rank.RANK_5)));
+        assertFalse(board.canCastle(BLACK_KINGSIDE));
+        assertFalse(board.canCastle(BLACK_QUEENSIDE));
+        assertFalse(board.canCastle(WHITE_KINGSIDE));
+        assertFalse(board.canCastle(WHITE_QUEENSIDE));
+        assertEquals(2,board.getMoveCounter());
+        assertEquals(0, board.getFiftyCounter());
+        assertEquals(Square.valueOf(File.FILE_C, Rank.RANK_6), board.getEPSquare());
     }
 
     @Test
@@ -69,7 +70,7 @@ public class FenParserTest {
 
         String fen = FenParser.getFen(b, true);
 
-        Assert.assertEquals("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", fen);
+        assertEquals("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", fen);
     }
 
     @Test
@@ -78,7 +79,7 @@ public class FenParserTest {
         String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
         FenParser.setPos(board, fen);
 
-        Assert.assertEquals(fen, FenParser.getFen(board, true));
+        assertEquals(fen, FenParser.getFen(board, true));
     }
 
     @Test
@@ -87,7 +88,7 @@ public class FenParserTest {
         String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq -";
         FenParser.setPos(board, fen);
 
-        Assert.assertEquals(fen, FenParser.getFen(board, false));
+        assertEquals(fen, FenParser.getFen(board, false));
     }
 
     @Test
@@ -96,7 +97,7 @@ public class FenParserTest {
         String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2";
         FenParser.setPos(board, fen);
 
-        Assert.assertEquals(fen, FenParser.getFen(board, true));
+        assertEquals(fen, FenParser.getFen(board, true));
     }
 
 }

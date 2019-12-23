@@ -10,6 +10,8 @@ import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.pieces.Pawn;
 
+import static org.junit.Assert.*;
+
 public class KillerMovesTest {
 
     @Test
