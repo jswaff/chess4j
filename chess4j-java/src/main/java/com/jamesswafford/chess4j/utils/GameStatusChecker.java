@@ -18,8 +18,7 @@ public final class GameStatusChecker {
 
     private GameStatusChecker() { }
 
-    public static GameStatus getGameStatus() {
-        Board b = Board.INSTANCE;
+    public static GameStatus getGameStatus(Board b) {
         List<Move> moves = MoveGen.genLegalMoves(b);
         if (moves.size()==0) {
             if (b.isPlayerInCheck()) {

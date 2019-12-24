@@ -8,7 +8,6 @@ import com.jamesswafford.chess4j.board.Move;
 
 import org.junit.Test;
 
-import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.io.EPDParser;
 import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.io.MoveParser;
@@ -21,8 +20,8 @@ import static com.jamesswafford.chess4j.pieces.Bishop.*;
 import static com.jamesswafford.chess4j.pieces.Rook.*;
 import static com.jamesswafford.chess4j.pieces.Queen.*;
 import static com.jamesswafford.chess4j.pieces.King.*;
-import static com.jamesswafford.chess4j.board.squares.File.*;
-import static com.jamesswafford.chess4j.board.squares.Rank.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
+
 
 public class MoveGenTest {
 
@@ -35,10 +34,10 @@ public class MoveGenTest {
         MoveGen.genKnightMoves(b,moves,true,true);
 
         assertEquals(4, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_KNIGHT,Square.valueOf(FILE_B, RANK_1),Square.valueOf(FILE_A, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_KNIGHT,Square.valueOf(FILE_B, RANK_1),Square.valueOf(FILE_C, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_KNIGHT,Square.valueOf(FILE_G, RANK_1),Square.valueOf(FILE_F, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_KNIGHT,Square.valueOf(FILE_G, RANK_1),Square.valueOf(FILE_H, RANK_3))));
+        assertTrue(moves.contains(new Move(WHITE_KNIGHT, B1, A3)));
+        assertTrue(moves.contains(new Move(WHITE_KNIGHT, B1, C3)));
+        assertTrue(moves.contains(new Move(WHITE_KNIGHT, G1, F3)));
+        assertTrue(moves.contains(new Move(WHITE_KNIGHT, G1, H3)));
     }
 
     @Test
@@ -50,7 +49,7 @@ public class MoveGenTest {
         MoveGen.genKnightMoves(b,moves,true,false);
 
         assertEquals(1, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_KNIGHT,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_F, RANK_6),BLACK_PAWN)));
+        assertTrue(moves.contains(new Move(WHITE_KNIGHT, E4, F6 ,BLACK_PAWN)));
     }
 
     @Test
@@ -62,12 +61,12 @@ public class MoveGenTest {
         MoveGen.genKnightMoves(b,moves,false,true);
 
         assertEquals(6, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_KNIGHT,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_G, RANK_5))));
-        assertTrue(moves.contains(new Move(WHITE_KNIGHT,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_G, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_KNIGHT,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_F, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_KNIGHT,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_D, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_KNIGHT,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_C, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_KNIGHT,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_C, RANK_5))));
+        assertTrue(moves.contains(new Move(WHITE_KNIGHT, E4, G5)));
+        assertTrue(moves.contains(new Move(WHITE_KNIGHT, E4, G3)));
+        assertTrue(moves.contains(new Move(WHITE_KNIGHT, E4, F2)));
+        assertTrue(moves.contains(new Move(WHITE_KNIGHT, E4, D2)));
+        assertTrue(moves.contains(new Move(WHITE_KNIGHT, E4, C3)));
+        assertTrue(moves.contains(new Move(WHITE_KNIGHT, E4, C5)));
     }
 
     @Test
@@ -77,24 +76,24 @@ public class MoveGenTest {
         List<Move> moves = new ArrayList<>();
         MoveGen.genBishopMoves(b, moves, true, true);
         assertEquals(18, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_F, RANK_6))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_F, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_G, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_H, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_D, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_C, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_B, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_A, RANK_1))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_D, RANK_6))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_C, RANK_7),BLACK_PAWN)));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_F, RANK_5))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_G, RANK_6))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_H, RANK_7))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_D, RANK_3),BLACK_PAWN)));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_D, RANK_5))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_C, RANK_6))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_B, RANK_7))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_A, RANK_8))));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, F6)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, F4)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, G3)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, H2)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, D4)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, C3)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, B2)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, A1)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, D6)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, C7, BLACK_PAWN)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, F5)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, G6)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, H7)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, D3, BLACK_PAWN)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, D5)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, C6)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, B7)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, A8)));
     }
 
     @Test
@@ -104,8 +103,8 @@ public class MoveGenTest {
         List<Move> moves = new ArrayList<>();
         MoveGen.genBishopMoves(b, moves, true, false);
         assertEquals(2, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_C, RANK_7),BLACK_PAWN)));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_D, RANK_3),BLACK_PAWN)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, C7,BLACK_PAWN)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, D3, BLACK_PAWN)));
     }
 
     @Test
@@ -115,22 +114,22 @@ public class MoveGenTest {
         List<Move> moves = new ArrayList<>();
         MoveGen.genBishopMoves(b, moves, false, true);
         assertEquals(16, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_F, RANK_6))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_F, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_G, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_H, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_D, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_C, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_B, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_A, RANK_1))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_D, RANK_6))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_F, RANK_5))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_G, RANK_6))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_H, RANK_7))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_D, RANK_5))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_C, RANK_6))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_B, RANK_7))));
-        assertTrue(moves.contains(new Move(WHITE_BISHOP,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_A, RANK_8))));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, F6)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, F4)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, G3)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, H2)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, D4)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, C3)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, B2)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, A1)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, D6)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, F5)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, G6)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, H7)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, D5)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, C6)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, B7)));
+        assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, A8)));
     }
 
     @Test
@@ -146,16 +145,16 @@ public class MoveGenTest {
         MoveGen.genRookMoves(b, moves, true, true);
 
         assertEquals(10, moves.size());
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_F, RANK_3))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_F, RANK_4))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_F, RANK_5))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_F, RANK_1))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_G, RANK_2))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_H, RANK_2))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_E, RANK_2))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_D, RANK_2))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_C, RANK_2))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_B, RANK_2),WHITE_ROOK)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, F3)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, F4)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, F5)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, F1)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, G2)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, H2)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, E2)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, D2)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, C2)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, B2,WHITE_ROOK)));
     }
 
     @Test
@@ -167,7 +166,7 @@ public class MoveGenTest {
         MoveGen.genRookMoves(b, moves, true, false);
 
         assertEquals(1, moves.size());
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_B, RANK_2),WHITE_ROOK)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, B2, WHITE_ROOK)));
     }
 
     @Test
@@ -179,15 +178,15 @@ public class MoveGenTest {
         MoveGen.genRookMoves(b, moves, false, true);
 
         assertEquals(9, moves.size());
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_F, RANK_3))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_F, RANK_4))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_F, RANK_5))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_F, RANK_1))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_G, RANK_2))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_H, RANK_2))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_E, RANK_2))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_D, RANK_2))));
-        assertTrue(moves.contains(new Move(BLACK_ROOK,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_C, RANK_2))));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, F3)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, F4)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, F5)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, F1)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, G2)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, H2)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, E2)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, D2)));
+        assertTrue(moves.contains(new Move(BLACK_ROOK, F2, C2)));
     }
 
     @Test
@@ -198,24 +197,24 @@ public class MoveGenTest {
         List<Move> moves = new ArrayList<>();
         MoveGen.genQueenMoves(b, moves, true, true);
         assertEquals(18, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_G, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_G, RANK_5))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_G, RANK_6))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_G, RANK_7))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_G, RANK_8))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_H, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_H, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_H, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_G, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_G, RANK_1))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_F, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_E, RANK_1))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_F, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_E, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_D, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_F, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_E, RANK_5))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_D, RANK_6),BLACK_BISHOP)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G4)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G5)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G6)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G7)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G8)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, H4)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, H3)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, H2)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G2)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G1)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, F2)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, E1)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, F3)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, E3)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, D3)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, F4)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, E5)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, D6, BLACK_BISHOP)));
     }
 
     @Test
@@ -226,7 +225,7 @@ public class MoveGenTest {
         List<Move> moves = new ArrayList<>();
         MoveGen.genQueenMoves(b, moves, true, false);
         assertEquals(1, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_D, RANK_6),BLACK_BISHOP)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, D6 ,BLACK_BISHOP)));
     }
 
     @Test
@@ -237,23 +236,23 @@ public class MoveGenTest {
         List<Move> moves = new ArrayList<>();
         MoveGen.genQueenMoves(b, moves, false, true);
         assertEquals(17, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_G, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_G, RANK_5))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_G, RANK_6))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_G, RANK_7))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_G, RANK_8))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_H, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_H, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_H, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_G, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_G, RANK_1))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_F, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_E, RANK_1))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_F, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_E, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_D, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_F, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_QUEEN,Square.valueOf(FILE_G, RANK_3),Square.valueOf(FILE_E, RANK_5))));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G4)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G5)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G6)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G7)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G8)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, H4)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, H3)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, H2)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G2)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G1)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, F2)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, E1)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, F3)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, E3)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, D3)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, F4)));
+        assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, E5)));
     }
 
 
@@ -264,25 +263,24 @@ public class MoveGenTest {
         List<Move> moves = new ArrayList<>();
         MoveGen.genKingMoves(b, moves, true, true);
         assertEquals(7, moves.size());
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_D, RANK_6),Square.valueOf(FILE_D, RANK_7))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_D, RANK_6),Square.valueOf(FILE_E, RANK_7))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_D, RANK_6),Square.valueOf(FILE_E, RANK_6))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_D, RANK_6),Square.valueOf(FILE_E, RANK_5),WHITE_PAWN)));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_D, RANK_6),Square.valueOf(FILE_D, RANK_5))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_D, RANK_6),Square.valueOf(FILE_C, RANK_6))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_D, RANK_6),Square.valueOf(FILE_C, RANK_7))));
+        assertTrue(moves.contains(new Move(BLACK_KING, D6, D7)));
+        assertTrue(moves.contains(new Move(BLACK_KING, D6, E7)));
+        assertTrue(moves.contains(new Move(BLACK_KING, D6, E6)));
+        assertTrue(moves.contains(new Move(BLACK_KING, D6, E5, WHITE_PAWN)));
+        assertTrue(moves.contains(new Move(BLACK_KING, D6, D5)));
+        assertTrue(moves.contains(new Move(BLACK_KING, D6, C6)));
+        assertTrue(moves.contains(new Move(BLACK_KING, D6, C7)));
 
         // flip sides
         FenParser.setPos(b, "8/8/3k4/2n1P3/8/8/3rP3/RN2K2R w KQ - 0 1");
         moves.clear();
         MoveGen.genKingMoves(b, moves, true, true);
         assertEquals(5, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_E, RANK_1),Square.valueOf(FILE_F, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_E, RANK_1),Square.valueOf(FILE_F, RANK_1))));
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_E, RANK_1),Square.valueOf(FILE_D, RANK_1))));
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_E, RANK_1),Square.valueOf(FILE_D, RANK_2),BLACK_ROOK)));
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_E, RANK_1),Square.valueOf(FILE_G, RANK_1),true)));
-
+        assertTrue(moves.contains(new Move(WHITE_KING, E1, F2)));
+        assertTrue(moves.contains(new Move(WHITE_KING, E1, F1)));
+        assertTrue(moves.contains(new Move(WHITE_KING, E1, D1)));
+        assertTrue(moves.contains(new Move(WHITE_KING, E1, D2, BLACK_ROOK)));
+        assertTrue(moves.contains(new Move(WHITE_KING, E1, G1,true)));
     }
 
     @Test
@@ -293,12 +291,12 @@ public class MoveGenTest {
         MoveGen.genKingMoves(b, moves, true, true);
 
         assertEquals(5, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_E, RANK_1),Square.valueOf(FILE_F, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_E, RANK_1),Square.valueOf(FILE_F, RANK_1))));
+        assertTrue(moves.contains(new Move(WHITE_KING, E1, F2)));
+        assertTrue(moves.contains(new Move(WHITE_KING, E1, F1)));
         // Kd1 illegal but that's handled elsewhere
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_E, RANK_1),Square.valueOf(FILE_D, RANK_1))));
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_E, RANK_1),Square.valueOf(FILE_D, RANK_2),BLACK_ROOK)));
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_E, RANK_1),Square.valueOf(FILE_G, RANK_1),true)));
+        assertTrue(moves.contains(new Move(WHITE_KING, E1, D1)));
+        assertTrue(moves.contains(new Move(WHITE_KING, E1, D2, BLACK_ROOK)));
+        assertTrue(moves.contains(new Move(WHITE_KING, E1, G1,true)));
     }
 
     @Test
@@ -309,9 +307,9 @@ public class MoveGenTest {
         MoveGen.genKingMoves(b, moves, true, true);
 
         assertEquals(3, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_H, RANK_1),Square.valueOf(FILE_G, RANK_1))));
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_H, RANK_1),Square.valueOf(FILE_G, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_H, RANK_1),Square.valueOf(FILE_H, RANK_2))));
+        assertTrue(moves.contains(new Move(WHITE_KING, H1, G1)));
+        assertTrue(moves.contains(new Move(WHITE_KING, H1, G2)));
+        assertTrue(moves.contains(new Move(WHITE_KING, H1, H2)));
     }
 
     @Test
@@ -322,9 +320,9 @@ public class MoveGenTest {
         MoveGen.genKingMoves(b, moves, true, true);
 
         assertEquals(3, moves.size());
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_A, RANK_8),Square.valueOf(FILE_A, RANK_7))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_A, RANK_8),Square.valueOf(FILE_B, RANK_7))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_A, RANK_8),Square.valueOf(FILE_B, RANK_8))));
+        assertTrue(moves.contains(new Move(BLACK_KING, A8, A7)));
+        assertTrue(moves.contains(new Move(BLACK_KING, A8, B7)));
+        assertTrue(moves.contains(new Move(BLACK_KING, A8, B8)));
     }
 
     @Test
@@ -335,11 +333,11 @@ public class MoveGenTest {
         MoveGen.genKingMoves(b, moves, true, true);
 
         assertEquals(4, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_E, RANK_1),Square.valueOf(FILE_F, RANK_1))));
+        assertTrue(moves.contains(new Move(WHITE_KING, E1, F1)));
         // Kf2 stays in check, but that's handled separately
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_E, RANK_1),Square.valueOf(FILE_F, RANK_2))));
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_E, RANK_1),Square.valueOf(FILE_D, RANK_1))));
-        assertTrue(moves.contains(new Move(WHITE_KING,Square.valueOf(FILE_E, RANK_1),Square.valueOf(FILE_D, RANK_2))));
+        assertTrue(moves.contains(new Move(WHITE_KING, E1, F2)));
+        assertTrue(moves.contains(new Move(WHITE_KING, E1, D1)));
+        assertTrue(moves.contains(new Move(WHITE_KING, E1, D2)));
     }
 
     @Test
@@ -350,12 +348,12 @@ public class MoveGenTest {
         MoveGen.genKingMoves(b, moves, true, true);
 
         assertEquals(6, moves.size());
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_E, RANK_8),Square.valueOf(FILE_F, RANK_8))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_E, RANK_8),Square.valueOf(FILE_F, RANK_7))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_E, RANK_8),Square.valueOf(FILE_D, RANK_8))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_E, RANK_8),Square.valueOf(FILE_D, RANK_7))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_E, RANK_8),Square.valueOf(FILE_E, RANK_7))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_E, RANK_8),Square.valueOf(FILE_C, RANK_8),true)));
+        assertTrue(moves.contains(new Move(BLACK_KING, E8, F8)));
+        assertTrue(moves.contains(new Move(BLACK_KING, E8, F7)));
+        assertTrue(moves.contains(new Move(BLACK_KING, E8, D8)));
+        assertTrue(moves.contains(new Move(BLACK_KING, E8, D7)));
+        assertTrue(moves.contains(new Move(BLACK_KING, E8, E7)));
+        assertTrue(moves.contains(new Move(BLACK_KING, E8, C8,true)));
     }
 
     @Test
@@ -366,7 +364,7 @@ public class MoveGenTest {
         MoveGen.genKingMoves(b, moves, true, false);
 
         assertEquals(1, moves.size());
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_D, RANK_6),Square.valueOf(FILE_E, RANK_5),WHITE_PAWN)));
+        assertTrue(moves.contains(new Move(BLACK_KING, D6, E5, WHITE_PAWN)));
     }
 
     @Test
@@ -377,12 +375,12 @@ public class MoveGenTest {
         MoveGen.genKingMoves(b, moves, false,true);
         assertEquals(6, moves.size());
 
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_D, RANK_6),Square.valueOf(FILE_D, RANK_7))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_D, RANK_6),Square.valueOf(FILE_E, RANK_7))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_D, RANK_6),Square.valueOf(FILE_E, RANK_6))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_D, RANK_6),Square.valueOf(FILE_D, RANK_5))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_D, RANK_6),Square.valueOf(FILE_C, RANK_6))));
-        assertTrue(moves.contains(new Move(BLACK_KING,Square.valueOf(FILE_D, RANK_6),Square.valueOf(FILE_C, RANK_7))));
+        assertTrue(moves.contains(new Move(BLACK_KING, D6, D7)));
+        assertTrue(moves.contains(new Move(BLACK_KING, D6, E7)));
+        assertTrue(moves.contains(new Move(BLACK_KING, D6, E6)));
+        assertTrue(moves.contains(new Move(BLACK_KING, D6, D5)));
+        assertTrue(moves.contains(new Move(BLACK_KING, D6, C6)));
+        assertTrue(moves.contains(new Move(BLACK_KING, D6, C7)));
     }
 
     @Test
@@ -393,27 +391,27 @@ public class MoveGenTest {
         MoveGen.genPawnMoves(b, moves, true, true);
 
         assertEquals(17, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_A, RANK_7),Square.valueOf(FILE_A, RANK_8),null,WHITE_QUEEN)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_A, RANK_7),Square.valueOf(FILE_A, RANK_8),null,WHITE_ROOK)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_A, RANK_7),Square.valueOf(FILE_A, RANK_8),null,WHITE_BISHOP)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_A, RANK_7),Square.valueOf(FILE_A, RANK_8),null,WHITE_KNIGHT)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_B, RANK_8),null,WHITE_QUEEN)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_B, RANK_8),null,WHITE_ROOK)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_B, RANK_8),null,WHITE_BISHOP)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_B, RANK_8),null,WHITE_KNIGHT)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, A7, A8,null, WHITE_QUEEN)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, A7, A8,null, WHITE_ROOK)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, A7, A8,null, WHITE_BISHOP)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, A7, A8,null, WHITE_KNIGHT)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, B8,null, WHITE_QUEEN)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, B8,null, WHITE_ROOK)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, B8,null, WHITE_BISHOP)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, B8,null, WHITE_KNIGHT)));
         // Capture + Promotion
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_C, RANK_8),BLACK_BISHOP,WHITE_QUEEN)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_C, RANK_8),BLACK_BISHOP,WHITE_ROOK)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_C, RANK_8),BLACK_BISHOP,WHITE_BISHOP)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_C, RANK_8),BLACK_BISHOP,WHITE_KNIGHT)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, C8, BLACK_BISHOP, WHITE_QUEEN)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, C8, BLACK_BISHOP, WHITE_ROOK)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, C8, BLACK_BISHOP, WHITE_BISHOP)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, C8, BLACK_BISHOP, WHITE_KNIGHT)));
 
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_E, RANK_6))));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, E5, E6)));
         // EP
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_D, RANK_6),BLACK_PAWN,true)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_D, RANK_5),BLACK_PAWN)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, E5, D6, BLACK_PAWN,true)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, E4, D5, BLACK_PAWN)));
 
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_G, RANK_2),Square.valueOf(FILE_G, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_G, RANK_2),Square.valueOf(FILE_G, RANK_4))));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, G2, G3)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, G2, G4)));
     }
 
     @Test
@@ -424,23 +422,23 @@ public class MoveGenTest {
         MoveGen.genPawnMoves(b, moves, true, false);
 
         assertEquals(14, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_A, RANK_7),Square.valueOf(FILE_A, RANK_8),null,WHITE_QUEEN)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_A, RANK_7),Square.valueOf(FILE_A, RANK_8),null,WHITE_ROOK)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_A, RANK_7),Square.valueOf(FILE_A, RANK_8),null,WHITE_BISHOP)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_A, RANK_7),Square.valueOf(FILE_A, RANK_8),null,WHITE_KNIGHT)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_B, RANK_8),null,WHITE_QUEEN)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_B, RANK_8),null,WHITE_ROOK)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_B, RANK_8),null,WHITE_BISHOP)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_B, RANK_8),null,WHITE_KNIGHT)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, A7, A8, null, WHITE_QUEEN)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, A7, A8, null, WHITE_ROOK)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, A7, A8, null, WHITE_BISHOP)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, A7, A8, null, WHITE_KNIGHT)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, B8, null, WHITE_QUEEN)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, B8, null, WHITE_ROOK)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, B8, null, WHITE_BISHOP)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, B8, null, WHITE_KNIGHT)));
         // Capture + Promotion
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_C, RANK_8),BLACK_BISHOP,WHITE_QUEEN)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_C, RANK_8),BLACK_BISHOP,WHITE_ROOK)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_C, RANK_8),BLACK_BISHOP,WHITE_BISHOP)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_7),Square.valueOf(FILE_C, RANK_8),BLACK_BISHOP,WHITE_KNIGHT)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, C8, BLACK_BISHOP, WHITE_QUEEN)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, C8, BLACK_BISHOP, WHITE_ROOK)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, C8, BLACK_BISHOP, WHITE_BISHOP)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B7, C8, BLACK_BISHOP, WHITE_KNIGHT)));
 
         // EP
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_D, RANK_6),BLACK_PAWN,true)));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_D, RANK_5),BLACK_PAWN)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, E5, D6, BLACK_PAWN, true)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, E4, D5, BLACK_PAWN)));
     }
 
     @Test
@@ -451,9 +449,9 @@ public class MoveGenTest {
         MoveGen.genPawnMoves(b, moves, false, true);
 
         assertEquals(3, moves.size());
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_E, RANK_6))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_G, RANK_2),Square.valueOf(FILE_G, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_G, RANK_2),Square.valueOf(FILE_G, RANK_4))));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, E5, E6)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, G2, G3)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, G2, G4)));
     }
 
     @Test
@@ -464,8 +462,8 @@ public class MoveGenTest {
         MoveGen.genPawnMoves(b, moves, true, true);
 
         assertEquals(16, moves.size());
-        assertTrue(moves.contains(new Move(BLACK_PAWN,Square.valueOf(FILE_D, RANK_7),Square.valueOf(FILE_D, RANK_6))));
-        assertTrue(moves.contains(new Move(BLACK_PAWN,Square.valueOf(FILE_D, RANK_7),Square.valueOf(FILE_D, RANK_5))));
+        assertTrue(moves.contains(new Move(BLACK_PAWN, D7, D6)));
+        assertTrue(moves.contains(new Move(BLACK_PAWN, D7, D5)));
     }
 
     @Test
@@ -476,27 +474,27 @@ public class MoveGenTest {
         List<Move> moves = MoveGen.genLegalMoves(b);
         assertEquals(20, moves.size());
 
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_A, RANK_2),Square.valueOf(FILE_A, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_A, RANK_2),Square.valueOf(FILE_A, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_2),Square.valueOf(FILE_B, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_2),Square.valueOf(FILE_B, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_C, RANK_2),Square.valueOf(FILE_C, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_C, RANK_2),Square.valueOf(FILE_C, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_D, RANK_2),Square.valueOf(FILE_D, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_D, RANK_2),Square.valueOf(FILE_D, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2),Square.valueOf(FILE_E, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2),Square.valueOf(FILE_E, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_F, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_F, RANK_2),Square.valueOf(FILE_F, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_G, RANK_2),Square.valueOf(FILE_G, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_G, RANK_2),Square.valueOf(FILE_G, RANK_4))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_H, RANK_2),Square.valueOf(FILE_H, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_PAWN,Square.valueOf(FILE_H, RANK_2),Square.valueOf(FILE_H, RANK_4))));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, A2, A3)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, A2, A4)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B2, B3)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, B2, B4)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, C2, C3)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, C2, C4)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, D2, D3)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, D2, D4)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, E2, E3)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, E2, E4)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, F2, F3)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, F2, F4)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, G2, G3)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, G2, G4)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, H2, H3)));
+        assertTrue(moves.contains(new Move(WHITE_PAWN, H2, H4)));
 
-        assertTrue(moves.contains(new Move(WHITE_KNIGHT,Square.valueOf(FILE_B, RANK_1),Square.valueOf(FILE_A, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_KNIGHT,Square.valueOf(FILE_B, RANK_1),Square.valueOf(FILE_C, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_KNIGHT,Square.valueOf(FILE_G, RANK_1),Square.valueOf(FILE_F, RANK_3))));
-        assertTrue(moves.contains(new Move(WHITE_KNIGHT,Square.valueOf(FILE_G, RANK_1),Square.valueOf(FILE_H, RANK_3))));
+        assertTrue(moves.contains(new Move(WHITE_KNIGHT, B1, A3)));
+        assertTrue(moves.contains(new Move(WHITE_KNIGHT, B1, C3)));
+        assertTrue(moves.contains(new Move(WHITE_KNIGHT, G1, F3)));
+        assertTrue(moves.contains(new Move(WHITE_KNIGHT, G1, H3)));
     }
 
     @Test

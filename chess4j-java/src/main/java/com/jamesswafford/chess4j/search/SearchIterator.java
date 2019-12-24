@@ -109,7 +109,7 @@ public final class SearchIterator {
 
         Board.INSTANCE.applyMove(pv.get(0));
         LOGGER.info("move " + pv.get(0));
-        GameStatus gs = GameStatusChecker.getGameStatus();
+        GameStatus gs = GameStatusChecker.getGameStatus(Board.INSTANCE);
 
         // pondering loop.  as long as we guess correctly we'll loop back around
         // if we don't predict correctly this thread is terminated
@@ -146,7 +146,7 @@ public final class SearchIterator {
                     assert(Board.INSTANCE.equals(searchPos));
                     Board.INSTANCE.applyMove(pv.get(0));
                     LOGGER.info("move " + pv.get(0));
-                    gs = GameStatusChecker.getGameStatus();
+                    gs = GameStatusChecker.getGameStatus(Board.INSTANCE);
                 } else {
                     // we're still in ponder mode.  this means the search terminated on its own.
                     // in this case just bail out.

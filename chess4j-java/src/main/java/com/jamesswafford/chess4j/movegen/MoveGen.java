@@ -21,6 +21,7 @@ import static com.jamesswafford.chess4j.pieces.Queen.*;
 import static com.jamesswafford.chess4j.pieces.King.*;
 import static com.jamesswafford.chess4j.board.squares.File.*;
 import static com.jamesswafford.chess4j.board.squares.Rank.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public final class MoveGen {
 
@@ -281,20 +282,20 @@ public final class MoveGen {
         Color player = board.getPlayerToMove();
 
         if (player.isWhite()) {
-            Square fromSq = Square.valueOf(FILE_E, RANK_1);
+            Square fromSq = E1;
             if (BoardUtils.whiteCanCastleKingSide(board)) {
-                moves.add(new Move(WHITE_KING,fromSq,Square.valueOf(FILE_G, RANK_1),true));
+                moves.add(new Move(WHITE_KING,fromSq,G1,true));
             }
             if (BoardUtils.whiteCanCastleQueenSide(board)) {
-                moves.add(new Move(WHITE_KING,fromSq,Square.valueOf(FILE_C,RANK_1),true));
+                moves.add(new Move(WHITE_KING,fromSq,C1,true));
             }
         } else {
-            Square fromSq = Square.valueOf(FILE_E, RANK_8);
+            Square fromSq = E8;
             if (BoardUtils.blackCanCastleKingSide(board)) {
-                moves.add(new Move(BLACK_KING,fromSq,Square.valueOf(FILE_G, RANK_8),true));
+                moves.add(new Move(BLACK_KING,fromSq,G8,true));
             }
             if (BoardUtils.blackCanCastleQueenSide(board)) {
-                moves.add(new Move(BLACK_KING,fromSq,Square.valueOf(FILE_C,RANK_8),true));
+                moves.add(new Move(BLACK_KING,fromSq,C8,true));
             }
         }
     }

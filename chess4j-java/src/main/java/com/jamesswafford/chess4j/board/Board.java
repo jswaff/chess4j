@@ -842,6 +842,8 @@ public final class Board {
 
     private boolean verify() {
 
+        assert(moveCounter >= fiftyCounter);
+
         // test king placement
         Square myWhiteKingSq=null;
         Square myBlackKingSq=null;
