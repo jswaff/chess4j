@@ -1,7 +1,5 @@
 package com.jamesswafford.chess4j;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
@@ -136,7 +134,7 @@ public class PerfTest {
         FenParser.setPos(Board.INSTANCE, fen);
         //DrawBoard.drawBoard(Board.INSTANCE);
         long n = Perft.perft(Board.INSTANCE, depth);
-        Assert.assertEquals(nodes, n);
+        assertEquals(nodes, n);
     }
 
 }

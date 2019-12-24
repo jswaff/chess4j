@@ -2,20 +2,20 @@ package com.jamesswafford.chess4j.utils;
 
 import org.junit.Test;
 
-import junit.framework.Assert;
-
 import static org.junit.Assert.*;
+
+import static com.jamesswafford.chess4j.utils.TimeUtils.*;
 
 public class TimeUtilsTest {
 
     @Test
     public void testGetSearchTime() {
-        Assert.assertEquals(4, TimeUtils.getSearchTime(100, 0));
-        Assert.assertEquals(3, TimeUtils.getSearchTime(99, 0));
-        Assert.assertEquals(1, TimeUtils.getSearchTime(25, 0));
-        Assert.assertEquals(0, TimeUtils.getSearchTime(24, 0));
-        Assert.assertEquals(3, TimeUtils.getSearchTime(0, 3));
-        Assert.assertEquals(3, TimeUtils.getSearchTime(-1, 3));
-        Assert.assertEquals(2, TimeUtils.getSearchTime(-25, 2));
+        assertEquals(4, getSearchTime(100, 0));
+        assertEquals(3, getSearchTime(99, 0));
+        assertEquals(1, getSearchTime(25, 0));
+        assertEquals(0, getSearchTime(24, 0));
+        assertEquals(3, getSearchTime(0, 3));
+        assertEquals(3, getSearchTime(-1, 3));
+        assertEquals(2, getSearchTime(-25, 2));
     }
 }

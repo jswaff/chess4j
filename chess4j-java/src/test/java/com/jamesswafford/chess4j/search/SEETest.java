@@ -2,8 +2,6 @@ package com.jamesswafford.chess4j.search;
 
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
@@ -34,7 +32,7 @@ public class SEETest {
         b.applyMove(m);
 
         int score = SEE.see(b,m);
-        Assert.assertEquals(Eval.PAWN_VAL, score);
+        assertEquals(Eval.PAWN_VAL, score);
     }
 
     @Test
@@ -47,7 +45,7 @@ public class SEETest {
         b.applyMove(m);
 
         int score = SEE.see(b,m);
-        Assert.assertEquals(Eval.PAWN_VAL - Eval.QUEEN_VAL, score);
+        assertEquals(Eval.PAWN_VAL - Eval.QUEEN_VAL, score);
     }
 
     @Test
@@ -60,11 +58,11 @@ public class SEETest {
                 Pawn.BLACK_PAWN);
 
         List<Move> moves = MoveGen.genLegalMoves(b);
-        Assert.assertTrue(moves.contains(m));
+        assertTrue(moves.contains(m));
         b.applyMove(m);
 
         int score = SEE.see(b, m);
-        Assert.assertEquals(Eval.PAWN_VAL, score);
+        assertEquals(Eval.PAWN_VAL, score);
     }
 
     @Test
@@ -77,11 +75,11 @@ public class SEETest {
                 Pawn.BLACK_PAWN);
 
         List<Move> moves = MoveGen.genLegalMoves(b);
-        Assert.assertTrue(moves.contains(m));
+        assertTrue(moves.contains(m));
         b.applyMove(m);
 
         int score = SEE.see(b, m);
-        Assert.assertEquals(Eval.PAWN_VAL - Eval.KNIGHT_VAL, score);
+        assertEquals(Eval.PAWN_VAL - Eval.KNIGHT_VAL, score);
     }
 
     @Test
@@ -94,11 +92,11 @@ public class SEETest {
                 Pawn.BLACK_PAWN);
 
         List<Move> moves = MoveGen.genLegalMoves(b);
-        Assert.assertTrue(moves.contains(m));
+        assertTrue(moves.contains(m));
         b.applyMove(m);
 
         int score = SEE.see(b, m);
-        Assert.assertEquals(Eval.PAWN_VAL, score);
+        assertEquals(Eval.PAWN_VAL, score);
     }
 
     @Test
@@ -109,11 +107,11 @@ public class SEETest {
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("c3d5", b);
-        Assert.assertTrue(moves.contains(m));
+        assertTrue(moves.contains(m));
         b.applyMove(m);
 
         int score = SEE.see(b, m);
-        Assert.assertEquals(Eval.PAWN_VAL, score);
+        assertEquals(Eval.PAWN_VAL, score);
     }
 
     @Test
@@ -124,11 +122,11 @@ public class SEETest {
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("c3d5", b);
-        Assert.assertTrue(moves.contains(m));
+        assertTrue(moves.contains(m));
         b.applyMove(m);
 
         int score = SEE.see(b, m);
-        Assert.assertEquals(Eval.PAWN_VAL, score);
+        assertEquals(Eval.PAWN_VAL, score);
     }
 
     @Test
@@ -139,11 +137,11 @@ public class SEETest {
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("e5d5", b);
-        Assert.assertTrue(moves.contains(m));
+        assertTrue(moves.contains(m));
         b.applyMove(m);
 
         int score = SEE.see(b, m);
-        Assert.assertEquals(Eval.PAWN_VAL - Eval.ROOK_VAL, score);
+        assertEquals(Eval.PAWN_VAL - Eval.ROOK_VAL, score);
     }
 
     @Test
@@ -154,11 +152,11 @@ public class SEETest {
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("e5d5", b);
-        Assert.assertTrue(moves.contains(m));
+        assertTrue(moves.contains(m));
         b.applyMove(m);
 
         int score = SEE.see(b, m);
-        Assert.assertEquals(Eval.PAWN_VAL, score);
+        assertEquals(Eval.PAWN_VAL, score);
     }
 
     @Test
@@ -169,11 +167,11 @@ public class SEETest {
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("c3d5", b);
-        Assert.assertTrue(moves.contains(m));
+        assertTrue(moves.contains(m));
         b.applyMove(m);
 
         int score = SEE.see(b, m);
-        Assert.assertEquals(Eval.PAWN_VAL, score);
+        assertEquals(Eval.PAWN_VAL, score);
     }
 
     @Test
@@ -184,11 +182,11 @@ public class SEETest {
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("b3d5", b);
-        Assert.assertTrue(moves.contains(m));
+        assertTrue(moves.contains(m));
         b.applyMove(m);
 
         int score = SEE.see(b, m);
-        Assert.assertEquals(Eval.PAWN_VAL-Eval.BISHOP_VAL+Eval.KNIGHT_VAL, score);
+        assertEquals(Eval.PAWN_VAL-Eval.BISHOP_VAL+Eval.KNIGHT_VAL, score);
     }
 
     @Test
@@ -199,11 +197,11 @@ public class SEETest {
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("c3d5", b);
-        Assert.assertTrue(moves.contains(m));
+        assertTrue(moves.contains(m));
         b.applyMove(m);
 
         int score = SEE.see(b, m);
-        Assert.assertEquals(Eval.PAWN_VAL - Eval.KNIGHT_VAL, score);
+        assertEquals(Eval.PAWN_VAL - Eval.KNIGHT_VAL, score);
     }
 
 
@@ -253,11 +251,11 @@ public class SEETest {
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove(mv, b);
 
-        Assert.assertTrue(MoveGen.genLegalMoves(b).contains(m));
+        assertTrue(MoveGen.genLegalMoves(b).contains(m));
         b.applyMove(m);
 
         int myScore = SEE.see(b, m);
-        Assert.assertEquals(score, myScore);
+        assertEquals(score, myScore);
     }
 
 }

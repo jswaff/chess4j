@@ -1,14 +1,10 @@
 package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.Color;
-import com.jamesswafford.chess4j.board.Move;
-import junit.framework.Assert;
 
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.pieces.Bishop;
@@ -18,48 +14,40 @@ import com.jamesswafford.chess4j.pieces.Queen;
 import com.jamesswafford.chess4j.pieces.Rook;
 import com.jamesswafford.chess4j.utils.OrderedPair;
 
+import static org.junit.Assert.*;
+
+import static com.jamesswafford.chess4j.board.squares.File.*;
+import static com.jamesswafford.chess4j.board.squares.Rank.*;
+
+import static com.jamesswafford.chess4j.eval.Eval.*;
 
 public class EvalTest {
 
     Board board = Board.INSTANCE;
 
     @Test
-    public void evalEquality() {
-        board.resetBoard();
-
-        Assert.assertEquals(
-                Eval.eval(board), Eval.evalNative(FenParser.getFen(board, false), false));
-
-        board.applyMove(new Move(Pawn.WHITE_PAWN, Square.valueOf(File.FILE_E, Rank.RANK_2),
-                Square.valueOf(File.FILE_E, Rank.RANK_4)));
-
-        Assert.assertEquals(
-                Eval.eval(board), Eval.evalNative(FenParser.getFen(board, false), false));
-    }
-
-    @Test
     public void testStartPosIs0() {
         board.resetBoard();
-        int eval = Eval.eval(board);
-        Assert.assertEquals(0, eval);
+        int eval = eval(board);
+        assertEquals(0, eval);
     }
 
     @Test
     public void testScore1() throws Exception {
         FenParser.setPos(board, "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
-        int eval = Eval.eval(board);
-        Assert.assertEquals(-(Eval.PAWN_PST[Square.valueOf(File.FILE_E, Rank.RANK_4).value()]
-                -Eval.PAWN_PST[Square.valueOf(File.FILE_E, Rank.RANK_2).value()]), eval);
+        int eval = eval(board);
+        assertEquals(-(PAWN_PST[Square.valueOf(FILE_E, RANK_4).value()]
+                -PAWN_PST[Square.valueOf(FILE_E, RANK_2).value()]), eval);
     }
 
     @Test
     public void testScore2() throws Exception {
         FenParser.setPos(board, "rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
-        int eval = Eval.eval(board);
-        Assert.assertEquals(Eval.PAWN_PST[Square.valueOf(File.FILE_E, Rank.RANK_4).value()]
-                -Eval.PAWN_PST[Square.valueOf(File.FILE_E, Rank.RANK_2).value()]
-                -Eval.PAWN_PST[Square.valueOf(File.FILE_C, Rank.RANK_6).flipVertical().value()]
-                +Eval.PAWN_PST[Square.valueOf(File.FILE_C, Rank.RANK_7).flipVertical().value()]
+        int eval = eval(board);
+        assertEquals(PAWN_PST[Square.valueOf(FILE_E, RANK_4).value()]
+                -PAWN_PST[Square.valueOf(FILE_E, RANK_2).value()]
+                -PAWN_PST[Square.valueOf(FILE_C, RANK_6).flipVertical().value()]
+                +PAWN_PST[Square.valueOf(FILE_C, RANK_7).flipVertical().value()]
                 , eval);
     }
 
@@ -110,190 +98,190 @@ public class EvalTest {
 
     private void testCaseSymmetry(String fen) throws Exception {
         FenParser.setPos(board, fen);
-        int eval = Eval.eval(board);
+        int eval = eval(board);
         board.flipVertical();
-        int eval2 = Eval.eval(board);
-        Assert.assertEquals(eval, eval2);
+        int eval2 = eval(board);
+        assertEquals(eval, eval2);
     }
 
     @Test
     public void testPieceVals() {
-        Assert.assertEquals(900, Eval.getPieceValue(Queen.WHITE_QUEEN));
-        Assert.assertEquals(900, Eval.getPieceValue(Queen.BLACK_QUEEN));
+        assertEquals(900, Eval.getPieceValue(Queen.WHITE_QUEEN));
+        assertEquals(900, Eval.getPieceValue(Queen.BLACK_QUEEN));
 
-        Assert.assertEquals(500, Eval.getPieceValue(Rook.WHITE_ROOK));
-        Assert.assertEquals(500, Eval.getPieceValue(Rook.BLACK_ROOK));
+        assertEquals(500, Eval.getPieceValue(Rook.WHITE_ROOK));
+        assertEquals(500, Eval.getPieceValue(Rook.BLACK_ROOK));
 
-        Assert.assertEquals(320, Eval.getPieceValue(Bishop.WHITE_BISHOP));
-        Assert.assertEquals(320, Eval.getPieceValue(Bishop.BLACK_BISHOP));
+        assertEquals(320, Eval.getPieceValue(Bishop.WHITE_BISHOP));
+        assertEquals(320, Eval.getPieceValue(Bishop.BLACK_BISHOP));
 
-        Assert.assertEquals(300, Eval.getPieceValue(Knight.WHITE_KNIGHT));
-        Assert.assertEquals(300, Eval.getPieceValue(Knight.BLACK_KNIGHT));
+        assertEquals(300, Eval.getPieceValue(Knight.WHITE_KNIGHT));
+        assertEquals(300, Eval.getPieceValue(Knight.BLACK_KNIGHT));
 
-        Assert.assertEquals(100, Eval.getPieceValue(Pawn.WHITE_PAWN));
-        Assert.assertEquals(100, Eval.getPieceValue(Pawn.BLACK_PAWN));
+        assertEquals(100, Eval.getPieceValue(Pawn.WHITE_PAWN));
+        assertEquals(100, Eval.getPieceValue(Pawn.BLACK_PAWN));
     }
 
     @Test
     public void testRookPST() throws Exception {
         FenParser.setPos(board, "6k1/3R4/8/8/8/8/8/3K4 w - - 0 1");
-        int eval = Eval.eval(board);
-        Assert.assertEquals(Eval.ROOK_VAL + Eval.ROOK_ON_7TH + Eval.ROOK_OPEN_FILE, eval);
+        int eval = eval(board);
+        assertEquals(ROOK_VAL + ROOK_ON_7TH + ROOK_OPEN_FILE, eval);
 
         FenParser.setPos(board, "6k1/3RR3/8/8/8/8/8/3K4 w - - 0 1");
-        eval = Eval.eval(board);
-        Assert.assertEquals(Eval.ROOK_VAL*2 + Eval.ROOK_ON_7TH*2
-                + Eval.CONNECTED_MAJORS_ON_7TH
-                + Eval.ROOK_OPEN_FILE * 2, eval);
+        eval = eval(board);
+        assertEquals(ROOK_VAL*2 + ROOK_ON_7TH*2
+                + CONNECTED_MAJORS_ON_7TH
+                + ROOK_OPEN_FILE * 2, eval);
 
         FenParser.setPos(board, "6k1/3RRr2/8/8/8/8/8/3K4 w - - 0 1");
-        eval = Eval.eval(board);
+        eval = eval(board);
         // white has two rooks on open files and black one, so net 1 for white
-        Assert.assertEquals(Eval.ROOK_VAL + Eval.ROOK_ON_7TH*2
-                + Eval.CONNECTED_MAJORS_ON_7TH
-                + Eval.ROOK_OPEN_FILE, eval);
+        assertEquals(ROOK_VAL + ROOK_ON_7TH*2
+                + CONNECTED_MAJORS_ON_7TH
+                + ROOK_OPEN_FILE, eval);
 
         FenParser.setPos(board, "6k1/3RRr2/8/8/8/8/r7/3K4 w - - 0 1");
-        eval = Eval.eval(board);
-        Assert.assertEquals(Eval.ROOK_ON_7TH + Eval.CONNECTED_MAJORS_ON_7TH, eval);
+        eval = eval(board);
+        assertEquals(ROOK_ON_7TH + CONNECTED_MAJORS_ON_7TH, eval);
 
         FenParser.setPos(board, "6k1/3RRr2/8/8/8/r7/8/3K4 w - - 0 1");
-        eval = Eval.eval(board);
+        eval = eval(board);
         // deduct for black for rook on A file
-        Assert.assertEquals(Eval.ROOK_ON_7TH*2 + Eval.CONNECTED_MAJORS_ON_7TH
-                - Eval.ROOK_PST[Square.valueOf(File.FILE_A, Rank.RANK_3).flipVertical().value()]
+        assertEquals(ROOK_ON_7TH*2 + CONNECTED_MAJORS_ON_7TH
+                - ROOK_PST[Square.valueOf(FILE_A, RANK_3).flipVertical().value()]
                 , eval);
 
         FenParser.setPos(board, "6k1/8/8/8/8/8/qr6/7K b - - 0 1");
-        Assert.assertEquals(Eval.QUEEN_VAL + Eval.ROOK_VAL
-                + Eval.ROOK_ON_7TH * 2
-                + Eval.CONNECTED_MAJORS_ON_7TH
-                + Eval.ROOK_OPEN_FILE
-                + Eval.QUEEN_PST[Square.valueOf(File.FILE_A, Rank.RANK_2).value()]
-                - Eval.scale(Eval.KING_SAFETY_PAWN_FAR_AWAY
-                + Eval.KING_SAFETY_PAWN_FAR_AWAY
-                + Eval.KING_SAFETY_PAWN_FAR_AWAY/2,Eval.QUEEN_VAL+Eval.ROOK_VAL),
-                Eval.eval(board));
+        assertEquals(QUEEN_VAL + ROOK_VAL
+                + ROOK_ON_7TH * 2
+                + CONNECTED_MAJORS_ON_7TH
+                + ROOK_OPEN_FILE
+                + QUEEN_PST[Square.valueOf(FILE_A, RANK_2).value()]
+                - scale(KING_SAFETY_PAWN_FAR_AWAY
+                + KING_SAFETY_PAWN_FAR_AWAY
+                + KING_SAFETY_PAWN_FAR_AWAY/2,QUEEN_VAL + ROOK_VAL),
+                eval(board));
     }
 
     @Test
     public void testRookOn7th() throws Exception {
         FenParser.setPos(board, "7k/8/8/8/8/8/r7/7K w - - 0 1");
-        Assert.assertEquals(-Eval.ROOK_VAL, Eval.evalMaterial(board));
+        assertEquals(-ROOK_VAL, evalMaterial(board));
 
-        Assert.assertEquals(-Eval.ROOK_VAL-Eval.ROOK_ON_7TH-Eval.ROOK_OPEN_FILE, Eval.eval(board));
+        assertEquals(-ROOK_VAL-ROOK_ON_7TH-ROOK_OPEN_FILE, eval(board));
 
         // move king out
         FenParser.setPos(board, "7k/8/8/8/8/7K/r7/8 w - - 0 1");
-        Assert.assertEquals(-Eval.ROOK_VAL-Eval.ROOK_OPEN_FILE, Eval.eval(board));
+        assertEquals(-ROOK_VAL-ROOK_OPEN_FILE, eval(board));
 
         // flipped
         FenParser.setPos(board, "7k/8/8/8/8/7K/r7/8 b - - 0 1");
-        Assert.assertEquals(Eval.ROOK_VAL+Eval.ROOK_OPEN_FILE, Eval.eval(board));
+        assertEquals(ROOK_VAL+ROOK_OPEN_FILE, eval(board));
     }
 
     @Test
     public void testConnectedMajorsOn7th() throws Exception {
         FenParser.setPos(board, "7k/R2R4/8/8/8/8/8/7K w - - 0 1");
-        Assert.assertEquals(Eval.ROOK_VAL*2 + Eval.ROOK_ON_7TH*2
-                + Eval.CONNECTED_MAJORS_ON_7TH
-                + Eval.ROOK_OPEN_FILE * 2,
-                Eval.eval(board));
+        assertEquals(ROOK_VAL*2 + ROOK_ON_7TH*2
+                + CONNECTED_MAJORS_ON_7TH
+                + ROOK_OPEN_FILE * 2,
+                eval(board));
 
         FenParser.setPos(board, "7k/R2QR3/8/8/8/8/8/7K w - - 0 1");
-        int expected = Eval.ROOK_VAL*2 + Eval.QUEEN_VAL
-                + Eval.ROOK_ON_7TH*3
-                + Eval.CONNECTED_MAJORS_ON_7TH*2
-                + Eval.ROOK_OPEN_FILE*2
-                - Eval.scale(Eval.KING_SAFETY_PAWN_FAR_AWAY    // F File
-                + Eval.KING_SAFETY_PAWN_FAR_AWAY    // G File
-                + (Eval.KING_SAFETY_PAWN_FAR_AWAY /2),Eval.ROOK_VAL*2+Eval.QUEEN_VAL); // H File
-        Assert.assertEquals(expected, Eval.eval(board));
+        int expected = ROOK_VAL*2 + QUEEN_VAL
+                + ROOK_ON_7TH*3
+                + CONNECTED_MAJORS_ON_7TH*2
+                + ROOK_OPEN_FILE*2
+                - scale(Eval.KING_SAFETY_PAWN_FAR_AWAY    // F File
+                + KING_SAFETY_PAWN_FAR_AWAY    // G File
+                + (KING_SAFETY_PAWN_FAR_AWAY /2),ROOK_VAL*2+QUEEN_VAL); // H File
+        assertEquals(expected, eval(board));
 
         // flip it
         FenParser.setPos(board, "7k/R2QR3/8/8/8/8/8/7K b - - 0 1");
-        Assert.assertEquals(-expected, Eval.eval(board));
+        assertEquals(-expected, eval(board));
     }
 
     @Test
     public void testRookOnOpenFile() throws Exception {
         FenParser.setPos(board, "3r3k/8/8/8/8/8/8/7K b - - 0 1");
-        Assert.assertEquals(Eval.ROOK_VAL + Eval.ROOK_OPEN_FILE, Eval.eval(board));
+        assertEquals(ROOK_VAL + ROOK_OPEN_FILE, eval(board));
 
         FenParser.setPos(board, "3r3k/3r4/8/8/8/8/8/7K b - - 0 1");
-        Assert.assertEquals(Eval.ROOK_VAL*2 + Eval.ROOK_OPEN_FILE*2, Eval.eval(board));
+        assertEquals(ROOK_VAL*2 + ROOK_OPEN_FILE*2, eval(board));
 
         FenParser.setPos(board, "3r3k/8/3p4/8/8/8/8/7K b - - 0 1");
-        Assert.assertEquals(Eval.ROOK_VAL+Eval.PAWN_VAL
-                +Eval.PASSED_PAWN
-                +Eval.ISOLATED_PAWN
-                +Eval.PAWN_PST[Square.valueOf(File.FILE_D, Rank.RANK_6).flipVertical().value()],
-                Eval.eval(board));
+        assertEquals(ROOK_VAL+PAWN_VAL
+                +PASSED_PAWN
+                +ISOLATED_PAWN
+                +PAWN_PST[Square.valueOf(FILE_D, RANK_6).flipVertical().value()],
+                eval(board));
     }
 
     @Test
     public void testRookHalfOpenFile() throws Exception {
         // friendly pawn, no bonus
         FenParser.setPos(board, "8/2P5/8/2R5/K7/8/7k/8 w - - 0 1");
-        Assert.assertEquals(Eval.ROOK_VAL+Eval.PAWN_VAL
-                +Eval.PASSED_PAWN
-                +Eval.ISOLATED_PAWN
-                +Eval.PAWN_PST[Square.valueOf(File.FILE_C, Rank.RANK_7).value()],
-                Eval.eval(board));
+        assertEquals(ROOK_VAL+PAWN_VAL
+                +PASSED_PAWN
+                +ISOLATED_PAWN
+                +PAWN_PST[Square.valueOf(FILE_C, RANK_7).value()],
+                eval(board));
 
         FenParser.setPos(board, "8/2p5/8/2R5/K7/8/7k/8 w - - 0 1");
-        Assert.assertEquals(Eval.ROOK_VAL-Eval.PAWN_VAL-Eval.PASSED_PAWN
-                -Eval.ISOLATED_PAWN
-                +Eval.PAWN_PST[Square.valueOf(File.FILE_C, Rank.RANK_7).flipVertical().value()]
-                +Eval.ROOK_HALF_OPEN_FILE,
-                Eval.eval(board));
+        assertEquals(ROOK_VAL-PAWN_VAL-PASSED_PAWN
+                -ISOLATED_PAWN
+                +PAWN_PST[Square.valueOf(FILE_C, RANK_7).flipVertical().value()]
+                +ROOK_HALF_OPEN_FILE,
+                eval(board));
     }
 
     @Test
     public void testQueenPST() throws Exception {
         FenParser.setPos(board,"3kq3/8/8/8/8/8/8/3K4 b - - 0 1");
-        Assert.assertEquals(Eval.QUEEN_VAL, Eval.evalMaterial(board));
-        Assert.assertEquals(Eval.QUEEN_VAL
-                + Eval.QUEEN_PST[Square.valueOf(File.FILE_E, Rank.RANK_8).flipVertical().value()],
-                Eval.eval(board));
+        assertEquals(QUEEN_VAL, evalMaterial(board));
+        assertEquals(QUEEN_VAL
+                + QUEEN_PST[Square.valueOf(FILE_E, RANK_8).flipVertical().value()],
+                eval(board));
     }
 
     @Test
     public void testBishopPST() throws Exception {
         FenParser.setPos(board, "6k1/3B4/8/8/8/8/8/K7 w - - 0 1");
-        int eval = Eval.eval(board);
-        Assert.assertEquals(Eval.getPieceValue(Bishop.WHITE_BISHOP)
-                + Eval.BISHOP_PST[Square.valueOf(File.FILE_D, Rank.RANK_7).value()], eval);
+        int eval = eval(board);
+        assertEquals(getPieceValue(Bishop.WHITE_BISHOP)
+                + BISHOP_PST[Square.valueOf(FILE_D, RANK_7).value()], eval);
 
         FenParser.setPos(board, "6k1/8/8/3B4/8/8/8/K7 w - - 0 1");
-        eval = Eval.eval(board);
-        Assert.assertEquals(Eval.getPieceValue(Bishop.WHITE_BISHOP)
-                + Eval.BISHOP_PST[Square.valueOf(File.FILE_D, Rank.RANK_5).value()], eval);
+        eval = eval(board);
+        assertEquals(Eval.getPieceValue(Bishop.WHITE_BISHOP)
+                + BISHOP_PST[Square.valueOf(FILE_D, RANK_5).value()], eval);
     }
 
     @Test
     public void testKingPST() throws Exception {
         FenParser.setPos(board, "rnbqkbnr/pppppppp/8/8/3P4/3BPN2/PPP2PPP/RNBQR1K1 w - - 0 1");
 
-        Assert.assertEquals(0,Eval.evalMaterial(board));
-        int score = Eval.eval(board);
+        assertEquals(0,evalMaterial(board));
+        int score = eval(board);
 
         int tropismDelta =
-                Eval.KNIGHT_TROPISM * Square.valueOf(File.FILE_F,Rank.RANK_3).distance(board.getKingSquare(Color.BLACK))
-                - Eval.KNIGHT_TROPISM * Square.valueOf(File.FILE_G,Rank.RANK_1).distance(board.getKingSquare(Color.BLACK));
+                KNIGHT_TROPISM * Square.valueOf(FILE_F,RANK_3).distance(board.getKingSquare(Color.BLACK))
+                - KNIGHT_TROPISM * Square.valueOf(FILE_G,RANK_1).distance(board.getKingSquare(Color.BLACK));
 
-        Assert.assertEquals(Eval.PAWN_PST[Square.valueOf(File.FILE_D, Rank.RANK_4).value()]
-                - Eval.PAWN_PST[Square.valueOf(File.FILE_D, Rank.RANK_2).value()]
-                + Eval.PAWN_PST[Square.valueOf(File.FILE_E, Rank.RANK_3).value()]
-                - Eval.PAWN_PST[Square.valueOf(File.FILE_E, Rank.RANK_2).value()]
-                + Eval.BISHOP_PST[Square.valueOf(File.FILE_D, Rank.RANK_3).value()]
-                - Eval.BISHOP_PST[Square.valueOf(File.FILE_F, Rank.RANK_1).value()]
-                + Eval.KNIGHT_PST[Square.valueOf(File.FILE_F, Rank.RANK_3).value()]
-                - Eval.KNIGHT_PST[Square.valueOf(File.FILE_G, Rank.RANK_1).value()]
-                + Eval.ROOK_PST[Square.valueOf(File.FILE_E, Rank.RANK_1).value()]
-                - Eval.ROOK_PST[Square.valueOf(File.FILE_H, Rank.RANK_1).value()]
-                + Eval.KING_PST[Square.valueOf(File.FILE_G, Rank.RANK_1).value()]
-                - Eval.KING_PST[Square.valueOf(File.FILE_E, Rank.RANK_1).value()]
+        assertEquals(PAWN_PST[Square.valueOf(FILE_D, RANK_4).value()]
+                - PAWN_PST[Square.valueOf(FILE_D, RANK_2).value()]
+                + PAWN_PST[Square.valueOf(FILE_E, RANK_3).value()]
+                - PAWN_PST[Square.valueOf(FILE_E, RANK_2).value()]
+                + BISHOP_PST[Square.valueOf(FILE_D, RANK_3).value()]
+                - BISHOP_PST[Square.valueOf(FILE_F, RANK_1).value()]
+                + KNIGHT_PST[Square.valueOf(FILE_F, RANK_3).value()]
+                - KNIGHT_PST[Square.valueOf(FILE_G, RANK_1).value()]
+                + ROOK_PST[Square.valueOf(FILE_E, RANK_1).value()]
+                - ROOK_PST[Square.valueOf(FILE_H, RANK_1).value()]
+                + KING_PST[Square.valueOf(FILE_G, RANK_1).value()]
+                - KING_PST[Square.valueOf(FILE_E, RANK_1).value()]
                 + tropismDelta
                 ,score);
     }
@@ -302,80 +290,80 @@ public class EvalTest {
     public void testKingEndGamePST() throws Exception {
         FenParser.setPos(board, "8/8/8/4k3/8/8/8/RNB2K2 w - - 0 1");
 
-        int expectedMaterial = Eval.ROOK_VAL + Eval.KNIGHT_VAL + Eval.BISHOP_VAL;
-        Assert.assertEquals(expectedMaterial,Eval.evalMaterial(board));
+        int expectedMaterial = ROOK_VAL + KNIGHT_VAL + BISHOP_VAL;
+        assertEquals(expectedMaterial,evalMaterial(board));
 
         int expected = expectedMaterial
-                + Eval.ROOK_OPEN_FILE
-                + Eval.KNIGHT_PST[Square.valueOf(File.FILE_B, Rank.RANK_1).value()]
-                + Eval.KNIGHT_TROPISM * Square.valueOf(File.FILE_B,Rank.RANK_1).distance(board.getKingSquare(Color.BLACK))
-                + Eval.KING_ENDGAME_PST[Square.valueOf(File.FILE_F,Rank.RANK_1).value()]
-                - Eval.KING_PST[Square.valueOf(File.FILE_E, Rank.RANK_5).value()]
-                - Eval.scale(Eval.KING_SAFETY_MIDDLE_OPEN_FILE,Eval.ROOK_VAL+Eval.KNIGHT_VAL+Eval.BISHOP_VAL);
-        Assert.assertEquals(expected, Eval.eval(board));
+                + ROOK_OPEN_FILE
+                + KNIGHT_PST[Square.valueOf(FILE_B, RANK_1).value()]
+                + KNIGHT_TROPISM * Square.valueOf(FILE_B,RANK_1).distance(board.getKingSquare(Color.BLACK))
+                + KING_ENDGAME_PST[Square.valueOf(FILE_F,RANK_1).value()]
+                - KING_PST[Square.valueOf(FILE_E, RANK_5).value()]
+                - scale(KING_SAFETY_MIDDLE_OPEN_FILE,ROOK_VAL+KNIGHT_VAL+BISHOP_VAL);
+        assertEquals(expected, eval(board));
 
         // by removing a bishop both sides should be evaluated as in the endgame
         FenParser.setPos(board, "8/8/8/4k3/8/8/8/RN3K2 b - - 0 1");
-        expected = -Eval.ROOK_VAL - Eval.KNIGHT_VAL
-                - Eval.ROOK_OPEN_FILE
-                - Eval.KNIGHT_PST[Square.valueOf(File.FILE_B, Rank.RANK_1).value()]
-                - Eval.KNIGHT_TROPISM * Square.valueOf(File.FILE_B,Rank.RANK_1).distance(board.getKingSquare(Color.BLACK))
-                - Eval.KING_ENDGAME_PST[Square.valueOf(File.FILE_F,Rank.RANK_1).value()]
-                + Eval.KING_ENDGAME_PST[Square.valueOf(File.FILE_E, Rank.RANK_5).value()];
-        Assert.assertEquals(expected, Eval.eval(board));
+        expected = -ROOK_VAL - KNIGHT_VAL
+                - ROOK_OPEN_FILE
+                - KNIGHT_PST[Square.valueOf(FILE_B, RANK_1).value()]
+                - KNIGHT_TROPISM * Square.valueOf(FILE_B,RANK_1).distance(board.getKingSquare(Color.BLACK))
+                - KING_ENDGAME_PST[Square.valueOf(FILE_F,RANK_1).value()]
+                + KING_ENDGAME_PST[Square.valueOf(FILE_E, RANK_5).value()];
+        assertEquals(expected, eval(board));
     }
 
     @Test
     public void testEvalMaterial() throws Exception {
         board.resetBoard();
-        Assert.assertEquals(0, Eval.evalMaterial(board));
+        assertEquals(0, evalMaterial(board));
 
         FenParser.setPos(board, "6k1/8/8/3B4/8/8/8/K7 w - - 0 1");
-        Assert.assertEquals(Eval.BISHOP_VAL, Eval.evalMaterial(board));
+        assertEquals(BISHOP_VAL, evalMaterial(board));
 
         FenParser.setPos(board, "6k1/8/8/3Br3/8/8/8/K7 w - - 0 1");
-        Assert.assertEquals(Eval.BISHOP_VAL-Eval.ROOK_VAL, Eval.evalMaterial(board));
+        assertEquals(BISHOP_VAL-ROOK_VAL, evalMaterial(board));
     }
 
     @Test
     public void testMaterialScores() throws Exception {
         FenParser.setPos(board, "8/k7/prb5/K7/QN6/8/8/8 b - - 0 1");
         OrderedPair<Integer,Integer> npScores = Eval.getNonPawnMaterialScore(board);
-        Assert.assertTrue(Eval.QUEEN_VAL+Eval.KNIGHT_VAL == npScores.getE1());
-        Assert.assertTrue(Eval.ROOK_VAL+Eval.BISHOP_VAL == npScores.getE2());
+        assertEquals(QUEEN_VAL + KNIGHT_VAL, (int) npScores.getE1());
+        assertEquals(ROOK_VAL + BISHOP_VAL, (int) npScores.getE2());
 
-        OrderedPair<Integer,Integer> pScores = Eval.getPawnMaterialScore(board);
-        Assert.assertTrue(0 == pScores.getE1());
-        Assert.assertTrue(Eval.PAWN_VAL == pScores.getE2());
+        OrderedPair<Integer,Integer> pScores = getPawnMaterialScore(board);
+        assertEquals(0, (int) pScores.getE1());
+        assertEquals(PAWN_VAL, (int) pScores.getE2());
     }
 
     @Test
     public void testDoubledAndIsolatedPawns() throws Exception {
         FenParser.setPos(board, "k7/p1p3p1/3p3p/1P5P/1PP1P3/8/8/K7 b - - 0 1");
 
-        Assert.assertEquals(0, Eval.evalMaterial(board));
+        assertEquals(0, evalMaterial(board));
 
-        int score = Eval.eval(board);
+        int score = eval(board);
 
         int expected =
-                Eval.KING_ENDGAME_PST[Square.valueOf(File.FILE_A, Rank.RANK_8).flipVertical().value()]
-                    + Eval.PAWN_PST[Square.valueOf(File.FILE_A, Rank.RANK_7).flipVertical().value()]
-                    + Eval.PAWN_PST[Square.valueOf(File.FILE_C, Rank.RANK_7).flipVertical().value()]
-                    + Eval.PAWN_PST[Square.valueOf(File.FILE_D, Rank.RANK_6).flipVertical().value()]
-                    + Eval.PAWN_PST[Square.valueOf(File.FILE_G, Rank.RANK_7).flipVertical().value()]
-                    + Eval.PAWN_PST[Square.valueOf(File.FILE_H, Rank.RANK_6).flipVertical().value()]
-                    + Eval.ISOLATED_PAWN // black pawn on A7
-                    - Eval.KING_ENDGAME_PST[Square.valueOf(File.FILE_A, Rank.RANK_1).value()]
-                    - Eval.PAWN_PST[Square.valueOf(File.FILE_B, Rank.RANK_5).value()]
-                    - Eval.PAWN_PST[Square.valueOf(File.FILE_B, Rank.RANK_4).value()]
-                    - Eval.PAWN_PST[Square.valueOf(File.FILE_C, Rank.RANK_4).value()]
-                    - Eval.PAWN_PST[Square.valueOf(File.FILE_E, Rank.RANK_4).value()]
-                    - Eval.PAWN_PST[Square.valueOf(File.FILE_H, Rank.RANK_5).value()]
-                    - Eval.ISOLATED_PAWN * 2  // white pawns on E4 and H1
-                    - Eval.DOUBLED_PAWN * 2 // white pawns on b4 and b5
+                KING_ENDGAME_PST[Square.valueOf(FILE_A, RANK_8).flipVertical().value()]
+                    + PAWN_PST[Square.valueOf(FILE_A, RANK_7).flipVertical().value()]
+                    + PAWN_PST[Square.valueOf(FILE_C, RANK_7).flipVertical().value()]
+                    + PAWN_PST[Square.valueOf(FILE_D, RANK_6).flipVertical().value()]
+                    + PAWN_PST[Square.valueOf(FILE_G, RANK_7).flipVertical().value()]
+                    + PAWN_PST[Square.valueOf(FILE_H, RANK_6).flipVertical().value()]
+                    + ISOLATED_PAWN // black pawn on A7
+                    - KING_ENDGAME_PST[Square.valueOf(FILE_A, RANK_1).value()]
+                    - PAWN_PST[Square.valueOf(FILE_B, RANK_5).value()]
+                    - PAWN_PST[Square.valueOf(FILE_B, RANK_4).value()]
+                    - PAWN_PST[Square.valueOf(FILE_C, RANK_4).value()]
+                    - PAWN_PST[Square.valueOf(FILE_E, RANK_4).value()]
+                    - PAWN_PST[Square.valueOf(FILE_H, RANK_5).value()]
+                    - ISOLATED_PAWN * 2  // white pawns on E4 and H1
+                    - DOUBLED_PAWN * 2 // white pawns on b4 and b5
                     ;
 
-        Assert.assertEquals(expected, score);
+        assertEquals(expected, score);
     }
 
     @Test
@@ -384,19 +372,19 @@ public class EvalTest {
 
         // initial position then e3 .. no penalty
         FenParser.setPos(b, "rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
-        int score1 = Eval.eval(b);
-        Assert.assertEquals(Eval.PAWN_PST[Square.valueOf(File.FILE_E, Rank.RANK_3).value()]
-                -Eval.PAWN_PST[Square.valueOf(File.FILE_E, Rank.RANK_2).value()]
+        int score1 = eval(b);
+        assertEquals(PAWN_PST[Square.valueOf(FILE_E, RANK_3).value()]
+                -PAWN_PST[Square.valueOf(FILE_E, RANK_2).value()]
                 , score1);
 
         //  open file for both, so still 0
         FenParser.setPos(b, "rnbqkbnr/pppp1ppp/8/8/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
-        Assert.assertEquals(0, Eval.eval(b));
+        assertEquals(0, eval(b));
 
-        // remove both queens.  open e file.  put black king on d8
+        // remove both queens.  open e   put black king on d8
         FenParser.setPos(b, "rnbk1bnr/pppp1ppp/8/8/8/8/PPPP1PPP/RNB1KBNR b KQ - 0 1");
-        Assert.assertEquals(-Eval.scale(Eval.KING_SAFETY_MIDDLE_OPEN_FILE,Eval.ROOK_VAL*2+Eval.KNIGHT_VAL*2+Eval.BISHOP_VAL*2)
-                +Eval.KING_PST[Square.valueOf(File.FILE_D, Rank.RANK_8).flipVertical().value()], Eval.eval(b));
+        assertEquals(-scale(KING_SAFETY_MIDDLE_OPEN_FILE,ROOK_VAL*2+KNIGHT_VAL*2+BISHOP_VAL*2)
+                +KING_PST[Square.valueOf(FILE_D, RANK_8).flipVertical().value()], Eval.eval(b));
     }
 
     @Test
@@ -405,29 +393,29 @@ public class EvalTest {
 
         // no pawns advanced
         FenParser.setPos(b, "rnbq1rk1/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1RK1 w - - 0 1");
-        Assert.assertEquals(0, Eval.eval(b));
+        assertEquals(0, eval(b));
 
         // white pawn on f3
         FenParser.setPos(b, "rnbq1rk1/pppppppp/8/8/8/5P2/PPPPP1PP/RNBQ1RK1 w - - 0 1");
-        Assert.assertEquals(Eval.PAWN_PST[Square.valueOf(File.FILE_F, Rank.RANK_3).value()]
-                -Eval.PAWN_PST[Square.valueOf(File.FILE_F, Rank.RANK_2).value()]
-                +Eval.scale(Eval.KING_SAFETY_PAWN_ONE_AWAY,Eval.ROOK_VAL*2+Eval.KNIGHT_VAL+Eval.BISHOP_VAL+Eval.QUEEN_VAL)
-                , Eval.eval(b));
+        assertEquals(PAWN_PST[Square.valueOf(FILE_F, RANK_3).value()]
+                -PAWN_PST[Square.valueOf(FILE_F, RANK_2).value()]
+                +scale(KING_SAFETY_PAWN_ONE_AWAY,ROOK_VAL*2+KNIGHT_VAL+BISHOP_VAL+QUEEN_VAL)
+                , eval(b));
 
         // white pawn on g4
         FenParser.setPos(b, "rnbq1rk1/pppppppp/8/8/6P1/8/PPPPPP1P/RNBQ1RK1 w - - 0 1");
-        Assert.assertEquals(Eval.PAWN_PST[Square.valueOf(File.FILE_G, Rank.RANK_4).value()]
-                -Eval.PAWN_PST[Square.valueOf(File.FILE_G, Rank.RANK_2).value()]
-                +Eval.scale(Eval.KING_SAFETY_PAWN_TWO_AWAY,Eval.ROOK_VAL*2+Eval.KNIGHT_VAL+Eval.BISHOP_VAL+Eval.QUEEN_VAL)
-                , Eval.eval(b));
+        assertEquals(PAWN_PST[Square.valueOf(FILE_G, RANK_4).value()]
+                -PAWN_PST[Square.valueOf(FILE_G, RANK_2).value()]
+                +scale(KING_SAFETY_PAWN_TWO_AWAY,ROOK_VAL*2+KNIGHT_VAL+BISHOP_VAL+QUEEN_VAL)
+                , eval(b));
 
         // black pawn on h4
         FenParser.setPos(b, "rnbq1rk1/ppppppp1/8/8/7p/8/PPPPPPPP/RNBQ1RK1 b - - 0 1");
-        Assert.assertEquals(
-                Eval.PAWN_PST[Square.valueOf(File.FILE_H, Rank.RANK_4).flipVertical().value()]
-                -Eval.PAWN_PST[Square.valueOf(File.FILE_H, Rank.RANK_7).flipVertical().value()]
-                +Eval.scale(Eval.KING_SAFETY_PAWN_FAR_AWAY/2,Eval.ROOK_VAL*2+Eval.KNIGHT_VAL+Eval.BISHOP_VAL+Eval.QUEEN_VAL)
-                , Eval.eval(b));
+        assertEquals(
+                PAWN_PST[Square.valueOf(FILE_H, RANK_4).flipVertical().value()]
+                -PAWN_PST[Square.valueOf(FILE_H, RANK_7).flipVertical().value()]
+                +scale(Eval.KING_SAFETY_PAWN_FAR_AWAY/2,ROOK_VAL*2+KNIGHT_VAL+BISHOP_VAL+QUEEN_VAL)
+                , eval(b));
 
     }
 
@@ -437,32 +425,32 @@ public class EvalTest {
 
         // white pawn on c3
         FenParser.setPos(b, "1krq1bnr/pppppppp/8/8/8/2P5/PP1PPPPP/1KRQ1BNR w - - 0 1");
-        Assert.assertEquals(Eval.PAWN_PST[Square.valueOf(File.FILE_C, Rank.RANK_3).value()]
-                -Eval.PAWN_PST[Square.valueOf(File.FILE_C, Rank.RANK_2).value()]
-                +Eval.scale(Eval.KING_SAFETY_PAWN_ONE_AWAY,Eval.ROOK_VAL*2+Eval.QUEEN_VAL+Eval.BISHOP_VAL+Eval.KNIGHT_VAL)
-                , Eval.eval(b));
+        assertEquals(PAWN_PST[Square.valueOf(FILE_C, RANK_3).value()]
+                -PAWN_PST[Square.valueOf(FILE_C, RANK_2).value()]
+                +scale(KING_SAFETY_PAWN_ONE_AWAY,ROOK_VAL*2+QUEEN_VAL+BISHOP_VAL+KNIGHT_VAL)
+                , eval(b));
 
         // white pawn on b4
         FenParser.setPos(b, "1krq1bnr/pppppppp/8/8/1P6/8/P1PPPPPP/1KRQ1BNR w - - 0 1");
-        Assert.assertEquals(Eval.PAWN_PST[Square.valueOf(File.FILE_B, Rank.RANK_4).value()]
-                -Eval.PAWN_PST[Square.valueOf(File.FILE_B, Rank.RANK_2).value()]
-                +Eval.scale(Eval.KING_SAFETY_PAWN_TWO_AWAY,Eval.ROOK_VAL*2+Eval.QUEEN_VAL+Eval.BISHOP_VAL+Eval.KNIGHT_VAL)
-                , Eval.eval(b));
+        assertEquals(PAWN_PST[Square.valueOf(FILE_B, RANK_4).value()]
+                -PAWN_PST[Square.valueOf(FILE_B, RANK_2).value()]
+                +scale(KING_SAFETY_PAWN_TWO_AWAY,ROOK_VAL*2+QUEEN_VAL+BISHOP_VAL+KNIGHT_VAL)
+                , eval(b));
 
         // black pawn on a4
         FenParser.setPos(b, "1krq1bnr/1ppppppp/8/8/p7/8/PPPPPPPP/1KRQ1BNR b - - 0 1");
-        Assert.assertEquals(Eval.PAWN_PST[Square.valueOf(File.FILE_A, Rank.RANK_4).flipVertical().value()]
-                -Eval.PAWN_PST[Square.valueOf(File.FILE_A, Rank.RANK_7).flipVertical().value()]
-                +Eval.scale(Eval.KING_SAFETY_PAWN_FAR_AWAY/2,Eval.ROOK_VAL*2+Eval.QUEEN_VAL+Eval.BISHOP_VAL+Eval.KNIGHT_VAL)
-                , Eval.eval(b));
+        assertEquals(PAWN_PST[Square.valueOf(FILE_A, RANK_4).flipVertical().value()]
+                -PAWN_PST[Square.valueOf(FILE_A, RANK_7).flipVertical().value()]
+                +scale(KING_SAFETY_PAWN_FAR_AWAY/2,ROOK_VAL*2+QUEEN_VAL+BISHOP_VAL+KNIGHT_VAL)
+                , eval(b));
 
     }
 
     @Test
     public void testScale() {
-        int material = Eval.ROOK_VAL * 2 + Eval.KNIGHT_VAL * 2 + Eval.BISHOP_VAL * 2 + Eval.QUEEN_VAL;
-        Assert.assertEquals(100, Eval.scale(100, material));
+        int material = ROOK_VAL * 2 + KNIGHT_VAL * 2 + BISHOP_VAL * 2 + QUEEN_VAL;
+        assertEquals(100, scale(100, material));
 
-        Assert.assertEquals(15, Eval.scale(100, Eval.ROOK_VAL));
+        assertEquals(15, scale(100, ROOK_VAL));
     }
 }

@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.Color;
@@ -47,8 +45,8 @@ public class ZobristTest {
     public void hammingDistances_maxDistance() {
         String key1="0000000000000000000000000000000000000000000000000000000000000000";
         String key2="1111111111111111111111111111111111111111111111111111111111111111";
-        Assert.assertEquals(64, key1.length());
-        Assert.assertEquals(64, key2.length());
+        assertEquals(64, key1.length());
+        assertEquals(64, key2.length());
         Hamming h = new Hamming(key1, key2);
         int hd=h.getHammingDistance();
         assertEquals(64, hd);

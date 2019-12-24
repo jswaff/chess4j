@@ -3,8 +3,6 @@ package com.jamesswafford.chess4j.search;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -44,7 +42,7 @@ public class SearchTest {
 
         int score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 2, searchStats,false);
-        Assert.assertEquals(Constants.CHECKMATE-1, score);
+        assertEquals(Constants.CHECKMATE-1, score);
     }
 
     @Test
@@ -59,7 +57,7 @@ public class SearchTest {
 
         int score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 2,searchStats,false);
-        Assert.assertEquals(Constants.CHECKMATE-1, score);
+        assertEquals(Constants.CHECKMATE-1, score);
     }
 
     @Test
@@ -74,7 +72,7 @@ public class SearchTest {
 
         int score = Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 4, searchStats,false);
-        Assert.assertEquals(Constants.CHECKMATE-3, score);
+        assertEquals(Constants.CHECKMATE-3, score);
     }
 
     @Test
@@ -89,7 +87,7 @@ public class SearchTest {
 
         int score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 6, searchStats,false);
-        Assert.assertEquals(Constants.CHECKMATE-5, score);
+        assertEquals(Constants.CHECKMATE-5, score);
     }
 
     @Test
@@ -105,8 +103,8 @@ public class SearchTest {
 
         int score = Search.search(pv, -Constants.INFINITY, Constants.INFINITY,
                 b, 1, searchStats,false);
-        Assert.assertEquals(0, score);
-        Assert.assertEquals(0, pv.size());
+        assertEquals(0, score);
+        assertEquals(0, pv.size());
     }
 
     @Test
@@ -135,8 +133,8 @@ public class SearchTest {
         Search.search(pv, -Constants.INFINITY, Constants.INFINITY,
                 b, 5, searchStats,false);
 
-        Assert.assertEquals(5, searchStats.getFirstLine().size());
-        Assert.assertEquals(lastPV, searchStats.getFirstLine().subList(0, 4));
+        assertEquals(5, searchStats.getFirstLine().size());
+        assertEquals(lastPV, searchStats.getFirstLine().subList(0, 4));
     }
 
     @Ignore // PVS has changed node count... need to revisit
@@ -152,14 +150,14 @@ public class SearchTest {
         Search.stopTime = Search.startTime + 10000;
         Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 1, searchStats,false);
-        Assert.assertEquals(21, searchStats.getNodes());
+        assertEquals(21, searchStats.getNodes());
 
         searchStats = new SearchStats();
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
         Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 3, searchStats,false);
-        Assert.assertEquals(4, searchStats.getNodes()); // 1 + 3 (down left side of the tree)
+        assertEquals(4, searchStats.getNodes()); // 1 + 3 (down left side of the tree)
 
         Search.abortSearch = false;
     }
@@ -180,7 +178,7 @@ public class SearchTest {
         b.applyMove(a2a4);
         List<Move> mvs = MoveGen.genLegalMoves(b);
         Move a7a5 = new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_A,Rank.RANK_7),Square.valueOf(File.FILE_A, Rank.RANK_5));
-        Assert.assertTrue(mvs.contains(a7a5));
+        assertTrue(mvs.contains(a7a5));
         for (Move mv : mvs) {
             b.applyMove(mv);
             int score=900;
@@ -196,9 +194,9 @@ public class SearchTest {
 
         List<Move> pv = new ArrayList<>();
         Search.search(pv, -Constants.INFINITY, Constants.INFINITY, b, 3, searchStats,false);
-        Assert.assertEquals(2, pv.size());
-        Assert.assertEquals(a2a4, pv.get(0));
-        Assert.assertEquals(a7a5, pv.get(1));
+        assertEquals(2, pv.size());
+        assertEquals(a2a4, pv.get(0));
+        assertEquals(a7a5, pv.get(1));
     }
 
     @Test
@@ -211,7 +209,7 @@ public class SearchTest {
         Search.stopTime = Search.startTime + 10000;
         int score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 2, new SearchStats(),false);
-        Assert.assertTrue(score != 0);
+        assertTrue(score != 0);
 
         // up to 99 (half) moves ... the extra comes from the root search
         b.setFiftyCounter(98);
@@ -221,7 +219,7 @@ public class SearchTest {
         Search.stopTime = Search.startTime + 10000;
         score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 2, new SearchStats(),false);
-        Assert.assertTrue(score != 0);
+        assertTrue(score != 0);
 
         // trigger 50 move rule
         b.setFiftyCounter(100);
@@ -231,7 +229,7 @@ public class SearchTest {
         Search.stopTime = Search.startTime + 10000;
         score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 2, new SearchStats(),false);
-        Assert.assertEquals(0, score);
+        assertEquals(0, score);
     }
 
     @Test
@@ -245,8 +243,8 @@ public class SearchTest {
         Search.stopTime = Search.startTime + 10000;
 
         Search.quiescenceSearch(-Constants.INFINITY,Constants.INFINITY,false,b,searchStats);
-        Assert.assertEquals(0,searchStats.getNodes());
-        Assert.assertEquals(0, searchStats.getQNodes());
+        assertEquals(0,searchStats.getNodes());
+        assertEquals(0, searchStats.getQNodes());
     }
 
     @Test
@@ -262,7 +260,7 @@ public class SearchTest {
         Search.stopTime = Search.startTime + 10000;
 
         int qScore = Search.quiescenceSearch(-Constants.INFINITY, Constants.INFINITY,false,b,searchStats);
-        Assert.assertEquals(score, qScore);
+        assertEquals(score, qScore);
     }
 
     @Test
@@ -276,7 +274,7 @@ public class SearchTest {
         Search.stopTime = Search.startTime + 10000;
 
         int qScore = Search.quiescenceSearch(Eval.QUEEN_VAL,Constants.INFINITY,false, b,searchStats);
-        Assert.assertEquals(Eval.QUEEN_VAL,qScore);
+        assertEquals(Eval.QUEEN_VAL,qScore);
     }
 
     @Test
@@ -285,7 +283,7 @@ public class SearchTest {
         FenParser.setPos(b, "7k/8/8/3b4/8/8/6P1/K7 b - -");
 
         List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
-        Assert.assertEquals(1, moves.size());
+        assertEquals(1, moves.size());
 
         Search.abortSearch = false;
 
@@ -295,8 +293,8 @@ public class SearchTest {
 
         Search.quiescenceSearch(-Constants.INFINITY,Constants.INFINITY,false,b,searchStats);
 
-        Assert.assertEquals(0,searchStats.getNodes());
-        Assert.assertEquals(1, searchStats.getQNodes());
+        assertEquals(0,searchStats.getNodes());
+        assertEquals(1, searchStats.getQNodes());
     }
 
     @Test
@@ -305,7 +303,7 @@ public class SearchTest {
         FenParser.setPos(b,"8/P6k/8/8/8/8/7K/8 w - -");
 
         List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
-        Assert.assertEquals(4, moves.size()); // just promotions
+        assertEquals(4, moves.size()); // just promotions
 
         Search.abortSearch = false;
 
@@ -315,8 +313,8 @@ public class SearchTest {
 
         Search.quiescenceSearch(-Constants.INFINITY,Constants.INFINITY,false,b,searchStats);
 
-        Assert.assertEquals(0,searchStats.getNodes());
-        Assert.assertEquals(4, searchStats.getQNodes());
+        assertEquals(0,searchStats.getNodes());
+        assertEquals(4, searchStats.getQNodes());
     }
 
     @Test
@@ -327,10 +325,10 @@ public class SearchTest {
         FenParser.setPos(b,"8/P6k/8/8/8/8/7K/8 w - -");
 
         List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
-        Assert.assertEquals(4, moves.size()); // just promotions
+        assertEquals(4, moves.size()); // just promotions
 
         int score = Eval.eval(b);
-        Assert.assertTrue(Math.abs(score) < Eval.QUEEN_VAL);
+        assertTrue(Math.abs(score) < Eval.QUEEN_VAL);
 
         Search.abortSearch = false;
         SearchStats searchStats = new SearchStats();
@@ -339,7 +337,7 @@ public class SearchTest {
 
         Search.quiescenceSearch(-Constants.INFINITY,-Eval.QUEEN_VAL,false,b,searchStats);
 
-        Assert.assertEquals(0,searchStats.getNodes());
-        Assert.assertEquals(0, searchStats.getQNodes());
+        assertEquals(0,searchStats.getNodes());
+        assertEquals(0, searchStats.getQNodes());
     }
 }
