@@ -610,7 +610,7 @@ public final class Board {
         Piece p = getPiece(m.from());
         if (p==WHITE_ROOK || p==BLACK_ROOK) {
             removeRookCastlingAvailability(m.from());
-        } else if (p==King.WHITE_KING) {
+        } else if (p==WHITE_KING) {
             if (castlingRights.isWhiteKingside()) {
                 zobristKey ^= Zobrist.getCastlingKey(WHITE_KINGSIDE);
                 castlingRights.removeWhiteKingside();
@@ -619,7 +619,7 @@ public final class Board {
                 zobristKey ^= Zobrist.getCastlingKey(WHITE_QUEENSIDE);
                 castlingRights.removeWhiteQueenside();
             }
-        } else if (p==King.BLACK_KING) {
+        } else if (p==BLACK_KING) {
             if (castlingRights.isBlackKingside()) {
                 zobristKey ^= Zobrist.getCastlingKey(BLACK_KINGSIDE);
                 castlingRights.removeBlackKingside();
@@ -631,7 +631,7 @@ public final class Board {
         }
     }
 
-    private Piece removeCapturedPiece(Move m) {
+    private void removeCapturedPiece(Move m) {
         assert(m.captured()!=null);
         Piece captured;
         if (m.isEpCapture()) {
@@ -646,10 +646,9 @@ public final class Board {
                 assert(captured==BLACK_PAWN);
             }
         } else {
-            captured = removePiece(m.to());
+            removePiece(m.to());
         }
 
-        return captured;
     }
 
     private Piece removePiece(Square sq) {

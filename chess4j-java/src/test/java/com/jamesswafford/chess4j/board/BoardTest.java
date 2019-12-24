@@ -30,7 +30,7 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 public class BoardTest {
 
     @Test
-    public void reset() {
+    public void testReset() {
         Board b = Board.INSTANCE;
         b.resetBoard();
         testResetBoard(b);
@@ -87,7 +87,7 @@ public class BoardTest {
     }
 
     @Test
-    public void kingSquares() throws Exception {
+    public void testKingSquares() throws Exception {
         Board b = Board.INSTANCE;
         b.resetBoard();
         assertEquals(E1, b.getKingSquare(Color.WHITE));
@@ -103,7 +103,7 @@ public class BoardTest {
     }
 
     @Test
-    public void applyMoveSequence1() throws Exception {
+    public void testApplyMoveSequence1() throws Exception {
         Board b = Board.INSTANCE;
         b.resetBoard();
         Board b2 = b.deepCopy();
@@ -192,7 +192,7 @@ public class BoardTest {
     }
 
     @Test
-    public void swapPlayer() {
+    public void testSwapPlayer() {
         Board b = Board.INSTANCE;
         b.resetBoard();
         b.swapPlayer();
@@ -202,7 +202,7 @@ public class BoardTest {
     }
 
     @Test
-    public void deepCopy() {
+    public void testDeepCopy() {
         Board b = Board.INSTANCE;
         Board b2 = b.deepCopy();
 
@@ -217,7 +217,7 @@ public class BoardTest {
     }
 
     @Test
-    public void deepCopy2() {
+    public void testDeepCopy2() {
         Board b = Board.INSTANCE;
         b.resetBoard();
         b.applyMove(new Move(WHITE_PAWN, E2, E4));
@@ -232,7 +232,7 @@ public class BoardTest {
     }
 
     @Test
-    public void deepCopy3() {
+    public void testDeepCopy3() {
         Board b = Board.INSTANCE;
         b.resetBoard();
         Board b2 = b.deepCopy();
@@ -243,7 +243,7 @@ public class BoardTest {
     }
 
     @Test
-    public void flipVertical() throws Exception {
+    public void testFlipVertical() throws Exception {
         Board b = Board.INSTANCE;
         b.resetBoard();
         Board b2 = b.deepCopy();
@@ -432,7 +432,7 @@ public class BoardTest {
     }
 
     @Test
-    public void equalityBeforeAndAfterCastle() throws ParseException {
+    public void testEqualityBeforeAndAfterCastle() throws ParseException {
         Board b1 = Board.INSTANCE;
         FenParser.setPos(b1, "4k2r/8/8/8/8/8/8/R3K3 b Qk - 0 1");
         Board b2 = b1.deepCopy();
@@ -453,7 +453,7 @@ public class BoardTest {
     }
 
     @Test
-    public void equalityBeforeAndAfterCapture() throws ParseException {
+    public void testEqualityBeforeAndAfterCapture() throws ParseException {
         Board b1 = Board.INSTANCE;
         FenParser.setPos(b1, "rnbqkbnr/pp1ppppp/8/2p5/3P4/8/PPP1PPPP/RNBQKBNR w KQkq c6 0 2");
         Board b2 = b1.deepCopy();
@@ -474,7 +474,7 @@ public class BoardTest {
     }
 
     @Test
-    public void equalityBeforeAndAfterEPCapture() throws ParseException {
+    public void testEqualityBeforeAndAfterEPCapture() throws ParseException {
         Board b1 = Board.INSTANCE;
         FenParser.setPos(b1, "rnbqkbnr/pp1ppppp/8/2pP4/8/8/PPP1PPPP/RNBQKBNR w KQkq c6 0 2");
         Board b2 = b1.deepCopy();
@@ -494,7 +494,7 @@ public class BoardTest {
     }
 
     @Test
-    public void equalityBeforeAndAfterPromotion() throws ParseException {
+    public void testEqualityBeforeAndAfterPromotion() throws ParseException {
         Board b1 = Board.INSTANCE;
         FenParser.setPos(b1, "8/PK6/8/8/8/8/k7/8 w - - 0 2");
         Board b2 = b1.deepCopy();
@@ -515,7 +515,7 @@ public class BoardTest {
     }
 
     @Test
-    public void equalityBeforeAndAfterCapturingPromotion() throws ParseException {
+    public void testEqualityBeforeAndAfterCapturingPromotion() throws ParseException {
         Board b1 = Board.INSTANCE;
         FenParser.setPos(b1, "1n6/PK6/8/8/8/8/k7/8 w - - 0 2");
         Board b2 = b1.deepCopy();
@@ -536,7 +536,7 @@ public class BoardTest {
     }
 
     @Test
-    public void zobristKey() throws ParseException, IllegalMoveException {
+    public void testZobristKey() throws ParseException, IllegalMoveException {
         Board b = Board.INSTANCE;
         b.resetBoard();
 
@@ -669,7 +669,7 @@ public class BoardTest {
     }
 
     @Test
-    public void pawnKey() throws Exception {
+    public void testPawnKey() throws Exception {
         Board b = Board.INSTANCE;
         b.resetBoard();
 
@@ -703,7 +703,7 @@ public class BoardTest {
     }
 
     @Test
-    public void pawnKeyPromotion() throws Exception {
+    public void testPawnKeyPromotion() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "7k/P7/K7/8/8/8/8/8 w - - 0 1");
         MoveParser mp = new MoveParser();
@@ -717,7 +717,7 @@ public class BoardTest {
     }
 
     @Test
-    public void numPawnsInitialPos() {
+    public void testNumPawnsInitialPos() {
         Board b = Board.INSTANCE;
         b.resetBoard();
 
@@ -727,7 +727,7 @@ public class BoardTest {
     }
 
     @Test
-    public void numPawns() throws Exception {
+    public void testNumPawns() throws Exception {
         Board b = Board.INSTANCE;
 
         FenParser.setPos(b, "7k/pp6/8/8/8/8/7P/7K w - - ");
@@ -738,7 +738,7 @@ public class BoardTest {
     }
 
     @Test
-    public void numNonPawnsInitialPos() {
+    public void testNumNonPawnsInitialPos() {
         Board b = Board.INSTANCE;
         b.resetBoard();
 
@@ -753,7 +753,7 @@ public class BoardTest {
     }
 
     @Test
-    public void numNonPawns() throws Exception {
+    public void testNumNonPawns() throws Exception {
         Board b = Board.INSTANCE;
 
         FenParser.setPos(b, "7k/br6/8/8/8/8/Q7/7K w - -");
@@ -769,7 +769,7 @@ public class BoardTest {
     }
 
     @Test
-    public void pieceCountsPromotion() throws Exception {
+    public void testPieceCountsPromotion() throws Exception {
         Board b = Board.INSTANCE;
 
         FenParser.setPos(b, "7k/P7/8/8/8/8/8/7K w - -");
@@ -794,7 +794,7 @@ public class BoardTest {
 
     // these taken from Arasan
     @Test
-    public void playerInCheck() throws Exception {
+    public void testPlayerInCheck() throws Exception {
         testCasePlayerInCheck("5r1k/pp4pp/2p5/2b1P3/4P3/1PB1p3/P5PP/3N1QK1 b - -","e2+",true);
         testCasePlayerInCheck("8/1n3ppk/7p/3n1P1P/1P4K1/1r6/2N5/3B4 w - -","Ne3",false);
         testCasePlayerInCheck("8/5ppb/3k3p/1p3P1P/1PrN1PK1/3R4/8/8 w - -","Nf3+",true);

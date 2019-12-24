@@ -7,6 +7,7 @@ import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.exceptions.ParseException;
+import com.jamesswafford.chess4j.pieces.King;
 import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.utils.BlankRemover;
 import com.jamesswafford.chess4j.utils.PieceFactory;
@@ -134,7 +135,7 @@ public final class FenParser {
 
     private static void setHalfMoveClock(Board b,String s) throws ParseException {
         try {
-            Integer halfMoves = s==null ? 0 : Integer.valueOf(s);
+            int halfMoves = s==null ? 0 : Integer.valueOf(s);
             b.setFiftyCounter(halfMoves);
         } catch (NumberFormatException e) {
             throw new ParseException(e);
@@ -143,7 +144,7 @@ public final class FenParser {
 
     private static void setFullMoveCounter(Board b,String s) throws ParseException {
         try {
-            Integer moveCounter = s==null? 1 : Integer.valueOf(s);
+            int moveCounter = s==null? 1 : Integer.valueOf(s);
             b.setMoveCounter((moveCounter-1)*2);
             if (Color.BLACK.equals(b.getPlayerToMove())) {
                 b.setMoveCounter(b.getMoveCounter()+1);
@@ -159,22 +160,22 @@ public final class FenParser {
         }
 
         char[] arr = s.toCharArray();
-        for (int i=0;i<arr.length;i++) {
-            switch (arr[i]) {
-            case 'K':
-                b.addCastlingRight(CastlingRights.WHITE_KINGSIDE);
-                break;
-            case 'k':
-                b.addCastlingRight(CastlingRights.BLACK_KINGSIDE);
-                break;
-            case 'Q':
-                b.addCastlingRight(CastlingRights.WHITE_QUEENSIDE);
-                break;
-            case 'q':
-                b.addCastlingRight(CastlingRights.BLACK_QUEENSIDE);
-                break;
-            default:
-                throw new ParseException("invalid character in setCastlingRights: " + s);
+        for (char c : arr) {
+            switch (c) {
+                case 'K':
+                    b.addCastlingRight(CastlingRights.WHITE_KINGSIDE);
+                    break;
+                case 'k':
+                    b.addCastlingRight(CastlingRights.BLACK_KINGSIDE);
+                    break;
+                case 'Q':
+                    b.addCastlingRight(CastlingRights.WHITE_QUEENSIDE);
+                    break;
+                case 'q':
+                    b.addCastlingRight(CastlingRights.BLACK_QUEENSIDE);
+                    break;
+                default:
+                    throw new ParseException("invalid character in setCastlingRights: " + s);
             }
         }
     }
@@ -208,12 +209,16 @@ public final class FenParser {
     private static void setPieces(Board b,String s) {
         char[] arr = s.toCharArray();
         int sq=0;
-        for (int i=0;i<arr.length;i++) {
-            char c = arr[i];
+        for (char c : arr) {
             Piece piece = PieceFactory.getPiece(String.valueOf(c));
             if (piece != null) {
                 b.addPiece(piece, Square.valueOf(sq));
                 sq++;
+                /*if (piece == King.BLACK_KING) {
+
+                } else if (piece == King.WHITE_KING) {
+
+                }*/
             } else if (c >= '1' && c <= '8') {
                 sq += Integer.valueOf(String.valueOf(c));
             }
