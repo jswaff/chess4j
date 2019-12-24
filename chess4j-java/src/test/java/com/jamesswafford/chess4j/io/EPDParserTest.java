@@ -32,10 +32,10 @@ public class EPDParserTest {
         assertEquals(Rook.BLACK_ROOK, b.getPiece(Square.valueOf(File.FILE_G,Rank.RANK_5)));
         assertEquals(Pawn.WHITE_PAWN, b.getPiece(Square.valueOf(File.FILE_G,Rank.RANK_3)));
         assertEquals(Color.WHITE, b.getPlayerToMove());
-        assertFalse(b.canCastle(CastlingRights.BLACK_KINGSIDE));
-        assertFalse(b.canCastle(CastlingRights.BLACK_QUEENSIDE));
-        assertFalse(b.canCastle(CastlingRights.WHITE_KINGSIDE));
-        assertFalse(b.canCastle(CastlingRights.WHITE_QUEENSIDE));
+        assertFalse(b.hasCastlingRight(CastlingRights.BLACK_KINGSIDE));
+        assertFalse(b.hasCastlingRight(CastlingRights.BLACK_QUEENSIDE));
+        assertFalse(b.hasCastlingRight(CastlingRights.WHITE_KINGSIDE));
+        assertFalse(b.hasCastlingRight(CastlingRights.WHITE_QUEENSIDE));
         assertEquals(0, b.getMoveCounter());
         assertNull(b.getEPSquare());
 

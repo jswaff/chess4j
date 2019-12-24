@@ -23,13 +23,13 @@ public class FenParserTest {
         FenParser.setPos(board, fen);
 
         assertEquals(Knight.WHITE_KNIGHT, board.getPiece(Square.valueOf(File.FILE_F, Rank.RANK_3)));
-        assertFalse(board.canCastle(BLACK_KINGSIDE));
-        assertFalse(board.canCastle(BLACK_QUEENSIDE));
-        assertFalse(board.canCastle(WHITE_KINGSIDE));
-        assertFalse(board.canCastle(WHITE_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
         assertEquals(3,board.getMoveCounter());
         assertEquals(1, board.getFiftyCounter());
-        assertEquals(null, board.getEPSquare());
+        assertNull(board.getEPSquare());
     }
 
     @Test
@@ -38,10 +38,10 @@ public class FenParserTest {
         FenParser.setPos(board, fen);
 
         assertEquals(Knight.WHITE_KNIGHT, board.getPiece(Square.valueOf(File.FILE_F, Rank.RANK_3)));
-        assertFalse(board.canCastle(BLACK_KINGSIDE));
-        assertFalse(board.canCastle(BLACK_QUEENSIDE));
-        assertFalse(board.canCastle(WHITE_KINGSIDE));
-        assertFalse(board.canCastle(WHITE_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
         assertEquals(1,board.getMoveCounter());
         assertEquals(0, board.getFiftyCounter());
         assertNull(board.getEPSquare());
@@ -53,10 +53,10 @@ public class FenParserTest {
         FenParser.setPos(board, fen);
 
         assertEquals(Pawn.BLACK_PAWN, board.getPiece(Square.valueOf(File.FILE_C, Rank.RANK_5)));
-        assertFalse(board.canCastle(BLACK_KINGSIDE));
-        assertFalse(board.canCastle(BLACK_QUEENSIDE));
-        assertFalse(board.canCastle(WHITE_KINGSIDE));
-        assertFalse(board.canCastle(WHITE_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
         assertEquals(2,board.getMoveCounter());
         assertEquals(0, board.getFiftyCounter());
         assertEquals(Square.valueOf(File.FILE_C, Rank.RANK_6), board.getEPSquare());

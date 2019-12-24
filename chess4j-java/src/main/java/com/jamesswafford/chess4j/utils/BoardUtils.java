@@ -4,6 +4,7 @@ import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.CastlingRights;
+import com.jamesswafford.chess4j.movegen.AttackDetector;
 import com.jamesswafford.chess4j.movegen.Magic;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.squares.File;
@@ -18,6 +19,12 @@ import com.jamesswafford.chess4j.pieces.Queen;
 import com.jamesswafford.chess4j.pieces.Rook;
 
 import java.util.Optional;
+
+import static com.jamesswafford.chess4j.board.CastlingRights.*;
+import static com.jamesswafford.chess4j.board.CastlingRights.BLACK_KINGSIDE;
+import static com.jamesswafford.chess4j.board.squares.File.*;
+import static com.jamesswafford.chess4j.board.squares.Rank.RANK_1;
+import static com.jamesswafford.chess4j.board.squares.Rank.RANK_8;
 
 public class BoardUtils {
 
@@ -87,10 +94,19 @@ public class BoardUtils {
         return false;
     }
 
+    /**
+     * Test if a move is good on a given board configuration.
+     *
+     * "Good" is pseunomymous with "pseudo-legal".
+     *
+     * @param board
+     * @param m
+     * @return
+     */
     public static boolean isGoodMove(Board board,Move m) {
 
         Piece mover = board.getPiece(m.from());
-        if (mover==null) {
+        if (mover == null) {
             return false;
         }
 
@@ -139,17 +155,13 @@ public class BoardUtils {
                 return true;
 
             if (m.isCastle()) {
-                if (m.to()==Square.valueOf(File.FILE_G, Rank.RANK_1)
-                        && board.canCastle(CastlingRights.WHITE_KINGSIDE)) {
+                if (m.to()==Square.valueOf(File.FILE_G, Rank.RANK_1) && whiteCanCastleKingSide(board)) {
                     return true;
-                } else if (m.to()==Square.valueOf(File.FILE_C, Rank.RANK_1)
-                        && board.canCastle(CastlingRights.WHITE_QUEENSIDE)) {
+                } else if (m.to()==Square.valueOf(File.FILE_C, Rank.RANK_1) && whiteCanCastleQueenSide(board)) {
                     return true;
-                } else if (m.to()==Square.valueOf(File.FILE_G, Rank.RANK_8)
-                        && board.canCastle(CastlingRights.BLACK_KINGSIDE)) {
+                } else if (m.to()==Square.valueOf(File.FILE_G, Rank.RANK_8) && blackCanCastleKingSide(board)) {
                     return true;
-                } else if (m.to()==Square.valueOf(File.FILE_C, Rank.RANK_8)
-                        && board.canCastle(CastlingRights.BLACK_QUEENSIDE)) {
+                } else if (m.to()==Square.valueOf(File.FILE_C, Rank.RANK_8) && blackCanCastleQueenSide(board)) {
                     return true;
                 }
             }
@@ -157,4 +169,78 @@ public class BoardUtils {
 
         return false;
     }
+
+    public static boolean blackCanCastleQueenSide(Board board) {
+        if (!board.hasCastlingRight(BLACK_QUEENSIDE)) {
+            return false;
+        }
+
+        boolean pathIsClear = board.isEmpty(Square.valueOf(FILE_D, RANK_8))
+                && board.isEmpty(Square.valueOf(FILE_C, RANK_8))
+                && board.isEmpty(Square.valueOf(FILE_B, RANK_8));
+        if (!pathIsClear) {
+            return false;
+        }
+
+        Color opponent = Color.swap(board.getPlayerToMove());
+        boolean wouldCrossCheck = AttackDetector.attacked(board, Square.valueOf(FILE_E, RANK_8), opponent)
+                || AttackDetector.attacked(board, Square.valueOf(FILE_D, RANK_8), opponent);
+
+        return !wouldCrossCheck;
+    }
+
+    public static boolean blackCanCastleKingSide(Board board) {
+        if (!board.hasCastlingRight(BLACK_KINGSIDE)) {
+            return false;
+        }
+        boolean pathIsClear = board.isEmpty(Square.valueOf(FILE_F, RANK_8))
+                && board.isEmpty(Square.valueOf(FILE_G, RANK_8));
+        if (!pathIsClear) {
+            return false;
+        }
+
+        Color opponent = Color.swap(board.getPlayerToMove());
+        boolean wouldCrossCheck  = AttackDetector.attacked(board,Square.valueOf(FILE_E, RANK_8),opponent)
+                || AttackDetector.attacked(board,Square.valueOf(FILE_F, RANK_8),opponent);
+
+        return !wouldCrossCheck;
+    }
+
+    public static boolean whiteCanCastleKingSide(Board board) {
+        if (!board.hasCastlingRight(WHITE_KINGSIDE)) {
+            return false;
+        }
+
+        boolean pathIsClear = board.isEmpty(Square.valueOf(FILE_F, RANK_1))
+                && board.isEmpty(Square.valueOf(FILE_G, RANK_1));
+        if (!pathIsClear) {
+            return false;
+        }
+
+        Color opponent = Color.swap(board.getPlayerToMove());
+        boolean wouldCrossCheck = AttackDetector.attacked(board, Square.valueOf(FILE_E, RANK_1),opponent)
+                || AttackDetector.attacked(board,Square.valueOf(FILE_F, RANK_1),opponent);
+
+        return !wouldCrossCheck;
+    }
+
+    public static boolean whiteCanCastleQueenSide(Board board) {
+        if (!board.hasCastlingRight(WHITE_QUEENSIDE)) {
+            return false;
+        }
+
+        boolean pathIsClear = board.isEmpty(Square.valueOf(FILE_D, RANK_1))
+                && board.isEmpty(Square.valueOf(FILE_C, RANK_1))
+                && board.isEmpty(Square.valueOf(FILE_B, RANK_1));
+        if (!pathIsClear) {
+            return false;
+        }
+
+        Color opponent = Color.swap(board.getPlayerToMove());
+        boolean wouldCrossCheck = AttackDetector.attacked(board,Square.valueOf(FILE_E, RANK_1),opponent)
+                || AttackDetector.attacked(board,Square.valueOf(FILE_D, RANK_1),opponent);
+
+        return !wouldCrossCheck;
+    }
+
 }

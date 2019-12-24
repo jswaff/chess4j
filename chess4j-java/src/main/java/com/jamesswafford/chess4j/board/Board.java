@@ -187,61 +187,6 @@ public final class Board {
         assert(verify());
     }
 
-    private boolean blackCanCastleKingSide() {
-        if (!hasCastlingRight(CastlingRights.BLACK_KINGSIDE)) {
-            return false;
-        }
-        boolean pathIsClear = isEmpty(Square.valueOf(File.FILE_F,Rank.RANK_8))
-                && isEmpty(Square.valueOf(File.FILE_G,Rank.RANK_8));
-        if (!pathIsClear) {
-            return false;
-        }
-
-        Color opponent = Color.swap(playerToMove);
-        boolean wouldCrossCheck  = AttackDetector.attacked(this,Square.valueOf(File.FILE_E,Rank.RANK_8),opponent)
-             || AttackDetector.attacked(this,Square.valueOf(File.FILE_F,Rank.RANK_8),opponent);
-        if (wouldCrossCheck) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean blackCanCastleQueenSide() {
-        if (!hasCastlingRight(CastlingRights.BLACK_QUEENSIDE)) {
-            return false;
-        }
-
-        boolean pathIsClear = isEmpty(Square.valueOf(File.FILE_D,Rank.RANK_8))
-                && isEmpty(Square.valueOf(File.FILE_C,Rank.RANK_8))
-                && isEmpty(Square.valueOf(File.FILE_B,Rank.RANK_8));
-        if (!pathIsClear) {
-            return false;
-        }
-
-        Color opponent = Color.swap(playerToMove);
-        boolean wouldCrossCheck = AttackDetector.attacked(this,Square.valueOf(File.FILE_E,Rank.RANK_8),opponent)
-             || AttackDetector.attacked(this,Square.valueOf(File.FILE_D,Rank.RANK_8),opponent);
-        if (wouldCrossCheck) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public boolean canCastle(CastlingRights cr) {
-
-        if (cr==CastlingRights.WHITE_KINGSIDE) {
-            return whiteCanCastleKingSide();
-        } else if (cr==CastlingRights.WHITE_QUEENSIDE) {
-            return whiteCanCastleQueenSide();
-        } else if (cr==CastlingRights.BLACK_KINGSIDE) {
-            return blackCanCastleKingSide();
-        } else {
-            return blackCanCastleQueenSide();
-        }
-    }
-
     public void clearBoard() {
         List<Square> squares = Square.allSquares();
         for (Square sq : squares) {
@@ -889,49 +834,6 @@ public final class Board {
 
         zobristKey = u.getZobristKey();
         assert(verify());
-    }
-
-    private boolean whiteCanCastleKingSide() {
-        if (!hasCastlingRight(CastlingRights.WHITE_KINGSIDE)) {
-            return false;
-        }
-
-        boolean pathIsClear = isEmpty(Square.valueOf(File.FILE_F,Rank.RANK_1))
-                && isEmpty(Square.valueOf(File.FILE_G,Rank.RANK_1));
-        if (!pathIsClear) {
-            return false;
-        }
-
-        Color opponent = Color.swap(playerToMove);
-        boolean wouldCrossCheck = AttackDetector.attacked(this,Square.valueOf(File.FILE_E,Rank.RANK_1),opponent)
-                || AttackDetector.attacked(this,Square.valueOf(File.FILE_F,Rank.RANK_1),opponent);
-        if (wouldCrossCheck) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean whiteCanCastleQueenSide() {
-        if (!hasCastlingRight(CastlingRights.WHITE_QUEENSIDE)) {
-            return false;
-        }
-
-        boolean pathIsClear = isEmpty(Square.valueOf(File.FILE_D,Rank.RANK_1))
-                && isEmpty(Square.valueOf(File.FILE_C,Rank.RANK_1))
-                && isEmpty(Square.valueOf(File.FILE_B,Rank.RANK_1));
-        if (!pathIsClear) {
-            return false;
-        }
-
-        Color opponent = Color.swap(playerToMove);
-        boolean wouldCrossCheck = AttackDetector.attacked(this,Square.valueOf(File.FILE_E,Rank.RANK_1),opponent)
-            || AttackDetector.attacked(this,Square.valueOf(File.FILE_D,Rank.RANK_1),opponent);
-        if (wouldCrossCheck) {
-            return false;
-        }
-
-        return true;
     }
 
     private boolean verify() {

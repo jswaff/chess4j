@@ -27,7 +27,7 @@ import static com.jamesswafford.chess4j.board.squares.Rank.*;
 public class MoveGenTest {
 
     @Test
-    public void knightMoves() {
+    public void testKnightMoves() {
         Board b = Board.INSTANCE;
         b.resetBoard();
 
@@ -71,7 +71,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void bishopMoves() throws Exception {
+    public void testBishopMoves() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "4k3/2p3P1/8/4B3/4B3/3p1P2/8/4K3 w - - 0 1");
         List<Move> moves = new ArrayList<>();
@@ -98,7 +98,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void bishopCaptures() throws Exception {
+    public void testBishopCaptures() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "4k3/2p3P1/8/4B3/4B3/3p1P2/8/4K3 w - - 0 1");
         List<Move> moves = new ArrayList<>();
@@ -109,7 +109,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void bishopNoncaptures() throws Exception {
+    public void testBishopNoncaptures() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "4k3/2p3P1/8/4B3/4B3/3p1P2/8/4K3 w - - 0 1");
         List<Move> moves = new ArrayList<>();
@@ -134,7 +134,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void rookMoves() throws Exception {
+    public void testRookMoves() throws Exception {
         Board b = Board.INSTANCE;
         b.resetBoard();
 
@@ -159,7 +159,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void rookCaptures() throws Exception {
+    public void testRookCaptures() throws Exception {
         Board b = Board.INSTANCE;
 
         List<Move> moves = new ArrayList<>();
@@ -171,7 +171,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void rookNoncaptures() throws Exception {
+    public void testRookNoncaptures() throws Exception {
         Board b = Board.INSTANCE;
 
         List<Move> moves = new ArrayList<>();
@@ -191,7 +191,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void queenMoves() throws Exception {
+    public void testQueenMoves() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "8/8/3bk3/8/8/2K3Q1/8/8 w - - 0 1");
 
@@ -219,7 +219,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void queenCaptures() throws Exception {
+    public void testQueenCaptures() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "8/8/3bk3/8/8/2K3Q1/8/8 w - - 0 1");
 
@@ -258,7 +258,7 @@ public class MoveGenTest {
 
 
     @Test
-    public void kingMoves() throws Exception {
+    public void testKingMoves() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "8/8/3k4/2n1P3/8/8/3rP3/R3K2R b KQ - 0 1");
         List<Move> moves = new ArrayList<>();
@@ -286,7 +286,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void kingMoves2() throws Exception {
+    public void testKingMoves2() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "3k4/8/8/2n1P3/8/8/3rP3/RN2K2R w KQ - 0 1");
         List<Move> moves = new ArrayList<>();
@@ -302,7 +302,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void kingMovesInCorner() throws Exception {
+    public void testKingMovesInCorner() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "k7/8/8/8/8/8/8/7K w - - 0 1");
         List<Move> moves = new ArrayList<>();
@@ -315,7 +315,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void kingMovesInCorner2() throws Exception {
+    public void testKingMovesInCorner2() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "k7/8/8/8/8/8/8/7K b - - 0 1");
         List<Move> moves = new ArrayList<>();
@@ -328,7 +328,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void kingNoCastleToEscapeCheck() throws Exception {
+    public void testKingNoCastleToEscapeCheck() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "3k4/8/8/2N1P3/7q/8/4P3/R3K2R w KQ - 0 1");
         List<Move> moves = new ArrayList<>();
@@ -343,7 +343,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void kingCannotCastleThroughCheck() throws Exception {
+    public void testKingCannotCastleThroughCheck() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "r3k2r/8/8/8/8/5Q2/8/4K3 b kq - 0 1");
         List<Move> moves = new ArrayList<>();
@@ -359,7 +359,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void kingCaptures() throws Exception {
+    public void testKingCaptures() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "8/8/3k4/2n1P3/8/8/3rP3/R3K2R b KQ - 0 1");
         List<Move> moves = new ArrayList<>();
@@ -370,7 +370,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void kingNoncaptures() throws Exception {
+    public void testKingNoncaptures() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "8/8/3k4/2n1P3/8/8/3rP3/R3K2R b KQ - 0 1");
         List<Move> moves = new ArrayList<>();
@@ -386,7 +386,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void pawnMoves() throws Exception {
+    public void testPawnMoves() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "2b1k3/PP6/8/3pP3/4P3/8/6P1/4K3 w - d6 0 1");
         List<Move> moves = new ArrayList<>();
@@ -417,7 +417,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void pawnCaptures() throws Exception {
+    public void testPawnCaptures() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "2b1k3/PP6/8/3pP3/4P3/8/6P1/4K3 w - d6 0 1");
         List<Move> moves = new ArrayList<>();
@@ -444,7 +444,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void pawnNoncaps() throws Exception {
+    public void testPawnNoncaps() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "2b1k3/PP6/8/3pP3/4P3/8/6P1/4K3 w - d6 0 1");
         List<Move> moves = new ArrayList<>();
@@ -457,7 +457,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void pawnMoves2() throws Exception {
+    public void testPawnMoves2() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
         List<Move> moves = new ArrayList<>();
@@ -469,7 +469,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void movesFromInitialPos() {
+    public void testMovesFromInitialPos() {
         Board b = Board.INSTANCE;
         b.resetBoard();
 
@@ -500,7 +500,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void capturesPromosOnlyFromInitialPosition() {
+    public void tsetCapturesPromosOnlyFromInitialPosition() {
         Board b = Board.INSTANCE;
         b.resetBoard();
         List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
@@ -508,7 +508,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void capturesPromosOnlyContainsPromotions() throws Exception {
+    public void testCapturesPromosOnlyContainsPromotions() throws Exception {
         Board b = Board.INSTANCE;
         EPDParser.setPos(b, "8/4Pk1p/6p1/1r6/8/5N2/2B2PPP/b5K1 w - - bm e8=Q+; id \"position 0631\";");
 
@@ -528,7 +528,7 @@ public class MoveGenTest {
     }
 
     @Test
-    public void capturesPromosOnlyContainsEP() throws Exception {
+    public void testCapturesPromosOnlyContainsEP() throws Exception {
         Board b = Board.INSTANCE;
         FenParser.setPos(b, "8/8/8/3pP3/8/8/K6k/8 w - d6");
 

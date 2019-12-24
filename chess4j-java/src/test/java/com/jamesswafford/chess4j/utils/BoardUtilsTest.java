@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.utils;
 
 import java.util.List;
 
+import com.jamesswafford.chess4j.board.CastlingRights;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.Color;
@@ -194,4 +195,75 @@ public class BoardUtilsTest {
                 true);
         assertFalse(BoardUtils.isGoodMove(b, bogus)); // bishop in the path
     }
+
+    @Test
+    public void testBlackCanCastleQueenSide() throws Exception {
+        Board board = Board.INSTANCE;
+        FenParser.setPos(board, "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1");
+
+        assertTrue(BoardUtils.blackCanCastleQueenSide(board));
+
+        board.clearCastlingRight(CastlingRights.BLACK_QUEENSIDE);
+        assertFalse(BoardUtils.blackCanCastleQueenSide(board));
+        board.addCastlingRight(CastlingRights.BLACK_QUEENSIDE);
+        assertTrue(BoardUtils.blackCanCastleQueenSide(board));
+
+        // verify that it's not allowed to cross check
+        FenParser.setPos(board, "r3k2r/8/1Q6/8/8/8/8/R3K2R b KQkq - 0 1");
+        assertFalse(BoardUtils.blackCanCastleQueenSide(board));
+    }
+
+    @Test
+    public void testBlackCanCastleKingSide() throws Exception {
+        Board board = Board.INSTANCE;
+        FenParser.setPos(board, "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1");
+
+        assertTrue(BoardUtils.blackCanCastleKingSide(board));
+
+        board.clearCastlingRight(CastlingRights.BLACK_KINGSIDE);
+        assertFalse(BoardUtils.blackCanCastleKingSide(board));
+        board.addCastlingRight(CastlingRights.BLACK_KINGSIDE);
+        assertTrue(BoardUtils.blackCanCastleKingSide(board));
+
+        // verify that it's not allowed to cross check
+        FenParser.setPos(board, "r3k2r/8/6Q1/8/8/8/8/R3K2R b KQkq - 0 1");
+        assertFalse(BoardUtils.blackCanCastleKingSide(board));
+    }
+
+
+    @Test
+    public void testWhiteCanCastleQueenSide() throws Exception {
+        Board board = Board.INSTANCE;
+        FenParser.setPos(board, "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+
+        assertTrue(BoardUtils.whiteCanCastleQueenSide(board));
+
+        board.clearCastlingRight(CastlingRights.WHITE_QUEENSIDE);
+        assertFalse(BoardUtils.whiteCanCastleQueenSide(board));
+        board.addCastlingRight(CastlingRights.WHITE_QUEENSIDE);
+        assertTrue(BoardUtils.whiteCanCastleQueenSide(board));
+
+        // verify that it's not allowed to cross check
+        FenParser.setPos(board, "r3k2r/8/8/8/8/1q6/8/R3K2R w KQkq - 0 1");
+        assertFalse(BoardUtils.whiteCanCastleQueenSide(board));
+    }
+
+
+    @Test
+    public void testWhiteCanCastleKingSide() throws Exception {
+        Board board = Board.INSTANCE;
+        FenParser.setPos(board, "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+
+        assertTrue(BoardUtils.whiteCanCastleKingSide(board));
+
+        board.clearCastlingRight(CastlingRights.WHITE_KINGSIDE);
+        assertFalse(BoardUtils.whiteCanCastleKingSide(board));
+        board.addCastlingRight(CastlingRights.WHITE_KINGSIDE);
+        assertTrue(BoardUtils.whiteCanCastleKingSide(board));
+
+        // verify that it's not allowed to cross check
+        FenParser.setPos(board, "r3k2r/8/8/8/8/6q1/8/R3K2R w KQkq - 0 1");
+        assertFalse(BoardUtils.whiteCanCastleKingSide(board));
+    }
+
 }
