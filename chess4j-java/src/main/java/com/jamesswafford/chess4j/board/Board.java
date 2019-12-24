@@ -3,18 +3,22 @@ package com.jamesswafford.chess4j.board;
 import java.util.*;
 
 import com.jamesswafford.chess4j.Color;
-import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.Zobrist;
 import com.jamesswafford.chess4j.movegen.AttackDetector;
-import com.jamesswafford.chess4j.pieces.Bishop;
 import com.jamesswafford.chess4j.pieces.King;
-import com.jamesswafford.chess4j.pieces.Knight;
-import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Piece;
-import com.jamesswafford.chess4j.pieces.Queen;
-import com.jamesswafford.chess4j.pieces.Rook;
+
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.pieces.Knight.*;
+import static com.jamesswafford.chess4j.pieces.Bishop.*;
+import static com.jamesswafford.chess4j.pieces.Rook.*;
+import static com.jamesswafford.chess4j.pieces.Queen.*;
+import static com.jamesswafford.chess4j.pieces.King.*;
+import static com.jamesswafford.chess4j.board.CastlingRights.*;
+import static com.jamesswafford.chess4j.board.squares.Rank.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 
 public final class Board {
@@ -44,22 +48,22 @@ public final class Board {
     }
 
     public void addCastlingRight(CastlingRights castlingRight) {
-        if (castlingRight == CastlingRights.WHITE_KINGSIDE) {
+        if (castlingRight == WHITE_KINGSIDE) {
             if (!castlingRights.isWhiteKingside()) {
                 castlingRights.setWhiteKingside();
                 zobristKey ^= Zobrist.getCastlingKey(castlingRight);
             }
-        } else if (castlingRight == CastlingRights.WHITE_QUEENSIDE) {
+        } else if (castlingRight == WHITE_QUEENSIDE) {
             if (!castlingRights.isWhiteQueenside()) {
                 castlingRights.setWhiteQueenside();
                 zobristKey ^= Zobrist.getCastlingKey(castlingRight);
             }
-        } else if (castlingRight == CastlingRights.BLACK_KINGSIDE) {
+        } else if (castlingRight == BLACK_KINGSIDE) {
             if (!castlingRights.isBlackKingside()) {
                 castlingRights.setBlackKingside();
                 zobristKey ^= Zobrist.getCastlingKey(castlingRight);
             }
-        } else if (castlingRight == CastlingRights.BLACK_QUEENSIDE) {
+        } else if (castlingRight == BLACK_QUEENSIDE) {
             if (!castlingRights.isBlackQueenside()) {
                 castlingRights.setBlackQueenside();
                 zobristKey ^= Zobrist.getCastlingKey(castlingRight);
@@ -72,54 +76,54 @@ public final class Board {
     private void addPieceToDestination(Move m) {
         Piece p = getPiece(m.from());
         addPiece(p,m.to());
-        if (p==Pawn.WHITE_PAWN) {
+        if (p==WHITE_PAWN) {
             fiftyCounter = 0;
             Optional<Square> nnSq = m.from().north().flatMap(Square::north);
             if (nnSq.isPresent() && m.to()==nnSq.get()) {
                 setEP(m.from().north().get());
-            } else if (m.to().rank()==Rank.RANK_8) {
+            } else if (m.to().rank()==RANK_8) {
                 assert(m.promotion()!=null);
                 removePiece(m.to());
                 addPiece(m.promotion(),m.to());
             }
-        } else if (p==Pawn.BLACK_PAWN) {
+        } else if (p==BLACK_PAWN) {
             fiftyCounter = 0;
             Optional<Square> ssSq = m.from().south().flatMap(Square::south);
             if (ssSq.isPresent() && m.to()==ssSq.get()) {
                 setEP(m.from().south().get());
-            } else if (m.to().rank()==Rank.RANK_1) {
+            } else if (m.to().rank()==RANK_1) {
                 assert(m.promotion()!=null);
                 removePiece(m.to());
                 addPiece(m.promotion(),m.to());
             }
-        } else if (p==King.WHITE_KING) {
+        } else if (p==WHITE_KING) {
             whiteKingSquare = m.to();
-            if (m.from()==Square.valueOf(File.FILE_E, Rank.RANK_1)) {
-                if (m.to()==Square.valueOf(File.FILE_G, Rank.RANK_1)) {
+            if (m.from() == E1) {
+                if (m.to() == G1) {
                     assert(m.isCastle());
                     fiftyCounter = 0;
-                    removePiece(Square.valueOf(File.FILE_H, Rank.RANK_1));
-                    addPiece(Rook.WHITE_ROOK,Square.valueOf(File.FILE_F, Rank.RANK_1));
-                } else if (m.to()==Square.valueOf(File.FILE_C, Rank.RANK_1)) {
+                    removePiece(H1);
+                    addPiece(WHITE_ROOK, F1);
+                } else if (m.to() == C1) {
                     assert(m.isCastle());
                     fiftyCounter = 0;
-                    removePiece(Square.valueOf(File.FILE_A, Rank.RANK_1));
-                    addPiece(Rook.WHITE_ROOK,Square.valueOf(File.FILE_D, Rank.RANK_1));
+                    removePiece(A1);
+                    addPiece(WHITE_ROOK, D1);
                 }
             }
-        } else if (p==King.BLACK_KING) {
+        } else if (p==BLACK_KING) {
             blackKingSquare = m.to();
-            if (m.from()==Square.valueOf(File.FILE_E, Rank.RANK_8)) {
-                if (m.to()==Square.valueOf(File.FILE_G, Rank.RANK_8)) {
+            if (m.from() == E8) {
+                if (m.to() == G8) {
                     assert(m.isCastle());
                     fiftyCounter = 0;
-                    removePiece(Square.valueOf(File.FILE_H, Rank.RANK_8));
-                    addPiece(Rook.BLACK_ROOK,Square.valueOf(File.FILE_F, Rank.RANK_8));
-                } else if (m.to()==Square.valueOf(File.FILE_C, Rank.RANK_8)) {
+                    removePiece(H8);
+                    addPiece(BLACK_ROOK, F8);
+                } else if (m.to() == C8) {
                     assert(m.isCastle());
                     fiftyCounter = 0;
-                    removePiece(Square.valueOf(File.FILE_A, Rank.RANK_8));
-                    addPiece(Rook.BLACK_ROOK,Square.valueOf(File.FILE_D, Rank.RANK_8));
+                    removePiece(A8);
+                    addPiece(BLACK_ROOK, D8);
                 }
             }
         }
@@ -134,30 +138,30 @@ public final class Board {
 
         if (p.isWhite()) {
             whitePieces |= bb;
-            if (p==Pawn.WHITE_PAWN) {
+            if (p==WHITE_PAWN) {
                 whitePawns |= bb;
                 pawnKey ^= Zobrist.getPieceKey(s, p);
-            } else if (p==Knight.WHITE_KNIGHT) {
+            } else if (p==WHITE_KNIGHT) {
                 whiteKnights |= bb;
-            } else if (p==Bishop.WHITE_BISHOP) {
+            } else if (p==WHITE_BISHOP) {
                 whiteBishops |= bb;
-            } else if (p==Rook.WHITE_ROOK) {
+            } else if (p==WHITE_ROOK) {
                 whiteRooks |= bb;
-            } else if (p==Queen.WHITE_QUEEN) {
+            } else if (p==WHITE_QUEEN) {
                 whiteQueens |= bb;
             }
         } else {
             blackPieces |= bb;
-            if (p==Pawn.BLACK_PAWN) {
+            if (p==BLACK_PAWN) {
                 blackPawns |= bb;
                 pawnKey ^= Zobrist.getPieceKey(s, p);
-            } else if (p==Knight.BLACK_KNIGHT) {
+            } else if (p==BLACK_KNIGHT) {
                 blackKnights |= bb;
-            } else if (p==Bishop.BLACK_BISHOP) {
+            } else if (p==BLACK_BISHOP) {
                 blackBishops |= bb;
-            } else if (p==Rook.BLACK_ROOK) {
+            } else if (p==BLACK_ROOK) {
                 blackRooks |= bb;
-            } else if (p==Queen.BLACK_QUEEN) {
+            } else if (p==BLACK_QUEEN) {
                 blackQueens |= bb;
             }
         }
@@ -203,35 +207,35 @@ public final class Board {
         fiftyCounter = 0;
         undoStack.clear();
 
-        assert(pieceCountsMap.get(Pawn.WHITE_PAWN)==0);
-        assert(pieceCountsMap.get(Pawn.BLACK_PAWN)==0);
-        assert(pieceCountsMap.get(Queen.WHITE_QUEEN)==0);
-        assert(pieceCountsMap.get(Queen.BLACK_QUEEN)==0);
-        assert(pieceCountsMap.get(Rook.WHITE_ROOK)==0);
-        assert(pieceCountsMap.get(Rook.BLACK_ROOK)==0);
-        assert(pieceCountsMap.get(Knight.WHITE_KNIGHT)==0);
-        assert(pieceCountsMap.get(Knight.BLACK_KNIGHT)==0);
-        assert(pieceCountsMap.get(Bishop.WHITE_BISHOP)==0);
-        assert(pieceCountsMap.get(Bishop.BLACK_BISHOP)==0);
+        assert(pieceCountsMap.get(WHITE_PAWN)==0);
+        assert(pieceCountsMap.get(BLACK_PAWN)==0);
+        assert(pieceCountsMap.get(WHITE_QUEEN)==0);
+        assert(pieceCountsMap.get(BLACK_QUEEN)==0);
+        assert(pieceCountsMap.get(WHITE_ROOK)==0);
+        assert(pieceCountsMap.get(BLACK_ROOK)==0);
+        assert(pieceCountsMap.get(WHITE_KNIGHT)==0);
+        assert(pieceCountsMap.get(BLACK_KNIGHT)==0);
+        assert(pieceCountsMap.get(WHITE_BISHOP)==0);
+        assert(pieceCountsMap.get(BLACK_BISHOP)==0);
     }
 
     public void clearCastlingRight(CastlingRights castlingRight) {
-        if (castlingRight == CastlingRights.WHITE_KINGSIDE) {
+        if (castlingRight == WHITE_KINGSIDE) {
             if (castlingRights.isWhiteKingside()) {
                 castlingRights.removeWhiteKingside();
                 zobristKey ^= Zobrist.getCastlingKey(castlingRight);
             }
-        } else if (castlingRight == CastlingRights.WHITE_QUEENSIDE) {
+        } else if (castlingRight == WHITE_QUEENSIDE) {
             if (castlingRights.isWhiteQueenside()) {
                 castlingRights.removeWhiteQueenside();
                 zobristKey ^= Zobrist.getCastlingKey(castlingRight);
             }
-        } else if (castlingRight == CastlingRights.BLACK_KINGSIDE) {
+        } else if (castlingRight == BLACK_KINGSIDE) {
             if (castlingRights.isBlackKingside()) {
                 castlingRights.removeBlackKingside();
                 zobristKey ^= Zobrist.getCastlingKey(castlingRight);
             }
-        } else if (castlingRight == CastlingRights.BLACK_QUEENSIDE) {
+        } else if (castlingRight == BLACK_QUEENSIDE) {
             if (castlingRights.isBlackQueenside()) {
                 castlingRights.removeBlackQueenside();
                 zobristKey ^= Zobrist.getCastlingKey(castlingRight);
@@ -428,29 +432,29 @@ public final class Board {
 
         // first remove existing rights
         if (castlingRights.isWhiteKingside()) {
-            clearCastlingRight(CastlingRights.WHITE_KINGSIDE);
+            clearCastlingRight(WHITE_KINGSIDE);
         }
         if (castlingRights.isWhiteQueenside()) {
-            clearCastlingRight(CastlingRights.WHITE_QUEENSIDE);
+            clearCastlingRight(WHITE_QUEENSIDE);
         }
         if (castlingRights.isBlackKingside()) {
-            clearCastlingRight(CastlingRights.BLACK_KINGSIDE);
+            clearCastlingRight(BLACK_KINGSIDE);
         }
         if (castlingRights.isBlackQueenside()) {
-            clearCastlingRight(CastlingRights.BLACK_QUEENSIDE);
+            clearCastlingRight(BLACK_QUEENSIDE);
         }
 
         if (myCastlingRights.isWhiteKingside()) {
-            addCastlingRight(CastlingRights.BLACK_KINGSIDE);
+            addCastlingRight(BLACK_KINGSIDE);
         }
         if (myCastlingRights.isWhiteQueenside()) {
-            addCastlingRight(CastlingRights.BLACK_QUEENSIDE);
+            addCastlingRight(BLACK_QUEENSIDE);
         }
         if (myCastlingRights.isBlackKingside()) {
-            addCastlingRight(CastlingRights.WHITE_KINGSIDE);
+            addCastlingRight(WHITE_KINGSIDE);
         }
         if (myCastlingRights.isBlackQueenside()) {
-            addCastlingRight(CastlingRights.WHITE_QUEENSIDE);
+            addCastlingRight(WHITE_QUEENSIDE);
         }
 
         resetKingSquares();
@@ -512,13 +516,13 @@ public final class Board {
     }
 
     public boolean hasCastlingRight(CastlingRights cr) {
-        if (CastlingRights.WHITE_KINGSIDE==cr) {
+        if (WHITE_KINGSIDE==cr) {
             return castlingRights.isWhiteKingside();
-        } else if (CastlingRights.WHITE_QUEENSIDE==cr) {
+        } else if (WHITE_QUEENSIDE==cr) {
             return castlingRights.isWhiteQueenside();
-        } else if (CastlingRights.BLACK_KINGSIDE==cr) {
+        } else if (BLACK_KINGSIDE==cr) {
             return castlingRights.isBlackKingside();
-        } else if (CastlingRights.BLACK_QUEENSIDE==cr) {
+        } else if (BLACK_QUEENSIDE==cr) {
             return castlingRights.isBlackQueenside();
         } else {
             throw new IllegalArgumentException("unknown castling right: " + cr);
@@ -573,24 +577,24 @@ public final class Board {
     }
 
     private void removeRookCastlingAvailability(Square sq) {
-        if (sq==Square.valueOf(File.FILE_A, Rank.RANK_1)) {
+        if (sq == A1) {
             if (castlingRights.isWhiteQueenside()) {
-                zobristKey ^= Zobrist.getCastlingKey(CastlingRights.WHITE_QUEENSIDE);
+                zobristKey ^= Zobrist.getCastlingKey(WHITE_QUEENSIDE);
                 castlingRights.removeWhiteQueenside();
             }
-        } else if (sq==Square.valueOf(File.FILE_H, Rank.RANK_1)) {
+        } else if (sq == H1) {
             if (castlingRights.isWhiteKingside()) {
-                zobristKey ^= Zobrist.getCastlingKey(CastlingRights.WHITE_KINGSIDE);
+                zobristKey ^= Zobrist.getCastlingKey(WHITE_KINGSIDE);
                 castlingRights.removeWhiteKingside();
             }
-        } else if (sq==Square.valueOf(File.FILE_A, Rank.RANK_8)) {
+        } else if (sq == A8) {
             if (castlingRights.isBlackQueenside()) {
-                zobristKey ^= Zobrist.getCastlingKey(CastlingRights.BLACK_QUEENSIDE);
+                zobristKey ^= Zobrist.getCastlingKey(BLACK_QUEENSIDE);
                 castlingRights.removeBlackQueenside();
             }
-        } else if (sq==Square.valueOf(File.FILE_H, Rank.RANK_8)) {
+        } else if (sq == H8) {
             if (castlingRights.isBlackKingside()) {
-                zobristKey ^= Zobrist.getCastlingKey(CastlingRights.BLACK_KINGSIDE);
+                zobristKey ^= Zobrist.getCastlingKey(BLACK_KINGSIDE);
                 castlingRights.removeBlackKingside();
             }
         }
@@ -604,24 +608,24 @@ public final class Board {
 
         // if a rook or king is moving, remove their castling availability
         Piece p = getPiece(m.from());
-        if (p==Rook.WHITE_ROOK || p==Rook.BLACK_ROOK) {
+        if (p==WHITE_ROOK || p==BLACK_ROOK) {
             removeRookCastlingAvailability(m.from());
         } else if (p==King.WHITE_KING) {
             if (castlingRights.isWhiteKingside()) {
-                zobristKey ^= Zobrist.getCastlingKey(CastlingRights.WHITE_KINGSIDE);
+                zobristKey ^= Zobrist.getCastlingKey(WHITE_KINGSIDE);
                 castlingRights.removeWhiteKingside();
             }
             if (castlingRights.isWhiteQueenside()) {
-                zobristKey ^= Zobrist.getCastlingKey(CastlingRights.WHITE_QUEENSIDE);
+                zobristKey ^= Zobrist.getCastlingKey(WHITE_QUEENSIDE);
                 castlingRights.removeWhiteQueenside();
             }
         } else if (p==King.BLACK_KING) {
             if (castlingRights.isBlackKingside()) {
-                zobristKey ^= Zobrist.getCastlingKey(CastlingRights.BLACK_KINGSIDE);
+                zobristKey ^= Zobrist.getCastlingKey(BLACK_KINGSIDE);
                 castlingRights.removeBlackKingside();
             }
             if (castlingRights.isBlackQueenside()) {
-                zobristKey ^= Zobrist.getCastlingKey(CastlingRights.BLACK_QUEENSIDE);
+                zobristKey ^= Zobrist.getCastlingKey(BLACK_QUEENSIDE);
                 castlingRights.removeBlackQueenside();
             }
         }
@@ -636,10 +640,10 @@ public final class Board {
             // remove pawn
             if (getPlayerToMove()==Color.WHITE) { // black WAS on move
                 captured = removePiece(epSquare.north().get());
-                assert(captured==Pawn.WHITE_PAWN);
+                assert(captured==WHITE_PAWN);
             } else {
                 captured = removePiece(epSquare.south().get());
-                assert(captured==Pawn.BLACK_PAWN);
+                assert(captured==BLACK_PAWN);
             }
         } else {
             captured = removePiece(m.to());
@@ -655,30 +659,30 @@ public final class Board {
         long bb_sq = Bitboard.squares[sq.value()];
         if (p.isWhite()) {
             whitePieces ^= bb_sq;
-            if (p==Pawn.WHITE_PAWN) {
+            if (p==WHITE_PAWN) {
                 whitePawns ^= bb_sq;
                 pawnKey ^= Zobrist.getPieceKey(sq, p);
-            } else if (p==Knight.WHITE_KNIGHT) {
+            } else if (p==WHITE_KNIGHT) {
                 whiteKnights ^= bb_sq;
-            } else if (p==Bishop.WHITE_BISHOP) {
+            } else if (p==WHITE_BISHOP) {
                 whiteBishops ^= bb_sq;
-            } else if (p==Rook.WHITE_ROOK) {
+            } else if (p==WHITE_ROOK) {
                 whiteRooks ^= bb_sq;
-            } else if (p==Queen.WHITE_QUEEN) {
+            } else if (p==WHITE_QUEEN) {
                 whiteQueens ^= bb_sq;
             }
         } else {
             blackPieces ^= bb_sq;
-            if (p==Pawn.BLACK_PAWN) {
+            if (p==BLACK_PAWN) {
                 blackPawns ^= bb_sq;
                 pawnKey ^= Zobrist.getPieceKey(sq, p);
-            } else if (p==Knight.BLACK_KNIGHT) {
+            } else if (p==BLACK_KNIGHT) {
                 blackKnights ^= bb_sq;
-            } else if (p==Bishop.BLACK_BISHOP) {
+            } else if (p==BLACK_BISHOP) {
                 blackBishops ^= bb_sq;
-            } else if (p==Rook.BLACK_ROOK) {
+            } else if (p==BLACK_ROOK) {
                 blackRooks ^= bb_sq;
-            } else if (p==Queen.BLACK_QUEEN) {
+            } else if (p==BLACK_QUEEN) {
                 blackQueens ^= bb_sq;
             }
         }
@@ -694,18 +698,18 @@ public final class Board {
     public void resetBoard() {
         undoStack.clear();
         pieceMap.clear();
-        pieceCountsMap.put(Queen.WHITE_QUEEN, 0);
-        pieceCountsMap.put(Queen.BLACK_QUEEN, 0);
-        pieceCountsMap.put(Rook.WHITE_ROOK, 0);
-        pieceCountsMap.put(Rook.BLACK_ROOK, 0);
-        pieceCountsMap.put(Knight.WHITE_KNIGHT, 0);
-        pieceCountsMap.put(Knight.BLACK_KNIGHT, 0);
-        pieceCountsMap.put(Bishop.WHITE_BISHOP, 0);
-        pieceCountsMap.put(Bishop.BLACK_BISHOP, 0);
-        pieceCountsMap.put(King.WHITE_KING, 0);
-        pieceCountsMap.put(King.BLACK_KING, 0);
-        pieceCountsMap.put(Pawn.WHITE_PAWN, 0);
-        pieceCountsMap.put(Pawn.BLACK_PAWN, 0);
+        pieceCountsMap.put(WHITE_QUEEN, 0);
+        pieceCountsMap.put(BLACK_QUEEN, 0);
+        pieceCountsMap.put(WHITE_ROOK, 0);
+        pieceCountsMap.put(BLACK_ROOK, 0);
+        pieceCountsMap.put(WHITE_KNIGHT, 0);
+        pieceCountsMap.put(BLACK_KNIGHT, 0);
+        pieceCountsMap.put(WHITE_BISHOP, 0);
+        pieceCountsMap.put(BLACK_BISHOP, 0);
+        pieceCountsMap.put(WHITE_KING, 0);
+        pieceCountsMap.put(BLACK_KING, 0);
+        pieceCountsMap.put(WHITE_PAWN, 0);
+        pieceCountsMap.put(BLACK_PAWN, 0);
 
         whitePawns = blackPawns = 0;
         whiteKnights = blackKnights = 0;
@@ -717,26 +721,26 @@ public final class Board {
         zobristKey = 0;
         pawnKey = 0;
 
-        addPiece(Rook.BLACK_ROOK,Square.valueOf(File.FILE_A, Rank.RANK_8));
-        addPiece(Knight.BLACK_KNIGHT,Square.valueOf(File.FILE_B, Rank.RANK_8));
-        addPiece(Bishop.BLACK_BISHOP,Square.valueOf(File.FILE_C, Rank.RANK_8));
-        addPiece(Queen.BLACK_QUEEN,Square.valueOf(File.FILE_D, Rank.RANK_8));
-        addPiece(King.BLACK_KING,Square.valueOf(File.FILE_E, Rank.RANK_8));
-        addPiece(Bishop.BLACK_BISHOP,Square.valueOf(File.FILE_F, Rank.RANK_8));
-        addPiece(Knight.BLACK_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_8));
-        addPiece(Rook.BLACK_ROOK,Square.valueOf(File.FILE_H, Rank.RANK_8));
+        addPiece(BLACK_ROOK, A8);
+        addPiece(BLACK_KNIGHT, B8);
+        addPiece(BLACK_BISHOP, C8);
+        addPiece(BLACK_QUEEN, D8);
+        addPiece(BLACK_KING, E8);
+        addPiece(BLACK_BISHOP, F8);
+        addPiece(BLACK_KNIGHT, G8);
+        addPiece(BLACK_ROOK, H8);
 
-        Square.rankSquares(Rank.RANK_7).stream().forEach(sq -> addPiece(Pawn.BLACK_PAWN,sq));
-        Square.rankSquares(Rank.RANK_2).stream().forEach(sq -> addPiece(Pawn.WHITE_PAWN,sq));
+        Square.rankSquares(Rank.RANK_7).stream().forEach(sq -> addPiece(BLACK_PAWN,sq));
+        Square.rankSquares(Rank.RANK_2).stream().forEach(sq -> addPiece(WHITE_PAWN,sq));
 
-        addPiece(Rook.WHITE_ROOK,Square.valueOf(File.FILE_A, Rank.RANK_1));
-        addPiece(Knight.WHITE_KNIGHT,Square.valueOf(File.FILE_B, Rank.RANK_1));
-        addPiece(Bishop.WHITE_BISHOP,Square.valueOf(File.FILE_C, Rank.RANK_1));
-        addPiece(Queen.WHITE_QUEEN,Square.valueOf(File.FILE_D, Rank.RANK_1));
-        addPiece(King.WHITE_KING,Square.valueOf(File.FILE_E, Rank.RANK_1));
-        addPiece(Bishop.WHITE_BISHOP,Square.valueOf(File.FILE_F, Rank.RANK_1));
-        addPiece(Knight.WHITE_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_1));
-        addPiece(Rook.WHITE_ROOK,Square.valueOf(File.FILE_H, Rank.RANK_1));
+        addPiece(WHITE_ROOK, A1);
+        addPiece(WHITE_KNIGHT, B1);
+        addPiece(WHITE_BISHOP, C1);
+        addPiece(WHITE_QUEEN, D1);
+        addPiece(WHITE_KING, E1);
+        addPiece(WHITE_BISHOP, F1);
+        addPiece(WHITE_KNIGHT, G1);
+        addPiece(WHITE_ROOK, H1);
 
         castlingRights.clear();
         EnumSet.allOf(CastlingRights.class).stream().forEach(cr -> addCastlingRight(cr));
@@ -745,15 +749,15 @@ public final class Board {
         zobristKey ^= Zobrist.getPlayerKey(Color.WHITE);
 
         epSquare = null;
-        whiteKingSquare = Square.valueOf(File.FILE_E,Rank.RANK_1);
-        blackKingSquare = Square.valueOf(File.FILE_E,Rank.RANK_8);
+        whiteKingSquare = E1;
+        blackKingSquare = E8;
         moveCounter = 0;
         fiftyCounter = 0;
     }
 
     public void resetKingSquares() {
-        blackKingSquare = findKingSquare(King.BLACK_KING);
-        whiteKingSquare = findKingSquare(King.WHITE_KING);
+        blackKingSquare = findKingSquare(BLACK_KING);
+        whiteKingSquare = findKingSquare(WHITE_KING);
     }
 
     public void setEP(Square ep) {
@@ -795,9 +799,9 @@ public final class Board {
 
         // place the moving piece on fromSq
         addPiece(u.getMove().piece(),u.getMove().from());
-        if (u.getMove().piece()==King.WHITE_KING) {
+        if (u.getMove().piece()==WHITE_KING) {
             whiteKingSquare = u.getMove().from();
-        } else if (u.getMove().piece()==King.BLACK_KING) {
+        } else if (u.getMove().piece()==BLACK_KING) {
             blackKingSquare = u.getMove().from();
         }
 
@@ -805,29 +809,29 @@ public final class Board {
         if (u.getMove().captured()!=null) {
             if (u.getMove().isEpCapture()) {
                 if (getPlayerToMove()==Color.BLACK) {
-                    addPiece(Pawn.WHITE_PAWN,epSquare.north().get());
+                    addPiece(WHITE_PAWN,epSquare.north().get());
                 } else {
-                    addPiece(Pawn.BLACK_PAWN,epSquare.south().get());
+                    addPiece(BLACK_PAWN,epSquare.south().get());
                 }
             } else {
                 addPiece(u.getMove().captured(),u.getMove().to());
             }
         } else if (u.getMove().isCastle()) {
-            if (u.getMove().from()==Square.valueOf(File.FILE_E, Rank.RANK_1)) {
-                if (u.getMove().to()==Square.valueOf(File.FILE_G, Rank.RANK_1)) {
-                    removePiece(Square.valueOf(File.FILE_F, Rank.RANK_1));
-                    addPiece(Rook.WHITE_ROOK,Square.valueOf(File.FILE_H, Rank.RANK_1));
+            if (u.getMove().from() == E1) {
+                if (u.getMove().to() == G1) {
+                    removePiece(F1);
+                    addPiece(WHITE_ROOK, H1);
                 } else {
-                    removePiece(Square.valueOf(File.FILE_D, Rank.RANK_1));
-                    addPiece(Rook.WHITE_ROOK,Square.valueOf(File.FILE_A, Rank.RANK_1));
+                    removePiece(D1);
+                    addPiece(WHITE_ROOK, A1);
                 }
             } else {
-                if (u.getMove().to()==Square.valueOf(File.FILE_G, Rank.RANK_8)) {
-                    removePiece(Square.valueOf(File.FILE_F, Rank.RANK_8));
-                    addPiece(Rook.BLACK_ROOK,Square.valueOf(File.FILE_H, Rank.RANK_8));
+                if (u.getMove().to() == G8) {
+                    removePiece(F8);
+                    addPiece(BLACK_ROOK, H8);
                 } else {
-                    removePiece(Square.valueOf(File.FILE_D, Rank.RANK_8));
-                    addPiece(Rook.BLACK_ROOK,Square.valueOf(File.FILE_A, Rank.RANK_8));
+                    removePiece(D8);
+                    addPiece(BLACK_ROOK, A8);
                 }
             }
         }
@@ -843,11 +847,11 @@ public final class Board {
         Square myBlackKingSq=null;
         for (Square sq : Square.allSquares()) {
             Piece p = getPiece(sq);
-            if (p==King.WHITE_KING) {
+            if (p==WHITE_KING) {
                 assert(myWhiteKingSq==null);
                 myWhiteKingSq = sq;
             }
-            if (p==King.BLACK_KING) {
+            if (p==BLACK_KING) {
                 assert(myBlackKingSq==null);
                 myBlackKingSq = sq;
             }
@@ -859,10 +863,10 @@ public final class Board {
         if (epSquare != null) {
             if (playerToMove==Color.BLACK) {
                 assert(epSquare.rank()==Rank.RANK_3);
-                assert(getPiece(epSquare.north().get())==Pawn.WHITE_PAWN);
+                assert(getPiece(epSquare.north().get())==WHITE_PAWN);
             } else {
                 assert(epSquare.rank()==Rank.RANK_6);
-                assert(getPiece(epSquare.south().get())==Pawn.BLACK_PAWN);
+                assert(getPiece(epSquare.south().get())==BLACK_PAWN);
             }
         }
 
@@ -891,34 +895,34 @@ public final class Board {
                 }
             }
 
-            if (Pawn.WHITE_PAWN==p) {
+            if (WHITE_PAWN==p) {
                 myWhitePawns |= bb;
                 numWhitePawns++;
-            } else if (Pawn.BLACK_PAWN==p) {
+            } else if (BLACK_PAWN==p) {
                 myBlackPawns |= bb;
                 numBlackPawns++;
-            } else if (Knight.WHITE_KNIGHT==p) {
+            } else if (WHITE_KNIGHT==p) {
                 myWhiteKnights |= bb;
                 numWhiteKnights++;
-            } else if (Knight.BLACK_KNIGHT==p) {
+            } else if (BLACK_KNIGHT==p) {
                 myBlackKnights |= bb;
                 numBlackKnights++;
-            } else if (Bishop.WHITE_BISHOP==p) {
+            } else if (WHITE_BISHOP==p) {
                 myWhiteBishops |= bb;
                 numWhiteBishops++;
-            } else if (Bishop.BLACK_BISHOP==p) {
+            } else if (BLACK_BISHOP==p) {
                 myBlackBishops |= bb;
                 numBlackBishops++;
-            } else if (Rook.WHITE_ROOK==p) {
+            } else if (WHITE_ROOK==p) {
                 myWhiteRooks |= bb;
                 numWhiteRooks++;
-            } else if (Rook.BLACK_ROOK==p) {
+            } else if (BLACK_ROOK==p) {
                 myBlackRooks |= bb;
                 numBlackRooks++;
-            } else if (Queen.WHITE_QUEEN==p) {
+            } else if (WHITE_QUEEN==p) {
                 myWhiteQueens |= bb;
                 numWhiteQueens++;
-            } else if (Queen.BLACK_QUEEN==p) {
+            } else if (BLACK_QUEEN==p) {
                 myBlackQueens |= bb;
                 numBlackQueens++;
             }
@@ -937,33 +941,33 @@ public final class Board {
         assert(whitePieces == myWhitePieces);
         assert(blackPieces == myBlackPieces);
 
-        assert(pieceCountsMap.get(Pawn.WHITE_PAWN)==numWhitePawns);
-        assert(pieceCountsMap.get(Pawn.BLACK_PAWN)==numBlackPawns);
-        assert(pieceCountsMap.get(Knight.WHITE_KNIGHT)==numWhiteKnights);
-        assert(pieceCountsMap.get(Knight.BLACK_KNIGHT)==numBlackKnights);
-        assert(pieceCountsMap.get(Bishop.WHITE_BISHOP)==numWhiteBishops);
-        assert(pieceCountsMap.get(Bishop.BLACK_BISHOP)==numBlackBishops);
-        assert(pieceCountsMap.get(Rook.WHITE_ROOK)==numWhiteRooks);
-        assert(pieceCountsMap.get(Rook.BLACK_ROOK)==numBlackRooks);
-        assert(pieceCountsMap.get(Queen.WHITE_QUEEN)==numWhiteQueens);
-        assert(pieceCountsMap.get(Queen.BLACK_QUEEN)==numBlackQueens);
+        assert(pieceCountsMap.get(WHITE_PAWN)==numWhitePawns);
+        assert(pieceCountsMap.get(BLACK_PAWN)==numBlackPawns);
+        assert(pieceCountsMap.get(WHITE_KNIGHT)==numWhiteKnights);
+        assert(pieceCountsMap.get(BLACK_KNIGHT)==numBlackKnights);
+        assert(pieceCountsMap.get(WHITE_BISHOP)==numWhiteBishops);
+        assert(pieceCountsMap.get(BLACK_BISHOP)==numBlackBishops);
+        assert(pieceCountsMap.get(WHITE_ROOK)==numWhiteRooks);
+        assert(pieceCountsMap.get(BLACK_ROOK)==numBlackRooks);
+        assert(pieceCountsMap.get(WHITE_QUEEN)==numWhiteQueens);
+        assert(pieceCountsMap.get(BLACK_QUEEN)==numBlackQueens);
 
         // assert castling rights make sense
-        if (hasCastlingRight(CastlingRights.BLACK_QUEENSIDE)) {
-            assert(getPiece(Square.valueOf(File.FILE_E,Rank.RANK_8))==King.BLACK_KING);
-            assert(getPiece(Square.valueOf(File.FILE_A,Rank.RANK_8))==Rook.BLACK_ROOK);
+        if (hasCastlingRight(BLACK_QUEENSIDE)) {
+            assert(getPiece(E8)==BLACK_KING);
+            assert(getPiece(A8)==BLACK_ROOK);
         }
-        if (hasCastlingRight(CastlingRights.BLACK_KINGSIDE)) {
-            assert(getPiece(Square.valueOf(File.FILE_E,Rank.RANK_8))==King.BLACK_KING);
-            assert(getPiece(Square.valueOf(File.FILE_H,Rank.RANK_8))==Rook.BLACK_ROOK);
+        if (hasCastlingRight(BLACK_KINGSIDE)) {
+            assert(getPiece(E8)==BLACK_KING);
+            assert(getPiece(H8)==BLACK_ROOK);
         }
-        if (hasCastlingRight(CastlingRights.WHITE_QUEENSIDE)) {
-            assert(getPiece(Square.valueOf(File.FILE_E,Rank.RANK_1))==King.WHITE_KING);
-            assert(getPiece(Square.valueOf(File.FILE_A,Rank.RANK_1))==Rook.WHITE_ROOK);
+        if (hasCastlingRight(WHITE_QUEENSIDE)) {
+            assert(getPiece(E1)==WHITE_KING);
+            assert(getPiece(A1)==WHITE_ROOK);
         }
-        if (hasCastlingRight(CastlingRights.WHITE_KINGSIDE)) {
-            assert(getPiece(Square.valueOf(File.FILE_E,Rank.RANK_1))==King.WHITE_KING);
-            assert(getPiece(Square.valueOf(File.FILE_H,Rank.RANK_1))==Rook.WHITE_ROOK);
+        if (hasCastlingRight(WHITE_KINGSIDE)) {
+            assert(getPiece(E1)==WHITE_KING);
+            assert(getPiece(H1)==WHITE_ROOK);
         }
 
         assert(zobristKey==Zobrist.getBoardKey(this));

@@ -24,8 +24,8 @@ import static com.jamesswafford.chess4j.pieces.Rook.*;
 import static com.jamesswafford.chess4j.pieces.Queen.*;
 import static com.jamesswafford.chess4j.pieces.King.*;
 import static com.jamesswafford.chess4j.board.CastlingRights.*;
-import static com.jamesswafford.chess4j.board.squares.File.*;
 import static com.jamesswafford.chess4j.board.squares.Rank.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public class BoardTest {
 
@@ -37,16 +37,16 @@ public class BoardTest {
     }
 
     private void testResetBoard(Board b) {
-        assertEquals(WHITE_ROOK,b.getPiece(Square.valueOf(FILE_A, RANK_1)));
-        assertEquals(WHITE_KNIGHT,b.getPiece(Square.valueOf(FILE_B, RANK_1)));
-        assertEquals(WHITE_BISHOP,b.getPiece(Square.valueOf(FILE_C, RANK_1)));
-        assertEquals(WHITE_QUEEN,b.getPiece(Square.valueOf(FILE_D, RANK_1)));
-        assertEquals(WHITE_KING,b.getPiece(Square.valueOf(FILE_E, RANK_1)));
-        assertEquals(WHITE_BISHOP,b.getPiece(Square.valueOf(FILE_F, RANK_1)));
-        assertEquals(WHITE_KNIGHT,b.getPiece(Square.valueOf(FILE_G, RANK_1)));
-        assertEquals(WHITE_ROOK,b.getPiece(Square.valueOf(FILE_H, RANK_1)));
+        assertEquals(WHITE_ROOK, b.getPiece(A1));
+        assertEquals(WHITE_KNIGHT, b.getPiece(B1));
+        assertEquals(WHITE_BISHOP, b.getPiece(C1));
+        assertEquals(WHITE_QUEEN, b.getPiece(D1));
+        assertEquals(WHITE_KING, b.getPiece(E1));
+        assertEquals(WHITE_BISHOP, b.getPiece(F1));
+        assertEquals(WHITE_KNIGHT, b.getPiece(G1));
+        assertEquals(WHITE_ROOK, b.getPiece(H1));
         for (Square sq : Square.rankSquares(RANK_2)) {
-            assertEquals(WHITE_PAWN,b.getPiece(sq));
+            assertEquals(WHITE_PAWN, b.getPiece(sq));
         }
         for (Square sq : Square.rankSquares(RANK_3)) {
             assertNull(b.getPiece(sq));
@@ -63,14 +63,14 @@ public class BoardTest {
         for (Square sq : Square.rankSquares(RANK_7)) {
             assertEquals(BLACK_PAWN,b.getPiece(sq));
         }
-        assertEquals(BLACK_ROOK,b.getPiece(Square.valueOf(FILE_A, RANK_8)));
-        assertEquals(BLACK_KNIGHT,b.getPiece(Square.valueOf(FILE_B, RANK_8)));
-        assertEquals(BLACK_BISHOP,b.getPiece(Square.valueOf(FILE_C, RANK_8)));
-        assertEquals(BLACK_QUEEN,b.getPiece(Square.valueOf(FILE_D, RANK_8)));
-        assertEquals(BLACK_KING,b.getPiece(Square.valueOf(FILE_E, RANK_8)));
-        assertEquals(BLACK_BISHOP,b.getPiece(Square.valueOf(FILE_F, RANK_8)));
-        assertEquals(BLACK_KNIGHT,b.getPiece(Square.valueOf(FILE_G, RANK_8)));
-        assertEquals(BLACK_ROOK,b.getPiece(Square.valueOf(FILE_H, RANK_8)));
+        assertEquals(BLACK_ROOK, b.getPiece(A8));
+        assertEquals(BLACK_KNIGHT, b.getPiece(B8));
+        assertEquals(BLACK_BISHOP, b.getPiece(C8));
+        assertEquals(BLACK_QUEEN, b.getPiece(D8));
+        assertEquals(BLACK_KING, b.getPiece(E8));
+        assertEquals(BLACK_BISHOP, b.getPiece(F8));
+        assertEquals(BLACK_KNIGHT, b.getPiece(G8));
+        assertEquals(BLACK_ROOK, b.getPiece(H8));
 
         assertTrue(b.hasCastlingRight(WHITE_KINGSIDE));
         assertTrue(b.hasCastlingRight(WHITE_QUEENSIDE));
@@ -82,24 +82,24 @@ public class BoardTest {
         assertEquals(0, b.getFiftyCounter());
         assertEquals(0, b.getMoveCounter());
 
-        assertEquals(Square.valueOf(FILE_E, RANK_1), b.getKingSquare(Color.WHITE));
-        assertEquals(Square.valueOf(FILE_E, RANK_8), b.getKingSquare(Color.BLACK));
+        assertEquals(E1, b.getKingSquare(Color.WHITE));
+        assertEquals(E8, b.getKingSquare(Color.BLACK));
     }
 
     @Test
     public void kingSquares() throws Exception {
         Board b = Board.INSTANCE;
         b.resetBoard();
-        assertEquals(Square.valueOf(FILE_E, RANK_1), b.getKingSquare(Color.WHITE));
-        assertEquals(Square.valueOf(FILE_E, RANK_8), b.getKingSquare(Color.BLACK));
+        assertEquals(E1, b.getKingSquare(Color.WHITE));
+        assertEquals(E8, b.getKingSquare(Color.BLACK));
 
         FenParser.setPos(b, "rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 b kq - 0 5");
-        assertEquals(Square.valueOf(FILE_G, RANK_1), b.getKingSquare(Color.WHITE));
-        assertEquals(Square.valueOf(FILE_E, RANK_8), b.getKingSquare(Color.BLACK));
+        assertEquals(G1, b.getKingSquare(Color.WHITE));
+        assertEquals(E8, b.getKingSquare(Color.BLACK));
 
-        b.applyMove(new Move(BLACK_KING,Square.valueOf(FILE_E, RANK_8),Square.valueOf(FILE_D, RANK_8)));
-        assertEquals(Square.valueOf(FILE_G, RANK_1), b.getKingSquare(Color.WHITE));
-        assertEquals(Square.valueOf(FILE_D, RANK_8), b.getKingSquare(Color.BLACK));
+        b.applyMove(new Move(BLACK_KING,E8,D8));
+        assertEquals(G1, b.getKingSquare(Color.WHITE));
+        assertEquals(D8, b.getKingSquare(Color.BLACK));
     }
 
     @Test
@@ -108,86 +108,83 @@ public class BoardTest {
         b.resetBoard();
         Board b2 = b.deepCopy();
 
-        Move m = new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2), Square.valueOf(FILE_E, RANK_4));
+        Move m = new Move(WHITE_PAWN,E2, E4);
         b.applyMove(m);
         FenParser.setPos(b2, "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
-        b.applyMove(new Move(BLACK_PAWN,Square.valueOf(FILE_C, RANK_7), Square.valueOf(FILE_C, RANK_5)));
+        b.applyMove(new Move(BLACK_PAWN,C7, C5));
         FenParser.setPos(b2, "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
-        b.applyMove(new Move(WHITE_KNIGHT,Square.valueOf(FILE_G, RANK_1), Square.valueOf(FILE_F, RANK_3)));
+        b.applyMove(new Move(WHITE_KNIGHT,G1, F3));
         FenParser.setPos(b2, "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
-        b.applyMove(new Move(BLACK_QUEEN,Square.valueOf(FILE_D, RANK_8), Square.valueOf(FILE_A, RANK_5)));
+        b.applyMove(new Move(BLACK_QUEEN,D8, A5));
         FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
-        b.applyMove(new Move(WHITE_BISHOP,Square.valueOf(FILE_F, RANK_1), Square.valueOf(FILE_E, RANK_2)));
+        b.applyMove(new Move(WHITE_BISHOP, F1, E2));
         FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPPBPPP/RNBQK2R b KQkq - 3 3");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
-        b.applyMove(new Move(BLACK_QUEEN,Square.valueOf(FILE_A, RANK_5), Square.valueOf(FILE_D, RANK_2),WHITE_BISHOP));
+        b.applyMove(new Move(BLACK_QUEEN, A5, D2, WHITE_BISHOP));
         FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPqBPPP/RNBQK2R w KQkq - 0 4");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
-        b.applyMove(new Move(WHITE_KNIGHT,Square.valueOf(FILE_B, RANK_1), Square.valueOf(FILE_D, RANK_2),BLACK_QUEEN));
+        b.applyMove(new Move(WHITE_KNIGHT, B1, D2,BLACK_QUEEN));
         FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPNBPPP/R1BQK2R b KQkq - 0 4");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
-        b.applyMove(new Move(BLACK_PAWN,Square.valueOf(FILE_C, RANK_5), Square.valueOf(FILE_C, RANK_4)));
+        b.applyMove(new Move(BLACK_PAWN, C5, C4));
         FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQK2R w KQkq - 0 5");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
-        b.applyMove(new Move(WHITE_KING,Square.valueOf(FILE_E, RANK_1), Square.valueOf(FILE_G, RANK_1),true));
+        b.applyMove(new Move(WHITE_KING, E1, G1,true));
         FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 b kq - 0 5");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
-        b.applyMove(new Move(BLACK_KING,Square.valueOf(FILE_E, RANK_8), Square.valueOf(FILE_D, RANK_8)));
+        b.applyMove(new Move(BLACK_KING, E8, D8));
         FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 w - - 1 6");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
-        b.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_B, RANK_2), Square.valueOf(FILE_B, RANK_4)));
+        b.applyMove(new Move(WHITE_PAWN, B2, B4));
         FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/1Pp1P3/5N2/P1PNBPPP/R1BQ1RK1 b - b3 0 6");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
-        b.applyMove(new Move(BLACK_PAWN,Square.valueOf(FILE_C, RANK_4), Square.valueOf(FILE_B, RANK_3),WHITE_PAWN,true));
+        b.applyMove(new Move(BLACK_PAWN, C4, B3,WHITE_PAWN,true));
         FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQ1RK1 w - - 0 7");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
-        b.applyMove(new Move(WHITE_ROOK,Square.valueOf(FILE_F, RANK_1), Square.valueOf(FILE_E, RANK_1)));
+        b.applyMove(new Move(WHITE_ROOK, F1, E1));
         FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQR1K1 b - - 1 7");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
-        b.applyMove(new Move(BLACK_PAWN,Square.valueOf(FILE_B, RANK_3), Square.valueOf(FILE_B, RANK_2)));
+        b.applyMove(new Move(BLACK_PAWN, B3, B2));
         FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR1K1 w - - 0 8");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
-        b.applyMove(new Move(WHITE_KING,Square.valueOf(FILE_G, RANK_1), Square.valueOf(FILE_H, RANK_1)));
+        b.applyMove(new Move(WHITE_KING, G1, H1));
         FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR2K b - - 1 8");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
-        b.applyMove(new Move(BLACK_PAWN,Square.valueOf(FILE_B, RANK_2),
-                Square.valueOf(FILE_A, RANK_1),
-                WHITE_ROOK,
-                BLACK_KNIGHT));
+        b.applyMove(new Move(BLACK_PAWN, B2, A1, WHITE_ROOK, BLACK_KNIGHT));
         FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/4P3/5N2/P1PNBPPP/n1BQR2K w - - 0 9");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
@@ -223,7 +220,7 @@ public class BoardTest {
     public void deepCopy2() {
         Board b = Board.INSTANCE;
         b.resetBoard();
-        b.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2),Square.valueOf(FILE_E, RANK_4)));
+        b.applyMove(new Move(WHITE_PAWN, E2, E4));
         Board b2 = b.deepCopy();
         assertNotSame(b, b2);
         assertEquals(b, b2);
@@ -240,7 +237,7 @@ public class BoardTest {
         b.resetBoard();
         Board b2 = b.deepCopy();
         assertNotSame(b, b2);
-        b.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2),Square.valueOf(FILE_E, RANK_4)));
+        b.applyMove(new Move(WHITE_PAWN, E2, E4));
         b.undoLastMove();
         assertEquals(b, b2);
     }
@@ -294,48 +291,48 @@ public class BoardTest {
         assertEquals(b1.hashCodeWithoutMoveHistory(true), b2.hashCodeWithoutMoveHistory(true));
 
         // step through French Defense with b1
-        b1.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2),Square.valueOf(FILE_E, RANK_4)));
+        b1.applyMove(new Move(WHITE_PAWN, E2, E4));
         hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
-        b1.applyMove(new Move(BLACK_PAWN,Square.valueOf(FILE_E, RANK_7),Square.valueOf(FILE_E, RANK_6)));
+        b1.applyMove(new Move(BLACK_PAWN, E7, E6));
         hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
-        b1.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_D, RANK_2),Square.valueOf(FILE_D, RANK_4)));
+        b1.applyMove(new Move(WHITE_PAWN, D2, D4));
         hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
-        b1.applyMove(new Move(BLACK_PAWN,Square.valueOf(FILE_D, RANK_7),Square.valueOf(FILE_D, RANK_5)));
+        b1.applyMove(new Move(BLACK_PAWN, D7, D5));
         hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
-        b1.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_D, RANK_5),BLACK_PAWN));
+        b1.applyMove(new Move(WHITE_PAWN, E4, D5,BLACK_PAWN));
         hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
-        b1.applyMove(new Move(BLACK_PAWN,Square.valueOf(FILE_E, RANK_6),Square.valueOf(FILE_D, RANK_5),WHITE_PAWN));
+        b1.applyMove(new Move(BLACK_PAWN, E6, D5,WHITE_PAWN));
         hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
-        b1.applyMove(new Move(WHITE_KNIGHT,Square.valueOf(FILE_G, RANK_1),Square.valueOf(FILE_F, RANK_3)));
+        b1.applyMove(new Move(WHITE_KNIGHT, G1, F3));
         hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
-        b1.applyMove(new Move(BLACK_KNIGHT,Square.valueOf(FILE_G, RANK_8),Square.valueOf(FILE_F, RANK_6)));
+        b1.applyMove(new Move(BLACK_KNIGHT, G8, F6));
         hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
 
 
         // step through the Petrov Defense with b2
-        b2.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2),Square.valueOf(FILE_E, RANK_4)));
+        b2.applyMove(new Move(WHITE_PAWN, E2, E4));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
-        b2.applyMove(new Move(BLACK_PAWN,Square.valueOf(FILE_E, RANK_7),Square.valueOf(FILE_E, RANK_5)));
+        b2.applyMove(new Move(BLACK_PAWN, E7, E5));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
-        b2.applyMove(new Move(WHITE_KNIGHT,Square.valueOf(FILE_G, RANK_1),Square.valueOf(FILE_F, RANK_3)));
+        b2.applyMove(new Move(WHITE_KNIGHT, G1, F3));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
-        b2.applyMove(new Move(BLACK_KNIGHT,Square.valueOf(FILE_G, RANK_8),Square.valueOf(FILE_F, RANK_6)));
+        b2.applyMove(new Move(BLACK_KNIGHT, G8, F6));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
-        b2.applyMove(new Move(WHITE_KNIGHT,Square.valueOf(FILE_F, RANK_3),Square.valueOf(FILE_E, RANK_5),BLACK_PAWN));
+        b2.applyMove(new Move(WHITE_KNIGHT, F3, E5,BLACK_PAWN));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
-        b2.applyMove(new Move(BLACK_PAWN,Square.valueOf(FILE_D, RANK_7),Square.valueOf(FILE_D, RANK_6)));
+        b2.applyMove(new Move(BLACK_PAWN, D7, D6));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
-        b2.applyMove(new Move(WHITE_KNIGHT,Square.valueOf(FILE_E, RANK_5),Square.valueOf(FILE_F, RANK_3)));
+        b2.applyMove(new Move(WHITE_KNIGHT, E5, F3));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
-        b2.applyMove(new Move(BLACK_KNIGHT,Square.valueOf(FILE_F, RANK_6),Square.valueOf(FILE_E, RANK_4),WHITE_PAWN));
+        b2.applyMove(new Move(BLACK_KNIGHT, F6, E4, WHITE_PAWN));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
-        b2.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_D, RANK_2),Square.valueOf(FILE_D, RANK_3)));
+        b2.applyMove(new Move(WHITE_PAWN, D2, D3));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
-        b2.applyMove(new Move(BLACK_KNIGHT,Square.valueOf(FILE_E, RANK_4),Square.valueOf(FILE_F, RANK_6)));
+        b2.applyMove(new Move(BLACK_KNIGHT, E4, F6));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
-        b2.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_D, RANK_3),Square.valueOf(FILE_D, RANK_4)));
+        b2.applyMove(new Move(WHITE_PAWN, D3, D4));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
-        b2.applyMove(new Move(BLACK_PAWN,Square.valueOf(FILE_D, RANK_6),Square.valueOf(FILE_D, RANK_5)));
+        b2.applyMove(new Move(BLACK_PAWN, D6, D5));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
 
 
@@ -345,8 +342,8 @@ public class BoardTest {
         assertFalse(b1.equalExceptMoveHistory(b2, true));
 
         // by adding a pawn move we should be equal except move history and number of moves
-        b1.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_G, RANK_2),Square.valueOf(FILE_G, RANK_3)));
-        b2.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_G, RANK_2),Square.valueOf(FILE_G, RANK_3)));
+        b1.applyMove(new Move(WHITE_PAWN, G2, G3));
+        b2.applyMove(new Move(WHITE_PAWN, G2, G3));
 
         assertNotEquals(b1, b2);
         assertFalse(b1.equalExceptMoveHistory(b2, true));
@@ -388,31 +385,31 @@ public class BoardTest {
         assertEquals(b1.hashCodeWithoutMoveHistory(true), b2.hashCodeWithoutMoveHistory(true));
 
         // Go through Queen's Gambit with b1
-        b1.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_D, RANK_2),Square.valueOf(FILE_D, RANK_4)));
+        b1.applyMove(new Move(WHITE_PAWN, D2, D4));
         hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-        b1.applyMove(new Move(BLACK_PAWN,Square.valueOf(FILE_D, RANK_7),Square.valueOf(FILE_D, RANK_5)));
+        b1.applyMove(new Move(BLACK_PAWN, D7, D5));
         hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-        b1.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_C, RANK_2),Square.valueOf(FILE_C, RANK_4)));
+        b1.applyMove(new Move(WHITE_PAWN, C2, C4));
         hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-        b1.applyMove(new Move(BLACK_PAWN,Square.valueOf(FILE_E, RANK_7),Square.valueOf(FILE_E, RANK_6)));
+        b1.applyMove(new Move(BLACK_PAWN, E7, E6));
         hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-        b1.applyMove(new Move(WHITE_KNIGHT,Square.valueOf(FILE_B, RANK_1),Square.valueOf(FILE_C, RANK_3)));
+        b1.applyMove(new Move(WHITE_KNIGHT, B1, C3));
         hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-        b1.applyMove(new Move(BLACK_KNIGHT,Square.valueOf(FILE_G, RANK_8),Square.valueOf(FILE_F, RANK_6)));
+        b1.applyMove(new Move(BLACK_KNIGHT, G8, F6));
         hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
 
         // Step through English Opening with b2
-        b2.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_C, RANK_2),Square.valueOf(FILE_C, RANK_4)));
+        b2.applyMove(new Move(WHITE_PAWN, C2, C4));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-        b2.applyMove(new Move(BLACK_KNIGHT,Square.valueOf(FILE_G, RANK_8),Square.valueOf(FILE_F, RANK_6)));
+        b2.applyMove(new Move(BLACK_KNIGHT, G8, F6));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-        b2.applyMove(new Move(WHITE_KNIGHT,Square.valueOf(FILE_B, RANK_1),Square.valueOf(FILE_C, RANK_3)));
+        b2.applyMove(new Move(WHITE_KNIGHT, B1, C3));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-        b2.applyMove(new Move(BLACK_PAWN,Square.valueOf(FILE_E, RANK_7),Square.valueOf(FILE_E, RANK_6)));
+        b2.applyMove(new Move(BLACK_PAWN, E7, E6));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-        b2.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_D, RANK_2),Square.valueOf(FILE_D, RANK_4)));
+        b2.applyMove(new Move(WHITE_PAWN, D2, D4));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-        b2.applyMove(new Move(BLACK_PAWN,Square.valueOf(FILE_D, RANK_7),Square.valueOf(FILE_D, RANK_5)));
+        b2.applyMove(new Move(BLACK_PAWN, D7, D5));
         hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
 
         // Positions would be equal at this point, except for move history, fifty counter and ep square
@@ -420,8 +417,8 @@ public class BoardTest {
         assertFalse(b1.equalExceptMoveHistory(b2, false));
 
         // by adding a pawn move we should be equal except move history
-        b1.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_G, RANK_2),Square.valueOf(FILE_G, RANK_3)));
-        b2.applyMove(new Move(WHITE_PAWN,Square.valueOf(FILE_G, RANK_2),Square.valueOf(FILE_G, RANK_3)));
+        b1.applyMove(new Move(WHITE_PAWN, G2, G3));
+        b2.applyMove(new Move(WHITE_PAWN, G2, G3));
         assertNotEquals(b1, b2);
         assertTrue(b1.equalExceptMoveHistory(b2, true));
         assertNotEquals(b1.hashCode(), b2.hashCode());
@@ -443,7 +440,7 @@ public class BoardTest {
         assertEquals(b1, b2);
         assertEquals(b1.hashCode(), b2.hashCode());
 
-        Move m = new Move(BLACK_KING,Square.valueOf(FILE_E, RANK_8),Square.valueOf(FILE_G,RANK_8),true);
+        Move m = new Move(BLACK_KING, E8, G8,true);
         List<Move> legalMoves = MoveGen.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
         b1.applyMove(m);
@@ -464,7 +461,7 @@ public class BoardTest {
         assertEquals(b1, b2);
         assertEquals(b1.hashCode(), b2.hashCode());
 
-        Move m = new Move(WHITE_PAWN,Square.valueOf(FILE_D, RANK_4),Square.valueOf(FILE_C,RANK_5),BLACK_PAWN);
+        Move m = new Move(WHITE_PAWN, D4, C5, BLACK_PAWN);
         List<Move> legalMoves = MoveGen.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
         b1.applyMove(m);
@@ -484,7 +481,7 @@ public class BoardTest {
 
         assertEquals(b1, b2);
         assertEquals(b1.hashCode(), b2.hashCode());
-        Move m = new Move(WHITE_PAWN,Square.valueOf(FILE_D, RANK_5),Square.valueOf(FILE_C,RANK_6),BLACK_PAWN,true);
+        Move m = new Move(WHITE_PAWN, D5, C6, BLACK_PAWN,true);
         List<Move> legalMoves = MoveGen.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
         b1.applyMove(m);
@@ -505,7 +502,7 @@ public class BoardTest {
         assertEquals(b1, b2);
         assertEquals(b1.hashCode(), b2.hashCode());
 
-        Move m = new Move(WHITE_PAWN,Square.valueOf(FILE_A, RANK_7),Square.valueOf(FILE_A,RANK_8),null,WHITE_QUEEN);
+        Move m = new Move(WHITE_PAWN, A7, A8,null,WHITE_QUEEN);
         List<Move> legalMoves = MoveGen.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
         b1.applyMove(m);
@@ -526,7 +523,7 @@ public class BoardTest {
         assertEquals(b1, b2);
         assertEquals(b1.hashCode(), b2.hashCode());
 
-        Move m = new Move(WHITE_PAWN,Square.valueOf(FILE_A, RANK_7),Square.valueOf(FILE_B,RANK_8),BLACK_KNIGHT,WHITE_QUEEN);
+        Move m = new Move(WHITE_PAWN, A7, B8, BLACK_KNIGHT, WHITE_QUEEN);
         List<Move> legalMoves = MoveGen.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
         b1.applyMove(m);
