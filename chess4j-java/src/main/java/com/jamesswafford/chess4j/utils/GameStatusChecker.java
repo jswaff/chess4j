@@ -21,7 +21,7 @@ public final class GameStatusChecker {
     public static GameStatus getGameStatus(Board b) {
         List<Move> moves = MoveGen.genLegalMoves(b);
         if (moves.size()==0) {
-            if (b.isPlayerInCheck()) {
+            if (BoardUtils.isPlayerInCheck(b)) {
                 return GameStatus.CHECKMATED;
             } else {
                 return GameStatus.STALEMATED;

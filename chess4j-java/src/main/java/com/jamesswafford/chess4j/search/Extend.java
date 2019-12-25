@@ -6,6 +6,7 @@ import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Piece;
+import com.jamesswafford.chess4j.utils.BoardUtils;
 
 public class Extend {
 
@@ -21,7 +22,7 @@ public class Extend {
      * @return
      */
     public static int extendDepth(Board b,Move lastMove) {
-        return extendDepth(b,lastMove,b.isPlayerInCheck());
+        return extendDepth(b,lastMove, BoardUtils.isPlayerInCheck(b));
     }
 
     public static int extendDepth(Board b,Move lastMove,boolean inCheck) {

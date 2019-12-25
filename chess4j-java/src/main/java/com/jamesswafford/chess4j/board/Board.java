@@ -7,7 +7,6 @@ import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.Zobrist;
-import com.jamesswafford.chess4j.movegen.AttackDetector;
 import com.jamesswafford.chess4j.pieces.King;
 import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.utils.BlankRemover;
@@ -446,14 +445,6 @@ public final class Board {
 
     public boolean isEmpty(Square square) {
         return pieceMap.get(square)==null;
-    }
-
-    public boolean isOpponentInCheck() {
-        return AttackDetector.attacked(this,getKingSquare(Color.swap(playerToMove)),playerToMove);
-    }
-
-    public boolean isPlayerInCheck() {
-        return AttackDetector.attacked(this,getKingSquare(playerToMove),Color.swap(playerToMove));
     }
 
     public void resetBoard() {

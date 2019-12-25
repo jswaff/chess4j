@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.jamesswafford.chess4j.movegen.MoveGen;
 
+import com.jamesswafford.chess4j.utils.BoardUtils;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.Color;
@@ -762,30 +763,12 @@ public class BoardTest {
     }
 
     @Test
-    public void testNumPawnsInitialPos() {
+    public void testGetNumPieces_initialPos() {
         Board b = Board.INSTANCE;
         b.resetBoard();
 
         assertEquals(8, b.getNumPieces(WHITE_PAWN));
-
         assertEquals(8, b.getNumPieces(BLACK_PAWN));
-    }
-
-    @Test
-    public void testNumPawns() {
-        Board b = Board.INSTANCE;
-        b.setPos("7k/pp6/8/8/8/8/7P/7K w - - ");
-
-        assertEquals(1, b.getNumPieces(WHITE_PAWN));
-
-        assertEquals(2, b.getNumPieces(BLACK_PAWN));
-    }
-
-    @Test
-    public void testNumNonPawnsInitialPos() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
-
         assertEquals(1, b.getNumPieces(WHITE_QUEEN));
         assertEquals(1, b.getNumPieces(BLACK_QUEEN));
         assertEquals(2, b.getNumPieces(WHITE_ROOK));
@@ -797,10 +780,12 @@ public class BoardTest {
     }
 
     @Test
-    public void testNumNonPawns() {
+    public void testGetNumPieces_pos1() {
         Board b = Board.INSTANCE;
         b.setPos("7k/br6/8/8/8/8/Q7/7K w - -");
 
+        assertEquals(0, b.getNumPieces(WHITE_PAWN));
+        assertEquals(0, b.getNumPieces(BLACK_PAWN));
         assertEquals(1, b.getNumPieces(WHITE_QUEEN));
         assertEquals(0, b.getNumPieces(BLACK_QUEEN));
         assertEquals(0, b.getNumPieces(WHITE_ROOK));
@@ -871,6 +856,6 @@ public class BoardTest {
         Move m = mp.parseMove(mv, Board.INSTANCE);
         b.applyMove(m);
 
-        assertEquals(inCheck, b.isPlayerInCheck());
+        assertEquals(inCheck, BoardUtils.isPlayerInCheck(b));
     }
 }

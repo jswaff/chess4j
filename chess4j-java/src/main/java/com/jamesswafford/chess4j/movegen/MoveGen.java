@@ -316,7 +316,7 @@ public final class MoveGen {
 
     private static boolean isMoveLegal(Board board,Move m) {
         board.applyMove(m);
-        boolean legal = !board.isOpponentInCheck();
+        boolean legal = !BoardUtils.isOpponentInCheck(board);
         board.undoLastMove();
         return legal;
     }

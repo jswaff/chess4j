@@ -58,17 +58,17 @@ public final class Search {
 
         Move move;
         while ((move = mo.selectNextMove()) != null) {
-            assert(BoardUtils.isGoodMove(board, move));
+            assert(BoardUtils.isPseudoLegalMove(board, move));
             recordFirstLine(true,numMovesSearched,stats,move);
             board.applyMove(move);
-            if (board.isOpponentInCheck()) {
+            if (BoardUtils.isOpponentInCheck(board)) {
                 // illegal
                 board.undoLastMove();
                 continue;
             }
 
             int score;
-            boolean givesCheck = board.isPlayerInCheck();
+            boolean givesCheck = BoardUtils.isPlayerInCheck(board);
 
             int extend = Extend.extendDepth(board,move,givesCheck);
             assert(extend >= 0 && extend <= 1);
@@ -117,7 +117,7 @@ public final class Search {
 
         assert(ply > 0);
         assert(alpha < beta);
-        assert(inCheck==board.isPlayerInCheck());
+        assert(inCheck==BoardUtils.isPlayerInCheck(board));
 
         int origAlpha = alpha;
         parentPV.clear();
@@ -211,16 +211,16 @@ public final class Search {
 
         Move move;
         while ((move = mo.selectNextMove()) != null) {
-            assert(BoardUtils.isGoodMove(board, move));
+            assert(BoardUtils.isPseudoLegalMove(board, move));
             recordFirstLine(pvNode,numMovesSearched,stats,move);
             board.applyMove(move);
-            if (board.isOpponentInCheck()) {
+            if (BoardUtils.isOpponentInCheck(board)) {
                 // illegal
                 board.undoLastMove();
                 continue;
             }
 
-            boolean givesCheck = board.isPlayerInCheck();
+            boolean givesCheck = BoardUtils.isPlayerInCheck(board);
 
             int extend = Extend.extendDepth(board,move,givesCheck);
             assert(extend >= 0 && extend <= 1);
@@ -336,11 +336,11 @@ public final class Search {
 
         Move mv;
         while ((mv = mo.selectNextMove(true)) != null) {
-            assert(BoardUtils.isGoodMove(board, mv));
+            assert(BoardUtils.isPseudoLegalMove(board, mv));
             assert(mv.captured()!=null || mv.promotion()!=null);
 
             board.applyMove(mv);
-            if (board.isOpponentInCheck()) {
+            if (BoardUtils.isOpponentInCheck(board)) {
                 // illegal
                 board.undoLastMove();
                 continue;
@@ -392,7 +392,7 @@ public final class Search {
         int adjScore=score;
 
         if (numMovesSearched==0) {
-            if (board.isPlayerInCheck()) {
+            if (BoardUtils.isPlayerInCheck(board)) {
                 adjScore = -(Constants.CHECKMATE-ply);
             } else {
                 // draw score
