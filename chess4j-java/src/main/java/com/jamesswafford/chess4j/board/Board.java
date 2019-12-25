@@ -5,10 +5,13 @@ import java.util.*;
 import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
+import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.Zobrist;
 import com.jamesswafford.chess4j.movegen.AttackDetector;
 import com.jamesswafford.chess4j.pieces.King;
 import com.jamesswafford.chess4j.pieces.Piece;
+import com.jamesswafford.chess4j.utils.BlankRemover;
+import com.jamesswafford.chess4j.utils.PieceFactory;
 
 import static com.jamesswafford.chess4j.pieces.Pawn.*;
 import static com.jamesswafford.chess4j.pieces.Knight.*;
@@ -44,130 +47,22 @@ public final class Board {
     private long pawnKey;
 
     private Board() {
+
+        // initialize the piece counts map
+        pieceCountsMap.put(WHITE_KING, 0);
+        pieceCountsMap.put(BLACK_KING, 0);
+        pieceCountsMap.put(WHITE_QUEEN, 0);
+        pieceCountsMap.put(BLACK_QUEEN, 0);
+        pieceCountsMap.put(WHITE_ROOK, 0);
+        pieceCountsMap.put(BLACK_ROOK, 0);
+        pieceCountsMap.put(WHITE_BISHOP, 0);
+        pieceCountsMap.put(BLACK_BISHOP, 0);
+        pieceCountsMap.put(WHITE_KNIGHT, 0);
+        pieceCountsMap.put(BLACK_KNIGHT, 0);
+        pieceCountsMap.put(WHITE_PAWN, 0);
+        pieceCountsMap.put(BLACK_PAWN, 0);
+
         resetBoard();
-    }
-
-    public void addCastlingRight(CastlingRights castlingRight) {
-        if (castlingRight == WHITE_KINGSIDE) {
-            if (!castlingRights.isWhiteKingside()) {
-                castlingRights.setWhiteKingside();
-                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
-            }
-        } else if (castlingRight == WHITE_QUEENSIDE) {
-            if (!castlingRights.isWhiteQueenside()) {
-                castlingRights.setWhiteQueenside();
-                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
-            }
-        } else if (castlingRight == BLACK_KINGSIDE) {
-            if (!castlingRights.isBlackKingside()) {
-                castlingRights.setBlackKingside();
-                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
-            }
-        } else if (castlingRight == BLACK_QUEENSIDE) {
-            if (!castlingRights.isBlackQueenside()) {
-                castlingRights.setBlackQueenside();
-                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
-            }
-        } else {
-            throw new IllegalArgumentException("illegal castling right: " + castlingRight);
-        }
-    }
-
-    private void addPieceToDestination(Move m) {
-        Piece p = getPiece(m.from());
-        addPiece(p,m.to());
-        if (p==WHITE_PAWN) {
-            fiftyCounter = 0;
-            Optional<Square> nnSq = m.from().north().flatMap(Square::north);
-            if (nnSq.isPresent() && m.to()==nnSq.get()) {
-                setEP(m.from().north().get());
-            } else if (m.to().rank()==RANK_8) {
-                assert(m.promotion()!=null);
-                removePiece(m.to());
-                addPiece(m.promotion(),m.to());
-            }
-        } else if (p==BLACK_PAWN) {
-            fiftyCounter = 0;
-            Optional<Square> ssSq = m.from().south().flatMap(Square::south);
-            if (ssSq.isPresent() && m.to()==ssSq.get()) {
-                setEP(m.from().south().get());
-            } else if (m.to().rank()==RANK_1) {
-                assert(m.promotion()!=null);
-                removePiece(m.to());
-                addPiece(m.promotion(),m.to());
-            }
-        } else if (p==WHITE_KING) {
-            whiteKingSquare = m.to();
-            if (m.from() == E1) {
-                if (m.to() == G1) {
-                    assert(m.isCastle());
-                    fiftyCounter = 0;
-                    removePiece(H1);
-                    addPiece(WHITE_ROOK, F1);
-                } else if (m.to() == C1) {
-                    assert(m.isCastle());
-                    fiftyCounter = 0;
-                    removePiece(A1);
-                    addPiece(WHITE_ROOK, D1);
-                }
-            }
-        } else if (p==BLACK_KING) {
-            blackKingSquare = m.to();
-            if (m.from() == E8) {
-                if (m.to() == G8) {
-                    assert(m.isCastle());
-                    fiftyCounter = 0;
-                    removePiece(H8);
-                    addPiece(BLACK_ROOK, F8);
-                } else if (m.to() == C8) {
-                    assert(m.isCastle());
-                    fiftyCounter = 0;
-                    removePiece(A8);
-                    addPiece(BLACK_ROOK, D8);
-                }
-            }
-        }
-    }
-
-    public void addPiece(Piece p,Square s) {
-        assert(p != null);
-        assert(getPiece(s)==null);
-
-        pieceMap.put(s, p);
-        long bb = Bitboard.squares[s.value()];
-
-        if (p.isWhite()) {
-            whitePieces |= bb;
-            if (p==WHITE_PAWN) {
-                whitePawns |= bb;
-                pawnKey ^= Zobrist.getPieceKey(s, p);
-            } else if (p==WHITE_KNIGHT) {
-                whiteKnights |= bb;
-            } else if (p==WHITE_BISHOP) {
-                whiteBishops |= bb;
-            } else if (p==WHITE_ROOK) {
-                whiteRooks |= bb;
-            } else if (p==WHITE_QUEEN) {
-                whiteQueens |= bb;
-            }
-        } else {
-            blackPieces |= bb;
-            if (p==BLACK_PAWN) {
-                blackPawns |= bb;
-                pawnKey ^= Zobrist.getPieceKey(s, p);
-            } else if (p==BLACK_KNIGHT) {
-                blackKnights |= bb;
-            } else if (p==BLACK_BISHOP) {
-                blackBishops |= bb;
-            } else if (p==BLACK_ROOK) {
-                blackRooks |= bb;
-            } else if (p==BLACK_QUEEN) {
-                blackQueens |= bb;
-            }
-        }
-
-        pieceCountsMap.put(p, pieceCountsMap.get(p)+1);
-        zobristKey ^= Zobrist.getPieceKey(s, p);
     }
 
     public void applyMove(Move m) {
@@ -176,11 +71,12 @@ public final class Board {
 
         swapPlayer();
         moveCounter++;
-        fiftyCounter++; // may get reset
 
         if (m.captured()!=null) {
             fiftyCounter = 0;
             removeCapturedPiece(m);
+        } else {
+            fiftyCounter++;
         }
 
         clearEPSquare();
@@ -189,60 +85,6 @@ public final class Board {
         removePiece(m.from());
 
         assert(verify());
-    }
-
-    public void clearBoard() {
-        List<Square> squares = Square.allSquares();
-        for (Square sq : squares) {
-            if (getPiece(sq)!=null) {
-                removePiece(sq);
-            }
-        }
-
-        clearEPSquare();
-        Set<CastlingRights> crs = EnumSet.allOf(CastlingRights.class);
-        for (CastlingRights cr : crs) {
-            clearCastlingRight(cr);
-        }
-        fiftyCounter = 0;
-        undoStack.clear();
-
-        assert(pieceCountsMap.get(WHITE_PAWN)==0);
-        assert(pieceCountsMap.get(BLACK_PAWN)==0);
-        assert(pieceCountsMap.get(WHITE_QUEEN)==0);
-        assert(pieceCountsMap.get(BLACK_QUEEN)==0);
-        assert(pieceCountsMap.get(WHITE_ROOK)==0);
-        assert(pieceCountsMap.get(BLACK_ROOK)==0);
-        assert(pieceCountsMap.get(WHITE_KNIGHT)==0);
-        assert(pieceCountsMap.get(BLACK_KNIGHT)==0);
-        assert(pieceCountsMap.get(WHITE_BISHOP)==0);
-        assert(pieceCountsMap.get(BLACK_BISHOP)==0);
-    }
-
-    public void clearCastlingRight(CastlingRights castlingRight) {
-        if (castlingRight == WHITE_KINGSIDE) {
-            if (castlingRights.isWhiteKingside()) {
-                castlingRights.removeWhiteKingside();
-                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
-            }
-        } else if (castlingRight == WHITE_QUEENSIDE) {
-            if (castlingRights.isWhiteQueenside()) {
-                castlingRights.removeWhiteQueenside();
-                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
-            }
-        } else if (castlingRight == BLACK_KINGSIDE) {
-            if (castlingRights.isBlackKingside()) {
-                castlingRights.removeBlackKingside();
-                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
-            }
-        } else if (castlingRight == BLACK_QUEENSIDE) {
-            if (castlingRights.isBlackQueenside()) {
-                castlingRights.removeBlackQueenside();
-                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
-            }
-        } else {
-            throw new IllegalArgumentException("illegal castling right: " + castlingRight);
-        }
     }
 
     public Square clearEPSquare() {
@@ -391,17 +233,12 @@ public final class Board {
         return true;
     }
 
-    private Square findKingSquare(King kingSquare) {
-        return Square.allSquares()
-                .stream()
-                .filter(sq -> getPiece(sq)==kingSquare)
-                .findFirst()
-                .get();
-    }
-
     public void flipVertical() {
         List<Square> squares = Square.allSquares();
         Map<Square,Piece> myPieceMap = new HashMap<>();
+
+        Square myWhiteKingSq = whiteKingSquare;
+        Square myBlackKingSq = blackKingSquare;
 
         // remove pieces, remembering where they were
         for (Square sq : squares) {
@@ -416,7 +253,7 @@ public final class Board {
         for (Square sq : squares) {
             Piece p = myPieceMap.get(sq);
             if (p != null) {
-                addPiece(p.getOppositeColorPiece(),sq.flipVertical());
+                addPiece(p.getOppositeColorPiece(), sq.flipVertical());
             }
         }
 
@@ -457,14 +294,39 @@ public final class Board {
             addCastlingRight(WHITE_QUEENSIDE);
         }
 
-        resetKingSquares();
+        // set the kings
+        whiteKingSquare = myBlackKingSq.flipVertical();
+        blackKingSquare = myWhiteKingSq.flipVertical();
+
+        // rebuild the hash keys
+        zobristKey = Zobrist.getBoardKey(this);
+        pawnKey = Zobrist.getPawnKey(this);
+
         assert(verify());
     }
 
-    private Square getBlackKingSquare() {
-        assert(blackKingSquare!=null);
-        assert(blackKingSquare.equals(findKingSquare(King.BLACK_KING)));
-        return blackKingSquare;
+    public long getBlackBishops() {
+        return blackBishops;
+    }
+
+    public long getBlackKnights() {
+        return blackKnights;
+    }
+
+    public long getBlackPawns() {
+        return blackPawns;
+    }
+
+    public long getBlackPieces() {
+        return blackPieces;
+    }
+
+    public long getBlackQueens() {
+        return blackQueens;
+    }
+
+    public long getBlackRooks() {
+        return blackRooks;
     }
 
     public Square getEPSquare() {
@@ -504,10 +366,28 @@ public final class Board {
         return Collections.unmodifiableList(undoStack);
     }
 
-    private Square getWhiteKingSquare() {
-        assert(whiteKingSquare!=null);
-        assert(whiteKingSquare.equals(findKingSquare(King.WHITE_KING)));
-        return whiteKingSquare;
+    public long getWhiteBishops() {
+        return whiteBishops;
+    }
+
+    public long getWhiteKnights() {
+        return whiteKnights;
+    }
+
+    public long getWhitePawns() {
+        return whitePawns;
+    }
+
+    public long getWhitePieces() {
+        return whitePieces;
+    }
+
+    public long getWhiteQueens() {
+        return whiteQueens;
+    }
+
+    public long getWhiteRooks() {
+        return whiteRooks;
     }
 
     public long getZobristKey() {
@@ -576,187 +456,10 @@ public final class Board {
         return AttackDetector.attacked(this,getKingSquare(playerToMove),Color.swap(playerToMove));
     }
 
-    private void removeRookCastlingAvailability(Square sq) {
-        if (sq == A1) {
-            if (castlingRights.isWhiteQueenside()) {
-                zobristKey ^= Zobrist.getCastlingKey(WHITE_QUEENSIDE);
-                castlingRights.removeWhiteQueenside();
-            }
-        } else if (sq == H1) {
-            if (castlingRights.isWhiteKingside()) {
-                zobristKey ^= Zobrist.getCastlingKey(WHITE_KINGSIDE);
-                castlingRights.removeWhiteKingside();
-            }
-        } else if (sq == A8) {
-            if (castlingRights.isBlackQueenside()) {
-                zobristKey ^= Zobrist.getCastlingKey(BLACK_QUEENSIDE);
-                castlingRights.removeBlackQueenside();
-            }
-        } else if (sq == H8) {
-            if (castlingRights.isBlackKingside()) {
-                zobristKey ^= Zobrist.getCastlingKey(BLACK_KINGSIDE);
-                castlingRights.removeBlackKingside();
-            }
-        }
-    }
-
-    private void removeCastlingAvailability(Move m) {
-        // if capturing a rook remove its castling availability
-        if (m.captured() != null) {
-            removeRookCastlingAvailability(m.to());
-        }
-
-        // if a rook or king is moving, remove their castling availability
-        Piece p = getPiece(m.from());
-        if (p==WHITE_ROOK || p==BLACK_ROOK) {
-            removeRookCastlingAvailability(m.from());
-        } else if (p==WHITE_KING) {
-            if (castlingRights.isWhiteKingside()) {
-                zobristKey ^= Zobrist.getCastlingKey(WHITE_KINGSIDE);
-                castlingRights.removeWhiteKingside();
-            }
-            if (castlingRights.isWhiteQueenside()) {
-                zobristKey ^= Zobrist.getCastlingKey(WHITE_QUEENSIDE);
-                castlingRights.removeWhiteQueenside();
-            }
-        } else if (p==BLACK_KING) {
-            if (castlingRights.isBlackKingside()) {
-                zobristKey ^= Zobrist.getCastlingKey(BLACK_KINGSIDE);
-                castlingRights.removeBlackKingside();
-            }
-            if (castlingRights.isBlackQueenside()) {
-                zobristKey ^= Zobrist.getCastlingKey(BLACK_QUEENSIDE);
-                castlingRights.removeBlackQueenside();
-            }
-        }
-    }
-
-    private void removeCapturedPiece(Move m) {
-        assert(m.captured()!=null);
-        Piece captured;
-        if (m.isEpCapture()) {
-            assert(epSquare != null);
-            assert(m.to()==epSquare);
-            // remove pawn
-            if (getPlayerToMove()==Color.WHITE) { // black WAS on move
-                captured = removePiece(epSquare.north().get());
-                assert(captured==WHITE_PAWN);
-            } else {
-                captured = removePiece(epSquare.south().get());
-                assert(captured==BLACK_PAWN);
-            }
-        } else {
-            removePiece(m.to());
-        }
-
-    }
-
-    private Piece removePiece(Square sq) {
-        Piece p = getPiece(sq);
-        assert(p != null);
-
-        long bb_sq = Bitboard.squares[sq.value()];
-        if (p.isWhite()) {
-            whitePieces ^= bb_sq;
-            if (p==WHITE_PAWN) {
-                whitePawns ^= bb_sq;
-                pawnKey ^= Zobrist.getPieceKey(sq, p);
-            } else if (p==WHITE_KNIGHT) {
-                whiteKnights ^= bb_sq;
-            } else if (p==WHITE_BISHOP) {
-                whiteBishops ^= bb_sq;
-            } else if (p==WHITE_ROOK) {
-                whiteRooks ^= bb_sq;
-            } else if (p==WHITE_QUEEN) {
-                whiteQueens ^= bb_sq;
-            }
-        } else {
-            blackPieces ^= bb_sq;
-            if (p==BLACK_PAWN) {
-                blackPawns ^= bb_sq;
-                pawnKey ^= Zobrist.getPieceKey(sq, p);
-            } else if (p==BLACK_KNIGHT) {
-                blackKnights ^= bb_sq;
-            } else if (p==BLACK_BISHOP) {
-                blackBishops ^= bb_sq;
-            } else if (p==BLACK_ROOK) {
-                blackRooks ^= bb_sq;
-            } else if (p==BLACK_QUEEN) {
-                blackQueens ^= bb_sq;
-            }
-        }
-
-        pieceMap.remove(sq);
-        pieceCountsMap.put(p, pieceCountsMap.get(p)-1);
-        assert(pieceCountsMap.get(p) >= 0);
-        zobristKey ^= Zobrist.getPieceKey(sq, p);
-
-        return p;
-    }
-
     public void resetBoard() {
         undoStack.clear();
-        pieceMap.clear();
-        pieceCountsMap.put(WHITE_QUEEN, 0);
-        pieceCountsMap.put(BLACK_QUEEN, 0);
-        pieceCountsMap.put(WHITE_ROOK, 0);
-        pieceCountsMap.put(BLACK_ROOK, 0);
-        pieceCountsMap.put(WHITE_KNIGHT, 0);
-        pieceCountsMap.put(BLACK_KNIGHT, 0);
-        pieceCountsMap.put(WHITE_BISHOP, 0);
-        pieceCountsMap.put(BLACK_BISHOP, 0);
-        pieceCountsMap.put(WHITE_KING, 0);
-        pieceCountsMap.put(BLACK_KING, 0);
-        pieceCountsMap.put(WHITE_PAWN, 0);
-        pieceCountsMap.put(BLACK_PAWN, 0);
 
-        whitePawns = blackPawns = 0;
-        whiteKnights = blackKnights = 0;
-        whiteBishops = blackBishops = 0;
-        whiteRooks = blackRooks = 0;
-        whiteQueens = blackQueens = 0;
-        whitePieces = blackPieces = 0;
-
-        zobristKey = 0;
-        pawnKey = 0;
-
-        addPiece(BLACK_ROOK, A8);
-        addPiece(BLACK_KNIGHT, B8);
-        addPiece(BLACK_BISHOP, C8);
-        addPiece(BLACK_QUEEN, D8);
-        addPiece(BLACK_KING, E8);
-        addPiece(BLACK_BISHOP, F8);
-        addPiece(BLACK_KNIGHT, G8);
-        addPiece(BLACK_ROOK, H8);
-
-        Square.rankSquares(Rank.RANK_7).stream().forEach(sq -> addPiece(BLACK_PAWN,sq));
-        Square.rankSquares(Rank.RANK_2).stream().forEach(sq -> addPiece(WHITE_PAWN,sq));
-
-        addPiece(WHITE_ROOK, A1);
-        addPiece(WHITE_KNIGHT, B1);
-        addPiece(WHITE_BISHOP, C1);
-        addPiece(WHITE_QUEEN, D1);
-        addPiece(WHITE_KING, E1);
-        addPiece(WHITE_BISHOP, F1);
-        addPiece(WHITE_KNIGHT, G1);
-        addPiece(WHITE_ROOK, H1);
-
-        castlingRights.clear();
-        EnumSet.allOf(CastlingRights.class).stream().forEach(cr -> addCastlingRight(cr));
-
-        playerToMove = Color.WHITE;
-        zobristKey ^= Zobrist.getPlayerKey(Color.WHITE);
-
-        epSquare = null;
-        whiteKingSquare = E1;
-        blackKingSquare = E8;
-        moveCounter = 0;
-        fiftyCounter = 0;
-    }
-
-    public void resetKingSquares() {
-        blackKingSquare = findKingSquare(BLACK_KING);
-        whiteKingSquare = findKingSquare(WHITE_KING);
+        setPos("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     }
 
     public void setEP(Square ep) {
@@ -765,12 +468,34 @@ public final class Board {
         zobristKey ^= Zobrist.getEnPassantKey(ep);
     }
 
-    public void setFiftyCounter(int fiftyCounter) {
-        this.fiftyCounter=fiftyCounter;
-    }
+    // the FEN grammar can be found here:
+    // http://chessprogramming.wikispaces.com/Forsyth-Edwards+Notation
+    // Note the grammar calls for six fields, but in practice the last two
+    // are considered optional.
+    public void setPos(String fen) {
+        String myFen = fen.trim();
+        clearBoard();
 
-    public void setMoveCounter(int moveCounter) {
-        this.moveCounter=moveCounter;
+        myFen = BlankRemover.trim(myFen);
+        // split on spaces
+        String[] fenPieces = myFen.split(" ");
+        if (fenPieces.length < 4) {
+            throw new ParseException("not enough parts to FEN.");
+        }
+
+        setPieces(fenPieces[0]);
+        setPlayer(fenPieces[1]);
+        setCastlingRights(fenPieces[2]);
+        setEP(fenPieces[3]);
+
+        // Parts 5 and 6 are the half move clock and the full move counter, respectively.
+        setHalfMoveClock(fenPieces.length > 4 ? fenPieces[4] : null);
+        setFullMoveCounter(fenPieces.length > 5 ? fenPieces[5] : null);
+
+        zobristKey = Zobrist.getBoardKey(this);
+        pawnKey = Zobrist.getPawnKey(this);
+
+        assert(verify());
     }
 
     public void swapPlayer() {
@@ -837,6 +562,416 @@ public final class Board {
 
         zobristKey = u.getZobristKey();
         assert(verify());
+    }
+
+    private void addCastlingRight(CastlingRights castlingRight) {
+        if (castlingRight == WHITE_KINGSIDE) {
+            if (!castlingRights.isWhiteKingside()) {
+                castlingRights.setWhiteKingside();
+                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
+            }
+        } else if (castlingRight == WHITE_QUEENSIDE) {
+            if (!castlingRights.isWhiteQueenside()) {
+                castlingRights.setWhiteQueenside();
+                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
+            }
+        } else if (castlingRight == BLACK_KINGSIDE) {
+            if (!castlingRights.isBlackKingside()) {
+                castlingRights.setBlackKingside();
+                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
+            }
+        } else if (castlingRight == BLACK_QUEENSIDE) {
+            if (!castlingRights.isBlackQueenside()) {
+                castlingRights.setBlackQueenside();
+                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
+            }
+        } else {
+            throw new IllegalArgumentException("illegal castling right: " + castlingRight);
+        }
+    }
+
+    private void addPiece(Piece p, Square s) {
+        assert(p != null);
+        assert(getPiece(s)==null);
+
+        pieceMap.put(s, p);
+        long bb = Bitboard.squares[s.value()];
+
+        if (p.isWhite()) {
+            whitePieces |= bb;
+            if (p==WHITE_PAWN) {
+                whitePawns |= bb;
+                pawnKey ^= Zobrist.getPieceKey(s, p);
+            } else if (p==WHITE_KNIGHT) {
+                whiteKnights |= bb;
+            } else if (p==WHITE_BISHOP) {
+                whiteBishops |= bb;
+            } else if (p==WHITE_ROOK) {
+                whiteRooks |= bb;
+            } else if (p==WHITE_QUEEN) {
+                whiteQueens |= bb;
+            }
+        } else {
+            blackPieces |= bb;
+            if (p==BLACK_PAWN) {
+                blackPawns |= bb;
+                pawnKey ^= Zobrist.getPieceKey(s, p);
+            } else if (p==BLACK_KNIGHT) {
+                blackKnights |= bb;
+            } else if (p==BLACK_BISHOP) {
+                blackBishops |= bb;
+            } else if (p==BLACK_ROOK) {
+                blackRooks |= bb;
+            } else if (p==BLACK_QUEEN) {
+                blackQueens |= bb;
+            }
+        }
+
+        pieceCountsMap.put(p, pieceCountsMap.get(p)+1);
+        zobristKey ^= Zobrist.getPieceKey(s, p);
+    }
+
+    private void addPieceToDestination(Move m) {
+        Piece p = getPiece(m.from());
+        addPiece(p,m.to());
+        if (p==WHITE_PAWN) {
+            fiftyCounter = 0;
+            Optional<Square> nnSq = m.from().north().flatMap(Square::north);
+            if (nnSq.isPresent() && m.to()==nnSq.get()) {
+                setEP(m.from().north().get());
+            } else if (m.to().rank()==RANK_8) {
+                assert(m.promotion()!=null);
+                removePiece(m.to());
+                addPiece(m.promotion(),m.to());
+            }
+        } else if (p==BLACK_PAWN) {
+            fiftyCounter = 0;
+            Optional<Square> ssSq = m.from().south().flatMap(Square::south);
+            if (ssSq.isPresent() && m.to()==ssSq.get()) {
+                setEP(m.from().south().get());
+            } else if (m.to().rank()==RANK_1) {
+                assert(m.promotion()!=null);
+                removePiece(m.to());
+                addPiece(m.promotion(),m.to());
+            }
+        } else if (p==WHITE_KING) {
+            whiteKingSquare = m.to();
+            if (m.from() == E1) {
+                if (m.to() == G1) {
+                    assert(m.isCastle());
+                    fiftyCounter = 0;
+                    removePiece(H1);
+                    addPiece(WHITE_ROOK, F1);
+                } else if (m.to() == C1) {
+                    assert(m.isCastle());
+                    fiftyCounter = 0;
+                    removePiece(A1);
+                    addPiece(WHITE_ROOK, D1);
+                }
+            }
+        } else if (p==BLACK_KING) {
+            blackKingSquare = m.to();
+            if (m.from() == E8) {
+                if (m.to() == G8) {
+                    assert(m.isCastle());
+                    fiftyCounter = 0;
+                    removePiece(H8);
+                    addPiece(BLACK_ROOK, F8);
+                } else if (m.to() == C8) {
+                    assert(m.isCastle());
+                    fiftyCounter = 0;
+                    removePiece(A8);
+                    addPiece(BLACK_ROOK, D8);
+                }
+            }
+        }
+    }
+
+    private void clearBoard() {
+        List<Square> squares = Square.allSquares();
+        for (Square sq : squares) {
+            if (getPiece(sq)!=null) {
+                removePiece(sq);
+            }
+        }
+
+        clearEPSquare();
+        Set<CastlingRights> crs = EnumSet.allOf(CastlingRights.class);
+        for (CastlingRights cr : crs) {
+            clearCastlingRight(cr);
+        }
+        fiftyCounter = 0;
+        undoStack.clear();
+
+        assert(pieceCountsMap.get(WHITE_PAWN)==0);
+        assert(pieceCountsMap.get(BLACK_PAWN)==0);
+        assert(pieceCountsMap.get(WHITE_QUEEN)==0);
+        assert(pieceCountsMap.get(BLACK_QUEEN)==0);
+        assert(pieceCountsMap.get(WHITE_ROOK)==0);
+        assert(pieceCountsMap.get(BLACK_ROOK)==0);
+        assert(pieceCountsMap.get(WHITE_KNIGHT)==0);
+        assert(pieceCountsMap.get(BLACK_KNIGHT)==0);
+        assert(pieceCountsMap.get(WHITE_BISHOP)==0);
+        assert(pieceCountsMap.get(BLACK_BISHOP)==0);
+    }
+
+    private void clearCastlingRight(CastlingRights castlingRight) {
+        if (castlingRight == WHITE_KINGSIDE) {
+            if (castlingRights.isWhiteKingside()) {
+                castlingRights.removeWhiteKingside();
+                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
+            }
+        } else if (castlingRight == WHITE_QUEENSIDE) {
+            if (castlingRights.isWhiteQueenside()) {
+                castlingRights.removeWhiteQueenside();
+                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
+            }
+        } else if (castlingRight == BLACK_KINGSIDE) {
+            if (castlingRights.isBlackKingside()) {
+                castlingRights.removeBlackKingside();
+                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
+            }
+        } else if (castlingRight == BLACK_QUEENSIDE) {
+            if (castlingRights.isBlackQueenside()) {
+                castlingRights.removeBlackQueenside();
+                zobristKey ^= Zobrist.getCastlingKey(castlingRight);
+            }
+        } else {
+            throw new IllegalArgumentException("illegal castling right: " + castlingRight);
+        }
+    }
+
+    private Square getBlackKingSquare() {
+        assert(blackKingSquare != null);
+        assert(getPiece(blackKingSquare) == BLACK_KING);
+        return blackKingSquare;
+    }
+
+    private Square getWhiteKingSquare() {
+        assert(whiteKingSquare != null);
+        assert(getPiece(whiteKingSquare) == WHITE_KING);
+        return whiteKingSquare;
+    }
+
+    private void removeCapturedPiece(Move m) {
+        assert(m.captured()!=null);
+        Piece captured;
+        if (m.isEpCapture()) {
+            assert(epSquare != null);
+            assert(m.to()==epSquare);
+            // remove pawn
+            if (getPlayerToMove()==Color.WHITE) { // black WAS on move
+                captured = removePiece(epSquare.north().get());
+                assert(captured==WHITE_PAWN);
+            } else {
+                captured = removePiece(epSquare.south().get());
+                assert(captured==BLACK_PAWN);
+            }
+        } else {
+            removePiece(m.to());
+        }
+
+    }
+
+    private void removeCastlingAvailability(Move m) {
+        // if capturing a rook remove its castling availability
+        if (m.captured() != null) {
+            removeRookCastlingAvailability(m.to());
+        }
+
+        // if a rook or king is moving, remove their castling availability
+        Piece p = getPiece(m.from());
+        if (p==WHITE_ROOK || p==BLACK_ROOK) {
+            removeRookCastlingAvailability(m.from());
+        } else if (p==WHITE_KING) {
+            if (castlingRights.isWhiteKingside()) {
+                zobristKey ^= Zobrist.getCastlingKey(WHITE_KINGSIDE);
+                castlingRights.removeWhiteKingside();
+            }
+            if (castlingRights.isWhiteQueenside()) {
+                zobristKey ^= Zobrist.getCastlingKey(WHITE_QUEENSIDE);
+                castlingRights.removeWhiteQueenside();
+            }
+        } else if (p==BLACK_KING) {
+            if (castlingRights.isBlackKingside()) {
+                zobristKey ^= Zobrist.getCastlingKey(BLACK_KINGSIDE);
+                castlingRights.removeBlackKingside();
+            }
+            if (castlingRights.isBlackQueenside()) {
+                zobristKey ^= Zobrist.getCastlingKey(BLACK_QUEENSIDE);
+                castlingRights.removeBlackQueenside();
+            }
+        }
+    }
+
+    private Piece removePiece(Square sq) {
+        Piece p = getPiece(sq);
+        assert(p != null);
+
+        long bb_sq = Bitboard.squares[sq.value()];
+        if (p.isWhite()) {
+            whitePieces ^= bb_sq;
+            if (p==WHITE_PAWN) {
+                whitePawns ^= bb_sq;
+                pawnKey ^= Zobrist.getPieceKey(sq, p);
+            } else if (p==WHITE_KNIGHT) {
+                whiteKnights ^= bb_sq;
+            } else if (p==WHITE_BISHOP) {
+                whiteBishops ^= bb_sq;
+            } else if (p==WHITE_ROOK) {
+                whiteRooks ^= bb_sq;
+            } else if (p==WHITE_QUEEN) {
+                whiteQueens ^= bb_sq;
+            }
+        } else {
+            blackPieces ^= bb_sq;
+            if (p==BLACK_PAWN) {
+                blackPawns ^= bb_sq;
+                pawnKey ^= Zobrist.getPieceKey(sq, p);
+            } else if (p==BLACK_KNIGHT) {
+                blackKnights ^= bb_sq;
+            } else if (p==BLACK_BISHOP) {
+                blackBishops ^= bb_sq;
+            } else if (p==BLACK_ROOK) {
+                blackRooks ^= bb_sq;
+            } else if (p==BLACK_QUEEN) {
+                blackQueens ^= bb_sq;
+            }
+        }
+
+        pieceMap.remove(sq);
+        pieceCountsMap.put(p, pieceCountsMap.get(p)-1);
+        assert(pieceCountsMap.get(p) >= 0);
+        zobristKey ^= Zobrist.getPieceKey(sq, p);
+
+        return p;
+    }
+
+    private void removeRookCastlingAvailability(Square sq) {
+        if (sq == A1) {
+            if (castlingRights.isWhiteQueenside()) {
+                zobristKey ^= Zobrist.getCastlingKey(WHITE_QUEENSIDE);
+                castlingRights.removeWhiteQueenside();
+            }
+        } else if (sq == H1) {
+            if (castlingRights.isWhiteKingside()) {
+                zobristKey ^= Zobrist.getCastlingKey(WHITE_KINGSIDE);
+                castlingRights.removeWhiteKingside();
+            }
+        } else if (sq == A8) {
+            if (castlingRights.isBlackQueenside()) {
+                zobristKey ^= Zobrist.getCastlingKey(BLACK_QUEENSIDE);
+                castlingRights.removeBlackQueenside();
+            }
+        } else if (sq == H8) {
+            if (castlingRights.isBlackKingside()) {
+                zobristKey ^= Zobrist.getCastlingKey(BLACK_KINGSIDE);
+                castlingRights.removeBlackKingside();
+            }
+        }
+    }
+
+    private void setCastlingRights(String fenPart) throws ParseException {
+        if (fenPart.equals("-")) {
+            return;
+        }
+
+        char[] arr = fenPart.toCharArray();
+        for (char c : arr) {
+            switch (c) {
+                case 'K':
+                    addCastlingRight(CastlingRights.WHITE_KINGSIDE);
+                    break;
+                case 'k':
+                    addCastlingRight(CastlingRights.BLACK_KINGSIDE);
+                    break;
+                case 'Q':
+                    addCastlingRight(CastlingRights.WHITE_QUEENSIDE);
+                    break;
+                case 'q':
+                    addCastlingRight(CastlingRights.BLACK_QUEENSIDE);
+                    break;
+                default:
+                    throw new ParseException("invalid character in setCastlingRights: " + fenPart);
+            }
+        }
+    }
+
+    private void setEP(String fenPart) throws ParseException {
+        if (fenPart.equals("-")) {
+            return;
+        }
+
+        char[] arr = fenPart.toCharArray();
+        if (arr.length != 2) {
+            throw new ParseException("invalid string in setEP: " + fenPart);
+        }
+
+        int epsq=0;
+        if (arr[0]>='a' && arr[0]<='h') {
+            epsq=arr[0]-'a';
+        } else {
+            throw new ParseException("invalid string in setEP: " + fenPart);
+        }
+
+        if (arr[1]>='1' && arr[1]<='8') {
+            epsq+= 8 * (8-(arr[1]-'0'));
+        } else {
+            throw new ParseException("invalid string in setEP: " + fenPart);
+        }
+
+        setEP(Square.valueOf(epsq));
+    }
+
+    private void setFullMoveCounter(String fenPart) throws ParseException {
+        try {
+            int fullMoveCounter = fenPart==null? 1 : Integer.valueOf(fenPart);
+            moveCounter = (fullMoveCounter-1)*2;
+            if (playerToMove == Color.BLACK) {
+                moveCounter++;
+            }
+        } catch (NumberFormatException e) {
+            throw new ParseException(e);
+        }
+    }
+
+    private void setHalfMoveClock(String fenPart) throws ParseException {
+        try {
+            fiftyCounter = fenPart==null ? 0 : Integer.valueOf(fenPart);
+        } catch (NumberFormatException e) {
+            throw new ParseException(e);
+        }
+    }
+
+    private void setPieces(String fenPart) {
+        char[] arr = fenPart.toCharArray();
+        int sqVal = 0;
+        for (char c : arr) {
+            Piece piece = PieceFactory.getPiece(String.valueOf(c));
+            if (piece != null) {
+                Square sq = Square.valueOf(sqVal);
+                if (piece == King.BLACK_KING) {
+                    blackKingSquare = sq;
+                } else if (piece == King.WHITE_KING) {
+                    whiteKingSquare = sq;
+                }
+                addPiece(piece, sq);
+                sqVal++;
+            } else if (c >= '1' && c <= '8') {
+                sqVal += Integer.valueOf(String.valueOf(c));
+            }
+        }
+        assert(sqVal == 64);
+    }
+
+    private void setPlayer(String fenPart) throws ParseException {
+        if (fenPart.equalsIgnoreCase("b")) {
+            playerToMove = Color.BLACK;
+        } else if (fenPart.equalsIgnoreCase("w")) {
+            playerToMove = Color.WHITE;
+        } else {
+            throw new ParseException("could not parse player: " + fenPart);
+        }
     }
 
     private boolean verify() {
@@ -977,55 +1112,6 @@ public final class Board {
         return true;
     }
 
-    public long getWhitePawns() {
-        return whitePawns;
-    }
-
-    public long getBlackPawns() {
-        return blackPawns;
-    }
-
-    public long getWhiteKnights() {
-        return whiteKnights;
-    }
-
-    public long getBlackKnights() {
-        return blackKnights;
-    }
-
-    public long getWhiteBishops() {
-        return whiteBishops;
-    }
-
-    public long getBlackBishops() {
-        return blackBishops;
-    }
-
-    public long getWhiteRooks() {
-        return whiteRooks;
-    }
-
-    public long getBlackRooks() {
-        return blackRooks;
-    }
-
-    public long getWhiteQueens() {
-        return whiteQueens;
-    }
-
-    public long getBlackQueens() {
-        return blackQueens;
-    }
-
-    public long getWhitePieces() {
-        return whitePieces;
-    }
-
-    public long getBlackPieces() {
-        return blackPieces;
-    }
-
-
 }
 
 class MyCastlingRights {
@@ -1045,68 +1131,12 @@ class MyCastlingRights {
         this.castlingRights = castlingRights;
     }
 
-    public void setWhiteKingside() {
-        castlingRights |= WHITE_KINGSIDE;
-    }
-
-    public void setWhiteQueenside() {
-        castlingRights |= WHITE_QUEENSIDE;
-    }
-
-    public void setBlackKingside() {
-        castlingRights |= BLACK_KINGSIDE;
-    }
-
-    public void setBlackQueenside() {
-        castlingRights |= BLACK_QUEENSIDE;
-    }
-
-    public void removeWhiteKingside() {
-        castlingRights &= ~WHITE_KINGSIDE;
-    }
-
-    public void removeWhiteQueenside() {
-        castlingRights &= ~WHITE_QUEENSIDE;
-    }
-
-    public void removeBlackKingside() {
-        castlingRights &= ~BLACK_KINGSIDE;
-    }
-
-    public void removeBlackQueenside() {
-        castlingRights &= ~BLACK_QUEENSIDE;
-    }
-
-    public boolean isWhiteKingside() {
-        return (castlingRights & WHITE_KINGSIDE) > 0;
-    }
-
-    public boolean isWhiteQueenside() {
-        return (castlingRights & WHITE_QUEENSIDE) > 0;
-    }
-
-    public boolean isBlackKingside() {
-        return (castlingRights & BLACK_KINGSIDE) > 0;
-    }
-
-    public boolean isBlackQueenside() {
-        return (castlingRights & BLACK_QUEENSIDE) > 0;
-    }
-
     public void addAll() {
         castlingRights = WHITE_KINGSIDE | WHITE_QUEENSIDE | BLACK_KINGSIDE | BLACK_QUEENSIDE;
     }
 
     public void clear() {
         castlingRights = 0;
-    }
-
-    public int getValue() {
-        return castlingRights;
-    }
-
-    public void setValue(int castlingRights) {
-        this.castlingRights = castlingRights;
     }
 
     @Override
@@ -1121,11 +1151,65 @@ class MyCastlingRights {
         return true;
     }
 
+    public int getValue() {
+        return castlingRights;
+    }
+
+    public void setValue(int castlingRights) {
+        this.castlingRights = castlingRights;
+    }
+
     @Override
     public int hashCode() {
         return this.castlingRights;
     }
 
+    public boolean isBlackKingside() {
+        return (castlingRights & BLACK_KINGSIDE) > 0;
+    }
+
+    public boolean isBlackQueenside() {
+        return (castlingRights & BLACK_QUEENSIDE) > 0;
+    }
+
+    public boolean isWhiteKingside() {
+        return (castlingRights & WHITE_KINGSIDE) > 0;
+    }
+
+    public boolean isWhiteQueenside() {
+        return (castlingRights & WHITE_QUEENSIDE) > 0;
+    }
+
+    public void removeBlackKingside() {
+        castlingRights &= ~BLACK_KINGSIDE;
+    }
+
+    public void removeBlackQueenside() {
+        castlingRights &= ~BLACK_QUEENSIDE;
+    }
+
+    public void removeWhiteKingside() {
+        castlingRights &= ~WHITE_KINGSIDE;
+    }
+
+    public void removeWhiteQueenside() {
+        castlingRights &= ~WHITE_QUEENSIDE;
+    }
+
+    public void setBlackKingside() {
+        castlingRights |= BLACK_KINGSIDE;
+    }
+
+    public void setBlackQueenside() {
+        castlingRights |= BLACK_QUEENSIDE;
+    }
+
+    public void setWhiteKingside() {
+        castlingRights |= WHITE_KINGSIDE;
+    }
+
+    public void setWhiteQueenside() {
+        castlingRights |= WHITE_QUEENSIDE;
+    }
 
 }
-

@@ -7,8 +7,6 @@ import org.junit.Test;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.movegen.MoveGen;
-import com.jamesswafford.chess4j.io.EPDParser;
-import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.io.MoveParser;
 
 import static org.junit.Assert.*;
@@ -19,7 +17,7 @@ public class MVVLVATest {
     @Test
     public void testScore1() throws Exception {
         Board b = Board.INSTANCE;
-        EPDParser.setPos(b, "3r1rk1/p3qp1p/2bb2p1/2p5/3P4/1P6/PBQN1PPP/2R2RK1 b - - bm Bxg2 Bxh2+; id \"WAC.297\";");
+        b.setPos("3r1rk1/p3qp1p/2bb2p1/2p5/3P4/1P6/PBQN1PPP/2R2RK1 b - -");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
@@ -49,7 +47,7 @@ public class MVVLVATest {
     @Test
     public void testScore2() throws Exception {
         Board b = Board.INSTANCE;
-        EPDParser.setPos(b, "8/4Pk1p/6p1/1r6/8/5N2/2B2PPP/b5K1 w - - bm e8=Q+; id \"position 0631\";");
+        b.setPos("8/4Pk1p/6p1/1r6/8/5N2/2B2PPP/b5K1 w - -");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
@@ -77,7 +75,7 @@ public class MVVLVATest {
     @Test
     public void testScore3() throws Exception {
         Board b = Board.INSTANCE;
-        EPDParser.setPos(b, "6r1/pp1b1P1p/5Q2/3p3k/5K2/8/2P3P1/8 w - - bm fxg8=N; id \"made up 001\";");
+        b.setPos("6r1/pp1b1P1p/5Q2/3p3k/5K2/8/2P3P1/8 w - -");
         List<Move> moves = MoveGen.genLegalMoves(b);
 
         MoveParser mp = new MoveParser();
@@ -115,7 +113,7 @@ public class MVVLVATest {
     @Test
     public void testScore4() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "6R1/kp6/8/1KpP4/8/8/8/6B1 w - c6");
+        b.setPos("6R1/kp6/8/1KpP4/8/8/8/6B1 w - c6");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();

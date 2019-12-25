@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.io.FenParser;
 
 import static org.junit.Assert.*;
 
@@ -24,58 +23,58 @@ public class GameStatusCheckerTest {
     }
 
     @Test
-    public void testGetCheckmateStatus_FoolsMate() throws Exception {
+    public void testGetCheckmateStatus_FoolsMate() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq -");
+        b.setPos("rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertEquals(CHECKMATED, gs);
     }
 
     @Test
-    public void testGetCheckmateStatus_ByrneFischer() throws Exception {
+    public void testGetCheckmateStatus_ByrneFischer() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "1Q6/5pk1/2p3p1/1p2N2p/1b5P/1bn5/2r3P1/2K5 w - -");
+        b.setPos("1Q6/5pk1/2p3p1/1p2N2p/1b5P/1bn5/2r3P1/2K5 w - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertEquals(CHECKMATED, gs);
     }
 
     @Test
-    public void testGetCheckmateStatus_SimpleMate() throws Exception {
+    public void testGetCheckmateStatus_SimpleMate() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "3k2R1/8/3K4/8/8/8/8/8 b - -");
+        b.setPos("3k2R1/8/3K4/8/8/8/8/8 b - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertEquals(CHECKMATED, gs);
     }
 
     @Test
-    public void testGetStalemateStatus() throws Exception {
+    public void testGetStalemateStatus() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/8/8/6K1/8/1Q6/p7/k7 b - -");
+        b.setPos("8/8/8/6K1/8/1Q6/p7/k7 b - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertEquals(STALEMATED, gs);
     }
 
     @Test
-    public void testGetStalemateStatus_BurnPilsbury() throws Exception {
+    public void testGetStalemateStatus_BurnPilsbury() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "5k2/5P2/5K2/8/8/8/8/8 b - -");
+        b.setPos("5k2/5P2/5K2/8/8/8/8/8 b - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertEquals(STALEMATED, gs);
     }
 
 
     @Test
-    public void testGetStalemateStatus2() throws Exception {
+    public void testGetStalemateStatus2() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "kb5R/8/1K6/8/8/8/8/8 b - - ");
+        b.setPos("kb5R/8/1K6/8/8/8/8/8 b - - ");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertEquals(STALEMATED, gs);
     }
 
     @Test
-    public void testGetStalemateStatus3() throws Exception {
+    public void testGetStalemateStatus3() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/8/8/8/8/2K5/1R6/k7 b - -");
+        b.setPos("8/8/8/8/8/2K5/1R6/k7 b - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertEquals(STALEMATED, gs);
     }
@@ -108,97 +107,97 @@ public class GameStatusCheckerTest {
     }
 
     @Test
-    public void testNoMaterialStatus() throws Exception {
+    public void testNoMaterialStatus() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "kb6/8/1K6/8/8/8/8/8 b - - ");
+        b.setPos("kb6/8/1K6/8/8/8/8/8 b - - ");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertEquals(DRAW_MATERIAL, gs);
     }
 
     @Test
-    public void testNoMaterialStatusOnePawn() throws Exception {
+    public void testNoMaterialStatusOnePawn() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "4k3/8/8/8/8/8/P7/4K3 w - -");
+        b.setPos("4k3/8/8/8/8/8/P7/4K3 w - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertNotEquals(DRAW_MATERIAL, gs);
     }
 
     @Test
-    public void testNoMaterialStatusOneKnight() throws Exception {
+    public void testNoMaterialStatusOneKnight() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "4k3/8/8/8/8/8/n7/4K3 w - -");
+        b.setPos("4k3/8/8/8/8/8/n7/4K3 w - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertEquals(DRAW_MATERIAL, gs);
     }
 
     @Test
-    public void testNoMaterialStatusOneBishop() throws Exception {
+    public void testNoMaterialStatusOneBishop() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "4k3/8/8/8/8/8/B7/4K3 w - -");
+        b.setPos("4k3/8/8/8/8/8/B7/4K3 w - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertEquals(DRAW_MATERIAL, gs);
     }
 
     @Test
-    public void testNoMaterialStatusOneRook() throws Exception {
+    public void testNoMaterialStatusOneRook() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "4k3/8/8/8/8/8/r7/4K3 b - -");
+        b.setPos("4k3/8/8/8/8/8/r7/4K3 b - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertNotEquals(DRAW_MATERIAL, gs);
     }
 
     @Test
-    public void testNoMaterialStatusOneQueen() throws Exception {
+    public void testNoMaterialStatusOneQueen() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "4k3/8/8/8/8/8/Q7/4K3 w - -");
+        b.setPos("4k3/8/8/8/8/8/Q7/4K3 w - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertNotEquals(DRAW_MATERIAL, gs);
     }
 
     @Test
-    public void testNoMaterialStatusJustKings() throws Exception {
+    public void testNoMaterialStatusJustKings() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "4k3/8/8/8/8/8/8/4K3 w - -");
+        b.setPos("4k3/8/8/8/8/8/8/4K3 w - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertEquals(DRAW_MATERIAL, gs);
     }
 
     @Test
-    public void testNoMaterialStatusTwoWhiteKnights() throws Exception {
+    public void testNoMaterialStatusTwoWhiteKnights() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "4k3/8/8/8/8/8/NN6/4K3 w - -");
+        b.setPos("4k3/8/8/8/8/8/NN6/4K3 w - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertNotEquals(DRAW_MATERIAL, gs);
     }
 
     @Test
-    public void testNoMaterialStatusTwoOpposingKnights() throws Exception {
+    public void testNoMaterialStatusTwoOpposingKnights() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "4k3/8/8/8/8/8/Nn6/4K3 b - -");
+        b.setPos("4k3/8/8/8/8/8/Nn6/4K3 b - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertNotEquals(DRAW_MATERIAL, gs);
     }
 
     @Test
-    public void testNoMaterialStatusTwoBishopsDifferentColors() throws Exception {
+    public void testNoMaterialStatusTwoBishopsDifferentColors() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "4k3/8/8/8/8/8/Bb6/4K3 w - -");
+        b.setPos("4k3/8/8/8/8/8/Bb6/4K3 w - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertNotEquals(DRAW_MATERIAL, gs);
     }
 
     @Test
-    public void testNoMaterialStatusTwoBishopsSameColor() throws Exception {
+    public void testNoMaterialStatusTwoBishopsSameColor() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "4k3/8/8/8/8/8/B1b5/4K3 b - -");
+        b.setPos("4k3/8/8/8/8/8/B1b5/4K3 b - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertEquals(DRAW_MATERIAL, gs);
     }
 
     @Test
-    public void testNoMaterialStatusBishopVsKnight() throws Exception {
+    public void testNoMaterialStatusBishopVsKnight() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "4k3/8/8/8/8/8/B1n5/5K2 b - -");
+        b.setPos("4k3/8/8/8/8/8/B1n5/5K2 b - -");
         GameStatus gs = GameStatusChecker.getGameStatus(b);
         assertNotEquals(DRAW_MATERIAL, gs);
     }

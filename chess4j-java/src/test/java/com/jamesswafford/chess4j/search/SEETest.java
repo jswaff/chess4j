@@ -7,28 +7,26 @@ import org.junit.Test;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.movegen.MoveGen;
-import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.eval.Eval;
-import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.io.MoveParser;
-import com.jamesswafford.chess4j.pieces.Knight;
-import com.jamesswafford.chess4j.pieces.Pawn;
-import com.jamesswafford.chess4j.pieces.Queen;
-import com.jamesswafford.chess4j.pieces.Rook;
 
 import static org.junit.Assert.*;
+
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.pieces.Knight.*;
+import static com.jamesswafford.chess4j.pieces.Rook.*;
+import static com.jamesswafford.chess4j.pieces.Queen.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
+
 
 public class SEETest {
 
     @Test
-    public void testQueenTakesUndefendedPawn() throws Exception {
+    public void testQueenTakesUndefendedPawn() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "7k/8/1p6/8/8/1Q6/8/7K w - -");
+        b.setPos("7k/8/1p6/8/8/1Q6/8/7K w - -");
 
-        Move m = new Move(Queen.WHITE_QUEEN,Square.valueOf(File.FILE_B, Rank.RANK_3),Square.valueOf(File.FILE_B, Rank.RANK_6),
-                Pawn.BLACK_PAWN);
+        Move m = new Move(WHITE_QUEEN, B3, B6, BLACK_PAWN);
         b.applyMove(m);
 
         int score = SEE.see(b,m);
@@ -36,12 +34,11 @@ public class SEETest {
     }
 
     @Test
-    public void testQueenTakesDefendedPawn() throws Exception {
+    public void testQueenTakesDefendedPawn() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "7k/p7/1p6/8/8/1Q6/8/7K w - -");
-        Move m = new Move(Queen.WHITE_QUEEN,Square.valueOf(File.FILE_B, Rank.RANK_3),
-                Square.valueOf(File.FILE_B, Rank.RANK_6),
-                Pawn.BLACK_PAWN);
+        b.setPos("7k/p7/1p6/8/8/1Q6/8/7K w - -");
+
+        Move m = new Move(WHITE_QUEEN, B3, B6, BLACK_PAWN);
         b.applyMove(m);
 
         int score = SEE.see(b,m);
@@ -49,13 +46,11 @@ public class SEETest {
     }
 
     @Test
-    public void testRookTakesUndefendedPawn() throws Exception {
+    public void testRookTakesUndefendedPawn() {
         Board b= Board.INSTANCE;
-        FenParser.setPos(b, "1k1r4/1pp4p/p7/4p3/8/P5P1/1PP4P/2K1R3 w - -");
+        b.setPos("1k1r4/1pp4p/p7/4p3/8/P5P1/1PP4P/2K1R3 w - -");
 
-        Move m = new Move(Rook.WHITE_ROOK,Square.valueOf(File.FILE_E, Rank.RANK_1),
-                Square.valueOf(File.FILE_E,Rank.RANK_5),
-                Pawn.BLACK_PAWN);
+        Move m = new Move(WHITE_ROOK, E1, E5, BLACK_PAWN);
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         assertTrue(moves.contains(m));
@@ -66,13 +61,11 @@ public class SEETest {
     }
 
     @Test
-    public void testWithXrays() throws Exception {
+    public void testWithXrays() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "1k1r3q/1ppn3p/p4b2/4p3/8/P2N2P1/1PP1R1BP/2K1Q3 w - -");
+        b.setPos("1k1r3q/1ppn3p/p4b2/4p3/8/P2N2P1/1PP1R1BP/2K1Q3 w - -");
 
-        Move m = new Move(Knight.WHITE_KNIGHT,Square.valueOf(File.FILE_D,Rank.RANK_3),
-                Square.valueOf(File.FILE_E,Rank.RANK_5),
-                Pawn.BLACK_PAWN);
+        Move m = new Move(WHITE_KNIGHT, D3, E5, BLACK_PAWN);
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         assertTrue(moves.contains(m));
@@ -83,13 +76,11 @@ public class SEETest {
     }
 
     @Test
-    public void testRookXRays() throws Exception {
+    public void testRookXRays() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "3kr3/8/4p3/8/8/4R3/4R3/4K3 w - -");
+        b.setPos("3kr3/8/4p3/8/8/4R3/4R3/4K3 w - -");
 
-        Move m = new Move(Rook.WHITE_ROOK,Square.valueOf(File.FILE_E,Rank.RANK_3),
-                Square.valueOf(File.FILE_E,Rank.RANK_6),
-                Pawn.BLACK_PAWN);
+        Move m = new Move(WHITE_ROOK, E3, E6 ,BLACK_PAWN);
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         assertTrue(moves.contains(m));
@@ -102,7 +93,7 @@ public class SEETest {
     @Test
     public void testKnightTakesDefendedPawnAsWhite() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "k7/8/5n2/3p4/8/2N2B2/8/K7 w - -");
+        b.setPos("k7/8/5n2/3p4/8/2N2B2/8/K7 w - -");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
@@ -117,7 +108,7 @@ public class SEETest {
     @Test
     public void testKnightTakesDefendedPawnAsBlack() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "K7/8/5N2/3P4/8/2n2b2/8/k7 b - -");
+        b.setPos("K7/8/5N2/3P4/8/2n2b2/8/k7 b - -");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
@@ -132,7 +123,7 @@ public class SEETest {
     @Test
     public void testCrazyRooks() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "2K5/8/8/3pRrRr/8/8/8/2k5 w - -");
+        b.setPos("2K5/8/8/3pRrRr/8/8/8/2k5 w - -");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
@@ -147,7 +138,7 @@ public class SEETest {
     @Test
     public void testCrazyRooks2() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "2K5/8/8/3pRrR1/8/8/8/2k5 w - -");
+        b.setPos("2K5/8/8/3pRrR1/8/8/8/2k5 w - -");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
@@ -162,7 +153,7 @@ public class SEETest {
     @Test
     public void testKnightTakesDefendedPawn() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "1K1k4/8/5n2/3p4/8/1BN5/8/8 w - -");
+        b.setPos("1K1k4/8/5n2/3p4/8/1BN5/8/8 w - -");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
@@ -177,7 +168,7 @@ public class SEETest {
     @Test
     public void testBishopTakesDefendedPawn() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "1K1k4/8/5n2/3p4/8/1BN5/8/8 w - -");
+        b.setPos("1K1k4/8/5n2/3p4/8/1BN5/8/8 w - -");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
@@ -192,7 +183,7 @@ public class SEETest {
     @Test
     public void testKnightTakesDefendedPawnWithCrazyBishops() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "1K1k4/8/5n2/3p4/8/2N2B2/6b1/7b w - -");
+        b.setPos("1K1k4/8/5n2/3p4/8/2N2B2/6b1/7b w - -");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
@@ -246,7 +237,7 @@ public class SEETest {
 
     private void testCaseSEE(String fen,String mv,int score) throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, fen);
+        b.setPos(fen);
 
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove(mv, b);

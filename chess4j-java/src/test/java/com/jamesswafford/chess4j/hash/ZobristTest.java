@@ -17,7 +17,6 @@ import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
-import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.io.MoveParser;
 import com.jamesswafford.chess4j.pieces.Bishop;
 import com.jamesswafford.chess4j.pieces.King;
@@ -343,7 +342,7 @@ public class ZobristTest {
     // the idea here is to progress through a series of moves, and for each one set up an equivalent board using
     // FEN notation, and make sure we compute the same zobrist keys.  Also keep track of a set of these
     // keys as we go an make sure they are all unique.
-    public void testGetBoardKey() throws Exception {
+    public void testGetBoardKey() {
         Board b = Board.INSTANCE;
         b.resetBoard();
         Board b2 = b.deepCopy();
@@ -352,103 +351,103 @@ public class ZobristTest {
 
         Move m = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_2), Square.valueOf(File.FILE_E, Rank.RANK_4));
         b.applyMove(m);
-        FenParser.setPos(b2, "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
+        b2.setPos("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
         long key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         keys.add(key);
 
         b.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_C, Rank.RANK_7), Square.valueOf(File.FILE_C, Rank.RANK_5)));
-        FenParser.setPos(b2, "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2");
+        b2.setPos("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2");
         key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
         b.applyMove(new Move(Knight.WHITE_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_1), Square.valueOf(File.FILE_F, Rank.RANK_3)));
-        FenParser.setPos(b2, "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2");
+        b2.setPos("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2");
         key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
         b.applyMove(new Move(Queen.BLACK_QUEEN,Square.valueOf(File.FILE_D, Rank.RANK_8), Square.valueOf(File.FILE_A, Rank.RANK_5)));
-        FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3");
+        b2.setPos("rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3");
         key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
         b.applyMove(new Move(Bishop.WHITE_BISHOP,Square.valueOf(File.FILE_F, Rank.RANK_1), Square.valueOf(File.FILE_E, Rank.RANK_2)));
-        FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPPBPPP/RNBQK2R b KQkq - 3 3");
+        b2.setPos("rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPPBPPP/RNBQK2R b KQkq - 3 3");
         key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
         b.applyMove(new Move(Queen.BLACK_QUEEN,Square.valueOf(File.FILE_A, Rank.RANK_5), Square.valueOf(File.FILE_D, Rank.RANK_2),Bishop.WHITE_BISHOP));
-        FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPqBPPP/RNBQK2R w KQkq - 0 4");
+        b2.setPos("rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPqBPPP/RNBQK2R w KQkq - 0 4");
         key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
         b.applyMove(new Move(Knight.WHITE_KNIGHT,Square.valueOf(File.FILE_B, Rank.RANK_1), Square.valueOf(File.FILE_D, Rank.RANK_2),Queen.BLACK_QUEEN));
-        FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPNBPPP/R1BQK2R b KQkq - 0 4");
+        b2.setPos("rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPNBPPP/R1BQK2R b KQkq - 0 4");
         key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
         b.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_C, Rank.RANK_5), Square.valueOf(File.FILE_C, Rank.RANK_4)));
-        FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQK2R w KQkq - 0 5");
+        b2.setPos("rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQK2R w KQkq - 0 5");
         key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
         b.applyMove(new Move(King.WHITE_KING,Square.valueOf(File.FILE_E, Rank.RANK_1), Square.valueOf(File.FILE_G, Rank.RANK_1),true));
-        FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 b kq - 0 5");
+        b2.setPos("rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 b kq - 0 5");
         key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
         b.applyMove(new Move(King.BLACK_KING,Square.valueOf(File.FILE_E, Rank.RANK_8), Square.valueOf(File.FILE_D, Rank.RANK_8)));
-        FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 w - - 1 6");
+        b2.setPos("rnbk1bnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 w - - 1 6");
         key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
         b.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_B, Rank.RANK_2), Square.valueOf(File.FILE_B, Rank.RANK_4)));
-        FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/1Pp1P3/5N2/P1PNBPPP/R1BQ1RK1 b - b3 0 6");
+        b2.setPos("rnbk1bnr/pp1ppppp/8/8/1Pp1P3/5N2/P1PNBPPP/R1BQ1RK1 b - b3 0 6");
         key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
         b.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_C, Rank.RANK_4), Square.valueOf(File.FILE_B, Rank.RANK_3),Pawn.BLACK_PAWN,true));
-        FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQ1RK1 w - - 0 7");
+        b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQ1RK1 w - - 0 7");
         key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
         b.applyMove(new Move(Rook.WHITE_ROOK,Square.valueOf(File.FILE_F, Rank.RANK_1), Square.valueOf(File.FILE_E, Rank.RANK_1)));
-        FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQR1K1 b - - 1 7");
+        b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQR1K1 b - - 1 7");
         key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
         b.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_B, Rank.RANK_3), Square.valueOf(File.FILE_B, Rank.RANK_2)));
-        FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR1K1 w - - 0 8");
+        b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR1K1 w - - 0 8");
         key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
         b.applyMove(new Move(King.WHITE_KING,Square.valueOf(File.FILE_G, Rank.RANK_1), Square.valueOf(File.FILE_H, Rank.RANK_1)));
-        FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR2K b - - 1 8");
+        b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR2K b - - 1 8");
         key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         assertFalse(keys.contains(key));
@@ -458,7 +457,7 @@ public class ZobristTest {
                 Square.valueOf(File.FILE_A, Rank.RANK_1),
                 Rook.WHITE_ROOK,
                 Knight.BLACK_KNIGHT));
-        FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/4P3/5N2/P1PNBPPP/n1BQR2K w - - 0 9");
+        b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/P1PNBPPP/n1BQR2K w - - 0 9");
         key = Zobrist.getBoardKey(b);
         assertEquals(Zobrist.getBoardKey(b2), key);
         assertFalse(keys.contains(key));

@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.io.FenParser;
 
 import static org.junit.Assert.*;
 
@@ -16,9 +15,9 @@ import static com.jamesswafford.chess4j.board.squares.Rank.*;
 public class AttackDetectorTest {
 
     @Test
-    public void testGetAttackers1() throws Exception {
+    public void testGetAttackers1() {
         Board board = Board.INSTANCE;
-        FenParser.setPos(board, "1k1r3q/1ppn3p/p4b2/4p3/8/P2N2P1/1PP1R1BP/2K1Q3 w - -");
+        board.setPos("1k1r3q/1ppn3p/p4b2/4p3/8/P2N2P1/1PP1R1BP/2K1Q3 w - -");
         long attackers = AttackDetector.getAttackers(board,Square.valueOf(FILE_E, RANK_5), Color.WHITE);
         assertTrue((attackers & Bitboard.squares[Square.valueOf(FILE_D, RANK_3).value()]) != 0);
         assertTrue((attackers & Bitboard.squares[Square.valueOf(FILE_E, RANK_2).value()]) != 0);
@@ -26,9 +25,9 @@ public class AttackDetectorTest {
     }
 
     @Test
-    public void testGetAttackers2() throws Exception {
+    public void testGetAttackers2() {
         Board board = Board.INSTANCE;
-        FenParser.setPos(board, "1k1r3q/1ppn3p/p4b2/4p3/8/P2N2P1/1PP1R1BP/2K1Q3 w - -");
+        board.setPos("1k1r3q/1ppn3p/p4b2/4p3/8/P2N2P1/1PP1R1BP/2K1Q3 w - -");
 
         long attackers = AttackDetector.getAttackers(board, Square.valueOf(FILE_E, RANK_5), Color.BLACK);
 
@@ -38,9 +37,9 @@ public class AttackDetectorTest {
     }
 
     @Test
-    public void testGetAttackers3() throws Exception {
+    public void testGetAttackers3() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/p1k5/1p6/8/3b4/1Q6/8/7K w - -");
+        b.setPos("8/p1k5/1p6/8/3b4/1Q6/8/7K w - -");
 
         long attackers = AttackDetector.getAttackers(b, Square.valueOf(FILE_B, RANK_6), Color.WHITE);
 
@@ -49,9 +48,9 @@ public class AttackDetectorTest {
     }
 
     @Test
-    public void testGetAttackers4() throws Exception {
+    public void testGetAttackers4() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/p1k5/1p6/8/3b4/1Q6/8/7K w - -");
+        b.setPos("8/p1k5/1p6/8/3b4/1Q6/8/7K w - -");
 
         long attackers = AttackDetector.getAttackers(b, Square.valueOf(FILE_B, RANK_6), Color.BLACK);
 

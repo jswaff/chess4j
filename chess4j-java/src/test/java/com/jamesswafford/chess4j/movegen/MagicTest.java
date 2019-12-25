@@ -5,7 +5,6 @@ import com.jamesswafford.chess4j.board.Board;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.io.FenParser;
 
 import static org.junit.Assert.*;
 
@@ -15,9 +14,9 @@ import static com.jamesswafford.chess4j.board.squares.Rank.*;
 public class MagicTest {
 
     @Test
-    public void rookMoves() throws Exception {
+    public void rookMoves() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/1r3k2/8/3bB3/8/8/8/3K4 b - - 0 1");
+        b.setPos("8/1r3k2/8/3bB3/8/8/8/3K4 b - - 0 1");
 
         Square b7 = Square.valueOf(FILE_B, RANK_7);
         long rookMoves = Magic.getRookMoves(b,b7.value(),b.getBlackPieces());
@@ -27,9 +26,9 @@ public class MagicTest {
     }
 
     @Test
-    public void bishopMoves() throws Exception {
+    public void bishopMoves() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/1r3k2/8/3bB3/8/8/8/3K4 b - - 0 1");
+        b.setPos("8/1r3k2/8/3bB3/8/8/8/3K4 b - - 0 1");
 
         Square d5 = Square.valueOf(FILE_D, RANK_5);
         Square f7 = Square.valueOf(FILE_F, RANK_7);

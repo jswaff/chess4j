@@ -17,7 +17,6 @@ import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.hash.TranspositionTableEntryType;
-import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.pieces.Knight;
 import com.jamesswafford.chess4j.pieces.Pawn;
 
@@ -33,7 +32,7 @@ public class SearchTest {
     @Test
     public void testMateIn1() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "4k3/8/3Q4/2B5/8/8/1K6/8 w - -");
+        b.setPos("4k3/8/3Q4/2B5/8/8/1K6/8 w - -");
 
         Search.abortSearch = false;
         SearchStats searchStats = new SearchStats();
@@ -48,7 +47,7 @@ public class SearchTest {
     @Test
     public void testMateIn1b() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "4K3/8/8/3n2q1/8/8/3k4/8 b - -");
+        b.setPos("4K3/8/8/3n2q1/8/8/3k4/8 b - -");
 
         Search.abortSearch = false;
         SearchStats searchStats = new SearchStats();
@@ -63,7 +62,7 @@ public class SearchTest {
     @Test
     public void testMateIn2() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "r1bq2r1/b4pk1/p1pp1p2/1p2pP2/1P2P1PB/3P4/1PPQ2P1/R3K2R w - -");
+        b.setPos("r1bq2r1/b4pk1/p1pp1p2/1p2pP2/1P2P1PB/3P4/1PPQ2P1/R3K2R w - -");
 
         Search.abortSearch = false;
         SearchStats searchStats = new SearchStats();
@@ -80,7 +79,7 @@ public class SearchTest {
         Board b = Board.INSTANCE;
 
         Search.abortSearch = false;
-        FenParser.setPos(b, "r5rk/5p1p/5R2/4B3/8/8/7P/7K w - -");
+        b.setPos("r5rk/5p1p/5R2/4B3/8/8/7P/7K w - -");
         SearchStats searchStats = new SearchStats();
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
@@ -93,7 +92,7 @@ public class SearchTest {
     @Test
     public void testStaleMate() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/6p1/5p2/5k1K/7P/8/8/8 w - -");
+        b.setPos("8/6p1/5p2/5k1K/7P/8/8/8 w - -");
 
         Search.abortSearch = false;
         SearchStats searchStats = new SearchStats();
@@ -200,39 +199,6 @@ public class SearchTest {
     }
 
     @Test
-    public void testDraw50() throws Exception {
-        Board b = Board.INSTANCE;
-        FenParser.setPos(b, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/1NBQKBNR w Kkq - 0 1");
-        TTHolder.clearAllTables();
-
-        Search.startTime = System.currentTimeMillis();
-        Search.stopTime = Search.startTime + 10000;
-        int score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
-                b, 2, new SearchStats(),false);
-        assertTrue(score != 0);
-
-        // up to 99 (half) moves ... the extra comes from the root search
-        b.setFiftyCounter(98);
-        b.setMoveCounter(98);
-        TTHolder.clearAllTables();
-        Search.startTime = System.currentTimeMillis();
-        Search.stopTime = Search.startTime + 10000;
-        score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
-                b, 2, new SearchStats(),false);
-        assertTrue(score != 0);
-
-        // trigger 50 move rule
-        b.setFiftyCounter(100);
-        b.setMoveCounter(100);
-        TTHolder.clearAllTables();
-        Search.startTime = System.currentTimeMillis();
-        Search.stopTime = Search.startTime + 10000;
-        score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
-                b, 2, new SearchStats(),false);
-        assertEquals(0, score);
-    }
-
-    @Test
     public void testQSearchDoesNotExpandNodesFromInitialPos() {
         Board b = Board.INSTANCE;
         b.resetBoard();
@@ -280,7 +246,7 @@ public class SearchTest {
     @Test
     public void testQSearchDoesExpandJustCaptures() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "7k/8/8/3b4/8/8/6P1/K7 b - -");
+        b.setPos("7k/8/8/3b4/8/8/6P1/K7 b - -");
 
         List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
         assertEquals(1, moves.size());
@@ -300,7 +266,7 @@ public class SearchTest {
     @Test
     public void testQSearchDoesExpandPromotions() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b,"8/P6k/8/8/8/8/7K/8 w - -");
+        b.setPos("8/P6k/8/8/8/8/7K/8 w - -");
 
         List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
         assertEquals(4, moves.size()); // just promotions
@@ -322,7 +288,7 @@ public class SearchTest {
         Board b = Board.INSTANCE;
 
         // this pos would be very good for white if searched
-        FenParser.setPos(b,"8/P6k/8/8/8/8/7K/8 w - -");
+        b.setPos("8/P6k/8/8/8/8/7K/8 w - -");
 
         List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
         assertEquals(4, moves.size()); // just promotions

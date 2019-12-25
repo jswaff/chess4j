@@ -12,7 +12,6 @@ import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.Zobrist;
-import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.io.MoveParser;
 
 import static org.junit.Assert.*;
@@ -33,10 +32,7 @@ public class BoardTest {
     public void testReset() {
         Board b = Board.INSTANCE;
         b.resetBoard();
-        testResetBoard(b);
-    }
 
-    private void testResetBoard(Board b) {
         assertEquals(WHITE_ROOK, b.getPiece(A1));
         assertEquals(WHITE_KNIGHT, b.getPiece(B1));
         assertEquals(WHITE_BISHOP, b.getPiece(C1));
@@ -87,105 +83,156 @@ public class BoardTest {
     }
 
     @Test
-    public void testKingSquares() throws Exception {
+    public void testSetPos_moveCounters() {
+
+        Board b = Board.INSTANCE;
+        String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
+        b.setPos(fen);
+
+        assertEquals(WHITE_KNIGHT,  b.getPiece(F3));
+        assertTrue(b.hasCastlingRight(BLACK_KINGSIDE));
+        assertTrue(b.hasCastlingRight(BLACK_QUEENSIDE));
+        assertTrue(b.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(b.hasCastlingRight(WHITE_QUEENSIDE));
+        assertEquals(3, b.getMoveCounter());
+        assertEquals(1, b.getFiftyCounter());
+        assertNull(b.getEPSquare());
+    }
+
+    @Test
+    public void testSetPos_castling() {
+
+        Board b = Board.INSTANCE;
+        String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQ -";
+        b.setPos(fen);
+
+        assertEquals(WHITE_KNIGHT, b.getPiece(F3));
+        assertFalse(b.hasCastlingRight(BLACK_KINGSIDE));
+        assertFalse(b.hasCastlingRight(BLACK_QUEENSIDE));
+        assertTrue(b.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(b.hasCastlingRight(WHITE_QUEENSIDE));
+        assertEquals(1, b.getMoveCounter());
+        assertEquals(0, b.getFiftyCounter());
+        assertNull(b.getEPSquare());
+    }
+
+    @Test
+    public void testSetPos_ep() {
+
+        Board b = Board.INSTANCE;
+        String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2";
+        b.setPos(fen);
+
+        assertEquals(BLACK_PAWN, b.getPiece(C5));
+        assertTrue(b.hasCastlingRight(BLACK_KINGSIDE));
+        assertTrue(b.hasCastlingRight(BLACK_QUEENSIDE));
+        assertTrue(b.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(b.hasCastlingRight(WHITE_QUEENSIDE));
+        assertEquals(2, b.getMoveCounter());
+        assertEquals(0, b.getFiftyCounter());
+        assertEquals(C6, b.getEPSquare());
+    }
+
+    @Test
+    public void testKingSquares() {
         Board b = Board.INSTANCE;
         b.resetBoard();
         assertEquals(E1, b.getKingSquare(Color.WHITE));
         assertEquals(E8, b.getKingSquare(Color.BLACK));
 
-        FenParser.setPos(b, "rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 b kq - 0 5");
+        b.setPos("rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 b kq - 0 5");
         assertEquals(G1, b.getKingSquare(Color.WHITE));
         assertEquals(E8, b.getKingSquare(Color.BLACK));
 
-        b.applyMove(new Move(BLACK_KING,E8,D8));
+        b.applyMove(new Move(BLACK_KING, E8, D8));
         assertEquals(G1, b.getKingSquare(Color.WHITE));
         assertEquals(D8, b.getKingSquare(Color.BLACK));
     }
 
     @Test
-    public void testApplyMoveSequence1() throws Exception {
+    public void testApplyMoveSequence1() {
         Board b = Board.INSTANCE;
         b.resetBoard();
         Board b2 = b.deepCopy();
 
         Move m = new Move(WHITE_PAWN,E2, E4);
         b.applyMove(m);
-        FenParser.setPos(b2, "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
+        b2.setPos("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
         b.applyMove(new Move(BLACK_PAWN,C7, C5));
-        FenParser.setPos(b2, "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2");
+        b2.setPos("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
         b.applyMove(new Move(WHITE_KNIGHT,G1, F3));
-        FenParser.setPos(b2, "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2");
+        b2.setPos("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
         b.applyMove(new Move(BLACK_QUEEN,D8, A5));
-        FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3");
+        b2.setPos("rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
         b.applyMove(new Move(WHITE_BISHOP, F1, E2));
-        FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPPBPPP/RNBQK2R b KQkq - 3 3");
+        b2.setPos("rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPPBPPP/RNBQK2R b KQkq - 3 3");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
         b.applyMove(new Move(BLACK_QUEEN, A5, D2, WHITE_BISHOP));
-        FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPqBPPP/RNBQK2R w KQkq - 0 4");
+        b2.setPos("rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPqBPPP/RNBQK2R w KQkq - 0 4");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
         b.applyMove(new Move(WHITE_KNIGHT, B1, D2,BLACK_QUEEN));
-        FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPNBPPP/R1BQK2R b KQkq - 0 4");
+        b2.setPos("rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPNBPPP/R1BQK2R b KQkq - 0 4");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
         b.applyMove(new Move(BLACK_PAWN, C5, C4));
-        FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQK2R w KQkq - 0 5");
+        b2.setPos("rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQK2R w KQkq - 0 5");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
         b.applyMove(new Move(WHITE_KING, E1, G1,true));
-        FenParser.setPos(b2, "rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 b kq - 0 5");
+        b2.setPos("rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 b kq - 0 5");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
         b.applyMove(new Move(BLACK_KING, E8, D8));
-        FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 w - - 1 6");
+        b2.setPos("rnbk1bnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 w - - 1 6");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
         b.applyMove(new Move(WHITE_PAWN, B2, B4));
-        FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/1Pp1P3/5N2/P1PNBPPP/R1BQ1RK1 b - b3 0 6");
+        b2.setPos("rnbk1bnr/pp1ppppp/8/8/1Pp1P3/5N2/P1PNBPPP/R1BQ1RK1 b - b3 0 6");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
         b.applyMove(new Move(BLACK_PAWN, C4, B3,WHITE_PAWN,true));
-        FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQ1RK1 w - - 0 7");
+        b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQ1RK1 w - - 0 7");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
         b.applyMove(new Move(WHITE_ROOK, F1, E1));
-        FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQR1K1 b - - 1 7");
+        b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQR1K1 b - - 1 7");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
         b.applyMove(new Move(BLACK_PAWN, B3, B2));
-        FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR1K1 w - - 0 8");
+        b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR1K1 w - - 0 8");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
         b.applyMove(new Move(WHITE_KING, G1, H1));
-        FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR2K b - - 1 8");
+        b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR2K b - - 1 8");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
         b.applyMove(new Move(BLACK_PAWN, B2, A1, WHITE_ROOK, BLACK_KNIGHT));
-        FenParser.setPos(b2, "rnbk1bnr/pp1ppppp/8/8/4P3/5N2/P1PNBPPP/n1BQR2K w - - 0 9");
+        b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/P1PNBPPP/n1BQR2K w - - 0 9");
         assertTrue(b.equalExceptMoveHistory(b2,true));
         assertTrue(b2.equalExceptMoveHistory(b,true));
 
@@ -243,35 +290,33 @@ public class BoardTest {
     }
 
     @Test
-    public void testFlipVertical() throws Exception {
+    public void testFlipVertical() {
         Board b = Board.INSTANCE;
+
         b.resetBoard();
         Board b2 = b.deepCopy();
-
         b.flipVertical();
         b.flipVertical();
         assertEquals(b2, b);
 
-        FenParser.setPos(b, "7r/R6p/2K4P/5k1P/2p4n/5p2/8/8 w - - 0 1");
-        FenParser.setPos(b2, "8/8/5P2/2P4N/5K1p/2k4p/r6P/7R b - - 0 1");
+        b.setPos("7r/R6p/2K4P/5k1P/2p4n/5p2/8/8 w - - 0 1");
+        b2 = b.deepCopy();
         b.flipVertical();
-        // move counter doesn't need to be part of this test
-        b.setMoveCounter(b2.getMoveCounter());
+        b.flipVertical();
         assertEquals(b2, b);
 
         // test EP
-        FenParser.setPos(b, "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
-        FenParser.setPos(b2, "rnbqkbnr/pppp1ppp/8/4p3/8/8/PPPPPPPP/RNBQKBNR w KQkq e6 0 1");
-
+        b.setPos("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
+        b2 = b.deepCopy();
         b.flipVertical();
-        b.setMoveCounter(b2.getMoveCounter());
+        b.flipVertical();
         assertEquals(b2, b);
 
         // test castling
-        FenParser.setPos(b, "4k2r/8/8/8/8/8/8/R3K3 b Qk - 0 1");
-        FenParser.setPos(b2, "r3k3/8/8/8/8/8/8/4K2R w qK - 0 1");
+        b.setPos("4k2r/8/8/8/8/8/8/R3K3 b Qk - 0 1");
+        b2 = b.deepCopy();
         b.flipVertical();
-        b.setMoveCounter(b2.getMoveCounter());
+        b.flipVertical();
         assertEquals(b2, b);
     }
 
@@ -432,9 +477,9 @@ public class BoardTest {
     }
 
     @Test
-    public void testEqualityBeforeAndAfterCastle() throws ParseException {
+    public void testEqualityBeforeAndAfterCastle() {
         Board b1 = Board.INSTANCE;
-        FenParser.setPos(b1, "4k2r/8/8/8/8/8/8/R3K3 b Qk - 0 1");
+        b1.setPos("4k2r/8/8/8/8/8/8/R3K3 b Qk - 0 1");
         Board b2 = b1.deepCopy();
 
         assertEquals(b1, b2);
@@ -453,9 +498,9 @@ public class BoardTest {
     }
 
     @Test
-    public void testEqualityBeforeAndAfterCapture() throws ParseException {
+    public void testEqualityBeforeAndAfterCapture() {
         Board b1 = Board.INSTANCE;
-        FenParser.setPos(b1, "rnbqkbnr/pp1ppppp/8/2p5/3P4/8/PPP1PPPP/RNBQKBNR w KQkq c6 0 2");
+        b1.setPos("rnbqkbnr/pp1ppppp/8/2p5/3P4/8/PPP1PPPP/RNBQKBNR w KQkq c6 0 2");
         Board b2 = b1.deepCopy();
 
         assertEquals(b1, b2);
@@ -474,9 +519,9 @@ public class BoardTest {
     }
 
     @Test
-    public void testEqualityBeforeAndAfterEPCapture() throws ParseException {
+    public void testEqualityBeforeAndAfterEPCapture() {
         Board b1 = Board.INSTANCE;
-        FenParser.setPos(b1, "rnbqkbnr/pp1ppppp/8/2pP4/8/8/PPP1PPPP/RNBQKBNR w KQkq c6 0 2");
+        b1.setPos("rnbqkbnr/pp1ppppp/8/2pP4/8/8/PPP1PPPP/RNBQKBNR w KQkq c6 0 2");
         Board b2 = b1.deepCopy();
 
         assertEquals(b1, b2);
@@ -496,7 +541,7 @@ public class BoardTest {
     @Test
     public void testEqualityBeforeAndAfterPromotion() throws ParseException {
         Board b1 = Board.INSTANCE;
-        FenParser.setPos(b1, "8/PK6/8/8/8/8/k7/8 w - - 0 2");
+        b1.setPos("8/PK6/8/8/8/8/k7/8 w - - 0 2");
         Board b2 = b1.deepCopy();
 
         assertEquals(b1, b2);
@@ -517,7 +562,7 @@ public class BoardTest {
     @Test
     public void testEqualityBeforeAndAfterCapturingPromotion() throws ParseException {
         Board b1 = Board.INSTANCE;
-        FenParser.setPos(b1, "1n6/PK6/8/8/8/8/k7/8 w - - 0 2");
+        b1.setPos("1n6/PK6/8/8/8/8/k7/8 w - - 0 2");
         Board b2 = b1.deepCopy();
 
         assertEquals(b1, b2);
@@ -705,7 +750,7 @@ public class BoardTest {
     @Test
     public void testPawnKeyPromotion() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "7k/P7/K7/8/8/8/8/8 w - - 0 1");
+        b.setPos("7k/P7/K7/8/8/8/8/8 w - - 0 1");
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("a8=Q", b);
         List<Move> legalMoves = MoveGen.genLegalMoves(b);
@@ -727,10 +772,9 @@ public class BoardTest {
     }
 
     @Test
-    public void testNumPawns() throws Exception {
+    public void testNumPawns() {
         Board b = Board.INSTANCE;
-
-        FenParser.setPos(b, "7k/pp6/8/8/8/8/7P/7K w - - ");
+        b.setPos("7k/pp6/8/8/8/8/7P/7K w - - ");
 
         assertEquals(1, b.getNumPieces(WHITE_PAWN));
 
@@ -753,10 +797,9 @@ public class BoardTest {
     }
 
     @Test
-    public void testNumNonPawns() throws Exception {
+    public void testNumNonPawns() {
         Board b = Board.INSTANCE;
-
-        FenParser.setPos(b, "7k/br6/8/8/8/8/Q7/7K w - -");
+        b.setPos("7k/br6/8/8/8/8/Q7/7K w - -");
 
         assertEquals(1, b.getNumPieces(WHITE_QUEEN));
         assertEquals(0, b.getNumPieces(BLACK_QUEEN));
@@ -771,8 +814,7 @@ public class BoardTest {
     @Test
     public void testPieceCountsPromotion() throws Exception {
         Board b = Board.INSTANCE;
-
-        FenParser.setPos(b, "7k/P7/8/8/8/8/8/7K w - -");
+        b.setPos("7k/P7/8/8/8/8/8/7K w - -");
 
         assertEquals(1, b.getNumPieces(WHITE_PAWN));
         assertEquals(0, b.getNumPieces(WHITE_QUEEN));
@@ -823,7 +865,7 @@ public class BoardTest {
 
     private void testCasePlayerInCheck(String fen,String mv,boolean inCheck) throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, fen);
+        b.setPos(fen);
 
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove(mv, Board.INSTANCE);

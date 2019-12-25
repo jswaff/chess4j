@@ -3,7 +3,6 @@ package com.jamesswafford.chess4j;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.utils.Perft;
 
 import static org.junit.Assert.*;
@@ -14,32 +13,32 @@ public class PerfTest {
     // these positions came from the Chess Programming Wiki:
     // https://chessprogramming.wikispaces.com/Perft+Results
     @Test
-    public void perftTest1() throws Exception {
+    public void perftTest1() {
         testCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",4,197281);
     }
 
     @Test
-    public void perftTest2() throws Exception {
+    public void perftTest2() {
         testCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",3,97862);
     }
 
     @Test
-    public void perftTest3() throws Exception {
+    public void perftTest3() {
         testCase("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1",6,11030083L);
     }
 
     @Test
-    public void perftTest4() throws Exception {
+    public void perftTest4() {
         testCase("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",5,15833292L);
     }
 
     @Test
-    public void perftTest5() throws Exception {
+    public void perftTest5() {
         testCase("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",4,2103487);
     }
 
     @Test
-    public void perftTest6() throws Exception {
+    public void perftTest6() {
         testCase("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",4,3894594L);
     }
 
@@ -130,8 +129,8 @@ public class PerfTest {
         testCase("8/5k2/8/5N2/5Q2/2K5/8/8 w - - 0 1", 4, 23527);
     }
 
-    private void testCase(String fen, int depth, long nodes) throws Exception {
-        FenParser.setPos(Board.INSTANCE, fen);
+    private void testCase(String fen, int depth, long nodes) {
+        Board.INSTANCE.setPos(fen);
         //DrawBoard.drawBoard(Board.INSTANCE);
         long n = Perft.perft(Board.INSTANCE, depth);
         assertEquals(nodes, n);

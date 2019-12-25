@@ -11,7 +11,6 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.io.EPDParser;
-import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.io.MoveParser;
 
 import static org.junit.Assert.*;
@@ -19,7 +18,7 @@ import static org.junit.Assert.*;
 public class MoveOrdererTest {
 
     @Test
-    public void testSomeMove() throws Exception {
+    public void testSomeMove() {
         Board b = Board.INSTANCE;
         EPDParser.setPos(b, "b2b1r1k/3R1ppp/4qP2/4p1PQ/4P3/5B2/4N1K1/8 w - - bm g6; id \"WAC.300\";");
 
@@ -29,7 +28,7 @@ public class MoveOrdererTest {
     }
 
     @Test
-    public void testPV() throws Exception {
+    public void testPV() {
         Board b = Board.INSTANCE;
         EPDParser.setPos(b, "b2b1r1k/3R1ppp/4qP2/4p1PQ/4P3/5B2/4N1K1/8 w - - bm g6; id \"WAC.300\";");
         List<Move> moves = MoveGen.genLegalMoves(b);
@@ -55,7 +54,7 @@ public class MoveOrdererTest {
 
     @Test
     // if no PV node but hash
-    public void testHash() throws Exception {
+    public void testHash() {
         Board b = Board.INSTANCE;
         EPDParser.setPos(b, "1R6/1brk2p1/4p2p/p1P1Pp2/P7/6P1/1P4P1/2R3K1 w - - bm Rxb7; id \"WAC.015\";");
         List<Move> moves = MoveGen.genLegalMoves(b);
@@ -69,7 +68,7 @@ public class MoveOrdererTest {
     }
 
     @Test
-    public void testPVThenHash() throws Exception {
+    public void testPVThenHash() {
         Board b = Board.INSTANCE;
         EPDParser.setPos(b, "6k1/p4p1p/1p3np1/2q5/4p3/4P1N1/PP3PPP/3Q2K1 w - - bm Qd8+; id \"WAC.032\";");
         List<Move> moves = MoveGen.genLegalMoves(b);
@@ -95,7 +94,7 @@ public class MoveOrdererTest {
     }
 
     @Test
-    public void testPVAndHashSameMove() throws Exception {
+    public void testPVAndHashSameMove() {
         Board b = Board.INSTANCE;
         b.resetBoard();
 
@@ -149,7 +148,7 @@ public class MoveOrdererTest {
     }
 
     @Test
-    public void testInitialPosition() throws Exception {
+    public void testInitialPosition() {
         Board b = Board.INSTANCE;
         b.resetBoard();
         List<Move> moves = MoveGen.genLegalMoves(b);
@@ -180,7 +179,7 @@ public class MoveOrdererTest {
     @Test
     public void testPVThenHashThenCaptures() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "6R1/kp6/8/1KpP4/8/8/8/6B1 w - c6");
+        b.setPos("6R1/kp6/8/1KpP4/8/8/8/6B1 w - c6");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
@@ -218,8 +217,7 @@ public class MoveOrdererTest {
     @Test
     public void testWinningCapsBeforeNonCaps() throws Exception {
         Board b = Board.INSTANCE;
-
-        FenParser.setPos(b, "5b2/p4PPk/1p6/8/K7/1R6/1p6/8 w - -");
+        b.setPos("5b2/p4PPk/1p6/8/K7/1R6/1p6/8 w - -");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
 
@@ -265,7 +263,7 @@ public class MoveOrdererTest {
 
         assertTrue(m1.equals(b3b2) || m1.equals(b3b6));
         assertTrue(m2.equals(b3b2) || m2.equals(b3b6));
-        assertFalse(m1.equals(m2));
+        assertNotEquals(m1, m2);
     }
 
     @Test
@@ -273,7 +271,7 @@ public class MoveOrdererTest {
         Board b = Board.INSTANCE;
 
         // this position has
-        FenParser.setPos(b, "5b2/p4PPk/1p6/8/K7/1R6/1p6/8 w - -");
+        b.setPos("5b2/p4PPk/1p6/8/K7/1R6/1p6/8 w - -");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         assertEquals(20, moves.size());
@@ -296,7 +294,7 @@ public class MoveOrdererTest {
     @Test
     public void testCapsInOrderWhite() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "7k/8/4p3/R2p2Q1/4P3/1B6/8/7K w - - ");
+        b.setPos("7k/8/4p3/R2p2Q1/4P3/1B6/8/7K w - - ");
 
         MoveOrderer mo = new MoveOrderer(b,null,Optional.empty(),null,null);
         MoveParser mp = new MoveParser();
@@ -310,7 +308,7 @@ public class MoveOrdererTest {
     @Test
     public void testCapsInOrderBlack() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "7k/8/4p3/r2P2q1/4P3/1b6/8/7K b - - ");
+        b.setPos("7k/8/4p3/r2P2q1/4P3/1b6/8/7K b - - ");
 
         MoveOrderer mo = new MoveOrderer(b,null,Optional.empty(),null,null);
         MoveParser mp = new MoveParser();
@@ -324,7 +322,7 @@ public class MoveOrdererTest {
     @Test
     public void testEPOrderedAsWinningCapture() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/3p4/8/4P3/8/8/K6k/8 b - -");
+        b.setPos("8/3p4/8/4P3/8/8/K6k/8 b - -");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();

@@ -7,6 +7,7 @@ import java.util.Map;
 import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.movegen.Magic;
 import com.jamesswafford.chess4j.board.squares.East;
 import com.jamesswafford.chess4j.board.squares.File;
@@ -15,7 +16,6 @@ import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
-import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.pieces.Bishop;
 import com.jamesswafford.chess4j.pieces.King;
 import com.jamesswafford.chess4j.pieces.Knight;
@@ -190,7 +190,7 @@ public final class Eval {
 
     private static boolean evalsAreEqual(int javaScore, Board board, boolean materialOnly) {
         if (Initializer.useNative()) {
-            String fen = FenParser.getFen(board, false);
+            String fen = FenBuilder.createFen(board, false);
             try {
                 int nativeSccore = evalNative(fen, materialOnly);
                 if (javaScore != nativeSccore) {

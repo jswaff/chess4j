@@ -31,7 +31,7 @@ public class MoveParserTest {
         /// should not have changed state of board
         assertEquals(board, b);
         board.applyMove(mv);
-        FenParser.setPos(b, "rnbqkbnr/pppppppp/8/8/8/2N5/PPPPPPPP/R1BQKBNR b KQkq - 0 1");
+        b.setPos("rnbqkbnr/pppppppp/8/8/8/2N5/PPPPPPPP/R1BQKBNR b KQkq - 0 1");
         assertTrue(board.equalExceptMoveHistory(b, false));
     }
 
@@ -43,7 +43,7 @@ public class MoveParserTest {
 
     @Test
     public void moveParserTest3() throws ParseException, IllegalMoveException {
-        FenParser.setPos(board, "5k2/8/8/8/8/8/8/4K2R w K - 0 1");
+        board.setPos("5k2/8/8/8/8/8/8/4K2R w K - 0 1");
         Move m = mp.parseMove("O-O",board);
         Move m2 = new Move(King.WHITE_KING,Square.valueOf(File.FILE_E, Rank.RANK_1),Square.valueOf(File.FILE_G, Rank.RANK_1),true);
         assertEquals(m2, m);
@@ -51,7 +51,7 @@ public class MoveParserTest {
 
     @Test
     public void moveParserTest4() throws ParseException, IllegalMoveException {
-        FenParser.setPos(board, "5k2/1P6/1K6/8/8/8/8/8 w - -");
+        board.setPos("5k2/1P6/1K6/8/8/8/8/8 w - -");
         Move m = mp.parseMove("b7b8n",board);
         Move m2 = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_B, Rank.RANK_7),Square.valueOf(File.FILE_B, Rank.RANK_8),null,Knight.WHITE_KNIGHT);
         assertEquals(m2, m);
@@ -59,7 +59,7 @@ public class MoveParserTest {
 
     @Test
     public void moveParserTest5() throws ParseException, IllegalMoveException {
-        FenParser.setPos(board, "8/8/8/8/8/8/3pk3/1KR5 b - -");
+        board.setPos("8/8/8/8/8/8/3pk3/1KR5 b - -");
         Move m = mp.parseMove("d2xc1q",board);
         Move m2 = new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_D, Rank.RANK_2),
                 Square.valueOf(File.FILE_C, Rank.RANK_1),Rook.WHITE_ROOK,Queen.BLACK_QUEEN);

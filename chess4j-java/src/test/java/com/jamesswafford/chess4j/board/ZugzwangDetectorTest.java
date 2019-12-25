@@ -2,8 +2,6 @@ package com.jamesswafford.chess4j.board;
 
 import org.junit.Test;
 
-import com.jamesswafford.chess4j.io.FenParser;
-
 import static org.junit.Assert.*;
 
 import static com.jamesswafford.chess4j.board.ZugzwangDetector.*;
@@ -19,33 +17,33 @@ public class ZugzwangDetectorTest {
     }
 
     @Test
-    public void justKings() throws Exception {
+    public void justKings() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "7k/8/8/8/8/8/8/7K w - - ");
+        b.setPos("7k/8/8/8/8/8/8/7K w - - ");
 
         assertTrue(isZugzwang(b));
     }
 
     @Test
-    public void singleWhiteBishop() throws Exception {
+    public void singleWhiteBishop() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "7k/8/8/B7/8/8/8/7K b - - ");
+        b.setPos("7k/8/8/B7/8/8/8/7K b - - ");
 
         assertTrue(isZugzwang(b));
     }
 
     @Test
-    public void whitePawnBlackKnight() throws Exception {
+    public void whitePawnBlackKnight() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "7k/8/8/n7/P7/8/8/7K b - - ");
+        b.setPos("7k/8/8/n7/P7/8/8/7K b - - ");
 
         assertTrue(isZugzwang(b));
     }
 
     @Test
-    public void whiteRookBlackKnight() throws Exception {
+    public void whiteRookBlackKnight() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "7k/8/8/n7/R7/8/8/7K b - - ");
+        b.setPos("7k/8/8/n7/R7/8/8/7K b - - ");
 
         assertFalse(isZugzwang(b));
     }

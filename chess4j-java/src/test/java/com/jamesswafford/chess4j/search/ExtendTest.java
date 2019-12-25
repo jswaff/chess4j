@@ -6,7 +6,6 @@ import org.junit.Test;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.movegen.MoveGen;
-import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.io.MoveParser;
 
 import static org.junit.Assert.*;
@@ -29,7 +28,7 @@ public class ExtendTest {
     @Test
     public void testExtendPromotion() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "k7/b1P5/KP6/6q1/8/8/8/4n3 w - -");
+        b.setPos("k7/b1P5/KP6/6q1/8/8/8/4n3 w - -");
 
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("c8=q", b);
@@ -42,7 +41,7 @@ public class ExtendTest {
     @Test
     public void testWhitePushTo7th() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "k7/b1P5/KP6/6q1/8/8/8/4n3 w - -");
+        b.setPos("k7/b1P5/KP6/6q1/8/8/8/4n3 w - -");
 
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("b7", b);
@@ -56,7 +55,7 @@ public class ExtendTest {
     @Test
     public void testPassedPawn4() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/5ppp/8/5PPP/8/6k1/8/6K1 b - -");
+        b.setPos("8/5ppp/8/5PPP/8/6k1/8/6K1 b - -");
 
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("g6", b);
@@ -69,7 +68,7 @@ public class ExtendTest {
     @Test
     public void testPassedPawn5() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/8/1PP2PbP/3r4/8/1Q5p/p5N1/k3K3 b - -");
+        b.setPos("8/8/1PP2PbP/3r4/8/1Q5p/p5N1/k3K3 b - -");
 
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("Rd4", b);
@@ -83,7 +82,7 @@ public class ExtendTest {
     @Test
     public void testBlackPushTo2nd() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/8/1PP2PbP/3r4/8/1Q5p/p5N1/k3K3 b - -");
+        b.setPos("8/8/1PP2PbP/3r4/8/1Q5p/p5N1/k3K3 b - -");
 
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("h2", b);
@@ -97,7 +96,7 @@ public class ExtendTest {
     public void testPassedPawn7() throws Exception {
         Board b = Board.INSTANCE;
         // Fischer-Larsen 71
-        FenParser.setPos(b, "8/4kp2/6p1/7p/P7/2K3P1/7P/8 w - -");
+        b.setPos("8/4kp2/6p1/7p/P7/2K3P1/7P/8 w - -");
 
         MoveParser mp = new MoveParser();
         Move a5 = mp.parseMove("a5", b);
@@ -111,7 +110,7 @@ public class ExtendTest {
     public void testPassedPawn8() throws Exception {
         Board b = Board.INSTANCE;
         // Fischer-Larsen 71
-        FenParser.setPos(b, "8/4kp2/6p1/7p/P7/2K3P1/7P/8 b - -");
+        b.setPos("8/4kp2/6p1/7p/P7/2K3P1/7P/8 b - -");
 
         MoveParser mp = new MoveParser();
         Move f6 = mp.parseMove("f6", b);
@@ -124,7 +123,8 @@ public class ExtendTest {
     @Test
     public void testPassedPawn9() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/p3q1kp/1p2Pnp1/3pQ3/2pP4/1nP3N1/1B4PP/6K1 b - -");
+        b.setPos("8/p3q1kp/1p2Pnp1/3pQ3/2pP4/1nP3N1/1B4PP/6K1 b - -");
+
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("a6", b);
         assertTrue(MoveGen.genLegalMoves(b).contains(m));
@@ -136,7 +136,8 @@ public class ExtendTest {
     @Test
     public void testPassedPawn10() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/p3q1kp/1p2Pnp1/3pQ3/2pP4/1nP3N1/1B4PP/6K1 b - -");
+        b.setPos("8/p3q1kp/1p2Pnp1/3pQ3/2pP4/1nP3N1/1B4PP/6K1 b - -");
+
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("b5", b);
         assertTrue(MoveGen.genLegalMoves(b).contains(m));
@@ -148,7 +149,7 @@ public class ExtendTest {
     @Test
     public void testNewlyCreatedPassedPawn() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "7k/8/6p1/4p3/5P2/8/8/7K w - -");
+        b.setPos("7k/8/6p1/4p3/5P2/8/8/7K w - -");
 
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("fxe5", b);
@@ -169,9 +170,9 @@ public class ExtendTest {
     @Test
     public void testRecapture() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "7k/8/8/3r4/3R4/3r4/8/6K1 w - -");
-        MoveParser mp = new MoveParser();
+        b.setPos("7k/8/8/3r4/3R4/3r4/8/6K1 w - -");
 
+        MoveParser mp = new MoveParser();
         Move m1 = mp.parseMove("Rxd5", b);
         assertTrue(MoveGen.genLegalMoves(b).contains(m1));
         b.applyMove(m1);
@@ -187,9 +188,9 @@ public class ExtendTest {
     @Test
     public void testRecapture2() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "7k/8/8/3r4/3R4/3q4/8/6K1 w - -");
-        MoveParser mp = new MoveParser();
+        b.setPos("7k/8/8/3r4/3R4/3q4/8/6K1 w - -");
 
+        MoveParser mp = new MoveParser();
         Move m1 = mp.parseMove("Rxd5", b);
         assertTrue(MoveGen.genLegalMoves(b).contains(m1));
         b.applyMove(m1);
@@ -205,7 +206,8 @@ public class ExtendTest {
     @Test
     public void testRecapture3() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "7k/8/8/3b4/3R4/3q4/8/6K1 w - -");
+        b.setPos("7k/8/8/3b4/3R4/3q4/8/6K1 w - -");
+
         MoveParser mp = new MoveParser();
 
         Move m1 = mp.parseMove("Rxd5", b);

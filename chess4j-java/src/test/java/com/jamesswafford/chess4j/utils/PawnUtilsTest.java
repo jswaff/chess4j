@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.io.FenParser;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Piece;
 
@@ -34,9 +33,9 @@ public class PawnUtilsTest {
     }
 
     @Test
-    public void testPassedPawnWikiPos() throws Exception {
+    public void testPassedPawnWikiPos() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "7k/8/7p/1P2Pp1P/2Pp1PP1/8/8/7K w - -");
+        b.setPos("7k/8/7p/1P2Pp1P/2Pp1PP1/8/8/7K w - -");
 
         assertTrue(isPassedPawn(b,Square.valueOf(FILE_B,RANK_5),true));
         assertTrue(isPassedPawn(b,Square.valueOf(FILE_C,RANK_4),true));
@@ -51,9 +50,9 @@ public class PawnUtilsTest {
     }
 
     @Test
-    public void testPassedPawnWikiPos2() throws Exception {
+    public void testPassedPawnWikiPos2() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/5ppp/8/5PPP/8/6k1/8/6K1 w - -");
+        b.setPos("8/5ppp/8/5PPP/8/6k1/8/6K1 w - -");
 
         assertFalse(isPassedPawn(b,Square.valueOf(FILE_F,RANK_7),false));
         assertFalse(isPassedPawn(b,Square.valueOf(FILE_G,RANK_7),false));
@@ -65,9 +64,9 @@ public class PawnUtilsTest {
     }
 
     @Test
-    public void tesPassedPawnWikiPos3() throws Exception {
+    public void tesPassedPawnWikiPos3() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/8/1PP2PbP/3r4/8/1Q5p/p5N1/k3K3 b - -");
+        b.setPos("8/8/1PP2PbP/3r4/8/1Q5p/p5N1/k3K3 b - -");
 
         assertTrue(isPassedPawn(b,Square.valueOf(FILE_B,RANK_6),true));
         assertTrue(isPassedPawn(b,Square.valueOf(FILE_C,RANK_6),true));
@@ -78,18 +77,18 @@ public class PawnUtilsTest {
     }
 
     @Test
-    public void testPassedPawnWikiPos4() throws Exception {
+    public void testPassedPawnWikiPos4() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "k7/b1P5/KP6/6q1/8/8/8/4n3 b - -");
+        b.setPos("k7/b1P5/KP6/6q1/8/8/8/4n3 b - -");
 
         assertTrue(isPassedPawn(b,Square.valueOf(FILE_B,RANK_6),true));
         assertTrue(isPassedPawn(b,Square.valueOf(FILE_C,RANK_7),true));
     }
 
     @Test
-    public void testLevinfishSmyslov57() throws Exception {
+    public void testLevinfishSmyslov57() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "R7/6k1/P5p1/5p1p/5P1P/r5P1/5K2/8 w - -");
+        b.setPos("R7/6k1/P5p1/5p1p/5P1P/r5P1/5K2/8 w - -");
 
         assertTrue(isPassedPawn(b,Square.valueOf(FILE_A,RANK_6),true));
         assertFalse(isPassedPawn(b,Square.valueOf(FILE_G,RANK_6),false));
@@ -101,9 +100,9 @@ public class PawnUtilsTest {
     }
 
     @Test
-    public void testFischerLarsen71() throws Exception {
+    public void testFischerLarsen71() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/4kp2/6p1/7p/P7/2K3P1/7P/8 b - -");
+        b.setPos("8/4kp2/6p1/7p/P7/2K3P1/7P/8 b - -");
 
         assertFalse(isPassedPawn(b,Square.valueOf(FILE_F,RANK_7),false));
         assertFalse(isPassedPawn(b,Square.valueOf(FILE_G,RANK_6),false));
@@ -115,9 +114,9 @@ public class PawnUtilsTest {
     }
 
     @Test
-    public void testBotvinnikCapablanca38() throws Exception {
+    public void testBotvinnikCapablanca38() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "8/p3q1kp/1p2Pnp1/3pQ3/2pP4/1nP3N1/1B4PP/6K1 w - -");
+        b.setPos("8/p3q1kp/1p2Pnp1/3pQ3/2pP4/1nP3N1/1B4PP/6K1 w - -");
 
         assertTrue(isPassedPawn(b,Square.valueOf(FILE_A,RANK_7),false));
         assertFalse(isPassedPawn(b,Square.valueOf(FILE_H,RANK_7),false));
@@ -133,9 +132,9 @@ public class PawnUtilsTest {
     }
 
     @Test
-    public void testIsolatedPawn() throws Exception {
+    public void testIsolatedPawn() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "k7/p1p3p1/3p3p/1P5P/1PP1P1P1/8/8/K7 w - - 0 1");
+        b.setPos("k7/p1p3p1/3p3p/1P5P/1PP1P1P1/8/8/K7 w - - 0 1");
 
         // white's pawn on the E file and black's pawn on the A file are isolated
         assertTrue(isIsolated(b,Square.valueOf(FILE_E, RANK_4),true));
@@ -156,9 +155,9 @@ public class PawnUtilsTest {
     }
 
     @Test
-    public void testDoubled() throws Exception {
+    public void testDoubled() {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "k7/p1p3p1/3p3p/1P5P/1PP1P1P1/8/8/K7 w - - 0 1");
+        b.setPos("k7/p1p3p1/3p3p/1P5P/1PP1P1P1/8/8/K7 w - - 0 1");
 
         assertTrue(isDoubled(b,Square.valueOf(FILE_B, RANK_5),true));
         assertFalse(isIsolated(b,Square.valueOf(FILE_B, RANK_5),true));
