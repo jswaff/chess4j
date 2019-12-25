@@ -30,7 +30,7 @@ public class PawnTranspositionTableTest {
     @Test
     public void storeAndProbe() {
         board.resetBoard();
-        long key = Zobrist.getPawnKey(board);
+        long key = Zobrist.calculatePawnKey(board);
 
         // shouldn't be anything
         PawnTranspositionTableEntry tte = ptable.probe(key);
@@ -47,13 +47,13 @@ public class PawnTranspositionTableTest {
         // now make move and reprobe
         Move m = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_2),Square.valueOf(File.FILE_E,Rank.RANK_4));
         board.applyMove(m);
-        key = Zobrist.getPawnKey(board);
+        key = Zobrist.calculatePawnKey(board);
         tte = ptable.probe(key);
         assertNull(tte);
 
         // finally undo move and reprobe again
         board.undoLastMove();
-        key = Zobrist.getPawnKey(board);
+        key = Zobrist.calculatePawnKey(board);
         tte = ptable.probe(key);
         assertNotNull(tte);
         assertEquals(lbe, tte);
@@ -63,7 +63,7 @@ public class PawnTranspositionTableTest {
     public void clearTable() throws Exception {
         EPDParser.setPos(board, "3qrrk1/1pp2pp1/1p2bn1p/5N2/2P5/P1P3B1/1P4PP/2Q1RRK1 w - - bm Nxg7; id \"WAC.090\";");
 
-        long key = Zobrist.getPawnKey(board);
+        long key = Zobrist.calculatePawnKey(board);
 
         List<Move> moves = MoveGen.genLegalMoves(board);
         MoveParser mp = new MoveParser();
@@ -84,7 +84,7 @@ public class PawnTranspositionTableTest {
     @Test
     public void overwrite() throws Exception {
         EPDParser.setPos(board, "8/k7/p7/3Qp2P/n1P5/3KP3/1q6/8 b - - bm e4+; id \"WAC.094\";");
-        long key = Zobrist.getPawnKey(board);
+        long key = Zobrist.calculatePawnKey(board);
 
         List<Move> moves = MoveGen.genLegalMoves(board);
         MoveParser mp = new MoveParser();

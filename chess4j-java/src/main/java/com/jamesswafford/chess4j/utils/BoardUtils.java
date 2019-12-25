@@ -3,7 +3,6 @@ package com.jamesswafford.chess4j.utils;
 import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.CastlingRights;
 import com.jamesswafford.chess4j.movegen.AttackDetector;
 import com.jamesswafford.chess4j.movegen.Magic;
 import com.jamesswafford.chess4j.board.Move;

@@ -299,8 +299,8 @@ public final class Board {
         blackKingSquare = myWhiteKingSq.flipVertical();
 
         // rebuild the hash keys
-        zobristKey = Zobrist.getBoardKey(this);
-        pawnKey = Zobrist.getPawnKey(this);
+        zobristKey = Zobrist.calculateBoardKey(this);
+        pawnKey = Zobrist.calculatePawnKey(this);
 
         assert(verify());
     }
@@ -350,7 +350,7 @@ public final class Board {
     }
 
     public long getPawnKey() {
-        assert(pawnKey == Zobrist.getPawnKey(this));
+        assert(pawnKey == Zobrist.calculatePawnKey(this));
         return pawnKey;
     }
 
@@ -391,7 +391,7 @@ public final class Board {
     }
 
     public long getZobristKey() {
-        assert(zobristKey == Zobrist.getBoardKey(this));
+        assert(zobristKey == Zobrist.calculateBoardKey(this));
         return zobristKey;
     }
 
@@ -492,8 +492,8 @@ public final class Board {
         setHalfMoveClock(fenPieces.length > 4 ? fenPieces[4] : null);
         setFullMoveCounter(fenPieces.length > 5 ? fenPieces[5] : null);
 
-        zobristKey = Zobrist.getBoardKey(this);
-        pawnKey = Zobrist.getPawnKey(this);
+        zobristKey = Zobrist.calculateBoardKey(this);
+        pawnKey = Zobrist.calculatePawnKey(this);
 
         assert(verify());
     }
@@ -1106,8 +1106,8 @@ public final class Board {
             assert(getPiece(H1)==WHITE_ROOK);
         }
 
-        assert(zobristKey==Zobrist.getBoardKey(this));
-        assert(pawnKey==Zobrist.getPawnKey(this));
+        assert(zobristKey==Zobrist.calculateBoardKey(this));
+        assert(pawnKey==Zobrist.calculatePawnKey(this));
 
         return true;
     }
