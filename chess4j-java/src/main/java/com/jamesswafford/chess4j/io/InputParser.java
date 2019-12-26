@@ -504,9 +504,9 @@ public class InputParser {
         // associate clock with player on move
         engineColor = Board.INSTANCE.getPlayerToMove();
 
-        GameStatus gs = GameStatusChecker.getGameStatus(Board.INSTANCE);
-        if (gs != GameStatus.INPROGRESS) {
-            PrintGameResult.printResult(gs);
+        GameStatus gameStatus = GameStatusChecker.getGameStatus(Board.INSTANCE);
+        if (gameStatus != GameStatus.INPROGRESS) {
+            PrintGameResult.printResult(gameStatus);
             return;
         }
 

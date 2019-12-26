@@ -9,25 +9,15 @@ import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.movegen.MoveGen;
-import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.pieces.Bishop;
-import com.jamesswafford.chess4j.pieces.King;
-import com.jamesswafford.chess4j.pieces.Knight;
-import com.jamesswafford.chess4j.pieces.Pawn;
-import com.jamesswafford.chess4j.pieces.Queen;
 
 import static org.junit.Assert.*;
 
 import static com.jamesswafford.chess4j.pieces.Pawn.*;
 import static com.jamesswafford.chess4j.pieces.Knight.*;
 import static com.jamesswafford.chess4j.pieces.Bishop.*;
-import static com.jamesswafford.chess4j.pieces.Rook.*;
 import static com.jamesswafford.chess4j.pieces.Queen.*;
 import static com.jamesswafford.chess4j.pieces.King.*;
-import static com.jamesswafford.chess4j.board.CastlingRights.*;
-import static com.jamesswafford.chess4j.board.squares.Rank.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 import static com.jamesswafford.chess4j.utils.BoardUtils.*;

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.jamesswafford.chess4j.board.Draw;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -19,7 +20,6 @@ import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TranspositionTableEntryType;
 import com.jamesswafford.chess4j.io.PrintLine;
 import com.jamesswafford.chess4j.utils.BoardUtils;
-import com.jamesswafford.chess4j.utils.GameStatusChecker;
 
 public final class Search {
 
@@ -141,8 +141,7 @@ public final class Search {
         }
 
         // Draw check
-        // Note we don't do insufficient material here -- too expensive without piece counters.
-        if (GameStatusChecker.isDrawByRep(board) || board.getFiftyCounter() >= 100) {
+        if (Draw.isDraw(board)) {
             return 0;
         }
 

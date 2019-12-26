@@ -109,12 +109,12 @@ public final class SearchIterator {
 
         Board.INSTANCE.applyMove(pv.get(0));
         LOGGER.info("move " + pv.get(0));
-        GameStatus gs = GameStatusChecker.getGameStatus(Board.INSTANCE);
+        GameStatus gameStatus = GameStatusChecker.getGameStatus(Board.INSTANCE);
 
         // pondering loop.  as long as we guess correctly we'll loop back around
         // if we don't predict correctly this thread is terminated
         boolean ponderFailure = false;
-        while (gs==GameStatus.INPROGRESS && ponderEnabled && pv.size() > 1 && !ponderFailure && !abortIterator) {
+        while (gameStatus==GameStatus.INPROGRESS && ponderEnabled && pv.size() > 1 && !ponderFailure && !abortIterator) {
 
             ponderMutex.lock();
             LOGGER.debug("# thinkHelper acquired lock #1 on ponderMutex");
@@ -146,7 +146,7 @@ public final class SearchIterator {
                     assert(Board.INSTANCE.equals(searchPos));
                     Board.INSTANCE.applyMove(pv.get(0));
                     LOGGER.info("move " + pv.get(0));
-                    gs = GameStatusChecker.getGameStatus(Board.INSTANCE);
+                    gameStatus = GameStatusChecker.getGameStatus(Board.INSTANCE);
                 } else {
                     // we're still in ponder mode.  this means the search terminated on its own.
                     // in this case just bail out.
@@ -162,8 +162,8 @@ public final class SearchIterator {
 
         LOGGER.debug("### exiting search thread");
 
-        if (gs != GameStatus.INPROGRESS) {
-            PrintGameResult.printResult(gs);
+        if (gameStatus != GameStatus.INPROGRESS) {
+            PrintGameResult.printResult(gameStatus);
         }
     }
 
