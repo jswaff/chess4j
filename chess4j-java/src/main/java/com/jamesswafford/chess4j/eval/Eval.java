@@ -10,7 +10,6 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.movegen.Magic;
 import com.jamesswafford.chess4j.board.squares.East;
-import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
@@ -27,6 +26,14 @@ import com.jamesswafford.chess4j.utils.OrderedPair;
 import com.jamesswafford.chess4j.utils.PawnUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.pieces.Knight.*;
+import static com.jamesswafford.chess4j.pieces.Bishop.*;
+import static com.jamesswafford.chess4j.pieces.Rook.*;
+import static com.jamesswafford.chess4j.pieces.Queen.*;
+import static com.jamesswafford.chess4j.board.squares.File.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public final class Eval {
 
@@ -447,58 +454,58 @@ public final class Eval {
         if (isWhite) {
             kingSq = board.getKingSquare(Color.WHITE);
             // which side are we on?
-            if (kingSq.file().eastOf(File.FILE_E)) {
+            if (kingSq.file().eastOf(FILE_E)) {
                 // check that pawns on f,g,h are not too far away
-                if (board.getPiece(Square.valueOf(File.FILE_F, Rank.RANK_2))==Pawn.WHITE_PAWN);
-                else if (board.getPiece(Square.valueOf(File.FILE_F, Rank.RANK_3))==Pawn.WHITE_PAWN) {
+                if (board.getPiece(F2) == WHITE_PAWN);
+                else if (board.getPiece(F3) == WHITE_PAWN) {
                     score += KING_SAFETY_PAWN_ONE_AWAY;
-                } else if (board.getPiece(Square.valueOf(File.FILE_F, Rank.RANK_4))==Pawn.WHITE_PAWN) {
+                } else if (board.getPiece(F4) == WHITE_PAWN) {
                     score += KING_SAFETY_PAWN_TWO_AWAY;
                 } else {
                     score += KING_SAFETY_PAWN_FAR_AWAY;
                 }
 
-                if (board.getPiece(Square.valueOf(File.FILE_G, Rank.RANK_2))==Pawn.WHITE_PAWN);
-                else if (board.getPiece(Square.valueOf(File.FILE_G, Rank.RANK_3))==Pawn.WHITE_PAWN) {
+                if (board.getPiece(G2) == WHITE_PAWN);
+                else if (board.getPiece(G3) == WHITE_PAWN) {
                     score += KING_SAFETY_PAWN_ONE_AWAY;
-                } else if (board.getPiece(Square.valueOf(File.FILE_G, Rank.RANK_4))==Pawn.WHITE_PAWN) {
+                } else if (board.getPiece(G4) == WHITE_PAWN) {
                     score += KING_SAFETY_PAWN_TWO_AWAY;
                 } else {
                     score += KING_SAFETY_PAWN_FAR_AWAY;
                 }
 
-                if (board.getPiece(Square.valueOf(File.FILE_H, Rank.RANK_2))==Pawn.WHITE_PAWN);
-                else if (board.getPiece(Square.valueOf(File.FILE_H, Rank.RANK_3))==Pawn.WHITE_PAWN) {
+                if (board.getPiece(H2) == WHITE_PAWN);
+                else if (board.getPiece(H3) == WHITE_PAWN) {
                     score += KING_SAFETY_PAWN_ONE_AWAY /2;
-                } else if (board.getPiece(Square.valueOf(File.FILE_H, Rank.RANK_4))==Pawn.WHITE_PAWN) {
+                } else if (board.getPiece(H4) == WHITE_PAWN) {
                     score += KING_SAFETY_PAWN_TWO_AWAY /2;
                 } else {
                     score += KING_SAFETY_PAWN_FAR_AWAY /2;
                 }
 
-            } else if (kingSq.file().westOf(File.FILE_D)) {
-                if (board.getPiece(Square.valueOf(File.FILE_C, Rank.RANK_2))==Pawn.WHITE_PAWN);
-                else if (board.getPiece(Square.valueOf(File.FILE_C, Rank.RANK_3))==Pawn.WHITE_PAWN) {
+            } else if (kingSq.file().westOf(FILE_D)) {
+                if (board.getPiece(C2) == WHITE_PAWN);
+                else if (board.getPiece(C3) == WHITE_PAWN) {
                     score += KING_SAFETY_PAWN_ONE_AWAY;
-                } else if (board.getPiece(Square.valueOf(File.FILE_C, Rank.RANK_4))==Pawn.WHITE_PAWN) {
+                } else if (board.getPiece(C4) == WHITE_PAWN) {
                     score += KING_SAFETY_PAWN_TWO_AWAY;
                 } else {
                     score += KING_SAFETY_PAWN_FAR_AWAY;
                 }
 
-                if (board.getPiece(Square.valueOf(File.FILE_B, Rank.RANK_2))==Pawn.WHITE_PAWN);
-                else if (board.getPiece(Square.valueOf(File.FILE_B, Rank.RANK_3))==Pawn.WHITE_PAWN) {
+                if (board.getPiece(B2) == WHITE_PAWN);
+                else if (board.getPiece(B3) == WHITE_PAWN) {
                     score += KING_SAFETY_PAWN_ONE_AWAY;
-                } else if (board.getPiece(Square.valueOf(File.FILE_B, Rank.RANK_4))==Pawn.WHITE_PAWN) {
+                } else if (board.getPiece(B4) == WHITE_PAWN) {
                     score += KING_SAFETY_PAWN_TWO_AWAY;
                 } else {
                     score += KING_SAFETY_PAWN_FAR_AWAY;
                 }
 
-                if (board.getPiece(Square.valueOf(File.FILE_A, Rank.RANK_2))==Pawn.WHITE_PAWN);
-                else if (board.getPiece(Square.valueOf(File.FILE_A, Rank.RANK_3))==Pawn.WHITE_PAWN) {
+                if (board.getPiece(A2) == WHITE_PAWN);
+                else if (board.getPiece(A3) == WHITE_PAWN) {
                     score += KING_SAFETY_PAWN_ONE_AWAY /2;
-                } else if (board.getPiece(Square.valueOf(File.FILE_A, Rank.RANK_4))==Pawn.WHITE_PAWN) {
+                } else if (board.getPiece(A4) == WHITE_PAWN) {
                     score += KING_SAFETY_PAWN_TWO_AWAY /2;
                 } else {
                     score += KING_SAFETY_PAWN_FAR_AWAY /2;
@@ -514,56 +521,56 @@ public final class Eval {
             // scale down with material?
         } else {
             kingSq = board.getKingSquare(Color.BLACK);
-            if (kingSq.file().eastOf(File.FILE_E)) {
-                if (board.getPiece(Square.valueOf(File.FILE_F, Rank.RANK_7))==Pawn.BLACK_PAWN);
-                else if (board.getPiece(Square.valueOf(File.FILE_F, Rank.RANK_6))==Pawn.BLACK_PAWN) {
+            if (kingSq.file().eastOf(FILE_E)) {
+                if (board.getPiece(F7) == BLACK_PAWN);
+                else if (board.getPiece(F6) == BLACK_PAWN) {
                     score += KING_SAFETY_PAWN_ONE_AWAY;
-                } else if (board.getPiece(Square.valueOf(File.FILE_F, Rank.RANK_5))==Pawn.BLACK_PAWN) {
+                } else if (board.getPiece(F5) == BLACK_PAWN) {
                     score += KING_SAFETY_PAWN_TWO_AWAY;
                 } else {
                     score += KING_SAFETY_PAWN_FAR_AWAY;
                 }
 
-                if (board.getPiece(Square.valueOf(File.FILE_G, Rank.RANK_7))==Pawn.BLACK_PAWN);
-                else if (board.getPiece(Square.valueOf(File.FILE_G, Rank.RANK_6))==Pawn.BLACK_PAWN) {
+                if (board.getPiece(G7) == BLACK_PAWN);
+                else if (board.getPiece(G6) == BLACK_PAWN) {
                     score += KING_SAFETY_PAWN_ONE_AWAY;
-                } else if (board.getPiece(Square.valueOf(File.FILE_G, Rank.RANK_5))==Pawn.BLACK_PAWN) {
+                } else if (board.getPiece(G5) == BLACK_PAWN) {
                     score += KING_SAFETY_PAWN_TWO_AWAY;
                 } else {
                     score += KING_SAFETY_PAWN_FAR_AWAY;
                 }
 
-                if (board.getPiece(Square.valueOf(File.FILE_H, Rank.RANK_7))==Pawn.BLACK_PAWN);
-                else if (board.getPiece(Square.valueOf(File.FILE_H, Rank.RANK_6))==Pawn.BLACK_PAWN) {
+                if (board.getPiece(H7) == BLACK_PAWN);
+                else if (board.getPiece(H6) == BLACK_PAWN) {
                     score += KING_SAFETY_PAWN_ONE_AWAY /2;
-                } else if (board.getPiece(Square.valueOf(File.FILE_H, Rank.RANK_5))==Pawn.BLACK_PAWN) {
+                } else if (board.getPiece(H5) == BLACK_PAWN) {
                     score += KING_SAFETY_PAWN_TWO_AWAY /2;
                 } else {
                     score += KING_SAFETY_PAWN_FAR_AWAY /2;
                 }
-            } else if (kingSq.file().westOf(File.FILE_D)) {
-                if (board.getPiece(Square.valueOf(File.FILE_C, Rank.RANK_7))==Pawn.BLACK_PAWN);
-                else if (board.getPiece(Square.valueOf(File.FILE_C, Rank.RANK_6))==Pawn.BLACK_PAWN) {
+            } else if (kingSq.file().westOf(FILE_D)) {
+                if (board.getPiece(C7) == BLACK_PAWN);
+                else if (board.getPiece(C6) == BLACK_PAWN) {
                     score += KING_SAFETY_PAWN_ONE_AWAY;
-                } else if (board.getPiece(Square.valueOf(File.FILE_C, Rank.RANK_5))==Pawn.BLACK_PAWN) {
+                } else if (board.getPiece(C5) == BLACK_PAWN) {
                     score += KING_SAFETY_PAWN_TWO_AWAY;
                 } else {
                     score += KING_SAFETY_PAWN_FAR_AWAY;
                 }
 
-                if (board.getPiece(Square.valueOf(File.FILE_B, Rank.RANK_7))==Pawn.BLACK_PAWN);
-                else if (board.getPiece(Square.valueOf(File.FILE_B, Rank.RANK_6))==Pawn.BLACK_PAWN) {
+                if (board.getPiece(B7) == BLACK_PAWN);
+                else if (board.getPiece(B6) == BLACK_PAWN) {
                     score += KING_SAFETY_PAWN_ONE_AWAY;
-                } else if (board.getPiece(Square.valueOf(File.FILE_B, Rank.RANK_5))==Pawn.BLACK_PAWN) {
+                } else if (board.getPiece(B5) == BLACK_PAWN) {
                     score += KING_SAFETY_PAWN_TWO_AWAY;
                 } else {
                     score += KING_SAFETY_PAWN_FAR_AWAY;
                 }
 
-                if (board.getPiece(Square.valueOf(File.FILE_A, Rank.RANK_7))==Pawn.BLACK_PAWN);
-                else if (board.getPiece(Square.valueOf(File.FILE_A, Rank.RANK_6))==Pawn.BLACK_PAWN) {
+                if (board.getPiece(A7) == BLACK_PAWN);
+                else if (board.getPiece(A6) == BLACK_PAWN) {
                     score += KING_SAFETY_PAWN_ONE_AWAY /2;
-                } else if (board.getPiece(Square.valueOf(File.FILE_A, Rank.RANK_5))==Pawn.BLACK_PAWN) {
+                } else if (board.getPiece(A5) == BLACK_PAWN) {
                     score += KING_SAFETY_PAWN_TWO_AWAY /2;
                 } else {
                     score += KING_SAFETY_PAWN_FAR_AWAY /2;
@@ -614,21 +621,21 @@ public final class Eval {
     }
 
     public static OrderedPair<Integer,Integer> getPawnMaterialScore(Board board) {
-        return new OrderedPair<Integer,Integer>(board.getNumPieces(Pawn.WHITE_PAWN) * PAWN_VAL,
-                board.getNumPieces(Pawn.BLACK_PAWN) * PAWN_VAL);
+        return new OrderedPair<>(board.getNumPieces(WHITE_PAWN) * PAWN_VAL,
+                board.getNumPieces(BLACK_PAWN) * PAWN_VAL);
     }
 
     // TODO: use Tuple?
     public static OrderedPair<Integer,Integer> getNonPawnMaterialScore(Board board) {
-        int wScore = board.getNumPieces(Queen.WHITE_QUEEN) * QUEEN_VAL
-                + board.getNumPieces(Rook.WHITE_ROOK) * ROOK_VAL
-                + board.getNumPieces(Knight.WHITE_KNIGHT) * KNIGHT_VAL
-                + board.getNumPieces(Bishop.WHITE_BISHOP) * BISHOP_VAL;
+        int wScore = board.getNumPieces(WHITE_QUEEN) * QUEEN_VAL
+                + board.getNumPieces(WHITE_ROOK) * ROOK_VAL
+                + board.getNumPieces(WHITE_KNIGHT) * KNIGHT_VAL
+                + board.getNumPieces(WHITE_BISHOP) * BISHOP_VAL;
 
-        int bScore = board.getNumPieces(Queen.BLACK_QUEEN) * QUEEN_VAL
-                + board.getNumPieces(Rook.BLACK_ROOK) * ROOK_VAL
-                + board.getNumPieces(Knight.BLACK_KNIGHT) * KNIGHT_VAL
-                + board.getNumPieces(Bishop.BLACK_BISHOP) * BISHOP_VAL;
+        int bScore = board.getNumPieces(BLACK_QUEEN) * QUEEN_VAL
+                + board.getNumPieces(BLACK_ROOK) * ROOK_VAL
+                + board.getNumPieces(BLACK_KNIGHT) * KNIGHT_VAL
+                + board.getNumPieces(BLACK_BISHOP) * BISHOP_VAL;
 
         return new OrderedPair<>(wScore,bScore);
     }

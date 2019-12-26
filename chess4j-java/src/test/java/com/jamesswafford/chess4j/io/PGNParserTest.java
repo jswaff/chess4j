@@ -6,10 +6,9 @@ import java.util.List;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.pieces.Pawn;
+
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 import static org.junit.Assert.*;
 
@@ -37,8 +36,8 @@ public class PGNParserTest {
         tags.add(new PGNTag("Result","1/2-1/2"));
 
         List<Move> moves = new ArrayList<>();
-        moves.add(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_2),Square.valueOf(File.FILE_E, Rank.RANK_4)));
-        moves.add(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_7),Square.valueOf(File.FILE_E, Rank.RANK_5)));
+        moves.add(new Move(WHITE_PAWN, E2, E4));
+        moves.add(new Move(BLACK_PAWN, E7, E5));
 
         PGNGame pgnGame = new PGNGame(tags,moves,PGNResult.DRAW);
 

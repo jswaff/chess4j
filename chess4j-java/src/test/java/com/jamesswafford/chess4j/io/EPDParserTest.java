@@ -6,16 +6,15 @@ import org.junit.Test;
 
 import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.CastlingRights;
-import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.exceptions.ParseException;
-import com.jamesswafford.chess4j.pieces.King;
-import com.jamesswafford.chess4j.pieces.Pawn;
-import com.jamesswafford.chess4j.pieces.Rook;
 
 import static org.junit.Assert.*;
+
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.pieces.Rook.*;
+import static com.jamesswafford.chess4j.pieces.King.*;
+import static com.jamesswafford.chess4j.board.CastlingRights.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public class EPDParserTest {
 
@@ -28,14 +27,14 @@ public class EPDParserTest {
 
         List<EPDOperation> ops = EPDParser.setPos(b, "7k/p7/1R5K/6r1/6p1/6P1/8/8 w - - bm Rb7; id \"WAC.006\";");
 
-        assertEquals(King.BLACK_KING, b.getPiece(Square.valueOf(File.FILE_H, Rank.RANK_8)));
-        assertEquals(Rook.BLACK_ROOK, b.getPiece(Square.valueOf(File.FILE_G,Rank.RANK_5)));
-        assertEquals(Pawn.WHITE_PAWN, b.getPiece(Square.valueOf(File.FILE_G,Rank.RANK_3)));
+        assertEquals(BLACK_KING, b.getPiece(H8));
+        assertEquals(BLACK_ROOK, b.getPiece(G5));
+        assertEquals(WHITE_PAWN, b.getPiece(G3));
         assertEquals(Color.WHITE, b.getPlayerToMove());
-        assertFalse(b.hasCastlingRight(CastlingRights.BLACK_KINGSIDE));
-        assertFalse(b.hasCastlingRight(CastlingRights.BLACK_QUEENSIDE));
-        assertFalse(b.hasCastlingRight(CastlingRights.WHITE_KINGSIDE));
-        assertFalse(b.hasCastlingRight(CastlingRights.WHITE_QUEENSIDE));
+        assertFalse(b.hasCastlingRight(BLACK_KINGSIDE));
+        assertFalse(b.hasCastlingRight(BLACK_QUEENSIDE));
+        assertFalse(b.hasCastlingRight(WHITE_KINGSIDE));
+        assertFalse(b.hasCastlingRight(WHITE_QUEENSIDE));
         assertEquals(0, b.getMoveCounter());
         assertNull(b.getEPSquare());
 

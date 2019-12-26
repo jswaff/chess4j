@@ -17,15 +17,14 @@ import static org.junit.Assert.*;
 import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.Zobrist;
 import com.jamesswafford.chess4j.io.MoveParser;
 import com.jamesswafford.chess4j.io.PGNGame;
 import com.jamesswafford.chess4j.io.PGNIterator;
-import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.utils.GameResult;
+
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public class OpeningBookSQLiteImplTest {
 
@@ -130,8 +129,7 @@ public class OpeningBookSQLiteImplTest {
         List<BookMove> bookMoves = book.getMoves(board);
         assertEquals(0,bookMoves.size());
 
-        Move illegal = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_2),
-                Square.valueOf(File.FILE_E, Rank.RANK_5));
+        Move illegal = new Move(WHITE_PAWN, E2, E5);
         book.addToBook(board, illegal);
 
         assertEquals(0,book.getMoves(board).size());
@@ -360,6 +358,5 @@ Be5 41.Rd2 Bc6 42.b5 Bf3 43.Bf4 1-0
         book.addIndexes();
         System.out.println("populated book in " + (end-start) + " ms");
     }
-
 
 }

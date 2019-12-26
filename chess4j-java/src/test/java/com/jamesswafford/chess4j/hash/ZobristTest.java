@@ -12,21 +12,21 @@ import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.CastlingRights;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.io.MoveParser;
-import com.jamesswafford.chess4j.pieces.Bishop;
-import com.jamesswafford.chess4j.pieces.King;
-import com.jamesswafford.chess4j.pieces.Knight;
-import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Piece;
-import com.jamesswafford.chess4j.pieces.Queen;
-import com.jamesswafford.chess4j.pieces.Rook;
 
 import static org.junit.Assert.*;
+
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.pieces.Knight.*;
+import static com.jamesswafford.chess4j.pieces.Bishop.*;
+import static com.jamesswafford.chess4j.pieces.Rook.*;
+import static com.jamesswafford.chess4j.pieces.Queen.*;
+import static com.jamesswafford.chess4j.pieces.King.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 
 public class ZobristTest {
@@ -315,18 +315,18 @@ public class ZobristTest {
         }
 
         // add piece/square keys
-        addToKeys(keys, Pawn.BLACK_PAWN);
-        addToKeys(keys, Pawn.WHITE_PAWN);
-        addToKeys(keys, Rook.BLACK_ROOK);
-        addToKeys(keys, Rook.WHITE_ROOK);
-        addToKeys(keys, Knight.BLACK_KNIGHT);
-        addToKeys(keys, Knight.WHITE_KNIGHT);
-        addToKeys(keys, Bishop.BLACK_BISHOP);
-        addToKeys(keys, Bishop.WHITE_BISHOP);
-        addToKeys(keys, Queen.BLACK_QUEEN);
-        addToKeys(keys, Queen.WHITE_QUEEN);
-        addToKeys(keys, King.BLACK_KING);
-        addToKeys(keys, King.WHITE_KING);
+        addToKeys(keys, BLACK_PAWN);
+        addToKeys(keys, WHITE_PAWN);
+        addToKeys(keys, BLACK_ROOK);
+        addToKeys(keys, WHITE_ROOK);
+        addToKeys(keys, BLACK_KNIGHT);
+        addToKeys(keys, WHITE_KNIGHT);
+        addToKeys(keys, BLACK_BISHOP);
+        addToKeys(keys, WHITE_BISHOP);
+        addToKeys(keys, BLACK_QUEEN);
+        addToKeys(keys, WHITE_QUEEN);
+        addToKeys(keys, BLACK_KING);
+        addToKeys(keys, WHITE_KING);
 
         return keys;
     }
@@ -349,114 +349,111 @@ public class ZobristTest {
 
         Set<Long> keys = new HashSet<>();
 
-        Move m = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_2), Square.valueOf(File.FILE_E, Rank.RANK_4));
+        Move m = new Move(WHITE_PAWN, E2, E4);
         b.applyMove(m);
         b2.setPos("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
         long key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
         keys.add(key);
 
-        b.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_C, Rank.RANK_7), Square.valueOf(File.FILE_C, Rank.RANK_5)));
+        b.applyMove(new Move(BLACK_PAWN, C7, C5));
         b2.setPos("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2");
         key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
-        b.applyMove(new Move(Knight.WHITE_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_1), Square.valueOf(File.FILE_F, Rank.RANK_3)));
+        b.applyMove(new Move(WHITE_KNIGHT, G1, F3));
         b2.setPos("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2");
         key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
-        b.applyMove(new Move(Queen.BLACK_QUEEN,Square.valueOf(File.FILE_D, Rank.RANK_8), Square.valueOf(File.FILE_A, Rank.RANK_5)));
+        b.applyMove(new Move(BLACK_QUEEN, D8, A5));
         b2.setPos("rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3");
         key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
-        b.applyMove(new Move(Bishop.WHITE_BISHOP,Square.valueOf(File.FILE_F, Rank.RANK_1), Square.valueOf(File.FILE_E, Rank.RANK_2)));
+        b.applyMove(new Move(WHITE_BISHOP, F1, E2));
         b2.setPos("rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPPBPPP/RNBQK2R b KQkq - 3 3");
         key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
-        b.applyMove(new Move(Queen.BLACK_QUEEN,Square.valueOf(File.FILE_A, Rank.RANK_5), Square.valueOf(File.FILE_D, Rank.RANK_2),Bishop.WHITE_BISHOP));
+        b.applyMove(new Move(BLACK_QUEEN, A5, D2, WHITE_BISHOP));
         b2.setPos("rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPqBPPP/RNBQK2R w KQkq - 0 4");
         key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
-        b.applyMove(new Move(Knight.WHITE_KNIGHT,Square.valueOf(File.FILE_B, Rank.RANK_1), Square.valueOf(File.FILE_D, Rank.RANK_2),Queen.BLACK_QUEEN));
+        b.applyMove(new Move(WHITE_KNIGHT, B1, D2, BLACK_QUEEN));
         b2.setPos("rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPNBPPP/R1BQK2R b KQkq - 0 4");
         key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
-        b.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_C, Rank.RANK_5), Square.valueOf(File.FILE_C, Rank.RANK_4)));
+        b.applyMove(new Move(BLACK_PAWN, C5, C4));
         b2.setPos("rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQK2R w KQkq - 0 5");
         key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
-        b.applyMove(new Move(King.WHITE_KING,Square.valueOf(File.FILE_E, Rank.RANK_1), Square.valueOf(File.FILE_G, Rank.RANK_1),true));
+        b.applyMove(new Move(WHITE_KING, E1, G1,true));
         b2.setPos("rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 b kq - 0 5");
         key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
-        b.applyMove(new Move(King.BLACK_KING,Square.valueOf(File.FILE_E, Rank.RANK_8), Square.valueOf(File.FILE_D, Rank.RANK_8)));
+        b.applyMove(new Move(BLACK_KING, E8, D8));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 w - - 1 6");
         key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
-        b.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_B, Rank.RANK_2), Square.valueOf(File.FILE_B, Rank.RANK_4)));
+        b.applyMove(new Move(WHITE_PAWN, B2, B4));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/1Pp1P3/5N2/P1PNBPPP/R1BQ1RK1 b - b3 0 6");
         key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
-        b.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_C, Rank.RANK_4), Square.valueOf(File.FILE_B, Rank.RANK_3),Pawn.BLACK_PAWN,true));
+        b.applyMove(new Move(BLACK_PAWN, C4, B3, BLACK_PAWN,true));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQ1RK1 w - - 0 7");
         key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
-        b.applyMove(new Move(Rook.WHITE_ROOK,Square.valueOf(File.FILE_F, Rank.RANK_1), Square.valueOf(File.FILE_E, Rank.RANK_1)));
+        b.applyMove(new Move(WHITE_ROOK, F1, E1));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQR1K1 b - - 1 7");
         key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
-        b.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_B, Rank.RANK_3), Square.valueOf(File.FILE_B, Rank.RANK_2)));
+        b.applyMove(new Move(BLACK_PAWN, B3, B2));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR1K1 w - - 0 8");
         key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
-        b.applyMove(new Move(King.WHITE_KING,Square.valueOf(File.FILE_G, Rank.RANK_1), Square.valueOf(File.FILE_H, Rank.RANK_1)));
+        b.applyMove(new Move(WHITE_KING, G1, H1));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR2K b - - 1 8");
         key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
         assertFalse(keys.contains(key));
         keys.add(key);
 
-        b.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_B, Rank.RANK_2),
-                Square.valueOf(File.FILE_A, Rank.RANK_1),
-                Rook.WHITE_ROOK,
-                Knight.BLACK_KNIGHT));
+        b.applyMove(new Move(BLACK_PAWN, B2, A1, WHITE_ROOK, BLACK_KNIGHT));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/P1PNBPPP/n1BQR2K w - - 0 9");
         key = Zobrist.calculateBoardKey(b);
         assertEquals(Zobrist.calculateBoardKey(b2), key);
@@ -479,48 +476,48 @@ public class ZobristTest {
         assertEquals(Zobrist.calculateBoardKey(b1), Zobrist.calculateBoardKey(b2));
 
         // step through French Defense with b1
-        b1.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_2),Square.valueOf(File.FILE_E, Rank.RANK_4)));
+        b1.applyMove(new Move(WHITE_PAWN, E2, E4));
         keys1.add(Zobrist.calculateBoardKey(b1));
-        b1.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_7),Square.valueOf(File.FILE_E, Rank.RANK_6)));
+        b1.applyMove(new Move(BLACK_PAWN, E7, E6));
         keys1.add(Zobrist.calculateBoardKey(b1));
-        b1.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_D, Rank.RANK_2),Square.valueOf(File.FILE_D, Rank.RANK_4)));
+        b1.applyMove(new Move(WHITE_PAWN, D2, D4));
         keys1.add(Zobrist.calculateBoardKey(b1));
-        b1.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_D, Rank.RANK_7),Square.valueOf(File.FILE_D, Rank.RANK_5)));
+        b1.applyMove(new Move(BLACK_PAWN, D7, D5));
         keys1.add(Zobrist.calculateBoardKey(b1));
-        b1.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_4),Square.valueOf(File.FILE_D, Rank.RANK_5),Pawn.BLACK_PAWN));
+        b1.applyMove(new Move(WHITE_PAWN, E4, D5, BLACK_PAWN));
         keys1.add(Zobrist.calculateBoardKey(b1));
-        b1.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_6),Square.valueOf(File.FILE_D, Rank.RANK_5),Pawn.WHITE_PAWN));
+        b1.applyMove(new Move(BLACK_PAWN, E6, D5, WHITE_PAWN));
         keys1.add(Zobrist.calculateBoardKey(b1));
-        b1.applyMove(new Move(Knight.WHITE_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_1),Square.valueOf(File.FILE_F, Rank.RANK_3)));
+        b1.applyMove(new Move(WHITE_KNIGHT, G1, F3));
         keys1.add(Zobrist.calculateBoardKey(b1));
-        b1.applyMove(new Move(Knight.BLACK_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_8),Square.valueOf(File.FILE_F, Rank.RANK_6)));
+        b1.applyMove(new Move(BLACK_KNIGHT, G8, F6));
         keys1.add(Zobrist.calculateBoardKey(b1));
 
 
         // step through the Petrov Defense with b2
-        b2.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_2),Square.valueOf(File.FILE_E, Rank.RANK_4)));
+        b2.applyMove(new Move(WHITE_PAWN, E2, E4));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_7),Square.valueOf(File.FILE_E, Rank.RANK_5)));
+        b2.applyMove(new Move(BLACK_PAWN, E7, E5));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Knight.WHITE_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_1),Square.valueOf(File.FILE_F, Rank.RANK_3)));
+        b2.applyMove(new Move(WHITE_KNIGHT, G1, F3));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Knight.BLACK_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_8),Square.valueOf(File.FILE_F, Rank.RANK_6)));
+        b2.applyMove(new Move(BLACK_KNIGHT, G8, F6));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Knight.WHITE_KNIGHT,Square.valueOf(File.FILE_F, Rank.RANK_3),Square.valueOf(File.FILE_E, Rank.RANK_5),Pawn.BLACK_PAWN));
+        b2.applyMove(new Move(WHITE_KNIGHT, F3, E5, BLACK_PAWN));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_D, Rank.RANK_7),Square.valueOf(File.FILE_D, Rank.RANK_6)));
+        b2.applyMove(new Move(BLACK_PAWN, D7, D6));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Knight.WHITE_KNIGHT,Square.valueOf(File.FILE_E, Rank.RANK_5),Square.valueOf(File.FILE_F, Rank.RANK_3)));
+        b2.applyMove(new Move(WHITE_KNIGHT, E5, F3));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Knight.BLACK_KNIGHT,Square.valueOf(File.FILE_F, Rank.RANK_6),Square.valueOf(File.FILE_E, Rank.RANK_4),Pawn.WHITE_PAWN));
+        b2.applyMove(new Move(BLACK_KNIGHT, F6, E4, WHITE_PAWN));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_D, Rank.RANK_2),Square.valueOf(File.FILE_D, Rank.RANK_3)));
+        b2.applyMove(new Move(WHITE_PAWN, D2, D3));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Knight.BLACK_KNIGHT,Square.valueOf(File.FILE_E, Rank.RANK_4),Square.valueOf(File.FILE_F, Rank.RANK_6)));
+        b2.applyMove(new Move(BLACK_KNIGHT, E4, F6));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_D, Rank.RANK_3),Square.valueOf(File.FILE_D, Rank.RANK_4)));
+        b2.applyMove(new Move(WHITE_PAWN, D3, D4));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_D, Rank.RANK_6),Square.valueOf(File.FILE_D, Rank.RANK_5)));
+        b2.applyMove(new Move(BLACK_PAWN, D6, D5));
         keys2.add(Zobrist.calculateBoardKey(b2));
 
 
@@ -529,8 +526,8 @@ public class ZobristTest {
         assertEquals(Zobrist.calculateBoardKey(b1), Zobrist.calculateBoardKey(b2));
 
         // by adding a pawn move we should be equal except move history and number of moves
-        b1.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_G, Rank.RANK_2),Square.valueOf(File.FILE_G, Rank.RANK_3)));
-        b2.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_G, Rank.RANK_2),Square.valueOf(File.FILE_G, Rank.RANK_3)));
+        b1.applyMove(new Move(WHITE_PAWN, G2, G3));
+        b2.applyMove(new Move(WHITE_PAWN, G2, G3));
 
         assertNotEquals(b1, b2);
         assertEquals(Zobrist.calculateBoardKey(b1), Zobrist.calculateBoardKey(b2));
@@ -567,31 +564,31 @@ public class ZobristTest {
         assertEquals(b1.hashCodeWithoutMoveHistory(true), b2.hashCodeWithoutMoveHistory(true));
 
         // Go through Queen's Gambit with b1
-        b1.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_D, Rank.RANK_2),Square.valueOf(File.FILE_D, Rank.RANK_4)));
+        b1.applyMove(new Move(WHITE_PAWN, D2, D4));
         keys1.add(Zobrist.calculateBoardKey(b1));
-        b1.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_D, Rank.RANK_7),Square.valueOf(File.FILE_D, Rank.RANK_5)));
+        b1.applyMove(new Move(BLACK_PAWN, D7, D5));
         keys1.add(Zobrist.calculateBoardKey(b1));
-        b1.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_C, Rank.RANK_2),Square.valueOf(File.FILE_C, Rank.RANK_4)));
+        b1.applyMove(new Move(WHITE_PAWN, C2, C4));
         keys1.add(Zobrist.calculateBoardKey(b1));
-        b1.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_7),Square.valueOf(File.FILE_E, Rank.RANK_6)));
+        b1.applyMove(new Move(BLACK_PAWN, E7, E6));
         keys1.add(Zobrist.calculateBoardKey(b1));
-        b1.applyMove(new Move(Knight.WHITE_KNIGHT,Square.valueOf(File.FILE_B, Rank.RANK_1),Square.valueOf(File.FILE_C, Rank.RANK_3)));
+        b1.applyMove(new Move(WHITE_KNIGHT, B1, C3));
         keys1.add(Zobrist.calculateBoardKey(b1));
-        b1.applyMove(new Move(Knight.BLACK_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_8),Square.valueOf(File.FILE_F, Rank.RANK_6)));
+        b1.applyMove(new Move(BLACK_KNIGHT, G8, F6));
         keys1.add(Zobrist.calculateBoardKey(b1));
 
         // Step through English Opening with b2
-        b2.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_C, Rank.RANK_2),Square.valueOf(File.FILE_C, Rank.RANK_4)));
+        b2.applyMove(new Move(WHITE_PAWN, C2, C4));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Knight.BLACK_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_8),Square.valueOf(File.FILE_F, Rank.RANK_6)));
+        b2.applyMove(new Move(BLACK_KNIGHT, G8, F6));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Knight.WHITE_KNIGHT,Square.valueOf(File.FILE_B, Rank.RANK_1),Square.valueOf(File.FILE_C, Rank.RANK_3)));
+        b2.applyMove(new Move(WHITE_KNIGHT, B1, C3));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_7),Square.valueOf(File.FILE_E, Rank.RANK_6)));
+        b2.applyMove(new Move(BLACK_PAWN, E7, E6));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_D, Rank.RANK_2),Square.valueOf(File.FILE_D, Rank.RANK_4)));
+        b2.applyMove(new Move(WHITE_PAWN, D2, D4));
         keys2.add(Zobrist.calculateBoardKey(b2));
-        b2.applyMove(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_D, Rank.RANK_7),Square.valueOf(File.FILE_D, Rank.RANK_5)));
+        b2.applyMove(new Move(BLACK_PAWN, D7, D5));
         keys2.add(Zobrist.calculateBoardKey(b2));
 
         // Positions would be equal at this point, except for move history, fifty counter and ep square
@@ -599,8 +596,8 @@ public class ZobristTest {
         assertNotEquals(Zobrist.calculateBoardKey(b1), Zobrist.calculateBoardKey(b2));
 
         // by adding a pawn move we should be equal except move history
-        b1.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_G, Rank.RANK_2),Square.valueOf(File.FILE_G, Rank.RANK_3)));
-        b2.applyMove(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_G, Rank.RANK_2),Square.valueOf(File.FILE_G, Rank.RANK_3)));
+        b1.applyMove(new Move(WHITE_PAWN, G2, G3));
+        b2.applyMove(new Move(WHITE_PAWN, G2, G3));
         assertNotEquals(b1, b2);
         assertEquals(Zobrist.calculateBoardKey(b1), Zobrist.calculateBoardKey(b2));
 

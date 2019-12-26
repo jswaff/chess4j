@@ -6,24 +6,22 @@ import java.util.List;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.squares.Square;
 
 import static org.junit.Assert.*;
 
 import static com.jamesswafford.chess4j.pieces.Pawn.*;
 import static com.jamesswafford.chess4j.pieces.Knight.*;
-import static com.jamesswafford.chess4j.board.squares.File.*;
-import static com.jamesswafford.chess4j.board.squares.Rank.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 
 public class MoveUtilsTest {
 
     @Test
     public void testMoveToTopList() {
-        Move m1 = new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2),Square.valueOf(FILE_E, RANK_3));
-        Move m2 = new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2),Square.valueOf(FILE_E, RANK_4));
-        Move m3 = new Move(WHITE_PAWN,Square.valueOf(FILE_A, RANK_2),Square.valueOf(FILE_A, RANK_3));
-        Move m4 = new Move(WHITE_KNIGHT,Square.valueOf(FILE_G, RANK_1),Square.valueOf(FILE_F, RANK_3));
+        Move m1 = new Move(WHITE_PAWN, E2, E3);
+        Move m2 = new Move(WHITE_PAWN, E2, E4);
+        Move m3 = new Move(WHITE_PAWN, A2, A3);
+        Move m4 = new Move(WHITE_KNIGHT, G1, F3);
 
         List<Move> moves = new ArrayList<>();
         moves.add(m1);
@@ -39,10 +37,10 @@ public class MoveUtilsTest {
 
     @Test
     public void testMoveToTopArray() {
-        Move m1 = new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2),Square.valueOf(FILE_E, RANK_3));
-        Move m2 = new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2),Square.valueOf(FILE_E, RANK_4));
-        Move m3 = new Move(WHITE_PAWN,Square.valueOf(FILE_A, RANK_2),Square.valueOf(FILE_A, RANK_3));
-        Move m4 = new Move(WHITE_KNIGHT,Square.valueOf(FILE_G, RANK_1),Square.valueOf(FILE_F, RANK_3));
+        Move m1 = new Move(WHITE_PAWN, E2, E3);
+        Move m2 = new Move(WHITE_PAWN, E2, E4);
+        Move m3 = new Move(WHITE_PAWN, A2, A3);
+        Move m4 = new Move(WHITE_KNIGHT, G1, F3);
 
         Move[] moves = new Move[] { m1,m2,m3,m4 };
 
@@ -54,10 +52,10 @@ public class MoveUtilsTest {
 
     @Test
     public void testSwapList() {
-        Move m0 = new Move(WHITE_PAWN, Square.valueOf(FILE_E, RANK_2), Square.valueOf(FILE_E, RANK_3));
-        Move m1 = new Move(WHITE_PAWN, Square.valueOf(FILE_E, RANK_2), Square.valueOf(FILE_E, RANK_4));
-        Move m2 = new Move(WHITE_PAWN, Square.valueOf(FILE_A, RANK_2), Square.valueOf(FILE_A, RANK_3));
-        Move m3 = new Move(WHITE_KNIGHT, Square.valueOf(FILE_G, RANK_1), Square.valueOf(FILE_F, RANK_3));
+        Move m0 = new Move(WHITE_PAWN, E2, E3);
+        Move m1 = new Move(WHITE_PAWN, E2, E4);
+        Move m2 = new Move(WHITE_PAWN, A2, A3);
+        Move m3 = new Move(WHITE_KNIGHT, G1, F3);
 
         List<Move> moves = new ArrayList<>();
         moves.add(m0);
@@ -82,10 +80,10 @@ public class MoveUtilsTest {
 
     @Test
     public void testSwapArray() {
-        Move m0 = new Move(WHITE_PAWN, Square.valueOf(FILE_E, RANK_2), Square.valueOf(FILE_E, RANK_3));
-        Move m1 = new Move(WHITE_PAWN, Square.valueOf(FILE_E, RANK_2), Square.valueOf(FILE_E, RANK_4));
-        Move m2 = new Move(WHITE_PAWN, Square.valueOf(FILE_A, RANK_2), Square.valueOf(FILE_A, RANK_3));
-        Move m3 = new Move(WHITE_KNIGHT, Square.valueOf(FILE_G, RANK_1), Square.valueOf(FILE_F, RANK_3));
+        Move m0 = new Move(WHITE_PAWN, E2, E3);
+        Move m1 = new Move(WHITE_PAWN, E2, E4);
+        Move m2 = new Move(WHITE_PAWN, A2, A3);
+        Move m3 = new Move(WHITE_KNIGHT, G1, F3);
 
         Move[] moves = new Move[] { m0,m1,m2,m3 };
 
@@ -106,10 +104,10 @@ public class MoveUtilsTest {
 
     @Test
     public void testIndexOfList() {
-        Move m0 = new Move(WHITE_PAWN, Square.valueOf(FILE_E, RANK_2), Square.valueOf(FILE_E, RANK_3));
-        Move m1 = new Move(WHITE_PAWN, Square.valueOf(FILE_E, RANK_2), Square.valueOf(FILE_E, RANK_4));
-        Move m2 = new Move(WHITE_PAWN, Square.valueOf(FILE_A, RANK_2), Square.valueOf(FILE_A, RANK_3));
-        Move m3 = new Move(WHITE_KNIGHT, Square.valueOf(FILE_G, RANK_1), Square.valueOf(FILE_F, RANK_3));
+        Move m0 = new Move(WHITE_PAWN, E2, E3);
+        Move m1 = new Move(WHITE_PAWN, E2, E4);
+        Move m2 = new Move(WHITE_PAWN, A2, A3);
+        Move m3 = new Move(WHITE_KNIGHT, G1, F3);
 
         List<Move> moves = new ArrayList<>();
         moves.add(m0);
@@ -120,23 +118,22 @@ public class MoveUtilsTest {
         assertEquals(1,MoveUtils.indexOf(moves, m1, 0));
         assertEquals(1,MoveUtils.indexOf(moves, m1, 1));
         assertEquals(-1,MoveUtils.indexOf(moves,m1,2));
-        assertEquals(-1,MoveUtils.indexOf(moves, new Move(WHITE_PAWN,Square.valueOf(FILE_C, RANK_2),Square.valueOf(FILE_C, RANK_4)), 0));
+        assertEquals(-1,MoveUtils.indexOf(moves, new Move(WHITE_PAWN, C2, C4), 0));
     }
 
     @Test
     public void testIndexOfArray() {
-        Move m0 = new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2),Square.valueOf(FILE_E, RANK_3));
-        Move m1 = new Move(WHITE_PAWN,Square.valueOf(FILE_E, RANK_2),Square.valueOf(FILE_E, RANK_4));
-        Move m2 = new Move(WHITE_PAWN,Square.valueOf(FILE_A, RANK_2),Square.valueOf(FILE_A, RANK_3));
-        Move m3 = new Move(WHITE_KNIGHT,Square.valueOf(FILE_G, RANK_1),Square.valueOf(FILE_F, RANK_3));
+        Move m0 = new Move(WHITE_PAWN, E2, E3);
+        Move m1 = new Move(WHITE_PAWN, E2, E4);
+        Move m2 = new Move(WHITE_PAWN, A2, A3);
+        Move m3 = new Move(WHITE_KNIGHT, G1, F3);
 
         Move[] moves = new Move[] { m0,m1,m2,m3 };
 
         assertEquals(1,MoveUtils.indexOf(moves, m1, 0));
         assertEquals(1,MoveUtils.indexOf(moves, m1, 1));
         assertEquals(-1,MoveUtils.indexOf(moves,m1,2));
-        assertEquals(-1,MoveUtils.indexOf(moves, new Move(WHITE_PAWN,Square.valueOf(FILE_C, RANK_2),Square.valueOf(FILE_C, RANK_4)), 0));
+        assertEquals(-1,MoveUtils.indexOf(moves, new Move(WHITE_PAWN, C2, C4), 0));
     }
-
 
 }

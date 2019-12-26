@@ -3,20 +3,19 @@ package com.jamesswafford.chess4j.utils;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.pieces.Pawn;
 
 import static org.junit.Assert.*;
+
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public class MoveStackTest {
 
     Move m1,m2;
 
     public MoveStackTest() {
-        m1 = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_2),Square.valueOf(File.FILE_E, Rank.RANK_4));
-        m2 = new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_D, Rank.RANK_7),Square.valueOf(File.FILE_D, Rank.RANK_5));
+        m1 = new Move(WHITE_PAWN, E2, E4);
+        m2 = new Move(BLACK_PAWN, D7, D5);
     }
 
     @Test
