@@ -240,6 +240,89 @@ public class BoardTest {
     }
 
     @Test
+    public void testApplyMoveSequence_castling() {
+        Board b = Board.INSTANCE;
+        b.setPos("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+
+        assertTrue(b.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(b.hasCastlingRight(WHITE_QUEENSIDE));
+        assertTrue(b.hasCastlingRight(BLACK_KINGSIDE));
+        assertTrue(b.hasCastlingRight(BLACK_QUEENSIDE));
+
+        // queenside black rook takes white rook removed qside castling options
+        b.applyMove(new Move(BLACK_ROOK, A8, A1, WHITE_ROOK));
+        assertTrue(b.hasCastlingRight(WHITE_KINGSIDE));
+        assertFalse(b.hasCastlingRight(WHITE_QUEENSIDE));
+        assertTrue(b.hasCastlingRight(BLACK_KINGSIDE));
+        assertFalse(b.hasCastlingRight(BLACK_QUEENSIDE));
+
+        // moving the black king removes bk castling option
+        b.applyMove(new Move(BLACK_KING, E8, E7));
+        assertTrue(b.hasCastlingRight(WHITE_KINGSIDE));
+        assertFalse(b.hasCastlingRight(WHITE_QUEENSIDE));
+        assertFalse(b.hasCastlingRight(BLACK_KINGSIDE));
+        assertFalse(b.hasCastlingRight(BLACK_QUEENSIDE));
+
+        // moving the wk rook removes the wk castling option
+        b.applyMove(new Move(WHITE_ROOK, H1, H7));
+        assertFalse(b.hasCastlingRight(WHITE_KINGSIDE));
+        assertFalse(b.hasCastlingRight(WHITE_QUEENSIDE));
+        assertFalse(b.hasCastlingRight(BLACK_KINGSIDE));
+        assertFalse(b.hasCastlingRight(BLACK_QUEENSIDE));
+    }
+
+    @Test
+    public void testUndoDoublePawnPush() {
+        Board b = Board.INSTANCE;
+        b.resetBoard();
+        Board b2 = b.deepCopy();
+
+
+        b.applyMove(new Move(WHITE_PAWN, E2, E4));
+        b.undoLastMove();
+
+        assertTrue(b.equalExceptMoveHistory(b2, true));
+    }
+
+    @Test
+    public void testUndoCapturingPromotion() {
+        Board b = Board.INSTANCE;
+        b.setPos("r7/1PK5/8/8/k7/8/8/8 w - -");
+        Board b2 = b.deepCopy();
+
+
+        b.applyMove(new Move(WHITE_PAWN, B7, A8, BLACK_ROOK, WHITE_QUEEN));
+        b.undoLastMove();
+
+        assertTrue(b.equalExceptMoveHistory(b2, true));
+    }
+
+    @Test
+    public void testUndoEp() {
+        Board b = Board.INSTANCE;
+        b.setPos("k7/8/8/8/pP6/8/K7/8 b - b3");
+        Board b2 = b.deepCopy();
+
+
+        b.applyMove(new Move(BLACK_PAWN, A4, B3, WHITE_PAWN, true));
+        b.undoLastMove();
+
+        assertTrue(b.equalExceptMoveHistory(b2, true));
+    }
+
+    @Test
+    public void testUndoCastle() {
+        Board b = Board.INSTANCE;
+        b.setPos("k7/8/8/8/8/8/8/4K2R w K -");
+        Board b2 = b.deepCopy();
+
+        b.applyMove(new Move(WHITE_KING, E1, G1, true));
+        b.undoLastMove();
+
+        assertTrue(b.equalExceptMoveHistory(b2, true));
+    }
+
+    @Test
     public void testSwapPlayer() {
         Board b = Board.INSTANCE;
         b.resetBoard();

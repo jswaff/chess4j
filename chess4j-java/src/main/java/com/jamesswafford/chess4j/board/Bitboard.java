@@ -6,6 +6,7 @@ import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -112,16 +113,6 @@ public class Bitboard {
         });
     }
 
-    private long val;
-
-    public Bitboard(Square sq) {
-        this.val = squares[sq.value()];
-    }
-
-    public Bitboard(long val) {
-        this.val = val;
-    }
-
     public static long isolateLSB(long mask, int index) {
         int n=0;
 
@@ -137,25 +128,36 @@ public class Bitboard {
         return 0;
     }
 
-
-    public int lsb() {
-        return lsb(val);
+    public static int lsb(Square sq) {
+        return lsb(squares[sq.value()]);
     }
 
     public static int lsb(long val) {
         return Long.numberOfTrailingZeros(val);
     }
 
-    public int msb() {
-        return msb(val);
+    public static int msb(Square sq) {
+        return msb(squares[sq.value()]);
     }
 
     public static int msb(long val) {
         return 63 - Long.numberOfLeadingZeros(val);
     }
 
-    @Override
-    public String toString() {
+    public static long toBitboard(Square sq) {
+        return squares[sq.value()];
+    }
+
+    public static long toBitboard(List<Square> squares) {
+        long val = 0;
+
+        for (Square sq : squares) {
+            val |= Bitboard.squares[sq.value()];
+        }
+        return val;
+    }
+
+    public static String drawBitboard(long val) {
         StringBuilder sb = new StringBuilder("");
 
         for (int i=0;i<64;i++) {

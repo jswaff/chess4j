@@ -5,6 +5,9 @@ import org.junit.Test;
 
 import com.jamesswafford.chess4j.Color;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import static org.junit.Assert.*;
 
 import static com.jamesswafford.chess4j.board.Bitboard.*;
@@ -14,19 +17,41 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 public class BitboardTest {
 
     @Test
+    public void toBitboard_single() {
+
+        assertEquals(squares[D6.value()], toBitboard(D6));
+        assertEquals(squares[F3.value()], toBitboard(F3));
+        assertEquals(squares[C8.value()], toBitboard(C8));
+    }
+
+    @Test
+    public void toBitboard_list() {
+
+        assertEquals(
+                squares[D6.value()] | squares[D7.value()] | squares[D8.value()],
+                toBitboard(Arrays.asList(D6, D7, D8)));
+
+        assertEquals(0, toBitboard(new ArrayList<>()));
+
+        assertEquals(-1L, toBitboard(Square.allSquares()));
+
+        //System.out.println("all squares:\n" + drawBitboard(toBitboard(Square.allSquares())));
+    }
+
+    @Test
     public void lsb() {
         Square.allSquares()
-                .forEach(square -> assertEquals(square.value(), new Bitboard(square).lsb()));
+                .forEach(square -> assertEquals(square.value(), Bitboard.lsb(square)));
 
-        assertEquals(A6.value(), new Bitboard(ranks[RANK_6.getValue()]).lsb());
+        assertEquals(A6.value(), Bitboard.lsb(ranks[RANK_6.getValue()]));
     }
 
     @Test
     public void msb() {
         Square.allSquares()
-                .forEach(square -> assertEquals(square.value(), new Bitboard(square).msb()));
+                .forEach(square -> assertEquals(square.value(), Bitboard.msb(square)));
 
-        assertEquals(H6.value(), new Bitboard(ranks[RANK_6.getValue()]).msb());
+        assertEquals(H6.value(), Bitboard.msb(ranks[RANK_6.getValue()]));
     }
 
     @Test
