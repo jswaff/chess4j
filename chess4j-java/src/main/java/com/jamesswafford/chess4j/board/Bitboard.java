@@ -114,8 +114,8 @@ public class Bitboard {
 
     private long val;
 
-    public Bitboard(int sq) {
-        this.val = squares[sq];
+    public Bitboard(Square sq) {
+        this.val = squares[sq.value()];
     }
 
     public Bitboard(long val) {

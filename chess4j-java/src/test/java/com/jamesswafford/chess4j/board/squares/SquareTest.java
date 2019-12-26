@@ -36,8 +36,8 @@ public class SquareTest {
 
     @Test
     public void testFileSquares() {
-        assertTrue(Square.fileSquares(FILE_B).contains(B2));
-        assertFalse(Square.fileSquares(FILE_B).contains(C2));
+        assertTrue(fileSquares(FILE_B).contains(B2));
+        assertFalse(fileSquares(FILE_B).contains(C2));
     }
 
     @Test

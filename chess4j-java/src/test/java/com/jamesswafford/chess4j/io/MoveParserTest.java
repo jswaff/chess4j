@@ -4,23 +4,22 @@ import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
-import com.jamesswafford.chess4j.pieces.King;
-import com.jamesswafford.chess4j.pieces.Knight;
-import com.jamesswafford.chess4j.pieces.Pawn;
-import com.jamesswafford.chess4j.pieces.Queen;
-import com.jamesswafford.chess4j.pieces.Rook;
 
 import static org.junit.Assert.*;
 
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.pieces.Knight.*;
+import static com.jamesswafford.chess4j.pieces.Rook.*;
+import static com.jamesswafford.chess4j.pieces.Queen.*;
+import static com.jamesswafford.chess4j.pieces.King.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
+
 public class MoveParserTest {
 
-    Board board = Board.INSTANCE;
-    MoveParser mp = new MoveParser();
+    private Board board = Board.INSTANCE;
+    private MoveParser mp = new MoveParser();
 
     @Test
     public void moveParserTest1() throws ParseException, IllegalMoveException {
@@ -45,7 +44,7 @@ public class MoveParserTest {
     public void moveParserTest3() throws ParseException, IllegalMoveException {
         board.setPos("5k2/8/8/8/8/8/8/4K2R w K - 0 1");
         Move m = mp.parseMove("O-O",board);
-        Move m2 = new Move(King.WHITE_KING,Square.valueOf(File.FILE_E, Rank.RANK_1),Square.valueOf(File.FILE_G, Rank.RANK_1),true);
+        Move m2 = new Move(WHITE_KING, E1, G1, true);
         assertEquals(m2, m);
     }
 
@@ -53,7 +52,7 @@ public class MoveParserTest {
     public void moveParserTest4() throws ParseException, IllegalMoveException {
         board.setPos("5k2/1P6/1K6/8/8/8/8/8 w - -");
         Move m = mp.parseMove("b7b8n",board);
-        Move m2 = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_B, Rank.RANK_7),Square.valueOf(File.FILE_B, Rank.RANK_8),null,Knight.WHITE_KNIGHT);
+        Move m2 = new Move(WHITE_PAWN, B7, B8,null, WHITE_KNIGHT);
         assertEquals(m2, m);
     }
 
@@ -61,8 +60,7 @@ public class MoveParserTest {
     public void moveParserTest5() throws ParseException, IllegalMoveException {
         board.setPos("8/8/8/8/8/8/3pk3/1KR5 b - -");
         Move m = mp.parseMove("d2xc1q",board);
-        Move m2 = new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_D, Rank.RANK_2),
-                Square.valueOf(File.FILE_C, Rank.RANK_1),Rook.WHITE_ROOK,Queen.BLACK_QUEEN);
+        Move m2 = new Move(BLACK_PAWN, D2, C1, WHITE_ROOK, BLACK_QUEEN);
         assertEquals(m2, m);
     }
 }

@@ -156,22 +156,18 @@ public final class Square {
         return rank.getValue()*8 + file.getValue();
     }
 
-    @Deprecated
     public static Optional<Square> valueOf(Optional<File> file,Optional<Rank> rank) {
         return file.flatMap(f -> rank.map(r -> valueOf(f,r)));
     }
 
-    @Deprecated
     public static Optional<Square> valueOf(Optional<File> file,Rank rank) {
         return file.map(f -> valueOf(f,rank));
     }
 
-    @Deprecated
     public static Optional<Square> valueOf(File file, Optional<Rank> rank) {
         return rank.map(r -> valueOf(file,r));
     }
 
-    @Deprecated
     public static Square valueOf(File file, Rank rank) {
         return squares_arr[file.getValue()][rank.getValue()];
     }

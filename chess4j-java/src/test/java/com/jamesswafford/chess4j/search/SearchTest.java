@@ -11,16 +11,15 @@ import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.movegen.MoveGen;
-import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.hash.TranspositionTableEntryType;
-import com.jamesswafford.chess4j.pieces.Knight;
-import com.jamesswafford.chess4j.pieces.Pawn;
 
 import static org.junit.Assert.*;
+
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.pieces.Knight.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public class SearchTest {
 
@@ -30,7 +29,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testMateIn1() throws Exception {
+    public void testMateIn1() {
         Board b = Board.INSTANCE;
         b.setPos("4k3/8/3Q4/2B5/8/8/1K6/8 w - -");
 
@@ -45,7 +44,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testMateIn1b() throws Exception {
+    public void testMateIn1b() {
         Board b = Board.INSTANCE;
         b.setPos("4K3/8/8/3n2q1/8/8/3k4/8 b - -");
 
@@ -60,7 +59,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testMateIn2() throws Exception {
+    public void testMateIn2() {
         Board b = Board.INSTANCE;
         b.setPos("r1bq2r1/b4pk1/p1pp1p2/1p2pP2/1P2P1PB/3P4/1PPQ2P1/R3K2R w - -");
 
@@ -69,13 +68,13 @@ public class SearchTest {
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 30000;
 
-        int score = Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY,
+        int score = Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 4, searchStats,false);
         assertEquals(Constants.CHECKMATE-3, score);
     }
 
     @Test
-    public void testMateIn3() throws Exception {
+    public void testMateIn3() {
         Board b = Board.INSTANCE;
 
         Search.abortSearch = false;
@@ -90,7 +89,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testStaleMate() throws Exception {
+    public void testStaleMate() {
         Board b = Board.INSTANCE;
         b.setPos("8/6p1/5p2/5k1K/7P/8/8/8 w - -");
 
@@ -107,17 +106,17 @@ public class SearchTest {
     }
 
     @Test
-    public void testSearchLastPVFirst() throws Exception {
+    public void testSearchLastPVFirst() {
         Board b = Board.INSTANCE;
         b.resetBoard();
 
         Search.abortSearch = false;
 
         // create an artificial PV and ensure it is searched first.
-        Move c2c4 = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_C, Rank.RANK_2),Square.valueOf(File.FILE_C, Rank.RANK_4));
-        Move b7b5 = new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_B, Rank.RANK_7),Square.valueOf(File.FILE_B, Rank.RANK_5));
-        Move c4b5 = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_C, Rank.RANK_4),Square.valueOf(File.FILE_B, Rank.RANK_5),Pawn.BLACK_PAWN);
-        Move g8h6 = new Move(Knight.BLACK_KNIGHT,Square.valueOf(File.FILE_G, Rank.RANK_8),Square.valueOf(File.FILE_H, Rank.RANK_6));
+        Move c2c4 = new Move(WHITE_PAWN, C2, C4);
+        Move b7b5 = new Move(BLACK_PAWN, B7, B5);
+        Move c4b5 = new Move(WHITE_PAWN, C4, B5, BLACK_PAWN);
+        Move g8h6 = new Move(BLACK_KNIGHT, G8, H6);
         List<Move> lastPV = new ArrayList<>();
         lastPV.add(c2c4);
         lastPV.add(b7b5);
@@ -138,7 +137,7 @@ public class SearchTest {
 
     @Ignore // PVS has changed node count... need to revisit
     @Test
-    public void testAbortSearch() throws Exception {
+    public void testAbortSearch() {
         Board b = Board.INSTANCE;
         b.resetBoard();
 
@@ -154,7 +153,7 @@ public class SearchTest {
         searchStats = new SearchStats();
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
-        Search.search(new ArrayList<Move>(), -Constants.INFINITY, Constants.INFINITY,
+        Search.search(new ArrayList<>(), -Constants.INFINITY, Constants.INFINITY,
                 b, 3, searchStats,false);
         assertEquals(4, searchStats.getNodes()); // 1 + 3 (down left side of the tree)
 
@@ -162,7 +161,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testTranspositionTable() throws Exception {
+    public void testTranspositionTable() {
         Board b = Board.INSTANCE;
         b.resetBoard();
 
@@ -173,10 +172,10 @@ public class SearchTest {
         Search.stopTime = Search.startTime + 10000;
         // make a (ridiculous) entry up.  the program would never play 1. a4, UNLESS of course it would be a piece up!
         // make 1. ... a5 a rook up for white, everything else a queen up, and verify PV is 1. a4 a5
-        Move a2a4 = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_A,Rank.RANK_2),Square.valueOf(File.FILE_A, Rank.RANK_4));
+        Move a2a4 = new Move(WHITE_PAWN, A2, A4);
         b.applyMove(a2a4);
         List<Move> mvs = MoveGen.genLegalMoves(b);
-        Move a7a5 = new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_A,Rank.RANK_7),Square.valueOf(File.FILE_A, Rank.RANK_5));
+        Move a7a5 = new Move(BLACK_PAWN, A7, A5);
         assertTrue(mvs.contains(a7a5));
         for (Move mv : mvs) {
             b.applyMove(mv);
@@ -244,7 +243,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testQSearchDoesExpandJustCaptures() throws Exception {
+    public void testQSearchDoesExpandJustCaptures() {
         Board b = Board.INSTANCE;
         b.setPos("7k/8/8/3b4/8/8/6P1/K7 b - -");
 
@@ -264,7 +263,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testQSearchDoesExpandPromotions() throws Exception {
+    public void testQSearchDoesExpandPromotions() {
         Board b = Board.INSTANCE;
         b.setPos("8/P6k/8/8/8/8/7K/8 w - -");
 
@@ -284,7 +283,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testQSearchBetaCutoff() throws Exception {
+    public void testQSearchBetaCutoff() {
         Board b = Board.INSTANCE;
 
         // this pos would be very good for white if searched

@@ -8,19 +8,18 @@ import org.junit.Test;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.movegen.MoveGen;
-import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.io.EPDParser;
 import com.jamesswafford.chess4j.io.MoveParser;
-import com.jamesswafford.chess4j.pieces.Pawn;
 
 import static org.junit.Assert.*;
 
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
+
 public class PawnTranspositionTableTest {
 
-    PawnTranspositionTable ptable = new PawnTranspositionTable();
-    Board board = Board.INSTANCE;
+    private PawnTranspositionTable ptable = new PawnTranspositionTable();
+    private Board board = Board.INSTANCE;
 
     @Before
     public void setUp() {
@@ -45,7 +44,7 @@ public class PawnTranspositionTableTest {
         assertEquals(lbe, tte);
 
         // now make move and reprobe
-        Move m = new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_2),Square.valueOf(File.FILE_E,Rank.RANK_4));
+        Move m = new Move(WHITE_PAWN, E2, E4);
         board.applyMove(m);
         key = Zobrist.calculatePawnKey(board);
         tte = ptable.probe(key);
