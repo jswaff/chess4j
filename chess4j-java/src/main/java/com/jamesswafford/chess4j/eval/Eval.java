@@ -8,9 +8,6 @@ import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.io.FenBuilder;
-import com.jamesswafford.chess4j.movegen.Magic;
-import com.jamesswafford.chess4j.board.squares.East;
-import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
@@ -23,7 +20,6 @@ import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.pieces.Queen;
 import com.jamesswafford.chess4j.pieces.Rook;
 import com.jamesswafford.chess4j.utils.OrderedPair;
-import com.jamesswafford.chess4j.utils.PawnUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -34,6 +30,12 @@ import static com.jamesswafford.chess4j.pieces.Rook.*;
 import static com.jamesswafford.chess4j.pieces.Queen.*;
 import static com.jamesswafford.chess4j.board.squares.File.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
+
+import static com.jamesswafford.chess4j.eval.EvalPawn.*;
+import static com.jamesswafford.chess4j.eval.EvalBishop.*;
+import static com.jamesswafford.chess4j.eval.EvalKnight.*;
+import static com.jamesswafford.chess4j.eval.EvalRook.*;
+import static com.jamesswafford.chess4j.eval.EvalQueen.*;
 
 public final class Eval {
 
@@ -46,32 +48,10 @@ public final class Eval {
     public static final int PAWN_VAL   = 100;
     public static final int ALL_NONPAWN_PIECES_VAL = QUEEN_VAL + ROOK_VAL*2 + KNIGHT_VAL*2 + BISHOP_VAL*2;
 
-    // having majors on the 7th is huge advantage.  This might actually be too small.
-    public static final int ROOK_ON_7TH = 50;
-    public static final int CONNECTED_MAJORS_ON_7TH = 80;
-
-    // an open file is one with no pawns of either color on it
-    public static final int ROOK_OPEN_FILE = 25;
-
-    // a half-open file is one with enemy pawns but not our own
-    public static final int ROOK_HALF_OPEN_FILE = 15;
-
-    // a passed pawn is a pawn with no enemy pawn in front of it or on an adjacent file
-    public static final int PASSED_PAWN = 20;
-
-    // an isolated pawn is one with no friendly pawn on an adjacent file
-    public static final int ISOLATED_PAWN = -20;
-
-    // a doubled pawn is a pawn that resides on the same file as a friendly pawn
-    // note this would get "awarded" to both pawns
-    public static final int DOUBLED_PAWN = -10;
-
     public static final int KING_SAFETY_PAWN_ONE_AWAY = -10;
     public static final int KING_SAFETY_PAWN_TWO_AWAY = -20;
     public static final int KING_SAFETY_PAWN_FAR_AWAY = -30;
     public static final int KING_SAFETY_MIDDLE_OPEN_FILE = -50;
-
-    public static final int KNIGHT_TROPISM = -2;
 
     private static Map<Class<?>,Integer> pieceValMap;
 
@@ -84,50 +64,6 @@ public final class Eval {
         pieceValMap.put(Knight.class, KNIGHT_VAL);
         pieceValMap.put(Pawn.class, PAWN_VAL);
     }
-
-    // A8 ... H8
-    //    ...
-    // A1 ... H1
-
-    public static final int[] BISHOP_PST = {
-         0, 0,  0,  0,  0,  0, 0, 0,
-         0, 7,  7,  7,  7,  7, 7, 0,
-         0, 7, 15, 15, 15, 15, 7, 0,
-         0, 7, 15, 20, 20, 15, 7, 0,
-         0, 7, 15, 20, 20, 15, 7, 0,
-         0, 7, 15, 15, 15, 15, 7, 0,
-         0, 7,  7,  7,  7,  7, 7, 0,
-         0, 0,  0,  0,  0,  0, 0, 0 };
-
-    public static final int[] KNIGHT_PST = {
-        -5, -5, -5, -5, -5, -5, -5, -5,
-        -5,  0, 10, 10, 10, 10,  0, -5,
-        -5,  0, 15, 20, 20, 15,  0, -5,
-        -5,  5, 10, 15, 15, 10,  5, -5,
-        -5,  0, 10, 15, 15, 10,  5, -5,
-        -5,  0,  8,  0,  0,  8,  0, -5,
-        -5,  0,  0,  5,  5,  0,  0, -5,
-        -10,-10,-5, -5, -5, -5,-10,-10 };
-
-    public static final int[] PAWN_PST = {
-         0,  0,  0,  0,  0,  0,  0,  0,
-        30, 30, 30, 30, 30, 30, 30, 30,
-        14, 14, 14, 18, 18, 14, 14, 14,
-         7,  7,  7, 10, 10,  7,  7,  7,
-         5,  5,  5,  7,  7,  5,  5,  5,
-         3,  3,  3,  5,  5,  3,  3,  3,
-         0,  0,  0, -3, -3,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0 };
-
-    public static final int[] ROOK_PST = {
-         0,  0,  0,  0,  0,  0,  0,  0,
-         0,  0,  0,  0,  0,  0,  0,  0,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-        -5,  0,  0,  0,  0,  0,  0, -5,
-         0,  0,  0,  0,  0,  0,  0,  0 };
 
     public static final int[] KING_PST = {
        -30,-30,-30,-30,-30,-30,-30,-30,
@@ -149,16 +85,6 @@ public final class Eval {
          0, 10, 20, 20, 20, 20, 10,  0,
          0, 10, 10, 10, 10, 10, 10,  0,
          0,  0,  0,  0,  0,  0,  0,  0 };
-
-    public static final int[] QUEEN_PST = {
-        -1, -1, -1, -1, -1, -1, -1, -1,
-        -1,  0,  0,  0,  0,  0,  0, -1,
-        -1,  0,  1,  1,  1,  1,  0, -1,
-        -1,  0,  1,  2,  2,  1,  0, -1,
-        -1,  0,  1,  2,  2,  1,  0, -1,
-        -1,  0,  1,  1,  1,  1,  0, -1,
-        -1,  0,  0,  0,  0,  0,  0, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1 };
 
     static {
         Initializer.init();
@@ -238,10 +164,6 @@ public final class Eval {
         return score;
     }
 
-    private static int evalBishop(boolean isWhite,Square sq) {
-        return BISHOP_PST[isWhite?sq.value():sq.flipVertical().value()];
-    }
-
     private static int evalKnights(Board board) {
         int score = 0;
 
@@ -261,18 +183,6 @@ public final class Eval {
             knightsMap ^= Bitboard.squares[knightSqVal];
         }
 
-        return score;
-    }
-
-    private static int evalKnight(Board board,boolean isWhite,Square sq) {
-        int score = 0;
-        if (isWhite) {
-            score = KNIGHT_PST[sq.value()];
-            score += KNIGHT_TROPISM * sq.distance(board.getKingSquare(Color.BLACK));
-        } else {
-            score = KNIGHT_PST[sq.flipVertical().value()];
-            score += KNIGHT_TROPISM * sq.distance(board.getKingSquare(Color.WHITE));
-        }
         return score;
     }
 
@@ -313,84 +223,6 @@ public final class Eval {
         return score;
     }
 
-    private static int evalPawn(Board board,boolean isWhite,Square sq) {
-        int score=0;
-
-        score += PAWN_PST[isWhite ? sq.value() : sq.flipVertical().value()];
-        if (PawnUtils.isPassedPawn(board,sq,isWhite)) {
-            score += PASSED_PAWN;
-        }
-        if (PawnUtils.isIsolated(board,sq,isWhite)) {
-            score += ISOLATED_PAWN;
-        }
-        if (PawnUtils.isDoubled(board,sq,isWhite)) {
-            score += DOUBLED_PAWN;
-        }
-
-        return score;
-    }
-
-    private static int evalConnectedMajorOn7th(Board board,boolean isWhite,Square sq) {
-        int score = 0;
-
-        long rookMoves = Magic.getRookMoves(board,sq.value(),
-                Bitboard.rays[sq.value()][East.getInstance().value()]);
-
-        if (isWhite) {
-            if ((rookMoves & (board.getWhiteRooks() | board.getWhiteQueens())) != 0) {
-                score += CONNECTED_MAJORS_ON_7TH;
-            }
-        } else {
-            if ((rookMoves & (board.getBlackRooks() | board.getBlackQueens())) != 0) {
-                score += CONNECTED_MAJORS_ON_7TH;
-            }
-        }
-
-        return score;
-    }
-
-    private static int evalMajorOn7th(Board board,boolean isWhite,Square sq) {
-        int score = 0;
-
-        if (isWhite) {
-            if (sq.rank()==Rank.RANK_7 && board.getKingSquare(Color.BLACK).rank()==Rank.RANK_8) {
-                score += ROOK_ON_7TH;
-                score += evalConnectedMajorOn7th(board,isWhite,sq);
-            }
-        } else {
-            if (sq.rank()==Rank.RANK_2 && board.getKingSquare(Color.WHITE).rank()==Rank.RANK_1) {
-                score += ROOK_ON_7TH;
-                score += evalConnectedMajorOn7th(board,isWhite,sq);
-            }
-        }
-
-        return score;
-    }
-
-    private static int evalRookOpenFile(Board board,boolean isWhite,Square sq) {
-        int score = 0;
-
-        long friends,enemies;
-        if (isWhite) {
-            friends = board.getWhitePawns();
-            enemies = board.getBlackPawns();
-        } else {
-            friends = board.getBlackPawns();
-            enemies = board.getWhitePawns();
-        }
-
-        long fileMask = Bitboard.files[sq.file().getValue()] ^ Bitboard.squares[sq.value()];
-        if ((fileMask & friends)==0) {
-            if ((fileMask & enemies)!=0) {
-                score += ROOK_HALF_OPEN_FILE;
-            } else {
-                score += ROOK_OPEN_FILE;
-            }
-        }
-
-        return score;
-    }
-
     private static int evalRooks(Board board) {
         int score = 0;
 
@@ -410,13 +242,6 @@ public final class Eval {
             rooksMap ^= Bitboard.squares[rookSqVal];
         }
 
-        return score;
-    }
-
-    private static int evalRook(Board board,boolean isWhite,Square sq) {
-        int score = ROOK_PST[isWhite?sq.value():sq.flipVertical().value()];
-        score += evalMajorOn7th(board,isWhite,sq);
-        score += evalRookOpenFile(board,isWhite,sq);
         return score;
     }
 
@@ -607,12 +432,6 @@ public final class Eval {
             queensMap ^= Bitboard.squares[queenSqVal];
         }
 
-        return score;
-    }
-
-    private static int evalQueen(Board board,boolean isWhite,Square sq) {
-        int score = QUEEN_PST[isWhite?sq.value():sq.flipVertical().value()];
-        score += evalMajorOn7th(board,isWhite,sq);
         return score;
     }
 
