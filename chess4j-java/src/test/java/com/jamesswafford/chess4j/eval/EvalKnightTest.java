@@ -14,6 +14,8 @@ public class EvalKnightTest {
 
     @Test
     public void testEvalKnight() {
+        board.resetBoard();
+
         assertEquals(KNIGHT_PST[B1.value()] + KNIGHT_TROPISM * B1.distance(E8),
                 evalKnight(board, true, B1));
 

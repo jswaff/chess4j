@@ -3,18 +3,16 @@ package com.jamesswafford.chess4j.eval;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.utils.OrderedPair;
 
 import static org.junit.Assert.*;
 
-import static com.jamesswafford.chess4j.pieces.Pawn.*;
-import static com.jamesswafford.chess4j.pieces.Knight.*;
-import static com.jamesswafford.chess4j.pieces.Bishop.*;
-import static com.jamesswafford.chess4j.pieces.Rook.*;
-import static com.jamesswafford.chess4j.pieces.Queen.*;
-
 import static com.jamesswafford.chess4j.eval.Eval.*;
 
+/**
+ * Test the evaluator.  We only do a few basic sanity checks here.  Most of the
+ * functionality is tested in other, smaller scoped tests.  Our goal here is
+ * to make sure all the pieces are wired together correctly.
+ */
 public class EvalTest {
 
     Board board = Board.INSTANCE;
@@ -79,53 +77,4 @@ public class EvalTest {
         assertEquals(eval, eval2);
     }
 
-    @Test
-    public void testPieceVals() {
-        assertEquals(900, Eval.getPieceValue(WHITE_QUEEN));
-        assertEquals(900, Eval.getPieceValue(BLACK_QUEEN));
-
-        assertEquals(500, Eval.getPieceValue(WHITE_ROOK));
-        assertEquals(500, Eval.getPieceValue(BLACK_ROOK));
-
-        assertEquals(320, Eval.getPieceValue(WHITE_BISHOP));
-        assertEquals(320, Eval.getPieceValue(BLACK_BISHOP));
-
-        assertEquals(300, Eval.getPieceValue(WHITE_KNIGHT));
-        assertEquals(300, Eval.getPieceValue(BLACK_KNIGHT));
-
-        assertEquals(100, Eval.getPieceValue(WHITE_PAWN));
-        assertEquals(100, Eval.getPieceValue(BLACK_PAWN));
-    }
-
-    @Test
-    public void testEvalMaterial() {
-        board.resetBoard();
-        assertEquals(0, evalMaterial(board));
-
-        board.setPos("6k1/8/8/3B4/8/8/8/K7 w - - 0 1");
-        assertEquals(BISHOP_VAL, evalMaterial(board));
-
-        board.setPos("6k1/8/8/3Br3/8/8/8/K7 w - - 0 1");
-        assertEquals(BISHOP_VAL-ROOK_VAL, evalMaterial(board));
-    }
-
-    @Test
-    public void testMaterialScores() {
-        board.setPos("8/k7/prb5/K7/QN6/8/8/8 b - - 0 1");
-        OrderedPair<Integer,Integer> npScores = Eval.getNonPawnMaterialScore(board);
-        assertEquals(QUEEN_VAL + KNIGHT_VAL, (int) npScores.getE1());
-        assertEquals(ROOK_VAL + BISHOP_VAL, (int) npScores.getE2());
-
-        OrderedPair<Integer,Integer> pScores = getPawnMaterialScore(board);
-        assertEquals(0, (int) pScores.getE1());
-        assertEquals(PAWN_VAL, (int) pScores.getE2());
-    }
-
-    @Test
-    public void testScale() {
-        int material = ROOK_VAL * 2 + KNIGHT_VAL * 2 + BISHOP_VAL * 2 + QUEEN_VAL;
-        assertEquals(100, scale(100, material));
-
-        assertEquals(15, scale(100, ROOK_VAL));
-    }
 }

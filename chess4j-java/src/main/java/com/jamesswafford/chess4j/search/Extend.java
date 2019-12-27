@@ -3,7 +3,7 @@ package com.jamesswafford.chess4j.search;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.eval.Eval;
+import com.jamesswafford.chess4j.eval.EvalMaterial;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.utils.BoardUtils;
@@ -62,9 +62,9 @@ public class Extend {
         Piece captured2 = b.getUndos().get(b.getUndos().size()-2).getMove().captured();
         if (captured2==null) return 0;
 
-        int val1 = Eval.getPieceValue(captured1);
-        int val2 = Eval.getPieceValue(captured2);
-        if (Math.abs(val1-val2) < Eval.PAWN_VAL) return 1;
+        int val1 = EvalMaterial.evalPiece(captured1);
+        int val2 = EvalMaterial.evalPiece(captured2);
+        if (Math.abs(val1-val2) < EvalMaterial.PAWN_VAL) return 1;
 
         return 0;
     }

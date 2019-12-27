@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.jamesswafford.chess4j.board.Draw;
+import com.jamesswafford.chess4j.eval.EvalMaterial;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -347,14 +348,14 @@ public final class Search {
 
             // can this capture possibly raise alpha?
             if (!inCheck && mv.promotion()==null
-                    && Eval.getPieceValue(mv.captured()) + Eval.PAWN_VAL*2 + standPat < alpha) {
+                    && EvalMaterial.evalPiece(mv.captured()) + EvalMaterial.PAWN_VAL*2 + standPat < alpha) {
                 board.undoLastMove();
                 continue;
             }
 
             // if not a promising capture just skip
             if (!inCheck && mv.promotion()==null
-                    && Eval.getPieceValue(board.getPiece(mv.to())) > Eval.getPieceValue(mv.captured())
+                    && EvalMaterial.evalPiece(board.getPiece(mv.to())) > EvalMaterial.evalPiece(mv.captured())
                     && SEE.see(board, mv) < 0) {
                 board.undoLastMove();
                 continue;

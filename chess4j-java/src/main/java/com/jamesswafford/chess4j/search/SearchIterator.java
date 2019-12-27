@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.jamesswafford.chess4j.eval.EvalMaterial;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -15,7 +16,6 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.book.BookMove;
-import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.io.PrintGameResult;
 import com.jamesswafford.chess4j.io.PrintLine;
@@ -24,11 +24,6 @@ import com.jamesswafford.chess4j.utils.GameStatusChecker;
 import com.jamesswafford.chess4j.utils.MoveUtils;
 import com.jamesswafford.chess4j.utils.TimeUtils;
 
-/**
- * SearchIterator
- * @author james
- *
- */
 public final class SearchIterator {
 
     private static final Log LOGGER = LogFactory.getLog(SearchIterator.class);
@@ -191,7 +186,7 @@ public final class SearchIterator {
         }
 
         TTHolder.clearAllTables();
-        List<Move> pv = new ArrayList<Move>();
+        List<Move> pv = new ArrayList<>();
         Search.startTime = System.currentTimeMillis();
         if (testSuiteMode) {
             Search.stopTime = Search.startTime + maxTime;
@@ -212,8 +207,8 @@ public final class SearchIterator {
             int alphaBound = -Constants.INFINITY;
             int betaBound = Constants.INFINITY;
             if (depth > 2) {
-                alphaBound = score - (Eval.PAWN_VAL / 3);
-                betaBound = score + (Eval.PAWN_VAL / 3);
+                alphaBound = score - (EvalMaterial.PAWN_VAL / 3);
+                betaBound = score + (EvalMaterial.PAWN_VAL / 3);
             }
 
             score=Search.search(pv,alphaBound, betaBound, board, depth,stats,true);

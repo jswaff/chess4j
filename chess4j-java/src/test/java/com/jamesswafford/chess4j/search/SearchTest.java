@@ -17,6 +17,7 @@ import com.jamesswafford.chess4j.hash.TranspositionTableEntryType;
 
 import static org.junit.Assert.*;
 
+import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
 import static com.jamesswafford.chess4j.pieces.Pawn.*;
 import static com.jamesswafford.chess4j.pieces.Knight.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
@@ -238,8 +239,8 @@ public class SearchTest {
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
 
-        int qScore = Search.quiescenceSearch(Eval.QUEEN_VAL,Constants.INFINITY,false, b,searchStats);
-        assertEquals(Eval.QUEEN_VAL,qScore);
+        int qScore = Search.quiescenceSearch(QUEEN_VAL,Constants.INFINITY,false, b,searchStats);
+        assertEquals(QUEEN_VAL,qScore);
     }
 
     @Test
@@ -293,14 +294,14 @@ public class SearchTest {
         assertEquals(4, moves.size()); // just promotions
 
         int score = Eval.eval(b);
-        assertTrue(Math.abs(score) < Eval.QUEEN_VAL);
+        assertTrue(Math.abs(score) < QUEEN_VAL);
 
         Search.abortSearch = false;
         SearchStats searchStats = new SearchStats();
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
 
-        Search.quiescenceSearch(-Constants.INFINITY,-Eval.QUEEN_VAL,false,b,searchStats);
+        Search.quiescenceSearch(-Constants.INFINITY,-QUEEN_VAL,false,b,searchStats);
 
         assertEquals(0,searchStats.getNodes());
         assertEquals(0, searchStats.getQNodes());
