@@ -81,16 +81,6 @@ public class Move {
         return s;
     }
 
-    public String toString2() {
-        return "Move[from: " + from + ", to: " + to
-                + ", piece: " + piece
-                + ", captured: " + captured
-                + ", promotion: " + promotion
-                + ", castle: " + castle
-                + ", epCapture: " + epCapture
-                + "] ";
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Move)) {

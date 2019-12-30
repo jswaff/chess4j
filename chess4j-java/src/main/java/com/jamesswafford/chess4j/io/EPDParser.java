@@ -13,7 +13,7 @@ public final class EPDParser {
     // set the board and return a list of operations
     // Note the EPD grammar can be found here:
     // http://chessprogramming.wikispaces.com/Extended+Position+Description
-    public static List<EPDOperation> setPos(Board b,String epd) throws ParseException {
+    public static List<EPDOperation> setPos(Board b, String epd) throws ParseException {
         List<EPDOperation> opsList = new ArrayList<>();
 
         // want the string up to the 4th space.
@@ -22,7 +22,7 @@ public final class EPDParser {
             ind = epd.indexOf(' ', ind+1);
         }
         String fenPart = epd.substring(0, ind);
-        FenParser.setPos(b, fenPart);
+        b.setPos(fenPart);
 
         // the remaining bits are operations
         // e.g. bm Ba2 Nxf7
@@ -37,7 +37,7 @@ public final class EPDParser {
             int opsInd = ops.indexOf(' ');
             if (opsInd==-1) {
                 opCode = ops;
-                operands = new ArrayList<String>();
+                operands = new ArrayList<>();
             } else {
                 opCode = ops.substring(0, opsInd);
                 operands = getOperands(ops.substring(opsInd+1));

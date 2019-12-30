@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.jamesswafford.chess4j.eval.EvalMaterial;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -13,9 +14,8 @@ import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.book.BookMove;
-import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.io.PrintGameResult;
 import com.jamesswafford.chess4j.io.PrintLine;
@@ -24,11 +24,6 @@ import com.jamesswafford.chess4j.utils.GameStatusChecker;
 import com.jamesswafford.chess4j.utils.MoveUtils;
 import com.jamesswafford.chess4j.utils.TimeUtils;
 
-/**
- * SearchIterator
- * @author james
- *
- */
 public final class SearchIterator {
 
     private static final Log LOGGER = LogFactory.getLog(SearchIterator.class);
@@ -109,12 +104,12 @@ public final class SearchIterator {
 
         Board.INSTANCE.applyMove(pv.get(0));
         LOGGER.info("move " + pv.get(0));
-        GameStatus gs = GameStatusChecker.getGameStatus();
+        GameStatus gameStatus = GameStatusChecker.getGameStatus(Board.INSTANCE);
 
         // pondering loop.  as long as we guess correctly we'll loop back around
         // if we don't predict correctly this thread is terminated
         boolean ponderFailure = false;
-        while (gs==GameStatus.INPROGRESS && ponderEnabled && pv.size() > 1 && !ponderFailure && !abortIterator) {
+        while (gameStatus==GameStatus.INPROGRESS && ponderEnabled && pv.size() > 1 && !ponderFailure && !abortIterator) {
 
             ponderMutex.lock();
             LOGGER.debug("# thinkHelper acquired lock #1 on ponderMutex");
@@ -146,7 +141,7 @@ public final class SearchIterator {
                     assert(Board.INSTANCE.equals(searchPos));
                     Board.INSTANCE.applyMove(pv.get(0));
                     LOGGER.info("move " + pv.get(0));
-                    gs = GameStatusChecker.getGameStatus();
+                    gameStatus = GameStatusChecker.getGameStatus(Board.INSTANCE);
                 } else {
                     // we're still in ponder mode.  this means the search terminated on its own.
                     // in this case just bail out.
@@ -162,8 +157,8 @@ public final class SearchIterator {
 
         LOGGER.debug("### exiting search thread");
 
-        if (gs != GameStatus.INPROGRESS) {
-            PrintGameResult.printResult(gs);
+        if (gameStatus != GameStatus.INPROGRESS) {
+            PrintGameResult.printResult(gameStatus);
         }
     }
 
@@ -191,7 +186,7 @@ public final class SearchIterator {
         }
 
         TTHolder.clearAllTables();
-        List<Move> pv = new ArrayList<Move>();
+        List<Move> pv = new ArrayList<>();
         Search.startTime = System.currentTimeMillis();
         if (testSuiteMode) {
             Search.stopTime = Search.startTime + maxTime;
@@ -212,8 +207,8 @@ public final class SearchIterator {
             int alphaBound = -Constants.INFINITY;
             int betaBound = Constants.INFINITY;
             if (depth > 2) {
-                alphaBound = score - (Eval.PAWN_VAL / 3);
-                betaBound = score + (Eval.PAWN_VAL / 3);
+                alphaBound = score - (EvalMaterial.PAWN_VAL / 3);
+                betaBound = score + (EvalMaterial.PAWN_VAL / 3);
             }
 
             score=Search.search(pv,alphaBound, betaBound, board, depth,stats,true);

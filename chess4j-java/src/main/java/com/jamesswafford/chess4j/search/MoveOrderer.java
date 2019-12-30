@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.io.DrawBoard;
 import com.jamesswafford.chess4j.utils.BoardUtils;
 import com.jamesswafford.chess4j.utils.MoveUtils;
@@ -43,7 +43,7 @@ public class MoveOrderer {
         if (nextMoveOrderStage==MoveOrderStage.PV) {
             nextMoveOrderStage = MoveOrderStage.HASH_MOVE;
             if (pvMove != null) {
-                assert(BoardUtils.isGoodMove(board, pvMove));
+                assert(BoardUtils.isPseudoLegalMove(board, pvMove));
                 assert(testGoodMove(board,pvMove));
                 return pvMove;
             }
@@ -54,7 +54,7 @@ public class MoveOrderer {
             nextMoveOrderStage = MoveOrderStage.GENCAPS;
             // TODO: try to express using filter and isPresent
             if (hashMove.isPresent() && !hashMove.get().equals(pvMove)
-                    && BoardUtils.isGoodMove(board, hashMove.get())) {
+                    && BoardUtils.isPseudoLegalMove(board, hashMove.get())) {
                 assert(testGoodMove(board,hashMove.get()));
                 return hashMove.get();
             }
@@ -94,7 +94,7 @@ public class MoveOrderer {
                 nextMoveOrderStage = MoveOrderStage.KILLER2;
                 if (killer1 != null && !killer1.equals(pvMove)
                         && !hashMove.filter(hm -> hm.equals(killer1)).isPresent()
-                        && BoardUtils.isGoodMove(board, killer1)) {
+                        && BoardUtils.isPseudoLegalMove(board, killer1)) {
 
                     assert(killer1.captured()==null);
                     assert(testGoodMove(board,killer1));
@@ -107,7 +107,7 @@ public class MoveOrderer {
                 nextMoveOrderStage = MoveOrderStage.GENNONCAPS;
                 if (killer2 != null
                     && !killer2.equals(pvMove) && !hashMove.filter(hm -> hm.equals(killer2)).isPresent()
-                    && BoardUtils.isGoodMove(board, killer2)) {
+                    && BoardUtils.isPseudoLegalMove(board, killer2)) {
 
                     assert(killer2.captured()==null);
                     assert(testGoodMove(board,killer2));
@@ -185,9 +185,9 @@ public class MoveOrderer {
         List<Move> moves = MoveGen.genPseudoLegalMoves(b);
         if (!moves.contains(m)) {
             DrawBoard.drawBoard(b);
-            System.out.println("not good!: " + m.toString2());
+            System.out.println("not good!: " + m.toString());
             for (Move mv : moves) {
-                System.out.println(mv.toString2());
+                System.out.println(mv.toString());
             }
         }
         return moves.contains(m);

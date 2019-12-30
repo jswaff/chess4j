@@ -6,6 +6,7 @@ import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -21,14 +22,14 @@ public class Bitboard {
     public static long[][] pawnAttacks = new long[64][2];
 
     static {
-        for (int i=0;i<64;i++) {
+        for (int i=0; i<64; i++) {
             squares[i] = 1L << i;
         }
-        for (int i=0;i<8;i++) {
+        for (int i=0; i<8; i++) {
             files[i] = ranks[i] = 0;
             File f = File.file(i);
             Rank r = Rank.rank(i);
-            for (int j=0;j<64;j++) {
+            for (int j=0 ;j<64; j++) {
                 Square sq = Square.valueOf(j);
                 if (sq.file()==f) {
                     files[i] |= squares[j];
@@ -42,12 +43,12 @@ public class Bitboard {
 
     // initialize rays
     static {
-        for (int i=0;i<64;i++) {
-            for (int j=0;j<8;j++) {
+        for (int i=0; i<64; i++) {
+            for (int j=0; j<8; j++) {
                 rays[i][j] = 0;
             }
 
-            for (int j=0;j<64;j++) {
+            for (int j=0; j<64; j++) {
                 if (i != j) {
                     Optional<Direction> dir = Direction.getDirectionTo(i,j);
                     int finalI = i; int finalJ = j;
@@ -112,20 +113,10 @@ public class Bitboard {
         });
     }
 
-    private long val;
-
-    public Bitboard(int sq) {
-        this.val = squares[sq];
-    }
-
-    public Bitboard(long val) {
-        this.val = val;
-    }
-
-    public static long isolateLSB(long mask,int index) {
+    public static long isolateLSB(long mask, int index) {
         int n=0;
 
-        for (int i=0;i<64;i++) {
+        for (int i=0; i<64; i++) {
             if ((squares[i] & mask) != 0) {
                 if (n==index) {
                     return squares[i];
@@ -137,25 +128,36 @@ public class Bitboard {
         return 0;
     }
 
-
-    public int lsb() {
-        return lsb(val);
+    public static int lsb(Square sq) {
+        return lsb(squares[sq.value()]);
     }
 
     public static int lsb(long val) {
         return Long.numberOfTrailingZeros(val);
     }
 
-    public int msb() {
-        return msb(val);
+    public static int msb(Square sq) {
+        return msb(squares[sq.value()]);
     }
 
     public static int msb(long val) {
         return 63 - Long.numberOfLeadingZeros(val);
     }
 
-    @Override
-    public String toString() {
+    public static long toBitboard(Square sq) {
+        return squares[sq.value()];
+    }
+
+    public static long toBitboard(List<Square> squares) {
+        long val = 0;
+
+        for (Square sq : squares) {
+            val |= Bitboard.squares[sq.value()];
+        }
+        return val;
+    }
+
+    public static String drawBitboard(long val) {
         StringBuilder sb = new StringBuilder("");
 
         for (int i=0;i<64;i++) {

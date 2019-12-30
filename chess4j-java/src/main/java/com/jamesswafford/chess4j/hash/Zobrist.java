@@ -1,12 +1,6 @@
 package com.jamesswafford.chess4j.hash;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Board;
@@ -84,7 +78,7 @@ public final class Zobrist {
         return epMap.get(sq);
     }
 
-    public static long getPawnKey(Board b) {
+    public static long calculatePawnKey(Board b) {
 
         return Square.allSquares().stream()
                 .filter(sq -> b.getPiece(sq) instanceof Pawn)
@@ -92,7 +86,7 @@ public final class Zobrist {
                 .reduce(0L,(x,y) -> x ^ y);
     }
 
-    public static long getBoardKey(Board b) {
+    public static long calculateBoardKey(Board b) {
 
         long key = Square.allSquares().stream()
                 .filter(sq -> b.getPiece(sq) != null)
@@ -100,7 +94,7 @@ public final class Zobrist {
                 .reduce(0L,(x,y) -> x ^ y);
 
         key = EnumSet.allOf(CastlingRights.class).stream()
-                .filter(cr -> b.hasCastlingRight(cr))
+                .filter(b::hasCastlingRight)
                 .map(cr -> castlingMap.get(cr))
                 .reduce(key, (x,y) -> x ^ y);
 
@@ -114,16 +108,14 @@ public final class Zobrist {
     }
 
     public static List<Long> getAllKeys() {
-        List<Long> keys = new ArrayList<Long>();
+        List<Long> keys = new ArrayList<>();
 
         String[] strPieces = {"P","R","N","B","Q","K","p","r","n","b","q","k"};
 
         for (String strPiece : strPieces) {
             Piece piece = PieceFactory.getPiece(strPiece);
             Long[] pieceKeys = pieceMap.get(piece);
-            for (int i=0;i<Square.NUM_SQUARES;i++) {
-                keys.add(pieceKeys[i]);
-            }
+            keys.addAll(Arrays.asList(pieceKeys).subList(0, Square.NUM_SQUARES));
         }
 
         keys.add(playerMap.get(Color.WHITE));

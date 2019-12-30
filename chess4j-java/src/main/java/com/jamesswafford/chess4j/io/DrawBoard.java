@@ -18,7 +18,7 @@ public class DrawBoard {
 
         for (Rank r : Rank.values()) {
             for (File f : File.values()) {
-                Piece p = b.getPiece(Square.valueOf(f,r));
+                Piece p = b.getPiece(Square.valueOf(f, r));
                 board.append(p==null?"-":p.toString());
                 if (f.equals(File.FILE_H)) {
                     if (r.equals(Rank.RANK_7)) {

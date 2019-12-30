@@ -1,25 +1,23 @@
 package com.jamesswafford.chess4j.search;
 
-import java.util.Collections;
 import java.util.List;
-
-import junit.framework.Assert;
 
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.MoveGen;
-import com.jamesswafford.chess4j.io.EPDParser;
-import com.jamesswafford.chess4j.io.FenParser;
+import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.io.MoveParser;
+
+import static org.junit.Assert.*;
+
 
 public class MVVLVATest {
 
     @Test
     public void testScore1() throws Exception {
         Board b = Board.INSTANCE;
-        EPDParser.setPos(b, "3r1rk1/p3qp1p/2bb2p1/2p5/3P4/1P6/PBQN1PPP/2R2RK1 b - - bm Bxg2 Bxh2+; id \"WAC.297\";");
+        b.setPos("3r1rk1/p3qp1p/2bb2p1/2p5/3P4/1P6/PBQN1PPP/2R2RK1 b - -");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
@@ -27,29 +25,29 @@ public class MVVLVATest {
         Move c6g2 = mp.parseMove("c6g2", b); // BxP
         Move d6h2 = mp.parseMove("d6h2", b); // BxP
 
-        Assert.assertTrue(moves.contains(c5d4));
-        Assert.assertTrue(moves.contains(c6g2));
-        Assert.assertTrue(moves.contains(d6h2));
+        assertTrue(moves.contains(c5d4));
+        assertTrue(moves.contains(c6g2));
+        assertTrue(moves.contains(d6h2));
 
         // whatever order the BxP moves were in should be preserved.
         boolean flag = moves.indexOf(c6g2) < moves.indexOf(d6h2);
 
-        Collections.sort(moves, new MVVLVA(b));
+        moves.sort(new MVVLVA(b));
 
-        Assert.assertTrue(moves.get(0).equals(c5d4));
+        assertEquals(c5d4, moves.get(0));
         if (flag) {
-            Assert.assertTrue(moves.get(1).equals(c6g2));
-            Assert.assertTrue(moves.get(2).equals(d6h2));
+            assertEquals(c6g2, moves.get(1));
+            assertEquals(d6h2, moves.get(2));
         } else {
-            Assert.assertTrue(moves.get(1).equals(d6h2));
-            Assert.assertTrue(moves.get(2).equals(c6g2));
+            assertEquals(d6h2, moves.get(1));
+            assertEquals(c6g2, moves.get(2));
         }
     }
 
     @Test
     public void testScore2() throws Exception {
         Board b = Board.INSTANCE;
-        EPDParser.setPos(b, "8/4Pk1p/6p1/1r6/8/5N2/2B2PPP/b5K1 w - - bm e8=Q+; id \"position 0631\";");
+        b.setPos("8/4Pk1p/6p1/1r6/8/5N2/2B2PPP/b5K1 w - -");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
@@ -59,25 +57,25 @@ public class MVVLVATest {
         Move e7e8n = mp.parseMove("e7e8=n", b);
         Move c2g6 = mp.parseMove("c2g6", b);
 
-        Assert.assertTrue(moves.contains(e7e8q));
-        Assert.assertTrue(moves.contains(e7e8r));
-        Assert.assertTrue(moves.contains(e7e8b));
-        Assert.assertTrue(moves.contains(e7e8n));
-        Assert.assertTrue(moves.contains(c2g6));
+        assertTrue(moves.contains(e7e8q));
+        assertTrue(moves.contains(e7e8r));
+        assertTrue(moves.contains(e7e8b));
+        assertTrue(moves.contains(e7e8n));
+        assertTrue(moves.contains(c2g6));
 
-        Collections.sort(moves, new MVVLVA(b));
+        moves.sort(new MVVLVA(b));
 
-        Assert.assertTrue(moves.get(0).equals(e7e8q));
-        Assert.assertTrue(moves.get(1).equals(e7e8r));
-        Assert.assertTrue(moves.get(2).equals(e7e8b));
-        Assert.assertTrue(moves.get(3).equals(e7e8n));
-        Assert.assertTrue(moves.get(4).equals(c2g6));
+        assertEquals(e7e8q, moves.get(0));
+        assertEquals(e7e8r, moves.get(1));
+        assertEquals(e7e8b, moves.get(2));
+        assertEquals(e7e8n, moves.get(3));
+        assertEquals(c2g6, moves.get(4));
     }
 
     @Test
     public void testScore3() throws Exception {
         Board b = Board.INSTANCE;
-        EPDParser.setPos(b, "6r1/pp1b1P1p/5Q2/3p3k/5K2/8/2P3P1/8 w - - bm fxg8=N; id \"made up 001\";");
+        b.setPos("6r1/pp1b1P1p/5Q2/3p3k/5K2/8/2P3P1/8 w - -");
         List<Move> moves = MoveGen.genLegalMoves(b);
 
         MoveParser mp = new MoveParser();
@@ -91,31 +89,31 @@ public class MVVLVATest {
         Move f7g8b = mp.parseMove("f7g8=b", b);
         Move f7g8n = mp.parseMove("f7g8=n", b);
 
-        Assert.assertTrue(moves.contains(f7f8q));
-        Assert.assertTrue(moves.contains(f7f8r));
-        Assert.assertTrue(moves.contains(f7f8b));
-        Assert.assertTrue(moves.contains(f7f8n));
-        Assert.assertTrue(moves.contains(f7g8q));
-        Assert.assertTrue(moves.contains(f7g8r));
-        Assert.assertTrue(moves.contains(f7g8b));
-        Assert.assertTrue(moves.contains(f7g8n));
+        assertTrue(moves.contains(f7f8q));
+        assertTrue(moves.contains(f7f8r));
+        assertTrue(moves.contains(f7f8b));
+        assertTrue(moves.contains(f7f8n));
+        assertTrue(moves.contains(f7g8q));
+        assertTrue(moves.contains(f7g8r));
+        assertTrue(moves.contains(f7g8b));
+        assertTrue(moves.contains(f7g8n));
 
-        Collections.sort(moves, new MVVLVA(b));
+        moves.sort(new MVVLVA(b));
 
-        Assert.assertTrue(moves.get(0).equals(f7g8q));
-        Assert.assertTrue(moves.get(1).equals(f7g8r));
-        Assert.assertTrue(moves.get(2).equals(f7g8b));
-        Assert.assertTrue(moves.get(3).equals(f7g8n));
-        Assert.assertTrue(moves.get(4).equals(f7f8q));
-        Assert.assertTrue(moves.get(5).equals(f7f8r));
-        Assert.assertTrue(moves.get(6).equals(f7f8b));
-        Assert.assertTrue(moves.get(7).equals(f7f8n));
+        assertEquals(f7g8q, moves.get(0));
+        assertEquals(f7g8r, moves.get(1));
+        assertEquals(f7g8b, moves.get(2));
+        assertEquals(f7g8n, moves.get(3));
+        assertEquals(f7f8q, moves.get(4));
+        assertEquals(f7f8r, moves.get(5));
+        assertEquals(f7f8b, moves.get(6));
+        assertEquals(f7f8n, moves.get(7));
     }
 
     @Test
     public void testScore4() throws Exception {
         Board b = Board.INSTANCE;
-        FenParser.setPos(b, "6R1/kp6/8/1KpP4/8/8/8/6B1 w - c6");
+        b.setPos("6R1/kp6/8/1KpP4/8/8/8/6B1 w - c6");
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         MoveParser mp = new MoveParser();
@@ -123,15 +121,15 @@ public class MVVLVATest {
         Move b5c5 = mp.parseMove("b5c5", b);
         Move g1c5 = mp.parseMove("g1c5", b);
 
-        Assert.assertTrue(moves.contains(d5c6));
-        Assert.assertTrue(moves.contains(b5c5));
-        Assert.assertTrue(moves.contains(g1c5));
+        assertTrue(moves.contains(d5c6));
+        assertTrue(moves.contains(b5c5));
+        assertTrue(moves.contains(g1c5));
 
-        Collections.sort(moves, new MVVLVA(b));
+        moves.sort(new MVVLVA(b));
 
-        Assert.assertTrue(moves.get(0).equals(d5c6));
-        Assert.assertTrue(moves.get(1).equals(g1c5));
-        Assert.assertTrue(moves.get(2).equals(b5c5));
+        assertEquals(d5c6, moves.get(0));
+        assertEquals(g1c5, moves.get(1));
+        assertEquals(b5c5, moves.get(2));
     }
 
 

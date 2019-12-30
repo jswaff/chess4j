@@ -18,7 +18,6 @@ import com.jamesswafford.chess4j.book.BookMove;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
-import com.jamesswafford.chess4j.search.Search;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.utils.GameResult;
 import com.jamesswafford.chess4j.utils.GameStatus;
@@ -414,7 +413,7 @@ public class InputParser {
             fen.append(input[i]);
         }
         try {
-            FenParser.setPos(Board.INSTANCE,fen.toString());
+            Board.INSTANCE.setPos(fen.toString());
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -505,9 +504,9 @@ public class InputParser {
         // associate clock with player on move
         engineColor = Board.INSTANCE.getPlayerToMove();
 
-        GameStatus gs = GameStatusChecker.getGameStatus();
-        if (gs != GameStatus.INPROGRESS) {
-            PrintGameResult.printResult(gs);
+        GameStatus gameStatus = GameStatusChecker.getGameStatus(Board.INSTANCE);
+        if (gameStatus != GameStatus.INPROGRESS) {
+            PrintGameResult.printResult(gameStatus);
             return;
         }
 

@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.jamesswafford.chess4j.board.Draw;
+import com.jamesswafford.chess4j.eval.EvalMaterial;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.board.ZugzwangDetector;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.eval.Eval;
@@ -19,7 +21,6 @@ import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TranspositionTableEntryType;
 import com.jamesswafford.chess4j.io.PrintLine;
 import com.jamesswafford.chess4j.utils.BoardUtils;
-import com.jamesswafford.chess4j.utils.GameStatusChecker;
 
 public final class Search {
 
@@ -58,17 +59,17 @@ public final class Search {
 
         Move move;
         while ((move = mo.selectNextMove()) != null) {
-            assert(BoardUtils.isGoodMove(board, move));
+            assert(BoardUtils.isPseudoLegalMove(board, move));
             recordFirstLine(true,numMovesSearched,stats,move);
             board.applyMove(move);
-            if (board.isOpponentInCheck()) {
+            if (BoardUtils.isOpponentInCheck(board)) {
                 // illegal
                 board.undoLastMove();
                 continue;
             }
 
             int score;
-            boolean givesCheck = board.isPlayerInCheck();
+            boolean givesCheck = BoardUtils.isPlayerInCheck(board);
 
             int extend = Extend.extendDepth(board,move,givesCheck);
             assert(extend >= 0 && extend <= 1);
@@ -117,7 +118,7 @@ public final class Search {
 
         assert(ply > 0);
         assert(alpha < beta);
-        assert(inCheck==board.isPlayerInCheck());
+        assert(inCheck==BoardUtils.isPlayerInCheck(board));
 
         int origAlpha = alpha;
         parentPV.clear();
@@ -141,8 +142,7 @@ public final class Search {
         }
 
         // Draw check
-        // Note we don't do insufficient material here -- too expensive without piece counters.
-        if (GameStatusChecker.isDrawByRep(board) || board.getFiftyCounter() >= 100) {
+        if (Draw.isDraw(board)) {
             return 0;
         }
 
@@ -211,16 +211,16 @@ public final class Search {
 
         Move move;
         while ((move = mo.selectNextMove()) != null) {
-            assert(BoardUtils.isGoodMove(board, move));
+            assert(BoardUtils.isPseudoLegalMove(board, move));
             recordFirstLine(pvNode,numMovesSearched,stats,move);
             board.applyMove(move);
-            if (board.isOpponentInCheck()) {
+            if (BoardUtils.isOpponentInCheck(board)) {
                 // illegal
                 board.undoLastMove();
                 continue;
             }
 
-            boolean givesCheck = board.isPlayerInCheck();
+            boolean givesCheck = BoardUtils.isPlayerInCheck(board);
 
             int extend = Extend.extendDepth(board,move,givesCheck);
             assert(extend >= 0 && extend <= 1);
@@ -336,11 +336,11 @@ public final class Search {
 
         Move mv;
         while ((mv = mo.selectNextMove(true)) != null) {
-            assert(BoardUtils.isGoodMove(board, mv));
+            assert(BoardUtils.isPseudoLegalMove(board, mv));
             assert(mv.captured()!=null || mv.promotion()!=null);
 
             board.applyMove(mv);
-            if (board.isOpponentInCheck()) {
+            if (BoardUtils.isOpponentInCheck(board)) {
                 // illegal
                 board.undoLastMove();
                 continue;
@@ -348,14 +348,14 @@ public final class Search {
 
             // can this capture possibly raise alpha?
             if (!inCheck && mv.promotion()==null
-                    && Eval.getPieceValue(mv.captured()) + Eval.PAWN_VAL*2 + standPat < alpha) {
+                    && EvalMaterial.evalPiece(mv.captured()) + EvalMaterial.PAWN_VAL*2 + standPat < alpha) {
                 board.undoLastMove();
                 continue;
             }
 
             // if not a promising capture just skip
             if (!inCheck && mv.promotion()==null
-                    && Eval.getPieceValue(board.getPiece(mv.to())) > Eval.getPieceValue(mv.captured())
+                    && EvalMaterial.evalPiece(board.getPiece(mv.to())) > EvalMaterial.evalPiece(mv.captured())
                     && SEE.see(board, mv) < 0) {
                 board.undoLastMove();
                 continue;
@@ -392,7 +392,7 @@ public final class Search {
         int adjScore=score;
 
         if (numMovesSearched==0) {
-            if (board.isPlayerInCheck()) {
+            if (BoardUtils.isPlayerInCheck(board)) {
                 adjScore = -(Constants.CHECKMATE-ply);
             } else {
                 // draw score

@@ -5,14 +5,14 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.jamesswafford.chess4j.Color;
-import com.jamesswafford.chess4j.board.AttackDetector;
+import com.jamesswafford.chess4j.eval.EvalMaterial;
+import com.jamesswafford.chess4j.movegen.AttackDetector;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Magic;
+import com.jamesswafford.chess4j.movegen.Magic;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.squares.Direction;
 import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.pieces.Bishop;
 import com.jamesswafford.chess4j.pieces.King;
 import com.jamesswafford.chess4j.pieces.Knight;
@@ -61,7 +61,7 @@ public class SEE {
         assert(b.getPiece(m.from())==null);
 
         int scores[] = new int[32];
-        scores[0] = Eval.getPieceValue(m.captured());
+        scores[0] = EvalMaterial.evalPiece(m.captured());
         int scoresInd = 1;
 
         // play out the sequence
@@ -71,7 +71,7 @@ public class SEE {
         Color sideToMove = b.getPlayerToMove();
         Square currentSq = m.from();
         Piece currentPiece = b.getPiece(m.to());
-        int attackedPieceVal = Eval.getPieceValue(currentPiece);
+        int attackedPieceVal = EvalMaterial.evalPiece(currentPiece);
 
         while (true) {
             // add any x-ray attackers back in, behind currentPiece in
@@ -110,7 +110,7 @@ public class SEE {
 
             scores[scoresInd] = attackedPieceVal - scores[scoresInd-1];
             scoresInd++;
-            attackedPieceVal = Eval.getPieceValue(currentPiece);
+            attackedPieceVal = EvalMaterial.evalPiece(currentPiece);
             sideToMove = Color.swap(sideToMove);
         }
 
@@ -124,22 +124,14 @@ public class SEE {
         return scores[0];
     }
 
-    /**
-     * Returns the square with the least valuable piece for <sideToMove>, or NULL
-     * if none of the squares have a piece of that color.
-     *
-     * @param attacker
-     * @param sideToMove
-     * @return
-     */
-    private static Square findLeastValuable(Board board,long attackers) {
+    private static Square findLeastValuable(Board board, long attackers) {
         Square lvSq = null;
         int lvScore = 0;
 
         while (attackers != 0) {
             int sqInd = Bitboard.lsb(attackers);
             Square sq = Square.valueOf(sqInd);
-            int myVal = Eval.getPieceValue(board.getPiece(sq));
+            int myVal = EvalMaterial.evalPiece(board.getPiece(sq));
             if (lvSq==null || myVal < lvScore) {
                 lvSq = sq;
                 lvScore = myVal;

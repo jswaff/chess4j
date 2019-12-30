@@ -35,7 +35,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     public void clear() {
         clearStats();
-        for (int i=0;i<numEntries;i++) {
+        for (int i=0; i<numEntries; i++) {
             table[i] = null;
         }
     }
@@ -58,11 +58,11 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     public Optional<TranspositionTableEntry> probe(long zobristKey) {
         numProbes++;
-        Optional<TranspositionTableEntry> te = Optional.ofNullable(table[getMaskedKey(zobristKey)]);
+        TranspositionTableEntry te = table[getMaskedKey(zobristKey)];
 
-        if (te.isPresent()) {
+        if (te != null) {
             // compare full signature to avoid collisions
-            if (te.get().getZobristKey() != zobristKey) {
+            if (te.getZobristKey() != zobristKey) {
                 numCollisions++;
                 return Optional.empty();
             } else {
@@ -70,7 +70,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
             }
         }
 
-        return te;
+        return Optional.ofNullable(te);
     }
 
     /**

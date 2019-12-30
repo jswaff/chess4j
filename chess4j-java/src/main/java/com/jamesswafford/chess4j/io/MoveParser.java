@@ -6,17 +6,19 @@ import java.util.Optional;
 import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
-import com.jamesswafford.chess4j.pieces.King;
-import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.utils.PieceFactory;
 
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.pieces.King.*;
+import static com.jamesswafford.chess4j.board.squares.Rank.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public final class MoveParser {
 
@@ -26,15 +28,15 @@ public final class MoveParser {
     private Move getCastlingMove() {
         if (strMove.equalsIgnoreCase("O-O") || strMove.equals("0-0")) {
             if (board.getPlayerToMove().equals(Color.WHITE)) {
-                return new Move(King.WHITE_KING,Square.valueOf(File.FILE_E, Rank.RANK_1),Square.valueOf(File.FILE_G, Rank.RANK_1),true);
+                return new Move(WHITE_KING, E1, G1,true);
             } else {
-                return new Move(King.BLACK_KING,Square.valueOf(File.FILE_E, Rank.RANK_8),Square.valueOf(File.FILE_G, Rank.RANK_8),true);
+                return new Move(BLACK_KING, E8, G8, true);
             }
         } else if (strMove.equalsIgnoreCase("O-O-O") || strMove.equals("0-0-0")) {
             if (board.getPlayerToMove().equals(Color.WHITE)) {
-                return new Move(King.WHITE_KING,Square.valueOf(File.FILE_E, Rank.RANK_1),Square.valueOf(File.FILE_C, Rank.RANK_1),true);
+                return new Move(WHITE_KING, E1, C1,true);
             } else {
-                return new Move(King.BLACK_KING,Square.valueOf(File.FILE_E, Rank.RANK_8),Square.valueOf(File.FILE_C, Rank.RANK_8),true);
+                return new Move(BLACK_KING, E8, C8, true);
             }
         }
         return null;
@@ -48,7 +50,7 @@ public final class MoveParser {
         }
 
         File dstFile = File.file(strMove.substring(strMove.length()-2,strMove.length()-1));
-        Rank dstRank = Rank.rank(strMove.substring(strMove.length()-1,strMove.length()));
+        Rank dstRank = Rank.rank(strMove.substring(strMove.length()-1));
         dst = Square.valueOf(dstFile, dstRank);
         strMove = strMove.substring(0,strMove.length()-2);
 
@@ -89,31 +91,31 @@ public final class MoveParser {
 
         boolean wtm = board.getPlayerToMove().equals(Color.WHITE);
         if (wtm) {
-            if (dst.rank().equals(Rank.RANK_8) && promotion==null) {
+            if (dst.rank().equals(RANK_8) && promotion==null) {
                 throw new ParseException("white pawn promotion with no promotion piece.");
             }
             Square sq = dst.south().orElseThrow(() -> new ParseException("expected square south of dst"));
-            if (Pawn.WHITE_PAWN.equals(board.getPiece(sq))) {
-                return new Move(Pawn.WHITE_PAWN, sq, dst, null, promotion);
+            if (WHITE_PAWN.equals(board.getPiece(sq))) {
+                return new Move(WHITE_PAWN, sq, dst, null, promotion);
             }
             Optional<Square> optSsq = sq.south();
             if (optSsq.isPresent()) {
-                if (Pawn.WHITE_PAWN.equals(board.getPiece(optSsq.get()))) {
-                    return new Move(Pawn.WHITE_PAWN, optSsq.get(), dst);
+                if (WHITE_PAWN.equals(board.getPiece(optSsq.get()))) {
+                    return new Move(WHITE_PAWN, optSsq.get(), dst);
                 }
             }
         } else {
-            if (dst.rank().equals(Rank.RANK_1) && promotion==null) {
+            if (dst.rank().equals(RANK_1) && promotion==null) {
                 throw new ParseException("black pawn promotion with no promotion piece.");
             }
             Square sq = dst.north().orElseThrow(() -> new ParseException("expected square north of dst"));
-            if (Pawn.BLACK_PAWN.equals(board.getPiece(sq))) {
-                return new Move(Pawn.BLACK_PAWN,sq,dst,null,promotion);
+            if (BLACK_PAWN.equals(board.getPiece(sq))) {
+                return new Move(BLACK_PAWN,sq,dst,null,promotion);
             }
             Optional<Square> optNsq = sq.north();
             if (optNsq.isPresent()) {
-                if (Pawn.BLACK_PAWN.equals(board.getPiece(optNsq.get()))) {
-                    return new Move(Pawn.BLACK_PAWN, optNsq.get(), dst);
+                if (BLACK_PAWN.equals(board.getPiece(optNsq.get()))) {
+                    return new Move(BLACK_PAWN, optNsq.get(), dst);
                 }
             }
         }
@@ -229,7 +231,7 @@ public final class MoveParser {
                 myPiece = board.getPiece(srcSq);
             } else {
                 boolean wtm = board.getPlayerToMove().equals(Color.WHITE);
-                myPiece = wtm?Pawn.WHITE_PAWN:Pawn.BLACK_PAWN;
+                myPiece = wtm ? WHITE_PAWN : BLACK_PAWN;
             }
         }
         return myPiece;

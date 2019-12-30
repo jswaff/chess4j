@@ -1,248 +1,203 @@
 package com.jamesswafford.chess4j.board;
 
+import com.jamesswafford.chess4j.board.squares.*;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.Color;
-import com.jamesswafford.chess4j.board.squares.East;
-import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.North;
-import com.jamesswafford.chess4j.board.squares.NorthEast;
-import com.jamesswafford.chess4j.board.squares.NorthWest;
-import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.board.squares.South;
-import com.jamesswafford.chess4j.board.squares.SouthEast;
-import com.jamesswafford.chess4j.board.squares.SouthWest;
-import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.board.squares.West;
 
-import junit.framework.Assert;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import static org.junit.Assert.*;
+
+import static com.jamesswafford.chess4j.board.Bitboard.*;
+import static com.jamesswafford.chess4j.board.squares.Rank.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public class BitboardTest {
 
     @Test
-    public void testLSB() {
-        Square e4 = Square.valueOf(File.FILE_E, Rank.RANK_4);
-        Assert.assertEquals(e4.value(),new Bitboard(e4.value()).lsb());
+    public void toBitboard_single() {
 
-        for (int i=0;i<64;i++) {
-            Assert.assertEquals(i, new Bitboard(i).lsb());
-        }
-
-        Assert.assertEquals(Square.valueOf(File.FILE_A, Rank.RANK_6).value(),
-                new Bitboard(Bitboard.ranks[Rank.RANK_6.getValue()]).lsb());
+        assertEquals(squares[D6.value()], toBitboard(D6));
+        assertEquals(squares[F3.value()], toBitboard(F3));
+        assertEquals(squares[C8.value()], toBitboard(C8));
     }
 
     @Test
-    public void testMSB() {
-        Square e4 = Square.valueOf(File.FILE_E, Rank.RANK_4);
-        Assert.assertEquals(e4.value(),new Bitboard(e4.value()).msb());
+    public void toBitboard_list() {
 
-        for (int i=0;i<64;i++) {
-            Assert.assertEquals(i, new Bitboard(i).msb());
-        }
+        assertEquals(
+                squares[D6.value()] | squares[D7.value()] | squares[D8.value()],
+                toBitboard(Arrays.asList(D6, D7, D8)));
 
-        Assert.assertEquals(Square.valueOf(File.FILE_H, Rank.RANK_6).value(),
-                new Bitboard(Bitboard.ranks[Rank.RANK_6.getValue()]).msb());
+        assertEquals(0, toBitboard(new ArrayList<>()));
+
+        assertEquals(-1L, toBitboard(Square.allSquares()));
+
+        //System.out.println("all squares:\n" + drawBitboard(toBitboard(Square.allSquares())));
     }
 
     @Test
-    public void testRays() {
+    public void lsb() {
+        Square.allSquares()
+                .forEach(square -> assertEquals(square.value(), Bitboard.lsb(square)));
 
-        Assert.assertEquals(
-                (Bitboard.squares[Square.valueOf(File.FILE_D, Rank.RANK_6).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_D, Rank.RANK_7).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_D, Rank.RANK_8).value()]
-                ),
-                Bitboard.rays[Square.valueOf(File.FILE_D, Rank.RANK_5).value()][North.getInstance().value()]);
-
-        Assert.assertEquals(
-                (Bitboard.squares[Square.valueOf(File.FILE_D, Rank.RANK_4).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_D, Rank.RANK_3).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_D, Rank.RANK_2).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_D, Rank.RANK_1).value()]
-                ),
-                Bitboard.rays[Square.valueOf(File.FILE_D, Rank.RANK_5).value()][South.getInstance().value()]);
-
-        Assert.assertEquals(
-                (Bitboard.squares[Square.valueOf(File.FILE_C, Rank.RANK_5).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_B, Rank.RANK_5).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_A, Rank.RANK_5).value()]
-                ),
-                Bitboard.rays[Square.valueOf(File.FILE_D, Rank.RANK_5).value()][West.getInstance().value()]);
-
-        Assert.assertEquals(
-                (Bitboard.squares[Square.valueOf(File.FILE_E, Rank.RANK_5).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_F, Rank.RANK_5).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_G, Rank.RANK_5).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_H, Rank.RANK_5).value()]
-                ),
-                Bitboard.rays[Square.valueOf(File.FILE_D, Rank.RANK_5).value()][East.getInstance().value()]);
-
-        Assert.assertEquals(
-                (Bitboard.squares[Square.valueOf(File.FILE_E, Rank.RANK_6).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_F, Rank.RANK_7).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_G, Rank.RANK_8).value()]
-                ),
-                Bitboard.rays[Square.valueOf(File.FILE_D, Rank.RANK_5).value()][NorthEast.getInstance().value()]);
-
-        Assert.assertEquals(
-                (Bitboard.squares[Square.valueOf(File.FILE_E, Rank.RANK_4).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_F, Rank.RANK_3).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_G, Rank.RANK_2).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_H, Rank.RANK_1).value()]
-                ),
-                Bitboard.rays[Square.valueOf(File.FILE_D, Rank.RANK_5).value()][SouthEast.getInstance().value()]);
-
-        Assert.assertEquals(
-                (Bitboard.squares[Square.valueOf(File.FILE_C, Rank.RANK_4).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_B, Rank.RANK_3).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_A, Rank.RANK_2).value()]
-                ),
-                Bitboard.rays[Square.valueOf(File.FILE_D, Rank.RANK_5).value()][SouthWest.getInstance().value()]);
-
-        Assert.assertEquals(
-                (Bitboard.squares[Square.valueOf(File.FILE_C, Rank.RANK_6).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_B, Rank.RANK_7).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_A, Rank.RANK_8).value()]
-                ),
-                Bitboard.rays[Square.valueOf(File.FILE_D, Rank.RANK_5).value()][NorthWest.getInstance().value()]);
+        assertEquals(A6.value(), Bitboard.lsb(ranks[RANK_6.getValue()]));
     }
 
     @Test
-    public void testKnightMoves() {
-        Square e4 = Square.valueOf(File.FILE_E, Rank.RANK_4);
-        long moves = Bitboard.knightMoves[e4.value()];
-        Assert.assertEquals(8, Long.bitCount(moves));
+    public void msb() {
+        Square.allSquares()
+                .forEach(square -> assertEquals(square.value(), Bitboard.msb(square)));
 
-        Square d6 = Square.valueOf(File.FILE_D, Rank.RANK_6);
-        Assert.assertEquals(d6.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[d6.value()];
-
-        Square f6 = Square.valueOf(File.FILE_F, Rank.RANK_6);
-        Assert.assertEquals(f6.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[f6.value()];
-
-        Square c5 = Square.valueOf(File.FILE_C, Rank.RANK_5);
-        Assert.assertEquals(c5.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[c5.value()];
-
-        Square g5 = Square.valueOf(File.FILE_G, Rank.RANK_5);
-        Assert.assertEquals(g5.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[g5.value()];
-
-        Square c3 = Square.valueOf(File.FILE_C, Rank.RANK_3);
-        Assert.assertEquals(c3.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[c3.value()];
-
-        Square g3 = Square.valueOf(File.FILE_G, Rank.RANK_3);
-        Assert.assertEquals(g3.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[g3.value()];
-
-        Square d2 = Square.valueOf(File.FILE_D, Rank.RANK_2);
-        Assert.assertEquals(d2.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[d2.value()];
-
-        Square f2 = Square.valueOf(File.FILE_F, Rank.RANK_2);
-        Assert.assertEquals(f2.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[f2.value()];
-
-        Assert.assertEquals(0, moves);
-
-        Square a8 = Square.valueOf(File.FILE_A, Rank.RANK_8);
-        moves = Bitboard.knightMoves[a8.value()];
-        Assert.assertEquals(2, Long.bitCount(moves));
-
-        Square c7 = Square.valueOf(File.FILE_C, Rank.RANK_7);
-        Assert.assertEquals(c7.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[c7.value()];
-
-        Square b6 = Square.valueOf(File.FILE_B, Rank.RANK_6);
-        Assert.assertEquals(b6.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[b6.value()];
-
-        Assert.assertEquals(0, moves);
+        assertEquals(H6.value(), Bitboard.msb(ranks[RANK_6.getValue()]));
     }
 
     @Test
-    public void testKingMoves() {
-        Square e4 = Square.valueOf(File.FILE_E, Rank.RANK_4);
-        long moves = Bitboard.kingMoves[e4.value()];
-        Assert.assertEquals(8, Long.bitCount(moves));
+    public void rays() {
 
-        Square d5 = Square.valueOf(File.FILE_D, Rank.RANK_5);
-        Assert.assertEquals(d5.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[d5.value()];
+        assertEquals(
+                squares[D6.value()] | squares[D7.value()] | squares[D8.value()],
+                rays[D5.value()][North.getInstance().value()]);
 
-        Square e5 = Square.valueOf(File.FILE_E, Rank.RANK_5);
-        Assert.assertEquals(e5.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[e5.value()];
+        assertEquals(
+                squares[D4.value()] | squares[D3.value()] | squares[D2.value()] | squares[D1.value()],
+                rays[D5.value()][South.getInstance().value()]);
 
-        Square f5 = Square.valueOf(File.FILE_F, Rank.RANK_5);
-        Assert.assertEquals(f5.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[f5.value()];
+        assertEquals(
+                squares[C5.value()] | squares[B5.value()] | squares[A5.value()],
+                rays[D5.value()][West.getInstance().value()]);
 
-        Square d4 = Square.valueOf(File.FILE_D, Rank.RANK_4);
-        Assert.assertEquals(d4.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[d4.value()];
+        assertEquals(
+                squares[E5.value()] | squares[F5.value()] | squares[G5.value()] | squares[H5.value()],
+                rays[D5.value()][East.getInstance().value()]);
 
-        Square f4 = Square.valueOf(File.FILE_F, Rank.RANK_4);
-        Assert.assertEquals(f4.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[f4.value()];
+        assertEquals(
+                squares[E6.value()] | squares[F7.value()] | squares[G8.value()],
+                rays[D5.value()][NorthEast.getInstance().value()]);
 
-        Square d3 = Square.valueOf(File.FILE_D, Rank.RANK_3);
-        Assert.assertEquals(d3.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[d3.value()];
+        assertEquals(
+                squares[E4.value()] | squares[F3.value()] | squares[G2.value()] | squares[H1.value()],
+                rays[D5.value()][SouthEast.getInstance().value()]);
 
-        Square e3 = Square.valueOf(File.FILE_E, Rank.RANK_3);
-        Assert.assertEquals(e3.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[e3.value()];
+        assertEquals(
+                squares[C4.value()] | squares[B3.value()] | squares[A2.value()],
+                rays[D5.value()][SouthWest.getInstance().value()]);
 
-        Square f3 = Square.valueOf(File.FILE_F, Rank.RANK_3);
-        Assert.assertEquals(f3.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[f3.value()];
-
-        Assert.assertEquals(0, moves);
-
-        Square a8 = Square.valueOf(File.FILE_A, Rank.RANK_8);
-        moves = Bitboard.kingMoves[a8.value()];
-        Assert.assertEquals(3, Long.bitCount(moves));
-
-        Square b8 = Square.valueOf(File.FILE_B, Rank.RANK_8);
-        Assert.assertEquals(b8.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[b8.value()];
-
-        Square a7 = Square.valueOf(File.FILE_A, Rank.RANK_7);
-        Assert.assertEquals(a7.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[a7.value()];
-
-        Square b7 = Square.valueOf(File.FILE_B, Rank.RANK_7);
-        Assert.assertEquals(b7.value(), Bitboard.lsb(moves));
-        moves ^= Bitboard.squares[b7.value()];
-
-        Assert.assertEquals(0, moves);
+        assertEquals(
+                squares[C6.value()] | squares[B7.value()] | squares[A8.value()],
+                rays[D5.value()][NorthWest.getInstance().value()]);
     }
 
     @Test
-    public void testPawnAttacks() {
-        Assert.assertEquals(Bitboard.squares[Square.valueOf(File.FILE_D, Rank.RANK_5).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_F, Rank.RANK_5).value()],
-                Bitboard.pawnAttacks[Square.valueOf(File.FILE_E, Rank.RANK_4).value()][Color.WHITE.getColor()]);
+    public void knightMoves() {
+        long moves = knightMoves[E4.value()];
+        assertEquals(8, Long.bitCount(moves));
 
-        Assert.assertEquals(Bitboard.squares[Square.valueOf(File.FILE_D, Rank.RANK_3).value()]
-                | Bitboard.squares[Square.valueOf(File.FILE_F, Rank.RANK_3).value()],
-                Bitboard.pawnAttacks[Square.valueOf(File.FILE_E, Rank.RANK_4).value()][Color.BLACK.getColor()]);
+        assertEquals(D6.value(), Bitboard.lsb(moves));
+        moves ^= squares[D6.value()];
 
-        Assert.assertEquals(Bitboard.squares[Square.valueOf(File.FILE_B, Rank.RANK_3).value()],
-                Bitboard.pawnAttacks[Square.valueOf(File.FILE_A, Rank.RANK_2).value()][Color.WHITE.getColor()]);
+        assertEquals(F6.value(), Bitboard.lsb(moves));
+        moves ^= squares[F6.value()];
 
-        Assert.assertEquals(Bitboard.squares[Square.valueOf(File.FILE_B, Rank.RANK_1).value()],
-                Bitboard.pawnAttacks[Square.valueOf(File.FILE_A, Rank.RANK_2).value()][Color.BLACK.getColor()]);
+        assertEquals(C5.value(), Bitboard.lsb(moves));
+        moves ^= squares[C5.value()];
 
-        Assert.assertEquals(Bitboard.squares[Square.valueOf(File.FILE_G, Rank.RANK_8).value()],
-                Bitboard.pawnAttacks[Square.valueOf(File.FILE_H, Rank.RANK_7).value()][Color.WHITE.getColor()]);
+        assertEquals(G5.value(), Bitboard.lsb(moves));
+        moves ^= squares[G5.value()];
 
-        Assert.assertEquals(Bitboard.squares[Square.valueOf(File.FILE_G, Rank.RANK_6).value()],
-                Bitboard.pawnAttacks[Square.valueOf(File.FILE_H, Rank.RANK_7).value()][Color.BLACK.getColor()]);
+        assertEquals(C3.value(), Bitboard.lsb(moves));
+        moves ^= squares[C3.value()];
+
+        assertEquals(G3.value(), Bitboard.lsb(moves));
+        moves ^= squares[G3.value()];
+
+        assertEquals(D2.value(), Bitboard.lsb(moves));
+        moves ^= squares[D2.value()];
+
+        assertEquals(F2.value(), Bitboard.lsb(moves));
+        moves ^= squares[F2.value()];
+
+        assertEquals(0, moves);
+
+        moves = knightMoves[A8.value()];
+        assertEquals(2, Long.bitCount(moves));
+
+        assertEquals(C7.value(), Bitboard.lsb(moves));
+        moves ^= squares[C7.value()];
+
+        assertEquals(B6.value(), Bitboard.lsb(moves));
+        moves ^= squares[B6.value()];
+
+        assertEquals(0, moves);
+    }
+
+    @Test
+    public void kingMoves() {
+        long moves = kingMoves[E4.value()];
+        assertEquals(8, Long.bitCount(moves));
+
+        assertEquals(D5.value(), Bitboard.lsb(moves));
+        moves ^= squares[D5.value()];
+
+        assertEquals(E5.value(), Bitboard.lsb(moves));
+        moves ^= squares[E5.value()];
+
+        assertEquals(F5.value(), Bitboard.lsb(moves));
+        moves ^= squares[F5.value()];
+
+        assertEquals(D4.value(), Bitboard.lsb(moves));
+        moves ^= squares[D4.value()];
+
+        assertEquals(F4.value(), Bitboard.lsb(moves));
+        moves ^= squares[F4.value()];
+
+        assertEquals(D3.value(), Bitboard.lsb(moves));
+        moves ^= squares[D3.value()];
+
+        assertEquals(E3.value(), Bitboard.lsb(moves));
+        moves ^= squares[E3.value()];
+
+        assertEquals(F3.value(), Bitboard.lsb(moves));
+        moves ^= squares[F3.value()];
+
+        assertEquals(0, moves);
+
+        moves = kingMoves[A8.value()];
+        assertEquals(3, Long.bitCount(moves));
+
+        assertEquals(B8.value(), Bitboard.lsb(moves));
+        moves ^= squares[B8.value()];
+
+        assertEquals(A7.value(), Bitboard.lsb(moves));
+        moves ^= squares[A7.value()];
+
+        assertEquals(B7.value(), Bitboard.lsb(moves));
+        moves ^= squares[B7.value()];
+
+        assertEquals(0, moves);
+    }
+
+    @Test
+    public void pawnAttacks() {
+        assertEquals(squares[D5.value()] | squares[F5.value()],
+                pawnAttacks[E4.value()][Color.WHITE.getColor()]);
+
+        assertEquals(squares[D3.value()] | squares[F3.value()],
+                pawnAttacks[E4.value()][Color.BLACK.getColor()]);
+
+        assertEquals(squares[B3.value()],
+                pawnAttacks[A2.value()][Color.WHITE.getColor()]);
+
+        assertEquals(squares[B1.value()],
+                pawnAttacks[A2.value()][Color.BLACK.getColor()]);
+
+        assertEquals(squares[G8.value()],
+                pawnAttacks[H7.value()][Color.WHITE.getColor()]);
+
+        assertEquals(squares[G6.value()],
+                pawnAttacks[H7.value()][Color.BLACK.getColor()]);
 
     }
 }

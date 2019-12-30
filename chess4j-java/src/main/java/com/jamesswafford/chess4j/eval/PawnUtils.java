@@ -1,4 +1,4 @@
-package com.jamesswafford.chess4j.utils;
+package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Bitboard;

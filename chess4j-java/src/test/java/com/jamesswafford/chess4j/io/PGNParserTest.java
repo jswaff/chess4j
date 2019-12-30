@@ -3,15 +3,14 @@ package com.jamesswafford.chess4j.io;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.squares.File;
-import com.jamesswafford.chess4j.board.squares.Rank;
-import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.pieces.Pawn;
+
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
+
+import static org.junit.Assert.*;
 
 public class PGNParserTest {
 
@@ -27,7 +26,7 @@ public class PGNParserTest {
             + "\n"
             + "1. e4 e5 1/2-1/2\n";
 
-        List<PGNTag> tags = new ArrayList<PGNTag>();
+        List<PGNTag> tags = new ArrayList<>();
         tags.add(new PGNTag("Event","F/S Return Match"));
         tags.add(new PGNTag("Site","Belgrade, Serbia Yugoslavia|JUG"));
         tags.add(new PGNTag("Date","1992.11.04"));
@@ -36,13 +35,13 @@ public class PGNParserTest {
         tags.add(new PGNTag("Black","Spassky, Boris V."));
         tags.add(new PGNTag("Result","1/2-1/2"));
 
-        List<Move> moves = new ArrayList<Move>();
-        moves.add(new Move(Pawn.WHITE_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_2),Square.valueOf(File.FILE_E, Rank.RANK_4)));
-        moves.add(new Move(Pawn.BLACK_PAWN,Square.valueOf(File.FILE_E, Rank.RANK_7),Square.valueOf(File.FILE_E, Rank.RANK_5)));
+        List<Move> moves = new ArrayList<>();
+        moves.add(new Move(WHITE_PAWN, E2, E4));
+        moves.add(new Move(BLACK_PAWN, E7, E5));
 
         PGNGame pgnGame = new PGNGame(tags,moves,PGNResult.DRAW);
 
-        Assert.assertEquals(pgnGame, new PGNParser().parseGame(pgn));
+        assertEquals(pgnGame, new PGNParser().parseGame(pgn));
     }
 
     @Test
@@ -65,10 +64,10 @@ public class PGNParserTest {
             + "Nf2 42. g4 Bd3 43. Re6 1/2-1/2\n";
 
         PGNGame pgnGame = new PGNParser().parseGame(pgn);
-        Assert.assertEquals(PGNResult.DRAW, pgnGame.getResult());
-        Assert.assertEquals(85, pgnGame.getMoves().size());
-        Assert.assertEquals(7, pgnGame.getTags().size());
-        Assert.assertEquals(new PGNTag("White","Fischer, Robert J."), pgnGame.getTags().get(4));
+        assertEquals(PGNResult.DRAW, pgnGame.getResult());
+        assertEquals(85, pgnGame.getMoves().size());
+        assertEquals(7, pgnGame.getTags().size());
+        assertEquals(new PGNTag("White","Fischer, Robert J."), pgnGame.getTags().get(4));
     }
 
     @Test
@@ -97,10 +96,9 @@ public class PGNParserTest {
             + "	resigns} 1-0\n";
 
         PGNGame pgnGame = new PGNParser().parseGame(pgn);
-        Assert.assertEquals(PGNResult.WHITE_WINS, pgnGame.getResult());
-        Assert.assertEquals(61, pgnGame.getMoves().size());
-        Assert.assertEquals(15, pgnGame.getTags().size());
-        Assert.assertEquals(new PGNTag("TimeControl","300+3"), pgnGame.getTags().get(14));
-
+        assertEquals(PGNResult.WHITE_WINS, pgnGame.getResult());
+        assertEquals(61, pgnGame.getMoves().size());
+        assertEquals(15, pgnGame.getTags().size());
+        assertEquals(new PGNTag("TimeControl","300+3"), pgnGame.getTags().get(14));
     }
 }
