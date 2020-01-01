@@ -19,7 +19,7 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 public class PawnTranspositionTableTest {
 
     private PawnTranspositionTable ptable = new PawnTranspositionTable();
-    private Board board = Board.INSTANCE;
+    private Board board = new Board();
 
     @Before
     public void setUp() {

@@ -26,38 +26,34 @@ public class BoardUtilsTest {
 
     @Test
     public void testCountPawns_initialPos() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
+        Board board = new Board();
 
-        assertEquals(8, countPawns(b, Color.WHITE));
-        assertEquals(8, countPawns(b, Color.BLACK));
+        assertEquals(8, countPawns(board, Color.WHITE));
+        assertEquals(8, countPawns(board, Color.BLACK));
     }
 
     @Test
     public void testCountPawns_pos1() {
-        Board b = Board.INSTANCE;
-        b.setPos("7k/pp6/8/8/8/8/7P/7K w - - ");
+        Board board = new Board("7k/pp6/8/8/8/8/7P/7K w - - ");
 
-        assertEquals(1, countPawns(b, Color.WHITE));
-        assertEquals(2, countPawns(b, Color.BLACK));
+        assertEquals(1, countPawns(board, Color.WHITE));
+        assertEquals(2, countPawns(board, Color.BLACK));
     }
 
     @Test
     public void testCountNonPawns_initialPos() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
+        Board board = new Board();
 
-        assertEquals(7, countNonPawns(b, Color.WHITE));
-        assertEquals(7, countNonPawns(b, Color.BLACK));
+        assertEquals(7, countNonPawns(board, Color.WHITE));
+        assertEquals(7, countNonPawns(board, Color.BLACK));
     }
 
     @Test
     public void testCountNonPawns_pos1() {
-        Board b = Board.INSTANCE;
-        b.setPos("7k/br6/8/8/8/8/Q7/7K w - -");
+        Board board = new Board("7k/br6/8/8/8/8/Q7/7K w - -");
 
-        assertEquals(1, countNonPawns(b, Color.WHITE));
-        assertEquals(2, countNonPawns(b, Color.BLACK));
+        assertEquals(1, countNonPawns(board, Color.WHITE));
+        assertEquals(2, countNonPawns(board, Color.BLACK));
     }
 
     @Test
@@ -72,67 +68,65 @@ public class BoardUtilsTest {
 
     @Test
     public void testIsPseudoLegalMove() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
+        Board board = new Board();
 
         // all moves from the initial position
-        assertAllMovesGood(b);
+        assertAllMovesGood(board);
 
         // some moves that are not legal from the initial position
-        assertFalse(isPseudoLegalMove(b, new Move(WHITE_KNIGHT, G1, E2)));
-        assertFalse(isPseudoLegalMove(b, new Move(WHITE_KNIGHT, B1, C4)));
+        assertFalse(isPseudoLegalMove(board, new Move(WHITE_KNIGHT, G1, E2)));
+        assertFalse(isPseudoLegalMove(board, new Move(WHITE_KNIGHT, B1, C4)));
 
         // some pawn tests
-        b.setPos("k7/P6P/8/4Pp2/1p6/3p4/1PPP4/K7 w - f6 0 1");
-        assertAllMovesGood(b);
-        assertFalse(isPseudoLegalMove(b, new Move(WHITE_PAWN, A7, A8, null, WHITE_QUEEN)));
-        assertFalse(isPseudoLegalMove(b, new Move(WHITE_PAWN, A7, B8, null, WHITE_QUEEN)));
-        assertFalse(isPseudoLegalMove(b, new Move(WHITE_PAWN, A7, B8, BLACK_PAWN, WHITE_QUEEN)));
-        assertFalse(isPseudoLegalMove(b, new Move(WHITE_PAWN, A7, A8, BLACK_KING, WHITE_QUEEN)));
+        board.setPos("k7/P6P/8/4Pp2/1p6/3p4/1PPP4/K7 w - f6 0 1");
+        assertAllMovesGood(board);
+        assertFalse(isPseudoLegalMove(board, new Move(WHITE_PAWN, A7, A8, null, WHITE_QUEEN)));
+        assertFalse(isPseudoLegalMove(board, new Move(WHITE_PAWN, A7, B8, null, WHITE_QUEEN)));
+        assertFalse(isPseudoLegalMove(board, new Move(WHITE_PAWN, A7, B8, BLACK_PAWN, WHITE_QUEEN)));
+        assertFalse(isPseudoLegalMove(board, new Move(WHITE_PAWN, A7, A8, BLACK_KING, WHITE_QUEEN)));
 
-        b.flipVertical();
-        assertAllMovesGood(b);
+        board.flipVertical();
+        assertAllMovesGood(board);
 
-        b.setPos("r5k1/6rp/5B2/8/8/7R/7P/7K w - - 0 1");
-        assertFalse(isPseudoLegalMove(b, new Move(WHITE_PAWN, H2, H4)));
+        board.setPos("r5k1/6rp/5B2/8/8/7R/7P/7K w - - 0 1");
+        assertFalse(isPseudoLegalMove(board, new Move(WHITE_PAWN, H2, H4)));
 
         // some knight tests
-        b.setPos("k7/8/4p3/6n1/4P3/8/8/K7 b - -");
-        assertAllMovesGood(b);
+        board.setPos("k7/8/4p3/6n1/4P3/8/8/K7 b - -");
+        assertAllMovesGood(board);
 
         for (int i=0; i<64; i++) {
             Square toSq = Square.valueOf(i);
-            Move testMove = new Move(BLACK_KNIGHT, G5, toSq, b.getPiece(toSq));
+            Move testMove = new Move(BLACK_KNIGHT, G5, toSq, board.getPiece(toSq));
 
-            assertEquals(Arrays.asList(F7, H7, E4, F3, H3).contains(toSq), isPseudoLegalMove(b, testMove));
+            assertEquals(Arrays.asList(F7, H7, E4, F3, H3).contains(toSq), isPseudoLegalMove(board, testMove));
         }
 
         // some bishop tests
-        b.setPos("k7/8/1Q3q2/8/3b4/8/8/1K6 b - - 0 1");
-        assertAllMovesGood(b);
-        assertFalse(isPseudoLegalMove(b, new Move(BLACK_BISHOP, D4, F6, BLACK_QUEEN)));
+        board.setPos("k7/8/1Q3q2/8/3b4/8/8/1K6 b - - 0 1");
+        assertAllMovesGood(board);
+        assertFalse(isPseudoLegalMove(board, new Move(BLACK_BISHOP, D4, F6, BLACK_QUEEN)));
 
         // some rook tests
-        b.setPos("k7/8/1Q3q2/8/2PR1p2/8/8/1K6 w - - 0 1");
-        assertAllMovesGood(b);
+        board.setPos("k7/8/1Q3q2/8/2PR1p2/8/8/1K6 w - - 0 1");
+        assertAllMovesGood(board);
 
         // some queen tests
-        b.setPos("k7/8/1Q3q2/8/2PQ1p2/8/8/1K6 w - - 0 1");
-        assertAllMovesGood(b);
+        board.setPos("k7/8/1Q3q2/8/2PQ1p2/8/8/1K6 w - - 0 1");
+        assertAllMovesGood(board);
 
         // king tests
-        b.setPos("r3kb1r/8/8/8/8/8/8/R3K2R b KQkq - 0 1");
-        assertAllMovesGood(b);
+        board.setPos("r3kb1r/8/8/8/8/8/8/R3K2R b KQkq - 0 1");
+        assertAllMovesGood(board);
 
         Move bogus = new Move(BLACK_KING, E8, G8, true);
-        assertFalse(isPseudoLegalMove(b, bogus)); // bishop in the path
+        assertFalse(isPseudoLegalMove(board, bogus)); // bishop in the path
     }
 
     @Test
     public void testIsOpponentInCheck() {
 
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+        Board board = new Board();
         assertFalse(isOpponentInCheck(board));
 
         board.setPos("k7/8/Q7/K7/8/8/8/8 w - -");
@@ -144,8 +138,7 @@ public class BoardUtilsTest {
 
     @Test
     public void testIsPlayerInCheck() {
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+        Board board = new Board();
         assertFalse(isPlayerInCheck(board));
 
         board.setPos("k7/8/Q7/K7/8/8/8/8 b - -");
@@ -157,8 +150,7 @@ public class BoardUtilsTest {
 
     @Test
     public void testBlackCanCastleQueenSide() {
-        Board board = Board.INSTANCE;
-        board.setPos("r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1");
+        Board board = new Board("r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1");
 
         assertTrue(blackCanCastleQueenSide(board));
 
@@ -169,8 +161,7 @@ public class BoardUtilsTest {
 
     @Test
     public void testBlackCanCastleKingSide() {
-        Board board = Board.INSTANCE;
-        board.setPos("r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1");
+        Board board = new Board("r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1");
 
         assertTrue(blackCanCastleKingSide(board));
 
@@ -181,8 +172,7 @@ public class BoardUtilsTest {
 
     @Test
     public void testWhiteCanCastleQueenSide() {
-        Board board = Board.INSTANCE;
-        board.setPos("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+        Board board = new Board("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
 
         assertTrue(whiteCanCastleQueenSide(board));
 
@@ -193,8 +183,7 @@ public class BoardUtilsTest {
 
     @Test
     public void testWhiteCanCastleKingSide() {
-        Board board = Board.INSTANCE;
-        board.setPos("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+        Board board = new Board("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
 
         assertTrue(whiteCanCastleKingSide(board));
 

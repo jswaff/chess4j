@@ -10,7 +10,7 @@ import static com.jamesswafford.chess4j.eval.EvalKnight.*;
 
 public class EvalKnightTest {
 
-    private Board board = Board.INSTANCE;
+    private Board board = new Board();
 
     @Test
     public void testEvalKnight() {

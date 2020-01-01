@@ -27,6 +27,8 @@ public final class Board {
 
     public static final Board INSTANCE = new Board();
 
+    private static final String INITIAL_POS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
     private List<Undo> undoStack = new ArrayList<>();
     private Map<Square,Piece> pieceMap = new HashMap<>();
     private Map<Piece,Integer> pieceCountsMap = new HashMap<>();
@@ -45,7 +47,11 @@ public final class Board {
     private long zobristKey;
     private long pawnKey;
 
-    private Board() {
+    public Board() {
+        this(INITIAL_POS);
+    }
+
+    public Board(String fen) {
 
         // initialize the piece counts map
         pieceCountsMap.put(WHITE_KING, 0);
@@ -61,7 +67,7 @@ public final class Board {
         pieceCountsMap.put(WHITE_PAWN, 0);
         pieceCountsMap.put(BLACK_PAWN, 0);
 
-        resetBoard();
+        setPos(fen);
     }
 
     public Undo applyMove(Move move) {
@@ -454,7 +460,7 @@ public final class Board {
     public void resetBoard() {
         undoStack.clear();
 
-        setPos("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        setPos(INITIAL_POS);
     }
 
     public void setEP(Square ep) {
@@ -691,7 +697,7 @@ public final class Board {
     private void clearBoard() {
         List<Square> squares = Square.allSquares();
         for (Square sq : squares) {
-            if (getPiece(sq)!=null) {
+            if (getPiece(sq) != null) {
                 removePiece(sq);
             }
         }
@@ -704,16 +710,18 @@ public final class Board {
         fiftyCounter = 0;
         undoStack.clear();
 
-        assert(pieceCountsMap.get(WHITE_PAWN)==0);
-        assert(pieceCountsMap.get(BLACK_PAWN)==0);
+        assert(pieceCountsMap.get(WHITE_KING)==0);
+        assert(pieceCountsMap.get(BLACK_KING)==0);
         assert(pieceCountsMap.get(WHITE_QUEEN)==0);
         assert(pieceCountsMap.get(BLACK_QUEEN)==0);
         assert(pieceCountsMap.get(WHITE_ROOK)==0);
         assert(pieceCountsMap.get(BLACK_ROOK)==0);
-        assert(pieceCountsMap.get(WHITE_KNIGHT)==0);
-        assert(pieceCountsMap.get(BLACK_KNIGHT)==0);
         assert(pieceCountsMap.get(WHITE_BISHOP)==0);
         assert(pieceCountsMap.get(BLACK_BISHOP)==0);
+        assert(pieceCountsMap.get(WHITE_KNIGHT)==0);
+        assert(pieceCountsMap.get(BLACK_KNIGHT)==0);
+        assert(pieceCountsMap.get(WHITE_PAWN)==0);
+        assert(pieceCountsMap.get(BLACK_PAWN)==0);
     }
 
     private void clearCastlingRight(CastlingRights castlingRight) {

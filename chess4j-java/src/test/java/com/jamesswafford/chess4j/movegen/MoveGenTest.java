@@ -8,7 +8,6 @@ import com.jamesswafford.chess4j.board.Move;
 
 import org.junit.Test;
 
-import com.jamesswafford.chess4j.io.EPDParser;
 import com.jamesswafford.chess4j.io.MoveParser;
 
 import static org.junit.Assert.*;
@@ -26,11 +25,10 @@ public class MoveGenTest {
 
     @Test
     public void testKnightMoves() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
+        Board board = new Board();
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genKnightMoves(b,moves,true,true);
+        MoveGen.genKnightMoves(board,moves,true,true);
 
         assertEquals(4, moves.size());
         assertTrue(moves.contains(new Move(WHITE_KNIGHT, B1, A3)));
@@ -41,11 +39,10 @@ public class MoveGenTest {
 
     @Test
     public void testKnightCaptures() {
-        Board b = Board.INSTANCE;
-        b.setPos("4k3/8/3P1p2/8/4N3/8/8/4K3 w - - 0 1");
+        Board board = new Board("4k3/8/3P1p2/8/4N3/8/8/4K3 w - - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genKnightMoves(b,moves,true,false);
+        MoveGen.genKnightMoves(board,moves,true,false);
 
         assertEquals(1, moves.size());
         assertTrue(moves.contains(new Move(WHITE_KNIGHT, E4, F6 ,BLACK_PAWN)));
@@ -53,11 +50,10 @@ public class MoveGenTest {
 
     @Test
     public void testKnightNoncaptures() {
-        Board b = Board.INSTANCE;
-        b.setPos("4k3/8/3P1p2/8/4N3/8/8/4K3 w - - 0 1");
+        Board board = new Board("4k3/8/3P1p2/8/4N3/8/8/4K3 w - - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genKnightMoves(b,moves,false,true);
+        MoveGen.genKnightMoves(board,moves,false,true);
 
         assertEquals(6, moves.size());
         assertTrue(moves.contains(new Move(WHITE_KNIGHT, E4, G5)));
@@ -70,11 +66,10 @@ public class MoveGenTest {
 
     @Test
     public void testBishopMoves() {
-        Board b = Board.INSTANCE;
-        b.setPos("4k3/2p3P1/8/4B3/4B3/3p1P2/8/4K3 w - - 0 1");
+        Board board = new Board("4k3/2p3P1/8/4B3/4B3/3p1P2/8/4K3 w - - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genBishopMoves(b, moves, true, true);
+        MoveGen.genBishopMoves(board, moves, true, true);
         assertEquals(18, moves.size());
         assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, F6)));
         assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, F4)));
@@ -98,11 +93,10 @@ public class MoveGenTest {
 
     @Test
     public void testBishopCaptures() {
-        Board b = Board.INSTANCE;
-        b.setPos("4k3/2p3P1/8/4B3/4B3/3p1P2/8/4K3 w - - 0 1");
+        Board board = new Board("4k3/2p3P1/8/4B3/4B3/3p1P2/8/4K3 w - - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genBishopMoves(b, moves, true, false);
+        MoveGen.genBishopMoves(board, moves, true, false);
         assertEquals(2, moves.size());
         assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, C7,BLACK_PAWN)));
         assertTrue(moves.contains(new Move(WHITE_BISHOP, E4, D3, BLACK_PAWN)));
@@ -110,11 +104,10 @@ public class MoveGenTest {
 
     @Test
     public void testBishopNoncaptures() {
-        Board b = Board.INSTANCE;
-        b.setPos("4k3/2p3P1/8/4B3/4B3/3p1P2/8/4K3 w - - 0 1");
+        Board board = new Board("4k3/2p3P1/8/4B3/4B3/3p1P2/8/4K3 w - - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genBishopMoves(b, moves, false, true);
+        MoveGen.genBishopMoves(board, moves, false, true);
         assertEquals(16, moves.size());
         assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, F6)));
         assertTrue(moves.contains(new Move(WHITE_BISHOP, E5, F4)));
@@ -136,15 +129,14 @@ public class MoveGenTest {
 
     @Test
     public void testRookMoves() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
+        Board board = new Board();
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genRookMoves(b, moves, true, true);
+        MoveGen.genRookMoves(board, moves, true, true);
         assertEquals(0, moves.size());
 
-        b.setPos("8/8/3k1p2/8/3K4/8/1R3r2/8 b - - 0 1");
-        MoveGen.genRookMoves(b, moves, true, true);
+        board.setPos("8/8/3k1p2/8/3K4/8/1R3r2/8 b - - 0 1");
+        MoveGen.genRookMoves(board, moves, true, true);
 
         assertEquals(10, moves.size());
         assertTrue(moves.contains(new Move(BLACK_ROOK, F2, F3)));
@@ -161,11 +153,10 @@ public class MoveGenTest {
 
     @Test
     public void testRookCaptures() {
-        Board b = Board.INSTANCE;
+        Board board = new Board("8/8/3k1p2/8/3K4/8/1R3r2/8 b - - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        b.setPos("8/8/3k1p2/8/3K4/8/1R3r2/8 b - - 0 1");
-        MoveGen.genRookMoves(b, moves, true, false);
+        MoveGen.genRookMoves(board, moves, true, false);
 
         assertEquals(1, moves.size());
         assertTrue(moves.contains(new Move(BLACK_ROOK, F2, B2, WHITE_ROOK)));
@@ -173,11 +164,10 @@ public class MoveGenTest {
 
     @Test
     public void testRookNoncaptures() {
-        Board b = Board.INSTANCE;
+        Board board = new Board("8/8/3k1p2/8/3K4/8/1R3r2/8 b - - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        b.setPos("8/8/3k1p2/8/3K4/8/1R3r2/8 b - - 0 1");
-        MoveGen.genRookMoves(b, moves, false, true);
+        MoveGen.genRookMoves(board, moves, false, true);
 
         assertEquals(9, moves.size());
         assertTrue(moves.contains(new Move(BLACK_ROOK, F2, F3)));
@@ -193,11 +183,10 @@ public class MoveGenTest {
 
     @Test
     public void testQueenMoves() {
-        Board b = Board.INSTANCE;
-        b.setPos("8/8/3bk3/8/8/2K3Q1/8/8 w - - 0 1");
+        Board board = new Board("8/8/3bk3/8/8/2K3Q1/8/8 w - - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genQueenMoves(b, moves, true, true);
+        MoveGen.genQueenMoves(board, moves, true, true);
         assertEquals(18, moves.size());
         assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G4)));
         assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G5)));
@@ -221,22 +210,20 @@ public class MoveGenTest {
 
     @Test
     public void testQueenCaptures() {
-        Board b = Board.INSTANCE;
-        b.setPos("8/8/3bk3/8/8/2K3Q1/8/8 w - - 0 1");
+        Board board = new Board("8/8/3bk3/8/8/2K3Q1/8/8 w - - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genQueenMoves(b, moves, true, false);
+        MoveGen.genQueenMoves(board, moves, true, false);
         assertEquals(1, moves.size());
         assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, D6 ,BLACK_BISHOP)));
     }
 
     @Test
     public void testQueenNoncaptures() {
-        Board b = Board.INSTANCE;
-        b.setPos("8/8/3bk3/8/8/2K3Q1/8/8 w - - 0 1");
+        Board board = new Board("8/8/3bk3/8/8/2K3Q1/8/8 w - - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genQueenMoves(b, moves, false, true);
+        MoveGen.genQueenMoves(board, moves, false, true);
         assertEquals(17, moves.size());
         assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G4)));
         assertTrue(moves.contains(new Move(WHITE_QUEEN, G3, G5)));
@@ -260,11 +247,10 @@ public class MoveGenTest {
 
     @Test
     public void testKingMoves() {
-        Board b = Board.INSTANCE;
-        b.setPos("8/8/3k4/2n1P3/8/8/3rP3/R3K2R b KQ - 0 1");
+        Board board = new Board("8/8/3k4/2n1P3/8/8/3rP3/R3K2R b KQ - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genKingMoves(b, moves, true, true);
+        MoveGen.genKingMoves(board, moves, true, true);
         assertEquals(7, moves.size());
         assertTrue(moves.contains(new Move(BLACK_KING, D6, D7)));
         assertTrue(moves.contains(new Move(BLACK_KING, D6, E7)));
@@ -275,9 +261,9 @@ public class MoveGenTest {
         assertTrue(moves.contains(new Move(BLACK_KING, D6, C7)));
 
         // flip sides
-        b.setPos("8/8/3k4/2n1P3/8/8/3rP3/RN2K2R w KQ - 0 1");
+        board.setPos("8/8/3k4/2n1P3/8/8/3rP3/RN2K2R w KQ - 0 1");
         moves.clear();
-        MoveGen.genKingMoves(b, moves, true, true);
+        MoveGen.genKingMoves(board, moves, true, true);
         assertEquals(5, moves.size());
         assertTrue(moves.contains(new Move(WHITE_KING, E1, F2)));
         assertTrue(moves.contains(new Move(WHITE_KING, E1, F1)));
@@ -288,11 +274,10 @@ public class MoveGenTest {
 
     @Test
     public void testKingMoves2() {
-        Board b = Board.INSTANCE;
-        b.setPos("3k4/8/8/2n1P3/8/8/3rP3/RN2K2R w KQ - 0 1");
+        Board board = new Board("3k4/8/8/2n1P3/8/8/3rP3/RN2K2R w KQ - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genKingMoves(b, moves, true, true);
+        MoveGen.genKingMoves(board, moves, true, true);
 
         assertEquals(5, moves.size());
         assertTrue(moves.contains(new Move(WHITE_KING, E1, F2)));
@@ -305,11 +290,10 @@ public class MoveGenTest {
 
     @Test
     public void testKingMovesInCorner() {
-        Board b = Board.INSTANCE;
-        b.setPos("k7/8/8/8/8/8/8/7K w - - 0 1");
+        Board board = new Board("k7/8/8/8/8/8/8/7K w - - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genKingMoves(b, moves, true, true);
+        MoveGen.genKingMoves(board, moves, true, true);
 
         assertEquals(3, moves.size());
         assertTrue(moves.contains(new Move(WHITE_KING, H1, G1)));
@@ -319,11 +303,10 @@ public class MoveGenTest {
 
     @Test
     public void testKingMovesInCorner2() {
-        Board b = Board.INSTANCE;
-        b.setPos("k7/8/8/8/8/8/8/7K b - - 0 1");
+        Board board = new Board("k7/8/8/8/8/8/8/7K b - - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genKingMoves(b, moves, true, true);
+        MoveGen.genKingMoves(board, moves, true, true);
 
         assertEquals(3, moves.size());
         assertTrue(moves.contains(new Move(BLACK_KING, A8, A7)));
@@ -333,11 +316,10 @@ public class MoveGenTest {
 
     @Test
     public void testKingNoCastleToEscapeCheck() {
-        Board b = Board.INSTANCE;
-        b.setPos("3k4/8/8/2N1P3/7q/8/4P3/R3K2R w KQ - 0 1");
+        Board board = new Board("3k4/8/8/2N1P3/7q/8/4P3/R3K2R w KQ - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genKingMoves(b, moves, true, true);
+        MoveGen.genKingMoves(board, moves, true, true);
 
         assertEquals(4, moves.size());
         assertTrue(moves.contains(new Move(WHITE_KING, E1, F1)));
@@ -349,11 +331,11 @@ public class MoveGenTest {
 
     @Test
     public void testKingCannotCastleThroughCheck() {
-        Board b = Board.INSTANCE;
-        b.setPos("r3k2r/8/8/8/8/5Q2/8/4K3 b kq - 0 1");
+        Board board = Board.INSTANCE;
+        board.setPos("r3k2r/8/8/8/8/5Q2/8/4K3 b kq - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genKingMoves(b, moves, true, true);
+        MoveGen.genKingMoves(board, moves, true, true);
 
         assertEquals(6, moves.size());
         assertTrue(moves.contains(new Move(BLACK_KING, E8, F8)));
@@ -366,11 +348,10 @@ public class MoveGenTest {
 
     @Test
     public void testKingCaptures() {
-        Board b = Board.INSTANCE;
-        b.setPos("8/8/3k4/2n1P3/8/8/3rP3/R3K2R b KQ - 0 1");
+        Board board = new Board("8/8/3k4/2n1P3/8/8/3rP3/R3K2R b KQ - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genKingMoves(b, moves, true, false);
+        MoveGen.genKingMoves(board, moves, true, false);
 
         assertEquals(1, moves.size());
         assertTrue(moves.contains(new Move(BLACK_KING, D6, E5, WHITE_PAWN)));
@@ -378,11 +359,10 @@ public class MoveGenTest {
 
     @Test
     public void testKingNoncaptures() {
-        Board b = Board.INSTANCE;
-        b.setPos("8/8/3k4/2n1P3/8/8/3rP3/R3K2R b KQ - 0 1");
+        Board board = new Board("8/8/3k4/2n1P3/8/8/3rP3/R3K2R b KQ - 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genKingMoves(b, moves, false,true);
+        MoveGen.genKingMoves(board, moves, false,true);
         assertEquals(6, moves.size());
 
         assertTrue(moves.contains(new Move(BLACK_KING, D6, D7)));
@@ -395,11 +375,10 @@ public class MoveGenTest {
 
     @Test
     public void testPawnMoves() {
-        Board b = Board.INSTANCE;
-        b.setPos("2b1k3/PP6/8/3pP3/4P3/8/6P1/4K3 w - d6 0 1");
+        Board board = new Board("2b1k3/PP6/8/3pP3/4P3/8/6P1/4K3 w - d6 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genPawnMoves(b, moves, true, true);
+        MoveGen.genPawnMoves(board, moves, true, true);
 
         assertEquals(17, moves.size());
         assertTrue(moves.contains(new Move(WHITE_PAWN, A7, A8,null, WHITE_QUEEN)));
@@ -427,11 +406,10 @@ public class MoveGenTest {
 
     @Test
     public void testPawnCaptures() {
-        Board b = Board.INSTANCE;
-        b.setPos("2b1k3/PP6/8/3pP3/4P3/8/6P1/4K3 w - d6 0 1");
+        Board board = new Board("2b1k3/PP6/8/3pP3/4P3/8/6P1/4K3 w - d6 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genPawnMoves(b, moves, true, false);
+        MoveGen.genPawnMoves(board, moves, true, false);
 
         assertEquals(14, moves.size());
         assertTrue(moves.contains(new Move(WHITE_PAWN, A7, A8, null, WHITE_QUEEN)));
@@ -455,11 +433,10 @@ public class MoveGenTest {
 
     @Test
     public void testPawnNoncaps() {
-        Board b = Board.INSTANCE;
-        b.setPos("2b1k3/PP6/8/3pP3/4P3/8/6P1/4K3 w - d6 0 1");
+        Board board = new Board("2b1k3/PP6/8/3pP3/4P3/8/6P1/4K3 w - d6 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genPawnMoves(b, moves, false, true);
+        MoveGen.genPawnMoves(board, moves, false, true);
 
         assertEquals(3, moves.size());
         assertTrue(moves.contains(new Move(WHITE_PAWN, E5, E6)));
@@ -469,11 +446,10 @@ public class MoveGenTest {
 
     @Test
     public void testPawnMoves2() {
-        Board b = Board.INSTANCE;
-        b.setPos("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
+        Board board = new Board("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
 
         List<Move> moves = new ArrayList<>();
-        MoveGen.genPawnMoves(b, moves, true, true);
+        MoveGen.genPawnMoves(board, moves, true, true);
 
         assertEquals(16, moves.size());
         assertTrue(moves.contains(new Move(BLACK_PAWN, D7, D6)));
@@ -482,10 +458,9 @@ public class MoveGenTest {
 
     @Test
     public void testMovesFromInitialPos() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
+        Board board = new Board();
 
-        List<Move> moves = MoveGen.genLegalMoves(b);
+        List<Move> moves = MoveGen.genLegalMoves(board);
         assertEquals(20, moves.size());
 
         assertTrue(moves.contains(new Move(WHITE_PAWN, A2, A3)));
@@ -513,25 +488,23 @@ public class MoveGenTest {
 
     @Test
     public void tsetCapturesPromosOnlyFromInitialPosition() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
-        List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
+        Board board = new Board();
+        List<Move> moves = MoveGen.genPseudoLegalMoves(board, true,false);
         assertTrue(moves.isEmpty());
     }
 
     @Test
     public void testCapturesPromosOnlyContainsPromotions() throws Exception {
-        Board b = Board.INSTANCE;
-        EPDParser.setPos(b, "8/4Pk1p/6p1/1r6/8/5N2/2B2PPP/b5K1 w - - bm e8=Q+; id \"position 0631\";");
+        Board board = new Board( "8/4Pk1p/6p1/1r6/8/5N2/2B2PPP/b5K1 w - -");
 
-        List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
+        List<Move> moves = MoveGen.genPseudoLegalMoves(board, true,false);
 
         MoveParser mp = new MoveParser();
-        Move e7e8q = mp.parseMove("e7e8=q", b);
-        Move e7e8r = mp.parseMove("e7e8=r", b);
-        Move e7e8b = mp.parseMove("e7e8=b", b);
-        Move e7e8n = mp.parseMove("e7e8=n", b);
-        Move c2g6 = mp.parseMove("c2g6", b);
+        Move e7e8q = mp.parseMove("e7e8=q", board);
+        Move e7e8r = mp.parseMove("e7e8=r", board);
+        Move e7e8b = mp.parseMove("e7e8=b", board);
+        Move e7e8n = mp.parseMove("e7e8=n", board);
+        Move c2g6 = mp.parseMove("c2g6", board);
         assertTrue(moves.contains(e7e8q));
         assertTrue(moves.contains(e7e8r));
         assertTrue(moves.contains(e7e8b));
@@ -541,12 +514,11 @@ public class MoveGenTest {
 
     @Test
     public void testCapturesPromosOnlyContainsEP() throws Exception {
-        Board b = Board.INSTANCE;
-        b.setPos("8/8/8/3pP3/8/8/K6k/8 w - d6");
+        Board board = new Board("8/8/8/3pP3/8/8/K6k/8 w - d6");
 
-        List<Move> moves = MoveGen.genPseudoLegalMoves(b, true,false);
+        List<Move> moves = MoveGen.genPseudoLegalMoves(board, true,false);
         assertEquals(1, moves.size());
         MoveParser mp = new MoveParser();
-        assertTrue(moves.contains(mp.parseMove("e5d6", b)));
+        assertTrue(moves.contains(mp.parseMove("e5d6", board)));
     }
 }

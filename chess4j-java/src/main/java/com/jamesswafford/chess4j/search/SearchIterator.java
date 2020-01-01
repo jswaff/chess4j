@@ -36,12 +36,13 @@ public final class SearchIterator {
     public static int maxTime;
     public static boolean post = true;
     public static boolean ponderEnabled;
+    public static final ReentrantLock ponderMutex = new ReentrantLock();
+
     private static boolean pondering;
     private static Move ponderMove;
     private static boolean abortIterator = false;
 
     private static Board searchPos;
-    public static final ReentrantLock ponderMutex = new ReentrantLock();
 
     public static boolean isPondering() {
         return pondering;

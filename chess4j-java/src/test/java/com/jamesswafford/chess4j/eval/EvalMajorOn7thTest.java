@@ -6,12 +6,11 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import static com.jamesswafford.chess4j.board.squares.Square.*;
-import static com.jamesswafford.chess4j.eval.EvalQueen.*;
 import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.*;
 
 public class EvalMajorOn7thTest {
 
-    private Board board = Board.INSTANCE;
+    private Board board = new Board();
 
     @Test
     public void testEvalMajorOn7th() {

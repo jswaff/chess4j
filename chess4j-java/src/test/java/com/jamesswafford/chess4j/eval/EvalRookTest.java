@@ -11,7 +11,7 @@ import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.*;
 
 public class EvalRookTest {
 
-    Board board = Board.INSTANCE;
+    Board board = new Board();
 
     @Test
     public void testEvalRook() {

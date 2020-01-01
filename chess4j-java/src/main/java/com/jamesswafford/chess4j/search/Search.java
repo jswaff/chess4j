@@ -26,12 +26,12 @@ public final class Search {
 
     private static final Log LOGGER = LogFactory.getLog(Search.class);
 
-    public static long startTime=0;
-    public static long stopTime=0;
-    private static long lastTimeCheck=0;
+    static long startTime = 0;
+    static long stopTime = 0;
+    static boolean analysisMode = false;
+    static boolean abortSearch = false;
 
-    public static boolean analysisMode=false;
-    public static boolean abortSearch=false;
+    private static long lastTimeCheck = 0;
 
     private Search() {}
 

@@ -47,7 +47,7 @@ public class TestSuiteProcessor {
         LOGGER.info("# problems: " + numProblems);
         DecimalFormat df = new DecimalFormat("0.0");
         int numCorrect = numProblems - wrongProblems.size();
-        double pctCorrect = Double.valueOf(numCorrect) / Double.valueOf(numProblems) * 100;
+        double pctCorrect = (double) numCorrect / (double) numProblems * 100;
         LOGGER.info("# correct: " + numCorrect + " (" + df.format(pctCorrect) + "%)");
         if (wrongProblems.size()>0) {
             LOGGER.info("incorrect problems:");
@@ -59,7 +59,7 @@ public class TestSuiteProcessor {
 
     private boolean processProblem(String epd,int secondsPerProblem) throws ParseException, IllegalMoveException {
         LOGGER.info("\n\nprocessing epd: " + epd);
-        Board b = Board.INSTANCE;
+        Board b = new Board();
         List<EPDOperation> ops = EPDParser.setPos(b, epd);
         DrawBoard.drawBoard(b);
         List<Move> bms = getBestMoves(b,ops);
