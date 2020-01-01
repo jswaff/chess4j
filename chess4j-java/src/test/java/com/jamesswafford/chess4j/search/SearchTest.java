@@ -187,9 +187,9 @@ public class SearchTest {
             TTHolder.getAlwaysReplaceTransTable().store(b.getZobristKey(),
                     TranspositionTableEntryType.EXACT_MATCH,
                     score, 1, mv);
-            b.undoLastMove();
+            b.undoMove();
         }
-        b.undoLastMove();
+        b.undoMove();
 
         List<Move> pv = new ArrayList<>();
         Search.search(pv, -Constants.INFINITY, Constants.INFINITY, b, 3, searchStats,false);

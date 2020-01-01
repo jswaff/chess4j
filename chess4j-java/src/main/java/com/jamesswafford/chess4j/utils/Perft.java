@@ -59,7 +59,7 @@ class PerftCallable implements Callable<Long> {
         for (Move m : moves) {
             board.applyMove(m);
             n += perft(myDepth-1);
-            board.undoLastMove();
+            board.undoMove();
         }
 
         return n;

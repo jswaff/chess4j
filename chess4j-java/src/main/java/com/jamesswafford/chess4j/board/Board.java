@@ -64,26 +64,30 @@ public final class Board {
         resetBoard();
     }
 
-    public void applyMove(Move m) {
+    public Undo applyMove(Move move) {
         assert(verify());
-        undoStack.add(new Undo(m,fiftyCounter,castlingRights.getValue(),epSquare,zobristKey));
+
+        Undo undo = new Undo(move, fiftyCounter, castlingRights.getValue(), epSquare, zobristKey);
+        undoStack.add(undo);
 
         swapPlayer();
         moveCounter++;
 
-        if (m.captured()!=null) {
+        if (move.captured()!=null) {
             fiftyCounter = 0;
-            removeCapturedPiece(m);
+            removeCapturedPiece(move);
         } else {
             fiftyCounter++;
         }
 
         clearEPSquare();
-        addPieceToDestination(m);
-        removeCastlingAvailability(m);
-        removePiece(m.from());
+        addPieceToDestination(move);
+        removeCastlingAvailability(move);
+        removePiece(move.from());
 
         assert(verify());
+
+        return undo;
     }
 
     public Square clearEPSquare() {
@@ -495,11 +499,17 @@ public final class Board {
         zobristKey ^= Zobrist.getPlayerKey(playerToMove);
     }
 
-    public void undoLastMove() {
+    // FIXME: temporary hack
+    public void undoMove() {
+        undoMove(null);
+    }
+
+    public void undoMove(Undo undo) {
         assert(verify());
         assert(undoStack.size() > 0);
         int ind = undoStack.size()-1;
         Undo u = undoStack.remove(ind);
+//        assert(u.equals(undo));
 
         swapPlayer();
         epSquare = u.getEpSquare();

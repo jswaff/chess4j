@@ -73,7 +73,7 @@ public class TranspositionTableTest {
         assertFalse(ttable.probe(key).isPresent());
 
         // finally undo move and reprobe again
-        board.undoLastMove();
+        board.undoMove();
         key = Zobrist.calculateBoardKey(board);
         tte = ttable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
         assertEquals(lbe, tte);

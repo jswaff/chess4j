@@ -252,7 +252,7 @@ public class InputParser {
                 processPGNFile(f,false);
                 DecimalFormat df = new DecimalFormat("0.00");
                 long elapsed = System.currentTimeMillis() - startTime;
-                logger.info("\nfinished in " + df.format(Double.valueOf(elapsed)/1000.0) + " seconds.");
+                logger.info("\nfinished in " + df.format((double) elapsed /1000.0) + " seconds.");
                 Board.INSTANCE.resetBoard();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -345,8 +345,8 @@ public class InputParser {
     */
     private void remove() {
         stopSearchThread();
-        Board.INSTANCE.undoLastMove();
-        Board.INSTANCE.undoLastMove();
+        Board.INSTANCE.undoMove();
+        Board.INSTANCE.undoMove();
     }
 
     /**
@@ -379,7 +379,7 @@ public class InputParser {
         logger.info("# result : " + result + " : " + gameResult);
 
         List<Undo> undos = Board.INSTANCE.getUndos();
-        List<Move> gameMoves = new ArrayList<Move>();
+        List<Move> gameMoves = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
         for (Undo undo : undos) {
             gameMoves.add(undo.getMove());
@@ -435,7 +435,7 @@ public class InputParser {
     * "force" mode first.  We don't have to worry about undoing a move the engine made.
     */
     private void undo() {
-        Board.INSTANCE.undoLastMove();
+        Board.INSTANCE.undoMove();
     }
 
     /**

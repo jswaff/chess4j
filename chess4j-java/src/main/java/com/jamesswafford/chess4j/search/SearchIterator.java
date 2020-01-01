@@ -2,7 +2,7 @@ package com.jamesswafford.chess4j.search;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -60,7 +60,6 @@ public final class SearchIterator {
         Search.analysisMode = ponderMode;
     }
 
-
     private SearchIterator() {	}
 
     public static SearchIterator getInstance() {
@@ -77,7 +76,7 @@ public final class SearchIterator {
      * Kick off the iterative deepening search in its own thread.
      * Returns the thread.
      *
-     * @return
+     * @return - search thread
      */
     public static Thread think() {
 
@@ -89,7 +88,7 @@ public final class SearchIterator {
         setPonderMode(false);
         setAbortIterator(false);
         
-        Thread thinkThread = new Thread(() -> threadHelper());
+        Thread thinkThread = new Thread(SearchIterator::threadHelper);
         thinkThread.start();
 
         return thinkThread;
@@ -166,15 +165,15 @@ public final class SearchIterator {
      * Iterate over the given position and return the principal variation.
      * The returned line (PV) is guaranteed to have at least one move.
      *
-     * @return
+     * @return - principal variation
      */
-    public static List<Move> iterate(Board board,boolean testSuiteMode) {
+    public static List<Move> iterate(Board board, boolean testSuiteMode) {
 
         if (!testSuiteMode && !pondering && App.getOpeningBook() != null && board.getMoveCounter() <= 30) {
             BookMove bookMove = App.getOpeningBook().getMoveWeightedRandomByFrequency(board);
             if (bookMove != null) {
                 LOGGER.debug("# book move: " + bookMove);
-                return Arrays.asList(bookMove.getMove());
+                return Collections.singletonList(bookMove.getMove());
             }
         }
 
@@ -182,7 +181,7 @@ public final class SearchIterator {
         List<Move> moves = MoveGen.genLegalMoves(board);
         LOGGER.debug("# position has " + moves.size() + " move(s)");
         if (!testSuiteMode && moves.size()==1) {
-            return Arrays.asList(moves.get(0));
+            return Collections.singletonList(moves.get(0));
         }
 
         TTHolder.clearAllTables();

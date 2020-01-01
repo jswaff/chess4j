@@ -277,9 +277,7 @@ public class BoardTest {
         b.resetBoard();
         Board b2 = b.deepCopy();
 
-
-        b.applyMove(new Move(WHITE_PAWN, E2, E4));
-        b.undoLastMove();
+        b.undoMove(b.applyMove(new Move(WHITE_PAWN, E2, E4)));
 
         assertTrue(b.equalExceptMoveHistory(b2, true));
     }
@@ -290,9 +288,7 @@ public class BoardTest {
         b.setPos("r7/1PK5/8/8/k7/8/8/8 w - -");
         Board b2 = b.deepCopy();
 
-
-        b.applyMove(new Move(WHITE_PAWN, B7, A8, BLACK_ROOK, WHITE_QUEEN));
-        b.undoLastMove();
+        b.undoMove(b.applyMove(new Move(WHITE_PAWN, B7, A8, BLACK_ROOK, WHITE_QUEEN)));
 
         assertTrue(b.equalExceptMoveHistory(b2, true));
     }
@@ -303,9 +299,7 @@ public class BoardTest {
         b.setPos("k7/8/8/8/pP6/8/K7/8 b - b3");
         Board b2 = b.deepCopy();
 
-
-        b.applyMove(new Move(BLACK_PAWN, A4, B3, WHITE_PAWN, true));
-        b.undoLastMove();
+        b.undoMove(b.applyMove(new Move(BLACK_PAWN, A4, B3, WHITE_PAWN, true)));
 
         assertTrue(b.equalExceptMoveHistory(b2, true));
     }
@@ -316,8 +310,7 @@ public class BoardTest {
         b.setPos("k7/8/8/8/8/8/8/4K2R w K -");
         Board b2 = b.deepCopy();
 
-        b.applyMove(new Move(WHITE_KING, E1, G1, true));
-        b.undoLastMove();
+        b.undoMove(b.applyMove(new Move(WHITE_KING, E1, G1, true)));
 
         assertTrue(b.equalExceptMoveHistory(b2, true));
     }
@@ -351,13 +344,13 @@ public class BoardTest {
     public void testDeepCopy2() {
         Board b = Board.INSTANCE;
         b.resetBoard();
-        b.applyMove(new Move(WHITE_PAWN, E2, E4));
+        Undo u = b.applyMove(new Move(WHITE_PAWN, E2, E4));
         Board b2 = b.deepCopy();
         assertNotSame(b, b2);
         assertEquals(b, b2);
 
-        b.undoLastMove();
-        b2.undoLastMove();
+        b.undoMove(u);
+        b2.undoMove(u);
         assertTrue(b.equalExceptMoveHistory(b2, false));
         assertEquals(b, b2);
     }
@@ -368,8 +361,7 @@ public class BoardTest {
         b.resetBoard();
         Board b2 = b.deepCopy();
         assertNotSame(b, b2);
-        b.applyMove(new Move(WHITE_PAWN, E2, E4));
-        b.undoLastMove();
+        b.undoMove(b.applyMove(new Move(WHITE_PAWN, E2, E4)));
         assertEquals(b, b2);
     }
 
@@ -572,11 +564,11 @@ public class BoardTest {
         Move m = new Move(BLACK_KING, E8, G8,true);
         List<Move> legalMoves = MoveGen.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
-        b1.applyMove(m);
+        Undo u = b1.applyMove(m);
         assertNotEquals(b1, b2);
         assertNotEquals(b1.hashCode(), b2.hashCode());
 
-        b1.undoLastMove();
+        b1.undoMove(u);
         assertEquals(b1, b2);
         assertEquals(b1.hashCode(), b2.hashCode());
     }
@@ -593,11 +585,11 @@ public class BoardTest {
         Move m = new Move(WHITE_PAWN, D4, C5, BLACK_PAWN);
         List<Move> legalMoves = MoveGen.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
-        b1.applyMove(m);
+        Undo u = b1.applyMove(m);
         assertNotEquals(b1, b2);
         assertNotEquals(b1.hashCode(), b2.hashCode());
 
-        b1.undoLastMove();
+        b1.undoMove(u);
         assertEquals(b1, b2);
         assertEquals(b1.hashCode(), b2.hashCode());
     }
@@ -613,11 +605,11 @@ public class BoardTest {
         Move m = new Move(WHITE_PAWN, D5, C6, BLACK_PAWN,true);
         List<Move> legalMoves = MoveGen.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
-        b1.applyMove(m);
+        Undo u = b1.applyMove(m);
         assertNotEquals(b1, b2);
         assertNotEquals(b1.hashCode(), b2.hashCode());
 
-        b1.undoLastMove();
+        b1.undoMove(u);
         assertEquals(b1, b2);
         assertEquals(b1.hashCode(), b2.hashCode());
     }
@@ -634,11 +626,11 @@ public class BoardTest {
         Move m = new Move(WHITE_PAWN, A7, A8,null,WHITE_QUEEN);
         List<Move> legalMoves = MoveGen.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
-        b1.applyMove(m);
+        Undo u = b1.applyMove(m);
         assertNotEquals(b1, b2);
         assertNotEquals(b1.hashCode(), b2.hashCode());
 
-        b1.undoLastMove();
+        b1.undoMove(u);
         assertEquals(b1, b2);
         assertEquals(b1.hashCode(), b2.hashCode());
     }
@@ -655,11 +647,11 @@ public class BoardTest {
         Move m = new Move(WHITE_PAWN, A7, B8, BLACK_KNIGHT, WHITE_QUEEN);
         List<Move> legalMoves = MoveGen.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
-        b1.applyMove(m);
+        Undo u = b1.applyMove(m);
         assertNotEquals(b1, b2);
         assertNotEquals(b1.hashCode(), b2.hashCode());
 
-        b1.undoLastMove();
+        b1.undoMove(u);
         assertEquals(b1, b2);
         assertEquals(b1.hashCode(), b2.hashCode());
     }
@@ -699,10 +691,10 @@ public class BoardTest {
         b.applyMove(mp.parseMove("Bc4", b));
         assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("bxc1=q", b));
+        Undo u = b.applyMove(mp.parseMove("bxc1=q", b));
         assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.undoLastMove();
+        b.undoMove(u);
         assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
         b.applyMove(mp.parseMove("bxa1=n", b));
@@ -804,30 +796,31 @@ public class BoardTest {
 
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
         MoveParser mp = new MoveParser();
-        b.applyMove(mp.parseMove("e4", b));
+        List<Undo> undos = new ArrayList<>();
+        undos.add(b.applyMove(mp.parseMove("e4", b)));
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("e5", b));
+        undos.add(b.applyMove(mp.parseMove("e5", b)));
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("d4", b));
+        undos.add(b.applyMove(mp.parseMove("d4", b)));
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("exd4", b));
+        undos.add(b.applyMove(mp.parseMove("exd4", b)));
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("c4", b));
+        undos.add(b.applyMove(mp.parseMove("c4", b)));
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("dxc3", b)); // ep
+        undos.add(b.applyMove(mp.parseMove("dxc3", b))); // ep
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
 
-        b.undoLastMove(); // dxc3
+        b.undoMove(undos.get(undos.size()-1)); // dxc3
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.undoLastMove(); // c4
+        b.undoMove(undos.get(undos.size()-2)); // c4
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.undoLastMove(); // exd4
+        b.undoMove(undos.get(undos.size()-3)); // exd4
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.undoLastMove(); // d4
+        b.undoMove(undos.get(undos.size()-4)); // d4
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.undoLastMove(); // e5
+        b.undoMove(undos.get(undos.size()-5)); // e5
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.undoLastMove(); // e4
+        b.undoMove(undos.get(undos.size()-6)); // e4
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
     }
 
@@ -839,9 +832,9 @@ public class BoardTest {
         Move m = mp.parseMove("a8=Q", b);
         List<Move> legalMoves = MoveGen.genLegalMoves(b);
         assertTrue(legalMoves.contains(m));
-        b.applyMove(m);
+        Undo u = b.applyMove(m);
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.undoLastMove();
+        b.undoMove(u);
         assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
     }
 
@@ -892,12 +885,12 @@ public class BoardTest {
 
         List<Move> moves = MoveGen.genLegalMoves(b);
         assertTrue(moves.contains(m));
-        b.applyMove(m);
+        Undo u = b.applyMove(m);
 
         assertEquals(0, b.getNumPieces(WHITE_PAWN));
         assertEquals(1, b.getNumPieces(WHITE_QUEEN));
 
-        b.undoLastMove();
+        b.undoMove(u);
         assertEquals(1, b.getNumPieces(WHITE_PAWN));
         assertEquals(0, b.getNumPieces(WHITE_QUEEN));
     }

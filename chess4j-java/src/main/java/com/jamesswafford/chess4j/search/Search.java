@@ -64,7 +64,7 @@ public final class Search {
             board.applyMove(move);
             if (BoardUtils.isOpponentInCheck(board)) {
                 // illegal
-                board.undoLastMove();
+                board.undoMove();
                 continue;
             }
 
@@ -83,7 +83,7 @@ public final class Search {
                 //}
             }
             numMovesSearched++;
-            board.undoLastMove();
+            board.undoMove();
 
             // if depth==1, we need to continue to search to ensure we have something to play
             if (depth > 1 && abortSearch) {
@@ -216,7 +216,7 @@ public final class Search {
             board.applyMove(move);
             if (BoardUtils.isOpponentInCheck(board)) {
                 // illegal
-                board.undoLastMove();
+                board.undoMove();
                 continue;
             }
 
@@ -234,7 +234,7 @@ public final class Search {
 
                 // if this position is looking unpromising, just skip it
                 if (Prune.prune(board, move, inCheck, givesCheck, extend, alpha, beta, depth)) {
-                    board.undoLastMove();
+                    board.undoMove();
                     stats.incPrunes();
                     numMovesPruned++;
                     continue;
@@ -267,7 +267,7 @@ public final class Search {
             //////
 
             numMovesSearched++;
-            board.undoLastMove();
+            board.undoMove();
 
             if (abortSearch) {
                 return 0;
@@ -342,14 +342,14 @@ public final class Search {
             board.applyMove(mv);
             if (BoardUtils.isOpponentInCheck(board)) {
                 // illegal
-                board.undoLastMove();
+                board.undoMove();
                 continue;
             }
 
             // can this capture possibly raise alpha?
             if (!inCheck && mv.promotion()==null
                     && EvalMaterial.evalPiece(mv.captured()) + EvalMaterial.PAWN_VAL*2 + standPat < alpha) {
-                board.undoLastMove();
+                board.undoMove();
                 continue;
             }
 
@@ -357,7 +357,7 @@ public final class Search {
             if (!inCheck && mv.promotion()==null
                     && EvalMaterial.evalPiece(board.getPiece(mv.to())) > EvalMaterial.evalPiece(mv.captured())
                     && SEE.see(board, mv) < 0) {
-                board.undoLastMove();
+                board.undoMove();
                 continue;
             }
 
@@ -365,7 +365,7 @@ public final class Search {
             stats.incQNodes();
             int score = -quiescenceSearch(-beta,-alpha,givesCheck,board,stats);
 
-            board.undoLastMove();
+            board.undoMove();
 
             if (abortSearch) {
                 return 0;

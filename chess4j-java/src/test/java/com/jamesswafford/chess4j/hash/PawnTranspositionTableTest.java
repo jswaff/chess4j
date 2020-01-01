@@ -51,7 +51,7 @@ public class PawnTranspositionTableTest {
         assertNull(tte);
 
         // finally undo move and reprobe again
-        board.undoLastMove();
+        board.undoMove();
         key = Zobrist.calculatePawnKey(board);
         tte = ptable.probe(key);
         assertNotNull(tte);
