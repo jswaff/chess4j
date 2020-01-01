@@ -158,7 +158,7 @@ public class ExtendTest {
 
         assertEquals(0, Extend.extendDepth(b, m));
 
-        b.undoLastMove();
+        b.undoMove();
         m = mp.parseMove("f5", b);
         assertTrue(MoveGen.genLegalMoves(b).contains(m));
         b.applyMove(m);
