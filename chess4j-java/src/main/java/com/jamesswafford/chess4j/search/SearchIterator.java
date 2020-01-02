@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.eval.EvalMaterial;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -84,7 +85,7 @@ public final class SearchIterator {
         // make a copy of the current position.  note that just because we are operating
         // of a copy of the global position, the global position itself should remain
         // unchanged until our search is complete.
-        searchPos = Board.INSTANCE.deepCopy();
+        searchPos = Globals.getBoard().deepCopy();
 
         setPonderMode(false);
         setAbortIterator(false);
@@ -100,11 +101,11 @@ public final class SearchIterator {
         List<Move> pv = iterate(searchPos,false);
 
         // sanity check - the global position shouldn't have changed
-        assert(Board.INSTANCE.equals(searchPos));
+        assert(Globals.getBoard().equals(searchPos));
 
-        Board.INSTANCE.applyMove(pv.get(0));
+        Globals.getBoard().applyMove(pv.get(0));
         LOGGER.info("move " + pv.get(0));
-        GameStatus gameStatus = GameStatusChecker.getGameStatus(Board.INSTANCE);
+        GameStatus gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard());
 
         // pondering loop.  as long as we guess correctly we'll loop back around
         // if we don't predict correctly this thread is terminated
@@ -138,10 +139,10 @@ public final class SearchIterator {
                 // if we're not in ponder mode, it's because the usermove was correctly predicted and the main
                 // thread transitioned the search into "normal mode."
                 if (!pondering) {
-                    assert(Board.INSTANCE.equals(searchPos));
-                    Board.INSTANCE.applyMove(pv.get(0));
+                    assert(Globals.getBoard().equals(searchPos));
+                    Globals.getBoard().applyMove(pv.get(0));
                     LOGGER.info("move " + pv.get(0));
-                    gameStatus = GameStatusChecker.getGameStatus(Board.INSTANCE);
+                    gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard());
                 } else {
                     // we're still in ponder mode.  this means the search terminated on its own.
                     // in this case just bail out.

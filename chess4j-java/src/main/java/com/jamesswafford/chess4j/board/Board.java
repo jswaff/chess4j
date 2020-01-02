@@ -25,8 +25,6 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public final class Board {
 
-    public static final Board INSTANCE = new Board();
-
     private static final String INITIAL_POS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
     private List<Undo> undoStack = new ArrayList<>();

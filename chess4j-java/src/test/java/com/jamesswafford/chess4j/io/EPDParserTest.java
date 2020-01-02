@@ -18,7 +18,7 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public class EPDParserTest {
 
-    Board board = Board.INSTANCE;
+    Board board = new Board();
 
     @Test
     public void epdParserTest1() throws ParseException {

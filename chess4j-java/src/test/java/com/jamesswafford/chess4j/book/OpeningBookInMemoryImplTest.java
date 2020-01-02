@@ -38,8 +38,7 @@ public class OpeningBookInMemoryImplTest {
 
     @Test
     public void movesFromInitialPos() throws Exception {
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+        Board board = new Board();
         List<BookMove> bookMoves = book.getMoves(board);
         assertEquals(5, bookMoves.size());
 
@@ -53,8 +52,7 @@ public class OpeningBookInMemoryImplTest {
 
     @Test
     public void movesAfterF4() throws Exception {
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+        Board board = new Board();
         MoveParser mp = new MoveParser();
         board.applyMove(mp.parseMove("f4", board));
 
@@ -68,8 +66,7 @@ public class OpeningBookInMemoryImplTest {
 
     @Test
     public void testWeightedRandomByFrequency() throws Exception {
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+        Board board = new Board();
 
         // we are going to call the function 1000 times from the opening.  expect to get
         // Nc3 approximately 1000 times, g3 1000, f4 4000, Nf3 3000, e4 1000
@@ -109,8 +106,7 @@ public class OpeningBookInMemoryImplTest {
 
     @Test
     public void testWeightedRandomByFrequency2() throws Exception {
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+        Board board = new Board();
 
         MoveParser mp = new MoveParser();
         board.applyMove(mp.parseMove("f4", board));

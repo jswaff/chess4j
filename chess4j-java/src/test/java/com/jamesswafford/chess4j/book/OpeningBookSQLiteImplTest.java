@@ -57,8 +57,7 @@ public class OpeningBookSQLiteImplTest {
 
     @Test
     public void addMove() throws Exception {
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+        Board board = new Board();
 
         List<BookMove> bookMoves = book.getMoves(board);
         assertEquals(0,bookMoves.size());
@@ -77,8 +76,7 @@ public class OpeningBookSQLiteImplTest {
 
     @Test
     public void addMoveTwice() throws Exception {
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+        Board board = new Board();
 
         List<BookMove> bookMoves = book.getMoves(board);
         assertEquals(0,bookMoves.size());
@@ -98,8 +96,7 @@ public class OpeningBookSQLiteImplTest {
 
     @Test
     public void addMultipleMoves() throws Exception {
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+        Board board = new Board();
 
         List<BookMove> bookMoves = book.getMoves(board);
         assertEquals(0,bookMoves.size());
@@ -123,8 +120,7 @@ public class OpeningBookSQLiteImplTest {
 
     @Test
     public void addIllegalMove() {
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+        Board board = new Board();
 
         List<BookMove> bookMoves = book.getMoves(board);
         assertEquals(0,bookMoves.size());
@@ -141,8 +137,7 @@ public class OpeningBookSQLiteImplTest {
 
         assertEquals(125, book.getTotalMoveCount()); // 850 for entire PGN
 
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+        Board board = new Board();
         List<BookMove> bookMoves = book.getMoves(board);
         assertEquals(5, bookMoves.size());
 
@@ -168,8 +163,7 @@ public class OpeningBookSQLiteImplTest {
         populateBook(tinyPGN);
         assertEquals(15, book.getTotalMoveCount()); // 85 for entire game
 
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+        Board board = new Board();
 
         MoveParser mp = new MoveParser();
 
@@ -225,8 +219,7 @@ Be5 41.Rd2 Bc6 42.b5 Bf3 43.Bf4 1-0
     public void learnMultipleTimes() throws Exception {
         populateBook(tinyPGN);
 
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+        Board board = new Board();
 
         MoveParser mp = new MoveParser();
         Move f4 = mp.parseMove("f4", board);
@@ -263,8 +256,7 @@ Be5 41.Rd2 Bc6 42.b5 Bf3 43.Bf4 1-0
     public void learn() throws Exception {
         populateBook(tinyPGN);
 
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+        Board board = new Board();
 
         MoveParser mp = new MoveParser();
         Move f4 = mp.parseMove("f4", board);

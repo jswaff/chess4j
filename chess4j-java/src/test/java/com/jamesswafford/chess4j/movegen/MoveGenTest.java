@@ -331,8 +331,7 @@ public class MoveGenTest {
 
     @Test
     public void testKingCannotCastleThroughCheck() {
-        Board board = Board.INSTANCE;
-        board.setPos("r3k2r/8/8/8/8/5Q2/8/4K3 b kq - 0 1");
+        Board board = new Board("r3k2r/8/8/8/8/5Q2/8/4K3 b kq - 0 1");
 
         List<Move> moves = new ArrayList<>();
         MoveGen.genKingMoves(board, moves, true, true);

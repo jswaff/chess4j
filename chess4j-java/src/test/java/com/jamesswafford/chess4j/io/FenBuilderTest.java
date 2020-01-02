@@ -11,10 +11,9 @@ public class FenBuilderTest {
     @Test
     public void testCreateFen_InitialPos() {
 
-        Board b = Board.INSTANCE;
-        b.resetBoard();
+        Board board = new Board();
 
-        String fen = FenBuilder.createFen(b, true);
+        String fen = FenBuilder.createFen(board, true);
 
         assertEquals("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", fen);
     }
@@ -22,31 +21,30 @@ public class FenBuilderTest {
     @Test
     public void testCreateFen_pos1() {
 
-        Board b = Board.INSTANCE;
         String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
-        b.setPos(fen);
+        Board board = new Board(fen);
 
-        assertEquals(fen, FenBuilder.createFen(b, true));
+        assertEquals(fen, FenBuilder.createFen(board, true));
     }
 
     @Test
     public void testCreateFen_pos2() {
 
-        Board b = Board.INSTANCE;
         String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq -";
-        b.setPos(fen);
 
-        assertEquals(fen, FenBuilder.createFen(b, false));
+        Board board = new Board(fen);
+
+        assertEquals(fen, FenBuilder.createFen(board, false));
     }
 
     @Test
     public void testCreateFen_pos3() {
 
-        Board b = Board.INSTANCE;
         String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2";
-        b.setPos(fen);
 
-        assertEquals(fen, FenBuilder.createFen(b, true));
+        Board board = new Board(fen);
+
+        assertEquals(fen, FenBuilder.createFen(board, true));
     }
 
 }

@@ -13,7 +13,7 @@ public abstract class AbstractOpeningBook {
 
     private Random r = new Random();
 
-    public abstract void addToBook(Board board,Move move);
+    public abstract void addToBook(Board board, Move move);
 
     public abstract List<BookMove> getMoves(Board board);
 
@@ -21,7 +21,7 @@ public abstract class AbstractOpeningBook {
 
     public abstract void initializeBook();
 
-    public void learn(List<Move> moves,Color engineColor,GameResult gameResult) {
+    public void learn(List<Move> moves, Color engineColor, GameResult gameResult) {
         // default impl is a no-op
     }
 
@@ -30,14 +30,16 @@ public abstract class AbstractOpeningBook {
     }
 
     public void addToBook(PGNGame game) {
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+
+        Board board = new Board();
 
         List<Move> gameMoves = game.getMoves();
-        for (int i=0;i<15 && i<gameMoves.size();i++) {
+        int i=0;
+        while (i<15 && i<gameMoves.size()) {
             Move gameMove = gameMoves.get(i);
-            addToBook(board,gameMove);
+            addToBook(board, gameMove);
             board.applyMove(gameMove);
+            i++;
         }
     }
 

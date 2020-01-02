@@ -18,7 +18,7 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public class MoveParserTest {
 
-    private Board board = Board.INSTANCE;
+    private Board board = new Board();
     private MoveParser mp = new MoveParser();
 
     @Test

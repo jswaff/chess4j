@@ -20,9 +20,9 @@ import static com.jamesswafford.chess4j.hash.TranspositionTableEntryType.*;
 
 public class TranspositionTableTest {
 
-    TranspositionTable ttable = new TranspositionTable(false);
-    TranspositionTable ttDPtable = new TranspositionTable(true);
-    Board board = Board.INSTANCE;
+    private TranspositionTable ttable = new TranspositionTable(false);
+    private TranspositionTable ttDPtable = new TranspositionTable(true);
+    private Board board = new Board();
 
     @Test
     public void testNumEntriesIsPowerOf2() {
@@ -259,9 +259,9 @@ public class TranspositionTableTest {
         // overwrite with different score/depth
         ttable.store(key, LOWER_BOUND,900, 6, m);
         tte = ttable.probe(key).get();
-        assertFalse(lbe.equals(tte));
+        assertNotEquals(lbe, tte);
         lbe = new TranspositionTableEntry(key, LOWER_BOUND,900,6,m);
-        assertTrue(lbe.equals(tte));
+        assertEquals(lbe, tte);
 
         // use different key to store new entry
         long key2 = ~key;

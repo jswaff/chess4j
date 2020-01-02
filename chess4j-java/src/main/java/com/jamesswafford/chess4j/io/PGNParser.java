@@ -40,8 +40,7 @@ public final class PGNParser {
         String[] mvs = moveText.split(" ");
         MoveParser mp = new MoveParser();
 
-        Board board = Board.INSTANCE;
-        board.resetBoard();
+        Board board = new Board();
 
         for (String mv : mvs) {
             Move m = mp.parseMove(mv, board);
