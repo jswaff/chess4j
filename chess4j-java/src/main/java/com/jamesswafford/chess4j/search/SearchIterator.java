@@ -7,12 +7,10 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.jamesswafford.chess4j.Globals;
-import com.jamesswafford.chess4j.eval.EvalMaterial;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.jamesswafford.chess4j.App;
-import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.movegen.MoveGen;
@@ -24,6 +22,10 @@ import com.jamesswafford.chess4j.utils.GameStatus;
 import com.jamesswafford.chess4j.utils.GameStatusChecker;
 import com.jamesswafford.chess4j.utils.MoveUtils;
 import com.jamesswafford.chess4j.utils.TimeUtils;
+
+import static com.jamesswafford.chess4j.Constants.*;
+import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
+import static com.jamesswafford.chess4j.utils.GameStatus.*;
 
 public final class SearchIterator {
 
@@ -110,7 +112,7 @@ public final class SearchIterator {
         // pondering loop.  as long as we guess correctly we'll loop back around
         // if we don't predict correctly this thread is terminated
         boolean ponderFailure = false;
-        while (gameStatus==GameStatus.INPROGRESS && ponderEnabled && pv.size() > 1 && !ponderFailure && !abortIterator) {
+        while (gameStatus==INPROGRESS && ponderEnabled && pv.size() > 1 && !ponderFailure && !abortIterator) {
 
             ponderMutex.lock();
             LOGGER.debug("# thinkHelper acquired lock #1 on ponderMutex");
@@ -158,7 +160,7 @@ public final class SearchIterator {
 
         LOGGER.debug("### exiting search thread");
 
-        if (gameStatus != GameStatus.INPROGRESS) {
+        if (gameStatus != INPROGRESS) {
             PrintGameResult.printResult(gameStatus);
         }
     }
@@ -205,18 +207,18 @@ public final class SearchIterator {
             ++depth;
 
             // aspiration windows
-            int alphaBound = -Constants.INFINITY;
-            int betaBound = Constants.INFINITY;
+            int alphaBound = -INFINITY;
+            int betaBound = INFINITY;
             if (depth > 2) {
-                alphaBound = score - (EvalMaterial.PAWN_VAL / 3);
-                betaBound = score + (EvalMaterial.PAWN_VAL / 3);
+                alphaBound = score - (PAWN_VAL / 3);
+                betaBound = score + (PAWN_VAL / 3);
             }
 
             score=Search.search(pv,alphaBound, betaBound, board, depth,stats,true);
 
             if ((score <= alphaBound || score >= betaBound) && !Search.abortSearch) {
                 LOGGER.debug("# research depth " + depth + "! alpha=" + alphaBound + ", beta=" + betaBound + ", score=" + score);
-                score=Search.search(pv,-Constants.INFINITY, Constants.INFINITY, board, depth,stats,true);
+                score=Search.search(pv,-INFINITY, INFINITY, board, depth,stats,true);
             }
 
             assert(pv.size()>0);
@@ -233,7 +235,7 @@ public final class SearchIterator {
             //LOGGER.debug("# first line: " + PrintLine.getMoveString(stats.getFirstLine()));
 
             // if this is a mate, stop here
-            if (Math.abs(score) > Constants.CHECKMATE-500) {
+            if (Math.abs(score) > CHECKMATE-500) {
                 LOGGER.debug("# stopping iterative search because mate found");
                 stopSearching = true;
             }

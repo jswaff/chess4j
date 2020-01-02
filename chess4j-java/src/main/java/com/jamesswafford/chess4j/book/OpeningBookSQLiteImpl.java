@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.jamesswafford.chess4j.Globals;
@@ -16,6 +17,8 @@ import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.hash.Zobrist;
 import com.jamesswafford.chess4j.utils.GameResult;
+
+import static com.jamesswafford.chess4j.utils.GameResult.*;
 
 public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
 
@@ -133,35 +136,34 @@ public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
 
     @Override
     public void learn(List<Move> moves, Color engineColor, GameResult gameResult) {
-        if (!(GameResult.WIN.equals(gameResult) || GameResult.LOSS.equals(gameResult)
-                || GameResult.DRAW.equals(gameResult)))
-        {
+
+        if (!Arrays.asList(WIN, LOSS, DRAW).contains(gameResult)) {
             return;
         }
 
-        Globals.getBoard().resetBoard();
+        Board board = new Board();
 
         try {
             for (Move move : moves) {
-                if (Globals.getBoard().getPlayerToMove().equals(engineColor)) {
-                    learn(move,gameResult);
+                if (board.getPlayerToMove().equals(engineColor)) {
+                    learn(move, board, gameResult);
                 }
-                Globals.getBoard().applyMove(move);
+                board.applyMove(move);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
 
-    private void learn(Move move,GameResult gameResult) throws SQLException {
-        List<BookMove> bookMoves = getMoves(Globals.getBoard());
+    private void learn(Move move, Board board, GameResult gameResult) throws SQLException {
+        List<BookMove> bookMoves = getMoves(board);
 
         for (BookMove bookMove : bookMoves) {
             if (bookMove.getMove().equals(move)) {
-                update(Globals.getBoard(), move, bookMove.getFrequency(),
-                        bookMove.getWins() + (GameResult.WIN.equals(gameResult) ? 1 : 0),
-                        bookMove.getLosses() + (GameResult.LOSS.equals(gameResult) ? 1 : 0),
-                        bookMove.getDraws() + (GameResult.DRAW.equals(gameResult) ? 1 : 0)
+                update(board, move, bookMove.getFrequency(),
+                        bookMove.getWins() + (WIN.equals(gameResult) ? 1 : 0),
+                        bookMove.getLosses() + (LOSS.equals(gameResult) ? 1 : 0),
+                        bookMove.getDraws() + (DRAW.equals(gameResult) ? 1 : 0)
                         );
             }
         }
