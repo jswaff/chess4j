@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.search;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jamesswafford.chess4j.board.Undo;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -39,7 +40,7 @@ public class SearchTest {
         Search.stopTime = Search.startTime + 10000;
 
         int score = Search.search(new ArrayList<>(), -INFINITY, INFINITY,
-                board, 2, searchStats,false);
+                board, new ArrayList<>() , 2, searchStats,false);
         assertEquals(CHECKMATE-1, score);
     }
 
@@ -53,7 +54,7 @@ public class SearchTest {
         Search.stopTime = Search.startTime + 10000;
 
         int score = Search.search(new ArrayList<>(), -INFINITY, INFINITY,
-                board, 2,searchStats,false);
+                board, new ArrayList<>(), 2,searchStats,false);
         assertEquals(CHECKMATE-1, score);
     }
 
@@ -67,7 +68,7 @@ public class SearchTest {
         Search.stopTime = Search.startTime + 30000;
 
         int score = Search.search(new ArrayList<>(), -INFINITY, INFINITY,
-                board, 4, searchStats,false);
+                board, new ArrayList<>(), 4, searchStats,false);
         assertEquals(CHECKMATE-3, score);
     }
 
@@ -81,7 +82,7 @@ public class SearchTest {
         Search.stopTime = Search.startTime + 10000;
 
         int score = Search.search(new ArrayList<>(), -INFINITY, INFINITY,
-                board, 6, searchStats,false);
+                board, new ArrayList<>(), 6, searchStats,false);
         assertEquals(CHECKMATE-5, score);
     }
 
@@ -96,7 +97,7 @@ public class SearchTest {
         Search.stopTime = Search.startTime + 10000;
 
         int score = Search.search(pv, -INFINITY, INFINITY,
-                board, 1, searchStats,false);
+                board, new ArrayList<>(), 1, searchStats,false);
         assertEquals(0, score);
         assertEquals(0, pv.size());
     }
@@ -124,7 +125,7 @@ public class SearchTest {
 
         List<Move> pv = new ArrayList<>();
         Search.search(pv, -INFINITY, INFINITY,
-                board, 5, searchStats,false);
+                board, new ArrayList<>(), 5, searchStats,false);
 
         assertEquals(5, searchStats.getFirstLine().size());
         assertEquals(lastPV, searchStats.getFirstLine().subList(0, 4));
@@ -141,14 +142,14 @@ public class SearchTest {
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
         Search.search(new ArrayList<>(), -INFINITY, INFINITY,
-                board, 1, searchStats,false);
+                board, new ArrayList<>(), 1, searchStats,false);
         assertEquals(21, searchStats.getNodes());
 
         searchStats = new SearchStats();
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
         Search.search(new ArrayList<>(), -INFINITY, INFINITY,
-                board, 3, searchStats,false);
+                board, new ArrayList<>(), 3, searchStats,false);
         assertEquals(4, searchStats.getNodes()); // 1 + 3 (down left side of the tree)
 
         Search.abortSearch = false;
@@ -166,12 +167,12 @@ public class SearchTest {
         // make a (ridiculous) entry up.  the program would never play 1. a4, UNLESS of course it would be a piece up!
         // make 1. ... a5 a rook up for white, everything else a queen up, and verify PV is 1. a4 a5
         Move a2a4 = new Move(WHITE_PAWN, A2, A4);
-        board.applyMove(a2a4);
+        Undo undoa2a4 = board.applyMove(a2a4);
         List<Move> mvs = MoveGen.genLegalMoves(board);
         Move a7a5 = new Move(BLACK_PAWN, A7, A5);
         assertTrue(mvs.contains(a7a5));
         for (Move mv : mvs) {
-            board.applyMove(mv);
+            Undo u = board.applyMove(mv);
             int score=900;
             if (mv.equals(a7a5)) {
                 score=500;
@@ -179,12 +180,12 @@ public class SearchTest {
             TTHolder.getAlwaysReplaceTransTable().store(board.getZobristKey(),
                     TranspositionTableEntryType.EXACT_MATCH,
                     score, 1, mv);
-            board.undoMove();
+            board.undoMove(u);
         }
-        board.undoMove();
+        board.undoMove(undoa2a4);
 
         List<Move> pv = new ArrayList<>();
-        Search.search(pv, -INFINITY, INFINITY, board, 3, searchStats,false);
+        Search.search(pv, -INFINITY, INFINITY, board, new ArrayList<>(), 3, searchStats,false);
         assertEquals(2, pv.size());
         assertEquals(a2a4, pv.get(0));
         assertEquals(a7a5, pv.get(1));
@@ -199,7 +200,7 @@ public class SearchTest {
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
 
-        Search.quiescenceSearch(-INFINITY,INFINITY,false,board,searchStats);
+        Search.quiescenceSearch(-INFINITY, INFINITY, false, board, new ArrayList<>(), searchStats);
         assertEquals(0,searchStats.getNodes());
         assertEquals(0, searchStats.getQNodes());
     }
@@ -215,7 +216,7 @@ public class SearchTest {
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
 
-        int qScore = Search.quiescenceSearch(-INFINITY, INFINITY,false,board,searchStats);
+        int qScore = Search.quiescenceSearch(-INFINITY, INFINITY,false, board, new ArrayList<>(), searchStats);
         assertEquals(score, qScore);
     }
 
@@ -228,7 +229,7 @@ public class SearchTest {
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
 
-        int qScore = Search.quiescenceSearch(QUEEN_VAL, INFINITY,false, board,searchStats);
+        int qScore = Search.quiescenceSearch(QUEEN_VAL, INFINITY,false, board, new ArrayList<>(), searchStats);
         assertEquals(QUEEN_VAL,qScore);
     }
 
@@ -245,7 +246,7 @@ public class SearchTest {
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
 
-        Search.quiescenceSearch(-INFINITY, INFINITY,false,board,searchStats);
+        Search.quiescenceSearch(-INFINITY, INFINITY,false, board, new ArrayList<>(), searchStats);
 
         assertEquals(0,searchStats.getNodes());
         assertEquals(1, searchStats.getQNodes());
@@ -264,7 +265,7 @@ public class SearchTest {
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
 
-        Search.quiescenceSearch(-INFINITY, INFINITY,false,board,searchStats);
+        Search.quiescenceSearch(-INFINITY, INFINITY,false, board, new ArrayList<>(), searchStats);
 
         assertEquals(0,searchStats.getNodes());
         assertEquals(4, searchStats.getQNodes());
@@ -285,9 +286,9 @@ public class SearchTest {
         Search.startTime = System.currentTimeMillis();
         Search.stopTime = Search.startTime + 10000;
 
-        Search.quiescenceSearch(-INFINITY, -QUEEN_VAL,false, board, searchStats);
+        Search.quiescenceSearch(-INFINITY, -QUEEN_VAL,false, board, new ArrayList<>(), searchStats);
 
-        assertEquals(0,searchStats.getNodes());
+        assertEquals(0, searchStats.getNodes());
         assertEquals(0, searchStats.getQNodes());
     }
 }

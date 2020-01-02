@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.search;
 
+import com.jamesswafford.chess4j.board.Undo;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -140,11 +141,11 @@ public class ExtendTest {
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("fxe5", board);
         assertTrue(MoveGen.genLegalMoves(board).contains(move));
-        board.applyMove(move);
+        Undo undo = board.applyMove(move);
 
         assertEquals(0, Extend.extendDepth(board, move));
 
-        board.undoMove();
+        board.undoMove(undo);
         move = mp.parseMove("f5", board);
         assertTrue(MoveGen.genLegalMoves(board).contains(move));
         board.applyMove(move);

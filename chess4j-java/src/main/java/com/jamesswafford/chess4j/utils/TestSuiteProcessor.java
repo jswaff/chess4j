@@ -59,10 +59,10 @@ public class TestSuiteProcessor {
 
     private boolean processProblem(String epd,int secondsPerProblem) throws ParseException, IllegalMoveException {
         LOGGER.info("\n\nprocessing epd: " + epd);
-        Board b = new Board();
-        List<EPDOperation> ops = EPDParser.setPos(b, epd);
-        DrawBoard.drawBoard(b);
-        List<Move> bms = getBestMoves(b,ops);
+        Board board = new Board();
+        List<EPDOperation> ops = EPDParser.setPos(board, epd);
+        DrawBoard.drawBoard(board);
+        List<Move> bms = getBestMoves(board, ops);
         LOGGER.info("best moves: ");
         for (Move bm : bms) {
             LOGGER.info("\t" + bm);
@@ -71,7 +71,7 @@ public class TestSuiteProcessor {
         SearchIterator.setAbortIterator(false);
         SearchIterator.setPonderMode(false);
         SearchIterator.maxTime = secondsPerProblem * 1000;
-        List<Move> pv = SearchIterator.iterate(b,true);
+        List<Move> pv = SearchIterator.iterate(board, new ArrayList<>(), true);
 
         return bms.contains(pv.get(0));
     }

@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.jamesswafford.chess4j.board.Undo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -57,9 +58,9 @@ class PerftCallable implements Callable<Long> {
         long n=0;
 
         for (Move m : moves) {
-            board.applyMove(m);
+            Undo undo = board.applyMove(m);
             n += perft(myDepth-1);
-            board.undoMove();
+            board.undoMove(undo);
         }
 
         return n;

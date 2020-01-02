@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.hash;
 
 import java.util.List;
 
+import com.jamesswafford.chess4j.board.Undo;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,13 +46,13 @@ public class PawnTranspositionTableTest {
 
         // now make move and reprobe
         Move m = new Move(WHITE_PAWN, E2, E4);
-        board.applyMove(m);
+        Undo u = board.applyMove(m);
         key = Zobrist.calculatePawnKey(board);
         tte = ptable.probe(key);
         assertNull(tte);
 
         // finally undo move and reprobe again
-        board.undoMove();
+        board.undoMove(u);
         key = Zobrist.calculatePawnKey(board);
         tte = ptable.probe(key);
         assertNotNull(tte);

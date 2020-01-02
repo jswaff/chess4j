@@ -4,16 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.jamesswafford.chess4j.board.Draw;
+import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.eval.EvalMaterial;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.jamesswafford.chess4j.Constants;
-import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.movegen.MoveGen;
-import com.jamesswafford.chess4j.board.ZugzwangDetector;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.hash.TTHolder;
@@ -35,8 +32,8 @@ public final class Search {
 
     private Search() {}
 
-    public static int search(List<Move> parentPV,int alpha,int beta,Board board,
-            int depth,SearchStats stats,boolean showThinking) {
+    public static int search(List<Move> parentPV,int alpha, int beta, Board board,
+            List<Undo> undos, int depth, SearchStats stats, boolean showThinking) {
 
         assert(depth>0);
         assert(beta>alpha);
@@ -61,10 +58,10 @@ public final class Search {
         while ((move = mo.selectNextMove()) != null) {
             assert(BoardUtils.isPseudoLegalMove(board, move));
             recordFirstLine(true,numMovesSearched,stats,move);
-            board.applyMove(move);
+            undos.add(board.applyMove(move));
             if (BoardUtils.isOpponentInCheck(board)) {
                 // illegal
-                board.undoMove();
+                board.undoMove(undos.remove(undos.size()-1));
                 continue;
             }
 
@@ -75,15 +72,17 @@ public final class Search {
             assert(extend >= 0 && extend <= 1);
 
             if (numMovesSearched==0) {
-                score = -searchHelper(pv,-beta,-alpha,board,depth-1+extend,1,true,givesCheck,false,stats);
+                score = -searchHelper(pv, -beta, -alpha, board, undos, depth-1+extend,1,true,
+                        givesCheck,false, stats);
             } else {
                 //score = -searchHelper(pv,-(alpha+1),-alpha,board,depth-1+extend,1,false,givesCheck,(extend==0),stats);
                 //if (score > alpha && score < beta) {
-                    score = -searchHelper(pv,-beta,-alpha,board,depth-1+extend,1,false,givesCheck,(extend==0),stats);
+                    score = -searchHelper(pv, -beta, -alpha, board, undos, depth-1+extend,1,false,
+                            givesCheck, (extend==0), stats);
                 //}
             }
             numMovesSearched++;
-            board.undoMove();
+            board.undoMove(undos.remove(undos.size()-1));
 
             // if depth==1, we need to continue to search to ensure we have something to play
             if (depth > 1 && abortSearch) {
@@ -97,24 +96,24 @@ public final class Search {
                 alpha = score;
                 setParentPV(parentPV,move,pv);
                 if (showThinking) {
-                    PrintLine.printLine(parentPV,depth,score,startTime,stats.getNodes());
+                    PrintLine.printLine(parentPV, depth, score, startTime, stats.getNodes());
                 }
             }
         }
 
-        alpha = adjustFinalScoreForMates(board,alpha,numMovesSearched,0);
+        alpha = adjustFinalScoreForMates(board, alpha, numMovesSearched,0);
 
         return alpha;
     }
 
-    private static void setParentPV(List<Move> parentPV,Move head,List<Move> tail) {
+    private static void setParentPV(List<Move> parentPV, Move head, List<Move> tail) {
         parentPV.clear();
         parentPV.add(head);
         parentPV.addAll(tail);
     }
 
-    private static int searchHelper(List<Move> parentPV,int alpha,int beta,Board board,
-            int depth,int ply,boolean pvNode,boolean inCheck,boolean isNullMoveOK,SearchStats stats) {
+    private static int searchHelper(List<Move> parentPV, int alpha, int beta, Board board, List<Undo> undos,
+            int depth, int ply, boolean pvNode, boolean inCheck, boolean isNullMoveOK, SearchStats stats) {
 
         assert(ply > 0);
         assert(alpha < beta);
@@ -126,7 +125,7 @@ public final class Search {
 
         if (depth < 1) {
             assert(!inCheck);
-            return Search.quiescenceSearch(alpha,beta,inCheck,board,stats);
+            return Search.quiescenceSearch(alpha, beta, inCheck, board, undos, stats);
         }
 
         // Time check
@@ -181,7 +180,8 @@ public final class Search {
 
             int nullDepth = depth - 4; // R=3
             if (nullDepth < 1) { nullDepth = 1; } // don't drop into q-search
-            int nullScore = -searchHelper(parentPV,0-beta,1-beta,board,nullDepth,ply,false,false,false,stats);
+            int nullScore = -searchHelper(parentPV,0-beta,1-beta, board, undos, nullDepth,ply,false,
+                    false,false,stats);
 
             board.swapPlayer();
             if (nullEP != null) {
@@ -213,10 +213,10 @@ public final class Search {
         while ((move = mo.selectNextMove()) != null) {
             assert(BoardUtils.isPseudoLegalMove(board, move));
             recordFirstLine(pvNode,numMovesSearched,stats,move);
-            board.applyMove(move);
+            undos.add(board.applyMove(move));
             if (BoardUtils.isOpponentInCheck(board)) {
                 // illegal
-                board.undoMove();
+                board.undoMove(undos.remove(undos.size()-1));
                 continue;
             }
 
@@ -229,12 +229,13 @@ public final class Search {
             int score;
             if (numMovesSearched == 0) {
                 // this is a PV node.
-                score = -searchHelper(pv,-beta,-alpha,board,depth-1+extend,ply+1,pvNode,givesCheck,!pvNode,stats);
+                score = -searchHelper(pv, -beta, -alpha, board, undos, depth-1+extend,ply+1, pvNode,
+                        givesCheck, !pvNode, stats);
             } else {
 
                 // if this position is looking unpromising, just skip it
                 if (Prune.prune(board, move, inCheck, givesCheck, extend, alpha, beta, depth)) {
-                    board.undoMove();
+                    board.undoMove(undos.remove(undos.size()-1));
                     stats.incPrunes();
                     numMovesPruned++;
                     continue;
@@ -250,7 +251,8 @@ public final class Search {
                         && !move.equals(KillerMoves.getInstance().getKiller1(ply))
                         && !move.equals(KillerMoves.getInstance().getKiller2(ply)))
                 {
-                    score = -searchHelper(pv,-(alpha+1),-alpha,board,depth-2,ply+1,false,false,true,stats);
+                    score = -searchHelper(pv, -(alpha+1), -alpha, board, undos, depth-2,ply+1,false,
+                            false,true, stats);
                 } else {
                     score = alpha + 1; // ensure a full depth search
                 }
@@ -260,14 +262,15 @@ public final class Search {
                     // alpha.  If it does, then we need to research with a full window to establish the real score.
                     //score = -searchHelper(pv,-(alpha+1),-alpha,board,depth-1+extend,ply+1,false,givesCheck,(extend==0),stats);
                     //if (score > alpha && score < beta) {
-                        score = -searchHelper(pv,-beta,-alpha,board,depth-1+extend,ply+1,false,givesCheck,(extend==0),stats);
+                        score = -searchHelper(pv, -beta, -alpha, board, undos, depth-1+extend,ply+1,
+                                false, givesCheck, (extend==0), stats);
                     //}
                 }
             }
             //////
 
             numMovesSearched++;
-            board.undoMove();
+            board.undoMove(undos.remove(undos.size()-1));
 
             if (abortSearch) {
                 return 0;
@@ -308,7 +311,8 @@ public final class Search {
         return alpha;
     }
 
-    public static int quiescenceSearch(int alpha,int beta,boolean inCheck,Board board,SearchStats stats) {
+    public static int quiescenceSearch(int alpha, int beta, boolean inCheck, Board board,
+                                       List<Undo> undos, SearchStats stats) {
         assert(alpha < beta);
 
         // Time check
@@ -339,17 +343,17 @@ public final class Search {
             assert(BoardUtils.isPseudoLegalMove(board, mv));
             assert(mv.captured()!=null || mv.promotion()!=null);
 
-            board.applyMove(mv);
+            undos.add(board.applyMove(mv));
             if (BoardUtils.isOpponentInCheck(board)) {
                 // illegal
-                board.undoMove();
+                board.undoMove(undos.remove(undos.size()-1));
                 continue;
             }
 
             // can this capture possibly raise alpha?
             if (!inCheck && mv.promotion()==null
                     && EvalMaterial.evalPiece(mv.captured()) + EvalMaterial.PAWN_VAL*2 + standPat < alpha) {
-                board.undoMove();
+                board.undoMove(undos.remove(undos.size()-1));
                 continue;
             }
 
@@ -357,15 +361,15 @@ public final class Search {
             if (!inCheck && mv.promotion()==null
                     && EvalMaterial.evalPiece(board.getPiece(mv.to())) > EvalMaterial.evalPiece(mv.captured())
                     && SEE.see(board, mv) < 0) {
-                board.undoMove();
+                board.undoMove(undos.remove(undos.size()-1));
                 continue;
             }
 
             boolean givesCheck = false; // board.isPlayerInCheck();
             stats.incQNodes();
-            int score = -quiescenceSearch(-beta,-alpha,givesCheck,board,stats);
+            int score = -quiescenceSearch(-beta, -alpha, givesCheck, board, undos, stats);
 
-            board.undoMove();
+            board.undoMove(undos.remove(undos.size()-1));
 
             if (abortSearch) {
                 return 0;

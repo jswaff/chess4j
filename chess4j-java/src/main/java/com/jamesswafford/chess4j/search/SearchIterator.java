@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.jamesswafford.chess4j.Globals;
+import com.jamesswafford.chess4j.board.Undo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -46,6 +47,7 @@ public final class SearchIterator {
     private static boolean abortIterator = false;
 
     private static Board searchPos;
+    private static List<Undo> searchUndos;
 
     public static boolean isPondering() {
         return pondering;
@@ -89,6 +91,9 @@ public final class SearchIterator {
         // unchanged until our search is complete.
         searchPos = Globals.getBoard().deepCopy();
 
+        // make a copy of the global undo stack
+        searchUndos = new ArrayList<>(Globals.gameUndos);
+
         setPonderMode(false);
         setAbortIterator(false);
         
@@ -100,7 +105,7 @@ public final class SearchIterator {
 
     private static void threadHelper() {
 
-        List<Move> pv = iterate(searchPos,false);
+        List<Move> pv = iterate(searchPos, searchUndos, false);
 
         // sanity check - the global position shouldn't have changed
         assert(Globals.getBoard().equals(searchPos));
@@ -130,7 +135,7 @@ public final class SearchIterator {
                 ponderMutex.unlock();
                 LOGGER.debug("thinkHelper released lock #1 on ponderMutex");
 
-                pv = iterate(searchPos,false);
+                pv = iterate(searchPos, searchUndos, false);
                 LOGGER.debug("# ponder search terminated");
 
                 ponderMutex.lock();
@@ -171,7 +176,7 @@ public final class SearchIterator {
      *
      * @return - principal variation
      */
-    public static List<Move> iterate(Board board, boolean testSuiteMode) {
+    public static List<Move> iterate(Board board, List<Undo> undos, boolean testSuiteMode) {
 
         if (!testSuiteMode && !pondering && App.getOpeningBook() != null && board.getMoveCounter() <= 30) {
             BookMove bookMove = App.getOpeningBook().getMoveWeightedRandomByFrequency(board);
@@ -214,11 +219,11 @@ public final class SearchIterator {
                 betaBound = score + (PAWN_VAL / 3);
             }
 
-            score=Search.search(pv,alphaBound, betaBound, board, depth,stats,true);
+            score=Search.search(pv,alphaBound, betaBound, board, undos, depth,stats,true);
 
             if ((score <= alphaBound || score >= betaBound) && !Search.abortSearch) {
                 LOGGER.debug("# research depth " + depth + "! alpha=" + alphaBound + ", beta=" + betaBound + ", score=" + score);
-                score=Search.search(pv,-INFINITY, INFINITY, board, depth,stats,true);
+                score=Search.search(pv,-INFINITY, INFINITY, board, undos, depth,stats,true);
             }
 
             assert(pv.size()>0);

@@ -503,17 +503,12 @@ public final class Board {
         zobristKey ^= Zobrist.getPlayerKey(playerToMove);
     }
 
-    // FIXME: temporary hack
-    public void undoMove() {
-        undoMove(null);
-    }
-
     public void undoMove(Undo undo) {
         assert(verify());
         assert(undoStack.size() > 0);
         int ind = undoStack.size()-1;
         Undo u = undoStack.remove(ind);
-//        assert(u.equals(undo));
+        assert(u.equals(undo));
 
         swapPlayer();
         epSquare = u.getEpSquare();
@@ -777,7 +772,6 @@ public final class Board {
         } else {
             removePiece(m.to());
         }
-
     }
 
     private void removeCastlingAvailability(Move m) {

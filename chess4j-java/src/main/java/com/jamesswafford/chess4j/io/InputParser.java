@@ -346,8 +346,8 @@ public class InputParser {
     */
     private void remove() {
         stopSearchThread();
-        Globals.getBoard().undoMove();
-        Globals.getBoard().undoMove();
+        Globals.getBoard().undoMove(Globals.gameUndos.remove(Globals.gameUndos.size()-1));
+        Globals.getBoard().undoMove(Globals.gameUndos.remove(Globals.gameUndos.size()-1));
     }
 
     /**
@@ -436,7 +436,7 @@ public class InputParser {
     * "force" mode first.  We don't have to worry about undoing a move the engine made.
     */
     private void undo() {
-        Globals.getBoard().undoMove();
+        Globals.getBoard().undoMove(Globals.gameUndos.remove(Globals.gameUndos.size()-1));
     }
 
     /**
