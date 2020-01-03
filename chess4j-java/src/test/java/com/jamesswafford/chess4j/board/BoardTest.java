@@ -151,84 +151,67 @@ public class BoardTest {
         Move m = new Move(WHITE_PAWN,E2, E4);
         b.applyMove(m);
         b2.setPos("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_PAWN,C7, C5));
         b2.setPos("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(WHITE_KNIGHT,G1, F3));
         b2.setPos("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_QUEEN,D8, A5));
         b2.setPos("rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(WHITE_BISHOP, F1, E2));
         b2.setPos("rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPPBPPP/RNBQK2R b KQkq - 3 3");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_QUEEN, A5, D2, WHITE_BISHOP));
         b2.setPos("rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPqBPPP/RNBQK2R w KQkq - 0 4");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(WHITE_KNIGHT, B1, D2,BLACK_QUEEN));
         b2.setPos("rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPNBPPP/R1BQK2R b KQkq - 0 4");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_PAWN, C5, C4));
         b2.setPos("rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQK2R w KQkq - 0 5");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(WHITE_KING, E1, G1,true));
         b2.setPos("rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 b kq - 0 5");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_KING, E8, D8));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 w - - 1 6");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(WHITE_PAWN, B2, B4));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/1Pp1P3/5N2/P1PNBPPP/R1BQ1RK1 b - b3 0 6");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_PAWN, C4, B3,WHITE_PAWN,true));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQ1RK1 w - - 0 7");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(WHITE_ROOK, F1, E1));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQR1K1 b - - 1 7");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_PAWN, B3, B2));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR1K1 w - - 0 8");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(WHITE_KING, G1, H1));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR2K b - - 1 8");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_PAWN, B2, A1, WHITE_ROOK, BLACK_KNIGHT));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/P1PNBPPP/n1BQR2K w - - 0 9");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
-
+        assertEquals(b2, b);
     }
 
     @Test
@@ -269,7 +252,7 @@ public class BoardTest {
 
         b.undoMove(b.applyMove(new Move(WHITE_PAWN, E2, E4)));
 
-        assertTrue(b.equalExceptMoveHistory(b2, true));
+        assertEquals(b2, b);
     }
 
     @Test
@@ -279,7 +262,7 @@ public class BoardTest {
 
         b.undoMove(b.applyMove(new Move(WHITE_PAWN, B7, A8, BLACK_ROOK, WHITE_QUEEN)));
 
-        assertTrue(b.equalExceptMoveHistory(b2, true));
+        assertEquals(b2, b);
     }
 
     @Test
@@ -289,7 +272,7 @@ public class BoardTest {
 
         b.undoMove(b.applyMove(new Move(BLACK_PAWN, A4, B3, WHITE_PAWN, true)));
 
-        assertTrue(b.equalExceptMoveHistory(b2, true));
+        assertEquals(b2, b);
     }
 
     @Test
@@ -299,7 +282,7 @@ public class BoardTest {
 
         b.undoMove(b.applyMove(new Move(WHITE_KING, E1, G1, true)));
 
-        assertTrue(b.equalExceptMoveHistory(b2, true));
+        assertEquals(b2, b);
     }
 
     @Test
@@ -331,21 +314,12 @@ public class BoardTest {
         Board b = new Board();
         Undo u = b.applyMove(new Move(WHITE_PAWN, E2, E4));
         Board b2 = b.deepCopy();
+
         assertNotSame(b, b2);
         assertEquals(b, b2);
 
         b.undoMove(u);
         b2.undoMove(u);
-        assertTrue(b.equalExceptMoveHistory(b2, false));
-        assertEquals(b, b2);
-    }
-
-    @Test
-    public void testDeepCopy3() {
-        Board b = new Board();
-        Board b2 = b.deepCopy();
-        assertNotSame(b, b2);
-        b.undoMove(b.applyMove(new Move(WHITE_PAWN, E2, E4)));
         assertEquals(b, b2);
     }
 
@@ -382,154 +356,57 @@ public class BoardTest {
     /*
      * Should be able to obtain an equal position using the French Defense and Petrov Defense
      */
-    public void testHash() {
-        List<Integer> hashCodes1 = new ArrayList<>();
-        List<Integer> hashCodes2 = new ArrayList<>();
+    public void testEqualsAndHash() {
 
         Board b1 = new Board();
         Board b2 = b1.deepCopy();
-
-        assertEquals(b1.hashCode(), b2.hashCode());
-        assertEquals(b1.hashCodeWithoutMoveHistory(true), b2.hashCodeWithoutMoveHistory(true));
 
         // step through French Defense with b1
         b1.applyMove(new Move(WHITE_PAWN, E2, E4));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
         b1.applyMove(new Move(BLACK_PAWN, E7, E6));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
         b1.applyMove(new Move(WHITE_PAWN, D2, D4));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
         b1.applyMove(new Move(BLACK_PAWN, D7, D5));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
-        b1.applyMove(new Move(WHITE_PAWN, E4, D5,BLACK_PAWN));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
-        b1.applyMove(new Move(BLACK_PAWN, E6, D5,WHITE_PAWN));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
+        b1.applyMove(new Move(WHITE_PAWN, E4, D5, BLACK_PAWN));
+        b1.applyMove(new Move(BLACK_PAWN, E6, D5, WHITE_PAWN));
         b1.applyMove(new Move(WHITE_KNIGHT, G1, F3));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
         b1.applyMove(new Move(BLACK_KNIGHT, G8, F6));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
-
 
         // step through the Petrov Defense with b2
         b2.applyMove(new Move(WHITE_PAWN, E2, E4));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(BLACK_PAWN, E7, E5));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(WHITE_KNIGHT, G1, F3));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(BLACK_KNIGHT, G8, F6));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
-        b2.applyMove(new Move(WHITE_KNIGHT, F3, E5,BLACK_PAWN));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
+        b2.applyMove(new Move(WHITE_KNIGHT, F3, E5, BLACK_PAWN));
         b2.applyMove(new Move(BLACK_PAWN, D7, D6));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(WHITE_KNIGHT, E5, F3));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(BLACK_KNIGHT, F6, E4, WHITE_PAWN));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(WHITE_PAWN, D2, D3));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(BLACK_KNIGHT, E4, F6));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(WHITE_PAWN, D3, D4));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(BLACK_PAWN, D6, D5));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
 
-
-        // Positions would be equal at this point, except for move history and fifty counter
+        // Positions would be equal at this point, except for move and fifty counters
         assertNotEquals(b1, b2);
-        assertTrue(b1.equalExceptMoveHistory(b2, false));
-        assertFalse(b1.equalExceptMoveHistory(b2, true));
+        assertNotEquals(b1.hashCode(), b2.hashCode());
 
-        // by adding a pawn move we should be equal except move history and number of moves
+        // make a couple of moves in b1 to catch the move counter up
+        b1.applyMove(new Move(WHITE_KNIGHT, B1, A3));
+        b1.applyMove(new Move(BLACK_KNIGHT, B8, A6));
+        b1.applyMove(new Move(WHITE_KNIGHT, A3, B1));
+        b1.applyMove(new Move(BLACK_KNIGHT, A6, B8));
+
+        assertEquals(b2.getMoveCounter(), b1.getMoveCounter());
+        assertNotEquals(b2.getFiftyCounter(), b1.getFiftyCounter());
+
+        // by adding a pawn move the fifty counters are re-aligned
         b1.applyMove(new Move(WHITE_PAWN, G2, G3));
         b2.applyMove(new Move(WHITE_PAWN, G2, G3));
 
-        assertNotEquals(b1, b2);
-        assertFalse(b1.equalExceptMoveHistory(b2, true));
-        assertTrue(b1.equalExceptMoveHistory(b2, false));
-        assertNotEquals(b1.hashCode(), b2.hashCode());
+        assertEquals(b2.getFiftyCounter(), b1.getFiftyCounter());
 
-        assertEquals(b1.hashCodeWithoutMoveHistory(false), b2.hashCodeWithoutMoveHistory(false));
-        assertNotEquals(b1.hashCodeWithoutMoveHistory(true), b2.hashCodeWithoutMoveHistory(true));
-
-        // hash codes should be equal at beginning, move 1, move 7 and end only.
-        for (int i=0;i<hashCodes1.size();i++) {
-            int hc1 = hashCodes1.get(i);
-            if (i==0) {
-                assertEquals((int) hashCodes2.get(0), hc1);
-                assertFalse(hashCodes2.subList(1, hashCodes2.size()).contains(hc1));
-            } else if (i==7) {
-                assertEquals(hc1, (int) hashCodes2.get(11));
-                assertFalse(hashCodes2.subList(0, hashCodes2.size()-1).contains(hc1));
-            } else {
-                assertFalse(hashCodes2.contains(hc1));
-            }
-        }
-    }
-
-    @Test
-    /*
-     * Should be able to obtain an equal position using the Queen's Gambit (d4,d5,c4,e6,Nc3,Nf6) and
-     * the English Opening (c4,Nf6,Nc3,e6,d4,d5).
-     */
-    public void testHash2() {
-        List<Integer> hashCodes1 = new ArrayList<>();
-        List<Integer> hashCodes2 = new ArrayList<>();
-
-        Board b1 = new Board();
-        Board b2 = b1.deepCopy();
-
-        assertEquals(b1.hashCode(), b2.hashCode());
-        assertEquals(b1.hashCodeWithoutMoveHistory(true), b2.hashCodeWithoutMoveHistory(true));
-
-        // Go through Queen's Gambit with b1
-        b1.applyMove(new Move(WHITE_PAWN, D2, D4));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-        b1.applyMove(new Move(BLACK_PAWN, D7, D5));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-        b1.applyMove(new Move(WHITE_PAWN, C2, C4));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-        b1.applyMove(new Move(BLACK_PAWN, E7, E6));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-        b1.applyMove(new Move(WHITE_KNIGHT, B1, C3));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-        b1.applyMove(new Move(BLACK_KNIGHT, G8, F6));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-
-        // Step through English Opening with b2
-        b2.applyMove(new Move(WHITE_PAWN, C2, C4));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-        b2.applyMove(new Move(BLACK_KNIGHT, G8, F6));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-        b2.applyMove(new Move(WHITE_KNIGHT, B1, C3));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-        b2.applyMove(new Move(BLACK_PAWN, E7, E6));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-        b2.applyMove(new Move(WHITE_PAWN, D2, D4));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-        b2.applyMove(new Move(BLACK_PAWN, D7, D5));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-
-        // Positions would be equal at this point, except for move history, fifty counter and ep square
-        assertNotEquals(b1, b2);
-        assertFalse(b1.equalExceptMoveHistory(b2, false));
-
-        // by adding a pawn move we should be equal except move history
-        b1.applyMove(new Move(WHITE_PAWN, G2, G3));
-        b2.applyMove(new Move(WHITE_PAWN, G2, G3));
-        assertNotEquals(b1, b2);
-        assertTrue(b1.equalExceptMoveHistory(b2, true));
-        assertNotEquals(b1.hashCode(), b2.hashCode());
-        assertEquals(b1.hashCodeWithoutMoveHistory(true), b2.hashCodeWithoutMoveHistory(true));
-
-        // hash codes should be equal at beginning and end only.  Neither were
-        // saved in list so lists should contain completely different codes
-        for (int hc1 : hashCodes1) {
-            assertFalse(hashCodes2.contains(hc1));
-        }
+        // and now the positions should be equal
+        assertEquals(b2, b1);
+        assertEquals(b2.hashCode(), b1.hashCode());
     }
 
     @Test

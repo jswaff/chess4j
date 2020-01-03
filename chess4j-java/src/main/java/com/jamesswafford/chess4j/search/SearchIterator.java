@@ -110,9 +110,9 @@ public final class SearchIterator {
         // sanity check - the global position shouldn't have changed
         assert(Globals.getBoard().equals(searchPos));
 
-        Globals.getBoard().applyMove(pv.get(0));
+        Globals.gameUndos.add(Globals.getBoard().applyMove(pv.get(0)));
         LOGGER.info("move " + pv.get(0));
-        GameStatus gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard());
+        GameStatus gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard(), Globals.gameUndos);
 
         // pondering loop.  as long as we guess correctly we'll loop back around
         // if we don't predict correctly this thread is terminated
@@ -147,9 +147,9 @@ public final class SearchIterator {
                 // thread transitioned the search into "normal mode."
                 if (!pondering) {
                     assert(Globals.getBoard().equals(searchPos));
-                    Globals.getBoard().applyMove(pv.get(0));
+                    Globals.gameUndos.add(Globals.getBoard().applyMove(pv.get(0)));
                     LOGGER.info("move " + pv.get(0));
-                    gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard());
+                    gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard(), Globals.gameUndos);
                 } else {
                     // we're still in ponder mode.  this means the search terminated on its own.
                     // in this case just bail out.

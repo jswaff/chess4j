@@ -24,14 +24,14 @@ public class MoveParserTest {
     @Test
     public void moveParserTest1() throws ParseException, IllegalMoveException {
         board.resetBoard();
-        Board b = board.deepCopy();
-        assertEquals(board, b);
+        Board board2 = board.deepCopy();
+        assertEquals(board, board2);
         Move mv = mp.parseMove("b1c3",board);
         /// should not have changed state of board
-        assertEquals(board, b);
+        assertEquals(board, board2);
         board.applyMove(mv);
-        b.setPos("rnbqkbnr/pppppppp/8/8/8/2N5/PPPPPPPP/R1BQKBNR b KQkq - 0 1");
-        assertTrue(board.equalExceptMoveHistory(b, false));
+        board2.setPos("rnbqkbnr/pppppppp/8/8/8/2N5/PPPPPPPP/R1BQKBNR b KQkq - 1 1");
+        assertEquals(board, board2);
     }
 
     @Test(expected=IllegalMoveException.class)

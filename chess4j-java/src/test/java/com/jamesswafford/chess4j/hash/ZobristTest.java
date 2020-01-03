@@ -558,7 +558,6 @@ public class ZobristTest {
         Board b2 = b1.deepCopy();
 
         assertEquals(b1.hashCode(), b2.hashCode());
-        assertEquals(b1.hashCodeWithoutMoveHistory(true), b2.hashCodeWithoutMoveHistory(true));
 
         // Go through Queen's Gambit with b1
         b1.applyMove(new Move(WHITE_PAWN, D2, D4));
@@ -592,10 +591,10 @@ public class ZobristTest {
         assertNotEquals(b1, b2);
         assertNotEquals(Zobrist.calculateBoardKey(b1), Zobrist.calculateBoardKey(b2));
 
-        // by adding a pawn move we should be equal except move history
+        // by adding a pawn move we should be equal
         b1.applyMove(new Move(WHITE_PAWN, G2, G3));
         b2.applyMove(new Move(WHITE_PAWN, G2, G3));
-        assertNotEquals(b1, b2);
+        assertEquals(b1, b2);
         assertEquals(Zobrist.calculateBoardKey(b1), Zobrist.calculateBoardKey(b2));
 
         // keys should be equal at beginning and end only.  Neither were

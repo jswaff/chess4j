@@ -141,7 +141,7 @@ public final class Search {
         }
 
         // Draw check
-        if (Draw.isDraw(board)) {
+        if (Draw.isDraw(board, undos)) {
             return 0;
         }
 

@@ -2,6 +2,8 @@ package com.jamesswafford.chess4j.board;
 
 import com.jamesswafford.chess4j.board.squares.Square;
 
+import java.util.List;
+
 import static com.jamesswafford.chess4j.pieces.Pawn.*;
 import static com.jamesswafford.chess4j.pieces.Knight.*;
 import static com.jamesswafford.chess4j.pieces.Bishop.*;
@@ -10,9 +12,9 @@ import static com.jamesswafford.chess4j.pieces.Queen.*;
 
 public class Draw {
 
-    public static boolean isDraw(Board board) {
+    public static boolean isDraw(Board board, List<Undo> undos) {
         return isDrawBy50MoveRule(board) || isDrawLackOfMaterial(board) ||
-                isDrawByRep(board);
+                isDrawByRep(board, undos);
     }
 
     public static boolean isDrawBy50MoveRule(Board board) {
@@ -78,10 +80,10 @@ public class Draw {
         return true;
     }
 
-    public static boolean isDrawByRep(Board board) {
+    public static boolean isDrawByRep(Board board, List<Undo> undos) {
         long currentZobristKey = board.getZobristKey();
 
-        long numPrevVisits = board.getUndos().stream()
+        long numPrevVisits = undos.stream()
                 .filter(u -> u.getZobristKey() == currentZobristKey)
                 .count();
 
