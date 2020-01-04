@@ -18,11 +18,10 @@ public class EvalQueenTest {
 
         board.resetBoard();
 
-        assertEquals(QUEEN_PST[D1.value()], evalQueen(board, true, D1));
+        assertEquals(QUEEN_PST[D1.value()], evalQueen(board, D1));
 
         // test symmetry
-        assertEquals(evalQueen(board, true, D1),
-                evalQueen(board, false, D8));
+        assertEquals(evalQueen(board, D1), evalQueen(board, D8));
     }
 
     @Test
@@ -31,6 +30,6 @@ public class EvalQueenTest {
         board.setPos("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
 
         assertEquals(QUEEN_PST[C7.value()] + MAJOR_ON_7TH + CONNECTED_MAJORS_ON_7TH,
-                evalQueen(board, true, C7));
+                evalQueen(board, C7));
     }
 }

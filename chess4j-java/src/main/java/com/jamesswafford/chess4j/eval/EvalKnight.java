@@ -18,10 +18,10 @@ public class EvalKnight {
 
     public static final int KNIGHT_TROPISM = -2;
 
-    public static int evalKnight(Board board, boolean isWhite, Square sq) {
+    public static int evalKnight(Board board, Square sq) {
         int score = 0;
 
-        if (isWhite) {
+        if (board.getPiece(sq).isWhite()) {
             score = KNIGHT_PST[sq.value()];
             score += KNIGHT_TROPISM * sq.distance(board.getKingSquare(Color.BLACK));
         } else {

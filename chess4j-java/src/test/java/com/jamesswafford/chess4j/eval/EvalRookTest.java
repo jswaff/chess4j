@@ -18,10 +18,10 @@ public class EvalRookTest {
 
         board.resetBoard();
 
-        assertEquals(ROOK_PST[A1.value()], evalRook(board, true, A1));
+        assertEquals(ROOK_PST[A1.value()], evalRook(board, A1));
 
         // test the symmetry
-        assertEquals(evalRook(board, true, A1), evalRook(board, false, A8));
+        assertEquals(evalRook(board, A1), evalRook(board, A8));
     }
 
     @Test
@@ -30,7 +30,7 @@ public class EvalRookTest {
         board.setPos("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
 
         assertEquals(ROOK_PST[F7.value()] + MAJOR_ON_7TH + ROOK_OPEN_FILE,
-                evalRook(board, true, F7));
+                evalRook(board, F7));
     }
 
     @Test
@@ -39,7 +39,7 @@ public class EvalRookTest {
         board.setPos("3r3k/8/8/8/8/8/8/7K b - - 0 1");
 
         assertEquals(ROOK_PST[D1.value()] + ROOK_OPEN_FILE,
-                evalRook(board, false, D8));
+                evalRook(board, D8));
     }
 
     @Test
@@ -48,12 +48,12 @@ public class EvalRookTest {
         // friendly pawn but no enemy -- not half open (or open)
         board.setPos("8/2P5/8/2R5/K7/8/7k/8 w - - 0 1");
 
-        assertEquals(ROOK_PST[C5.value()], evalRook(board, true, C5));
+        assertEquals(ROOK_PST[C5.value()], evalRook(board, C5));
 
         // enemy pawn on C makes it half open
         board.setPos("8/2p5/8/2R5/K7/8/7k/8 w - - 0 1");
 
         assertEquals(ROOK_PST[C5.value()] + ROOK_HALF_OPEN_FILE,
-                evalRook(board, true, C5));
+                evalRook(board, C5));
     }
 }

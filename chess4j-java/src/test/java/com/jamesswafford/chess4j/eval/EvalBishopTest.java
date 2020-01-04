@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.eval;
 
+import com.jamesswafford.chess4j.board.Board;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -12,10 +13,12 @@ public class EvalBishopTest {
     @Test
     public void testEvalBishop() {
 
-        assertEquals(BISHOP_PST[C1.value()], evalBishop(true, C1));
+        Board board = new Board();
+
+        assertEquals(BISHOP_PST[C1.value()], evalBishop(board, C1));
 
         // test the symmetry
-        assertEquals(evalBishop(true, C1), evalBishop(false, C8));
+        assertEquals(evalBishop(board, C1), evalBishop(board, C8));
     }
 
 

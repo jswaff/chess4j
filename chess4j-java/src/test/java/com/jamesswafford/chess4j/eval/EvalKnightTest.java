@@ -17,11 +17,10 @@ public class EvalKnightTest {
         board.resetBoard();
 
         assertEquals(KNIGHT_PST[B1.value()] + KNIGHT_TROPISM * B1.distance(E8),
-                evalKnight(board, true, B1));
+                evalKnight(board, B1));
 
         // test the symmetry
-        assertEquals(evalKnight(board, true, B1),
-                evalKnight(board, false, B8));
+        assertEquals(evalKnight(board, B1), evalKnight(board, B8));
     }
 
 }

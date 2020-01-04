@@ -11,11 +11,8 @@ import com.jamesswafford.chess4j.init.Initializer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import static com.jamesswafford.chess4j.eval.EvalPawn.*;
-import static com.jamesswafford.chess4j.eval.EvalBishop.*;
-import static com.jamesswafford.chess4j.eval.EvalKnight.*;
-import static com.jamesswafford.chess4j.eval.EvalRook.*;
-import static com.jamesswafford.chess4j.eval.EvalQueen.*;
+import java.util.function.BiFunction;
+
 import static com.jamesswafford.chess4j.eval.EvalKing.*;
 
 public final class Eval {
@@ -38,10 +35,14 @@ public final class Eval {
 
         if (!materialOnly) {
             score += evalPawns(board);
-            score += evalKnights(board);
-            score += evalBishops(board);
-            score += evalRooks(board);
-            score += evalQueens(board);
+            score += evalPieces(board.getWhiteKnights(), board, EvalKnight::evalKnight)
+                    - evalPieces(board.getBlackKnights(), board, EvalKnight::evalKnight);
+            score += evalPieces(board.getWhiteBishops(), board, EvalBishop::evalBishop)
+                    - evalPieces(board.getBlackBishops(), board, EvalBishop::evalBishop);
+            score += evalPieces(board.getWhiteRooks(), board, EvalRook::evalRook)
+                    - evalPieces(board.getBlackRooks(), board, EvalRook::evalRook);
+            score += evalPieces(board.getWhiteQueens(), board, EvalQueen::evalQueen)
+                    - evalPieces(board.getBlackQueens(), board, EvalQueen::evalQueen);
             score += evalKing(board, board.getKingSquare(Color.WHITE))
                     - evalKing(board, board.getKingSquare(Color.BLACK));
         }
@@ -74,46 +75,14 @@ public final class Eval {
         }
     }
 
-
-    private static int evalBishops(Board board) {
+    private static int evalPieces(long pieceMap, Board board, BiFunction<Board, Square, Integer> evalFunc) {
         int score = 0;
 
-        long bishopsMap = board.getWhiteBishops();
-        while (bishopsMap != 0) {
-            int bishopSqVal = Bitboard.msb(bishopsMap);
-            Square bishopSq = Square.valueOf(bishopSqVal);
-            score += evalBishop(true,bishopSq);
-            bishopsMap ^= Bitboard.squares[bishopSqVal];
-        }
-
-        bishopsMap = board.getBlackBishops();
-        while (bishopsMap != 0) {
-            int bishopSqVal = Bitboard.lsb(bishopsMap);
-            Square bishopSq = Square.valueOf(bishopSqVal);
-            score -= evalBishop(false,bishopSq);
-            bishopsMap ^= Bitboard.squares[bishopSqVal];
-        }
-
-        return score;
-    }
-
-    private static int evalKnights(Board board) {
-        int score = 0;
-
-        long knightsMap = board.getWhiteKnights();
-        while (knightsMap != 0) {
-            int knightSqVal = Bitboard.msb(knightsMap);
-            Square knightSq = Square.valueOf(knightSqVal);
-            score += evalKnight(board,true,knightSq);
-            knightsMap ^= Bitboard.squares[knightSqVal];
-        }
-
-        knightsMap = board.getBlackKnights();
-        while (knightsMap != 0) {
-            int knightSqVal = Bitboard.lsb(knightsMap);
-            Square knightSq = Square.valueOf(knightSqVal);
-            score -= evalKnight(board,false,knightSq);
-            knightsMap ^= Bitboard.squares[knightSqVal];
+        while (pieceMap != 0) {
+            int sqVal = Bitboard.lsb(pieceMap);
+            Square sq = Square.valueOf(sqVal);
+            score += evalFunc.apply(board, sq);
+            pieceMap ^= Bitboard.squares[sqVal];
         }
 
         return score;
@@ -129,75 +98,15 @@ public final class Eval {
         }
 
         int score = evalPawnsNoHash(board);
+
         TTHolder.getPawnTransTable().store(board.getPawnKey(), score);
 
         return score;
     }
 
     private static int evalPawnsNoHash(Board board) {
-        int score = 0;
-
-        long pawnsMap = board.getWhitePawns();
-        while (pawnsMap != 0) {
-            int pawnSqVal = Bitboard.msb(pawnsMap);
-            Square pawnSq = Square.valueOf(pawnSqVal);
-            score += evalPawn(board,true,pawnSq);
-            pawnsMap ^= Bitboard.squares[pawnSqVal];
-        }
-
-        pawnsMap = board.getBlackPawns();
-        while (pawnsMap != 0) {
-            int pawnSqVal = Bitboard.lsb(pawnsMap);
-            Square pawnSq = Square.valueOf(pawnSqVal);
-            score -= evalPawn(board,false,pawnSq);
-            pawnsMap ^= Bitboard.squares[pawnSqVal];
-        }
-
-        return score;
-    }
-
-    private static int evalRooks(Board board) {
-        int score = 0;
-
-        long rooksMap = board.getWhiteRooks();
-        while (rooksMap != 0) {
-            int rookSqVal = Bitboard.msb(rooksMap);
-            Square rookSq = Square.valueOf(rookSqVal);
-            score += evalRook(board,true,rookSq);
-            rooksMap ^= Bitboard.squares[rookSqVal];
-        }
-
-        rooksMap = board.getBlackRooks();
-        while (rooksMap != 0) {
-            int rookSqVal = Bitboard.lsb(rooksMap);
-            Square rookSq = Square.valueOf(rookSqVal);
-            score -= evalRook(board,false,rookSq);
-            rooksMap ^= Bitboard.squares[rookSqVal];
-        }
-
-        return score;
-    }
-
-    private static int evalQueens(Board board) {
-        int score = 0;
-
-        long queensMap = board.getWhiteQueens();
-        while (queensMap != 0) {
-            int queenSqVal = Bitboard.msb(queensMap);
-            Square queenSq = Square.valueOf(queenSqVal);
-            score += evalQueen(board,true,queenSq);
-            queensMap ^= Bitboard.squares[queenSqVal];
-        }
-
-        queensMap = board.getBlackQueens();
-        while (queensMap != 0) {
-            int queenSqVal = Bitboard.lsb(queensMap);
-            Square queenSq = Square.valueOf(queenSqVal);
-            score -= evalQueen(board,false,queenSq);
-            queensMap ^= Bitboard.squares[queenSqVal];
-        }
-
-        return score;
+        return evalPieces(board.getWhitePawns(), board, EvalPawn::evalPawn)
+                - evalPieces(board.getBlackPawns(), board, EvalPawn::evalPawn);
     }
 
     public static int scale(int score, int material) {
