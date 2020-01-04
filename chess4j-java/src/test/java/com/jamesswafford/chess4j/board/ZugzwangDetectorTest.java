@@ -10,42 +10,37 @@ public class ZugzwangDetectorTest {
 
     @Test
     public void initialPos() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
+        Board board = new Board();
 
-        assertFalse(isZugzwang(b));
+        assertFalse(isZugzwang(board));
     }
 
     @Test
     public void justKings() {
-        Board b = Board.INSTANCE;
-        b.setPos("7k/8/8/8/8/8/8/7K w - - ");
+        Board board = new Board("7k/8/8/8/8/8/8/7K w - - ");
 
-        assertTrue(isZugzwang(b));
+        assertTrue(isZugzwang(board));
     }
 
     @Test
     public void singleWhiteBishop() {
-        Board b = Board.INSTANCE;
-        b.setPos("7k/8/8/B7/8/8/8/7K b - - ");
+        Board board = new Board("7k/8/8/B7/8/8/8/7K b - - ");
 
-        assertTrue(isZugzwang(b));
+        assertTrue(isZugzwang(board));
     }
 
     @Test
     public void whitePawnBlackKnight() {
-        Board b = Board.INSTANCE;
-        b.setPos("7k/8/8/n7/P7/8/8/7K b - - ");
+        Board board = new Board("7k/8/8/n7/P7/8/8/7K b - - ");
 
-        assertTrue(isZugzwang(b));
+        assertTrue(isZugzwang(board));
     }
 
     @Test
     public void whiteRookBlackKnight() {
-        Board b = Board.INSTANCE;
-        b.setPos("7k/8/8/n7/R7/8/8/7K b - - ");
+        Board board = new Board("7k/8/8/n7/R7/8/8/7K b - - ");
 
-        assertFalse(isZugzwang(b));
+        assertFalse(isZugzwang(board));
     }
 
 }

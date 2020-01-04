@@ -31,303 +31,272 @@ public class BoardTest {
 
     @Test
     public void testReset() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
+        Board board = new Board();
 
-        assertEquals(WHITE_ROOK, b.getPiece(A1));
-        assertEquals(WHITE_KNIGHT, b.getPiece(B1));
-        assertEquals(WHITE_BISHOP, b.getPiece(C1));
-        assertEquals(WHITE_QUEEN, b.getPiece(D1));
-        assertEquals(WHITE_KING, b.getPiece(E1));
-        assertEquals(WHITE_BISHOP, b.getPiece(F1));
-        assertEquals(WHITE_KNIGHT, b.getPiece(G1));
-        assertEquals(WHITE_ROOK, b.getPiece(H1));
+        assertEquals(WHITE_ROOK, board.getPiece(A1));
+        assertEquals(WHITE_KNIGHT, board.getPiece(B1));
+        assertEquals(WHITE_BISHOP, board.getPiece(C1));
+        assertEquals(WHITE_QUEEN, board.getPiece(D1));
+        assertEquals(WHITE_KING, board.getPiece(E1));
+        assertEquals(WHITE_BISHOP, board.getPiece(F1));
+        assertEquals(WHITE_KNIGHT, board.getPiece(G1));
+        assertEquals(WHITE_ROOK, board.getPiece(H1));
         for (Square sq : Square.rankSquares(RANK_2)) {
-            assertEquals(WHITE_PAWN, b.getPiece(sq));
+            assertEquals(WHITE_PAWN, board.getPiece(sq));
         }
         for (Square sq : Square.rankSquares(RANK_3)) {
-            assertNull(b.getPiece(sq));
+            assertNull(board.getPiece(sq));
         }
         for (Square sq : Square.rankSquares(RANK_4)) {
-            assertNull(b.getPiece(sq));
+            assertNull(board.getPiece(sq));
         }
         for (Square sq : Square.rankSquares(RANK_5)) {
-            assertNull(b.getPiece(sq));
+            assertNull(board.getPiece(sq));
         }
         for (Square sq : Square.rankSquares(RANK_6)) {
-            assertNull(b.getPiece(sq));
+            assertNull(board.getPiece(sq));
         }
         for (Square sq : Square.rankSquares(RANK_7)) {
-            assertEquals(BLACK_PAWN,b.getPiece(sq));
+            assertEquals(BLACK_PAWN,board.getPiece(sq));
         }
-        assertEquals(BLACK_ROOK, b.getPiece(A8));
-        assertEquals(BLACK_KNIGHT, b.getPiece(B8));
-        assertEquals(BLACK_BISHOP, b.getPiece(C8));
-        assertEquals(BLACK_QUEEN, b.getPiece(D8));
-        assertEquals(BLACK_KING, b.getPiece(E8));
-        assertEquals(BLACK_BISHOP, b.getPiece(F8));
-        assertEquals(BLACK_KNIGHT, b.getPiece(G8));
-        assertEquals(BLACK_ROOK, b.getPiece(H8));
+        assertEquals(BLACK_ROOK, board.getPiece(A8));
+        assertEquals(BLACK_KNIGHT, board.getPiece(B8));
+        assertEquals(BLACK_BISHOP, board.getPiece(C8));
+        assertEquals(BLACK_QUEEN, board.getPiece(D8));
+        assertEquals(BLACK_KING, board.getPiece(E8));
+        assertEquals(BLACK_BISHOP, board.getPiece(F8));
+        assertEquals(BLACK_KNIGHT, board.getPiece(G8));
+        assertEquals(BLACK_ROOK, board.getPiece(H8));
 
-        assertTrue(b.hasCastlingRight(WHITE_KINGSIDE));
-        assertTrue(b.hasCastlingRight(WHITE_QUEENSIDE));
-        assertTrue(b.hasCastlingRight(BLACK_KINGSIDE));
-        assertTrue(b.hasCastlingRight(BLACK_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_QUEENSIDE));
 
-        assertEquals(Color.WHITE, b.getPlayerToMove());
-        assertNull(b.getEPSquare());
-        assertEquals(0, b.getFiftyCounter());
-        assertEquals(0, b.getMoveCounter());
+        assertEquals(Color.WHITE, board.getPlayerToMove());
+        assertNull(board.getEPSquare());
+        assertEquals(0, board.getFiftyCounter());
+        assertEquals(0, board.getMoveCounter());
 
-        assertEquals(E1, b.getKingSquare(Color.WHITE));
-        assertEquals(E8, b.getKingSquare(Color.BLACK));
+        assertEquals(E1, board.getKingSquare(Color.WHITE));
+        assertEquals(E8, board.getKingSquare(Color.BLACK));
     }
 
     @Test
     public void testSetPos_moveCounters() {
 
-        Board b = Board.INSTANCE;
-        String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
-        b.setPos(fen);
+        Board board = new Board("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2");
 
-        assertEquals(WHITE_KNIGHT,  b.getPiece(F3));
-        assertTrue(b.hasCastlingRight(BLACK_KINGSIDE));
-        assertTrue(b.hasCastlingRight(BLACK_QUEENSIDE));
-        assertTrue(b.hasCastlingRight(WHITE_KINGSIDE));
-        assertTrue(b.hasCastlingRight(WHITE_QUEENSIDE));
-        assertEquals(3, b.getMoveCounter());
-        assertEquals(1, b.getFiftyCounter());
-        assertNull(b.getEPSquare());
+        assertEquals(WHITE_KNIGHT,  board.getPiece(F3));
+        assertTrue(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
+        assertEquals(3, board.getMoveCounter());
+        assertEquals(1, board.getFiftyCounter());
+        assertNull(board.getEPSquare());
     }
 
     @Test
     public void testSetPos_castling() {
 
-        Board b = Board.INSTANCE;
-        String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQ -";
-        b.setPos(fen);
+        Board board = new Board("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQ -");
 
-        assertEquals(WHITE_KNIGHT, b.getPiece(F3));
-        assertFalse(b.hasCastlingRight(BLACK_KINGSIDE));
-        assertFalse(b.hasCastlingRight(BLACK_QUEENSIDE));
-        assertTrue(b.hasCastlingRight(WHITE_KINGSIDE));
-        assertTrue(b.hasCastlingRight(WHITE_QUEENSIDE));
-        assertEquals(1, b.getMoveCounter());
-        assertEquals(0, b.getFiftyCounter());
-        assertNull(b.getEPSquare());
+        assertEquals(WHITE_KNIGHT, board.getPiece(F3));
+        assertFalse(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertFalse(board.hasCastlingRight(BLACK_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
+        assertEquals(1, board.getMoveCounter());
+        assertEquals(0, board.getFiftyCounter());
+        assertNull(board.getEPSquare());
     }
 
     @Test
     public void testSetPos_ep() {
 
-        Board b = Board.INSTANCE;
-        String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2";
-        b.setPos(fen);
+        Board board = new Board("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2");
 
-        assertEquals(BLACK_PAWN, b.getPiece(C5));
-        assertTrue(b.hasCastlingRight(BLACK_KINGSIDE));
-        assertTrue(b.hasCastlingRight(BLACK_QUEENSIDE));
-        assertTrue(b.hasCastlingRight(WHITE_KINGSIDE));
-        assertTrue(b.hasCastlingRight(WHITE_QUEENSIDE));
-        assertEquals(2, b.getMoveCounter());
-        assertEquals(0, b.getFiftyCounter());
-        assertEquals(C6, b.getEPSquare());
+        assertEquals(BLACK_PAWN, board.getPiece(C5));
+        assertTrue(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
+        assertEquals(2, board.getMoveCounter());
+        assertEquals(0, board.getFiftyCounter());
+        assertEquals(C6, board.getEPSquare());
     }
 
     @Test
     public void testKingSquares() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
-        assertEquals(E1, b.getKingSquare(Color.WHITE));
-        assertEquals(E8, b.getKingSquare(Color.BLACK));
 
-        b.setPos("rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 b kq - 0 5");
-        assertEquals(G1, b.getKingSquare(Color.WHITE));
-        assertEquals(E8, b.getKingSquare(Color.BLACK));
+        Board board = new Board();
+        assertEquals(E1, board.getKingSquare(Color.WHITE));
+        assertEquals(E8, board.getKingSquare(Color.BLACK));
 
-        b.applyMove(new Move(BLACK_KING, E8, D8));
-        assertEquals(G1, b.getKingSquare(Color.WHITE));
-        assertEquals(D8, b.getKingSquare(Color.BLACK));
+        board.setPos("rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 b kq - 0 5");
+        assertEquals(G1, board.getKingSquare(Color.WHITE));
+        assertEquals(E8, board.getKingSquare(Color.BLACK));
+
+        board.applyMove(new Move(BLACK_KING, E8, D8));
+        assertEquals(G1, board.getKingSquare(Color.WHITE));
+        assertEquals(D8, board.getKingSquare(Color.BLACK));
     }
 
     @Test
     public void testApplyMoveSequence1() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
+        Board b = new Board();
         Board b2 = b.deepCopy();
 
         Move m = new Move(WHITE_PAWN,E2, E4);
         b.applyMove(m);
         b2.setPos("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_PAWN,C7, C5));
         b2.setPos("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(WHITE_KNIGHT,G1, F3));
         b2.setPos("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_QUEEN,D8, A5));
         b2.setPos("rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(WHITE_BISHOP, F1, E2));
         b2.setPos("rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPPBPPP/RNBQK2R b KQkq - 3 3");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_QUEEN, A5, D2, WHITE_BISHOP));
         b2.setPos("rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPqBPPP/RNBQK2R w KQkq - 0 4");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(WHITE_KNIGHT, B1, D2,BLACK_QUEEN));
         b2.setPos("rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPNBPPP/R1BQK2R b KQkq - 0 4");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_PAWN, C5, C4));
         b2.setPos("rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQK2R w KQkq - 0 5");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(WHITE_KING, E1, G1,true));
         b2.setPos("rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 b kq - 0 5");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_KING, E8, D8));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 w - - 1 6");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(WHITE_PAWN, B2, B4));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/1Pp1P3/5N2/P1PNBPPP/R1BQ1RK1 b - b3 0 6");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_PAWN, C4, B3,WHITE_PAWN,true));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQ1RK1 w - - 0 7");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(WHITE_ROOK, F1, E1));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQR1K1 b - - 1 7");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_PAWN, B3, B2));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR1K1 w - - 0 8");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(WHITE_KING, G1, H1));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR2K b - - 1 8");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
+        assertEquals(b2, b);
 
         b.applyMove(new Move(BLACK_PAWN, B2, A1, WHITE_ROOK, BLACK_KNIGHT));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/P1PNBPPP/n1BQR2K w - - 0 9");
-        assertTrue(b.equalExceptMoveHistory(b2,true));
-        assertTrue(b2.equalExceptMoveHistory(b,true));
-
+        assertEquals(b2, b);
     }
 
     @Test
     public void testApplyMoveSequence_castling() {
-        Board b = Board.INSTANCE;
-        b.setPos("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+        Board board = new Board("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
 
-        assertTrue(b.hasCastlingRight(WHITE_KINGSIDE));
-        assertTrue(b.hasCastlingRight(WHITE_QUEENSIDE));
-        assertTrue(b.hasCastlingRight(BLACK_KINGSIDE));
-        assertTrue(b.hasCastlingRight(BLACK_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_QUEENSIDE));
 
         // queenside black rook takes white rook removed qside castling options
-        b.applyMove(new Move(BLACK_ROOK, A8, A1, WHITE_ROOK));
-        assertTrue(b.hasCastlingRight(WHITE_KINGSIDE));
-        assertFalse(b.hasCastlingRight(WHITE_QUEENSIDE));
-        assertTrue(b.hasCastlingRight(BLACK_KINGSIDE));
-        assertFalse(b.hasCastlingRight(BLACK_QUEENSIDE));
+        board.applyMove(new Move(BLACK_ROOK, A8, A1, WHITE_ROOK));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertFalse(board.hasCastlingRight(WHITE_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertFalse(board.hasCastlingRight(BLACK_QUEENSIDE));
 
         // moving the black king removes bk castling option
-        b.applyMove(new Move(BLACK_KING, E8, E7));
-        assertTrue(b.hasCastlingRight(WHITE_KINGSIDE));
-        assertFalse(b.hasCastlingRight(WHITE_QUEENSIDE));
-        assertFalse(b.hasCastlingRight(BLACK_KINGSIDE));
-        assertFalse(b.hasCastlingRight(BLACK_QUEENSIDE));
+        board.applyMove(new Move(BLACK_KING, E8, E7));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertFalse(board.hasCastlingRight(WHITE_QUEENSIDE));
+        assertFalse(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertFalse(board.hasCastlingRight(BLACK_QUEENSIDE));
 
         // moving the wk rook removes the wk castling option
-        b.applyMove(new Move(WHITE_ROOK, H1, H7));
-        assertFalse(b.hasCastlingRight(WHITE_KINGSIDE));
-        assertFalse(b.hasCastlingRight(WHITE_QUEENSIDE));
-        assertFalse(b.hasCastlingRight(BLACK_KINGSIDE));
-        assertFalse(b.hasCastlingRight(BLACK_QUEENSIDE));
+        board.applyMove(new Move(WHITE_ROOK, H1, H7));
+        assertFalse(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertFalse(board.hasCastlingRight(WHITE_QUEENSIDE));
+        assertFalse(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertFalse(board.hasCastlingRight(BLACK_QUEENSIDE));
     }
 
     @Test
     public void testUndoDoublePawnPush() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
+        Board b = new Board();
         Board b2 = b.deepCopy();
 
         b.undoMove(b.applyMove(new Move(WHITE_PAWN, E2, E4)));
 
-        assertTrue(b.equalExceptMoveHistory(b2, true));
+        assertEquals(b2, b);
     }
 
     @Test
     public void testUndoCapturingPromotion() {
-        Board b = Board.INSTANCE;
-        b.setPos("r7/1PK5/8/8/k7/8/8/8 w - -");
+        Board b = new Board("r7/1PK5/8/8/k7/8/8/8 w - -");
         Board b2 = b.deepCopy();
 
         b.undoMove(b.applyMove(new Move(WHITE_PAWN, B7, A8, BLACK_ROOK, WHITE_QUEEN)));
 
-        assertTrue(b.equalExceptMoveHistory(b2, true));
+        assertEquals(b2, b);
     }
 
     @Test
     public void testUndoEp() {
-        Board b = Board.INSTANCE;
-        b.setPos("k7/8/8/8/pP6/8/K7/8 b - b3");
+        Board b = new Board("k7/8/8/8/pP6/8/K7/8 b - b3");
         Board b2 = b.deepCopy();
 
         b.undoMove(b.applyMove(new Move(BLACK_PAWN, A4, B3, WHITE_PAWN, true)));
 
-        assertTrue(b.equalExceptMoveHistory(b2, true));
+        assertEquals(b2, b);
     }
 
     @Test
     public void testUndoCastle() {
-        Board b = Board.INSTANCE;
-        b.setPos("k7/8/8/8/8/8/8/4K2R w K -");
+        Board b = new Board("k7/8/8/8/8/8/8/4K2R w K -");
         Board b2 = b.deepCopy();
 
         b.undoMove(b.applyMove(new Move(WHITE_KING, E1, G1, true)));
 
-        assertTrue(b.equalExceptMoveHistory(b2, true));
+        assertEquals(b2, b);
     }
 
     @Test
     public void testSwapPlayer() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
-        b.swapPlayer();
-        assertEquals(Color.BLACK, b.getPlayerToMove());
-        b.swapPlayer();
-        assertEquals(Color.WHITE, b.getPlayerToMove());
+        Board board = new Board();
+        board.swapPlayer();
+        assertEquals(Color.BLACK, board.getPlayerToMove());
+        board.swapPlayer();
+        assertEquals(Color.WHITE, board.getPlayerToMove());
     }
 
     @Test
     public void testDeepCopy() {
-        Board b = Board.INSTANCE;
+        Board b = new Board();
         Board b2 = b.deepCopy();
 
         assertNotSame(b, b2);
@@ -342,34 +311,21 @@ public class BoardTest {
 
     @Test
     public void testDeepCopy2() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
+        Board b = new Board();
         Undo u = b.applyMove(new Move(WHITE_PAWN, E2, E4));
         Board b2 = b.deepCopy();
+
         assertNotSame(b, b2);
         assertEquals(b, b2);
 
         b.undoMove(u);
         b2.undoMove(u);
-        assertTrue(b.equalExceptMoveHistory(b2, false));
-        assertEquals(b, b2);
-    }
-
-    @Test
-    public void testDeepCopy3() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
-        Board b2 = b.deepCopy();
-        assertNotSame(b, b2);
-        b.undoMove(b.applyMove(new Move(WHITE_PAWN, E2, E4)));
         assertEquals(b, b2);
     }
 
     @Test
     public void testFlipVertical() {
-        Board b = Board.INSTANCE;
-
-        b.resetBoard();
+        Board b = new Board();
         Board b2 = b.deepCopy();
         b.flipVertical();
         b.flipVertical();
@@ -400,162 +356,62 @@ public class BoardTest {
     /*
      * Should be able to obtain an equal position using the French Defense and Petrov Defense
      */
-    public void testHash() {
-        List<Integer> hashCodes1 = new ArrayList<>();
-        List<Integer> hashCodes2 = new ArrayList<>();
+    public void testEqualsAndHash() {
 
-        Board b1 = Board.INSTANCE;
-        b1.resetBoard();
+        Board b1 = new Board();
         Board b2 = b1.deepCopy();
-
-        assertEquals(b1.hashCode(), b2.hashCode());
-        assertEquals(b1.hashCodeWithoutMoveHistory(true), b2.hashCodeWithoutMoveHistory(true));
 
         // step through French Defense with b1
         b1.applyMove(new Move(WHITE_PAWN, E2, E4));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
         b1.applyMove(new Move(BLACK_PAWN, E7, E6));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
         b1.applyMove(new Move(WHITE_PAWN, D2, D4));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
         b1.applyMove(new Move(BLACK_PAWN, D7, D5));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
-        b1.applyMove(new Move(WHITE_PAWN, E4, D5,BLACK_PAWN));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
-        b1.applyMove(new Move(BLACK_PAWN, E6, D5,WHITE_PAWN));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
+        b1.applyMove(new Move(WHITE_PAWN, E4, D5, BLACK_PAWN));
+        b1.applyMove(new Move(BLACK_PAWN, E6, D5, WHITE_PAWN));
         b1.applyMove(new Move(WHITE_KNIGHT, G1, F3));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
         b1.applyMove(new Move(BLACK_KNIGHT, G8, F6));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(false));
-
 
         // step through the Petrov Defense with b2
         b2.applyMove(new Move(WHITE_PAWN, E2, E4));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(BLACK_PAWN, E7, E5));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(WHITE_KNIGHT, G1, F3));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(BLACK_KNIGHT, G8, F6));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
-        b2.applyMove(new Move(WHITE_KNIGHT, F3, E5,BLACK_PAWN));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
+        b2.applyMove(new Move(WHITE_KNIGHT, F3, E5, BLACK_PAWN));
         b2.applyMove(new Move(BLACK_PAWN, D7, D6));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(WHITE_KNIGHT, E5, F3));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(BLACK_KNIGHT, F6, E4, WHITE_PAWN));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(WHITE_PAWN, D2, D3));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(BLACK_KNIGHT, E4, F6));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(WHITE_PAWN, D3, D4));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
         b2.applyMove(new Move(BLACK_PAWN, D6, D5));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(false));
 
-
-        // Positions would be equal at this point, except for move history and fifty counter
+        // Positions would be equal at this point, except for move and fifty counters
         assertNotEquals(b1, b2);
-        assertTrue(b1.equalExceptMoveHistory(b2, false));
-        assertFalse(b1.equalExceptMoveHistory(b2, true));
+        assertNotEquals(b1.hashCode(), b2.hashCode());
 
-        // by adding a pawn move we should be equal except move history and number of moves
+        // make a couple of moves in b1 to catch the move counter up
+        b1.applyMove(new Move(WHITE_KNIGHT, B1, A3));
+        b1.applyMove(new Move(BLACK_KNIGHT, B8, A6));
+        b1.applyMove(new Move(WHITE_KNIGHT, A3, B1));
+        b1.applyMove(new Move(BLACK_KNIGHT, A6, B8));
+
+        assertEquals(b2.getMoveCounter(), b1.getMoveCounter());
+        assertNotEquals(b2.getFiftyCounter(), b1.getFiftyCounter());
+
+        // by adding a pawn move the fifty counters are re-aligned
         b1.applyMove(new Move(WHITE_PAWN, G2, G3));
         b2.applyMove(new Move(WHITE_PAWN, G2, G3));
 
-        assertNotEquals(b1, b2);
-        assertFalse(b1.equalExceptMoveHistory(b2, true));
-        assertTrue(b1.equalExceptMoveHistory(b2, false));
-        assertNotEquals(b1.hashCode(), b2.hashCode());
+        assertEquals(b2.getFiftyCounter(), b1.getFiftyCounter());
 
-        assertEquals(b1.hashCodeWithoutMoveHistory(false), b2.hashCodeWithoutMoveHistory(false));
-        assertNotEquals(b1.hashCodeWithoutMoveHistory(true), b2.hashCodeWithoutMoveHistory(true));
-
-        // hash codes should be equal at beginning, move 1, move 7 and end only.
-        for (int i=0;i<hashCodes1.size();i++) {
-            int hc1 = hashCodes1.get(i);
-            if (i==0) {
-                assertEquals((int) hashCodes2.get(0), hc1);
-                assertFalse(hashCodes2.subList(1, hashCodes2.size()).contains(hc1));
-            } else if (i==7) {
-                assertEquals(hc1, (int) hashCodes2.get(11));
-                assertFalse(hashCodes2.subList(0, hashCodes2.size()-1).contains(hc1));
-            } else {
-                assertFalse(hashCodes2.contains(hc1));
-            }
-        }
-    }
-
-    @Test
-    /*
-     * Should be able to obtain an equal position using the Queen's Gambit (d4,d5,c4,e6,Nc3,Nf6) and
-     * the English Opening (c4,Nf6,Nc3,e6,d4,d5).
-     */
-    public void testHash2() {
-        List<Integer> hashCodes1 = new ArrayList<>();
-        List<Integer> hashCodes2 = new ArrayList<>();
-
-        Board b1 = Board.INSTANCE;
-        b1.resetBoard();
-        Board b2 = b1.deepCopy();
-
-        assertEquals(b1.hashCode(), b2.hashCode());
-        assertEquals(b1.hashCodeWithoutMoveHistory(true), b2.hashCodeWithoutMoveHistory(true));
-
-        // Go through Queen's Gambit with b1
-        b1.applyMove(new Move(WHITE_PAWN, D2, D4));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-        b1.applyMove(new Move(BLACK_PAWN, D7, D5));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-        b1.applyMove(new Move(WHITE_PAWN, C2, C4));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-        b1.applyMove(new Move(BLACK_PAWN, E7, E6));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-        b1.applyMove(new Move(WHITE_KNIGHT, B1, C3));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-        b1.applyMove(new Move(BLACK_KNIGHT, G8, F6));
-        hashCodes1.add(b1.hashCodeWithoutMoveHistory(true));
-
-        // Step through English Opening with b2
-        b2.applyMove(new Move(WHITE_PAWN, C2, C4));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-        b2.applyMove(new Move(BLACK_KNIGHT, G8, F6));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-        b2.applyMove(new Move(WHITE_KNIGHT, B1, C3));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-        b2.applyMove(new Move(BLACK_PAWN, E7, E6));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-        b2.applyMove(new Move(WHITE_PAWN, D2, D4));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-        b2.applyMove(new Move(BLACK_PAWN, D7, D5));
-        hashCodes2.add(b2.hashCodeWithoutMoveHistory(true));
-
-        // Positions would be equal at this point, except for move history, fifty counter and ep square
-        assertNotEquals(b1, b2);
-        assertFalse(b1.equalExceptMoveHistory(b2, false));
-
-        // by adding a pawn move we should be equal except move history
-        b1.applyMove(new Move(WHITE_PAWN, G2, G3));
-        b2.applyMove(new Move(WHITE_PAWN, G2, G3));
-        assertNotEquals(b1, b2);
-        assertTrue(b1.equalExceptMoveHistory(b2, true));
-        assertNotEquals(b1.hashCode(), b2.hashCode());
-        assertEquals(b1.hashCodeWithoutMoveHistory(true), b2.hashCodeWithoutMoveHistory(true));
-
-        // hash codes should be equal at beginning and end only.  Neither were
-        // saved in list so lists should contain completely different codes
-        for (int hc1 : hashCodes1) {
-            assertFalse(hashCodes2.contains(hc1));
-        }
+        // and now the positions should be equal
+        assertEquals(b2, b1);
+        assertEquals(b2.hashCode(), b1.hashCode());
     }
 
     @Test
     public void testEqualityBeforeAndAfterCastle() {
-        Board b1 = Board.INSTANCE;
-        b1.setPos("4k2r/8/8/8/8/8/8/R3K3 b Qk - 0 1");
+        Board b1 = new Board("4k2r/8/8/8/8/8/8/R3K3 b Qk - 0 1");
         Board b2 = b1.deepCopy();
 
         assertEquals(b1, b2);
@@ -575,8 +431,7 @@ public class BoardTest {
 
     @Test
     public void testEqualityBeforeAndAfterCapture() {
-        Board b1 = Board.INSTANCE;
-        b1.setPos("rnbqkbnr/pp1ppppp/8/2p5/3P4/8/PPP1PPPP/RNBQKBNR w KQkq c6 0 2");
+        Board b1 = new Board("rnbqkbnr/pp1ppppp/8/2p5/3P4/8/PPP1PPPP/RNBQKBNR w KQkq c6 0 2");
         Board b2 = b1.deepCopy();
 
         assertEquals(b1, b2);
@@ -596,8 +451,7 @@ public class BoardTest {
 
     @Test
     public void testEqualityBeforeAndAfterEPCapture() {
-        Board b1 = Board.INSTANCE;
-        b1.setPos("rnbqkbnr/pp1ppppp/8/2pP4/8/8/PPP1PPPP/RNBQKBNR w KQkq c6 0 2");
+        Board b1 = new Board("rnbqkbnr/pp1ppppp/8/2pP4/8/8/PPP1PPPP/RNBQKBNR w KQkq c6 0 2");
         Board b2 = b1.deepCopy();
 
         assertEquals(b1, b2);
@@ -616,8 +470,7 @@ public class BoardTest {
 
     @Test
     public void testEqualityBeforeAndAfterPromotion() throws ParseException {
-        Board b1 = Board.INSTANCE;
-        b1.setPos("8/PK6/8/8/8/8/k7/8 w - - 0 2");
+        Board b1 = new Board("8/PK6/8/8/8/8/k7/8 w - - 0 2");
         Board b2 = b1.deepCopy();
 
         assertEquals(b1, b2);
@@ -637,8 +490,7 @@ public class BoardTest {
 
     @Test
     public void testEqualityBeforeAndAfterCapturingPromotion() throws ParseException {
-        Board b1 = Board.INSTANCE;
-        b1.setPos("1n6/PK6/8/8/8/8/k7/8 w - - 0 2");
+        Board b1 = new Board("1n6/PK6/8/8/8/8/k7/8 w - - 0 2");
         Board b2 = b1.deepCopy();
 
         assertEquals(b1, b2);
@@ -658,224 +510,218 @@ public class BoardTest {
 
     @Test
     public void testZobristKey() throws ParseException, IllegalMoveException {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
+        Board board = new Board();
 
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
 
         MoveParser mp = new MoveParser();
-        b.applyMove(mp.parseMove("e4", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("e5", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("d4", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("exd4", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("c4", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("dxc3", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Nf3", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("cxb2", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Bc4", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        Undo u = b.applyMove(mp.parseMove("bxc1=q", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.undoMove(u);
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("bxa1=n", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("O-O", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("b5", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Bxb5", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Nc6", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Nc3", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("d5", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Bd2", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Bh3", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Qxa1", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Qd7", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Ng5", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("O-O-O", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("g2xh3", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Kb7", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("h4", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Be7", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Nxh7", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Rxh7", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("h5", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Rh6", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Kh1", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Rg6", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("h6", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Rg1", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Kxg1", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("Nf6", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("h7", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("a6", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.applyMove(mp.parseMove("h8=r", b));
-        assertEquals(Zobrist.calculateBoardKey(b), b.getZobristKey());
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
+        board.applyMove(mp.parseMove("e4", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("e5", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("d4", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("exd4", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("c4", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("dxc3", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Nf3", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("cxb2", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Bc4", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        Undo u = board.applyMove(mp.parseMove("bxc1=q", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.undoMove(u);
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("bxa1=n", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("O-O", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("b5", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Bxb5", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Nc6", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Nc3", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("d5", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Bd2", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Bh3", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Qxa1", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Qd7", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Ng5", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("O-O-O", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("g2xh3", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Kb7", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("h4", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Be7", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Nxh7", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Rxh7", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("h5", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Rh6", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Kh1", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Rg6", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("h6", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Rg1", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Kxg1", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("Nf6", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("h7", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("a6", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.applyMove(mp.parseMove("h8=r", board));
+        assertEquals(Zobrist.calculateBoardKey(board), board.getZobristKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
     }
 
     @Test
     public void testPawnKey() throws Exception {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
+        Board board = new Board();
 
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
         MoveParser mp = new MoveParser();
         List<Undo> undos = new ArrayList<>();
-        undos.add(b.applyMove(mp.parseMove("e4", b)));
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        undos.add(b.applyMove(mp.parseMove("e5", b)));
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        undos.add(b.applyMove(mp.parseMove("d4", b)));
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        undos.add(b.applyMove(mp.parseMove("exd4", b)));
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        undos.add(b.applyMove(mp.parseMove("c4", b)));
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        undos.add(b.applyMove(mp.parseMove("dxc3", b))); // ep
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
+        undos.add(board.applyMove(mp.parseMove("e4", board)));
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        undos.add(board.applyMove(mp.parseMove("e5", board)));
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        undos.add(board.applyMove(mp.parseMove("d4", board)));
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        undos.add(board.applyMove(mp.parseMove("exd4", board)));
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        undos.add(board.applyMove(mp.parseMove("c4", board)));
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        undos.add(board.applyMove(mp.parseMove("dxc3", board))); // ep
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
 
-        b.undoMove(undos.get(undos.size()-1)); // dxc3
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.undoMove(undos.get(undos.size()-2)); // c4
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.undoMove(undos.get(undos.size()-3)); // exd4
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.undoMove(undos.get(undos.size()-4)); // d4
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.undoMove(undos.get(undos.size()-5)); // e5
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.undoMove(undos.get(undos.size()-6)); // e4
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
+        board.undoMove(undos.get(undos.size()-1)); // dxc3
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.undoMove(undos.get(undos.size()-2)); // c4
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.undoMove(undos.get(undos.size()-3)); // exd4
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.undoMove(undos.get(undos.size()-4)); // d4
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.undoMove(undos.get(undos.size()-5)); // e5
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.undoMove(undos.get(undos.size()-6)); // e4
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
     }
 
     @Test
     public void testPawnKeyPromotion() throws Exception {
-        Board b = Board.INSTANCE;
-        b.setPos("7k/P7/K7/8/8/8/8/8 w - - 0 1");
+        Board board = new Board("7k/P7/K7/8/8/8/8/8 w - - 0 1");
         MoveParser mp = new MoveParser();
-        Move m = mp.parseMove("a8=Q", b);
-        List<Move> legalMoves = MoveGen.genLegalMoves(b);
+        Move m = mp.parseMove("a8=Q", board);
+        List<Move> legalMoves = MoveGen.genLegalMoves(board);
         assertTrue(legalMoves.contains(m));
-        Undo u = b.applyMove(m);
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
-        b.undoMove(u);
-        assertEquals(Zobrist.calculatePawnKey(b), b.getPawnKey());
+        Undo u = board.applyMove(m);
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
+        board.undoMove(u);
+        assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
     }
 
     @Test
     public void testGetNumPieces_initialPos() {
-        Board b = Board.INSTANCE;
-        b.resetBoard();
+        Board board = new Board();
 
-        assertEquals(8, b.getNumPieces(WHITE_PAWN));
-        assertEquals(8, b.getNumPieces(BLACK_PAWN));
-        assertEquals(1, b.getNumPieces(WHITE_QUEEN));
-        assertEquals(1, b.getNumPieces(BLACK_QUEEN));
-        assertEquals(2, b.getNumPieces(WHITE_ROOK));
-        assertEquals(2, b.getNumPieces(BLACK_ROOK));
-        assertEquals(2, b.getNumPieces(WHITE_KNIGHT));
-        assertEquals(2, b.getNumPieces(BLACK_KNIGHT));
-        assertEquals(2, b.getNumPieces(WHITE_BISHOP));
-        assertEquals(2, b.getNumPieces(BLACK_BISHOP));
+        assertEquals(8, board.getNumPieces(WHITE_PAWN));
+        assertEquals(8, board.getNumPieces(BLACK_PAWN));
+        assertEquals(1, board.getNumPieces(WHITE_QUEEN));
+        assertEquals(1, board.getNumPieces(BLACK_QUEEN));
+        assertEquals(2, board.getNumPieces(WHITE_ROOK));
+        assertEquals(2, board.getNumPieces(BLACK_ROOK));
+        assertEquals(2, board.getNumPieces(WHITE_KNIGHT));
+        assertEquals(2, board.getNumPieces(BLACK_KNIGHT));
+        assertEquals(2, board.getNumPieces(WHITE_BISHOP));
+        assertEquals(2, board.getNumPieces(BLACK_BISHOP));
     }
 
     @Test
     public void testGetNumPieces_pos1() {
-        Board b = Board.INSTANCE;
-        b.setPos("7k/br6/8/8/8/8/Q7/7K w - -");
+        Board board = new Board("7k/br6/8/8/8/8/Q7/7K w - -");
 
-        assertEquals(0, b.getNumPieces(WHITE_PAWN));
-        assertEquals(0, b.getNumPieces(BLACK_PAWN));
-        assertEquals(1, b.getNumPieces(WHITE_QUEEN));
-        assertEquals(0, b.getNumPieces(BLACK_QUEEN));
-        assertEquals(0, b.getNumPieces(WHITE_ROOK));
-        assertEquals(1, b.getNumPieces(BLACK_ROOK));
-        assertEquals(0, b.getNumPieces(WHITE_KNIGHT));
-        assertEquals(0, b.getNumPieces(BLACK_KNIGHT));
-        assertEquals(0, b.getNumPieces(WHITE_BISHOP));
-        assertEquals(1, b.getNumPieces(BLACK_BISHOP));
+        assertEquals(0, board.getNumPieces(WHITE_PAWN));
+        assertEquals(0, board.getNumPieces(BLACK_PAWN));
+        assertEquals(1, board.getNumPieces(WHITE_QUEEN));
+        assertEquals(0, board.getNumPieces(BLACK_QUEEN));
+        assertEquals(0, board.getNumPieces(WHITE_ROOK));
+        assertEquals(1, board.getNumPieces(BLACK_ROOK));
+        assertEquals(0, board.getNumPieces(WHITE_KNIGHT));
+        assertEquals(0, board.getNumPieces(BLACK_KNIGHT));
+        assertEquals(0, board.getNumPieces(WHITE_BISHOP));
+        assertEquals(1, board.getNumPieces(BLACK_BISHOP));
     }
 
     @Test
     public void testPieceCountsPromotion() throws Exception {
-        Board b = Board.INSTANCE;
-        b.setPos("7k/P7/8/8/8/8/8/7K w - -");
+        Board b = new Board("7k/P7/8/8/8/8/8/7K w - -");
 
         assertEquals(1, b.getNumPieces(WHITE_PAWN));
         assertEquals(0, b.getNumPieces(WHITE_QUEEN));
@@ -925,13 +771,12 @@ public class BoardTest {
     }
 
     private void testCasePlayerInCheck(String fen,String mv,boolean inCheck) throws Exception {
-        Board b = Board.INSTANCE;
-        b.setPos(fen);
+        Board board = new Board(fen);
 
         MoveParser mp = new MoveParser();
-        Move m = mp.parseMove(mv, Board.INSTANCE);
-        b.applyMove(m);
+        Move m = mp.parseMove(mv, board);
+        board.applyMove(m);
 
-        assertEquals(inCheck, BoardUtils.isPlayerInCheck(b));
+        assertEquals(inCheck, BoardUtils.isPlayerInCheck(board));
     }
 }

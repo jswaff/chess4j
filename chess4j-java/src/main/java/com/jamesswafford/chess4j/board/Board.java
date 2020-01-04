@@ -25,7 +25,7 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public final class Board {
 
-    public static final Board INSTANCE = new Board();
+    private static final String INITIAL_POS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
     private List<Undo> undoStack = new ArrayList<>();
     private Map<Square,Piece> pieceMap = new HashMap<>();
@@ -45,7 +45,11 @@ public final class Board {
     private long zobristKey;
     private long pawnKey;
 
-    private Board() {
+    public Board() {
+        this(INITIAL_POS);
+    }
+
+    public Board(String fen) {
 
         // initialize the piece counts map
         pieceCountsMap.put(WHITE_KING, 0);
@@ -61,14 +65,13 @@ public final class Board {
         pieceCountsMap.put(WHITE_PAWN, 0);
         pieceCountsMap.put(BLACK_PAWN, 0);
 
-        resetBoard();
+        setPos(fen);
     }
 
     public Undo applyMove(Move move) {
         assert(verify());
 
         Undo undo = new Undo(move, fiftyCounter, castlingRights.getValue(), epSquare, zobristKey);
-        undoStack.add(undo);
 
         swapPlayer();
         moveCounter++;
@@ -101,8 +104,6 @@ public final class Board {
 
     public synchronized Board deepCopy() {
         Board b = new Board();
-        b.undoStack.clear();
-        b.undoStack.addAll(undoStack);
         b.pieceMap.clear();
         for (Square sq : pieceMap.keySet()) {
             b.pieceMap.put(sq, pieceMap.get(sq));
@@ -134,105 +135,94 @@ public final class Board {
         return b;
     }
 
-    public boolean equalExceptMoveHistory(Board otherBoard,boolean strict) {
-        if (!this.pieceMap.equals(otherBoard.pieceMap)) {
-            return false;
-        }
-        if (!this.pieceCountsMap.equals(otherBoard.pieceCountsMap)) {
-            return false;
-        }
-        if (!this.castlingRights.equals(otherBoard.castlingRights)) {
-            return false;
-        }
-        if (!this.getPlayerToMove().equals(otherBoard.getPlayerToMove())) {
-            return false;
-        }
-        if (this.epSquare==null) {
-            if (otherBoard.epSquare!=null) {
-                return false;
-            }
-        } else {
-            if (!this.epSquare.equals(otherBoard.epSquare)) {
-                return false;
-            }
-        }
-        if (this.blackKingSquare==null) {
-            if (otherBoard.blackKingSquare!=null) {
-                return false;
-            }
-        } else {
-            if (!this.blackKingSquare.equals(otherBoard.blackKingSquare)) {
-                return false;
-            }
-        }
-        if (this.whiteKingSquare==null) {
-            if (otherBoard.whiteKingSquare!=null) {
-                return false;
-            }
-        } else {
-            if (!this.whiteKingSquare.equals(otherBoard.whiteKingSquare)) {
-                return false;
-            }
-        }
-        if (this.whitePawns!=otherBoard.whitePawns) {
-            return false;
-        }
-        if (this.blackPawns!=otherBoard.blackPawns) {
-            return false;
-        }
-        if (this.whiteKnights!=otherBoard.whiteKnights) {
-            return false;
-        }
-        if (this.blackKnights!=otherBoard.blackKnights) {
-            return false;
-        }
-        if (this.whiteBishops!=otherBoard.whiteBishops) {
-            return false;
-        }
-        if (this.blackBishops!=otherBoard.blackBishops) {
-            return false;
-        }
-        if (this.whiteRooks!=otherBoard.whiteRooks) {
-            return false;
-        }
-        if (this.blackRooks!=otherBoard.blackRooks) {
-            return false;
-        }
-        if (this.whiteQueens!=otherBoard.whiteQueens) {
-            return false;
-        }
-        if (this.blackQueens!=otherBoard.blackQueens) {
-            return false;
-        }
-        if (this.whitePieces!=otherBoard.whitePieces) {
-            return false;
-        }
-        if (this.blackPieces!=otherBoard.blackPieces) {
-            return false;
-        }
-        if (strict) {
-            if (this.moveCounter!=otherBoard.moveCounter) {
-                return false;
-            }
-            if (this.fiftyCounter!=otherBoard.fiftyCounter) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Board)) {
             return false;
         }
         Board that = (Board)obj;
-        if (!equalExceptMoveHistory(that,true)) {
+        if (!this.pieceMap.equals(that.pieceMap)) {
             return false;
         }
-        if (!this.undoStack.equals(that.undoStack)) {
+        if (!this.pieceCountsMap.equals(that.pieceCountsMap)) {
             return false;
         }
+        if (!this.castlingRights.equals(that.castlingRights)) {
+            return false;
+        }
+        if (!this.getPlayerToMove().equals(that.getPlayerToMove())) {
+            return false;
+        }
+        if (this.epSquare==null) {
+            if (that.epSquare!=null) {
+                return false;
+            }
+        } else {
+            if (!this.epSquare.equals(that.epSquare)) {
+                return false;
+            }
+        }
+        if (this.blackKingSquare==null) {
+            if (that.blackKingSquare!=null) {
+                return false;
+            }
+        } else {
+            if (!this.blackKingSquare.equals(that.blackKingSquare)) {
+                return false;
+            }
+        }
+        if (this.whiteKingSquare==null) {
+            if (that.whiteKingSquare!=null) {
+                return false;
+            }
+        } else {
+            if (!this.whiteKingSquare.equals(that.whiteKingSquare)) {
+                return false;
+            }
+        }
+        if (this.whitePawns!=that.whitePawns) {
+            return false;
+        }
+        if (this.blackPawns!=that.blackPawns) {
+            return false;
+        }
+        if (this.whiteKnights!=that.whiteKnights) {
+            return false;
+        }
+        if (this.blackKnights!=that.blackKnights) {
+            return false;
+        }
+        if (this.whiteBishops!=that.whiteBishops) {
+            return false;
+        }
+        if (this.blackBishops!=that.blackBishops) {
+            return false;
+        }
+        if (this.whiteRooks!=that.whiteRooks) {
+            return false;
+        }
+        if (this.blackRooks!=that.blackRooks) {
+            return false;
+        }
+        if (this.whiteQueens!=that.whiteQueens) {
+            return false;
+        }
+        if (this.blackQueens!=that.blackQueens) {
+            return false;
+        }
+        if (this.whitePieces!=that.whitePieces) {
+            return false;
+        }
+        if (this.blackPieces!=that.blackPieces) {
+            return false;
+        }
+        if (this.moveCounter!=that.moveCounter) {
+            return false;
+        }
+        if (this.fiftyCounter!=that.fiftyCounter) {
+            return false;
+        }
+
         return true;
     }
 
@@ -365,10 +355,6 @@ public final class Board {
         return playerToMove;
     }
 
-    public List<Undo> getUndos() {
-        return Collections.unmodifiableList(undoStack);
-    }
-
     public long getWhiteBishops() {
         return whiteBishops;
     }
@@ -414,13 +400,7 @@ public final class Board {
 
     @Override
     public int hashCode() {
-        int hash = hashCodeWithoutMoveHistory(true);
-        hash = hash * 31 + undoStack.hashCode();
 
-        return hash;
-    }
-
-    public int hashCodeWithoutMoveHistory(boolean strict) {
         int hash = pieceMap.hashCode();
         hash = hash * 17 + castlingRights.hashCode();
         hash = hash * 13 + playerToMove.hashCode();
@@ -440,10 +420,9 @@ public final class Board {
         hash = hash * 71 + Long.valueOf(whitePieces).hashCode();
         hash = hash * 73 + Long.valueOf(blackPieces).hashCode();
 
-        if (strict) {
-            hash = hash * 17 + moveCounter;
-            hash = hash * 13 + fiftyCounter;
-        }
+        hash = hash * 17 + moveCounter;
+        hash = hash * 13 + fiftyCounter;
+
         return hash;
     }
 
@@ -452,9 +431,7 @@ public final class Board {
     }
 
     public void resetBoard() {
-        undoStack.clear();
-
-        setPos("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        setPos(INITIAL_POS);
     }
 
     public void setEP(Square ep) {
@@ -499,51 +476,42 @@ public final class Board {
         zobristKey ^= Zobrist.getPlayerKey(playerToMove);
     }
 
-    // FIXME: temporary hack
-    public void undoMove() {
-        undoMove(null);
-    }
-
     public void undoMove(Undo undo) {
         assert(verify());
-        assert(undoStack.size() > 0);
-        int ind = undoStack.size()-1;
-        Undo u = undoStack.remove(ind);
-//        assert(u.equals(undo));
 
         swapPlayer();
-        epSquare = u.getEpSquare();
+        epSquare = undo.getEpSquare();
         moveCounter--;
-        fiftyCounter = u.getFiftyCounter();
-        castlingRights.setValue(u.getCastlingRights());
+        fiftyCounter = undo.getFiftyCounter();
+        castlingRights.setValue(undo.getCastlingRights());
 
         // remove the moving piece from toSq
-        if (getPiece(u.getMove().to()) != null) {
-            removePiece(u.getMove().to());
+        if (getPiece(undo.getMove().to()) != null) {
+            removePiece(undo.getMove().to());
         }
 
         // place the moving piece on fromSq
-        addPiece(u.getMove().piece(),u.getMove().from());
-        if (u.getMove().piece()==WHITE_KING) {
-            whiteKingSquare = u.getMove().from();
-        } else if (u.getMove().piece()==BLACK_KING) {
-            blackKingSquare = u.getMove().from();
+        addPiece(undo.getMove().piece(),undo.getMove().from());
+        if (undo.getMove().piece()==WHITE_KING) {
+            whiteKingSquare = undo.getMove().from();
+        } else if (undo.getMove().piece()==BLACK_KING) {
+            blackKingSquare = undo.getMove().from();
         }
 
         // restore the captured piece
-        if (u.getMove().captured()!=null) {
-            if (u.getMove().isEpCapture()) {
+        if (undo.getMove().captured()!=null) {
+            if (undo.getMove().isEpCapture()) {
                 if (getPlayerToMove()==Color.BLACK) {
                     addPiece(WHITE_PAWN,epSquare.north().get());
                 } else {
                     addPiece(BLACK_PAWN,epSquare.south().get());
                 }
             } else {
-                addPiece(u.getMove().captured(),u.getMove().to());
+                addPiece(undo.getMove().captured(),undo.getMove().to());
             }
-        } else if (u.getMove().isCastle()) {
-            if (u.getMove().from() == E1) {
-                if (u.getMove().to() == G1) {
+        } else if (undo.getMove().isCastle()) {
+            if (undo.getMove().from() == E1) {
+                if (undo.getMove().to() == G1) {
                     removePiece(F1);
                     addPiece(WHITE_ROOK, H1);
                 } else {
@@ -551,7 +519,7 @@ public final class Board {
                     addPiece(WHITE_ROOK, A1);
                 }
             } else {
-                if (u.getMove().to() == G8) {
+                if (undo.getMove().to() == G8) {
                     removePiece(F8);
                     addPiece(BLACK_ROOK, H8);
                 } else {
@@ -561,7 +529,7 @@ public final class Board {
             }
         }
 
-        zobristKey = u.getZobristKey();
+        zobristKey = undo.getZobristKey();
         assert(verify());
     }
 
@@ -691,7 +659,7 @@ public final class Board {
     private void clearBoard() {
         List<Square> squares = Square.allSquares();
         for (Square sq : squares) {
-            if (getPiece(sq)!=null) {
+            if (getPiece(sq) != null) {
                 removePiece(sq);
             }
         }
@@ -702,18 +670,19 @@ public final class Board {
             clearCastlingRight(cr);
         }
         fiftyCounter = 0;
-        undoStack.clear();
 
-        assert(pieceCountsMap.get(WHITE_PAWN)==0);
-        assert(pieceCountsMap.get(BLACK_PAWN)==0);
+        assert(pieceCountsMap.get(WHITE_KING)==0);
+        assert(pieceCountsMap.get(BLACK_KING)==0);
         assert(pieceCountsMap.get(WHITE_QUEEN)==0);
         assert(pieceCountsMap.get(BLACK_QUEEN)==0);
         assert(pieceCountsMap.get(WHITE_ROOK)==0);
         assert(pieceCountsMap.get(BLACK_ROOK)==0);
-        assert(pieceCountsMap.get(WHITE_KNIGHT)==0);
-        assert(pieceCountsMap.get(BLACK_KNIGHT)==0);
         assert(pieceCountsMap.get(WHITE_BISHOP)==0);
         assert(pieceCountsMap.get(BLACK_BISHOP)==0);
+        assert(pieceCountsMap.get(WHITE_KNIGHT)==0);
+        assert(pieceCountsMap.get(BLACK_KNIGHT)==0);
+        assert(pieceCountsMap.get(WHITE_PAWN)==0);
+        assert(pieceCountsMap.get(BLACK_PAWN)==0);
     }
 
     private void clearCastlingRight(CastlingRights castlingRight) {
@@ -771,7 +740,6 @@ public final class Board {
         } else {
             removePiece(m.to());
         }
-
     }
 
     private void removeCastlingAvailability(Move m) {

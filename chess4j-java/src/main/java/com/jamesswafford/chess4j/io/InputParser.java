@@ -1,10 +1,12 @@
 package com.jamesswafford.chess4j.io;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -121,7 +123,7 @@ public class InputParser {
 
     private void bk() {
         if (App.getOpeningBook() != null) {
-            List<BookMove> bookMoves = App.getOpeningBook().getMoves(Board.INSTANCE);
+            List<BookMove> bookMoves = App.getOpeningBook().getMoves(Globals.getBoard());
             bookMoves.sort((BookMove bm1, BookMove bm2) -> bm2.getFrequency() - bm1.getFrequency());
 
             logger.info("# book moves:");
@@ -137,11 +139,11 @@ public class InputParser {
     }
 
     private void db() {
-        DrawBoard.drawBoard(Board.INSTANCE);
+        DrawBoard.drawBoard(Globals.getBoard());
     }
 
     private void eval() {
-        int eval = Eval.eval(Board.INSTANCE);
+        int eval = Eval.eval(Globals.getBoard());
         logger.info("eval=" + eval);
     }
 
@@ -220,16 +222,17 @@ public class InputParser {
     private void newGame() {
         stopSearchThread();
         forceMode = false;
-        Board.INSTANCE.resetBoard();
+        Globals.getBoard().resetBoard();
+        Globals.gameUndos.clear();
         engineColor = Color.BLACK;
         SearchIterator.maxDepth = 0;
     }
 
     private void perft(String[] input) {
         int depth = Integer.valueOf(input[1]);
-        DrawBoard.drawBoard(Board.INSTANCE);
+        DrawBoard.drawBoard(Globals.getBoard());
         long start = System.currentTimeMillis();
-        long nodes=Perft.perft(Board.INSTANCE, depth);
+        long nodes=Perft.perft(Globals.getBoard(), depth);
         long end = System.currentTimeMillis();
         if (end==start) end=start+1; // HACK to avoid div 0
         DecimalFormat df = new DecimalFormat("0,000");
@@ -253,16 +256,17 @@ public class InputParser {
                 DecimalFormat df = new DecimalFormat("0.00");
                 long elapsed = System.currentTimeMillis() - startTime;
                 logger.info("\nfinished in " + df.format((double) elapsed /1000.0) + " seconds.");
-                Board.INSTANCE.resetBoard();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (IOException e) {
+                logger.error("There was an I/O error processing the pgn file", e);
+            } catch (IllegalMoveException e) {
+                logger.error("Illegal move found in PGN file", e);
             }
         } else {
-            logger.info("file " + fName + " not found.");
+            logger.warn("file " + fName + " not found.");
         }
     }
 
-    private int processPGNFile(java.io.File f,boolean dryRun) throws Exception {
+    private int processPGNFile(java.io.File f, boolean dryRun) throws IOException, IllegalMoveException {
         int n = 0;
 
         try {
@@ -345,8 +349,8 @@ public class InputParser {
     */
     private void remove() {
         stopSearchThread();
-        Board.INSTANCE.undoMove();
-        Board.INSTANCE.undoMove();
+        Globals.getBoard().undoMove(Globals.gameUndos.remove(Globals.gameUndos.size()-1));
+        Globals.getBoard().undoMove(Globals.gameUndos.remove(Globals.gameUndos.size()-1));
     }
 
     /**
@@ -378,7 +382,7 @@ public class InputParser {
 
         logger.info("# result : " + result + " : " + gameResult);
 
-        List<Undo> undos = Board.INSTANCE.getUndos();
+        List<Undo> undos = Globals.gameUndos;
         List<Move> gameMoves = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
         for (Undo undo : undos) {
@@ -413,11 +417,12 @@ public class InputParser {
             fen.append(input[i]);
         }
         try {
-            Board.INSTANCE.setPos(fen.toString());
+            Globals.getBoard().setPos(fen.toString());
+            Globals.gameUndos.clear();
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        DrawBoard.drawBoard(Board.INSTANCE);
+        DrawBoard.drawBoard(Globals.getBoard());
     }
 
     /**
@@ -435,7 +440,7 @@ public class InputParser {
     * "force" mode first.  We don't have to worry about undoing a move the engine made.
     */
     private void undo() {
-        Board.INSTANCE.undoMove();
+        Globals.getBoard().undoMove(Globals.gameUndos.remove(Globals.gameUndos.size()-1));
     }
 
     /**
@@ -445,8 +450,8 @@ public class InputParser {
     private void usermove(String[] input) throws IllegalMoveException, ParseException {
         String strMove = input[1];
         MoveParser mp = new MoveParser();
-        Move mv = mp.parseMove(strMove,Board.INSTANCE);
-        Board.INSTANCE.applyMove(mv);
+        Move mv = mp.parseMove(strMove, Globals.getBoard());
+        Globals.gameUndos.add(Globals.getBoard().applyMove(mv));
 
         if (!forceMode) {
 
@@ -502,9 +507,9 @@ public class InputParser {
 
     private void thinkAndMakeMove() {
         // associate clock with player on move
-        engineColor = Board.INSTANCE.getPlayerToMove();
+        engineColor = Globals.getBoard().getPlayerToMove();
 
-        GameStatus gameStatus = GameStatusChecker.getGameStatus(Board.INSTANCE);
+        GameStatus gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard(), Globals.gameUndos);
         if (gameStatus != GameStatus.INPROGRESS) {
             PrintGameResult.printResult(gameStatus);
             return;

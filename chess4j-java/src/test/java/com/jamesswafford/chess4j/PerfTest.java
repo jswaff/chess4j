@@ -130,9 +130,8 @@ public class PerfTest {
     }
 
     private void testCase(String fen, int depth, long nodes) {
-        Board.INSTANCE.setPos(fen);
-        //DrawBoard.drawBoard(Board.INSTANCE);
-        long n = Perft.perft(Board.INSTANCE, depth);
+        Board board = new Board(fen);
+        long n = Perft.perft(board, depth);
         assertEquals(nodes, n);
     }
 

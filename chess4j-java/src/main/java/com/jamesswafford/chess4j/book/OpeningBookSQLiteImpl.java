@@ -6,10 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.jamesswafford.chess4j.Globals;
 
 import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Board;
@@ -18,9 +18,9 @@ import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.hash.Zobrist;
 import com.jamesswafford.chess4j.utils.GameResult;
 
-public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
+import static com.jamesswafford.chess4j.utils.GameResult.*;
 
-    private static final Log logger = LogFactory.getLog(OpeningBookSQLiteImpl.class);
+public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
 
     private Connection conn;
 
@@ -135,36 +135,35 @@ public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
     }
 
     @Override
-    public void learn(List<Move> moves,Color engineColor,GameResult gameResult) {
-        if (!(GameResult.WIN.equals(gameResult) || GameResult.LOSS.equals(gameResult)
-                || GameResult.DRAW.equals(gameResult)))
-        {
+    public void learn(List<Move> moves, Color engineColor, GameResult gameResult) {
+
+        if (!Arrays.asList(WIN, LOSS, DRAW).contains(gameResult)) {
             return;
         }
 
-        Board.INSTANCE.resetBoard();
+        Board board = new Board();
 
         try {
             for (Move move : moves) {
-                if (Board.INSTANCE.getPlayerToMove().equals(engineColor)) {
-                    learn(move,gameResult);
+                if (board.getPlayerToMove().equals(engineColor)) {
+                    learn(move, board, gameResult);
                 }
-                Board.INSTANCE.applyMove(move);
+                board.applyMove(move);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
 
-    private void learn(Move move,GameResult gameResult) throws SQLException {
-        List<BookMove> bookMoves = getMoves(Board.INSTANCE);
+    private void learn(Move move, Board board, GameResult gameResult) throws SQLException {
+        List<BookMove> bookMoves = getMoves(board);
 
         for (BookMove bookMove : bookMoves) {
             if (bookMove.getMove().equals(move)) {
-                update(Board.INSTANCE,move,bookMove.getFrequency(),
-                        bookMove.getWins() + (GameResult.WIN.equals(gameResult) ? 1 : 0),
-                        bookMove.getLosses() + (GameResult.LOSS.equals(gameResult) ? 1 : 0),
-                        bookMove.getDraws() + (GameResult.DRAW.equals(gameResult) ? 1 : 0)
+                update(board, move, bookMove.getFrequency(),
+                        bookMove.getWins() + (WIN.equals(gameResult) ? 1 : 0),
+                        bookMove.getLosses() + (LOSS.equals(gameResult) ? 1 : 0),
+                        bookMove.getDraws() + (DRAW.equals(gameResult) ? 1 : 0)
                         );
             }
         }
@@ -183,7 +182,7 @@ public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
         Zobrist.setKeys(keys);
     }
 
-    public void writeZobristKeys() throws SQLException {
+    void writeZobristKeys() throws SQLException {
         Statement stmt = conn.createStatement();
         stmt.execute("delete from zobrist_keys");
         stmt.close();
@@ -192,8 +191,8 @@ public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
 
         List<Long> zobristKeys = Zobrist.getAllKeys();
 
-        for (int i=0;i<zobristKeys.size();i++) {
-            ps.setLong(1, zobristKeys.get(i));
+        for (Long zobristKey : zobristKeys) {
+            ps.setLong(1, zobristKey);
             ps.executeUpdate();
         }
         ps.close();
@@ -207,7 +206,7 @@ public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
         stmt.close();
     }
 
-    private int getMoveCount(Board board,Move move) throws SQLException {
+    private int getMoveCount(Board board, Move move) throws SQLException {
         int freq = 0;
         String sql = "select frequency from book_moves where key=? and fromsq=? and tosq=?";
 

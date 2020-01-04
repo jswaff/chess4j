@@ -47,7 +47,7 @@ public class TestSuiteProcessor {
         LOGGER.info("# problems: " + numProblems);
         DecimalFormat df = new DecimalFormat("0.0");
         int numCorrect = numProblems - wrongProblems.size();
-        double pctCorrect = Double.valueOf(numCorrect) / Double.valueOf(numProblems) * 100;
+        double pctCorrect = (double) numCorrect / (double) numProblems * 100;
         LOGGER.info("# correct: " + numCorrect + " (" + df.format(pctCorrect) + "%)");
         if (wrongProblems.size()>0) {
             LOGGER.info("incorrect problems:");
@@ -59,10 +59,10 @@ public class TestSuiteProcessor {
 
     private boolean processProblem(String epd,int secondsPerProblem) throws ParseException, IllegalMoveException {
         LOGGER.info("\n\nprocessing epd: " + epd);
-        Board b = Board.INSTANCE;
-        List<EPDOperation> ops = EPDParser.setPos(b, epd);
-        DrawBoard.drawBoard(b);
-        List<Move> bms = getBestMoves(b,ops);
+        Board board = new Board();
+        List<EPDOperation> ops = EPDParser.setPos(board, epd);
+        DrawBoard.drawBoard(board);
+        List<Move> bms = getBestMoves(board, ops);
         LOGGER.info("best moves: ");
         for (Move bm : bms) {
             LOGGER.info("\t" + bm);
@@ -71,7 +71,7 @@ public class TestSuiteProcessor {
         SearchIterator.setAbortIterator(false);
         SearchIterator.setPonderMode(false);
         SearchIterator.maxTime = secondsPerProblem * 1000;
-        List<Move> pv = SearchIterator.iterate(b,true);
+        List<Move> pv = SearchIterator.iterate(board, new ArrayList<>(), true);
 
         return bms.contains(pv.get(0));
     }

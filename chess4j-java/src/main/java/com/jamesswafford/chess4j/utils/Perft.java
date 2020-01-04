@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.jamesswafford.chess4j.board.Undo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -43,7 +44,7 @@ class PerftCallable implements Callable<Long> {
     private Board board;
     private int depth;
 
-    public PerftCallable(Board board,int depth) {
+    public PerftCallable(Board board, int depth) {
         this.board=board;
         this.depth=depth;
     }
@@ -57,9 +58,9 @@ class PerftCallable implements Callable<Long> {
         long n=0;
 
         for (Move m : moves) {
-            board.applyMove(m);
+            Undo undo = board.applyMove(m);
             n += perft(myDepth-1);
-            board.undoMove();
+            board.undoMove(undo);
         }
 
         return n;
@@ -77,7 +78,7 @@ public final class Perft {
 
     private Perft() { }
 
-    public static long perft(Board b,int depth) {
+    public static long perft(Board board, int depth) {
         if (depth <= 0) {
             return 1;
         }
@@ -86,10 +87,10 @@ public final class Perft {
         LOGGER.info("detected " + processors + " processors.");
         ExecutorService executor = Executors.newFixedThreadPool(processors);
         List<Future<Long>> futures = new ArrayList<>();
-        List<Move> moves = MoveGen.genLegalMoves(b);
+        List<Move> moves = MoveGen.genLegalMoves(board);
 
         for (Move m : moves) {
-            Board b2 = b.deepCopy();
+            Board b2 = board.deepCopy();
             b2.applyMove(m);
             PerftCallable pc = new PerftCallable(b2,depth-1);
             futures.add(executor.submit(pc));

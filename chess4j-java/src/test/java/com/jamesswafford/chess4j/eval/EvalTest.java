@@ -16,7 +16,7 @@ import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
  */
 public class EvalTest {
 
-    Board board = Board.INSTANCE;
+    Board board = new Board();
 
     @Test
     public void testStartPosIs0() {

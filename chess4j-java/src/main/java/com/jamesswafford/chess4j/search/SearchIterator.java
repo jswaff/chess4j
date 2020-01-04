@@ -6,12 +6,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.jamesswafford.chess4j.eval.EvalMaterial;
+import com.jamesswafford.chess4j.Globals;
+import com.jamesswafford.chess4j.board.Undo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.jamesswafford.chess4j.App;
-import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.movegen.MoveGen;
@@ -23,6 +23,10 @@ import com.jamesswafford.chess4j.utils.GameStatus;
 import com.jamesswafford.chess4j.utils.GameStatusChecker;
 import com.jamesswafford.chess4j.utils.MoveUtils;
 import com.jamesswafford.chess4j.utils.TimeUtils;
+
+import static com.jamesswafford.chess4j.Constants.*;
+import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
+import static com.jamesswafford.chess4j.utils.GameStatus.*;
 
 public final class SearchIterator {
 
@@ -36,12 +40,14 @@ public final class SearchIterator {
     public static int maxTime;
     public static boolean post = true;
     public static boolean ponderEnabled;
+    public static final ReentrantLock ponderMutex = new ReentrantLock();
+
     private static boolean pondering;
     private static Move ponderMove;
     private static boolean abortIterator = false;
 
     private static Board searchPos;
-    public static final ReentrantLock ponderMutex = new ReentrantLock();
+    private static List<Undo> searchUndos;
 
     public static boolean isPondering() {
         return pondering;
@@ -83,7 +89,10 @@ public final class SearchIterator {
         // make a copy of the current position.  note that just because we are operating
         // of a copy of the global position, the global position itself should remain
         // unchanged until our search is complete.
-        searchPos = Board.INSTANCE.deepCopy();
+        searchPos = Globals.getBoard().deepCopy();
+
+        // make a copy of the global undo stack
+        searchUndos = new ArrayList<>(Globals.gameUndos);
 
         setPonderMode(false);
         setAbortIterator(false);
@@ -96,19 +105,19 @@ public final class SearchIterator {
 
     private static void threadHelper() {
 
-        List<Move> pv = iterate(searchPos,false);
+        List<Move> pv = iterate(searchPos, searchUndos, false);
 
         // sanity check - the global position shouldn't have changed
-        assert(Board.INSTANCE.equals(searchPos));
+        assert(Globals.getBoard().equals(searchPos));
 
-        Board.INSTANCE.applyMove(pv.get(0));
+        Globals.gameUndos.add(Globals.getBoard().applyMove(pv.get(0)));
         LOGGER.info("move " + pv.get(0));
-        GameStatus gameStatus = GameStatusChecker.getGameStatus(Board.INSTANCE);
+        GameStatus gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard(), Globals.gameUndos);
 
         // pondering loop.  as long as we guess correctly we'll loop back around
         // if we don't predict correctly this thread is terminated
         boolean ponderFailure = false;
-        while (gameStatus==GameStatus.INPROGRESS && ponderEnabled && pv.size() > 1 && !ponderFailure && !abortIterator) {
+        while (gameStatus==INPROGRESS && ponderEnabled && pv.size() > 1 && !ponderFailure && !abortIterator) {
 
             ponderMutex.lock();
             LOGGER.debug("# thinkHelper acquired lock #1 on ponderMutex");
@@ -126,7 +135,7 @@ public final class SearchIterator {
                 ponderMutex.unlock();
                 LOGGER.debug("thinkHelper released lock #1 on ponderMutex");
 
-                pv = iterate(searchPos,false);
+                pv = iterate(searchPos, searchUndos, false);
                 LOGGER.debug("# ponder search terminated");
 
                 ponderMutex.lock();
@@ -137,10 +146,10 @@ public final class SearchIterator {
                 // if we're not in ponder mode, it's because the usermove was correctly predicted and the main
                 // thread transitioned the search into "normal mode."
                 if (!pondering) {
-                    assert(Board.INSTANCE.equals(searchPos));
-                    Board.INSTANCE.applyMove(pv.get(0));
+                    assert(Globals.getBoard().equals(searchPos));
+                    Globals.gameUndos.add(Globals.getBoard().applyMove(pv.get(0)));
                     LOGGER.info("move " + pv.get(0));
-                    gameStatus = GameStatusChecker.getGameStatus(Board.INSTANCE);
+                    gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard(), Globals.gameUndos);
                 } else {
                     // we're still in ponder mode.  this means the search terminated on its own.
                     // in this case just bail out.
@@ -156,7 +165,7 @@ public final class SearchIterator {
 
         LOGGER.debug("### exiting search thread");
 
-        if (gameStatus != GameStatus.INPROGRESS) {
+        if (gameStatus != INPROGRESS) {
             PrintGameResult.printResult(gameStatus);
         }
     }
@@ -167,7 +176,7 @@ public final class SearchIterator {
      *
      * @return - principal variation
      */
-    public static List<Move> iterate(Board board, boolean testSuiteMode) {
+    public static List<Move> iterate(Board board, List<Undo> undos, boolean testSuiteMode) {
 
         if (!testSuiteMode && !pondering && App.getOpeningBook() != null && board.getMoveCounter() <= 30) {
             BookMove bookMove = App.getOpeningBook().getMoveWeightedRandomByFrequency(board);
@@ -203,18 +212,18 @@ public final class SearchIterator {
             ++depth;
 
             // aspiration windows
-            int alphaBound = -Constants.INFINITY;
-            int betaBound = Constants.INFINITY;
+            int alphaBound = -INFINITY;
+            int betaBound = INFINITY;
             if (depth > 2) {
-                alphaBound = score - (EvalMaterial.PAWN_VAL / 3);
-                betaBound = score + (EvalMaterial.PAWN_VAL / 3);
+                alphaBound = score - (PAWN_VAL / 3);
+                betaBound = score + (PAWN_VAL / 3);
             }
 
-            score=Search.search(pv,alphaBound, betaBound, board, depth,stats,true);
+            score=Search.search(pv,alphaBound, betaBound, board, undos, depth,stats,true);
 
             if ((score <= alphaBound || score >= betaBound) && !Search.abortSearch) {
                 LOGGER.debug("# research depth " + depth + "! alpha=" + alphaBound + ", beta=" + betaBound + ", score=" + score);
-                score=Search.search(pv,-Constants.INFINITY, Constants.INFINITY, board, depth,stats,true);
+                score=Search.search(pv,-INFINITY, INFINITY, board, undos, depth,stats,true);
             }
 
             assert(pv.size()>0);
@@ -231,7 +240,7 @@ public final class SearchIterator {
             //LOGGER.debug("# first line: " + PrintLine.getMoveString(stats.getFirstLine()));
 
             // if this is a mate, stop here
-            if (Math.abs(score) > Constants.CHECKMATE-500) {
+            if (Math.abs(score) > CHECKMATE-500) {
                 LOGGER.debug("# stopping iterative search because mate found");
                 stopSearching = true;
             }

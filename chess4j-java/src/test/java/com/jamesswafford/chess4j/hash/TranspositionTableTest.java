@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.hash;
 
+import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.movegen.MoveGen;
 
 import org.junit.Test;
@@ -20,9 +21,9 @@ import static com.jamesswafford.chess4j.hash.TranspositionTableEntryType.*;
 
 public class TranspositionTableTest {
 
-    TranspositionTable ttable = new TranspositionTable(false);
-    TranspositionTable ttDPtable = new TranspositionTable(true);
-    Board board = Board.INSTANCE;
+    private TranspositionTable ttable = new TranspositionTable(false);
+    private TranspositionTable ttDPtable = new TranspositionTable(true);
+    private Board board = new Board();
 
     @Test
     public void testNumEntriesIsPowerOf2() {
@@ -68,12 +69,12 @@ public class TranspositionTableTest {
         assertEquals(tte, lbe);
 
         // now make move and reprobe
-        board.applyMove(m);
+        Undo u = board.applyMove(m);
         key = Zobrist.calculateBoardKey(board);
         assertFalse(ttable.probe(key).isPresent());
 
         // finally undo move and reprobe again
-        board.undoMove();
+        board.undoMove(u);
         key = Zobrist.calculateBoardKey(board);
         tte = ttable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
         assertEquals(lbe, tte);
@@ -259,9 +260,9 @@ public class TranspositionTableTest {
         // overwrite with different score/depth
         ttable.store(key, LOWER_BOUND,900, 6, m);
         tte = ttable.probe(key).get();
-        assertFalse(lbe.equals(tte));
+        assertNotEquals(lbe, tte);
         lbe = new TranspositionTableEntry(key, LOWER_BOUND,900,6,m);
-        assertTrue(lbe.equals(tte));
+        assertEquals(lbe, tte);
 
         // use different key to store new entry
         long key2 = ~key;

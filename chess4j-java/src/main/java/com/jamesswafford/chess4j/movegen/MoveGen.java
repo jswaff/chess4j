@@ -314,10 +314,10 @@ public final class MoveGen {
         return targets;
     }
 
-    private static boolean isMoveLegal(Board board,Move m) {
-        board.applyMove(m);
+    private static boolean isMoveLegal(Board board, Move m) {
+        Undo undo = board.applyMove(m);
         boolean legal = !BoardUtils.isOpponentInCheck(board);
-        board.undoMove();
+        board.undoMove(undo);
         return legal;
     }
 

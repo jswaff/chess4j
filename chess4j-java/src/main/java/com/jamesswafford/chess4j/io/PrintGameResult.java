@@ -1,10 +1,10 @@
 package com.jamesswafford.chess4j.io;
 
+import com.jamesswafford.chess4j.Globals;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.jamesswafford.chess4j.Color;
-import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.utils.GameStatus;
 
 public final class PrintGameResult {
@@ -14,9 +14,8 @@ public final class PrintGameResult {
     private PrintGameResult() { }
 
     public static void printResult(GameStatus gs) {
-        Board b = Board.INSTANCE;
         if (GameStatus.CHECKMATED.equals(gs)) {
-            if (b.getPlayerToMove().equals(Color.WHITE)) {
+            if (Globals.getBoard().getPlayerToMove().equals(Color.WHITE)) {
                 LOGGER.info("RESULT 0-1 {Black mates}\n");
             } else {
                 LOGGER.info("RESULT 1-0 {White mates}\n");
