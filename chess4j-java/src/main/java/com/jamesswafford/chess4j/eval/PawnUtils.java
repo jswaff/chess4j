@@ -47,12 +47,12 @@ public class PawnUtils {
      * @param pawnSq
      * @return
      */
-    public static boolean isPassedPawn(Board board,final Square pawnSq,boolean isWhite) {
+    public static boolean isPassedPawn(Board board, final Square pawnSq, boolean isWhite) {
         long enemies = isWhite ? board.getBlackPawns() : board.getWhitePawns();
         return (passed[pawnSq.value()][isWhite?Color.WHITE.ordinal():Color.BLACK.ordinal()] & enemies)==0;
     }
 
-    public static boolean isDoubled(Board board,Square pawnSq,boolean isWhite) {
+    public static boolean isDoubled(Board board, Square pawnSq, boolean isWhite) {
 
         long fileMask = Bitboard.files[pawnSq.file().getValue()] ^ Bitboard.squares[pawnSq.value()];
         if (isWhite) {
@@ -64,7 +64,7 @@ public class PawnUtils {
         return false;
     }
 
-    public static boolean isIsolated(Board board,Square pawnSq,boolean isWhite) {
+    public static boolean isIsolated(Board board, Square pawnSq, boolean isWhite) {
         long friends = isWhite ? board.getWhitePawns() : board.getBlackPawns();
         return (isolated[pawnSq.value()] & friends)==0;
     }

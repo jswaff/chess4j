@@ -26,17 +26,19 @@ public class EvalPawn {
     public static final int DOUBLED_PAWN = -10;
 
 
-    public static int evalPawn(Board board, boolean isWhite, Square sq) {
+    public static int evalPawn(Board board, Square sq) {
         int score=0;
 
+        boolean isWhite = board.getPiece(sq).isWhite();
+
         score += PAWN_PST[isWhite ? sq.value() : sq.flipVertical().value()];
-        if (PawnUtils.isPassedPawn(board,sq,isWhite)) {
+        if (PawnUtils.isPassedPawn(board, sq, isWhite)) {
             score += PASSED_PAWN;
         }
-        if (PawnUtils.isIsolated(board,sq,isWhite)) {
+        if (PawnUtils.isIsolated(board, sq, isWhite)) {
             score += ISOLATED_PAWN;
         }
-        if (PawnUtils.isDoubled(board,sq,isWhite)) {
+        if (PawnUtils.isDoubled(board, sq, isWhite)) {
             score += DOUBLED_PAWN;
         }
 
