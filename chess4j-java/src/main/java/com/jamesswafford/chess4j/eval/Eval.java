@@ -15,7 +15,7 @@ import java.util.function.BiFunction;
 
 import static com.jamesswafford.chess4j.eval.EvalKing.*;
 
-public final class Eval {
+public final class Eval implements Evaluator {
 
     private static final Log LOGGER = LogFactory.getLog(Eval.class);
 
@@ -118,4 +118,8 @@ public final class Eval {
 
     public static native int evalNative(String boardFen, boolean materialOnly);
 
+    @Override
+    public int evaluateBoard(Board board) {
+        return eval(board);
+    }
 }
