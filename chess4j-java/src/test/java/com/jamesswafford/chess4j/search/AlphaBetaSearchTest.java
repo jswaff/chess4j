@@ -5,6 +5,7 @@ import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import org.junit.Test;
 
+import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -42,6 +43,71 @@ public class AlphaBetaSearchTest {
 
         // and the score should be the highest returned score
         assertEquals(5, score);
+    }
+
+    @Test
+    public void testMateIn1() {
+        Board board = new Board("4k3/8/3Q4/2B5/8/8/1K6/8 w - -");
+
+        Evaluator evaluator = mock(Evaluator.class);
+        SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
+
+        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
+        int score = alphaBetaSearch.search();
+
+        assertEquals(CHECKMATE-1, score);
+    }
+
+    @Test
+    public void testMateIn1b() {
+        Board board = new Board("4K3/8/8/3n2q1/8/8/3k4/8 b - -");
+
+        Evaluator evaluator = mock(Evaluator.class);
+        SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
+
+        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
+        int score = alphaBetaSearch.search();
+
+        assertEquals(CHECKMATE-1, score);
+    }
+
+    @Test
+    public void testMateIn2() {
+        Board board = new Board("r1bq2r1/b4pk1/p1pp1p2/1p2pP2/1P2P1PB/3P4/1PPQ2P1/R3K2R w - -");
+
+        Evaluator evaluator = mock(Evaluator.class);
+        SearchParameters params = new SearchParameters(4, -INFINITY, INFINITY);
+
+        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
+        int score = alphaBetaSearch.search();
+
+        assertEquals(CHECKMATE-3, score);
+    }
+
+    @Test
+    public void testMateIn3() {
+        Board board = new Board("r5rk/5p1p/5R2/4B3/8/8/7P/7K w - -");
+
+        Evaluator evaluator = mock(Evaluator.class);
+        SearchParameters params = new SearchParameters(6, -INFINITY, INFINITY);
+
+        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
+        int score = alphaBetaSearch.search();
+
+        assertEquals(CHECKMATE-5, score);
+    }
+
+    @Test
+    public void testStaleMate() {
+        Board board = new Board("8/6p1/5p2/5k1K/7P/8/8/8 w - -");
+
+        Evaluator evaluator = mock(Evaluator.class);
+        SearchParameters params = new SearchParameters(1, -INFINITY, INFINITY);
+
+        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
+        int score = alphaBetaSearch.search();
+
+        assertEquals(0, score);
     }
 
 }

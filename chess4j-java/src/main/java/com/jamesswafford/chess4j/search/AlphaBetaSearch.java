@@ -5,8 +5,11 @@ import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.utils.BoardUtils;
 
 import java.util.List;
+
+import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 
 public class AlphaBetaSearch {
 
@@ -21,20 +24,29 @@ public class AlphaBetaSearch {
     }
 
     public int search() {
-        return search(searchParameters.getDepth(), searchParameters.getAlpha(), searchParameters.getBeta());
+        return search(0, searchParameters.getDepth(), searchParameters.getAlpha(), searchParameters.getBeta());
     }
 
-    private int search(int depth, int alpha, int beta) {
+    private int search(int ply, int depth, int alpha, int beta) {
 
         if (depth == 0) {
             return evaluator.evaluateBoard(board);
         }
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MoveGen.genPseudoLegalMoves(board);
 
+        int numMovesSearched = 0;
         for (Move move : moves) {
             Undo undo = board.applyMove(move);
-            int val = -search(depth-1, -beta, -alpha);
+            // check if move was legal
+            if (BoardUtils.isOpponentInCheck(board)) {
+                board.undoMove(undo);
+                continue;
+            }
+
+            // TODO: undo should be passed through for draw checks
+            int val = -search(ply+1, depth-1, -beta, -alpha);
+            ++numMovesSearched;
             board.undoMove(undo);
             if (val >= beta) {
                 return beta;
@@ -44,6 +56,24 @@ public class AlphaBetaSearch {
             }
         }
 
+        alpha = adjustFinalScoreForMates(alpha, numMovesSearched, ply);
+
         return alpha;
     }
+
+    private int adjustFinalScoreForMates(int score, int numMovesSearched, int ply) {
+        int adjScore = score;
+
+        if (numMovesSearched==0) {
+            if (BoardUtils.isPlayerInCheck(board)) {
+                adjScore = -CHECKMATE + ply;
+            } else {
+                // draw score
+                adjScore = 0;
+            }
+        }
+
+        return adjScore;
+    }
+
 }
