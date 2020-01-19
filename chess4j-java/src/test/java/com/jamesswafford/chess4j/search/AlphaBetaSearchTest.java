@@ -36,7 +36,7 @@ public class AlphaBetaSearchTest {
 
         // when the search is invoked
         AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
-        int score = alphaBetaSearch.search();
+        int score = alphaBetaSearch.search(false);
 
         // then the evaluator should have been invoked for each move
         verify(evaluator, times(20)).evaluateBoard(any(Board.class));
@@ -53,7 +53,7 @@ public class AlphaBetaSearchTest {
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
         AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
-        int score = alphaBetaSearch.search();
+        int score = alphaBetaSearch.search(false);
 
         assertEquals(CHECKMATE-1, score);
     }
@@ -66,7 +66,7 @@ public class AlphaBetaSearchTest {
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
         AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
-        int score = alphaBetaSearch.search();
+        int score = alphaBetaSearch.search(false);
 
         assertEquals(CHECKMATE-1, score);
     }
@@ -79,7 +79,7 @@ public class AlphaBetaSearchTest {
         SearchParameters params = new SearchParameters(4, -INFINITY, INFINITY);
 
         AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
-        int score = alphaBetaSearch.search();
+        int score = alphaBetaSearch.search(false);
 
         assertEquals(CHECKMATE-3, score);
     }
@@ -92,7 +92,7 @@ public class AlphaBetaSearchTest {
         SearchParameters params = new SearchParameters(6, -INFINITY, INFINITY);
 
         AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
-        int score = alphaBetaSearch.search();
+        int score = alphaBetaSearch.search(false);
 
         assertEquals(CHECKMATE-5, score);
     }
@@ -105,7 +105,7 @@ public class AlphaBetaSearchTest {
         SearchParameters params = new SearchParameters(1, -INFINITY, INFINITY);
 
         AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
-        int score = alphaBetaSearch.search();
+        int score = alphaBetaSearch.search(false);
 
         assertEquals(0, score);
     }

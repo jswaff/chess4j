@@ -23,4 +23,9 @@ public class SearchParameters {
     public int getBeta() {
         return beta;
     }
+
+    @Override
+    public String toString() {
+        return "SearchParameters [depth: " + depth + ", alpha: " + alpha + ", beta: " + beta + "]";
+    }
 }

@@ -4,14 +4,24 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.eval.Evaluator;
+import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.utils.BoardUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.List;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 
 public class AlphaBetaSearch {
+
+    private static final Log LOGGER = LogFactory.getLog(AlphaBetaSearch.class);
+
+    static {
+        Initializer.init();
+    }
 
     private final Board board;
     private final SearchParameters searchParameters;
@@ -23,8 +33,51 @@ public class AlphaBetaSearch {
         this.evaluator = evaluator;
     }
 
-    public int search() {
-        return search(0, searchParameters.getDepth(), searchParameters.getAlpha(), searchParameters.getBeta());
+    public int search(boolean useNative) {
+        if (useNative && Initializer.useNative()) {
+            return searchWithNativeCode();
+        } else {
+            return searchWithJavaCode();
+        }
+    }
+
+    private int searchWithJavaCode() {
+        long startTime = System.currentTimeMillis();
+        LOGGER.debug("# performing depth " + searchParameters.getDepth() + " search with java code.");
+        int javaScore = search(0, searchParameters.getDepth(), searchParameters.getAlpha(), searchParameters.getBeta());
+        LOGGER.debug("# ... finished java search in " + (System.currentTimeMillis() - startTime) + " ms.");
+        return javaScore;
+    }
+
+    private int searchWithNativeCode() {
+        long startTime = System.currentTimeMillis();
+        LOGGER.debug("# performing depth " + searchParameters.getDepth() + " search with native code.");
+        String fen = FenBuilder.createFen(board, false);
+        try {
+            int nativeScore = searchNative(fen, searchParameters.getDepth(),
+                    searchParameters.getAlpha(), searchParameters.getBeta());
+            LOGGER.debug("# ... finished native search in " + (System.currentTimeMillis() - startTime) + " ms.");
+            assert (searchesAreEqual(nativeScore, fen));
+            return nativeScore;
+        } catch (IllegalStateException e) {
+            LOGGER.error(e);
+            throw e;
+        }
+    }
+
+    private boolean searchesAreEqual(int nativeScore, String fen) {
+        try {
+            int javaScore = searchWithJavaCode();
+            if (javaScore != nativeScore) {
+                LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore +
+                        ", params: " + searchParameters + ", fen: " + fen);
+                return false;
+            }
+            return true;
+        } catch (IllegalStateException e) {
+            LOGGER.error(e);
+            throw e;
+        }
     }
 
     private int search(int ply, int depth, int alpha, int beta) {
@@ -75,5 +128,7 @@ public class AlphaBetaSearch {
 
         return adjScore;
     }
+
+    private native int searchNative(String boardFen, int depth, int alpha, int beta);
 
 }

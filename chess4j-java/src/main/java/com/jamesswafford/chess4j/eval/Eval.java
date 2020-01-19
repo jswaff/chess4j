@@ -23,7 +23,7 @@ public final class Eval implements Evaluator {
         Initializer.init();
     }
 
-    private Eval() { }
+    public Eval() { }
 
     public static int eval(Board board) {
         return eval(board,false);

@@ -8,6 +8,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Undo;
+import com.jamesswafford.chess4j.eval.Eval;
+import com.jamesswafford.chess4j.eval.Evaluator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -220,6 +222,15 @@ public final class SearchIterator {
             }
 
             score=Search.search(pv,alphaBound, betaBound, board, undos, depth,stats,true);
+
+            /// TODO: this is temporary code while building up the new search
+            /*if (testSuiteMode && depth <= 6) {
+                SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
+                AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, parameters, new Eval());
+                int abScore = alphaBetaSearch.search(true);
+                LOGGER.debug("# A/B Score: " + abScore);
+            }*/
+            /// END TEMPORARY CODE
 
             if ((score <= alphaBound || score >= betaBound) && !Search.abortSearch) {
                 LOGGER.debug("# research depth " + depth + "! alpha=" + alphaBound + ", beta=" + betaBound + ", score=" + score);
