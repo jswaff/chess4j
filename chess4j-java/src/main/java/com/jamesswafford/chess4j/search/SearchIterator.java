@@ -10,6 +10,7 @@ import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.Evaluator;
+import com.jamesswafford.chess4j.search.v2.SearchParameters;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -224,15 +225,17 @@ public final class SearchIterator {
             score=Search.search(pv,alphaBound, betaBound, board, undos, depth,stats,true);
 
             /// TODO: this is temporary code while building up the new search
-            /*if (testSuiteMode && depth <= 5) {
+            if (testSuiteMode && depth <= 5) {
                 SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
-                AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, parameters, new Eval());
-                int abScore = alphaBetaSearch.search(true);
-                LOGGER.debug("# A/B Score: " + abScore);
+                com.jamesswafford.chess4j.search.v2.Search searchV2 =
+                        new com.jamesswafford.chess4j.search.v2.Search(
+                        board, parameters, new Eval(), new MoveGen());
+                int abScore = searchV2.search(true);
+                LOGGER.debug("# V2 Score: " + abScore);
             }
             if (depth == 5) {
                 Search.abortSearch = true;
-            }*/
+            }
             /// END TEMPORARY CODE
 
             if ((score <= alphaBound || score >= betaBound) && !Search.abortSearch) {

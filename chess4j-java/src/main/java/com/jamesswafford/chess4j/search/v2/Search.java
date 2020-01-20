@@ -38,7 +38,7 @@ public class Search {
         this.searchStats = new SearchStats();
     }
 
-    public SearchStats getSearchStats() {
+    SearchStats getSearchStats() {
         return searchStats;
     }
 
@@ -65,7 +65,9 @@ public class Search {
         String fen = FenBuilder.createFen(board, false);
         try {
             int nativeScore = searchNative(fen, searchParameters.getDepth(),
-                    searchParameters.getAlpha(), searchParameters.getBeta());
+                    searchParameters.getAlpha(), searchParameters.getBeta(), searchStats);
+            assert (searchStats.nodes == 5L);
+            assert (searchStats.failHighs == 3L);
             LOGGER.debug("# ... finished native search in " + (System.currentTimeMillis() - startTime) + " ms.");
             assert (searchesAreEqual(nativeScore, fen));
             return nativeScore;
@@ -77,10 +79,17 @@ public class Search {
 
     private boolean searchesAreEqual(int nativeScore, String fen) {
         try {
+            // copy the search stats for comparison
+            SearchStats nativeStats = new SearchStats();
+            nativeStats.nodes = searchStats.nodes;
+            nativeStats.failHighs = searchStats.failHighs;
+
+            searchStats.initialize();
             int javaScore = searchWithJavaCode();
-            if (javaScore != nativeScore) {
-                LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore +
-                        ", params: " + searchParameters + ", fen: " + fen);
+            if (javaScore != nativeScore || !searchStats.equals(nativeStats)) {
+                LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
+                        + ", java stats: " + searchStats + ", native stats: " + nativeStats
+                        + ", params: " + searchParameters + ", fen: " + fen);
                 return false;
             }
             return true;
@@ -142,6 +151,6 @@ public class Search {
         return adjScore;
     }
 
-    private native int searchNative(String boardFen, int depth, int alpha, int beta);
+    private native int searchNative(String boardFen, int depth, int alpha, int beta, SearchStats searchStats);
 
 }

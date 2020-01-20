@@ -10,15 +10,16 @@
 /*
  * Class:     com_jamesswafford_chess4j_search_v2_Search
  * Method:    searchNative
- * Signature: (Ljava/lang/String;III)I
+ * Signature: (Ljava/lang/String;IIILcom/jamesswafford/chess4j/search/v2/SearchStats;)I
  */
 JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_v2_Search_searchNative
   (JNIEnv *env, jobject UNUSED(search_obj), jstring board_fen, jint depth, 
-    jint alpha, jint beta)
+    jint alpha, jint beta, jobject search_stats)
 
 {
     jint retval = 0;
 
+    /* ensure the static library is initialized */
     if (!p4_initialized) 
     {
         (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
@@ -26,8 +27,8 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_v2_Search_searchNat
         return 0;
     }
 
+    /* set the position according to the FEN */
     const char* fen = (*env)->GetStringUTFChars(env, board_fen, 0);
-    
     position_t pos;
     if (!set_pos(&pos, fen))
     {
@@ -38,8 +39,17 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_v2_Search_searchNat
         goto cleanup;
     }
 
+    /* perform the search */
     int32_t native_score = search(&pos, depth, alpha, beta);
     retval = (jint) native_score;
+
+    /* set the search stats */
+    jclass class_SearchStats = (*env)->GetObjectClass(env, search_stats);
+    jfieldID fidNodes = (*env)->GetFieldID(env, class_SearchStats, "nodes", "J");
+    (*env)->SetLongField(env, search_stats, fidNodes, 5);
+
+    jfieldID fidFailHighs = (*env)->GetFieldID(env, class_SearchStats, "failHighs", "J");
+    (*env)->SetLongField(env, search_stats, fidFailHighs, 3);
 
 cleanup:
     (*env)->ReleaseStringUTFChars(env, board_fen, fen);
