@@ -229,7 +229,7 @@ public final class SearchIterator {
                 SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
                 com.jamesswafford.chess4j.search.v2.Search searchV2 =
                         new com.jamesswafford.chess4j.search.v2.Search(
-                        board, parameters, new Eval(), new MoveGen());
+                        board, undos, parameters, new Eval(), new MoveGen());
                 int abScore = searchV2.search(true);
                 LOGGER.debug("# V2 Score: " + abScore);
             }

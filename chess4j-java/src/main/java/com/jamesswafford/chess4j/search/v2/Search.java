@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.search.v2;
 
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Draw;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.eval.Evaluator;
@@ -11,6 +12,7 @@ import com.jamesswafford.chess4j.utils.BoardUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
@@ -24,14 +26,16 @@ public class Search {
     }
 
     private final Board board;
+    private final List<Undo> undos;
     private final SearchParameters searchParameters;
     private final Evaluator evaluator;
     private final MoveGenerator moveGenerator;
     private final SearchStats searchStats;
 
-    public Search(Board board, SearchParameters searchParameters, Evaluator evaluator,
+    public Search(Board board, List<Undo> undos, SearchParameters searchParameters, Evaluator evaluator,
                   MoveGenerator moveGenerator) {
         this.board = board;
+        this.undos = new ArrayList<>(undos);
         this.searchParameters = searchParameters;
         this.evaluator = evaluator;
         this.moveGenerator = moveGenerator;
@@ -106,21 +110,26 @@ public class Search {
             return evaluator.evaluateBoard(board);
         }
 
+        // Draw check
+        /*if (Draw.isDraw(board, undos)) {
+            return 0;
+        }*/
+
         List<Move> moves = moveGenerator.generatePseudoLegalMoves(board);
 
         int numMovesSearched = 0;
         for (Move move : moves) {
-            Undo undo = board.applyMove(move);
+            undos.add(board.applyMove(move));
             // check if move was legal
             if (BoardUtils.isOpponentInCheck(board)) {
-                board.undoMove(undo);
+                board.undoMove(undos.remove(undos.size()-1));
                 continue;
             }
 
             // TODO: undo should be passed through for draw checks
             int val = -search(ply+1, depth-1, -beta, -alpha);
             ++numMovesSearched;
-            board.undoMove(undo);
+            board.undoMove(undos.remove(undos.size()-1));
             if (val >= beta) {
                 searchStats.failHighs++;
                 return beta;

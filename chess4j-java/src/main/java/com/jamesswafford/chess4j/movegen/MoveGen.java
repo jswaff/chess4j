@@ -7,9 +7,14 @@ import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Square;
+import com.jamesswafford.chess4j.eval.Eval;
+import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.utils.BoardUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import static java.util.stream.Collectors.toList;
 
@@ -24,6 +29,12 @@ import static com.jamesswafford.chess4j.board.squares.Rank.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public final class MoveGen implements MoveGenerator {
+
+    private static final Log LOGGER = LogFactory.getLog(MoveGen.class);
+
+    static {
+        Initializer.init();
+    }
 
     public static void genBishopMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
         Piece piece;
@@ -197,8 +208,34 @@ public final class MoveGen implements MoveGenerator {
     }
 
     public static List<Move> genPseudoLegalMoves(Board board) {
-        return genPseudoLegalMoves(board,true,true);
+        List<Move> moves = genPseudoLegalMoves(board,true,true);
+        assert (moveGensAreEqual(moves, board));
+        return moves;
     }
+
+    private static boolean moveGensAreEqual(List<Move> javaMoves, Board board) {
+        if (Initializer.useNative()) {
+            String fen = FenBuilder.createFen(board, false);
+            List<Move> nativeMoves = new ArrayList<>();
+            try {
+                int nMoves = genPseudoLegalMovesNative(fen, nativeMoves);
+                // TODO: some comparisons on the contents of the lists
+                if (nMoves != javaMoves.size()) {
+                    LOGGER.error("Move lists not equal! # java moves: " + javaMoves.size()
+                        + ", # native moves: " + nMoves);
+                    return false;
+                }
+                return true;
+            } catch (IllegalStateException e) {
+                LOGGER.error(e);
+                throw e;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    private static native int genPseudoLegalMovesNative(String fen, List<Move> moves);
 
     public static List<Move> genPseudoLegalMoves(Board board,boolean caps,boolean noncaps) {
         List<Move> moves = new ArrayList<>(100);

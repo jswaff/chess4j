@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
@@ -48,7 +49,7 @@ public class SearchTest {
         when(evaluator.evaluateBoard(board2)).thenReturn(-5);
 
         // when the search is invoked
-        Search search = new Search(board, params, evaluator, moveGenerator);
+        Search search = new Search(board, new ArrayList<>(), params, evaluator, moveGenerator);
         int score = search.search(false);
 
         // then the evaluator should have been invoked for each move
@@ -65,7 +66,7 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        Search search = new Search(board, params, evaluator, moveGenerator);
+        Search search = new Search(board, new ArrayList<>(), params, evaluator, moveGenerator);
         int score = search.search(false);
 
         assertEquals(CHECKMATE-1, score);
@@ -78,7 +79,7 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        Search search = new Search(board, params, evaluator, moveGenerator);
+        Search search = new Search(board, new ArrayList<>(), params, evaluator, moveGenerator);
         int score = search.search(false);
 
         assertEquals(CHECKMATE-1, score);
@@ -91,7 +92,7 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(4, -INFINITY, INFINITY);
 
-        Search search = new Search(board, params, evaluator, moveGenerator);
+        Search search = new Search(board, new ArrayList<>(), params, evaluator, moveGenerator);
         int score = search.search(false);
 
         assertEquals(CHECKMATE-3, score);
@@ -104,7 +105,7 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(6, -INFINITY, INFINITY);
 
-        Search search = new Search(board, params, evaluator, moveGenerator);
+        Search search = new Search(board, new ArrayList<>(), params, evaluator, moveGenerator);
         int score = search.search(false);
 
         assertEquals(CHECKMATE-5, score);
@@ -117,7 +118,7 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(1, -INFINITY, INFINITY);
 
-        Search search = new Search(board, params, evaluator, moveGenerator);
+        Search search = new Search(board, new ArrayList<>(), params, evaluator, moveGenerator);
         int score = search.search(false);
 
         assertEquals(0, score);
@@ -239,7 +240,7 @@ public class SearchTest {
         boardU.applyMove(b1a3);
 
         // start the search!
-        Search search = new Search(boardA, params, evaluator, moveGenerator);
+        Search search = new Search(boardA, new ArrayList<>(), params, evaluator, moveGenerator);
         int score = search.search(false);
         assertEquals(3, score);
 
