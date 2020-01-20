@@ -40,16 +40,17 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_v2_Search_searchNat
     }
 
     /* perform the search */
-    int32_t native_score = search(&pos, depth, alpha, beta);
+    stats_t native_stats;
+    int32_t native_score = search(&pos, depth, alpha, beta, &native_stats);
     retval = (jint) native_score;
 
     /* set the search stats */
     jclass class_SearchStats = (*env)->GetObjectClass(env, search_stats);
     jfieldID fidNodes = (*env)->GetFieldID(env, class_SearchStats, "nodes", "J");
-    (*env)->SetLongField(env, search_stats, fidNodes, 5);
+    (*env)->SetLongField(env, search_stats, fidNodes, native_stats.nodes);
 
     jfieldID fidFailHighs = (*env)->GetFieldID(env, class_SearchStats, "failHighs", "J");
-    (*env)->SetLongField(env, search_stats, fidFailHighs, 3);
+    (*env)->SetLongField(env, search_stats, fidFailHighs, native_stats.fail_highs);
 
 cleanup:
     (*env)->ReleaseStringUTFChars(env, board_fen, fen);
