@@ -1,4 +1,4 @@
-package com.jamesswafford.chess4j.search;
+package com.jamesswafford.chess4j.search.v2;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
@@ -15,9 +15,9 @@ import java.util.List;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 
-public class AlphaBetaSearch {
+public class Search {
 
-    private static final Log LOGGER = LogFactory.getLog(AlphaBetaSearch.class);
+    private static final Log LOGGER = LogFactory.getLog(Search.class);
 
     static {
         Initializer.init();
@@ -27,13 +27,19 @@ public class AlphaBetaSearch {
     private final SearchParameters searchParameters;
     private final Evaluator evaluator;
     private final MoveGenerator moveGenerator;
+    private final SearchStats searchStats;
 
-    public AlphaBetaSearch(Board board, SearchParameters searchParameters, Evaluator evaluator,
-                           MoveGenerator moveGenerator) {
+    public Search(Board board, SearchParameters searchParameters, Evaluator evaluator,
+                  MoveGenerator moveGenerator) {
         this.board = board;
         this.searchParameters = searchParameters;
         this.evaluator = evaluator;
         this.moveGenerator = moveGenerator;
+        this.searchStats = new SearchStats();
+    }
+
+    public SearchStats getSearchStats() {
+        return searchStats;
     }
 
     public int search(boolean useNative) {
@@ -86,6 +92,8 @@ public class AlphaBetaSearch {
 
     private int search(int ply, int depth, int alpha, int beta) {
 
+        searchStats.nodes++;
+
         if (depth == 0) {
             return evaluator.evaluateBoard(board);
         }
@@ -106,6 +114,7 @@ public class AlphaBetaSearch {
             ++numMovesSearched;
             board.undoMove(undo);
             if (val >= beta) {
+                searchStats.failHighs++;
                 return beta;
             }
             if (val > alpha) {

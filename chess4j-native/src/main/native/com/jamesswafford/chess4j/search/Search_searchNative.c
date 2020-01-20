@@ -8,11 +8,11 @@
 #include <string.h>
 
 /*
- * Class:     com_jamesswafford_chess4j_search_AlphaBetaSearch
+ * Class:     com_jamesswafford_chess4j_search_v2_Search
  * Method:    searchNative
  * Signature: (Ljava/lang/String;III)I
  */
-JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_searchNative
+JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_v2_Search_searchNative
   (JNIEnv *env, jobject UNUSED(search_obj), jstring board_fen, jint depth, 
     jint alpha, jint beta)
 

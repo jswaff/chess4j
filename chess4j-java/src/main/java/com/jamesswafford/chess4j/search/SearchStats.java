@@ -18,51 +18,51 @@ public class SearchStats {
     private List<Move> firstLine = new ArrayList<>();
     private long prunes=0;
 
-    public long getFailHighs() {
+    long getFailHighs() {
         return failHighs;
     }
 
-    public long getFailLows() {
+    long getFailLows() {
         return failLows;
     }
 
-    public List<Move> getFirstLine() {
+    List<Move> getFirstLine() {
         return firstLine;
     }
 
-    public long getHashExactScores() {
+    long getHashExactScores() {
         return hashExactScores;
     }
 
-    public List<Move> getLastPV() {
+    List<Move> getLastPV() {
         return lastPV;
     }
 
-    public long getNodes() {
+    long getNodes() {
         return nodes;
     }
 
-    public long getQNodes() {
+    long getQNodes() {
         return qnodes;
     }
 
-    public void incFailHighs() {
+    void incFailHighs() {
         failHighs++;
     }
 
-    public void incFailLows() {
+    void incFailLows() {
         failLows++;
     }
 
-    public void incHashExactScores() {
+    void incHashExactScores() {
         hashExactScores++;
     }
 
-    public void incNodes() {
+    void incNodes() {
         nodes++;
     }
 
-    public void incQNodes() {
+    void incQNodes() {
         qnodes++;
     }
 
@@ -71,16 +71,16 @@ public class SearchStats {
         this.firstLine.addAll(firstLine);
     }
 
-    public void setLastPV(List<Move> lastPV) {
+    void setLastPV(List<Move> lastPV) {
         this.lastPV.clear();
         this.lastPV.addAll(lastPV);
     }
 
-    public long getPrunes() {
+    long getPrunes() {
         return prunes;
     }
 
-    public void incPrunes() {
+    void incPrunes() {
         prunes++;
     }
 }

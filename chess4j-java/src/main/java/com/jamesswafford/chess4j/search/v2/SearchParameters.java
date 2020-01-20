@@ -1,4 +1,4 @@
-package com.jamesswafford.chess4j.search;
+package com.jamesswafford.chess4j.search.v2;
 
 public class SearchParameters {
 

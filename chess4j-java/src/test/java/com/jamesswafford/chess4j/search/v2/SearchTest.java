@@ -1,4 +1,4 @@
-package com.jamesswafford.chess4j.search;
+package com.jamesswafford.chess4j.search.v2;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
@@ -20,7 +20,7 @@ import static com.jamesswafford.chess4j.pieces.Pawn.*;
 import static com.jamesswafford.chess4j.pieces.Knight.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 
-public class AlphaBetaSearchTest {
+public class SearchTest {
 
     private MoveGenerator moveGenerator;
 
@@ -48,8 +48,8 @@ public class AlphaBetaSearchTest {
         when(evaluator.evaluateBoard(board2)).thenReturn(-5);
 
         // when the search is invoked
-        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator, moveGenerator);
-        int score = alphaBetaSearch.search(false);
+        Search search = new Search(board, params, evaluator, moveGenerator);
+        int score = search.search(false);
 
         // then the evaluator should have been invoked for each move
         verify(evaluator, times(20)).evaluateBoard(any(Board.class));
@@ -65,8 +65,8 @@ public class AlphaBetaSearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator, moveGenerator);
-        int score = alphaBetaSearch.search(false);
+        Search search = new Search(board, params, evaluator, moveGenerator);
+        int score = search.search(false);
 
         assertEquals(CHECKMATE-1, score);
     }
@@ -78,8 +78,8 @@ public class AlphaBetaSearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator, moveGenerator);
-        int score = alphaBetaSearch.search(false);
+        Search search = new Search(board, params, evaluator, moveGenerator);
+        int score = search.search(false);
 
         assertEquals(CHECKMATE-1, score);
     }
@@ -91,8 +91,8 @@ public class AlphaBetaSearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(4, -INFINITY, INFINITY);
 
-        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator, moveGenerator);
-        int score = alphaBetaSearch.search(false);
+        Search search = new Search(board, params, evaluator, moveGenerator);
+        int score = search.search(false);
 
         assertEquals(CHECKMATE-3, score);
     }
@@ -104,8 +104,8 @@ public class AlphaBetaSearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(6, -INFINITY, INFINITY);
 
-        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator, moveGenerator);
-        int score = alphaBetaSearch.search(false);
+        Search search = new Search(board, params, evaluator, moveGenerator);
+        int score = search.search(false);
 
         assertEquals(CHECKMATE-5, score);
     }
@@ -117,8 +117,8 @@ public class AlphaBetaSearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(1, -INFINITY, INFINITY);
 
-        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator, moveGenerator);
-        int score = alphaBetaSearch.search(false);
+        Search search = new Search(board, params, evaluator, moveGenerator);
+        int score = search.search(false);
 
         assertEquals(0, score);
     }
@@ -239,8 +239,8 @@ public class AlphaBetaSearchTest {
         boardU.applyMove(b1a3);
 
         // start the search!
-        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(boardA, params, evaluator, moveGenerator);
-        int score = alphaBetaSearch.search(false);
+        Search search = new Search(boardA, params, evaluator, moveGenerator);
+        int score = search.search(false);
         assertEquals(3, score);
 
         // ensure the proper nodes were evaluated
@@ -249,6 +249,8 @@ public class AlphaBetaSearchTest {
         // all board A since we don't copy the board when evaluating.
         assertEquals(boardA, boardCaptor.getAllValues().get(0));
 
-        // TODO: verify 14 nodes visited and 3 fail highs
+        // verify 14 nodes visited and 3 fail highs
+        assertEquals(14L, search.getSearchStats().nodes);
+        assertEquals(3L, search.getSearchStats().failHighs);
     }
 }
