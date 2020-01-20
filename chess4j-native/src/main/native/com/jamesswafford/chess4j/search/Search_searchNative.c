@@ -1,3 +1,4 @@
+#include <prophet/const.h>
 #include <prophet/search.h>
 #include <prophet/parameters.h>
 
@@ -6,6 +7,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+
+extern move_t gmoves[MAX_PLY * MAX_MOVES_PER_PLY];
 
 /*
  * Class:     com_jamesswafford_chess4j_search_v2_Search
@@ -41,7 +44,7 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_v2_Search_searchNat
 
     /* perform the search */
     stats_t native_stats;
-    int32_t native_score = search(&pos, depth, alpha, beta, &native_stats);
+    int32_t native_score = search(&pos, depth, alpha, beta, gmoves, &native_stats);
     retval = (jint) native_score;
 
     /* set the search stats */

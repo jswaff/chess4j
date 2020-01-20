@@ -50,7 +50,7 @@ public final class Eval implements Evaluator {
         int retVal = board.getPlayerToMove() == Color.WHITE ? score : -score;
 
         // if we are running with assertions enabled and the native library is loaded, verify equality
-        assert(evalsAreEqual(retVal, board, materialOnly));
+        //assert(evalsAreEqual(retVal, board, materialOnly));
 
         return retVal;
     }
