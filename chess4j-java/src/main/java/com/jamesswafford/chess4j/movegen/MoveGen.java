@@ -23,7 +23,7 @@ import static com.jamesswafford.chess4j.board.squares.File.*;
 import static com.jamesswafford.chess4j.board.squares.Rank.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 
-public final class MoveGen {
+public final class MoveGen implements MoveGenerator {
 
     public static void genBishopMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
         Piece piece;
@@ -253,8 +253,6 @@ public final class MoveGen {
         }
     }
 
-    private MoveGen() {}
-
     private static void addMoves(Board board, Piece piece, Square fromSq, long moveMap, List<Move> moves) {
         while (moveMap != 0) {
             int toVal = Bitboard.lsb(moveMap);
@@ -321,4 +319,13 @@ public final class MoveGen {
         return legal;
     }
 
+    @Override
+    public List<Move> generateLegalMoves(Board board) {
+        return genLegalMoves(board);
+    }
+
+    @Override
+    public List<Move> generatePseudoLegalMoves(Board board) {
+        return genPseudoLegalMoves(board);
+    }
 }

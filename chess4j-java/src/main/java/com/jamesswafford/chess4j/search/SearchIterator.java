@@ -224,11 +224,14 @@ public final class SearchIterator {
             score=Search.search(pv,alphaBound, betaBound, board, undos, depth,stats,true);
 
             /// TODO: this is temporary code while building up the new search
-            /*if (testSuiteMode && depth <= 6) {
+            /*if (testSuiteMode && depth <= 5) {
                 SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
                 AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, parameters, new Eval());
                 int abScore = alphaBetaSearch.search(true);
                 LOGGER.debug("# A/B Score: " + abScore);
+            }
+            if (depth == 5) {
+                Search.abortSearch = true;
             }*/
             /// END TEMPORARY CODE
 

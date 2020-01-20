@@ -3,7 +3,13 @@ package com.jamesswafford.chess4j.search;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.eval.Evaluator;
+import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGenerator;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+
+import java.util.Arrays;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 import static org.junit.Assert.*;
@@ -15,6 +21,13 @@ import static com.jamesswafford.chess4j.pieces.Knight.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public class AlphaBetaSearchTest {
+
+    private MoveGenerator moveGenerator;
+
+    @Before
+    public void setUp() {
+        moveGenerator = new MoveGen();
+    }
 
     @Test
     public void testSearch_initialPos_depth1() {
@@ -35,7 +48,7 @@ public class AlphaBetaSearchTest {
         when(evaluator.evaluateBoard(board2)).thenReturn(-5);
 
         // when the search is invoked
-        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
+        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator, moveGenerator);
         int score = alphaBetaSearch.search(false);
 
         // then the evaluator should have been invoked for each move
@@ -52,7 +65,7 @@ public class AlphaBetaSearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
+        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator, moveGenerator);
         int score = alphaBetaSearch.search(false);
 
         assertEquals(CHECKMATE-1, score);
@@ -65,7 +78,7 @@ public class AlphaBetaSearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
+        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator, moveGenerator);
         int score = alphaBetaSearch.search(false);
 
         assertEquals(CHECKMATE-1, score);
@@ -78,7 +91,7 @@ public class AlphaBetaSearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(4, -INFINITY, INFINITY);
 
-        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
+        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator, moveGenerator);
         int score = alphaBetaSearch.search(false);
 
         assertEquals(CHECKMATE-3, score);
@@ -91,7 +104,7 @@ public class AlphaBetaSearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(6, -INFINITY, INFINITY);
 
-        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
+        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator, moveGenerator);
         int score = alphaBetaSearch.search(false);
 
         assertEquals(CHECKMATE-5, score);
@@ -104,10 +117,138 @@ public class AlphaBetaSearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(1, -INFINITY, INFINITY);
 
-        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator);
+        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(board, params, evaluator, moveGenerator);
         int score = alphaBetaSearch.search(false);
 
         assertEquals(0, score);
     }
 
+    /**
+     * Test that the search is making the correct cutoffs using the alpha/beta algorithm.  This example
+     * follows the example on page 6 of my Master's project paper.
+     */
+    @Test
+    public void testAlphaBetaCutoffs() {
+
+        Board boardA = new Board();
+
+        Evaluator evaluator = mock(Evaluator.class);
+        MoveGenerator moveGenerator = mock(MoveGenerator.class);
+        SearchParameters params = new SearchParameters(3, -INFINITY, INFINITY);
+        ArgumentCaptor<Board> boardCaptor = ArgumentCaptor.forClass(Board.class);
+
+        // from position A we need three moves.  It doesn't matter what the moves
+        // are as long as they are legal.
+        Move e2e3 = new Move(WHITE_PAWN, E2, E3);
+        Move e2e4 = new Move(WHITE_PAWN, E2, E4);
+        Move d2d4 = new Move(WHITE_PAWN, D2, D4);
+
+        when(moveGenerator.generatePseudoLegalMoves(boardA)).thenReturn(Arrays.asList(e2e3, e2e4, d2d4));
+        Board boardB = boardA.deepCopy();
+        boardB.applyMove(e2e3);
+        Board boardI = boardA.deepCopy();
+        boardI.applyMove(e2e4);
+        Board boardO = boardA.deepCopy();
+        boardO.applyMove(d2d4);
+
+        // from position B (1. e3) we need two moves.
+        Move d7d5 = new Move(BLACK_PAWN, D7, D5);
+        Move d7d6 = new Move(BLACK_PAWN, D7, D6);
+        when(moveGenerator.generatePseudoLegalMoves(boardB)).thenReturn(Arrays.asList(d7d5, d7d6));
+        Board boardC = boardB.deepCopy();
+        boardC.applyMove(d7d5);
+        Board boardF = boardB.deepCopy();
+        boardF.applyMove(d7d6);
+
+        // from position C (1. e3 d5) we need two moves.
+        Move b2b3 = new Move(WHITE_PAWN, B2, B3);
+        Move b2b4 = new Move(WHITE_PAWN, B2, B4);
+        when(moveGenerator.generatePseudoLegalMoves(boardC)).thenReturn(Arrays.asList(b2b3, b2b4));
+        Board boardD = boardC.deepCopy();
+        boardD.applyMove(b2b3);
+        Board boardE = boardC.deepCopy();
+        boardE.applyMove(b2b4);
+
+        // position D (1. e3 d5 2. b3) is a leaf node
+        when(evaluator.evaluateBoard(boardD)).thenReturn(-1);
+
+        // position E (1. e3 d5 2. b4) is a leaf node
+        when(evaluator.evaluateBoard(boardE)).thenReturn(-3);
+
+        // from position F (1. e3 d6) we need two moves.  One will end up being cutoff.
+        Move c2c3 = new Move(WHITE_PAWN, C2, C3);
+        Move c2c4 = new Move(WHITE_PAWN, C2, C4);
+        when(moveGenerator.generatePseudoLegalMoves(boardF)).thenReturn(Arrays.asList(c2c3, c2c4));
+        Board boardG = boardF.deepCopy();
+        boardG.applyMove(c2c3);
+        Board boardH = boardF.deepCopy();
+        boardH.applyMove(c2c4);
+
+        // position  G (1. e3 d6 2. c3) is a leaf node
+        when(evaluator.evaluateBoard(boardG)).thenReturn(-5);
+
+        // from position I  (1. e4) we need two moves.
+        Move c7c5 = new Move(BLACK_PAWN, C7, C5);
+        Move c7c6 = new Move(BLACK_PAWN, C7, C6);
+        when(moveGenerator.generatePseudoLegalMoves(boardI)).thenReturn(Arrays.asList(c7c5, c7c6));
+        Board boardJ = boardI.deepCopy();
+        boardJ.applyMove(c7c5);
+        Board boardL = boardI.deepCopy();
+        boardL.applyMove(c7c6);
+
+        // from position J (1. e4 c5) we need one move.
+        Move a2a3 = new Move(WHITE_PAWN, A2, A3);
+        when(moveGenerator.generatePseudoLegalMoves(boardJ)).thenReturn(Arrays.asList(a2a3));
+        Board boardK = boardJ.deepCopy();
+        boardK.applyMove(a2a3);
+
+        // position K (1. e4 c5 2. a3) is a leaf node.
+        when(evaluator.evaluateBoard(boardK)).thenReturn(9);
+
+        // from position O (1. d4)  we need two moves.
+        Move g7g5 = new Move(BLACK_PAWN, G7, G5);
+        Move g7g6 = new Move(BLACK_PAWN, G7, G6);
+        when(moveGenerator.generatePseudoLegalMoves(boardO)).thenReturn(Arrays.asList(g7g5, g7g6));
+        Board boardP = boardO.deepCopy();
+        boardP.applyMove(g7g5);
+        Board boardS = boardO.deepCopy();
+        boardS.applyMove(g7g6);
+
+        // from position P (1. d4 g5) we need two moves
+        Move h2h4 = new Move(WHITE_PAWN, H2, H4);
+        Move h2h3 = new Move(WHITE_PAWN, H2, H3);
+        when(moveGenerator.generatePseudoLegalMoves(boardP)).thenReturn(Arrays.asList(h2h4, h2h3));
+        Board boardQ = boardP.deepCopy();
+        boardQ.applyMove(h2h4);
+        Board boardR = boardP.deepCopy();
+        boardR.applyMove(h2h3);
+
+        // position Q is a leaf node.
+        when(evaluator.evaluateBoard(boardQ)).thenReturn(0);
+
+        // position R is a leaf node
+        when(evaluator.evaluateBoard(boardR)).thenReturn(4);
+
+        // from position S (1. d4 g6) we need two moves
+        Move b1c3 = new Move(WHITE_KNIGHT, B1, C3);
+        Move b1a3 = new Move(WHITE_KNIGHT, B1, A3);
+        when(moveGenerator.generatePseudoLegalMoves(boardS)).thenReturn(Arrays.asList(b1c3, b1a3));
+        Board boardT = boardS.deepCopy();
+        boardT.applyMove(b1c3);
+        Board boardU = boardS.deepCopy();
+        boardU.applyMove(b1a3);
+
+        // start the search!
+        AlphaBetaSearch alphaBetaSearch = new AlphaBetaSearch(boardA, params, evaluator, moveGenerator);
+        int score = alphaBetaSearch.search(false);
+        assertEquals(3, score);
+
+        // ensure the proper nodes were evaluated
+        verify(evaluator, times(6)).evaluateBoard(boardCaptor.capture());
+        // it would be nice to verify the actual boards that were evaluated but they are
+        // all board A since we don't copy the board when evaluating.
+        assertEquals(boardA, boardCaptor.getAllValues().get(0));
+
+        // TODO: verify 14 nodes visited and 3 fail highs
+    }
 }

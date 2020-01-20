@@ -6,7 +6,7 @@ import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
-import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import com.jamesswafford.chess4j.utils.BoardUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,11 +26,14 @@ public class AlphaBetaSearch {
     private final Board board;
     private final SearchParameters searchParameters;
     private final Evaluator evaluator;
+    private final MoveGenerator moveGenerator;
 
-    public AlphaBetaSearch(Board board, SearchParameters searchParameters, Evaluator evaluator) {
+    public AlphaBetaSearch(Board board, SearchParameters searchParameters, Evaluator evaluator,
+                           MoveGenerator moveGenerator) {
         this.board = board;
         this.searchParameters = searchParameters;
         this.evaluator = evaluator;
+        this.moveGenerator = moveGenerator;
     }
 
     public int search(boolean useNative) {
@@ -44,7 +47,8 @@ public class AlphaBetaSearch {
     private int searchWithJavaCode() {
         long startTime = System.currentTimeMillis();
         LOGGER.debug("# performing depth " + searchParameters.getDepth() + " search with java code.");
-        int javaScore = search(0, searchParameters.getDepth(), searchParameters.getAlpha(), searchParameters.getBeta());
+        int javaScore = search(0, searchParameters.getDepth(), searchParameters.getAlpha(),
+                searchParameters.getBeta());
         LOGGER.debug("# ... finished java search in " + (System.currentTimeMillis() - startTime) + " ms.");
         return javaScore;
     }
@@ -86,7 +90,7 @@ public class AlphaBetaSearch {
             return evaluator.evaluateBoard(board);
         }
 
-        List<Move> moves = MoveGen.genPseudoLegalMoves(board);
+        List<Move> moves = moveGenerator.generatePseudoLegalMoves(board);
 
         int numMovesSearched = 0;
         for (Move move : moves) {
