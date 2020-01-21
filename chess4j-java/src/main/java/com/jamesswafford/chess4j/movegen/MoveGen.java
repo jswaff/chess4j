@@ -215,7 +215,7 @@ public final class MoveGen implements MoveGenerator {
     private static boolean moveGensAreEqual(List<Move> javaMoves, Board board) {
         if (Initializer.useNative()) {
             String fen = FenBuilder.createFen(board, false);
-            List<Move> nativeMoves = new ArrayList<>();
+            List<Long> nativeMoves = new ArrayList<>();
             try {
                 int nMoves = genPseudoLegalMovesNative(fen, nativeMoves);
                 // TODO: some comparisons on the contents of the lists
@@ -234,7 +234,7 @@ public final class MoveGen implements MoveGenerator {
         }
     }
 
-    private static native int genPseudoLegalMovesNative(String fen, List<Move> moves);
+    private static native int genPseudoLegalMovesNative(String fen, List<Long> moves);
 
     public static List<Move> genPseudoLegalMoves(Board board,boolean caps,boolean noncaps) {
         List<Move> moves = new ArrayList<>(100);

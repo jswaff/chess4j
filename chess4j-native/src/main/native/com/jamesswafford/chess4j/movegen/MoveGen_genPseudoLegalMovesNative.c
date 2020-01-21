@@ -4,6 +4,7 @@
 
 #include <com_jamesswafford_chess4j_movegen_MoveGen.h>
 #include "../init/p4_init.h"
+#include "../../../../java/lang/Long.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -47,6 +48,10 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_movegen_MoveGen_genPseudoL
     int num_moves = 0;
     for (const move_t* mp=moves; mp<endp; mp++) 
     {
+        /* create Long value representing this move */
+        jobject lval = (*env)->CallStaticObjectMethod(
+            env, Long, Long_valueOf, (jlong)*mp);
+
         /* TODO - add to java list */
 
         ++num_moves;
