@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import com.jamesswafford.chess4j.Color;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.CastlingRights;
 import com.jamesswafford.chess4j.board.Move;

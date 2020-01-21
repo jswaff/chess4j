@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.jamesswafford.chess4j.Color;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.eval.EvalMaterial;
 import com.jamesswafford.chess4j.movegen.AttackDetector;
 import com.jamesswafford.chess4j.board.Bitboard;

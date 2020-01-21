@@ -2,7 +2,7 @@ package com.jamesswafford.chess4j.pieces;
 
 import org.junit.Test;
 
-import static com.jamesswafford.chess4j.Color.*;
+import static com.jamesswafford.chess4j.board.Color.*;
 import static com.jamesswafford.chess4j.pieces.Queen.*;
 
 import static org.junit.Assert.*;

@@ -3,11 +3,10 @@ package com.jamesswafford.chess4j.movegen;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jamesswafford.chess4j.Color;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.pieces.Pawn;

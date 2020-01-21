@@ -8,7 +8,6 @@ import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.utils.BoardUtils;
 import org.junit.Test;
 
-import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;

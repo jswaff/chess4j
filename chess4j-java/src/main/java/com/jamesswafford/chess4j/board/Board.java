@@ -2,7 +2,6 @@ package com.jamesswafford.chess4j.board;
 
 import java.util.*;
 
-import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.exceptions.ParseException;
