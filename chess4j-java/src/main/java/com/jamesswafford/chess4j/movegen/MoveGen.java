@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.movegen;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.*;
@@ -218,12 +219,36 @@ public final class MoveGen implements MoveGenerator {
             List<Long> nativeMoves = new ArrayList<>();
             try {
                 int nMoves = genPseudoLegalMovesNative(fen, nativeMoves);
-                // TODO: some comparisons on the contents of the lists
+                assert (nMoves == nativeMoves.size());
                 if (nMoves != javaMoves.size()) {
                     LOGGER.error("Move lists not equal! # java moves: " + javaMoves.size()
                         + ", # native moves: " + nMoves);
                     return false;
                 }
+                // for every java move, ensure there is exactly one corresponding native move
+                for (Move javaMove : javaMoves) {
+                    if (nativeMoves.stream()
+                            .filter(nativeMove -> moveIsMatch(javaMove, nativeMove))
+                            .count() != 1L)
+                    {
+                        LOGGER.error("No native move found for java move: " + javaMove
+                            + ", fen: " + fen);
+                        return false;
+                    }
+                }
+
+                // sort java moves to match order of native moves
+                List<Move> sortedJavaMoves = new ArrayList<>();
+                for (Long nativeMove : nativeMoves) {
+                    Move matchingMove = javaMoves.stream()
+                            .filter(javaMove -> moveIsMatch(javaMove, nativeMove))
+                            .findFirst().get();
+                    sortedJavaMoves.add(matchingMove);
+                }
+                assert (sortedJavaMoves.size() == javaMoves.size());
+                javaMoves.clear();
+                javaMoves.addAll(sortedJavaMoves);
+
                 return true;
             } catch (IllegalStateException e) {
                 LOGGER.error(e);
@@ -232,6 +257,20 @@ public final class MoveGen implements MoveGenerator {
         } else {
             return true;
         }
+    }
+
+    private static boolean moveIsMatch(Move javaMove, Long nativeMove) {
+        int fromSq = (int)(nativeMove & 63);
+        int toSq = (int)((nativeMove >> 6) & 63);
+        int promo = (int)((nativeMove >> 15) & 7);
+
+        return javaMove.from().value() == fromSq &&
+                javaMove.to().value() == toSq &&
+                ((javaMove.promotion() == null && promo == 0)
+                        || ((javaMove.promotion() == WHITE_KNIGHT || javaMove.promotion() == BLACK_KNIGHT) && promo == 2)
+                        || ((javaMove.promotion() == WHITE_BISHOP || javaMove.promotion() == BLACK_BISHOP) && promo == 3)
+                        || ((javaMove.promotion() == WHITE_ROOK || javaMove.promotion() == BLACK_ROOK) && promo == 4)
+                        || ((javaMove.promotion() == WHITE_QUEEN || javaMove.promotion() == BLACK_QUEEN) && promo == 5));
     }
 
     private static native int genPseudoLegalMovesNative(String fen, List<Long> moves);

@@ -4,6 +4,7 @@
 
 #include <com_jamesswafford_chess4j_movegen_MoveGen.h>
 #include "../init/p4_init.h"
+#include "../../../../java/util/ArrayList.h"
 #include "../../../../java/lang/Long.h"
 
 #include <stdlib.h>
@@ -15,7 +16,7 @@
  * Signature: (Ljava/lang/String;Ljava/util/List;)I
  */
 JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_movegen_MoveGen_genPseudoLegalMovesNative
-  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jobject UNUSED(jmoves))
+  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jobject jmoves)
 {
     jint retval = 0;
 
@@ -52,7 +53,9 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_movegen_MoveGen_genPseudoL
         jobject lval = (*env)->CallStaticObjectMethod(
             env, Long, Long_valueOf, (jlong)*mp);
 
-        /* TODO - add to java list */
+        /* add to java list */
+        (*env)->CallBooleanMethod(env, jmoves, ArrayList_add, lval);
+        (*env)->DeleteLocalRef(env, lval);
 
         ++num_moves;
     }

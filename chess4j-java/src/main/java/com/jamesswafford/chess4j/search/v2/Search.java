@@ -88,8 +88,7 @@ public class Search {
 
             searchStats.initialize();
             int javaScore = searchWithJavaCode();
-            // TODO: stats equality check disabled until move ordering aligned.
-            if (javaScore != nativeScore /*|| !searchStats.equals(nativeStats)*/) {
+            if (javaScore != nativeScore || !searchStats.equals(nativeStats)) {
                 LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
                         + ", params: " + searchParameters + ", fen: " + fen);
