@@ -2,7 +2,7 @@ package com.jamesswafford.chess4j.search.v2;
 
 public class SearchStats {
 
-    long nodes, failHighs, failLows;
+    public long nodes, failHighs, failLows;
 
     public SearchStats() {
         initialize();

@@ -55,7 +55,7 @@ public class InputParser {
             db();
         } else if ("draw".equals(cmd)) {
         } else if ("easy".equals(cmd)) {
-            SearchIterator.ponderEnabled = false;
+//            SearchIterator.ponderEnabled = false;
         } else if ("eval".equals(cmd)) {
             eval();
         } else if ("force".equals(cmd)) {
@@ -63,7 +63,7 @@ public class InputParser {
         } else if ("go".equals(cmd)) {
             go();
         } else if ("hard".equals(cmd)) {
-            SearchIterator.ponderEnabled = true;
+//            SearchIterator.ponderEnabled = true;
         } else if ("hint".equals(cmd)) {
         } else if ("ics".equals(cmd)) {
         } else if ("level".equals(cmd)) {
@@ -213,9 +213,9 @@ public class InputParser {
      * The only bad consequence is that xboard's Move Now menu command will do nothing.
      */
     private void moveNow() {
-        if (!SearchIterator.isPondering()) {
+//        if (!SearchIterator.isPondering()) {
             stopSearchThread();
-        }
+//        }
     }
 
     private void newGame() {
@@ -317,9 +317,9 @@ public class InputParser {
      *
      */
     private void ping(String[] input) {
-        if (!SearchIterator.isPondering()) {
+//        if (!SearchIterator.isPondering()) {
             stopSearchThread();
-        }
+//        }
         logger.info("pong " + input[1]);
     }
 
@@ -453,32 +453,7 @@ public class InputParser {
         Globals.gameUndos.add(Globals.getBoard().applyMove(mv));
 
         if (!forceMode) {
-
-            // we might be in a ponder search
-            SearchIterator.ponderMutex.lock();
-            logger.debug("# usermove acquired lock on ponderMutex");
-
-            boolean pondering = SearchIterator.isPondering();
-            boolean predicted = mv.equals(SearchIterator.getPonderMove());
-            logger.debug("# pondering?: " + SearchIterator.isPondering() + ", predicted?: " + predicted);
-
-            boolean startNewSearch;
-            if (pondering && predicted) {
-                SearchIterator.calculateSearchTimes();
-                SearchIterator.setPonderMode(false);
-                startNewSearch = false;
-            } else {
-                SearchIterator.setAbortIterator(true);
-                startNewSearch = true;
-            }
-
-            SearchIterator.ponderMutex.unlock();
-            logger.debug("# usermove released lock on ponderMutex");
-
-            if (startNewSearch) {
-                stopSearchThread();
-                thinkAndMakeMove();
-            }
+            thinkAndMakeMove();
         }
     }
 
@@ -497,7 +472,7 @@ public class InputParser {
             return;
         }
         try {
-            SearchIterator.setAbortIterator(true);
+//            SearchIterator.setAbortIterator(true);
             searchThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();

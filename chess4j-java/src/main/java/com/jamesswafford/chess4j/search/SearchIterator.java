@@ -4,13 +4,13 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.eval.Eval;
-import com.jamesswafford.chess4j.eval.Evaluator;
+import com.jamesswafford.chess4j.search.v2.Search;
 import com.jamesswafford.chess4j.search.v2.SearchParameters;
+import com.jamesswafford.chess4j.search.v2.SearchStats;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -25,10 +25,8 @@ import com.jamesswafford.chess4j.io.PrintLine;
 import com.jamesswafford.chess4j.utils.GameStatus;
 import com.jamesswafford.chess4j.utils.GameStatusChecker;
 import com.jamesswafford.chess4j.utils.MoveUtils;
-import com.jamesswafford.chess4j.utils.TimeUtils;
 
 import static com.jamesswafford.chess4j.Constants.*;
-import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
 import static com.jamesswafford.chess4j.utils.GameStatus.*;
 
 public final class SearchIterator {
@@ -42,43 +40,14 @@ public final class SearchIterator {
     public static int maxDepth;
     public static int maxTime;
     public static boolean post = true;
-    public static boolean ponderEnabled;
-    public static final ReentrantLock ponderMutex = new ReentrantLock();
-
-    private static boolean pondering;
-    private static Move ponderMove;
-    private static boolean abortIterator = false;
 
     private static Board searchPos;
     private static List<Undo> searchUndos;
-
-    public static boolean isPondering() {
-        return pondering;
-    }
-    public static Move getPonderMove() {
-        return ponderMove;
-    }
-
-    public static void setAbortIterator(boolean abort) {
-        abortIterator = abort;
-        Search.abortSearch = abort;
-    }
-
-    public static void setPonderMode(boolean ponderMode) {
-        pondering = ponderMode;
-        Search.analysisMode = ponderMode;
-    }
 
     private SearchIterator() {	}
 
     public static SearchIterator getInstance() {
         return INSTANCE;
-    }
-
-    public static void calculateSearchTimes() {
-        maxTime = TimeUtils.getSearchTime(remainingTimeMS, incrementMS);
-        Search.stopTime = Search.startTime + maxTime;
-        LOGGER.debug("# calculated search time: " + maxTime);
     }
 
     /**
@@ -97,9 +66,6 @@ public final class SearchIterator {
         // make a copy of the global undo stack
         searchUndos = new ArrayList<>(Globals.gameUndos);
 
-        setPonderMode(false);
-        setAbortIterator(false);
-        
         Thread thinkThread = new Thread(SearchIterator::threadHelper);
         thinkThread.start();
 
@@ -117,57 +83,6 @@ public final class SearchIterator {
         LOGGER.info("move " + pv.get(0));
         GameStatus gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard(), Globals.gameUndos);
 
-        // pondering loop.  as long as we guess correctly we'll loop back around
-        // if we don't predict correctly this thread is terminated
-        boolean ponderFailure = false;
-        while (gameStatus==INPROGRESS && ponderEnabled && pv.size() > 1 && !ponderFailure && !abortIterator) {
-
-            ponderMutex.lock();
-            LOGGER.debug("# thinkHelper acquired lock #1 on ponderMutex");
-
-            if (!abortIterator) {
-                ponderMove = pv.get(1);
-                searchPos.applyMove(pv.get(0)); // apply the move just made so we're in sync
-                searchPos.applyMove(ponderMove); // apply the predicted move
-
-                LOGGER.debug("### START PONDERING: " + ponderMove);
-
-                setPonderMode(true);
-                Search.abortSearch = false;
-
-                ponderMutex.unlock();
-                LOGGER.debug("thinkHelper released lock #1 on ponderMutex");
-
-                pv = iterate(searchPos, searchUndos, false);
-                LOGGER.debug("# ponder search terminated");
-
-                ponderMutex.lock();
-                LOGGER.debug("thinkHelper acquired lock #2 on ponderMutex");
-
-                ponderMove = null;
-
-                // if we're not in ponder mode, it's because the usermove was correctly predicted and the main
-                // thread transitioned the search into "normal mode."
-                if (!pondering) {
-                    assert(Globals.getBoard().equals(searchPos));
-                    Globals.gameUndos.add(Globals.getBoard().applyMove(pv.get(0)));
-                    LOGGER.info("move " + pv.get(0));
-                    gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard(), Globals.gameUndos);
-                } else {
-                    // we're still in ponder mode.  this means the search terminated on its own.
-                    // in this case just bail out.
-                    ponderFailure = true;
-                }
-
-                setPonderMode(false);
-            }
-
-            ponderMutex.unlock();
-            LOGGER.debug("thinkHelper released lock #2 on ponderMutex");
-        }
-
-        LOGGER.debug("### exiting search thread");
-
         if (gameStatus != INPROGRESS) {
             PrintGameResult.printResult(gameStatus);
         }
@@ -181,7 +96,7 @@ public final class SearchIterator {
      */
     public static List<Move> iterate(Board board, List<Undo> undos, boolean testSuiteMode) {
 
-        if (!testSuiteMode && !pondering && App.getOpeningBook() != null && board.getMoveCounter() <= 30) {
+        if (!testSuiteMode && App.getOpeningBook() != null && board.getMoveCounter() <= 30) {
             BookMove bookMove = App.getOpeningBook().getMoveWeightedRandomByFrequency(board);
             if (bookMove != null) {
                 LOGGER.debug("# book move: " + bookMove);
@@ -197,62 +112,25 @@ public final class SearchIterator {
         }
 
         TTHolder.clearAllTables();
-        List<Move> pv = new ArrayList<>();
-        Search.startTime = System.currentTimeMillis();
-        if (testSuiteMode) {
-            Search.stopTime = Search.startTime + maxTime;
-        } else {
-            calculateSearchTimes();
-        }
-
-        SearchStats stats = new SearchStats();
-
-        int depth = 0;
+        long startTime = System.currentTimeMillis();
+        int depth = 0, score = 0;
         boolean stopSearching = false;
+        Search search = new Search(board, undos, new Eval(), new MoveGen());
 
-        int score = 0;
         do {
             ++depth;
 
-            // aspiration windows
             int alphaBound = -INFINITY;
             int betaBound = INFINITY;
-            if (depth > 2) {
-                alphaBound = score - (PAWN_VAL / 3);
-                betaBound = score + (PAWN_VAL / 3);
-            }
 
-            score=Search.search(pv,alphaBound, betaBound, board, undos, depth,stats,true);
+            SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
+            score = search.search(true, parameters);
 
-            /// TODO: this is temporary code while building up the new search
-            if (testSuiteMode && depth <= 5) {
-                SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
-                com.jamesswafford.chess4j.search.v2.Search searchV2 =
-                        new com.jamesswafford.chess4j.search.v2.Search(
-                        board, undos, parameters, new Eval(), new MoveGen());
-                int abScore = searchV2.search(true);
-                LOGGER.debug("# V2 Score: " + abScore);
-            }
-            if (depth == 5) {
-                Search.abortSearch = true;
-            }
-            /// END TEMPORARY CODE
-
-            if ((score <= alphaBound || score >= betaBound) && !Search.abortSearch) {
-                LOGGER.debug("# research depth " + depth + "! alpha=" + alphaBound + ", beta=" + betaBound + ", score=" + score);
-                score=Search.search(pv,-INFINITY, INFINITY, board, undos, depth,stats,true);
-            }
-
-            assert(pv.size()>0);
-            if (Search.abortSearch) {
-                break;
-            }
+            assert(search.getLastPV().size()>0);
 
             if (post) {
-                PrintLine.printLine(pv,depth,score,Search.startTime,stats.getNodes());
+                PrintLine.printLine(search.getLastPV(), depth, score, startTime, search.getSearchStats().nodes);
             }
-
-            stats.setLastPV(pv);
 
             //LOGGER.debug("# first line: " + PrintLine.getMoveString(stats.getFirstLine()));
 
@@ -268,36 +146,36 @@ public final class SearchIterator {
             }
 
             // if we've used more than half our time, don't start a new iteration.
-            long elapsedTime = System.currentTimeMillis() - Search.startTime;
-            if (!pondering && !testSuiteMode && elapsedTime > (maxTime / 2)) {
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            if (!testSuiteMode && elapsedTime > (maxTime / 2)) {
                 LOGGER.debug("# stopping iterative search because half time expired.");
                 stopSearching = true;
             }
         } while (!stopSearching);
 
-        assert(pv.size()>0);
-        assert(MoveUtils.isLineValid(pv, board));
+        assert(search.getLastPV().size()>0);
+        assert(MoveUtils.isLineValid(search.getLastPV(), board));
 
-        printSearchSummary(depth,stats);
+        printSearchSummary(depth, startTime, search.getSearchStats());
 
-        return pv;
+        return search.getLastPV();
     }
 
-    private static void printSearchSummary(int lastDepth,SearchStats stats) {
+    private static void printSearchSummary(int lastDepth, long startTime, SearchStats stats) {
         DecimalFormat df = new DecimalFormat("0.00");
         DecimalFormat df2 = new DecimalFormat("#,###,##0");
 
-        long totalNodes = stats.getNodes() + stats.getQNodes();
-        double interiorPct = stats.getNodes() / (totalNodes/100.0);
-        double qnodePct = stats.getQNodes() / (totalNodes/100.0);
+        long totalNodes = stats.nodes; // + stats.getQNodes();
+        double interiorPct = stats.nodes / (totalNodes/100.0);
+        double qnodePct = 0.0; //stats.getQNodes() / (totalNodes/100.0);
 
         LOGGER.info("\n");
         LOGGER.info("# depth: " + lastDepth);
         LOGGER.info("# nodes: " + df2.format(totalNodes) + ", interior: "
-                + df2.format(stats.getNodes()) + " (" + df.format(interiorPct) + "%)"
-                + ", quiescense: " + df2.format(stats.getQNodes()) + " (" + df.format(qnodePct) + "%)");
+                + df2.format(stats.nodes) + " (" + df.format(interiorPct) + "%)"
+                + ", quiescense: " + df2.format(0.0) + " (" + df.format(qnodePct) + "%)");
 
-        long totalSearchTime = System.currentTimeMillis() - Search.startTime;
+        long totalSearchTime = System.currentTimeMillis() - startTime;
         LOGGER.info("# search time: " + totalSearchTime/1000.0 + " seconds"
                 + ", rate: " + df2.format(totalNodes / (totalSearchTime/1000.0)) + " nodes per second");
 
@@ -324,15 +202,14 @@ public final class SearchIterator {
                 + ", hits: " + df2.format(pawnHashHits) + " (" + df.format(pawnHashHitPct) + "%)"
                 + ", collisions: " + df2.format(pawnHashCollisions) + " (" + df.format(pawnHashCollisionPct) + "%)");
 
-        double failHighPct = stats.getFailHighs() / (hashProbes/100.0);
-        double failLowPct = stats.getFailLows() / (hashProbes/100.0);
-        double exactScorePct = stats.getHashExactScores() / (hashProbes/100.0);
-        LOGGER.info("# fail highs: " + df2.format(stats.getFailHighs()) + " (" + df.format(failHighPct) + "%)"
-                + ", fail lows: " + df2.format(stats.getFailLows()) + " (" + df.format(failLowPct) + "%)"
-                + ", exact scores: " + df2.format(stats.getHashExactScores()) + " (" + df.format(exactScorePct) + "%)");
-
-        LOGGER.info("# prunes: " + stats.getPrunes());
+//        double failHighPct = stats.getFailHighs() / (hashProbes/100.0);
+//        double failLowPct = stats.getFailLows() / (hashProbes/100.0);
+//        double exactScorePct = stats.getHashExactScores() / (hashProbes/100.0);
+//        LOGGER.info("# fail highs: " + df2.format(stats.getFailHighs()) + " (" + df.format(failHighPct) + "%)"
+//                + ", fail lows: " + df2.format(stats.getFailLows()) + " (" + df.format(failLowPct) + "%)"
+//                + ", exact scores: " + df2.format(stats.getHashExactScores()) + " (" + df.format(exactScorePct) + "%)");
+//
+//        LOGGER.info("# prunes: " + stats.getPrunes());
     }
-
 
 }

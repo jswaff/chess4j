@@ -64,13 +64,10 @@ public class TestSuiteProcessor {
         DrawBoard.drawBoard(board);
         List<Move> bms = getBestMoves(board, ops);
         LOGGER.info("best moves: ");
-        for (Move bm : bms) {
-            LOGGER.info("\t" + bm);
-        }
+        bms.forEach(bm -> LOGGER.info("\t" + bm));
         TTHolder.clearAllTables();
-        SearchIterator.setAbortIterator(false);
-        SearchIterator.setPonderMode(false);
         SearchIterator.maxTime = secondsPerProblem * 1000;
+        SearchIterator.maxDepth = 6; // FIXME
         List<Move> pv = SearchIterator.iterate(board, new ArrayList<>(), true);
 
         return bms.contains(pv.get(0));

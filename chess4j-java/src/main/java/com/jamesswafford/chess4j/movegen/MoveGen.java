@@ -2,7 +2,6 @@ package com.jamesswafford.chess4j.movegen;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.*;
@@ -204,7 +203,6 @@ public final class MoveGen implements MoveGenerator {
                 }
             }
         }
-
     }
 
     public static List<Move> genPseudoLegalMoves(Board board) {

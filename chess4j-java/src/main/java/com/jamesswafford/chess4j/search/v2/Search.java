@@ -1,7 +1,6 @@
 package com.jamesswafford.chess4j.search.v2;
 
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Draw;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.eval.Evaluator;
@@ -13,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
@@ -27,43 +27,45 @@ public class Search {
 
     private final Board board;
     private final List<Undo> undos;
-    private final SearchParameters searchParameters;
     private final Evaluator evaluator;
     private final MoveGenerator moveGenerator;
     private final SearchStats searchStats;
+    private final List<Move> lastPV;
 
-    public Search(Board board, List<Undo> undos, SearchParameters searchParameters, Evaluator evaluator,
-                  MoveGenerator moveGenerator) {
+    public Search(Board board, List<Undo> undos, Evaluator evaluator, MoveGenerator moveGenerator) {
         this.board = board;
         this.undos = new ArrayList<>(undos);
-        this.searchParameters = searchParameters;
         this.evaluator = evaluator;
         this.moveGenerator = moveGenerator;
         this.searchStats = new SearchStats();
+        this.lastPV = new ArrayList<>();
     }
 
-    SearchStats getSearchStats() {
+    public SearchStats getSearchStats() {
         return searchStats;
     }
 
-    public int search(boolean useNative) {
+    public List<Move> getLastPV() { return Collections.unmodifiableList(lastPV); }
+
+    public int search(boolean useNative, SearchParameters searchParameters) {
         if (useNative && Initializer.useNative()) {
-            return searchWithNativeCode();
+            return searchWithNativeCode(searchParameters);
         } else {
-            return searchWithJavaCode();
+            return searchWithJavaCode(searchParameters);
         }
     }
 
-    private int searchWithJavaCode() {
+    private int searchWithJavaCode(SearchParameters searchParameters) {
         long startTime = System.currentTimeMillis();
         LOGGER.debug("# performing depth " + searchParameters.getDepth() + " search with java code.");
-        int javaScore = search(0, searchParameters.getDepth(), searchParameters.getAlpha(),
-                searchParameters.getBeta());
+        lastPV.clear();
+        int javaScore = search(lastPV, 0, searchParameters.getDepth(),
+                searchParameters.getAlpha(), searchParameters.getBeta());
         LOGGER.debug("# ... finished java search in " + (System.currentTimeMillis() - startTime) + " ms.");
         return javaScore;
     }
 
-    private int searchWithNativeCode() {
+    private int searchWithNativeCode(SearchParameters searchParameters) {
         long startTime = System.currentTimeMillis();
         LOGGER.debug("# performing depth " + searchParameters.getDepth() + " search with native code.");
         String fen = FenBuilder.createFen(board, false);
@@ -71,7 +73,7 @@ public class Search {
             int nativeScore = searchNative(fen, searchParameters.getDepth(),
                     searchParameters.getAlpha(), searchParameters.getBeta(), searchStats);
             LOGGER.debug("# ... finished native search in " + (System.currentTimeMillis() - startTime) + " ms.");
-            assert (searchesAreEqual(nativeScore, fen));
+            assert (searchesAreEqual(searchParameters, nativeScore, fen));
             return nativeScore;
         } catch (IllegalStateException e) {
             LOGGER.error(e);
@@ -79,7 +81,7 @@ public class Search {
         }
     }
 
-    private boolean searchesAreEqual(int nativeScore, String fen) {
+    private boolean searchesAreEqual(SearchParameters searchParameters, int nativeScore, String fen) {
         try {
             // copy the search stats for comparison
             SearchStats nativeStats = new SearchStats();
@@ -87,7 +89,7 @@ public class Search {
             nativeStats.failHighs = searchStats.failHighs;
 
             searchStats.initialize();
-            int javaScore = searchWithJavaCode();
+            int javaScore = searchWithJavaCode(searchParameters);
             if (javaScore != nativeScore || !searchStats.equals(nativeStats)) {
                 LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
@@ -101,7 +103,7 @@ public class Search {
         }
     }
 
-    private int search(int ply, int depth, int alpha, int beta) {
+    private int search(List<Move> parentPV, int ply, int depth, int alpha, int beta) {
 
         searchStats.nodes++;
 
@@ -115,6 +117,7 @@ public class Search {
         }*/
 
         List<Move> moves = moveGenerator.generatePseudoLegalMoves(board);
+        List<Move> pv = new ArrayList<>(50);
 
         int numMovesSearched = 0;
         for (Move move : moves) {
@@ -126,7 +129,7 @@ public class Search {
             }
 
             // TODO: undo should be passed through for draw checks
-            int val = -search(ply+1, depth-1, -beta, -alpha);
+            int val = -search(pv, ply+1, depth-1, -beta, -alpha);
             ++numMovesSearched;
             board.undoMove(undos.remove(undos.size()-1));
             if (val >= beta) {
@@ -135,6 +138,7 @@ public class Search {
             }
             if (val > alpha) {
                 alpha = val;
+                setParentPV(parentPV, move, pv);
             }
         }
 
@@ -156,6 +160,12 @@ public class Search {
         }
 
         return adjScore;
+    }
+
+    private void setParentPV(List<Move> parentPV, Move head, List<Move> tail) {
+        parentPV.clear();
+        parentPV.add(head);
+        parentPV.addAll(tail);
     }
 
     private native int searchNative(String boardFen, int depth, int alpha, int beta, SearchStats searchStats);

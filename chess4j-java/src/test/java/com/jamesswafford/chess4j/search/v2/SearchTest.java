@@ -49,8 +49,8 @@ public class SearchTest {
         when(evaluator.evaluateBoard(board2)).thenReturn(-5);
 
         // when the search is invoked
-        Search search = new Search(board, new ArrayList<>(), params, evaluator, moveGenerator);
-        int score = search.search(false);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
+        int score = search.search(false, params);
 
         // then the evaluator should have been invoked for each move
         verify(evaluator, times(20)).evaluateBoard(any(Board.class));
@@ -66,8 +66,8 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>(), params, evaluator, moveGenerator);
-        int score = search.search(false);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
+        int score = search.search(false, params);
 
         assertEquals(CHECKMATE-1, score);
     }
@@ -79,8 +79,8 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>(), params, evaluator, moveGenerator);
-        int score = search.search(false);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
+        int score = search.search(false, params);
 
         assertEquals(CHECKMATE-1, score);
     }
@@ -92,8 +92,8 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(4, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>(), params, evaluator, moveGenerator);
-        int score = search.search(false);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
+        int score = search.search(false, params);
 
         assertEquals(CHECKMATE-3, score);
     }
@@ -105,8 +105,8 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(6, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>(), params, evaluator, moveGenerator);
-        int score = search.search(false);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
+        int score = search.search(false, params);
 
         assertEquals(CHECKMATE-5, score);
     }
@@ -118,8 +118,8 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(1, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>(), params, evaluator, moveGenerator);
-        int score = search.search(false);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
+        int score = search.search(false, params);
 
         assertEquals(0, score);
     }
@@ -240,8 +240,8 @@ public class SearchTest {
         boardU.applyMove(b1a3);
 
         // start the search!
-        Search search = new Search(boardA, new ArrayList<>(), params, evaluator, moveGenerator);
-        int score = search.search(false);
+        Search search = new Search(boardA, new ArrayList<>(), evaluator, moveGenerator);
+        int score = search.search(false, params);
         assertEquals(3, score);
 
         // ensure the proper nodes were evaluated
