@@ -56,23 +56,16 @@ public class Search {
     }
 
     private int searchWithJavaCode(SearchParameters searchParameters) {
-        long startTime = System.currentTimeMillis();
-        LOGGER.debug("# performing depth " + searchParameters.getDepth() + " search with java code.");
         lastPV.clear();
-        int javaScore = search(lastPV, 0, searchParameters.getDepth(),
+        return search(lastPV, 0, searchParameters.getDepth(),
                 searchParameters.getAlpha(), searchParameters.getBeta());
-        LOGGER.debug("# ... finished java search in " + (System.currentTimeMillis() - startTime) + " ms.");
-        return javaScore;
     }
 
     private int searchWithNativeCode(SearchParameters searchParameters) {
-        long startTime = System.currentTimeMillis();
-        LOGGER.debug("# performing depth " + searchParameters.getDepth() + " search with native code.");
         String fen = FenBuilder.createFen(board, false);
         try {
             int nativeScore = searchNative(fen, searchParameters.getDepth(),
                     searchParameters.getAlpha(), searchParameters.getBeta(), searchStats);
-            LOGGER.debug("# ... finished native search in " + (System.currentTimeMillis() - startTime) + " ms.");
             assert (searchesAreEqual(searchParameters, nativeScore, fen));
             return nativeScore;
         } catch (IllegalStateException e) {
