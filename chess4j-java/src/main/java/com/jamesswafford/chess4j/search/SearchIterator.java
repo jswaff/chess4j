@@ -179,28 +179,28 @@ public final class SearchIterator {
         LOGGER.info("# search time: " + totalSearchTime/1000.0 + " seconds"
                 + ", rate: " + df2.format(totalNodes / (totalSearchTime/1000.0)) + " nodes per second");
 
-        long hashHits = TTHolder.getDepthPreferredTransTable().getNumHits()
-                + TTHolder.getAlwaysReplaceTransTable().getNumHits();
-        long hashProbes = TTHolder.getDepthPreferredTransTable().getNumProbes()
-                + TTHolder.getAlwaysReplaceTransTable().getNumProbes();
-        long hashCollisions = TTHolder.getDepthPreferredTransTable().getNumCollisions()
-                + TTHolder.getAlwaysReplaceTransTable().getNumCollisions();
-        double hashHitPct = hashHits / (hashProbes/100.0);
-        double hashCollisionPct = hashCollisions / (hashProbes/100.0);
-
-        LOGGER.info("# hash probes: " + df2.format(hashProbes)
-                + ", hits: " + df2.format(hashHits) + " (" + df.format(hashHitPct) + "%)"
-                + ", collisions: " + df2.format(hashCollisions) + " (" + df.format(hashCollisionPct) + "%)");
-
-        long pawnHashHits = TTHolder.getPawnTransTable().getNumHits();
-        long pawnHashProbes = TTHolder.getPawnTransTable().getNumProbes();
-        long pawnHashCollisions = TTHolder.getPawnTransTable().getNumCollisions();
-        double pawnHashHitPct = pawnHashHits / (pawnHashProbes/100.0);
-        double pawnHashCollisionPct = pawnHashCollisions / (pawnHashProbes/100.0);
-
-        LOGGER.info("# pawn hash probes: " + df2.format(pawnHashProbes)
-                + ", hits: " + df2.format(pawnHashHits) + " (" + df.format(pawnHashHitPct) + "%)"
-                + ", collisions: " + df2.format(pawnHashCollisions) + " (" + df.format(pawnHashCollisionPct) + "%)");
+//        long hashHits = TTHolder.getDepthPreferredTransTable().getNumHits()
+//                + TTHolder.getAlwaysReplaceTransTable().getNumHits();
+//        long hashProbes = TTHolder.getDepthPreferredTransTable().getNumProbes()
+//                + TTHolder.getAlwaysReplaceTransTable().getNumProbes();
+//        long hashCollisions = TTHolder.getDepthPreferredTransTable().getNumCollisions()
+//                + TTHolder.getAlwaysReplaceTransTable().getNumCollisions();
+//        double hashHitPct = hashHits / (hashProbes/100.0);
+//        double hashCollisionPct = hashCollisions / (hashProbes/100.0);
+//
+//        LOGGER.info("# hash probes: " + df2.format(hashProbes)
+//                + ", hits: " + df2.format(hashHits) + " (" + df.format(hashHitPct) + "%)"
+//                + ", collisions: " + df2.format(hashCollisions) + " (" + df.format(hashCollisionPct) + "%)");
+//
+//        long pawnHashHits = TTHolder.getPawnTransTable().getNumHits();
+//        long pawnHashProbes = TTHolder.getPawnTransTable().getNumProbes();
+//        long pawnHashCollisions = TTHolder.getPawnTransTable().getNumCollisions();
+//        double pawnHashHitPct = pawnHashHits / (pawnHashProbes/100.0);
+//        double pawnHashCollisionPct = pawnHashCollisions / (pawnHashProbes/100.0);
+//
+//        LOGGER.info("# pawn hash probes: " + df2.format(pawnHashProbes)
+//                + ", hits: " + df2.format(pawnHashHits) + " (" + df.format(pawnHashHitPct) + "%)"
+//                + ", collisions: " + df2.format(pawnHashCollisions) + " (" + df.format(pawnHashCollisionPct) + "%)");
 
 //        double failHighPct = stats.getFailHighs() / (hashProbes/100.0);
 //        double failLowPct = stats.getFailLows() / (hashProbes/100.0);

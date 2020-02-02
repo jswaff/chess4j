@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.search.v2;
 
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.eval.Evaluator;
@@ -8,6 +9,7 @@ import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import com.jamesswafford.chess4j.utils.BoardUtils;
+import com.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -33,7 +35,7 @@ public class Search {
     private final List<Move> lastPV;
 
     public Search(Board board, List<Undo> undos, Evaluator evaluator, MoveGenerator moveGenerator) {
-        this.board = board;
+        this.board = board.deepCopy();
         this.undos = new ArrayList<>(undos);
         this.evaluator = evaluator;
         this.moveGenerator = moveGenerator;
@@ -56,17 +58,28 @@ public class Search {
     }
 
     private int searchWithJavaCode(SearchParameters searchParameters) {
-        lastPV.clear();
         return search(lastPV, 0, searchParameters.getDepth(),
                 searchParameters.getAlpha(), searchParameters.getBeta());
     }
 
     private int searchWithNativeCode(SearchParameters searchParameters) {
         String fen = FenBuilder.createFen(board, false);
+        List<Long> nativePV = new ArrayList<>();
         try {
-            int nativeScore = searchNative(fen, searchParameters.getDepth(),
+            int nativeScore = searchNative(fen, nativePV, searchParameters.getDepth(),
                     searchParameters.getAlpha(), searchParameters.getBeta(), searchStats);
-            assert (searchesAreEqual(searchParameters, nativeScore, fen));
+
+            assert (searchesAreEqual(fen, searchParameters, nativeScore, nativePV));
+
+            // translate the native PV into the object's PV
+            lastPV.clear();
+            for (int i=0; i<nativePV.size(); i++) {
+                Long nativeMv = nativePV.get(i);
+                // which side is moving?  On even moves it is the player on move.
+                Color ptm = (i % 2) == 0 ? board.getPlayerToMove() : Color.swap(board.getPlayerToMove());
+                lastPV.add(MoveUtils.convertNativeMove(nativeMv, ptm));
+            }
+
             return nativeScore;
         } catch (IllegalStateException e) {
             LOGGER.error(e);
@@ -74,7 +87,8 @@ public class Search {
         }
     }
 
-    private boolean searchesAreEqual(SearchParameters searchParameters, int nativeScore, String fen) {
+    private boolean searchesAreEqual(String fen, SearchParameters searchParameters, int nativeScore,
+                                     List<Long> nativePV) {
         try {
             // copy the search stats for comparison
             SearchStats nativeStats = new SearchStats();
@@ -89,6 +103,14 @@ public class Search {
                         + ", params: " + searchParameters + ", fen: " + fen);
                 return false;
             }
+            // compare the PVs.
+            if (!moveLinesAreEqual(nativePV, lastPV)) {
+                LOGGER.error("pvs are not equal!"
+                        + ", java stats: " + searchStats + ", native stats: " + nativeStats
+                        + ", params: " + searchParameters + ", fen: " + fen);
+                return false;
+            }
+
             return true;
         } catch (IllegalStateException e) {
             LOGGER.error(e);
@@ -96,9 +118,30 @@ public class Search {
         }
     }
 
+    private boolean moveLinesAreEqual(List<Long> nativePV, List<Move> javaPV) {
+        if (nativePV.size() != lastPV.size()) {
+            LOGGER.error("nativePV.size: " + nativePV.size() + ", javaPV.size: " + javaPV.size());
+            return false;
+        }
+
+        for (int i=0; i<nativePV.size(); i++) {
+            Long nativeMv = nativePV.get(i);
+            // which side is moving?  On even moves it is the player on move.
+            Color ptm = (i % 2) == 0 ? board.getPlayerToMove() : Color.swap(board.getPlayerToMove());
+            Move convertedMv = MoveUtils.convertNativeMove(nativeMv, ptm);
+            Move javaMv = javaPV.get(i);
+            if (! javaMv.equals(convertedMv)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private int search(List<Move> parentPV, int ply, int depth, int alpha, int beta) {
 
         searchStats.nodes++;
+        parentPV.clear();
 
         if (depth == 0) {
             return evaluator.evaluateBoard(board);
@@ -161,6 +204,7 @@ public class Search {
         parentPV.addAll(tail);
     }
 
-    private native int searchNative(String boardFen, int depth, int alpha, int beta, SearchStats searchStats);
+    private native int searchNative(String boardFen, List<Long> parentPV, int depth, int alpha, int beta,
+                                    SearchStats searchStats);
 
 }

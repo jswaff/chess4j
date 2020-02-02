@@ -11,14 +11,19 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import static com.jamesswafford.chess4j.Constants.INFINITY;
-import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.pieces.Bishop.*;
+import static com.jamesswafford.chess4j.pieces.King.*;
 import static com.jamesswafford.chess4j.pieces.Knight.*;
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.pieces.Queen.*;
+import static com.jamesswafford.chess4j.pieces.Rook.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public class SearchTest {
@@ -57,6 +62,10 @@ public class SearchTest {
 
         // and the score should be the highest returned score
         assertEquals(5, score);
+
+        // and the PV should have Nc3
+        assertEquals(1, search.getLastPV().size());
+        assertEquals(new Move(WHITE_KNIGHT, B1, C3), search.getLastPV().get(0));
     }
 
     @Test
@@ -68,8 +77,11 @@ public class SearchTest {
 
         Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
         int score = search.search(false, params);
-
         assertEquals(CHECKMATE-1, score);
+
+        List<Move> pv = search.getLastPV();
+        assertEquals(1, pv.size());
+        assertEquals(new Move(WHITE_QUEEN, D6, E7), pv.get(0));
     }
 
     @Test
@@ -81,8 +93,11 @@ public class SearchTest {
 
         Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
         int score = search.search(false, params);
-
         assertEquals(CHECKMATE-1, score);
+
+        List<Move> pv = search.getLastPV();
+        assertEquals(1, pv.size());
+        assertEquals(new Move(BLACK_QUEEN, G5, E7), pv.get(0));
     }
 
     @Test
@@ -94,8 +109,13 @@ public class SearchTest {
 
         Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
         int score = search.search(false, params);
-
         assertEquals(CHECKMATE-3, score);
+
+        List<Move> pv = search.getLastPV();
+        assertEquals(3, pv.size());
+        assertEquals(new Move(WHITE_QUEEN, D2, H6), pv.get(0));
+        assertEquals(new Move(BLACK_KING, G7, H6, WHITE_QUEEN), pv.get(1));
+        assertEquals(new Move(WHITE_BISHOP, H4, F6, BLACK_PAWN), pv.get(2));
     }
 
     @Test
@@ -107,8 +127,15 @@ public class SearchTest {
 
         Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
         int score = search.search(false, params);
-
         assertEquals(CHECKMATE-5, score);
+
+        List<Move> pv = search.getLastPV();
+        assertEquals(5, pv.size());
+        assertEquals(new Move(WHITE_ROOK, F6, A6), pv.get(0));
+        assertEquals(new Move(BLACK_PAWN, F7, F6), pv.get(1));
+        assertEquals(new Move(WHITE_BISHOP, E5, F6, BLACK_PAWN), pv.get(2));
+        assertEquals(new Move(BLACK_ROOK, G8, G7), pv.get(3));
+        assertEquals(new Move(WHITE_ROOK, A6, A8, BLACK_ROOK), pv.get(4));
     }
 
     @Test
@@ -120,8 +147,9 @@ public class SearchTest {
 
         Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
         int score = search.search(false, params);
-
         assertEquals(0, score);
+
+        assertEquals(0, search.getLastPV().size());
     }
 
     /**

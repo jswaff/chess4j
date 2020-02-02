@@ -4,6 +4,8 @@
 
 #include <com_jamesswafford_chess4j_eval_Eval.h>
 #include "../init/p4_init.h"
+#include "../../../../java/util/ArrayList.h"
+#include "../../../../java/lang/Long.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -11,14 +13,15 @@
 /* move stack */
 move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
 
+
 /*
  * Class:     com_jamesswafford_chess4j_search_v2_Search
  * Method:    searchNative
- * Signature: (Ljava/lang/String;IIILcom/jamesswafford/chess4j/search/v2/SearchStats;)I
+ * Signature: (Ljava/lang/String;Ljava/util/List;IIILcom/jamesswafford/chess4j/search/v2/SearchStats;)I
  */
 JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_v2_Search_searchNative
-  (JNIEnv *env, jobject UNUSED(search_obj), jstring board_fen, jint depth, 
-    jint alpha, jint beta, jobject search_stats)
+  (JNIEnv *env, jobject UNUSED(search_obj), jstring board_fen, jobject parent_pv, 
+    jint depth, jint alpha, jint beta, jobject search_stats)
 
 {
     jint retval = 0;
@@ -45,10 +48,24 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_v2_Search_searchNat
 
     /* perform the search */
     stats_t native_stats;
-    int32_t native_score = search(&pos, depth, alpha, beta, moves, &native_stats);
+    move_line_t pv;
+    int32_t native_score = search(&pos, &pv, depth, alpha, beta, moves, 
+        &native_stats);
     retval = (jint) native_score;
 
-    /* set the search stats */
+    /* copy the PV to the Java list */
+    for (int i=0; i < pv.n; i++)
+    {
+        /* create Long value representing this move */
+        jobject lval = (*env)->CallStaticObjectMethod(
+            env, Long, Long_valueOf, (jlong)(pv.mv[i]));
+
+        /* add to java list */
+        (*env)->CallBooleanMethod(env, parent_pv, ArrayList_add, lval);
+        (*env)->DeleteLocalRef(env, lval);
+    }
+
+    /* copy the search stats to the Java structure */
     jclass class_SearchStats = (*env)->GetObjectClass(env, search_stats);
     jfieldID fidNodes = (*env)->GetFieldID(env, class_SearchStats, "nodes", "J");
     (*env)->SetLongField(env, search_stats, fidNodes, native_stats.nodes);
