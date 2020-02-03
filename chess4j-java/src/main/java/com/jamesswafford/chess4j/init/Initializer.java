@@ -4,8 +4,8 @@ import java.io.*;
 
 public final class Initializer {
 
-    private static boolean initialized = false;
-    private static boolean useNative = false;
+    public static boolean attemptToUseNative = false;
+    private static boolean nativeCodeInitialized = false;
 
     private Initializer() { }
 
@@ -54,7 +54,7 @@ public final class Initializer {
 
     public static synchronized void init() {
 
-        if (!initialized) {
+        if (attemptToUseNative && !nativeCodeInitialized) {
             // which OS are we running on?
 
             String os = System.getProperty("os.name");
@@ -67,19 +67,19 @@ public final class Initializer {
                 System.load(libFile.getPath());
 
                 if (!p4Init()) {
+                    attemptToUseNative = false;
                     throw new IllegalStateException("Could not initialize p4!");
                 }
 
-                useNative = true;
             }
 
-            initialized = true;
+            nativeCodeInitialized = true;
         }
     }
 
     private static native boolean p4Init();
 
-    public static boolean useNative() {
-        return useNative;
+    public static boolean nativeCodeInitialized() {
+        return nativeCodeInitialized;
     }
 }

@@ -55,7 +55,7 @@ public class SearchTest {
 
         // when the search is invoked
         Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
-        int score = search.search(false, params);
+        int score = search.search(params);
 
         // then the evaluator should have been invoked for each move
         verify(evaluator, times(20)).evaluateBoard(any(Board.class));
@@ -76,7 +76,7 @@ public class SearchTest {
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
         Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
-        int score = search.search(false, params);
+        int score = search.search(params);
         assertEquals(CHECKMATE-1, score);
 
         List<Move> pv = search.getLastPV();
@@ -92,7 +92,7 @@ public class SearchTest {
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
         Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
-        int score = search.search(false, params);
+        int score = search.search(params);
         assertEquals(CHECKMATE-1, score);
 
         List<Move> pv = search.getLastPV();
@@ -108,7 +108,7 @@ public class SearchTest {
         SearchParameters params = new SearchParameters(4, -INFINITY, INFINITY);
 
         Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
-        int score = search.search(false, params);
+        int score = search.search(params);
         assertEquals(CHECKMATE-3, score);
 
         List<Move> pv = search.getLastPV();
@@ -126,7 +126,7 @@ public class SearchTest {
         SearchParameters params = new SearchParameters(6, -INFINITY, INFINITY);
 
         Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
-        int score = search.search(false, params);
+        int score = search.search(params);
         assertEquals(CHECKMATE-5, score);
 
         List<Move> pv = search.getLastPV();
@@ -146,7 +146,7 @@ public class SearchTest {
         SearchParameters params = new SearchParameters(1, -INFINITY, INFINITY);
 
         Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
-        int score = search.search(false, params);
+        int score = search.search(params);
         assertEquals(0, score);
 
         assertEquals(0, search.getLastPV().size());
@@ -269,7 +269,7 @@ public class SearchTest {
 
         // start the search!
         Search search = new Search(boardA, new ArrayList<>(), evaluator, moveGenerator);
-        int score = search.search(false, params);
+        int score = search.search(params);
         assertEquals(3, score);
 
         // ensure the proper nodes were evaluated
@@ -281,5 +281,11 @@ public class SearchTest {
         // verify 14 nodes visited and 3 fail highs
         assertEquals(14L, search.getSearchStats().nodes);
         assertEquals(3L, search.getSearchStats().failHighs);
+
+        // verify the PV follows A -> B -> C -> E
+        assertEquals(3, search.getLastPV().size());
+        assertEquals(e2e3, search.getLastPV().get(0));
+        assertEquals(d7d5, search.getLastPV().get(1));
+        assertEquals(b2b4, search.getLastPV().get(2));
     }
 }

@@ -49,8 +49,8 @@ public class Search {
 
     public List<Move> getLastPV() { return Collections.unmodifiableList(lastPV); }
 
-    public int search(boolean useNative, SearchParameters searchParameters) {
-        if (useNative && Initializer.useNative()) {
+    public int search(SearchParameters searchParameters) {
+        if (Initializer.nativeCodeInitialized()) {
             return searchWithNativeCode(searchParameters);
         } else {
             return searchWithJavaCode(searchParameters);

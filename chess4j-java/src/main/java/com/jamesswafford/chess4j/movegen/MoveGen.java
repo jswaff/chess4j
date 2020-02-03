@@ -213,7 +213,7 @@ public final class MoveGen implements MoveGenerator {
     }
 
     private static boolean moveGensAreEqual(List<Move> javaMoves, Board board) {
-        if (Initializer.useNative()) {
+        if (Initializer.nativeCodeInitialized()) {
             String fen = FenBuilder.createFen(board, false);
             List<Long> nativeMoves = new ArrayList<>();
             try {

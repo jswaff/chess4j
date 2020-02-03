@@ -67,7 +67,7 @@ public class TestSuiteProcessor {
         bms.forEach(bm -> LOGGER.info("\t" + bm));
         TTHolder.clearAllTables();
         SearchIterator.maxTime = secondsPerProblem * 1000;
-        SearchIterator.maxDepth = 4; // FIXME
+        SearchIterator.maxDepth = 6; // FIXME
         List<Move> pv = SearchIterator.iterate(board, new ArrayList<>(), true);
 
         return bms.contains(pv.get(0));

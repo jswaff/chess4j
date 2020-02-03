@@ -56,7 +56,7 @@ public final class Eval implements Evaluator {
     }
 
     private static boolean evalsAreEqual(int javaScore, Board board, boolean materialOnly) {
-        if (Initializer.useNative()) {
+        if (Initializer.nativeCodeInitialized()) {
             String fen = FenBuilder.createFen(board, false);
             try {
                 int nativeSccore = evalNative(fen, materialOnly);

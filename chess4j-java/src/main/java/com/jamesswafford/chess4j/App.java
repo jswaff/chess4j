@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
+import com.jamesswafford.chess4j.init.Initializer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -31,7 +32,9 @@ public final class App {
     private App() { }
 
     private static void processArgument(String arg) {
-        if (arg.startsWith("-suite=")) {
+        if (arg.startsWith("-native")) {
+            Initializer.attemptToUseNative = true;
+        } else if (arg.startsWith("-suite=")) {
             testSuiteFile = arg.substring(7); // "-suite=" is 7 characters
         } else if (arg.startsWith("-time=")) {
             testSuiteTime = Integer.valueOf(arg.substring(6));
@@ -77,9 +80,6 @@ public final class App {
         return true;
     }
 
-    /**
-     * @param args
-     */
     public static void main(String[] args) throws Exception {
         LOGGER.info("Welcome to chess4j!\n\n");
 

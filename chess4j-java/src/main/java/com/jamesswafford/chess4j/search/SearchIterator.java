@@ -124,7 +124,7 @@ public final class SearchIterator {
             int betaBound = INFINITY;
 
             SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
-            score = search.search(true, parameters);
+            score = search.search(parameters);
 
             assert(search.getLastPV().size()>0);
 
