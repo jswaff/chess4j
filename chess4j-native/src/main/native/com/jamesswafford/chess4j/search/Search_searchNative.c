@@ -47,8 +47,8 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_v2_Search_searchNat
     }
 
     /* perform the search */
-    stats_t native_stats;
     move_line_t pv;
+    stats_t native_stats;
     int32_t native_score = search(&pos, &pv, depth, alpha, beta, moves, 
         &native_stats);
     retval = (jint) native_score;
