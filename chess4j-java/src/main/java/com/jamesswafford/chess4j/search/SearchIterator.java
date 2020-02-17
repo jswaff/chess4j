@@ -115,7 +115,7 @@ public final class SearchIterator {
         long startTime = System.currentTimeMillis();
         int depth = 0, score = 0;
         boolean stopSearching = false;
-        Search search = new Search(board, undos, new Eval(), new MoveGen());
+        Search search = new Search(board, undos, new Eval(), new MoveGen(), new MVVLVA());
 
         do {
             ++depth;
