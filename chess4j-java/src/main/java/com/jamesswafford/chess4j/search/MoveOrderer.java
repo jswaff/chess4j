@@ -64,7 +64,7 @@ public class MoveOrderer {
         if (nextMoveOrderStage == MoveOrderStage.GENCAPS) {
             nextMoveOrderStage = MoveOrderStage.CAPTURES_PROMOS;
             List<Move> myCaptures = MoveGen.genPseudoLegalMoves(board,true,false);
-            captures =  myCaptures.toArray(new Move[myCaptures.size()]);
+            captures =  myCaptures.toArray(new Move[0]);
             captureIndex = 0;
             captureScores = new Integer[myCaptures.size()];
             for (int i=0;i<captures.length;i++) {
@@ -72,7 +72,7 @@ public class MoveOrderer {
                 if (captures[i].equals(pvMove) || hashMove.filter(hm -> hm.equals(captures[finalI])).isPresent()) {
                     captures[i] = null;
                 } else {
-                    captureScores[i] = MVVLVA.score(board, captures[i]);
+                    captureScores[i] = MVVLVA.score(captures[i]);
                 }
             }
         }
