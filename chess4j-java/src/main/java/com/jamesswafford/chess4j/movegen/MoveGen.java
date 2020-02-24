@@ -209,16 +209,15 @@ public final class MoveGen implements MoveGenerator {
 
     public static List<Move> genPseudoLegalMoves(Board board) {
         List<Move> moves = genPseudoLegalMoves(board,true,true);
-        assert (moveGensAreEqual(moves, board));
         return moves;
     }
 
-    private static boolean moveGensAreEqual(List<Move> javaMoves, Board board) {
+    private static boolean moveGensAreEqual(List<Move> javaMoves, Board board, boolean caps, boolean noncaps) {
         if (Initializer.nativeCodeInitialized()) {
             String fen = FenBuilder.createFen(board, false);
             List<Long> nativeMoves = new ArrayList<>();
             try {
-                int nMoves = genPseudoLegalMovesNative(fen, nativeMoves);
+                int nMoves = genPseudoLegalMovesNative(fen, nativeMoves, caps, noncaps);
                 assert (nMoves == nativeMoves.size());
                 if (nMoves != javaMoves.size()) {
                     LOGGER.error("Move lists not equal! # java moves: " + javaMoves.size()
@@ -259,7 +258,7 @@ public final class MoveGen implements MoveGenerator {
         }
     }
 
-    private static native int genPseudoLegalMovesNative(String fen, List<Long> moves);
+    private static native int genPseudoLegalMovesNative(String fen, List<Long> moves, boolean caps, boolean noncaps);
 
     public static List<Move> genPseudoLegalMoves(Board board, boolean caps, boolean noncaps) {
         List<Move> moves = new ArrayList<>(100);
@@ -270,6 +269,9 @@ public final class MoveGen implements MoveGenerator {
         genRookMoves(board,moves,caps,noncaps);
         genQueenMoves(board,moves,caps,noncaps);
         genKingMoves(board,moves,caps,noncaps);
+
+        assert (moveGensAreEqual(moves, board, caps, noncaps));
+
 
         return moves;
     }

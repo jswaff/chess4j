@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 public class MVVLVATest {
 
     @Test
-    public void mvvLva1() throws Exception {
+    public void bishopTakesPawnVsPawnTakesPawn() throws Exception {
         Board board = new Board("3r1rk1/p3qp1p/2bb2p1/2p5/3P4/1P6/PBQN1PPP/2R2RK1 b - -");
 
         List<Move> moves = MoveGen.genLegalMoves(board);
@@ -48,7 +48,7 @@ public class MVVLVATest {
     }
 
     @Test
-    public void mvvLva2() throws Exception {
+    public void noncapturingPromos() throws Exception {
         Board board = new Board("8/4Pk1p/6p1/1r6/8/5N2/2B2PPP/b5K1 w - -");
 
         List<Move> moves = MoveGen.genLegalMoves(board);
@@ -77,7 +77,7 @@ public class MVVLVATest {
     }
 
     @Test
-    public void mvvLva3() throws Exception {
+    public void capturingVsNoncapturingPromos() throws Exception {
         Board board = new Board("6r1/pp1b1P1p/5Q2/3p3k/5K2/8/2P3P1/8 w - -");
         List<Move> moves = MoveGen.genLegalMoves(board);
         Collections.shuffle(moves);
@@ -115,7 +115,7 @@ public class MVVLVATest {
     }
 
     @Test
-    public void mvvLva4() throws Exception {
+    public void promosCapturesEp() throws Exception {
         Board board = new Board("3b2R1/kp2P3/8/1KpP4/8/6q1/5B1P/5N2 w - c6");
 
         List<Move> moves = MoveGen.genLegalMoves(board);
@@ -177,7 +177,7 @@ public class MVVLVATest {
     }
 
     @Test
-    public void mvvLva5() throws Exception {
+    public void blackToMove() throws Exception {
         Board board = new Board("7k/8/4p3/r2P2q1/4P3/1b6/8/7K b - - ");
 
         List<Move> moves = MoveGen.genLegalMoves(board);

@@ -35,16 +35,16 @@ public final class App {
         if (arg.startsWith("-native")) {
             Initializer.attemptToUseNative = true;
         } else if (arg.startsWith("-suite=")) {
-            testSuiteFile = arg.substring(7); // "-suite=" is 7 characters
+            testSuiteFile = arg.substring(7);
         } else if (arg.startsWith("-time=")) {
-            testSuiteTime = Integer.valueOf(arg.substring(6));
+            testSuiteTime = Integer.parseInt(arg.substring(6));
         } else if (arg.startsWith("-book=")) {
             bookPath = arg.substring(6);
         } else if (arg.startsWith("-hash=")) {
-            int maxMemBytes = Integer.valueOf(arg.substring(6)) * 1024 * 1024;
+            int maxMemBytes = Integer.parseInt(arg.substring(6)) * 1024 * 1024;
             TTHolder.maxEntries = maxMemBytes / TranspositionTableEntry.sizeOf();
         } else if (arg.startsWith("-phash=")) {
-            int maxMemBytes = Integer.valueOf(arg.substring(7)) * 1024 * 1024;
+            int maxMemBytes = Integer.parseInt(arg.substring(7)) * 1024 * 1024;
             TTHolder.maxPawnEntries = maxMemBytes / PawnTranspositionTableEntry.sizeOf();
         }
     }
