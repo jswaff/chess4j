@@ -118,7 +118,8 @@ public final class MoveGen implements MoveGenerator {
                     int toSqVal = Bitboard.msb(pmap);
                     Square toSq = Square.valueOf(toSqVal);
                     Piece captured = toSq==board.getEPSquare() ? BLACK_PAWN : board.getPiece(toSq);
-                    addPawnMove(moves,WHITE_PAWN,toSq.southEast().get(),toSq,captured,toSq==board.getEPSquare());
+                    addPawnMove(moves,WHITE_PAWN,toSq.southEast().get(),toSq,captured,
+                            toSq==board.getEPSquare());
                     pmap ^= Bitboard.squares[toSqVal];
                 }
 
@@ -208,16 +209,15 @@ public final class MoveGen implements MoveGenerator {
 
     public static List<Move> genPseudoLegalMoves(Board board) {
         List<Move> moves = genPseudoLegalMoves(board,true,true);
-        assert (moveGensAreEqual(moves, board));
         return moves;
     }
 
-    private static boolean moveGensAreEqual(List<Move> javaMoves, Board board) {
+    private static boolean moveGensAreEqual(List<Move> javaMoves, Board board, boolean caps, boolean noncaps) {
         if (Initializer.nativeCodeInitialized()) {
             String fen = FenBuilder.createFen(board, false);
             List<Long> nativeMoves = new ArrayList<>();
             try {
-                int nMoves = genPseudoLegalMovesNative(fen, nativeMoves);
+                int nMoves = genPseudoLegalMovesNative(fen, nativeMoves, caps, noncaps);
                 assert (nMoves == nativeMoves.size());
                 if (nMoves != javaMoves.size()) {
                     LOGGER.error("Move lists not equal! # java moves: " + javaMoves.size()
@@ -258,9 +258,9 @@ public final class MoveGen implements MoveGenerator {
         }
     }
 
-    private static native int genPseudoLegalMovesNative(String fen, List<Long> moves);
+    private static native int genPseudoLegalMovesNative(String fen, List<Long> moves, boolean caps, boolean noncaps);
 
-    public static List<Move> genPseudoLegalMoves(Board board,boolean caps,boolean noncaps) {
+    public static List<Move> genPseudoLegalMoves(Board board, boolean caps, boolean noncaps) {
         List<Move> moves = new ArrayList<>(100);
 
         genPawnMoves(board,moves,caps,noncaps);
@@ -269,6 +269,9 @@ public final class MoveGen implements MoveGenerator {
         genRookMoves(board,moves,caps,noncaps);
         genQueenMoves(board,moves,caps,noncaps);
         genKingMoves(board,moves,caps,noncaps);
+
+        assert (moveGensAreEqual(moves, board, caps, noncaps));
+
 
         return moves;
     }
@@ -293,7 +296,7 @@ public final class MoveGen implements MoveGenerator {
         }
     }
 
-    public static void genRookMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
+    public static void genRookMoves(Board board, List<Move> moves, boolean caps, boolean noncaps) {
         Piece piece;
         long pieceMap;
 
@@ -323,7 +326,9 @@ public final class MoveGen implements MoveGenerator {
         }
     }
 
-    private static void addPawnMove(List<Move> moves,Pawn movingPawn,Square fromSq,Square toSq,Piece captured,boolean epCapture) {
+    private static void addPawnMove(List<Move> moves, Pawn movingPawn, Square fromSq, Square toSq, Piece captured,
+                                    boolean epCapture)
+    {
         if (toSq.rank()==RANK_1 || toSq.rank()==RANK_8) {
             boolean isWhite = toSq.rank()==RANK_8;
             assert((isWhite && movingPawn==WHITE_PAWN) || (!isWhite && movingPawn==BLACK_PAWN));
@@ -336,7 +341,7 @@ public final class MoveGen implements MoveGenerator {
         }
     }
 
-    private static void genCastlingMoves(Board board,List<Move> moves) {
+    private static void genCastlingMoves(Board board, List<Move> moves) {
         Color player = board.getPlayerToMove();
 
         if (player.isWhite()) {
@@ -387,5 +392,15 @@ public final class MoveGen implements MoveGenerator {
     @Override
     public List<Move> generatePseudoLegalMoves(Board board) {
         return genPseudoLegalMoves(board);
+    }
+
+    @Override
+    public List<Move> generatePseudoLegalCaptures(Board board) {
+        return genPseudoLegalMoves(board, true, false);
+    }
+
+    @Override
+    public List<Move> generatePseudoLegalNonCaptures(Board board) {
+        return genPseudoLegalMoves(board, false, true);
     }
 }

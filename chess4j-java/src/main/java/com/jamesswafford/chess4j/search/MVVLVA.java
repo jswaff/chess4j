@@ -1,10 +1,8 @@
 package com.jamesswafford.chess4j.search;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.pieces.Bishop;
 import com.jamesswafford.chess4j.pieces.King;
@@ -12,8 +10,9 @@ import com.jamesswafford.chess4j.pieces.Knight;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Queen;
 import com.jamesswafford.chess4j.pieces.Rook;
+import com.jamesswafford.chess4j.search.v2.MoveScorer;
 
-public class MVVLVA implements Comparator<Move> {
+public class MVVLVA implements MoveScorer {
 
     private static Map<Class<?>,Integer> pieceMap;
 
@@ -25,12 +24,6 @@ public class MVVLVA implements Comparator<Move> {
         pieceMap.put(Bishop.class, 3);
         pieceMap.put(Knight.class, 2);
         pieceMap.put(Pawn.class, 1);
-    }
-
-    private Board board;
-
-    public MVVLVA(Board board) {
-        this.board = board;
     }
 
     /**
@@ -50,7 +43,7 @@ public class MVVLVA implements Comparator<Move> {
      * @param m
      * @return
      */
-    public static int score(Board b,Move m) {
+    public static int score(Move m) {
         int score = 0;
 
         if (m.promotion() != null) {
@@ -58,7 +51,7 @@ public class MVVLVA implements Comparator<Move> {
         }
 
         if (m.captured() != null) {
-            score += scoreCapture(b,m);
+            score += scoreCapture(m);
         }
 
         return score;
@@ -70,25 +63,14 @@ public class MVVLVA implements Comparator<Move> {
         return 10000 + promoVal;
     }
 
-    private static int scoreCapture(Board b,Move m) {
+    private static int scoreCapture(Move m) {
         int capturedVal = pieceMap.get(m.captured().getClass());
-        int moverVal = pieceMap.get(b.getPiece(m.from()).getClass());
+        int moverVal = pieceMap.get(m.piece().getClass());
         return 1000 + (capturedVal * 10) - moverVal;
     }
 
     @Override
-    public int compare(Move m1, Move m2) {
-        int score1 = score(board,m1);
-        int score2 = score(board,m2);
-
-        int retVal = 0;
-        if (score1 > score2) {
-            retVal = -1;
-        } else if (score1 < score2) {
-            retVal = 1;
-        }
-
-        return retVal;
+    public int calculateStaticScore(Move mv) {
+        return score(mv);
     }
-
 }

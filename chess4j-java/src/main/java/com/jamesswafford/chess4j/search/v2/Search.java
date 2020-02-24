@@ -31,14 +31,17 @@ public class Search {
     private final List<Undo> undos;
     private final Evaluator evaluator;
     private final MoveGenerator moveGenerator;
+    private final MoveScorer moveScorer;
     private final SearchStats searchStats;
     private final List<Move> lastPV;
 
-    public Search(Board board, List<Undo> undos, Evaluator evaluator, MoveGenerator moveGenerator) {
+    public Search(Board board, List<Undo> undos, Evaluator evaluator, MoveGenerator moveGenerator,
+                  MoveScorer moveScorer) {
         this.board = board.deepCopy();
         this.undos = new ArrayList<>(undos);
         this.evaluator = evaluator;
         this.moveGenerator = moveGenerator;
+        this.moveScorer = moveScorer;
         this.searchStats = new SearchStats();
         this.lastPV = new ArrayList<>();
     }
@@ -152,11 +155,15 @@ public class Search {
             return 0;
         }*/
 
-        List<Move> moves = moveGenerator.generatePseudoLegalMoves(board);
         List<Move> pv = new ArrayList<>(50);
 
         int numMovesSearched = 0;
-        for (Move move : moves) {
+        MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer);
+        Move move;
+
+        while ((move = moveOrderer.selectNextMove()) != null) {
+            assert(BoardUtils.isPseudoLegalMove(board, move));
+
             undos.add(board.applyMove(move));
             // check if move was legal
             if (BoardUtils.isOpponentInCheck(board)) {

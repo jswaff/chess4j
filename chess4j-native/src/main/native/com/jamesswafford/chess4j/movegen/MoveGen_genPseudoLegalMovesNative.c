@@ -13,10 +13,11 @@
 /*
  * Class:     com_jamesswafford_chess4j_movegen_MoveGen
  * Method:    genPseudoLegalMovesNative
- * Signature: (Ljava/lang/String;Ljava/util/List;)I
+ * Signature: (Ljava/lang/String;Ljava/util/List;ZZ)I
  */
 JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_movegen_MoveGen_genPseudoLegalMovesNative
-  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jobject jmoves)
+  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jobject jmoves, 
+    jboolean caps, jboolean noncaps)
 {
     jint retval = 0;
 
@@ -42,7 +43,7 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_movegen_MoveGen_genPseudoL
 
     /* generate moves */
     move_t moves[MAX_MOVES_PER_PLY];
-    move_t* endp = gen_pseudo_legal_moves(moves, &pos, true, true);
+    move_t* endp = gen_pseudo_legal_moves(moves, &pos, caps, noncaps);
 
 
     /* add the moves to the java list */

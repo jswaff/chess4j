@@ -11,4 +11,8 @@ public interface MoveGenerator {
 
     List<Move> generatePseudoLegalMoves(Board board);
 
+    List<Move> generatePseudoLegalCaptures(Board board);
+
+    List<Move> generatePseudoLegalNonCaptures(Board board);
+
 }

@@ -5,6 +5,7 @@ import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
+import com.jamesswafford.chess4j.search.MVVLVA;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -29,10 +30,12 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 public class SearchTest {
 
     private MoveGenerator moveGenerator;
+    private MoveScorer moveScorer;
 
     @Before
     public void setUp() {
         moveGenerator = new MoveGen();
+        moveScorer = new MVVLVA();
     }
 
     @Test
@@ -54,7 +57,7 @@ public class SearchTest {
         when(evaluator.evaluateBoard(board2)).thenReturn(-5);
 
         // when the search is invoked
-        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer);
         int score = search.search(params);
 
         // then the evaluator should have been invoked for each move
@@ -75,7 +78,7 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer);
         int score = search.search(params);
         assertEquals(CHECKMATE-1, score);
 
@@ -91,7 +94,7 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer);
         int score = search.search(params);
         assertEquals(CHECKMATE-1, score);
 
@@ -107,7 +110,7 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(4, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer);
         int score = search.search(params);
         assertEquals(CHECKMATE-3, score);
 
@@ -125,7 +128,7 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(6, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer);
         int score = search.search(params);
         assertEquals(CHECKMATE-5, score);
 
@@ -145,7 +148,7 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(1, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer);
         int score = search.search(params);
         assertEquals(0, score);
 
@@ -172,7 +175,7 @@ public class SearchTest {
         Move e2e4 = new Move(WHITE_PAWN, E2, E4);
         Move d2d4 = new Move(WHITE_PAWN, D2, D4);
 
-        when(moveGenerator.generatePseudoLegalMoves(boardA)).thenReturn(Arrays.asList(e2e3, e2e4, d2d4));
+        when(moveGenerator.generatePseudoLegalCaptures(boardA)).thenReturn(Arrays.asList(e2e3, e2e4, d2d4));
         Board boardB = boardA.deepCopy();
         boardB.applyMove(e2e3);
         Board boardI = boardA.deepCopy();
@@ -183,7 +186,7 @@ public class SearchTest {
         // from position B (1. e3) we need two moves.
         Move d7d5 = new Move(BLACK_PAWN, D7, D5);
         Move d7d6 = new Move(BLACK_PAWN, D7, D6);
-        when(moveGenerator.generatePseudoLegalMoves(boardB)).thenReturn(Arrays.asList(d7d5, d7d6));
+        when(moveGenerator.generatePseudoLegalCaptures(boardB)).thenReturn(Arrays.asList(d7d5, d7d6));
         Board boardC = boardB.deepCopy();
         boardC.applyMove(d7d5);
         Board boardF = boardB.deepCopy();
@@ -192,7 +195,7 @@ public class SearchTest {
         // from position C (1. e3 d5) we need two moves.
         Move b2b3 = new Move(WHITE_PAWN, B2, B3);
         Move b2b4 = new Move(WHITE_PAWN, B2, B4);
-        when(moveGenerator.generatePseudoLegalMoves(boardC)).thenReturn(Arrays.asList(b2b3, b2b4));
+        when(moveGenerator.generatePseudoLegalCaptures(boardC)).thenReturn(Arrays.asList(b2b3, b2b4));
         Board boardD = boardC.deepCopy();
         boardD.applyMove(b2b3);
         Board boardE = boardC.deepCopy();
@@ -207,7 +210,7 @@ public class SearchTest {
         // from position F (1. e3 d6) we need two moves.  One will end up being cutoff.
         Move c2c3 = new Move(WHITE_PAWN, C2, C3);
         Move c2c4 = new Move(WHITE_PAWN, C2, C4);
-        when(moveGenerator.generatePseudoLegalMoves(boardF)).thenReturn(Arrays.asList(c2c3, c2c4));
+        when(moveGenerator.generatePseudoLegalCaptures(boardF)).thenReturn(Arrays.asList(c2c3, c2c4));
         Board boardG = boardF.deepCopy();
         boardG.applyMove(c2c3);
         Board boardH = boardF.deepCopy();
@@ -219,7 +222,7 @@ public class SearchTest {
         // from position I  (1. e4) we need two moves.
         Move c7c5 = new Move(BLACK_PAWN, C7, C5);
         Move c7c6 = new Move(BLACK_PAWN, C7, C6);
-        when(moveGenerator.generatePseudoLegalMoves(boardI)).thenReturn(Arrays.asList(c7c5, c7c6));
+        when(moveGenerator.generatePseudoLegalCaptures(boardI)).thenReturn(Arrays.asList(c7c5, c7c6));
         Board boardJ = boardI.deepCopy();
         boardJ.applyMove(c7c5);
         Board boardL = boardI.deepCopy();
@@ -227,7 +230,7 @@ public class SearchTest {
 
         // from position J (1. e4 c5) we need one move.
         Move a2a3 = new Move(WHITE_PAWN, A2, A3);
-        when(moveGenerator.generatePseudoLegalMoves(boardJ)).thenReturn(Arrays.asList(a2a3));
+        when(moveGenerator.generatePseudoLegalCaptures(boardJ)).thenReturn(Arrays.asList(a2a3));
         Board boardK = boardJ.deepCopy();
         boardK.applyMove(a2a3);
 
@@ -237,7 +240,7 @@ public class SearchTest {
         // from position O (1. d4)  we need two moves.
         Move g7g5 = new Move(BLACK_PAWN, G7, G5);
         Move g7g6 = new Move(BLACK_PAWN, G7, G6);
-        when(moveGenerator.generatePseudoLegalMoves(boardO)).thenReturn(Arrays.asList(g7g5, g7g6));
+        when(moveGenerator.generatePseudoLegalCaptures(boardO)).thenReturn(Arrays.asList(g7g5, g7g6));
         Board boardP = boardO.deepCopy();
         boardP.applyMove(g7g5);
         Board boardS = boardO.deepCopy();
@@ -246,7 +249,7 @@ public class SearchTest {
         // from position P (1. d4 g5) we need two moves
         Move h2h4 = new Move(WHITE_PAWN, H2, H4);
         Move h2h3 = new Move(WHITE_PAWN, H2, H3);
-        when(moveGenerator.generatePseudoLegalMoves(boardP)).thenReturn(Arrays.asList(h2h4, h2h3));
+        when(moveGenerator.generatePseudoLegalCaptures(boardP)).thenReturn(Arrays.asList(h2h4, h2h3));
         Board boardQ = boardP.deepCopy();
         boardQ.applyMove(h2h4);
         Board boardR = boardP.deepCopy();
@@ -261,14 +264,14 @@ public class SearchTest {
         // from position S (1. d4 g6) we need two moves
         Move b1c3 = new Move(WHITE_KNIGHT, B1, C3);
         Move b1a3 = new Move(WHITE_KNIGHT, B1, A3);
-        when(moveGenerator.generatePseudoLegalMoves(boardS)).thenReturn(Arrays.asList(b1c3, b1a3));
+        when(moveGenerator.generatePseudoLegalCaptures(boardS)).thenReturn(Arrays.asList(b1c3, b1a3));
         Board boardT = boardS.deepCopy();
         boardT.applyMove(b1c3);
         Board boardU = boardS.deepCopy();
         boardU.applyMove(b1a3);
 
         // start the search!
-        Search search = new Search(boardA, new ArrayList<>(), evaluator, moveGenerator);
+        Search search = new Search(boardA, new ArrayList<>(), evaluator, moveGenerator, moveScorer);
         int score = search.search(params);
         assertEquals(3, score);
 
