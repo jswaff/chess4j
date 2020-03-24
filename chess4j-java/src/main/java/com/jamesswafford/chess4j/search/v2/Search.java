@@ -8,6 +8,8 @@ import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
+import com.jamesswafford.chess4j.search.KillerMoves;
+import com.jamesswafford.chess4j.search.KillerMovesStore;
 import com.jamesswafford.chess4j.utils.BoardUtils;
 import com.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.commons.logging.Log;
@@ -32,16 +34,18 @@ public class Search {
     private final Evaluator evaluator;
     private final MoveGenerator moveGenerator;
     private final MoveScorer moveScorer;
+    private final KillerMovesStore killerMovesStore;
     private final SearchStats searchStats;
     private final List<Move> lastPV;
 
     public Search(Board board, List<Undo> undos, Evaluator evaluator, MoveGenerator moveGenerator,
-                  MoveScorer moveScorer) {
+                  MoveScorer moveScorer, KillerMovesStore killerMovesStore) {
         this.board = board.deepCopy();
         this.undos = new ArrayList<>(undos);
         this.evaluator = evaluator;
         this.moveGenerator = moveGenerator;
         this.moveScorer = moveScorer;
+        this.killerMovesStore = killerMovesStore;
         this.searchStats = new SearchStats();
         this.lastPV = new ArrayList<>();
     }
@@ -61,6 +65,7 @@ public class Search {
     }
 
     private int searchWithJavaCode(SearchParameters searchParameters) {
+        killerMovesStore.clear();
         return search(lastPV, 0, searchParameters.getDepth(),
                 searchParameters.getAlpha(), searchParameters.getBeta());
     }
@@ -158,7 +163,8 @@ public class Search {
         List<Move> pv = new ArrayList<>(50);
 
         int numMovesSearched = 0;
-        MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer);
+        MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer,
+                killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply));
         Move move;
 
         while ((move = moveOrderer.selectNextMove()) != null) {
@@ -177,6 +183,9 @@ public class Search {
             board.undoMove(undos.remove(undos.size()-1));
             if (val >= beta) {
                 searchStats.failHighs++;
+                if (move.captured()==null && move.promotion()==null) {
+                    killerMovesStore.addKiller(ply, move);
+                }
                 return beta;
             }
             if (val > alpha) {

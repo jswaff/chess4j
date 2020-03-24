@@ -5,6 +5,8 @@ import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
+import com.jamesswafford.chess4j.search.KillerMoves;
+import com.jamesswafford.chess4j.search.KillerMovesStore;
 import com.jamesswafford.chess4j.search.MVVLVA;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +14,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
@@ -31,11 +34,13 @@ public class SearchTest {
 
     private MoveGenerator moveGenerator;
     private MoveScorer moveScorer;
+    private KillerMovesStore killerMovesStore;
 
     @Before
     public void setUp() {
         moveGenerator = new MoveGen();
         moveScorer = new MVVLVA();
+        killerMovesStore = KillerMoves.getInstance();
     }
 
     @Test
@@ -57,7 +62,7 @@ public class SearchTest {
         when(evaluator.evaluateBoard(board2)).thenReturn(-5);
 
         // when the search is invoked
-        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer, killerMovesStore);
         int score = search.search(params);
 
         // then the evaluator should have been invoked for each move
@@ -78,7 +83,7 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer, killerMovesStore);
         int score = search.search(params);
         assertEquals(CHECKMATE-1, score);
 
@@ -94,7 +99,7 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer, killerMovesStore);
         int score = search.search(params);
         assertEquals(CHECKMATE-1, score);
 
@@ -110,7 +115,7 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(4, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer, killerMovesStore);
         int score = search.search(params);
         assertEquals(CHECKMATE-3, score);
 
@@ -128,7 +133,7 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(6, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer, killerMovesStore);
         int score = search.search(params);
         assertEquals(CHECKMATE-5, score);
 
@@ -148,7 +153,7 @@ public class SearchTest {
         Evaluator evaluator = mock(Evaluator.class);
         SearchParameters params = new SearchParameters(1, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer);
+        Search search = new Search(board, new ArrayList<>(), evaluator, moveGenerator, moveScorer, killerMovesStore);
         int score = search.search(params);
         assertEquals(0, score);
 
@@ -166,6 +171,7 @@ public class SearchTest {
 
         Evaluator evaluator = mock(Evaluator.class);
         MoveGenerator moveGenerator = mock(MoveGenerator.class);
+        KillerMovesStore killerMovesStore = mock(KillerMovesStore.class);
         SearchParameters params = new SearchParameters(3, -INFINITY, INFINITY);
         ArgumentCaptor<Board> boardCaptor = ArgumentCaptor.forClass(Board.class);
 
@@ -230,7 +236,7 @@ public class SearchTest {
 
         // from position J (1. e4 c5) we need one move.
         Move a2a3 = new Move(WHITE_PAWN, A2, A3);
-        when(moveGenerator.generatePseudoLegalCaptures(boardJ)).thenReturn(Arrays.asList(a2a3));
+        when(moveGenerator.generatePseudoLegalCaptures(boardJ)).thenReturn(Collections.singletonList(a2a3));
         Board boardK = boardJ.deepCopy();
         boardK.applyMove(a2a3);
 
@@ -271,7 +277,7 @@ public class SearchTest {
         boardU.applyMove(b1a3);
 
         // start the search!
-        Search search = new Search(boardA, new ArrayList<>(), evaluator, moveGenerator, moveScorer);
+        Search search = new Search(boardA, new ArrayList<>(), evaluator, moveGenerator, moveScorer, killerMovesStore);
         int score = search.search(params);
         assertEquals(3, score);
 

@@ -43,7 +43,7 @@ public class MoveOrdererTest {
         when(moveGenerator.generatePseudoLegalCaptures(board))
                 .thenReturn(MoveGen.genPseudoLegalMoves(board, true, false));
 
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer);
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null);
         mo.selectNextMove();
 
         assertEquals(CAPTURES_PROMOS, mo.getNextMoveOrderStage());
@@ -60,7 +60,7 @@ public class MoveOrdererTest {
         assertEquals(20, moves.size());
 
         // without a PV or hash the order shouldn't change, since there are no captures
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer);
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null);
         List<Move> moves2 = new ArrayList<>();
         for (int i=0;i<20;i++) {
             moves2.add(mo.selectNextMove());
@@ -100,7 +100,7 @@ public class MoveOrdererTest {
         when(moveScorer.calculateStaticScore(d4b6)).thenReturn(-50);
         when(moveScorer.calculateStaticScore(a7a8)).thenReturn(900);
 
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer);
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null);
 
         assertEquals(GENCAPS, mo.getNextMoveOrderStage());
         assertEquals(a7a8, mo.selectNextMove());
@@ -116,6 +116,50 @@ public class MoveOrdererTest {
         // we should have called the move generator once for caps and once for noncaps
         verify(moveGenerator, times(1)).generatePseudoLegalCaptures(board);
         verify(moveGenerator, times(1)).generatePseudoLegalNonCaptures(board);
+    }
+
+    @Test
+    public void killersAfterCaps() {
+
+        Board board = new Board("8/7p/5k2/5p2/p1p2P2/Pr1pPK2/1P1R3P/8 b - - "); // WAC-2
+
+        List<Move> noncaps = moveGenerator.generatePseudoLegalNonCaptures(board);
+
+
+        Move b3b7 = new Move(BLACK_ROOK, B3, B7);
+        Move f6e7 = new Move(BLACK_KING, F6, E7);
+
+        assertTrue(noncaps.contains(b3b7));
+        assertTrue(noncaps.contains(f6e7));
+
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, b3b7, f6e7);
+
+        // first two moves should be the captures Rxa3 and Rxb2
+        assertNotNull(mo.selectNextMove().captured());
+        assertNotNull(mo.selectNextMove().captured());
+
+        // the next move should be our first killer
+        assertEquals(b3b7, mo.selectNextMove());
+
+        // and then our second killer
+        assertEquals(f6e7, mo.selectNextMove());
+
+        List<Move> selectedNonCaps = new ArrayList<>();
+        selectedNonCaps.add(b3b7);
+        selectedNonCaps.add(f6e7);
+
+        // the killers shouldn't be selected again
+        Move nextMv = mo.selectNextMove();
+        while(nextMv != null) {
+            assertNotEquals(b3b7, nextMv);
+            assertNotEquals(f6e7, nextMv);
+            assertTrue(noncaps.contains(nextMv));
+            selectedNonCaps.add(nextMv);
+            nextMv = mo.selectNextMove();
+        }
+
+        // and all noncaps should have been selected
+        assertTrue(selectedNonCaps.containsAll(noncaps));
     }
 
 }

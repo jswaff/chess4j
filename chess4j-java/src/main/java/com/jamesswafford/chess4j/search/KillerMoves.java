@@ -2,7 +2,7 @@ package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.board.Move;
 
-public class KillerMoves {
+public class KillerMoves implements KillerMovesStore {
 
     private static final KillerMoves INSTANCE = new KillerMoves();
 
