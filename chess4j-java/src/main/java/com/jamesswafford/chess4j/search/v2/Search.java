@@ -1,9 +1,6 @@
 package com.jamesswafford.chess4j.search.v2;
 
-import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Color;
-import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.Undo;
+import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
@@ -156,9 +153,9 @@ public class Search {
         }
 
         // Draw check
-        /*if (Draw.isDraw(board, undos)) {
+        if (Draw.isDraw(board, undos)) {
             return 0;
-        }*/
+        }
 
         List<Move> pv = new ArrayList<>(50);
 
