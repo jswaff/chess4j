@@ -146,11 +146,11 @@ public final class SearchIterator {
             }
 
             // if we've used more than half our time, don't start a new iteration.
-            long elapsedTime = System.currentTimeMillis() - startTime;
+            /*long elapsedTime = System.currentTimeMillis() - startTime;
             if (!testSuiteMode && elapsedTime > (maxTime / 2)) {
                 LOGGER.debug("# stopping iterative search because half time expired.");
                 stopSearching = true;
-            }
+            }*/
         } while (!stopSearching);
 
         assert(search.getLastPV().size()>0);

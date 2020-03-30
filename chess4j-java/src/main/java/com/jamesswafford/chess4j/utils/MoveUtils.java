@@ -6,7 +6,7 @@ import java.util.List;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.io.PrintLine;
-import com.jamesswafford.chess4j.pieces.Piece;
+import com.jamesswafford.chess4j.pieces.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -88,19 +88,45 @@ public final class MoveUtils {
         return true;
     }
 
-    public static Move convertNativeMove(Long nativeMove, Color ptm) {
+    public static Move fromNativeMove(Long nativeMove, Color ptm) {
         Square fromSq = Square.valueOf((int)(nativeMove & 0x3F));
         Square toSq = Square.valueOf((int)((nativeMove >> 6) & 0x3F));
-        Piece piece = convertNativePiece((int)((nativeMove >> 12) & 0x07), ptm);
-        Piece promoPiece = convertNativePiece((int)((nativeMove >> 15) & 0x07), ptm);
-        Piece capturedPiece = convertNativePiece((int)((nativeMove >> 18) & 0x07), Color.swap(ptm));
+        Piece piece = fromNativePiece((int)((nativeMove >> 12) & 0x07), ptm);
+        Piece promoPiece = fromNativePiece((int)((nativeMove >> 15) & 0x07), ptm);
+        Piece capturedPiece = fromNativePiece((int)((nativeMove >> 18) & 0x07), Color.swap(ptm));
         boolean isEpCapture = (int)((nativeMove >> 21) & 0x01) == 1;
         boolean isCastle = (int)((nativeMove >> 22) & 0x01) == 1;
 
-        return new Move(piece, fromSq, toSq, capturedPiece, promoPiece, isCastle, isEpCapture);
+        Move converted = new Move(piece, fromSq, toSq, capturedPiece, promoPiece, isCastle, isEpCapture);
+
+        assert (toNativeMove(converted).equals(nativeMove));
+
+        return converted;
     }
 
-    private static Piece convertNativePiece(int pieceType, Color pieceColor) {
+    public static Long toNativeMove(Move mv) {
+        Long nativeMv = 0L;
+
+        nativeMv = (long)mv.from().value() & 0x3F;
+        nativeMv |= ((long)mv.to().value() & 0x3F) << 6;
+        nativeMv |= (toNativePiece(mv.piece()) & 0x07) << 12;
+        if (mv.promotion() != null) {
+            nativeMv |= (toNativePiece(mv.promotion()) & 0x07) << 15;
+        }
+        if (mv.captured() != null) {
+            nativeMv |= (toNativePiece(mv.captured()) & 0x07) << 18;
+        }
+        if (mv.isEpCapture()) {
+            nativeMv |= 1L << 21;
+        }
+        if (mv.isCastle()) {
+            nativeMv |= 1L << 22;
+        }
+
+        return nativeMv;
+    }
+
+    private static Piece fromNativePiece(int pieceType, Color pieceColor) {
         boolean isWhite = pieceColor.isWhite();
 
         switch (pieceType) {
@@ -121,6 +147,23 @@ public final class MoveUtils {
             default:
                 throw new IllegalArgumentException("Don't know how to translate native piece: " + pieceType);
         }
+    }
+
+    private static long toNativePiece(Piece piece) {
+        if (piece.getClass() == Pawn.class) {
+            return 1;
+        } else if (piece.getClass() == Knight.class) {
+            return 2;
+        } else if (piece.getClass() == Bishop.class) {
+            return 3;
+        } else if (piece.getClass() == Rook.class) {
+            return 4;
+        } else if (piece.getClass() == Queen.class) {
+            return 5;
+        } else if (piece.getClass() == King.class) {
+            return 6;
+        }
+        throw new IllegalArgumentException("Invalid piece type in toNativePiece: " + piece);
     }
 
     private static boolean isLegalMove(Move move, Board board) {

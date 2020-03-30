@@ -26,7 +26,7 @@ import static com.jamesswafford.chess4j.pieces.King.*;
 import static com.jamesswafford.chess4j.board.squares.File.*;
 import static com.jamesswafford.chess4j.board.squares.Rank.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
-import static com.jamesswafford.chess4j.utils.MoveUtils.convertNativeMove;
+import static com.jamesswafford.chess4j.utils.MoveUtils.fromNativeMove;
 
 public final class MoveGen implements MoveGenerator {
 
@@ -227,7 +227,7 @@ public final class MoveGen implements MoveGenerator {
                 // for every java move, ensure there is exactly one corresponding native move
                 for (Move javaMove : javaMoves) {
                     if (nativeMoves.stream()
-                            .filter(nativeMove -> javaMove.equals(convertNativeMove(nativeMove, board.getPlayerToMove())))
+                            .filter(nativeMove -> javaMove.equals(fromNativeMove(nativeMove, board.getPlayerToMove())))
                             .count() != 1L)
                     {
                         LOGGER.error("No native move found for java move: " + javaMove
@@ -240,7 +240,7 @@ public final class MoveGen implements MoveGenerator {
                 List<Move> sortedJavaMoves = new ArrayList<>();
                 for (Long nativeMove : nativeMoves) {
                     Move matchingMove = javaMoves.stream()
-                            .filter(javaMove -> javaMove.equals(convertNativeMove(nativeMove, board.getPlayerToMove())))
+                            .filter(javaMove -> javaMove.equals(fromNativeMove(nativeMove, board.getPlayerToMove())))
                             .findFirst().get();
                     sortedJavaMoves.add(matchingMove);
                 }

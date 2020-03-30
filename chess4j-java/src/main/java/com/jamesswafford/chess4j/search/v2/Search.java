@@ -5,7 +5,6 @@ import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
-import com.jamesswafford.chess4j.search.KillerMoves;
 import com.jamesswafford.chess4j.search.KillerMovesStore;
 import com.jamesswafford.chess4j.utils.BoardUtils;
 import com.jamesswafford.chess4j.utils.MoveUtils;
@@ -15,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 
@@ -69,9 +69,14 @@ public class Search {
 
     private int searchWithNativeCode(SearchParameters searchParameters) {
         String fen = FenBuilder.createFen(board, false);
+
+        List<Long> prevMoves = undos.stream()
+                .map(undo -> MoveUtils.toNativeMove(undo.getMove()))
+                .collect(Collectors.toList());
+
         List<Long> nativePV = new ArrayList<>();
         try {
-            int nativeScore = searchNative(fen, nativePV, searchParameters.getDepth(),
+            int nativeScore = searchNative(fen, prevMoves, nativePV, searchParameters.getDepth(),
                     searchParameters.getAlpha(), searchParameters.getBeta(), searchStats);
 
             assert (searchesAreEqual(fen, searchParameters, nativeScore, nativePV));
@@ -82,7 +87,7 @@ public class Search {
                 Long nativeMv = nativePV.get(i);
                 // which side is moving?  On even moves it is the player on move.
                 Color ptm = (i % 2) == 0 ? board.getPlayerToMove() : Color.swap(board.getPlayerToMove());
-                lastPV.add(MoveUtils.convertNativeMove(nativeMv, ptm));
+                lastPV.add(MoveUtils.fromNativeMove(nativeMv, ptm));
             }
 
             return nativeScore;
@@ -99,9 +104,11 @@ public class Search {
             SearchStats nativeStats = new SearchStats();
             nativeStats.nodes = searchStats.nodes;
             nativeStats.failHighs = searchStats.failHighs;
+            nativeStats.draws = searchStats.draws;
 
             searchStats.initialize();
             int javaScore = searchWithJavaCode(searchParameters);
+            LOGGER.info("searchStats: " + searchStats);
             if (javaScore != nativeScore || !searchStats.equals(nativeStats)) {
                 LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
@@ -133,7 +140,7 @@ public class Search {
             Long nativeMv = nativePV.get(i);
             // which side is moving?  On even moves it is the player on move.
             Color ptm = (i % 2) == 0 ? board.getPlayerToMove() : Color.swap(board.getPlayerToMove());
-            Move convertedMv = MoveUtils.convertNativeMove(nativeMv, ptm);
+            Move convertedMv = MoveUtils.fromNativeMove(nativeMv, ptm);
             Move javaMv = javaPV.get(i);
             if (! javaMv.equals(convertedMv)) {
                 return false;
@@ -154,6 +161,7 @@ public class Search {
 
         // Draw check
         if (Draw.isDraw(board, undos)) {
+            searchStats.draws++;
             return 0;
         }
 
@@ -217,7 +225,7 @@ public class Search {
         parentPV.addAll(tail);
     }
 
-    private native int searchNative(String boardFen, List<Long> parentPV, int depth, int alpha, int beta,
-                                    SearchStats searchStats);
+    private native int searchNative(String boardFen, List<Long> prevMoves, List<Long> parentPV,
+                                    int depth, int alpha, int beta, SearchStats searchStats);
 
 }
