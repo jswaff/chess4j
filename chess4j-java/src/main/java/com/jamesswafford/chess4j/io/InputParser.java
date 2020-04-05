@@ -478,6 +478,7 @@ public class InputParser {
         }
 
         try {
+            // TODO: iterator.abort
             searchFuture.get();
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
