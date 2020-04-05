@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.hash.TTHolder;
+import com.jamesswafford.chess4j.search.v2.SearchIterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -19,7 +22,6 @@ import com.jamesswafford.chess4j.book.BookMove;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
-import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.utils.GameResult;
 import com.jamesswafford.chess4j.utils.GameStatus;
 import com.jamesswafford.chess4j.utils.GameStatusChecker;
@@ -30,7 +32,8 @@ public class InputParser {
     private static final Log logger = LogFactory.getLog(InputParser.class);
     private static final InputParser INSTANCE = new InputParser();
     private boolean forceMode = true;
-    private Thread searchThread;
+    private SearchIterator searchIterator = new SearchIterator();
+    private CompletableFuture<List<Move>> searchFuture;
     private Color engineColor;
 
     private InputParser() { }
@@ -75,7 +78,7 @@ public class InputParser {
         } else if ("new".equals(cmd)) {
             newGame();
         } else if ("nopost".equals(cmd)) {
-            SearchIterator.post = false;
+            searchIterator.setPost(false);
         } else if ("otim".equals(cmd)) {
         } else if ("perft".equals(cmd)) {
             perft(input);
@@ -86,7 +89,7 @@ public class InputParser {
         } else if ("ping".equals(cmd)) {
             ping(input);
         } else if ("post".equals(cmd)) {
-            SearchIterator.post = true;
+            searchIterator.setPost(true);
         } else if ("protover".equals(cmd)) {
             protover(input);
         } else if ("quit".equals(cmd)) {
@@ -166,11 +169,12 @@ public class InputParser {
     private void level(String[] input) {
         String mps = input[1];
         String base = input[2];
-        Double increment = Double.valueOf(input[3]);
+        double increment = Double.parseDouble(input[3]);
         logger.debug("# level: " + mps + ", " + base + ", " + increment);
         increment *= 1000;
         logger.debug("# increment: " + increment + " ms.");
-        SearchIterator.incrementMS = increment.intValue();
+        // TODO: timer
+        //SearchIterator.incrementMS = increment.intValue();
     }
 
     /**
@@ -187,7 +191,7 @@ public class InputParser {
      */
     int prevMaxMB = 0;
     private void memory(String[] input) {
-        int maxMemMB = Integer.valueOf(input[1]);
+        int maxMemMB = Integer.parseInt(input[1]);
 
         logger.debug("# received memory command, N=" + maxMemMB);
 
@@ -224,11 +228,11 @@ public class InputParser {
         Globals.getBoard().resetBoard();
         Globals.gameUndos.clear();
         engineColor = Color.BLACK;
-        SearchIterator.maxDepth = 0;
+        searchIterator.setMaxDepth(0);
     }
 
     private void perft(String[] input) {
-        int depth = Integer.valueOf(input[1]);
+        int depth = Integer.parseInt(input[1]);
         DrawBoard.drawBoard(Globals.getBoard());
         long start = System.currentTimeMillis();
         long nodes=Perft.perft(Globals.getBoard(), depth);
@@ -324,7 +328,7 @@ public class InputParser {
     }
 
     private void protover(String[] input) {
-        Integer version = Integer.valueOf(input[1]);
+        int version = Integer.parseInt(input[1]);
         if (version < 2) {
             logger.info("Error: invalid protocol version.");
             System.exit(1);
@@ -386,7 +390,7 @@ public class InputParser {
         StringBuilder sb = new StringBuilder();
         for (Undo undo : undos) {
             gameMoves.add(undo.getMove());
-            sb.append(undo.getMove().toString() + " ");
+            sb.append(undo.getMove().toString()).append(" ");
         }
 
         logger.info("# game moves: " + sb.toString());
@@ -402,9 +406,9 @@ public class InputParser {
      *
      */
     private void sd(String[] input) {
-        Integer depth = Integer.valueOf(input[1]);
+        int depth = Integer.parseInt(input[1]);
         logger.debug("# setting depth to : " + depth);
-        SearchIterator.maxDepth = depth;
+        searchIterator.setMaxDepth(depth);
     }
 
     private void setboard(String[] input) {
@@ -428,10 +432,11 @@ public class InputParser {
      * Read in the engine's remaining time, in centiseconds.
      */
     private void time(String[] input) {
-        Integer time = Integer.valueOf(input[1]);
+        int time = Integer.parseInt(input[1]);
         time *= 10; // centiseconds to milliseconds
         logger.debug("# MY TIME: " + time);
-        SearchIterator.remainingTimeMS = time;
+        // TODO: timer
+        //SearchIterator.remainingTimeMS = time;
     }
 
     /**
@@ -468,13 +473,14 @@ public class InputParser {
      *
      */
     private void stopSearchThread() {
-        if (searchThread==null) {
+        if (searchFuture==null) {
             return;
         }
+
         try {
-//            SearchIterator.setAbortIterator(true);
-            searchThread.join();
-        } catch (InterruptedException e) {
+            // TODO: iterator.abort
+            searchFuture.get();
+        } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -483,13 +489,25 @@ public class InputParser {
         // associate clock with player on move
         engineColor = Globals.getBoard().getPlayerToMove();
 
+        if (!endOfGameCheck()) {
+            searchFuture = searchIterator.findPvFuture(Globals.getBoard(), Globals.gameUndos)
+                    .thenApply(
+                        pv -> {
+                            Globals.gameUndos.add(Globals.getBoard().applyMove(pv.get(0)));
+                            logger.info("move " + pv.get(0));
+                            endOfGameCheck();
+                            return pv;
+                        }
+                    );
+        }
+    }
+
+    private boolean endOfGameCheck() {
         GameStatus gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard(), Globals.gameUndos);
         if (gameStatus != GameStatus.INPROGRESS) {
             PrintGameResult.printResult(gameStatus);
-            return;
+            return true;
         }
-
-        searchThread = SearchIterator.think();
+        return false;
     }
-
 }

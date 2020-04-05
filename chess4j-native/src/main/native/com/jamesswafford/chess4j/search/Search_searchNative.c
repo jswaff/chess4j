@@ -13,15 +13,17 @@
 /* move stack */
 move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
 
+/* undo stack */
+undo_t undos[MAX_PLY];
 
 /*
  * Class:     com_jamesswafford_chess4j_search_v2_Search
  * Method:    searchNative
- * Signature: (Ljava/lang/String;Ljava/util/List;IIILcom/jamesswafford/chess4j/search/v2/SearchStats;)I
+ * Signature: (Ljava/util/List;Ljava/util/List;IIILcom/jamesswafford/chess4j/search/v2/SearchStats;)I
  */
 JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_v2_Search_searchNative
-  (JNIEnv *env, jobject UNUSED(search_obj), jstring board_fen, jobject parent_pv, 
-    jint depth, jint alpha, jint beta, jobject search_stats)
+  (JNIEnv *env, jobject UNUSED(search_obj), jobject prev_moves,
+    jobject parent_pv, jint depth, jint alpha, jint beta, jobject search_stats)
 
 {
     jint retval = 0;
@@ -34,22 +36,45 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_v2_Search_searchNat
         return 0;
     }
 
-    /* set the position according to the FEN */
-    const char* fen = (*env)->GetStringUTFChars(env, board_fen, 0);
+    
+    /* retrieve the java.util.List interface class */
+    jclass class_List = (*env)->FindClass(env, "java/util/List");
+
+    /* retrieve the size and get methods */
+    jmethodID midSize = (*env)->GetMethodID(env, class_List, "size", "()I");
+    jmethodID midGet = (*env)->GetMethodID(env, class_List, "get", "(I)Ljava/lang/Object;");
+
+    /* retrieve the java.lang.Long class */
+    jclass class_Long = (*env)->FindClass(env, "java/lang/Long");
+
+    /* retrieve the longValue method */
+    jmethodID midLongValue = (*env)->GetMethodID(env, class_Long, "longValue", "()J");
+
+    /* initialize the position */
     position_t pos;
-    if (!set_pos(&pos, fen))
+    reset_pos(&pos);
+
+
+    /* get the size of the prev_moves list and iterate over it */
+    jint size = (*env)->CallIntMethod(env, prev_moves, midSize);
+    jvalue arg;
+    for (int i=0; i<size; i++)
     {
-        char error_buffer[255];
-        sprintf(error_buffer, "Could not set position: %s\n", fen);
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            error_buffer);
-        goto cleanup;
+        arg.i = i;
+        jobject element = (*env)->CallObjectMethodA(env, prev_moves, midGet, &arg);
+        jlong prev_mv = (*env)->CallLongMethod(env, element, midLongValue);
+
+        /* apply this move */
+        apply_move(&pos, (move_t) prev_mv, undos + pos.move_counter);
+
+        (*env)->DeleteLocalRef(env, element);
     }
+
 
     /* perform the search */
     move_line_t pv;
     stats_t native_stats;
-    int32_t native_score = search(&pos, &pv, depth, alpha, beta, moves, 
+    int32_t native_score = search(&pos, &pv, depth, alpha, beta, moves, undos,
         &native_stats);
     retval = (jint) native_score;
 
@@ -73,8 +98,12 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_v2_Search_searchNat
     jfieldID fidFailHighs = (*env)->GetFieldID(env, class_SearchStats, "failHighs", "J");
     (*env)->SetLongField(env, search_stats, fidFailHighs, native_stats.fail_highs);
 
-cleanup:
-    (*env)->ReleaseStringUTFChars(env, board_fen, fen);
+    jfieldID fidFailLows = (*env)->GetFieldID(env, class_SearchStats, "failLows", "J");
+    (*env)->SetLongField(env, search_stats, fidFailLows, native_stats.fail_lows);
+
+    jfieldID fidDraws = (*env)->GetFieldID(env, class_SearchStats, "draws", "J");
+    (*env)->SetLongField(env, search_stats, fidDraws, native_stats.draws);
+
 
 
     return retval;

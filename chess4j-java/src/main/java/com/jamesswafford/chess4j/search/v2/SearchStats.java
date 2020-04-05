@@ -2,7 +2,7 @@ package com.jamesswafford.chess4j.search.v2;
 
 public class SearchStats {
 
-    public long nodes, failHighs, failLows;
+    public long nodes, failHighs, failLows, draws;
 
     public SearchStats() {
         initialize();
@@ -12,6 +12,7 @@ public class SearchStats {
         nodes = 0;
         failHighs = 0;
         failLows = 0;
+        draws = 0;
     }
 
     @Override
@@ -24,6 +25,7 @@ public class SearchStats {
         if (this.nodes != that.nodes) return false;
         if (this.failHighs != that.failHighs) return false;
         if (this.failLows != that.failLows) return false;
+        if (this.draws != that.draws) return false;
 
         return true;
     }
@@ -35,6 +37,7 @@ public class SearchStats {
         hash = 31 * hash + Long.valueOf(nodes).hashCode();
         hash = 31 * hash + Long.valueOf(failHighs).hashCode();
         hash = 31 * hash + Long.valueOf(failLows).hashCode();
+        hash = 37 * hash + Long.valueOf(draws).hashCode();
 
         return hash;
     }
@@ -44,6 +47,7 @@ public class SearchStats {
         return "SearchStats [nodes: " + nodes
                 + ", failHighs: " + failHighs
                 + ", failLows: " + failLows
+                + ", draws: " + draws
                 + "]";
     }
 }

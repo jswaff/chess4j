@@ -1,4 +1,4 @@
 [submodule "lib/prophet4"]
 	path = lib/prophet4
 	url = git@github.com:jswaff/prophet4.git
-	branch = killer_moves
+	branch = master

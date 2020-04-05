@@ -8,6 +8,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jamesswafford.chess4j.search.v2.SearchIterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -20,9 +21,9 @@ import com.jamesswafford.chess4j.io.DrawBoard;
 import com.jamesswafford.chess4j.io.EPDOperation;
 import com.jamesswafford.chess4j.io.EPDParser;
 import com.jamesswafford.chess4j.io.MoveParser;
-import com.jamesswafford.chess4j.search.SearchIterator;
 
 public class TestSuiteProcessor {
+
     private static final Log LOGGER = LogFactory.getLog(TestSuiteProcessor.class);
 
     private List<Move> getBestMoves(Board b,List<EPDOperation> ops) throws ParseException, IllegalMoveException {
@@ -57,7 +58,7 @@ public class TestSuiteProcessor {
         }
     }
 
-    private boolean processProblem(String epd,int secondsPerProblem) throws ParseException, IllegalMoveException {
+    private boolean processProblem(String epd,int secondsPerProblem) throws Exception {
         LOGGER.info("\n\nprocessing epd: " + epd);
         Board board = new Board();
         List<EPDOperation> ops = EPDParser.setPos(board, epd);
@@ -66,9 +67,15 @@ public class TestSuiteProcessor {
         LOGGER.info("best moves: ");
         bms.forEach(bm -> LOGGER.info("\t" + bm));
         TTHolder.clearAllTables();
-        SearchIterator.maxTime = secondsPerProblem * 1000;
-        SearchIterator.maxDepth = 7; // FIXME
-        List<Move> pv = SearchIterator.iterate(board, new ArrayList<>(), true);
+
+        SearchIterator searchIterator = new SearchIterator();
+        searchIterator.setMaxDepth(7); // FIXME
+
+        List<Move> pv = searchIterator.findPvFuture(board, new ArrayList<>()).get();
+
+//        SearchIterator.maxTime = secondsPerProblem * 1000;
+//        SearchIterator.maxDepth = 7; // FIXME
+//        List<Move> pv = SearchIterator.iterate(board, new ArrayList<>(), true);
 
         return bms.contains(pv.get(0));
     }
@@ -77,7 +84,8 @@ public class TestSuiteProcessor {
         LOGGER.info("processing. test suite: " + testSuite);
         LOGGER.info("seconds per problem: " + secondsPerProblem);
 
-        SearchIterator.maxTime = secondsPerProblem * 1000;
+//        SearchIterator.maxTime = secondsPerProblem * 1000;  // FIXME
+
         List<String> wrongProblems = new ArrayList<>();
         int numProblems = 0;
 
@@ -86,7 +94,7 @@ public class TestSuiteProcessor {
         for (String line : lines) {
             numProblems++;
             boolean correct = true;
-            if (!processProblem(line,secondsPerProblem)) {
+            if (!processProblem(line, secondsPerProblem)) {
                 correct = false;
                 wrongProblems.add(line);
             }
