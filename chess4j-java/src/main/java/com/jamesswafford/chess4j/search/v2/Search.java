@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.search.v2;
 import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import com.jamesswafford.chess4j.search.KillerMovesStore;
 import com.jamesswafford.chess4j.utils.BoardUtils;
@@ -67,6 +68,7 @@ public class Search {
     }
 
     private int searchWithNativeCode(SearchParameters searchParameters) {
+        String fen = FenBuilder.createFen(board, false);
 
         List<Long> prevMoves = undos.stream()
                 .map(undo -> MoveUtils.toNativeMove(undo.getMove()))
@@ -74,10 +76,10 @@ public class Search {
 
         List<Long> nativePV = new ArrayList<>();
         try {
-            int nativeScore = searchNative(prevMoves, nativePV, searchParameters.getDepth(),
+            int nativeScore = searchNative(fen, prevMoves, nativePV, searchParameters.getDepth(),
                     searchParameters.getAlpha(), searchParameters.getBeta(), searchStats);
 
-            assert (searchesAreEqual(searchParameters, nativeScore, nativePV));
+            assert (searchesAreEqual(fen, searchParameters, nativeScore, nativePV));
 
             // translate the native PV into the object's PV
             lastPV.clear();
@@ -95,7 +97,7 @@ public class Search {
         }
     }
 
-    private boolean searchesAreEqual(SearchParameters searchParameters, int nativeScore,
+    private boolean searchesAreEqual(String fen, SearchParameters searchParameters, int nativeScore,
                                      List<Long> nativePV) {
         try {
             // copy the search stats for comparison
@@ -110,14 +112,14 @@ public class Search {
             if (javaScore != nativeScore || !searchStats.equals(nativeStats)) {
                 LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
-                        + ", params: " + searchParameters);
+                        + ", params: " + searchParameters + ", fen: " + fen);
                 return false;
             }
             // compare the PVs.
             if (!moveLinesAreEqual(nativePV, lastPV)) {
                 LOGGER.error("pvs are not equal!"
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
-                        + ", params: " + searchParameters);
+                        + ", params: " + searchParameters + ", fen: " + fen);
                 return false;
             }
 
@@ -180,7 +182,6 @@ public class Search {
                 continue;
             }
 
-            // TODO: undo should be passed through for draw checks
             int val = -search(pv, ply+1, depth-1, -beta, -alpha);
             ++numMovesSearched;
             board.undoMove(undos.remove(undos.size()-1));
@@ -223,7 +224,7 @@ public class Search {
         parentPV.addAll(tail);
     }
 
-    private native int searchNative(List<Long> prevMoves, List<Long> parentPV, int depth, int alpha, int beta,
-                                    SearchStats searchStats);
+    private native int searchNative(String boardFen, List<Long> prevMoves, List<Long> parentPV, int depth,
+                                    int alpha, int beta, SearchStats searchStats);
 
 }

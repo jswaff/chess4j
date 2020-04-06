@@ -69,6 +69,7 @@ public class TestSuiteProcessor {
         TTHolder.clearAllTables();
 
         SearchIterator searchIterator = new SearchIterator();
+        searchIterator.setTestSuiteMode(true);
         searchIterator.setMaxDepth(7); // FIXME
 
         List<Move> pv = searchIterator.findPvFuture(board, new ArrayList<>()).get();
