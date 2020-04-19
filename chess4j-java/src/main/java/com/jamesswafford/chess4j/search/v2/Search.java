@@ -108,7 +108,6 @@ public class Search {
 
             searchStats.initialize();
             int javaScore = searchWithJavaCode(searchParameters);
-            LOGGER.info("searchStats: " + searchStats);
             if (javaScore != nativeScore || !searchStats.equals(nativeStats)) {
                 LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats

@@ -1,9 +1,12 @@
 package com.jamesswafford.chess4j.search.v2;
 
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.eval.Eval;
+import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.io.PrintLine;
 import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.search.KillerMoves;
@@ -17,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 import static com.jamesswafford.chess4j.Constants.INFINITY;
@@ -56,7 +60,7 @@ public class SearchIterator {
      *
      * @return - principal variation
      */
-    private List<Move> findPrincipalVariation(Board board, List<Undo> undos) {
+    private List<Move> findPrincipalVariation(Board board, final List<Undo> undos) {
 
         List<Move> moves = MoveGen.genLegalMoves(board);
         LOGGER.debug("# position has " + moves.size() + " move(s)");
@@ -67,7 +71,8 @@ public class SearchIterator {
         long startTime = System.currentTimeMillis();
         int depth = 0, score = 0;
         boolean stopSearching = false;
-        Search search = new Search(board, undos, new Eval(), new MoveGen(), new MVVLVA(), KillerMoves.getInstance());
+        Search search = new Search(board, new ArrayList<>(undos), new Eval(), new MoveGen(), new MVVLVA(),
+                KillerMoves.getInstance());
 
         do {
             ++depth;
@@ -102,7 +107,57 @@ public class SearchIterator {
 
         printSearchSummary(depth, startTime, search.getSearchStats());
 
+        // if we are running with assertions enabled and the native library is loaded, verify equality
+        assert(iterationsAreEqual(search.getLastPV(), board, undos));
+
         return search.getLastPV();
+    }
+
+    private boolean iterationsAreEqual(List<Move> javaPV, Board board, List<Undo> undos) {
+
+        if (Initializer.nativeCodeInitialized()) {
+
+            List<Move> nativePV = findPrincipalVariationNative(board, undos);
+
+            if (!nativePV.equals(javaPV)) {
+                LOGGER.error("PVs are not equal! javaPV: " + PrintLine.getMoveString(javaPV) +
+                        ", nativePV: " + PrintLine.getMoveString(nativePV));
+                return false;
+            } else {
+                return true;
+            }
+
+        } else {
+            // native library not loaded
+            return true;
+        }
+    }
+
+    private List<Move> findPrincipalVariationNative(Board board, List<Undo> undos) {
+        String fen = FenBuilder.createFen(board, false);
+
+        List<Long> prevMoves = undos.stream()
+                .map(undo -> MoveUtils.toNativeMove(undo.getMove()))
+                .collect(Collectors.toList());
+
+        List<Long> nativePV = new ArrayList<>();
+
+        try {
+            iterateNative(fen, prevMoves, nativePV);
+
+            // translate the native PV
+            List<Move> pv = new ArrayList<>();
+            for (int i=0; i<nativePV.size(); i++) {
+                Long nativeMv = nativePV.get(i);
+                // which side is moving?  On even moves it is the player on move.
+                Color ptm = (i % 2) == 0 ? board.getPlayerToMove() : Color.swap(board.getPlayerToMove());
+                pv.add(MoveUtils.fromNativeMove(nativeMv, ptm));
+            }
+            return pv;
+        } catch (IllegalStateException e) {
+            LOGGER.error(e);
+            throw e;
+        }
     }
 
     private void printSearchSummary(int lastDepth, long startTime, SearchStats stats) {
@@ -155,5 +210,12 @@ public class SearchIterator {
 //
 //        LOGGER.info("# prunes: " + stats.getPrunes());
     }
+
+//        private List<Move> findPrincipalVariationWithNativeCode(Board board, List<Undo> undos) {
+//
+//
+//        }
+
+        private native void iterateNative(String boardFen, List<Long> prevMoves, List<Long> pv);
 
 }

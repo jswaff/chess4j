@@ -18,11 +18,11 @@ public class PrintLine {
     }
 
     public static String getMoveString(List<Move> moves) {
-        String s = "";
+        StringBuilder s = new StringBuilder();
         for (Move m : moves) {
-            s += m.toString() + " ";
+            s.append(m.toString()).append(" ");
         }
-        return s;
+        return s.toString();
     }
 
 }
