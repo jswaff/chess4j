@@ -29,9 +29,9 @@ public class SearchIterator {
 
     private static final Log LOGGER = LogFactory.getLog(SearchIterator.class);
 
-    private int maxDepth = 0;
+    private int maxDepth = 6;
     private boolean post = true;
-    private boolean testSuiteMode = false;
+    private boolean earlyExitOk = true;
 
     public SearchIterator() {
     }
@@ -44,8 +44,8 @@ public class SearchIterator {
         this.post = post;
     }
 
-    public void setTestSuiteMode(boolean testSuiteMode) {
-        this.testSuiteMode = testSuiteMode;
+    public void setEarlyExitOk(boolean earlyExitOk) {
+        this.earlyExitOk = earlyExitOk;
     }
 
     public CompletableFuture<List<Move>> findPvFuture(Board board, List<Undo> undos) {
@@ -64,12 +64,12 @@ public class SearchIterator {
 
         List<Move> moves = MoveGen.genLegalMoves(board);
         LOGGER.debug("# position has " + moves.size() + " move(s)");
-        if (!testSuiteMode && moves.size()==1) {
+        if (earlyExitOk && moves.size()==1) {
             return Collections.singletonList(moves.get(0));
         }
 
         long startTime = System.currentTimeMillis();
-        int depth = 0, score = 0;
+        int depth = 0, score;
         boolean stopSearching = false;
         Search search = new Search(board, new ArrayList<>(undos), new Eval(), new MoveGen(), new MVVLVA(),
                 KillerMoves.getInstance());
@@ -143,7 +143,7 @@ public class SearchIterator {
         List<Long> nativePV = new ArrayList<>();
 
         try {
-            iterateNative(fen, prevMoves, nativePV);
+            iterateNative(fen, prevMoves, maxDepth, nativePV);
 
             // translate the native PV
             List<Move> pv = new ArrayList<>();
@@ -216,6 +216,6 @@ public class SearchIterator {
 //
 //        }
 
-        private native void iterateNative(String boardFen, List<Long> prevMoves, List<Long> pv);
+        private native void iterateNative(String boardFen, List<Long> prevMoves, int maxDepth, List<Long> pv);
 
 }

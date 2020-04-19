@@ -28,6 +28,7 @@ public final class App {
     private static String bookPath = null;
     private static String testSuiteFile = null;
     private static int testSuiteTime = 10; // default to ten seconds
+    private static int maxDepth = 6;
 
     private App() { }
 
@@ -36,6 +37,8 @@ public final class App {
             Initializer.attemptToUseNative = true;
         } else if (arg.startsWith("-suite=")) {
             testSuiteFile = arg.substring(7);
+        } else if (arg.startsWith("-depth=")) {
+            maxDepth = Integer.parseInt(arg.substring(7));
         } else if (arg.startsWith("-time=")) {
             testSuiteTime = Integer.parseInt(arg.substring(6));
         } else if (arg.startsWith("-book=")) {
@@ -92,7 +95,7 @@ public final class App {
 
         if (testSuiteFile != null) {
             TestSuiteProcessor tp = new TestSuiteProcessor();
-            tp.processTestSuite(testSuiteFile,testSuiteTime);
+            tp.processTestSuite(testSuiteFile, maxDepth, testSuiteTime);
             System.exit(0);
         }
 

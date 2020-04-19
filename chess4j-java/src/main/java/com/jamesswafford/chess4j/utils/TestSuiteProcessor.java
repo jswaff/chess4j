@@ -58,7 +58,7 @@ public class TestSuiteProcessor {
         }
     }
 
-    private boolean processProblem(String epd,int secondsPerProblem) throws Exception {
+    private boolean processProblem(String epd, int maxDepth, int secondsPerProblem) throws Exception {
         LOGGER.info("\n\nprocessing epd: " + epd);
         Board board = new Board();
         List<EPDOperation> ops = EPDParser.setPos(board, epd);
@@ -69,23 +69,18 @@ public class TestSuiteProcessor {
         TTHolder.clearAllTables();
 
         SearchIterator searchIterator = new SearchIterator();
-        searchIterator.setTestSuiteMode(true);
-        searchIterator.setMaxDepth(7); // FIXME
+        searchIterator.setEarlyExitOk(false);
+        searchIterator.setMaxDepth(maxDepth);
 
         List<Move> pv = searchIterator.findPvFuture(board, new ArrayList<>()).get();
-
-//        SearchIterator.maxTime = secondsPerProblem * 1000;
-//        SearchIterator.maxDepth = 7; // FIXME
-//        List<Move> pv = SearchIterator.iterate(board, new ArrayList<>(), true);
 
         return bms.contains(pv.get(0));
     }
 
-    public void processTestSuite(String testSuite,int secondsPerProblem) throws Exception {
+    public void processTestSuite(String testSuite, int maxDepth, int secondsPerProblem) throws Exception {
         LOGGER.info("processing. test suite: " + testSuite);
+        LOGGER.info("max depth: " + maxDepth);
         LOGGER.info("seconds per problem: " + secondsPerProblem);
-
-//        SearchIterator.maxTime = secondsPerProblem * 1000;  // FIXME
 
         List<String> wrongProblems = new ArrayList<>();
         int numProblems = 0;
@@ -95,7 +90,7 @@ public class TestSuiteProcessor {
         for (String line : lines) {
             numProblems++;
             boolean correct = true;
-            if (!processProblem(line, secondsPerProblem)) {
+            if (!processProblem(line, maxDepth, secondsPerProblem)) {
                 correct = false;
                 wrongProblems.add(line);
             }
@@ -103,7 +98,7 @@ public class TestSuiteProcessor {
                     + (numProblems-wrongProblems.size() + " / " + numProblems));
         }
 
-        printSummary(numProblems,wrongProblems);
+        printSummary(numProblems, wrongProblems);
     }
 
 }

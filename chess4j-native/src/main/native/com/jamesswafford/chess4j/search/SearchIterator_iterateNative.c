@@ -17,16 +17,15 @@ move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
 /* undo stack */
 undo_t undos[MAX_PLY];
 
-
 /*
  * Class:     com_jamesswafford_chess4j_search_v2_SearchIterator
  * Method:    iterateNative
- * Signature: (Ljava/lang/String;Ljava/util/List;Ljava/util/List;)V
+ * Signature: (Ljava/lang/String;Ljava/util/List;ILjava/util/List;)V
  */
 JNIEXPORT void 
 JNICALL Java_com_jamesswafford_chess4j_search_v2_SearchIterator_iterateNative
   (JNIEnv *env, jobject UNUSED(iterator_obj), jstring board_fen, 
-    jobject prev_moves, jobject pv_moves)
+    jobject prev_moves, jint max_depth, jobject pv_moves)
 {
 
     /* ensure the static library is initialized */
@@ -86,7 +85,7 @@ JNICALL Java_com_jamesswafford_chess4j_search_v2_SearchIterator_iterateNative
     /* call the search iterator */
     iterator_options_t opts;
     opts.early_exit_ok = true;
-    opts.max_depth = 7; /* FIX ME */
+    opts.max_depth = max_depth;
     opts.post_mode = false;
 
     iterator_context_t ctx;
