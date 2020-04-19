@@ -17,10 +17,6 @@ move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
 /* undo stack */
 undo_t undos[MAX_PLY];
 
-/* FIXME */
-int32_t max_depth = 7;
-bool xboard_post_mode;
-
 
 /*
  * Class:     com_jamesswafford_chess4j_search_v2_SearchIterator
@@ -88,7 +84,17 @@ JNICALL Java_com_jamesswafford_chess4j_search_v2_SearchIterator_iterateNative
     }
 
     /* call the search iterator */
-    move_line_t pv = iterate(&pos, false, moves, undos);
+    iterator_options_t opts;
+    opts.early_exit_ok = true;
+    opts.max_depth = 7; /* FIX ME */
+    opts.post_mode = false;
+
+    iterator_context_t ctx;
+    ctx.pos = &pos;
+    ctx.move_stack = moves;
+    ctx.undo_stack = undos;
+
+    move_line_t pv = iterate(&opts, &ctx);
 
     /* copy the PV to the Java list */
     for (int i=0; i < pv.n; i++)
