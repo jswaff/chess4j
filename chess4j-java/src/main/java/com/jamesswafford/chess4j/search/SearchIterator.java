@@ -7,7 +7,7 @@ import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.io.PrintLine;
-import com.jamesswafford.chess4j.movegen.MoveGeneratorImpl;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import com.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.commons.logging.Log;
@@ -34,7 +34,7 @@ public class SearchIterator {
     private MoveGenerator moveGenerator;
 
     public SearchIterator() {
-        moveGenerator = new MoveGeneratorImpl();
+        moveGenerator = new MagicBitboardMoveGenerator();
     }
 
     public void setMaxDepth(int maxDepth) {
@@ -76,7 +76,7 @@ public class SearchIterator {
         long startTime = System.currentTimeMillis();
         int depth = 0, score;
         boolean stopSearching = false;
-        Search search = new Search(board, new ArrayList<>(undos));
+        AlphaBetaSearch search = new AlphaBetaSearch(board, new ArrayList<>(undos));
 
         do {
             ++depth;

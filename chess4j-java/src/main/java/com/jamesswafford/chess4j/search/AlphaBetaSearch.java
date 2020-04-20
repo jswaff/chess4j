@@ -5,7 +5,7 @@ import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
-import com.jamesswafford.chess4j.movegen.MoveGeneratorImpl;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import com.jamesswafford.chess4j.utils.BoardUtils;
 import com.jamesswafford.chess4j.utils.MoveUtils;
@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 
-public class Search {
+public class AlphaBetaSearch {
 
-    private static final Log LOGGER = LogFactory.getLog(Search.class);
+    private static final Log LOGGER = LogFactory.getLog(AlphaBetaSearch.class);
 
     static {
         Initializer.init();
@@ -37,14 +37,14 @@ public class Search {
     private MoveScorer moveScorer;
     private KillerMovesStore killerMovesStore;
 
-    public Search(Board board, List<Undo> undos) {
+    public AlphaBetaSearch(Board board, List<Undo> undos) {
         this.board = board.deepCopy();
         this.undos = new ArrayList<>(undos);
         this.lastPV = new ArrayList<>();
         this.searchStats = new SearchStats();
 
         this.evaluator = new Eval();
-        this.moveGenerator = new MoveGeneratorImpl();
+        this.moveGenerator = new MagicBitboardMoveGenerator();
         this.moveScorer = new MVVLVA();
         this.killerMovesStore = KillerMoves.getInstance();
     }

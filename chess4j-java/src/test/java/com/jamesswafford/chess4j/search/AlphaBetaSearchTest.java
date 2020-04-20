@@ -25,7 +25,7 @@ import static com.jamesswafford.chess4j.pieces.Queen.*;
 import static com.jamesswafford.chess4j.pieces.Rook.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 
-public class SearchTest {
+public class AlphaBetaSearchTest {
 
     @Test
     public void testSearch_initialPos_depth1() {
@@ -46,7 +46,7 @@ public class SearchTest {
         when(evaluator.evaluateBoard(board2)).thenReturn(-5);
 
         // when the search is invoked
-        Search search = new Search(board, new ArrayList<>());
+        AlphaBetaSearch search = new AlphaBetaSearch(board, new ArrayList<>());
         search.setEvaluator(evaluator);
 
         int score = search.search(params);
@@ -68,7 +68,7 @@ public class SearchTest {
 
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>());
+        AlphaBetaSearch search = new AlphaBetaSearch(board, new ArrayList<>());
 
         int score = search.search(params);
         assertEquals(CHECKMATE-1, score);
@@ -84,7 +84,7 @@ public class SearchTest {
 
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>());
+        AlphaBetaSearch search = new AlphaBetaSearch(board, new ArrayList<>());
 
         int score = search.search(params);
         assertEquals(CHECKMATE-1, score);
@@ -100,7 +100,7 @@ public class SearchTest {
 
         SearchParameters params = new SearchParameters(4, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>());
+        AlphaBetaSearch search = new AlphaBetaSearch(board, new ArrayList<>());
         int score = search.search(params);
         assertEquals(CHECKMATE-3, score);
 
@@ -117,7 +117,7 @@ public class SearchTest {
 
         SearchParameters params = new SearchParameters(6, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>());
+        AlphaBetaSearch search = new AlphaBetaSearch(board, new ArrayList<>());
         int score = search.search(params);
         assertEquals(CHECKMATE-5, score);
 
@@ -136,7 +136,7 @@ public class SearchTest {
 
         SearchParameters params = new SearchParameters(1, -INFINITY, INFINITY);
 
-        Search search = new Search(board, new ArrayList<>());
+        AlphaBetaSearch search = new AlphaBetaSearch(board, new ArrayList<>());
         int score = search.search(params);
         assertEquals(0, score);
 
@@ -260,7 +260,7 @@ public class SearchTest {
         boardU.applyMove(b1a3);
 
         // start the search!
-        Search search = new Search(boardA, new ArrayList<>());
+        AlphaBetaSearch search = new AlphaBetaSearch(boardA, new ArrayList<>());
         search.setEvaluator(evaluator);
         search.setMoveGenerator(moveGenerator);
         search.setKillerMovesStore(mock(KillerMovesStore.class));

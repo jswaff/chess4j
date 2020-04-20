@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGeneratorImpl;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.io.EPDParser;
 import com.jamesswafford.chess4j.io.MoveParser;
 
@@ -65,7 +65,7 @@ public class PawnTranspositionTableTest {
 
         long key = Zobrist.calculatePawnKey(board);
 
-        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
         MoveParser mp = new MoveParser();
         Move b2b4 = mp.parseMove("b2b4", board);
         assertTrue(moves.contains(b2b4));
@@ -86,7 +86,7 @@ public class PawnTranspositionTableTest {
         EPDParser.setPos(board, "8/k7/p7/3Qp2P/n1P5/3KP3/1q6/8 b - - bm e4+; id \"WAC.094\";");
         long key = Zobrist.calculatePawnKey(board);
 
-        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
         MoveParser mp = new MoveParser();
         Move e5e4 = mp.parseMove("e4", board);
         assertTrue(moves.contains(e5e4));

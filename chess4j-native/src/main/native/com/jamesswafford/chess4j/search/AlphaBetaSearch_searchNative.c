@@ -2,7 +2,7 @@
 #include <prophet/search.h>
 #include <prophet/parameters.h>
 
-#include <com_jamesswafford_chess4j_search_v2_Search.h>
+#include <com_jamesswafford_chess4j_search_AlphaBetaSearch.h>
 #include "../init/p4_init.h"
 #include "../../../../java/util/ArrayList.h"
 #include "../../../../java/lang/Long.h"
@@ -17,11 +17,11 @@ move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
 undo_t undos[MAX_PLY];
 
 /*
- * Class:     com_jamesswafford_chess4j_search_v2_Search
+ * Class:     com_jamesswafford_chess4j_search_AlphaBetaSearch
  * Method:    searchNative
- * Signature: (Ljava/lang/String;Ljava/util/List;Ljava/util/List;IIILcom/jamesswafford/chess4j/search/v2/SearchStats;)I
+ * Signature: (Ljava/lang/String;Ljava/util/List;Ljava/util/List;IIILcom/jamesswafford/chess4j/search/SearchStats;)I
  */
-JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_v2_Search_searchNative
+JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_searchNative
   (JNIEnv *env, jobject UNUSED(search_obj), jstring board_fen, jobject prev_moves,
     jobject parent_pv, jint depth, jint alpha, jint beta, jobject search_stats)
 

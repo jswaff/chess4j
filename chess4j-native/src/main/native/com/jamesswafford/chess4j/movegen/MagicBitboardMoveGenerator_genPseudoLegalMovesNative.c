@@ -2,7 +2,7 @@
 #include <prophet/movegen.h>
 #include <prophet/parameters.h>
 
-#include <com_jamesswafford_chess4j_movegen_MoveGen.h>
+#include <com_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator.h>
 #include "../init/p4_init.h"
 #include "../../../../java/util/ArrayList.h"
 #include "../../../../java/lang/Long.h"
@@ -11,11 +11,12 @@
 #include <string.h>
 
 /*
- * Class:     com_jamesswafford_chess4j_movegen_MoveGen
+ * Class:     com_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator
  * Method:    genPseudoLegalMovesNative
  * Signature: (Ljava/lang/String;Ljava/util/List;ZZ)I
  */
-JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_movegen_MoveGen_genPseudoLegalMovesNative
+JNIEXPORT jint 
+JNICALL Java_com_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator_genPseudoLegalMovesNative
   (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jobject jmoves, 
     jboolean caps, jboolean noncaps)
 {

@@ -6,7 +6,7 @@ import java.util.Optional;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGeneratorImpl;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
@@ -63,7 +63,7 @@ public final class MoveParser {
         Move move=null;
         int nMatches=0;
 
-        List<Move> legalMoves = MoveGeneratorImpl.genLegalMoves(board);
+        List<Move> legalMoves = MagicBitboardMoveGenerator.genLegalMoves(board);
         for (Move legalMove : legalMoves) {
             if (isMatchToMove(srcFile,srcRank,dstSquare,piece,promo,legalMove)) {
                 nMatches++;
@@ -136,7 +136,7 @@ public final class MoveParser {
     }
 
     private boolean isLegalMove(Move move) {
-        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
         return moves.contains(move);
     }
 

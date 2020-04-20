@@ -8,7 +8,7 @@ import org.junit.Test;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGeneratorImpl;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.board.squares.Square;
 
 import static org.junit.Assert.*;
@@ -193,7 +193,7 @@ public class BoardUtilsTest {
     }
 
     private void assertAllMovesGood(Board b) {
-        List<Move> moves = MoveGeneratorImpl.genLegalMoves(b);
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(b);
 
         for (Move m : moves) {
             assertTrue(isPseudoLegalMove(b, m));

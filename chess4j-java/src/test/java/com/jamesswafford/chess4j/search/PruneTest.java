@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGeneratorImpl;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 
 import static org.junit.Assert.*;
 
@@ -19,7 +19,7 @@ public class PruneTest {
     public void testInitialPosition() {
 
         Board board = new Board();
-        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
 
         assertFalse(Prune.prune(board,moves.get(0),false,false,0,-INFINITY,
                 INFINITY,3));

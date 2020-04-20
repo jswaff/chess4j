@@ -28,9 +28,9 @@ import static com.jamesswafford.chess4j.board.squares.Rank.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.utils.MoveUtils.fromNativeMove;
 
-public final class MoveGeneratorImpl implements MoveGenerator {
+public final class MagicBitboardMoveGenerator implements MoveGenerator {
 
-    private static final Log LOGGER = LogFactory.getLog(MoveGeneratorImpl.class);
+    private static final Log LOGGER = LogFactory.getLog(MagicBitboardMoveGenerator.class);
 
     static {
         Initializer.init();
@@ -208,8 +208,7 @@ public final class MoveGeneratorImpl implements MoveGenerator {
     }
 
     public static List<Move> genPseudoLegalMoves(Board board) {
-        List<Move> moves = genPseudoLegalMoves(board,true,true);
-        return moves;
+        return genPseudoLegalMoves(board,true,true);
     }
 
     private static boolean moveGensAreEqual(List<Move> javaMoves, Board board, boolean caps, boolean noncaps) {
