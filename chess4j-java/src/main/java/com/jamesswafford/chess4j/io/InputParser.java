@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutionException;
 
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.hash.TTHolder;
-import com.jamesswafford.chess4j.search.v2.SearchIterator;
+import com.jamesswafford.chess4j.search.SearchIterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

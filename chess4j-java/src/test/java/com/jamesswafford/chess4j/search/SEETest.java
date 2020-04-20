@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGeneratorImpl;
 import com.jamesswafford.chess4j.io.MoveParser;
 
 import static org.junit.Assert.*;
@@ -49,7 +49,7 @@ public class SEETest {
 
         Move move = new Move(WHITE_ROOK, E1, E5, BLACK_PAWN);
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
         assertTrue(moves.contains(move));
         board.applyMove(move);
 
@@ -63,7 +63,7 @@ public class SEETest {
 
         Move move = new Move(WHITE_KNIGHT, D3, E5, BLACK_PAWN);
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
         assertTrue(moves.contains(move));
         board.applyMove(move);
 
@@ -77,7 +77,7 @@ public class SEETest {
 
         Move move = new Move(WHITE_ROOK, E3, E6 ,BLACK_PAWN);
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
         assertTrue(moves.contains(move));
         board.applyMove(move);
 
@@ -89,7 +89,7 @@ public class SEETest {
     public void testKnightTakesDefendedPawnAsWhite() throws Exception {
         Board board = new Board("k7/8/5n2/3p4/8/2N2B2/8/K7 w - -");
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("c3d5", board);
         assertTrue(moves.contains(m));
@@ -103,7 +103,7 @@ public class SEETest {
     public void testKnightTakesDefendedPawnAsBlack() throws Exception {
         Board board = new Board("K7/8/5N2/3P4/8/2n2b2/8/k7 b - -");
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("c3d5", board);
         assertTrue(moves.contains(move));
@@ -117,7 +117,7 @@ public class SEETest {
     public void testCrazyRooks() throws Exception {
         Board board = new Board("2K5/8/8/3pRrRr/8/8/8/2k5 w - -");
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("e5d5", board);
         assertTrue(moves.contains(move));
@@ -131,7 +131,7 @@ public class SEETest {
     public void testCrazyRooks2() throws Exception {
         Board board = new Board("2K5/8/8/3pRrR1/8/8/8/2k5 w - -");
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("e5d5", board);
         assertTrue(moves.contains(move));
@@ -145,7 +145,7 @@ public class SEETest {
     public void testKnightTakesDefendedPawn() throws Exception {
         Board board = new Board("1K1k4/8/5n2/3p4/8/1BN5/8/8 w - -");
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("c3d5", board);
         assertTrue(moves.contains(move));
@@ -159,7 +159,7 @@ public class SEETest {
     public void testBishopTakesDefendedPawn() throws Exception {
         Board board = new Board("1K1k4/8/5n2/3p4/8/1BN5/8/8 w - -");
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("b3d5", board);
         assertTrue(moves.contains(move));
@@ -173,7 +173,7 @@ public class SEETest {
     public void testKnightTakesDefendedPawnWithCrazyBishops() throws Exception {
         Board board = new Board("1K1k4/8/5n2/3p4/8/2N2B2/6b1/7b w - -");
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("c3d5", board);
         assertTrue(moves.contains(move));
@@ -230,7 +230,7 @@ public class SEETest {
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove(mv, board);
 
-        assertTrue(MoveGen.genLegalMoves(board).contains(move));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(move));
         board.applyMove(move);
 
         int myScore = SEE.see(board, move);

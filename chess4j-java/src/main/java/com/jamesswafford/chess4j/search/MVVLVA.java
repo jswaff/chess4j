@@ -10,7 +10,6 @@ import com.jamesswafford.chess4j.pieces.Knight;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Queen;
 import com.jamesswafford.chess4j.pieces.Rook;
-import com.jamesswafford.chess4j.search.v2.MoveScorer;
 
 public class MVVLVA implements MoveScorer {
 

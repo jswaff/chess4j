@@ -1,10 +1,9 @@
-package com.jamesswafford.chess4j.search.v2;
+package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGeneratorImpl;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
-import com.jamesswafford.chess4j.search.MVVLVA;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,7 +29,7 @@ public class MoveOrdererTest {
     @Before
     public void setUp() {
         // default impls
-        moveGenerator = new MoveGen();
+        moveGenerator = new MoveGeneratorImpl();
         moveScorer = new MVVLVA();
     }
 
@@ -41,7 +40,7 @@ public class MoveOrdererTest {
         // need a mock for the verify() call
         moveGenerator = mock(MoveGenerator.class);
         when(moveGenerator.generatePseudoLegalCaptures(board))
-                .thenReturn(MoveGen.genPseudoLegalMoves(board, true, false));
+                .thenReturn(MoveGeneratorImpl.genPseudoLegalMoves(board, true, false));
 
         MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null);
         mo.selectNextMove();
@@ -56,7 +55,7 @@ public class MoveOrdererTest {
     public void nonCapturesPlayedInOrderGenerated() {
         Board board = new Board();
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
         assertEquals(20, moves.size());
 
         // without a PV or hash the order shouldn't change, since there are no captures

@@ -1,15 +1,12 @@
-package com.jamesswafford.chess4j.search.v2;
+package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
-import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGeneratorImpl;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
-import com.jamesswafford.chess4j.search.KillerMoves;
-import com.jamesswafford.chess4j.search.KillerMovesStore;
-import com.jamesswafford.chess4j.search.MVVLVA;
 import com.jamesswafford.chess4j.utils.BoardUtils;
 import com.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.commons.logging.Log;
@@ -47,7 +44,7 @@ public class Search {
         this.searchStats = new SearchStats();
 
         this.evaluator = new Eval();
-        this.moveGenerator = new MoveGen();
+        this.moveGenerator = new MoveGeneratorImpl();
         this.moveScorer = new MVVLVA();
         this.killerMovesStore = KillerMoves.getInstance();
     }

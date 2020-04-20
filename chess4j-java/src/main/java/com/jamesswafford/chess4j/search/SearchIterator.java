@@ -1,4 +1,4 @@
-package com.jamesswafford.chess4j.search.v2;
+package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
@@ -7,7 +7,7 @@ import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.io.PrintLine;
-import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGeneratorImpl;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import com.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.commons.logging.Log;
@@ -34,7 +34,7 @@ public class SearchIterator {
     private MoveGenerator moveGenerator;
 
     public SearchIterator() {
-        moveGenerator = new MoveGen();
+        moveGenerator = new MoveGeneratorImpl();
     }
 
     public void setMaxDepth(int maxDepth) {

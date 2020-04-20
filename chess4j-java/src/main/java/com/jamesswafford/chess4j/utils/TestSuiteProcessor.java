@@ -8,7 +8,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jamesswafford.chess4j.search.v2.SearchIterator;
+import com.jamesswafford.chess4j.search.SearchIterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

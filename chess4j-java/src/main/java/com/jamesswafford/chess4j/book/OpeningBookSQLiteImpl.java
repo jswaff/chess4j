@@ -12,7 +12,7 @@ import java.util.List;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGeneratorImpl;
 import com.jamesswafford.chess4j.hash.Zobrist;
 import com.jamesswafford.chess4j.utils.GameResult;
 
@@ -71,7 +71,7 @@ public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
 
         List<BookMove> bookMoves = new ArrayList<>();
 
-        List<Move> legalMoves = MoveGen.genLegalMoves(board);
+        List<Move> legalMoves = MoveGeneratorImpl.genLegalMoves(board);
 
         String qry = "select fromsq,tosq,frequency,wins,losses,draws from book_moves where key=?";
         try {

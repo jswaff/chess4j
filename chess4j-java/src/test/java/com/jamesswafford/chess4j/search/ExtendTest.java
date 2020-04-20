@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGeneratorImpl;
 import com.jamesswafford.chess4j.io.MoveParser;
 
 import static org.junit.Assert.*;
@@ -19,7 +19,7 @@ public class ExtendTest {
 
         MoveParser mp = new MoveParser();
         Move e4 = mp.parseMove("e4", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(e4));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(e4));
         board.applyMove(e4);
 
         assertEquals(0, Extend.extendDepth(board, e4));
@@ -31,7 +31,7 @@ public class ExtendTest {
 
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("c8=q", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(move));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(move));
         board.applyMove(move);
 
         assertEquals(1, Extend.extendDepth(board, move));
@@ -43,7 +43,7 @@ public class ExtendTest {
 
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("b7", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(move));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(move));
         board.applyMove(move);
 
         assertEquals(1, Extend.extendDepth(board, move));
@@ -55,7 +55,7 @@ public class ExtendTest {
 
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("g6", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(move));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(move));
         board.applyMove(move);
 
         assertEquals(0, Extend.extendDepth(board, move));
@@ -67,7 +67,7 @@ public class ExtendTest {
 
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("Rd4", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(move));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(move));
         board.applyMove(move);
 
         assertEquals(0, Extend.extendDepth(board, move));
@@ -80,7 +80,7 @@ public class ExtendTest {
 
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("h2", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(move));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(move));
         board.applyMove(move);
 
         assertEquals(1, Extend.extendDepth(board, move));
@@ -92,7 +92,7 @@ public class ExtendTest {
 
         MoveParser mp = new MoveParser();
         Move a5 = mp.parseMove("a5", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(a5));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(a5));
         board.applyMove(a5);
 
         assertEquals(0, Extend.extendDepth(board, a5));
@@ -104,7 +104,7 @@ public class ExtendTest {
 
         MoveParser mp = new MoveParser();
         Move f6 = mp.parseMove("f6", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(f6));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(f6));
         board.applyMove(f6);
 
         assertEquals(0, Extend.extendDepth(board, f6));
@@ -116,7 +116,7 @@ public class ExtendTest {
 
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("a6", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(move));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(move));
         board.applyMove(move);
 
         assertEquals(0, Extend.extendDepth(board, move));
@@ -128,7 +128,7 @@ public class ExtendTest {
 
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("b5", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(move));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(move));
         board.applyMove(move);
 
         assertEquals(0, Extend.extendDepth(board, move));
@@ -140,14 +140,14 @@ public class ExtendTest {
 
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("fxe5", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(move));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(move));
         Undo undo = board.applyMove(move);
 
         assertEquals(0, Extend.extendDepth(board, move));
 
         board.undoMove(undo);
         move = mp.parseMove("f5", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(move));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(move));
         board.applyMove(move);
 
         assertEquals(0, Extend.extendDepth(board, move));
@@ -160,11 +160,11 @@ public class ExtendTest {
 
         MoveParser mp = new MoveParser();
         Move m1 = mp.parseMove("Rxd5", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(m1));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(m1));
         board.applyMove(m1);
 
         Move m2 = mp.parseMove("Rxd5", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(m2));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(m2));
         board.applyMove(m2);
 
         assertEquals(1, Extend.extendDepth(board, m2));
@@ -177,11 +177,11 @@ public class ExtendTest {
 
         MoveParser mp = new MoveParser();
         Move m1 = mp.parseMove("Rxd5", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(m1));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(m1));
         board.applyMove(m1);
 
         Move m2 = mp.parseMove("Qxd5", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(m2));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(m2));
         board.applyMove(m2);
 
         assertEquals(1, Extend.extendDepth(board, m2));
@@ -195,11 +195,11 @@ public class ExtendTest {
         MoveParser mp = new MoveParser();
 
         Move m1 = mp.parseMove("Rxd5", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(m1));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(m1));
         board.applyMove(m1);
 
         Move m2 = mp.parseMove("Qxd5", board);
-        assertTrue(MoveGen.genLegalMoves(board).contains(m2));
+        assertTrue(MoveGeneratorImpl.genLegalMoves(board).contains(m2));
         board.applyMove(m2);
 
         assertEquals(0, Extend.extendDepth(board, m2));

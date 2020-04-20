@@ -1,4 +1,4 @@
-package com.jamesswafford.chess4j.search.v2;
+package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.board.Move;
 

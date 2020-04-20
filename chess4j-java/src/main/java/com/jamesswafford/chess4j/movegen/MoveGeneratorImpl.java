@@ -28,9 +28,9 @@ import static com.jamesswafford.chess4j.board.squares.Rank.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.utils.MoveUtils.fromNativeMove;
 
-public final class MoveGen implements MoveGenerator {
+public final class MoveGeneratorImpl implements MoveGenerator {
 
-    private static final Log LOGGER = LogFactory.getLog(MoveGen.class);
+    private static final Log LOGGER = LogFactory.getLog(MoveGeneratorImpl.class);
 
     static {
         Initializer.init();

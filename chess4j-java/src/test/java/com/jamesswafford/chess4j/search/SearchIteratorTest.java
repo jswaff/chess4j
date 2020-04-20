@@ -1,4 +1,4 @@
-package com.jamesswafford.chess4j.search.v2;
+package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
@@ -25,7 +25,7 @@ public class SearchIteratorTest {
     public void setUp() {
         searchIterator = new SearchIterator();
     }
-    
+
     @Test
     public void earlyExitOneLegalMove() throws Exception {
 

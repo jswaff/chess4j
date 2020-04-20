@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.movegen.MoveGeneratorImpl;
 
 
 /*	Initial position
@@ -54,7 +54,7 @@ class PerftCallable implements Callable<Long> {
             return 1;
         }
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
         long n=0;
 
         for (Move m : moves) {
@@ -87,7 +87,7 @@ public final class Perft {
         LOGGER.info("detected " + processors + " processors.");
         ExecutorService executor = Executors.newFixedThreadPool(processors);
         List<Future<Long>> futures = new ArrayList<>();
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MoveGeneratorImpl.genLegalMoves(board);
 
         for (Move m : moves) {
             Board b2 = board.deepCopy();
