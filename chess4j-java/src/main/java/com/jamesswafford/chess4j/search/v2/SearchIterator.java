@@ -4,13 +4,11 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
-import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.io.PrintLine;
 import com.jamesswafford.chess4j.movegen.MoveGen;
-import com.jamesswafford.chess4j.search.KillerMoves;
-import com.jamesswafford.chess4j.search.MVVLVA;
+import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import com.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,7 +31,10 @@ public class SearchIterator {
     private boolean post = true;
     private boolean earlyExitOk = true;
 
+    private MoveGenerator moveGenerator;
+
     public SearchIterator() {
+        moveGenerator = new MoveGen();
     }
 
     public void setMaxDepth(int maxDepth) {
@@ -46,6 +47,10 @@ public class SearchIterator {
 
     public void setEarlyExitOk(boolean earlyExitOk) {
         this.earlyExitOk = earlyExitOk;
+    }
+
+    public void setMoveGenerator(MoveGenerator moveGenerator) {
+        this.moveGenerator = moveGenerator;
     }
 
     public CompletableFuture<List<Move>> findPvFuture(Board board, List<Undo> undos) {
@@ -62,7 +67,7 @@ public class SearchIterator {
      */
     private List<Move> findPrincipalVariation(Board board, final List<Undo> undos) {
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = moveGenerator.generateLegalMoves(board);
         LOGGER.debug("# position has " + moves.size() + " move(s)");
         if (earlyExitOk && moves.size()==1) {
             return Collections.singletonList(moves.get(0));
@@ -71,8 +76,7 @@ public class SearchIterator {
         long startTime = System.currentTimeMillis();
         int depth = 0, score;
         boolean stopSearching = false;
-        Search search = new Search(board, new ArrayList<>(undos), new Eval(), new MoveGen(), new MVVLVA(),
-                KillerMoves.getInstance());
+        Search search = new Search(board, new ArrayList<>(undos));
 
         do {
             ++depth;

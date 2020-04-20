@@ -1,11 +1,15 @@
 package com.jamesswafford.chess4j.search.v2;
 
 import com.jamesswafford.chess4j.board.*;
+import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
+import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
+import com.jamesswafford.chess4j.search.KillerMoves;
 import com.jamesswafford.chess4j.search.KillerMovesStore;
+import com.jamesswafford.chess4j.search.MVVLVA;
 import com.jamesswafford.chess4j.utils.BoardUtils;
 import com.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.commons.logging.Log;
@@ -28,23 +32,24 @@ public class Search {
 
     private final Board board;
     private final List<Undo> undos;
-    private final Evaluator evaluator;
-    private final MoveGenerator moveGenerator;
-    private final MoveScorer moveScorer;
-    private final KillerMovesStore killerMovesStore;
     private final SearchStats searchStats;
     private final List<Move> lastPV;
 
-    public Search(Board board, List<Undo> undos, Evaluator evaluator, MoveGenerator moveGenerator,
-                  MoveScorer moveScorer, KillerMovesStore killerMovesStore) {
+    private Evaluator evaluator;
+    private MoveGenerator moveGenerator;
+    private MoveScorer moveScorer;
+    private KillerMovesStore killerMovesStore;
+
+    public Search(Board board, List<Undo> undos) {
         this.board = board.deepCopy();
         this.undos = new ArrayList<>(undos);
-        this.evaluator = evaluator;
-        this.moveGenerator = moveGenerator;
-        this.moveScorer = moveScorer;
-        this.killerMovesStore = killerMovesStore;
-        this.searchStats = new SearchStats();
         this.lastPV = new ArrayList<>();
+        this.searchStats = new SearchStats();
+
+        this.evaluator = new Eval();
+        this.moveGenerator = new MoveGen();
+        this.moveScorer = new MVVLVA();
+        this.killerMovesStore = KillerMoves.getInstance();
     }
 
     public SearchStats getSearchStats() {
@@ -52,6 +57,22 @@ public class Search {
     }
 
     public List<Move> getLastPV() { return Collections.unmodifiableList(lastPV); }
+
+    public void setEvaluator(Evaluator evaluator) {
+        this.evaluator = evaluator;
+    }
+
+    public void setMoveGenerator(MoveGenerator moveGenerator) {
+        this.moveGenerator = moveGenerator;
+    }
+
+    public void setMoveScorer(MoveScorer moveScorer) {
+        this.moveScorer = moveScorer;
+    }
+
+    public void setKillerMovesStore(KillerMovesStore killerMovesStore) {
+        this.killerMovesStore = killerMovesStore;
+    }
 
     public int search(SearchParameters searchParameters) {
         if (Initializer.nativeCodeInitialized()) {

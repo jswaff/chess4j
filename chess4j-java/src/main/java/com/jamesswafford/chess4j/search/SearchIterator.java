@@ -7,7 +7,6 @@ import java.util.List;
 
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Undo;
-import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.search.v2.Search;
 import com.jamesswafford.chess4j.search.v2.SearchParameters;
 import com.jamesswafford.chess4j.search.v2.SearchStats;
@@ -115,7 +114,7 @@ public final class SearchIterator {
         long startTime = System.currentTimeMillis();
         int depth = 0, score = 0;
         boolean stopSearching = false;
-        Search search = new Search(board, undos, new Eval(), new MoveGen(), new MVVLVA(), KillerMoves.getInstance());
+        Search search = new Search(board, undos);
 
         do {
             ++depth;
