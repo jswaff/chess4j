@@ -3,7 +3,7 @@ package com.jamesswafford.chess4j.board;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 
 import com.jamesswafford.chess4j.utils.BoardUtils;
 import org.junit.Test;
@@ -417,7 +417,7 @@ public class BoardTest {
         assertEquals(b1.hashCode(), b2.hashCode());
 
         Move m = new Move(BLACK_KING, E8, G8,true);
-        List<Move> legalMoves = MoveGen.genLegalMoves(b1);
+        List<Move> legalMoves = MagicBitboardMoveGenerator.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
         Undo u = b1.applyMove(m);
         assertNotEquals(b1, b2);
@@ -437,7 +437,7 @@ public class BoardTest {
         assertEquals(b1.hashCode(), b2.hashCode());
 
         Move m = new Move(WHITE_PAWN, D4, C5, BLACK_PAWN);
-        List<Move> legalMoves = MoveGen.genLegalMoves(b1);
+        List<Move> legalMoves = MagicBitboardMoveGenerator.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
         Undo u = b1.applyMove(m);
         assertNotEquals(b1, b2);
@@ -456,7 +456,7 @@ public class BoardTest {
         assertEquals(b1, b2);
         assertEquals(b1.hashCode(), b2.hashCode());
         Move m = new Move(WHITE_PAWN, D5, C6, BLACK_PAWN,true);
-        List<Move> legalMoves = MoveGen.genLegalMoves(b1);
+        List<Move> legalMoves = MagicBitboardMoveGenerator.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
         Undo u = b1.applyMove(m);
         assertNotEquals(b1, b2);
@@ -476,7 +476,7 @@ public class BoardTest {
         assertEquals(b1.hashCode(), b2.hashCode());
 
         Move m = new Move(WHITE_PAWN, A7, A8,null,WHITE_QUEEN);
-        List<Move> legalMoves = MoveGen.genLegalMoves(b1);
+        List<Move> legalMoves = MagicBitboardMoveGenerator.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
         Undo u = b1.applyMove(m);
         assertNotEquals(b1, b2);
@@ -496,7 +496,7 @@ public class BoardTest {
         assertEquals(b1.hashCode(), b2.hashCode());
 
         Move m = new Move(WHITE_PAWN, A7, B8, BLACK_KNIGHT, WHITE_QUEEN);
-        List<Move> legalMoves = MoveGen.genLegalMoves(b1);
+        List<Move> legalMoves = MagicBitboardMoveGenerator.genLegalMoves(b1);
         assertTrue(legalMoves.contains(m));
         Undo u = b1.applyMove(m);
         assertNotEquals(b1, b2);
@@ -678,7 +678,7 @@ public class BoardTest {
         Board board = new Board("7k/P7/K7/8/8/8/8/8 w - - 0 1");
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("a8=Q", board);
-        List<Move> legalMoves = MoveGen.genLegalMoves(board);
+        List<Move> legalMoves = MagicBitboardMoveGenerator.genLegalMoves(board);
         assertTrue(legalMoves.contains(m));
         Undo u = board.applyMove(m);
         assertEquals(Zobrist.calculatePawnKey(board), board.getPawnKey());
@@ -728,7 +728,7 @@ public class BoardTest {
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("a8=q", b);
 
-        List<Move> moves = MoveGen.genLegalMoves(b);
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(b);
         assertTrue(moves.contains(m));
         Undo u = b.applyMove(m);
 

@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 
 public class OpeningBookInMemoryImpl extends AbstractOpeningBook {
 
@@ -53,7 +53,7 @@ public class OpeningBookInMemoryImpl extends AbstractOpeningBook {
         List<BookMove> bookMoves = movesMap.get(board.getZobristKey());
 
         if (bookMoves != null) {
-            List<Move> lms = MoveGen.genLegalMoves(board);
+            List<Move> lms = MagicBitboardMoveGenerator.genLegalMoves(board);
             for (BookMove bm : bookMoves) {
                 if (lms.contains(bm.getMove())) {
                     legalMoves.add(bm);

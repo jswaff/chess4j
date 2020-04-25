@@ -4,88 +4,67 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
-import com.jamesswafford.chess4j.Globals;
-import com.jamesswafford.chess4j.board.Undo;
-import com.jamesswafford.chess4j.eval.Eval;
-import com.jamesswafford.chess4j.search.v2.Search;
-import com.jamesswafford.chess4j.search.v2.SearchParameters;
-import com.jamesswafford.chess4j.search.v2.SearchStats;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGen;
-import com.jamesswafford.chess4j.book.BookMove;
-import com.jamesswafford.chess4j.hash.TTHolder;
-import com.jamesswafford.chess4j.io.PrintGameResult;
+import com.jamesswafford.chess4j.board.Undo;
+import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.io.PrintLine;
-import com.jamesswafford.chess4j.utils.GameStatus;
-import com.jamesswafford.chess4j.utils.GameStatusChecker;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
+import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import com.jamesswafford.chess4j.utils.MoveUtils;
 
-import static com.jamesswafford.chess4j.Constants.*;
-import static com.jamesswafford.chess4j.utils.GameStatus.*;
 
-public final class SearchIterator {
+import static com.jamesswafford.chess4j.Constants.CHECKMATE;
+import static com.jamesswafford.chess4j.Constants.INFINITY;
 
-    private static final Log LOGGER = LogFactory.getLog(SearchIterator.class);
+public class SearchIterator {
 
-    private static final SearchIterator INSTANCE = new SearchIterator();
+    private static final  Logger LOGGER = LogManager.getLogger(SearchIterator.class);
 
-    public static int remainingTimeMS;
-    public static int incrementMS;
-    public static int maxDepth;
-    public static int maxTime;
-    public static boolean post = true;
+    private int maxDepth = 6;
+    private boolean post = true;
+    private boolean earlyExitOk = true;
 
-    private static Board searchPos;
-    private static List<Undo> searchUndos;
+    private MoveGenerator moveGenerator;
+    private Search search;
 
-    private SearchIterator() {	}
-
-    public static SearchIterator getInstance() {
-        return INSTANCE;
+    public SearchIterator() {
+        moveGenerator = new MagicBitboardMoveGenerator();
+        search = new AlphaBetaSearch();
     }
 
-    /**
-     * Kick off the iterative deepening search in its own thread.
-     * Returns the thread.
-     *
-     * @return - search thread
-     */
-    public static Thread think() {
-
-        // make a copy of the current position.  note that just because we are operating
-        // of a copy of the global position, the global position itself should remain
-        // unchanged until our search is complete.
-        searchPos = Globals.getBoard().deepCopy();
-
-        // make a copy of the global undo stack
-        searchUndos = new ArrayList<>(Globals.gameUndos);
-
-        Thread thinkThread = new Thread(SearchIterator::threadHelper);
-        thinkThread.start();
-
-        return thinkThread;
+    public void setMaxDepth(int maxDepth) {
+        this.maxDepth = maxDepth;
     }
 
-    private static void threadHelper() {
+    public void setPost(boolean post) {
+        this.post = post;
+    }
 
-        List<Move> pv = iterate(searchPos, searchUndos, false);
+    public void setEarlyExitOk(boolean earlyExitOk) {
+        this.earlyExitOk = earlyExitOk;
+    }
 
-        // sanity check - the global position shouldn't have changed
-        assert(Globals.getBoard().equals(searchPos));
+    public void setMoveGenerator(MoveGenerator moveGenerator) {
+        this.moveGenerator = moveGenerator;
+    }
 
-        Globals.gameUndos.add(Globals.getBoard().applyMove(pv.get(0)));
-        LOGGER.info("move " + pv.get(0));
-        GameStatus gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard(), Globals.gameUndos);
+    public void setSearch(Search search) {
+        this.search = search;
+    }
 
-        if (gameStatus != INPROGRESS) {
-            PrintGameResult.printResult(gameStatus);
-        }
+    public CompletableFuture<List<Move>> findPvFuture(Board board, List<Undo> undos) {
+        return CompletableFuture.supplyAsync(() -> findPrincipalVariation(
+                board.deepCopy(),
+                new ArrayList<>(undos)));
     }
 
     /**
@@ -94,28 +73,17 @@ public final class SearchIterator {
      *
      * @return - principal variation
      */
-    public static List<Move> iterate(Board board, List<Undo> undos, boolean testSuiteMode) {
+    private List<Move> findPrincipalVariation(Board board, final List<Undo> undos) {
 
-        if (!testSuiteMode && App.getOpeningBook() != null && board.getMoveCounter() <= 30) {
-            BookMove bookMove = App.getOpeningBook().getMoveWeightedRandomByFrequency(board);
-            if (bookMove != null) {
-                LOGGER.debug("# book move: " + bookMove);
-                return Collections.singletonList(bookMove.getMove());
-            }
-        }
-
-        // if just one legal move don't bother searching
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = moveGenerator.generateLegalMoves(board);
         LOGGER.debug("# position has " + moves.size() + " move(s)");
-        if (!testSuiteMode && moves.size()==1) {
+        if (earlyExitOk && moves.size()==1) {
             return Collections.singletonList(moves.get(0));
         }
 
-        TTHolder.clearAllTables();
         long startTime = System.currentTimeMillis();
-        int depth = 0, score = 0;
+        int depth = 0, score;
         boolean stopSearching = false;
-        Search search = new Search(board, undos, new Eval(), new MoveGen(), new MVVLVA(), KillerMoves.getInstance());
 
         do {
             ++depth;
@@ -124,15 +92,13 @@ public final class SearchIterator {
             int betaBound = INFINITY;
 
             SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
-            score = search.search(parameters);
+            score = search.search(board, undos, parameters);
 
             assert(search.getLastPV().size()>0);
 
             if (post) {
                 PrintLine.printLine(search.getLastPV(), depth, score, startTime, search.getSearchStats().nodes);
             }
-
-            //LOGGER.debug("# first line: " + PrintLine.getMoveString(stats.getFirstLine()));
 
             // if this is a mate, stop here
             if (Math.abs(score) > CHECKMATE-500) {
@@ -145,23 +111,69 @@ public final class SearchIterator {
                 stopSearching = true;
             }
 
-            // if we've used more than half our time, don't start a new iteration.
-            /*long elapsedTime = System.currentTimeMillis() - startTime;
-            if (!testSuiteMode && elapsedTime > (maxTime / 2)) {
-                LOGGER.debug("# stopping iterative search because half time expired.");
-                stopSearching = true;
-            }*/
         } while (!stopSearching);
 
         assert(search.getLastPV().size()>0);
         assert(MoveUtils.isLineValid(search.getLastPV(), board));
 
-        printSearchSummary(depth, startTime, search.getSearchStats());
+        if (post) {
+            printSearchSummary(depth, startTime, search.getSearchStats());
+        }
+
+        // if we are running with assertions enabled and the native library is loaded, verify equality
+        assert(iterationsAreEqual(search.getLastPV(), board, undos));
 
         return search.getLastPV();
     }
 
-    private static void printSearchSummary(int lastDepth, long startTime, SearchStats stats) {
+    private boolean iterationsAreEqual(List<Move> javaPV, Board board, List<Undo> undos) {
+
+        if (Initializer.nativeCodeInitialized()) {
+
+            List<Move> nativePV = findPrincipalVariationNative(board, undos);
+
+            if (!nativePV.equals(javaPV)) {
+                LOGGER.error("PVs are not equal! javaPV: " + PrintLine.getMoveString(javaPV) +
+                        ", nativePV: " + PrintLine.getMoveString(nativePV));
+                return false;
+            } else {
+                return true;
+            }
+
+        } else {
+            // native library not loaded
+            return true;
+        }
+    }
+
+    private List<Move> findPrincipalVariationNative(Board board, List<Undo> undos) {
+        String fen = FenBuilder.createFen(board, false);
+
+        List<Long> prevMoves = undos.stream()
+                .map(undo -> MoveUtils.toNativeMove(undo.getMove()))
+                .collect(Collectors.toList());
+
+        List<Long> nativePV = new ArrayList<>();
+
+        try {
+            iterateNative(fen, prevMoves, maxDepth, nativePV);
+
+            // translate the native PV
+            List<Move> pv = new ArrayList<>();
+            for (int i=0; i<nativePV.size(); i++) {
+                Long nativeMv = nativePV.get(i);
+                // which side is moving?  On even moves it is the player on move.
+                Color ptm = (i % 2) == 0 ? board.getPlayerToMove() : Color.swap(board.getPlayerToMove());
+                pv.add(MoveUtils.fromNativeMove(nativeMv, ptm));
+            }
+            return pv;
+        } catch (IllegalStateException e) {
+            LOGGER.error(e);
+            throw e;
+        }
+    }
+
+    private void printSearchSummary(int lastDepth, long startTime, SearchStats stats) {
         DecimalFormat df = new DecimalFormat("0.00");
         DecimalFormat df2 = new DecimalFormat("#,###,##0");
 
@@ -173,7 +185,7 @@ public final class SearchIterator {
         LOGGER.info("# depth: " + lastDepth);
         LOGGER.info("# nodes: " + df2.format(totalNodes) + ", interior: "
                 + df2.format(stats.nodes) + " (" + df.format(interiorPct) + "%)"
-                + ", quiescense: " + df2.format(0.0) + " (" + df.format(qnodePct) + "%)");
+                + ", quiescence: " + df2.format(0.0) + " (" + df.format(qnodePct) + "%)");
 
         long totalSearchTime = System.currentTimeMillis() - startTime;
         LOGGER.info("# search time: " + totalSearchTime/1000.0 + " seconds"
@@ -211,5 +223,12 @@ public final class SearchIterator {
 //
 //        LOGGER.info("# prunes: " + stats.getPrunes());
     }
+
+//        private List<Move> findPrincipalVariationWithNativeCode(Board board, List<Undo> undos) {
+//
+//
+//        }
+
+        private native void iterateNative(String boardFen, List<Long> prevMoves, int maxDepth, List<Long> pv);
 
 }

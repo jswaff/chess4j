@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.movegen;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.board.squares.File;
@@ -12,8 +13,9 @@ import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.utils.BoardUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static java.util.stream.Collectors.toList;
 
@@ -28,9 +30,9 @@ import static com.jamesswafford.chess4j.board.squares.Rank.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.utils.MoveUtils.fromNativeMove;
 
-public final class MoveGen implements MoveGenerator {
+public final class MagicBitboardMoveGenerator implements MoveGenerator {
 
-    private static final Log LOGGER = LogFactory.getLog(MoveGen.class);
+    private static final  Logger LOGGER = LogManager.getLogger(MagicBitboardMoveGenerator.class);
 
     static {
         Initializer.init();
@@ -208,8 +210,7 @@ public final class MoveGen implements MoveGenerator {
     }
 
     public static List<Move> genPseudoLegalMoves(Board board) {
-        List<Move> moves = genPseudoLegalMoves(board,true,true);
-        return moves;
+        return genPseudoLegalMoves(board,true,true);
     }
 
     private static boolean moveGensAreEqual(List<Move> javaMoves, Board board, boolean caps, boolean noncaps) {

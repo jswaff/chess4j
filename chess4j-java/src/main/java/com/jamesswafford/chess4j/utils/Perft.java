@@ -8,13 +8,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.board.Undo;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 
 
 /*	Initial position
@@ -54,7 +55,7 @@ class PerftCallable implements Callable<Long> {
             return 1;
         }
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
         long n=0;
 
         for (Move m : moves) {
@@ -74,7 +75,7 @@ class PerftCallable implements Callable<Long> {
 }
 
 public final class Perft {
-    private static final Log LOGGER = LogFactory.getLog(Perft.class);
+    private static final  Logger LOGGER = LogManager.getLogger(Perft.class);
 
     private Perft() { }
 
@@ -87,7 +88,7 @@ public final class Perft {
         LOGGER.info("detected " + processors + " processors.");
         ExecutorService executor = Executors.newFixedThreadPool(processors);
         List<Future<Long>> futures = new ArrayList<>();
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
 
         for (Move m : moves) {
             Board b2 = board.deepCopy();

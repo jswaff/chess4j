@@ -1,15 +1,16 @@
 package com.jamesswafford.chess4j.io;
 
+import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.Globals;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.utils.GameStatus;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public final class PrintGameResult {
 
-    private static final Log LOGGER = LogFactory.getLog(PrintGameResult.class);
+    private static final  Logger LOGGER = LogManager.getLogger(PrintGameResult.class);
 
     private PrintGameResult() { }
 

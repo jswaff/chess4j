@@ -1,7 +1,8 @@
 package com.jamesswafford.chess4j.io;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.jamesswafford.chess4j.App;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.CastlingRights;
@@ -11,7 +12,7 @@ import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.pieces.Piece;
 
 public class DrawBoard {
-    private static final Log logger = LogFactory.getLog(DrawBoard.class);
+    private static final  Logger LOGGER = LogManager.getLogger(DrawBoard.class);
 
     public static void drawBoard(Board b) {
         StringBuffer board = new StringBuffer();
@@ -48,7 +49,7 @@ public class DrawBoard {
             board.append("\n");
         }
 
-        logger.info(board);
+        LOGGER.info(board);
     }
 
 }

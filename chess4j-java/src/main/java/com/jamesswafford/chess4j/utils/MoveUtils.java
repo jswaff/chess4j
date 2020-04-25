@@ -3,16 +3,17 @@ package com.jamesswafford.chess4j.utils;
 import java.util.Collections;
 import java.util.List;
 
+import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.io.PrintLine;
 import com.jamesswafford.chess4j.pieces.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 
 import static com.jamesswafford.chess4j.pieces.Pawn.*;
 import static com.jamesswafford.chess4j.pieces.Knight.*;
@@ -24,7 +25,7 @@ import static com.jamesswafford.chess4j.pieces.King.*;
 
 public final class MoveUtils {
 
-    private static final Log LOGGER = LogFactory.getLog(MoveUtils.class);
+    private static final  Logger LOGGER = LogManager.getLogger(MoveUtils.class);
 
     private MoveUtils() { }
 
@@ -167,7 +168,7 @@ public final class MoveUtils {
     }
 
     private static boolean isLegalMove(Move move, Board board) {
-        List<Move> legalMoves = MoveGen.genLegalMoves(board);
+        List<Move> legalMoves = MagicBitboardMoveGenerator.genLegalMoves(board);
         return legalMoves.contains(move);
     }
 

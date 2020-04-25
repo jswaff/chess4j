@@ -1,15 +1,17 @@
-package com.jamesswafford.chess4j.search.v2;
+package com.jamesswafford.chess4j.search;
 
+import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.board.*;
+import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
-import com.jamesswafford.chess4j.search.KillerMovesStore;
 import com.jamesswafford.chess4j.utils.BoardUtils;
 import com.jamesswafford.chess4j.utils.MoveUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,33 +20,30 @@ import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 
-public class Search {
+public class AlphaBetaSearch implements Search {
 
-    private static final Log LOGGER = LogFactory.getLog(Search.class);
+    private static final  Logger LOGGER = LogManager.getLogger(AlphaBetaSearch.class);
 
     static {
         Initializer.init();
     }
 
-    private final Board board;
-    private final List<Undo> undos;
-    private final Evaluator evaluator;
-    private final MoveGenerator moveGenerator;
-    private final MoveScorer moveScorer;
-    private final KillerMovesStore killerMovesStore;
-    private final SearchStats searchStats;
     private final List<Move> lastPV;
+    private final SearchStats searchStats;
 
-    public Search(Board board, List<Undo> undos, Evaluator evaluator, MoveGenerator moveGenerator,
-                  MoveScorer moveScorer, KillerMovesStore killerMovesStore) {
-        this.board = board.deepCopy();
-        this.undos = new ArrayList<>(undos);
-        this.evaluator = evaluator;
-        this.moveGenerator = moveGenerator;
-        this.moveScorer = moveScorer;
-        this.killerMovesStore = killerMovesStore;
-        this.searchStats = new SearchStats();
+    private Evaluator evaluator;
+    private MoveGenerator moveGenerator;
+    private MoveScorer moveScorer;
+    private KillerMovesStore killerMovesStore;
+
+    public AlphaBetaSearch() {
         this.lastPV = new ArrayList<>();
+        this.searchStats = new SearchStats();
+
+        this.evaluator = new Eval();
+        this.moveGenerator = new MagicBitboardMoveGenerator();
+        this.moveScorer = new MVVLVA();
+        this.killerMovesStore = KillerMoves.getInstance();
     }
 
     public SearchStats getSearchStats() {
@@ -53,21 +52,45 @@ public class Search {
 
     public List<Move> getLastPV() { return Collections.unmodifiableList(lastPV); }
 
-    public int search(SearchParameters searchParameters) {
+
+    public void setEvaluator(Evaluator evaluator) {
+        this.evaluator = evaluator;
+    }
+
+    public void setMoveGenerator(MoveGenerator moveGenerator) {
+        this.moveGenerator = moveGenerator;
+    }
+
+    public void setMoveScorer(MoveScorer moveScorer) {
+        this.moveScorer = moveScorer;
+    }
+
+    public void setKillerMovesStore(KillerMovesStore killerMovesStore) {
+        this.killerMovesStore = killerMovesStore;
+    }
+
+    @Override
+    public int search(Board board, SearchParameters searchParameters) {
+        return search(board, new ArrayList<>(), searchParameters);
+    }
+
+    @Override
+    public int search(Board board, List<Undo> undos, SearchParameters searchParameters) {
         if (Initializer.nativeCodeInitialized()) {
-            return searchWithNativeCode(searchParameters);
+            return searchWithNativeCode(board, undos, searchParameters);
         } else {
-            return searchWithJavaCode(searchParameters);
+            return searchWithJavaCode(board, undos, searchParameters);
         }
     }
 
-    private int searchWithJavaCode(SearchParameters searchParameters) {
+    private int searchWithJavaCode(Board board, List<Undo> undos, SearchParameters searchParameters) {
         killerMovesStore.clear();
-        return search(lastPV, 0, searchParameters.getDepth(),
+        return search(board, undos, lastPV, 0, searchParameters.getDepth(),
                 searchParameters.getAlpha(), searchParameters.getBeta());
     }
 
-    private int searchWithNativeCode(SearchParameters searchParameters) {
+    private int searchWithNativeCode(Board board, List<Undo> undos, SearchParameters searchParameters) {
+
         String fen = FenBuilder.createFen(board, false);
 
         List<Long> prevMoves = undos.stream()
@@ -79,7 +102,7 @@ public class Search {
             int nativeScore = searchNative(fen, prevMoves, nativePV, searchParameters.getDepth(),
                     searchParameters.getAlpha(), searchParameters.getBeta(), searchStats);
 
-            assert (searchesAreEqual(fen, searchParameters, nativeScore, nativePV));
+            assert (searchesAreEqual(board, undos, searchParameters, fen, nativeScore, nativePV));
 
             // translate the native PV into the object's PV
             lastPV.clear();
@@ -97,8 +120,9 @@ public class Search {
         }
     }
 
-    private boolean searchesAreEqual(String fen, SearchParameters searchParameters, int nativeScore,
-                                     List<Long> nativePV) {
+    private boolean searchesAreEqual(Board board, List<Undo> undos, SearchParameters searchParameters,
+                                     String fen, int nativeScore, List<Long> nativePV)
+    {
         try {
             // copy the search stats for comparison
             SearchStats nativeStats = new SearchStats();
@@ -107,8 +131,7 @@ public class Search {
             nativeStats.draws = searchStats.draws;
 
             searchStats.initialize();
-            int javaScore = searchWithJavaCode(searchParameters);
-            LOGGER.info("searchStats: " + searchStats);
+            int javaScore = searchWithJavaCode(board, undos, searchParameters);
             if (javaScore != nativeScore || !searchStats.equals(nativeStats)) {
                 LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
@@ -116,7 +139,7 @@ public class Search {
                 return false;
             }
             // compare the PVs.
-            if (!moveLinesAreEqual(nativePV, lastPV)) {
+            if (!moveLinesAreEqual(board, nativePV, lastPV)) {
                 LOGGER.error("pvs are not equal!"
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
                         + ", params: " + searchParameters + ", fen: " + fen);
@@ -130,7 +153,7 @@ public class Search {
         }
     }
 
-    private boolean moveLinesAreEqual(List<Long> nativePV, List<Move> javaPV) {
+    private boolean moveLinesAreEqual(Board board, List<Long> nativePV, List<Move> javaPV) {
         if (nativePV.size() != lastPV.size()) {
             LOGGER.error("nativePV.size: " + nativePV.size() + ", javaPV.size: " + javaPV.size());
             return false;
@@ -150,7 +173,7 @@ public class Search {
         return true;
     }
 
-    private int search(List<Move> parentPV, int ply, int depth, int alpha, int beta) {
+    private int search(Board board, List<Undo> undos, List<Move> parentPV, int ply, int depth, int alpha, int beta) {
 
         searchStats.nodes++;
         parentPV.clear();
@@ -182,7 +205,7 @@ public class Search {
                 continue;
             }
 
-            int val = -search(pv, ply+1, depth-1, -beta, -alpha);
+            int val = -search(board, undos, pv, ply+1, depth-1, -beta, -alpha);
             ++numMovesSearched;
             board.undoMove(undos.remove(undos.size()-1));
             if (val >= beta) {
@@ -198,12 +221,12 @@ public class Search {
             }
         }
 
-        alpha = adjustFinalScoreForMates(alpha, numMovesSearched, ply);
+        alpha = adjustFinalScoreForMates(board, alpha, numMovesSearched, ply);
 
         return alpha;
     }
 
-    private int adjustFinalScoreForMates(int score, int numMovesSearched, int ply) {
+    private int adjustFinalScoreForMates(Board board, int score, int numMovesSearched, int ply) {
         int adjScore = score;
 
         if (numMovesSearched==0) {

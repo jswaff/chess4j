@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.hash.TTHolder;
-import com.jamesswafford.chess4j.search.v2.SearchIterator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
@@ -29,7 +29,8 @@ import com.jamesswafford.chess4j.utils.Perft;
 
 public class InputParser {
 
-    private static final Log logger = LogFactory.getLog(InputParser.class);
+    private static final  Logger LOGGER = LogManager.getLogger(InputParser.class);
+
     private static final InputParser INSTANCE = new InputParser();
     private boolean forceMode = true;
     private SearchIterator searchIterator = new SearchIterator();
@@ -43,7 +44,7 @@ public class InputParser {
     }
 
     public void parseCommand(String command) throws IllegalMoveException,ParseException {
-        logger.debug("# parsing: " + command);
+        LOGGER.debug("# parsing: " + command);
 
         String[] input = command.split("\\s+");
         String cmd = input[0];
@@ -74,7 +75,7 @@ public class InputParser {
         } else if ("memory".equals(cmd)) {
             memory(input);
         } else if ("name".equals(cmd)) {
-            logger.info("# opponent is: " + input[1]);
+            LOGGER.info("# opponent is: " + input[1]);
         } else if ("new".equals(cmd)) {
             newGame();
         } else if ("nopost".equals(cmd)) {
@@ -128,16 +129,16 @@ public class InputParser {
             List<BookMove> bookMoves = App.getOpeningBook().getMoves(Globals.getBoard());
             bookMoves.sort((BookMove bm1, BookMove bm2) -> bm2.getFrequency() - bm1.getFrequency());
 
-            logger.info("# book moves:");
+            LOGGER.info("# book moves:");
             for (BookMove bookMove : bookMoves) {
-                logger.info("\t" + bookMove.getMove() + " - freq: " + bookMove.getFrequency()
+                LOGGER.info("\t" + bookMove.getMove() + " - freq: " + bookMove.getFrequency()
                         + ", w/l/d: " + bookMove.getWins() + " / " + bookMove.getLosses()
                         + " / " + bookMove.getDraws());
             }
         } else {
-            logger.info("\tbook not enabled");
+            LOGGER.info("\tbook not enabled");
         }
-        logger.info(""); // blank line required by protocol
+        LOGGER.info(""); // blank line required by protocol
     }
 
     private void db() {
@@ -146,7 +147,7 @@ public class InputParser {
 
     private void eval() {
         int eval = Eval.eval(Globals.getBoard());
-        logger.info("eval=" + eval);
+        LOGGER.info("eval=" + eval);
     }
 
     private void force() {
@@ -170,9 +171,9 @@ public class InputParser {
         String mps = input[1];
         String base = input[2];
         double increment = Double.parseDouble(input[3]);
-        logger.debug("# level: " + mps + ", " + base + ", " + increment);
+        LOGGER.debug("# level: " + mps + ", " + base + ", " + increment);
         increment *= 1000;
-        logger.debug("# increment: " + increment + " ms.");
+        LOGGER.debug("# increment: " + increment + " ms.");
         // TODO: timer
         //SearchIterator.incrementMS = increment.intValue();
     }
@@ -193,7 +194,7 @@ public class InputParser {
     private void memory(String[] input) {
         int maxMemMB = Integer.parseInt(input[1]);
 
-        logger.debug("# received memory command, N=" + maxMemMB);
+        LOGGER.debug("# received memory command, N=" + maxMemMB);
 
         if (maxMemMB != prevMaxMB) {
             int maxMemPerTable = maxMemMB * 1024 * 1024 / 3; // DP, AR and pawn
@@ -207,7 +208,7 @@ public class InputParser {
             // suggest to the JVM that now is good time to garbage collect the previous tables
             System.gc();
         } else {
-            logger.debug("# memory usage unchanged, skipping new table instantiation.");
+            LOGGER.debug("# memory usage unchanged, skipping new table instantiation.");
         }
     }
 
@@ -239,9 +240,9 @@ public class InputParser {
         long end = System.currentTimeMillis();
         if (end==start) end=start+1; // HACK to avoid div 0
         DecimalFormat df = new DecimalFormat("0,000");
-        logger.info("# nodes: " + df.format(nodes));
-        logger.info("# elapsed time: " + (end-start) + " ms");
-        logger.info("# rate: " + df.format(nodes*1000/(end-start)) + " n/s\n");
+        LOGGER.info("# nodes: " + df.format(nodes));
+        LOGGER.info("# elapsed time: " + (end-start) + " ms");
+        LOGGER.info("# rate: " + df.format(nodes*1000/(end-start)) + " n/s\n");
     }
 
     private void pgn2book(String[] input) {
@@ -249,23 +250,23 @@ public class InputParser {
         java.io.File f = new java.io.File(fName);
         if (f.exists()) {
             long startTime = System.currentTimeMillis();
-            logger.info("processing pgn: " + fName + " ...");
-            logger.info("doing dry run...");
+            LOGGER.info("processing pgn: " + fName + " ...");
+            LOGGER.info("doing dry run...");
             int n;
             try {
                 n = processPGNFile(f,true);
-                logger.info("\nadding " + n + " games to book...");
+                LOGGER.info("\nadding " + n + " games to book...");
                 processPGNFile(f,false);
                 DecimalFormat df = new DecimalFormat("0.00");
                 long elapsed = System.currentTimeMillis() - startTime;
-                logger.info("\nfinished in " + df.format((double) elapsed /1000.0) + " seconds.");
+                LOGGER.info("\nfinished in " + df.format((double) elapsed /1000.0) + " seconds.");
             } catch (IOException e) {
-                logger.error("There was an I/O error processing the pgn file", e);
+                LOGGER.error("There was an I/O error processing the pgn file", e);
             } catch (IllegalMoveException e) {
-                logger.error("Illegal move found in PGN file", e);
+                LOGGER.error("Illegal move found in PGN file", e);
             }
         } else {
-            logger.warn("file " + fName + " not found.");
+            LOGGER.warn("file " + fName + " not found.");
         }
     }
 
@@ -324,25 +325,25 @@ public class InputParser {
 //        if (!SearchIterator.isPondering()) {
             stopSearchThread();
 //        }
-        logger.info("pong " + input[1]);
+        LOGGER.info("pong " + input[1]);
     }
 
     private void protover(String[] input) {
         int version = Integer.parseInt(input[1]);
         if (version < 2) {
-            logger.info("Error: invalid protocol version.");
+            LOGGER.info("Error: invalid protocol version.");
             System.exit(1);
         }
-        logger.info("feature analyze=0 black=0 colors=0 ping=1 draw=0 debug=1 edit=0 ics=1");
-        logger.info("feature level=0 name=1 nps=0 memory=1 playother=0 pause=0 resume=0 reuse=1 san=0");
-        logger.info("feature setboard=1 sigint=0 sigterm=0 smp=0 st=0 time=1 usermove=1");
-        logger.info("feature white=0 variants=\"normal\" myname=\"chess4j\"");
-        logger.info("feature done=1"); // must be last
+        LOGGER.info("feature analyze=0 black=0 colors=0 ping=1 draw=0 debug=1 edit=0 ics=1");
+        LOGGER.info("feature level=0 name=1 nps=0 memory=1 playother=0 pause=0 resume=0 reuse=1 san=0");
+        LOGGER.info("feature setboard=1 sigint=0 sigterm=0 smp=0 st=0 time=1 usermove=1");
+        LOGGER.info("feature white=0 variants=\"normal\" myname=\"chess4j\"");
+        LOGGER.info("feature done=1"); // must be last
     }
 
     private void quit() {
         stopSearchThread();
-        logger.info("bye...");
+        LOGGER.info("bye...");
         System.exit(0);
     }
 
@@ -383,7 +384,7 @@ public class InputParser {
             gameResult = GameResult.ADJOURNED;
         }
 
-        logger.info("# result : " + result + " : " + gameResult);
+        LOGGER.info("# result : " + result + " : " + gameResult);
 
         List<Undo> undos = Globals.gameUndos;
         List<Move> gameMoves = new ArrayList<>();
@@ -393,7 +394,7 @@ public class InputParser {
             sb.append(undo.getMove().toString()).append(" ");
         }
 
-        logger.info("# game moves: " + sb.toString());
+        LOGGER.info("# game moves: " + sb.toString());
 
         App.getOpeningBook().learn(gameMoves, engineColor, gameResult);
     }
@@ -407,7 +408,7 @@ public class InputParser {
      */
     private void sd(String[] input) {
         int depth = Integer.parseInt(input[1]);
-        logger.debug("# setting depth to : " + depth);
+        LOGGER.debug("# setting depth to : " + depth);
         searchIterator.setMaxDepth(depth);
     }
 
@@ -434,7 +435,7 @@ public class InputParser {
     private void time(String[] input) {
         int time = Integer.parseInt(input[1]);
         time *= 10; // centiseconds to milliseconds
-        logger.debug("# MY TIME: " + time);
+        LOGGER.debug("# MY TIME: " + time);
         // TODO: timer
         //SearchIterator.remainingTimeMS = time;
     }
@@ -464,7 +465,7 @@ public class InputParser {
 
     private void variant(String[] input) {
         if (! "normal".equals(input[1])) {
-            logger.info("Error: unsupported variant.");
+            LOGGER.info("Error: unsupported variant.");
         }
     }
 
@@ -494,7 +495,7 @@ public class InputParser {
                     .thenApply(
                         pv -> {
                             Globals.gameUndos.add(Globals.getBoard().applyMove(pv.get(0)));
-                            logger.info("move " + pv.get(0));
+                            LOGGER.info("move " + pv.get(0));
                             endOfGameCheck();
                             return pv;
                         }

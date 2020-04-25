@@ -1,7 +1,7 @@
 package com.jamesswafford.chess4j.hash;
 
 import com.jamesswafford.chess4j.board.Undo;
-import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 
 import org.junit.Test;
 
@@ -84,7 +84,7 @@ public class TranspositionTableTest {
     public void testStoreCapture() {
         ttable.clear();
         board.setPos("5k2/6pp/p1qN4/1p1p4/3P4/2PKP2Q/PP3r2/3R4 b - -");
-        Move capture = MoveGen.genLegalMoves(board).stream()
+        Move capture = MagicBitboardMoveGenerator.genLegalMoves(board).stream()
                 .filter(m -> m.captured() != null)
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("expected capture"));
@@ -102,7 +102,7 @@ public class TranspositionTableTest {
     public void testStorePromotion() {
         ttable.clear();
         board.setPos("8/4Pk1p/6p1/1r6/8/5N2/2B2PPP/b5K1 w - -");
-        Move promotion = MoveGen.genLegalMoves(board).stream()
+        Move promotion = MagicBitboardMoveGenerator.genLegalMoves(board).stream()
                 .filter(m -> m.promotion() != null)
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("expected promotion"));
@@ -118,7 +118,7 @@ public class TranspositionTableTest {
     public void testStoreCastle() {
         ttable.clear();
         board.setPos("4k2r/8/8/8/8/8/8/R3K3 b Qk - 0 1");
-        Move castle = MoveGen.genLegalMoves(board).stream()
+        Move castle = MagicBitboardMoveGenerator.genLegalMoves(board).stream()
                 .filter(Move::isCastle)
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("expected castle"));
@@ -134,7 +134,7 @@ public class TranspositionTableTest {
     public void testStoreEPCapture() {
         ttable.clear();
         board.setPos("rnbk1bnr/pp1ppppp/8/8/1Pp1P3/5N2/P1PNBPPP/R1BQ1RK1 b - b3 0 6");
-        Move epCapture = MoveGen.genLegalMoves(board).stream()
+        Move epCapture = MagicBitboardMoveGenerator.genLegalMoves(board).stream()
                 .filter(Move::isEpCapture)
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("expected ep capture"));
