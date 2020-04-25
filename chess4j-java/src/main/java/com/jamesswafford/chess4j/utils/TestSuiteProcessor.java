@@ -1,17 +1,5 @@
 package com.jamesswafford.chess4j.utils;
 
-import java.nio.charset.Charset;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.jamesswafford.chess4j.search.SearchIterator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
@@ -21,10 +9,21 @@ import com.jamesswafford.chess4j.io.DrawBoard;
 import com.jamesswafford.chess4j.io.EPDOperation;
 import com.jamesswafford.chess4j.io.EPDParser;
 import com.jamesswafford.chess4j.io.MoveParser;
+import com.jamesswafford.chess4j.search.SearchIterator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.nio.charset.Charset;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestSuiteProcessor {
 
-    private static final Log LOGGER = LogFactory.getLog(TestSuiteProcessor.class);
+    private static final  Logger LOGGER = LogManager.getLogger(TestSuiteProcessor.class);
 
     private List<Move> getBestMoves(Board b,List<EPDOperation> ops) throws ParseException, IllegalMoveException {
         List<Move> bms = new ArrayList<>();

@@ -1,5 +1,18 @@
 package com.jamesswafford.chess4j;
 
+import com.jamesswafford.chess4j.book.AbstractOpeningBook;
+import com.jamesswafford.chess4j.book.OpeningBookSQLiteImpl;
+import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
+import com.jamesswafford.chess4j.exceptions.ParseException;
+import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
+import com.jamesswafford.chess4j.hash.TTHolder;
+import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
+import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.io.InputParser;
+import com.jamesswafford.chess4j.utils.TestSuiteProcessor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -7,22 +20,8 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
-import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
-import com.jamesswafford.chess4j.init.Initializer;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.jamesswafford.chess4j.book.AbstractOpeningBook;
-import com.jamesswafford.chess4j.book.OpeningBookSQLiteImpl;
-import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
-import com.jamesswafford.chess4j.exceptions.ParseException;
-import com.jamesswafford.chess4j.hash.TTHolder;
-import com.jamesswafford.chess4j.io.InputParser;
-import com.jamesswafford.chess4j.utils.TestSuiteProcessor;
-
 public final class App {
-    private static final Log LOGGER = LogFactory.getLog(App.class);
+    private static final  Logger LOGGER = LogManager.getLogger(App.class);
 
     private static AbstractOpeningBook openingBook;
     private static String bookPath = null;

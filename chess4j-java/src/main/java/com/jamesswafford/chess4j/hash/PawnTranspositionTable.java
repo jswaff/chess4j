@@ -1,11 +1,11 @@
 package com.jamesswafford.chess4j.hash;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class PawnTranspositionTable extends AbstractTranspositionTable {
 
-    private static final Log LOGGER = LogFactory.getLog(PawnTranspositionTable.class);
+    private static final  Logger LOGGER = LogManager.getLogger(PawnTranspositionTable.class);
 
     private static int DEFAULT_ENTRIES = 1048576; // = 0x100000   ~1 million entries
 

@@ -8,9 +8,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.board.Undo;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
@@ -74,7 +75,7 @@ class PerftCallable implements Callable<Long> {
 }
 
 public final class Perft {
-    private static final Log LOGGER = LogFactory.getLog(Perft.class);
+    private static final  Logger LOGGER = LogManager.getLogger(Perft.class);
 
     private Perft() { }
 

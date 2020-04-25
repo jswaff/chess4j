@@ -1,5 +1,10 @@
 package com.jamesswafford.chess4j.eval;
 
+import java.util.function.BiFunction;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
@@ -8,16 +13,12 @@ import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.function.BiFunction;
 
 import static com.jamesswafford.chess4j.eval.EvalKing.*;
 
 public final class Eval implements Evaluator {
 
-    private static final Log LOGGER = LogFactory.getLog(Eval.class);
+    private static final  Logger LOGGER = LogManager.getLogger(Evaluator.class);
 
     static {
         Initializer.init();

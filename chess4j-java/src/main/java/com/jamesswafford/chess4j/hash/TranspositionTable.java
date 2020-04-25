@@ -1,16 +1,15 @@
 package com.jamesswafford.chess4j.hash;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Move;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Optional;
 
 public class TranspositionTable extends AbstractTranspositionTable {
 
-    private static final Log LOGGER = LogFactory.getLog(TranspositionTable.class);
+    private static final  Logger LOGGER = LogManager.getLogger(TranspositionTable.class);
 
     private static int DEFAULT_ENTRIES = 1048576; // = 0x100000   ~1 million entries
 

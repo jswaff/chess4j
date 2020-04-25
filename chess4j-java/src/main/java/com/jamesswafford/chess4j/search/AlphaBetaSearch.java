@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.search;
 
+import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.Evaluator;
@@ -9,8 +10,8 @@ import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import com.jamesswafford.chess4j.utils.BoardUtils;
 import com.jamesswafford.chess4j.utils.MoveUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +22,7 @@ import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 
 public class AlphaBetaSearch implements Search {
 
-    private static final Log LOGGER = LogFactory.getLog(AlphaBetaSearch.class);
+    private static final  Logger LOGGER = LogManager.getLogger(AlphaBetaSearch.class);
 
     static {
         Initializer.init();

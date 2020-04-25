@@ -3,12 +3,13 @@ package com.jamesswafford.chess4j.utils;
 import java.util.Collections;
 import java.util.List;
 
+import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.io.PrintLine;
 import com.jamesswafford.chess4j.pieces.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
@@ -24,7 +25,7 @@ import static com.jamesswafford.chess4j.pieces.King.*;
 
 public final class MoveUtils {
 
-    private static final Log LOGGER = LogFactory.getLog(MoveUtils.class);
+    private static final  Logger LOGGER = LogManager.getLogger(MoveUtils.class);
 
     private MoveUtils() { }
 
