@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 
-public class AlphaBetaSearch {
+public class AlphaBetaSearch implements Search {
 
     private static final Log LOGGER = LogFactory.getLog(AlphaBetaSearch.class);
 
@@ -27,19 +27,15 @@ public class AlphaBetaSearch {
         Initializer.init();
     }
 
-    private final Board board;
-    private final List<Undo> undos;
-    private final SearchStats searchStats;
     private final List<Move> lastPV;
+    private final SearchStats searchStats;
 
     private Evaluator evaluator;
     private MoveGenerator moveGenerator;
     private MoveScorer moveScorer;
     private KillerMovesStore killerMovesStore;
 
-    public AlphaBetaSearch(Board board, List<Undo> undos) {
-        this.board = board.deepCopy();
-        this.undos = new ArrayList<>(undos);
+    public AlphaBetaSearch() {
         this.lastPV = new ArrayList<>();
         this.searchStats = new SearchStats();
 
@@ -54,6 +50,7 @@ public class AlphaBetaSearch {
     }
 
     public List<Move> getLastPV() { return Collections.unmodifiableList(lastPV); }
+
 
     public void setEvaluator(Evaluator evaluator) {
         this.evaluator = evaluator;
@@ -71,21 +68,28 @@ public class AlphaBetaSearch {
         this.killerMovesStore = killerMovesStore;
     }
 
-    public int search(SearchParameters searchParameters) {
+    @Override
+    public int search(Board board, SearchParameters searchParameters) {
+        return search(board, new ArrayList<>(), searchParameters);
+    }
+
+    @Override
+    public int search(Board board, List<Undo> undos, SearchParameters searchParameters) {
         if (Initializer.nativeCodeInitialized()) {
-            return searchWithNativeCode(searchParameters);
+            return searchWithNativeCode(board, undos, searchParameters);
         } else {
-            return searchWithJavaCode(searchParameters);
+            return searchWithJavaCode(board, undos, searchParameters);
         }
     }
 
-    private int searchWithJavaCode(SearchParameters searchParameters) {
+    private int searchWithJavaCode(Board board, List<Undo> undos, SearchParameters searchParameters) {
         killerMovesStore.clear();
-        return search(lastPV, 0, searchParameters.getDepth(),
+        return search(board, undos, lastPV, 0, searchParameters.getDepth(),
                 searchParameters.getAlpha(), searchParameters.getBeta());
     }
 
-    private int searchWithNativeCode(SearchParameters searchParameters) {
+    private int searchWithNativeCode(Board board, List<Undo> undos, SearchParameters searchParameters) {
+
         String fen = FenBuilder.createFen(board, false);
 
         List<Long> prevMoves = undos.stream()
@@ -97,7 +101,7 @@ public class AlphaBetaSearch {
             int nativeScore = searchNative(fen, prevMoves, nativePV, searchParameters.getDepth(),
                     searchParameters.getAlpha(), searchParameters.getBeta(), searchStats);
 
-            assert (searchesAreEqual(fen, searchParameters, nativeScore, nativePV));
+            assert (searchesAreEqual(board, undos, searchParameters, fen, nativeScore, nativePV));
 
             // translate the native PV into the object's PV
             lastPV.clear();
@@ -115,8 +119,9 @@ public class AlphaBetaSearch {
         }
     }
 
-    private boolean searchesAreEqual(String fen, SearchParameters searchParameters, int nativeScore,
-                                     List<Long> nativePV) {
+    private boolean searchesAreEqual(Board board, List<Undo> undos, SearchParameters searchParameters,
+                                     String fen, int nativeScore, List<Long> nativePV)
+    {
         try {
             // copy the search stats for comparison
             SearchStats nativeStats = new SearchStats();
@@ -125,7 +130,7 @@ public class AlphaBetaSearch {
             nativeStats.draws = searchStats.draws;
 
             searchStats.initialize();
-            int javaScore = searchWithJavaCode(searchParameters);
+            int javaScore = searchWithJavaCode(board, undos, searchParameters);
             if (javaScore != nativeScore || !searchStats.equals(nativeStats)) {
                 LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
@@ -133,7 +138,7 @@ public class AlphaBetaSearch {
                 return false;
             }
             // compare the PVs.
-            if (!moveLinesAreEqual(nativePV, lastPV)) {
+            if (!moveLinesAreEqual(board, nativePV, lastPV)) {
                 LOGGER.error("pvs are not equal!"
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
                         + ", params: " + searchParameters + ", fen: " + fen);
@@ -147,7 +152,7 @@ public class AlphaBetaSearch {
         }
     }
 
-    private boolean moveLinesAreEqual(List<Long> nativePV, List<Move> javaPV) {
+    private boolean moveLinesAreEqual(Board board, List<Long> nativePV, List<Move> javaPV) {
         if (nativePV.size() != lastPV.size()) {
             LOGGER.error("nativePV.size: " + nativePV.size() + ", javaPV.size: " + javaPV.size());
             return false;
@@ -167,7 +172,7 @@ public class AlphaBetaSearch {
         return true;
     }
 
-    private int search(List<Move> parentPV, int ply, int depth, int alpha, int beta) {
+    private int search(Board board, List<Undo> undos, List<Move> parentPV, int ply, int depth, int alpha, int beta) {
 
         searchStats.nodes++;
         parentPV.clear();
@@ -199,7 +204,7 @@ public class AlphaBetaSearch {
                 continue;
             }
 
-            int val = -search(pv, ply+1, depth-1, -beta, -alpha);
+            int val = -search(board, undos, pv, ply+1, depth-1, -beta, -alpha);
             ++numMovesSearched;
             board.undoMove(undos.remove(undos.size()-1));
             if (val >= beta) {
@@ -215,12 +220,12 @@ public class AlphaBetaSearch {
             }
         }
 
-        alpha = adjustFinalScoreForMates(alpha, numMovesSearched, ply);
+        alpha = adjustFinalScoreForMates(board, alpha, numMovesSearched, ply);
 
         return alpha;
     }
 
-    private int adjustFinalScoreForMates(int score, int numMovesSearched, int ply) {
+    private int adjustFinalScoreForMates(Board board, int score, int numMovesSearched, int ply) {
         int adjScore = score;
 
         if (numMovesSearched==0) {

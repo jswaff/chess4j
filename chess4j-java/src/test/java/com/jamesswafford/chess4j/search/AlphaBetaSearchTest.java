@@ -4,10 +4,10 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +26,13 @@ import static com.jamesswafford.chess4j.pieces.Rook.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public class AlphaBetaSearchTest {
+
+    AlphaBetaSearch search;
+
+    @Before
+    public void setUp() {
+        search = new AlphaBetaSearch();
+    }
 
     @Test
     public void testSearch_initialPos_depth1() {
@@ -46,10 +53,9 @@ public class AlphaBetaSearchTest {
         when(evaluator.evaluateBoard(board2)).thenReturn(-5);
 
         // when the search is invoked
-        AlphaBetaSearch search = new AlphaBetaSearch(board, new ArrayList<>());
         search.setEvaluator(evaluator);
 
-        int score = search.search(params);
+        int score = search.search(board, params);
 
         // then the evaluator should have been invoked for each move
         verify(evaluator, times(20)).evaluateBoard(any(Board.class));
@@ -68,9 +74,7 @@ public class AlphaBetaSearchTest {
 
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        AlphaBetaSearch search = new AlphaBetaSearch(board, new ArrayList<>());
-
-        int score = search.search(params);
+        int score = search.search(board, params);
         assertEquals(CHECKMATE-1, score);
 
         List<Move> pv = search.getLastPV();
@@ -84,9 +88,7 @@ public class AlphaBetaSearchTest {
 
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
 
-        AlphaBetaSearch search = new AlphaBetaSearch(board, new ArrayList<>());
-
-        int score = search.search(params);
+        int score = search.search(board, params);
         assertEquals(CHECKMATE-1, score);
 
         List<Move> pv = search.getLastPV();
@@ -100,8 +102,7 @@ public class AlphaBetaSearchTest {
 
         SearchParameters params = new SearchParameters(4, -INFINITY, INFINITY);
 
-        AlphaBetaSearch search = new AlphaBetaSearch(board, new ArrayList<>());
-        int score = search.search(params);
+        int score = search.search(board, params);
         assertEquals(CHECKMATE-3, score);
 
         List<Move> pv = search.getLastPV();
@@ -117,8 +118,7 @@ public class AlphaBetaSearchTest {
 
         SearchParameters params = new SearchParameters(6, -INFINITY, INFINITY);
 
-        AlphaBetaSearch search = new AlphaBetaSearch(board, new ArrayList<>());
-        int score = search.search(params);
+        int score = search.search(board, params);
         assertEquals(CHECKMATE-5, score);
 
         List<Move> pv = search.getLastPV();
@@ -136,8 +136,7 @@ public class AlphaBetaSearchTest {
 
         SearchParameters params = new SearchParameters(1, -INFINITY, INFINITY);
 
-        AlphaBetaSearch search = new AlphaBetaSearch(board, new ArrayList<>());
-        int score = search.search(params);
+        int score = search.search(board, params);
         assertEquals(0, score);
 
         assertEquals(0, search.getLastPV().size());
@@ -260,12 +259,11 @@ public class AlphaBetaSearchTest {
         boardU.applyMove(b1a3);
 
         // start the search!
-        AlphaBetaSearch search = new AlphaBetaSearch(boardA, new ArrayList<>());
         search.setEvaluator(evaluator);
         search.setMoveGenerator(moveGenerator);
         search.setKillerMovesStore(mock(KillerMovesStore.class));
 
-        int score = search.search(params);
+        int score = search.search(boardA, params);
         assertEquals(3, score);
 
         // ensure the proper nodes were evaluated

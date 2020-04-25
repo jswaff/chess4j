@@ -32,9 +32,11 @@ public class SearchIterator {
     private boolean earlyExitOk = true;
 
     private MoveGenerator moveGenerator;
+    private Search search;
 
     public SearchIterator() {
         moveGenerator = new MagicBitboardMoveGenerator();
+        search = new AlphaBetaSearch();
     }
 
     public void setMaxDepth(int maxDepth) {
@@ -51,6 +53,10 @@ public class SearchIterator {
 
     public void setMoveGenerator(MoveGenerator moveGenerator) {
         this.moveGenerator = moveGenerator;
+    }
+
+    public void setSearch(Search search) {
+        this.search = search;
     }
 
     public CompletableFuture<List<Move>> findPvFuture(Board board, List<Undo> undos) {
@@ -76,7 +82,6 @@ public class SearchIterator {
         long startTime = System.currentTimeMillis();
         int depth = 0, score;
         boolean stopSearching = false;
-        AlphaBetaSearch search = new AlphaBetaSearch(board, new ArrayList<>(undos));
 
         do {
             ++depth;
@@ -85,7 +90,7 @@ public class SearchIterator {
             int betaBound = INFINITY;
 
             SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
-            score = search.search(parameters);
+            score = search.search(board, undos, parameters);
 
             assert(search.getLastPV().size()>0);
 
@@ -109,7 +114,9 @@ public class SearchIterator {
         assert(search.getLastPV().size()>0);
         assert(MoveUtils.isLineValid(search.getLastPV(), board));
 
-        printSearchSummary(depth, startTime, search.getSearchStats());
+        if (post) {
+            printSearchSummary(depth, startTime, search.getSearchStats());
+        }
 
         // if we are running with assertions enabled and the native library is loaded, verify equality
         assert(iterationsAreEqual(search.getLastPV(), board, undos));

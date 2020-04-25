@@ -28,4 +28,29 @@ public class SearchParameters {
     public String toString() {
         return "SearchParameters [depth: " + depth + ", alpha: " + alpha + ", beta: " + beta + "]";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof SearchParameters)) return false;
+
+        SearchParameters that = (SearchParameters)obj;
+
+        if (this.getDepth() != that.getDepth()) return false;
+        if (this.getAlpha() != that.getAlpha()) return false;
+        if (this.getBeta() != that.getBeta()) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hc = 7;
+
+        hc = 31 * hc + depth;
+        hc = 37 * hc + alpha;
+        hc = 43 * hc + beta;
+
+        return hc;
+    }
+
 }
