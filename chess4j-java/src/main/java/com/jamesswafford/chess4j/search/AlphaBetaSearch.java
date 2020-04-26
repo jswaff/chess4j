@@ -1,6 +1,5 @@
 package com.jamesswafford.chess4j.search;
 
-import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.Evaluator;

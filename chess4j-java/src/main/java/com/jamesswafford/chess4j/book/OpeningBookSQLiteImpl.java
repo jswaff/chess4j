@@ -1,20 +1,16 @@
 package com.jamesswafford.chess4j.book;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Color;
+import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.hash.Zobrist;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
+import com.jamesswafford.chess4j.utils.GameResult;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import com.jamesswafford.chess4j.board.Color;
-import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
-import com.jamesswafford.chess4j.hash.Zobrist;
-import com.jamesswafford.chess4j.utils.GameResult;
 
 import static com.jamesswafford.chess4j.utils.GameResult.*;
 

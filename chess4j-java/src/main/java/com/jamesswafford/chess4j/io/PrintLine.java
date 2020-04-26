@@ -1,12 +1,10 @@
 package com.jamesswafford.chess4j.io;
 
-import java.util.List;
-
-import com.jamesswafford.chess4j.App;
+import com.jamesswafford.chess4j.board.Move;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.jamesswafford.chess4j.board.Move;
+import java.util.List;
 
 public class PrintLine {
     private static final  Logger LOGGER = LogManager.getLogger(PrintLine.class);

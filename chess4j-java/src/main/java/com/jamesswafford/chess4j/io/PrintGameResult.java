@@ -1,10 +1,8 @@
 package com.jamesswafford.chess4j.io;
 
-import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.utils.GameStatus;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

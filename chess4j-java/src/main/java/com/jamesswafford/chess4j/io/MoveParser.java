@@ -1,24 +1,27 @@
 package com.jamesswafford.chess4j.io;
 
-import java.util.List;
-import java.util.Optional;
-
-import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.utils.PieceFactory;
 
-import static com.jamesswafford.chess4j.pieces.Pawn.*;
-import static com.jamesswafford.chess4j.pieces.King.*;
-import static com.jamesswafford.chess4j.board.squares.Rank.*;
+import java.util.List;
+import java.util.Optional;
+
+import static com.jamesswafford.chess4j.board.squares.Rank.RANK_1;
+import static com.jamesswafford.chess4j.board.squares.Rank.RANK_8;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
+import static com.jamesswafford.chess4j.pieces.King.BLACK_KING;
+import static com.jamesswafford.chess4j.pieces.King.WHITE_KING;
+import static com.jamesswafford.chess4j.pieces.Pawn.BLACK_PAWN;
+import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
 
 public final class MoveParser {
 

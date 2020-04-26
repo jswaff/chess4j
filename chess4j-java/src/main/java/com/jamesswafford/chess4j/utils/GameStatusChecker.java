@@ -1,12 +1,12 @@
 package com.jamesswafford.chess4j.utils;
 
-import java.util.List;
-
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Draw;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
+
+import java.util.List;
 
 public final class GameStatusChecker {
 

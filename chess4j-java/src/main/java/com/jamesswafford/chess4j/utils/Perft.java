@@ -1,21 +1,15 @@
 package com.jamesswafford.chess4j.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-import com.jamesswafford.chess4j.App;
+import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
 
 
 /*	Initial position

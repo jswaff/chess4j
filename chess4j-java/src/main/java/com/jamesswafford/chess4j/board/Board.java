@@ -1,7 +1,5 @@
 package com.jamesswafford.chess4j.board;
 
-import java.util.*;
-
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.exceptions.ParseException;
@@ -11,15 +9,24 @@ import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.utils.BlankRemover;
 import com.jamesswafford.chess4j.utils.PieceFactory;
 
-import static com.jamesswafford.chess4j.pieces.Pawn.*;
-import static com.jamesswafford.chess4j.pieces.Knight.*;
-import static com.jamesswafford.chess4j.pieces.Bishop.*;
-import static com.jamesswafford.chess4j.pieces.Rook.*;
-import static com.jamesswafford.chess4j.pieces.Queen.*;
-import static com.jamesswafford.chess4j.pieces.King.*;
+import java.util.*;
+
 import static com.jamesswafford.chess4j.board.CastlingRights.*;
-import static com.jamesswafford.chess4j.board.squares.Rank.*;
+import static com.jamesswafford.chess4j.board.squares.Rank.RANK_1;
+import static com.jamesswafford.chess4j.board.squares.Rank.RANK_8;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
+import static com.jamesswafford.chess4j.pieces.Bishop.BLACK_BISHOP;
+import static com.jamesswafford.chess4j.pieces.Bishop.WHITE_BISHOP;
+import static com.jamesswafford.chess4j.pieces.King.BLACK_KING;
+import static com.jamesswafford.chess4j.pieces.King.WHITE_KING;
+import static com.jamesswafford.chess4j.pieces.Knight.BLACK_KNIGHT;
+import static com.jamesswafford.chess4j.pieces.Knight.WHITE_KNIGHT;
+import static com.jamesswafford.chess4j.pieces.Pawn.BLACK_PAWN;
+import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
+import static com.jamesswafford.chess4j.pieces.Queen.BLACK_QUEEN;
+import static com.jamesswafford.chess4j.pieces.Queen.WHITE_QUEEN;
+import static com.jamesswafford.chess4j.pieces.Rook.BLACK_ROOK;
+import static com.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
 
 
 public final class Board {

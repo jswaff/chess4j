@@ -1,8 +1,8 @@
 package com.jamesswafford.chess4j.eval;
 
-import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.North;
 import com.jamesswafford.chess4j.board.squares.South;

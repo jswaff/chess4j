@@ -1,12 +1,12 @@
 package com.jamesswafford.chess4j.io;
 
+import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
+import com.jamesswafford.chess4j.exceptions.ParseException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
-import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
-import com.jamesswafford.chess4j.exceptions.ParseException;
 
 public class PGNIterator {
 

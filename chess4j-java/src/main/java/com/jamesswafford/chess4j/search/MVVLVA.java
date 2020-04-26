@@ -1,15 +1,10 @@
 package com.jamesswafford.chess4j.search;
 
+import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.pieces.*;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.pieces.Bishop;
-import com.jamesswafford.chess4j.pieces.King;
-import com.jamesswafford.chess4j.pieces.Knight;
-import com.jamesswafford.chess4j.pieces.Pawn;
-import com.jamesswafford.chess4j.pieces.Queen;
-import com.jamesswafford.chess4j.pieces.Rook;
 
 public class MVVLVA implements MoveScorer {
 

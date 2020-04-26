@@ -4,11 +4,16 @@ import com.jamesswafford.chess4j.board.squares.Square;
 
 import java.util.List;
 
-import static com.jamesswafford.chess4j.pieces.Pawn.*;
-import static com.jamesswafford.chess4j.pieces.Knight.*;
-import static com.jamesswafford.chess4j.pieces.Bishop.*;
-import static com.jamesswafford.chess4j.pieces.Rook.*;
-import static com.jamesswafford.chess4j.pieces.Queen.*;
+import static com.jamesswafford.chess4j.pieces.Bishop.BLACK_BISHOP;
+import static com.jamesswafford.chess4j.pieces.Bishop.WHITE_BISHOP;
+import static com.jamesswafford.chess4j.pieces.Knight.BLACK_KNIGHT;
+import static com.jamesswafford.chess4j.pieces.Knight.WHITE_KNIGHT;
+import static com.jamesswafford.chess4j.pieces.Pawn.BLACK_PAWN;
+import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
+import static com.jamesswafford.chess4j.pieces.Queen.BLACK_QUEEN;
+import static com.jamesswafford.chess4j.pieces.Queen.WHITE_QUEEN;
+import static com.jamesswafford.chess4j.pieces.Rook.BLACK_ROOK;
+import static com.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
 
 public class Draw {
 

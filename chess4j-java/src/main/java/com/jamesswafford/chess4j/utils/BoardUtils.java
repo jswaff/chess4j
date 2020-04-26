@@ -1,29 +1,30 @@
 package com.jamesswafford.chess4j.utils;
 
-import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.movegen.AttackDetector;
-import com.jamesswafford.chess4j.movegen.Magic;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.pieces.Bishop;
-import com.jamesswafford.chess4j.pieces.Knight;
-import com.jamesswafford.chess4j.pieces.Pawn;
-import com.jamesswafford.chess4j.pieces.Piece;
-import com.jamesswafford.chess4j.pieces.Queen;
-import com.jamesswafford.chess4j.pieces.Rook;
+import com.jamesswafford.chess4j.movegen.AttackDetector;
+import com.jamesswafford.chess4j.movegen.Magic;
+import com.jamesswafford.chess4j.pieces.*;
 
 import java.util.Optional;
 
-import static com.jamesswafford.chess4j.pieces.Pawn.*;
-import static com.jamesswafford.chess4j.pieces.Knight.*;
-import static com.jamesswafford.chess4j.pieces.Bishop.*;
-import static com.jamesswafford.chess4j.pieces.Rook.*;
-import static com.jamesswafford.chess4j.pieces.Queen.*;
-import static com.jamesswafford.chess4j.pieces.King.*;
 import static com.jamesswafford.chess4j.board.CastlingRights.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
+import static com.jamesswafford.chess4j.pieces.Bishop.BLACK_BISHOP;
+import static com.jamesswafford.chess4j.pieces.Bishop.WHITE_BISHOP;
+import static com.jamesswafford.chess4j.pieces.King.BLACK_KING;
+import static com.jamesswafford.chess4j.pieces.King.WHITE_KING;
+import static com.jamesswafford.chess4j.pieces.Knight.BLACK_KNIGHT;
+import static com.jamesswafford.chess4j.pieces.Knight.WHITE_KNIGHT;
+import static com.jamesswafford.chess4j.pieces.Pawn.BLACK_PAWN;
+import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
+import static com.jamesswafford.chess4j.pieces.Queen.BLACK_QUEEN;
+import static com.jamesswafford.chess4j.pieces.Queen.WHITE_QUEEN;
+import static com.jamesswafford.chess4j.pieces.Rook.BLACK_ROOK;
+import static com.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
 
 public class BoardUtils {
 

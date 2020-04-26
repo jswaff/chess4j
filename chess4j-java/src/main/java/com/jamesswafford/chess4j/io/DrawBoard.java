@@ -1,15 +1,13 @@
 package com.jamesswafford.chess4j.io;
 
-import com.jamesswafford.chess4j.App;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.CastlingRights;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.pieces.Piece;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DrawBoard {
     private static final  Logger LOGGER = LogManager.getLogger(DrawBoard.class);

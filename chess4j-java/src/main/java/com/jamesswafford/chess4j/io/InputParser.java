@@ -1,20 +1,7 @@
 package com.jamesswafford.chess4j.io;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.jamesswafford.chess4j.Globals;
-import com.jamesswafford.chess4j.hash.TTHolder;
-import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.App;
+import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
@@ -22,10 +9,23 @@ import com.jamesswafford.chess4j.book.BookMove;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
+import com.jamesswafford.chess4j.hash.TTHolder;
+import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.utils.GameResult;
 import com.jamesswafford.chess4j.utils.GameStatus;
 import com.jamesswafford.chess4j.utils.GameStatusChecker;
 import com.jamesswafford.chess4j.utils.Perft;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class InputParser {
 

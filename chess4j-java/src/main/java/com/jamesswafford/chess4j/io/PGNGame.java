@@ -1,10 +1,10 @@
 package com.jamesswafford.chess4j.io;
 
+import com.jamesswafford.chess4j.board.Move;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.jamesswafford.chess4j.board.Move;
 
 public class PGNGame {
 
