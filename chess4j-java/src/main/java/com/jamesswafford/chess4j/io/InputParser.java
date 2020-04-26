@@ -19,23 +19,73 @@ import com.jamesswafford.chess4j.utils.Perft;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 public class InputParser {
 
     private static final  Logger LOGGER = LogManager.getLogger(InputParser.class);
 
     private static final InputParser INSTANCE = new InputParser();
-    private boolean forceMode = true;
+
     private SearchIterator searchIterator = new SearchIterator();
     private CompletableFuture<List<Move>> searchFuture;
     private Color engineColor;
+    private boolean forceMode = true;
+
+    private Map<String, Consumer<String[]>> cmdMap = new HashMap<>() {{
+        put("accepted", InputParser::noOp);
+        put("analyze", InputParser::noOp);
+        put("black", InputParser::noOp);
+        put("bk", InputParser::bk);
+        put("computer", InputParser::noOp);
+        put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
+        put("draw", InputParser::noOp);
+        put("easy", InputParser::noOp);
+        put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getBoard())));
+        put("force", InputParser.this::force);
+        put("go", InputParser.this::go);
+        put("hard", InputParser::noOp);
+        put("hint", InputParser::noOp);
+        put("ics", InputParser::noOp);
+        put("level", InputParser::level);
+        put("memory", InputParser.this::memory);
+        put("name", InputParser::noOp);
+        put("new", InputParser.this::newGame);
+        put("nopost", (String[] cmd) -> searchIterator.setPost(false));
+        put("otim", InputParser::noOp);
+        put("perft", InputParser::perft);
+        put("pgn2book", InputParser::pgn2book);
+        put("ping", InputParser.this::ping);
+        put("playother", InputParser::playother);
+        put("post", (String[] cmd) -> searchIterator.setPost(true));
+        put("protover", InputParser::protover);
+        put("quit", InputParser.this::quit);
+        put("random", InputParser::noOp);
+        put("rating", InputParser::noOp);
+        put("rejected", InputParser::noOp);
+        put("remove", InputParser.this::remove);
+        put("result", InputParser.this::result);
+        put("sd", InputParser.this::sd);
+        put("setboard", InputParser::setboard);
+        put("st", InputParser::noOp);
+        put("time", InputParser::time);
+        put("undo", InputParser::undo);
+        //put("usermove", InputParser.this::usermove);
+        put("variant", InputParser::variant);
+        put("white", InputParser::noOp);
+        put("xboard", InputParser::noOp);
+        put("?", InputParser.this::moveNow);
+    }};
 
     private InputParser() { }
 
@@ -43,88 +93,24 @@ public class InputParser {
         return INSTANCE;
     }
 
-    public void parseCommand(String command) throws IllegalMoveException,ParseException {
+    public void parseCommand(String command) throws IllegalMoveException, ParseException {
         LOGGER.debug("# parsing: " + command);
 
         String[] input = command.split("\\s+");
         String cmd = input[0];
-        // TODO: replace this with a map of cmd -> Consumer
-        if ("accepted".equals(cmd)) {
-        } else if ("analyze".equals(cmd)) {
-        } else if ("black".equals(cmd)) {
-        } else if ("bk".equals(cmd)) {
-            bk();
-        } else if ("computer".equals(cmd)) {
-        } else if ("db".equals(cmd)) {
-            db();
-        } else if ("draw".equals(cmd)) {
-        } else if ("easy".equals(cmd)) {
-//            SearchIterator.ponderEnabled = false;
-        } else if ("eval".equals(cmd)) {
-            eval();
-        } else if ("force".equals(cmd)) {
-            force();
-        } else if ("go".equals(cmd)) {
-            go();
-        } else if ("hard".equals(cmd)) {
-//            SearchIterator.ponderEnabled = true;
-        } else if ("hint".equals(cmd)) {
-        } else if ("ics".equals(cmd)) {
-        } else if ("level".equals(cmd)) {
-            level(input);
-        } else if ("memory".equals(cmd)) {
-            memory(input);
-        } else if ("name".equals(cmd)) {
-            LOGGER.info("# opponent is: " + input[1]);
-        } else if ("new".equals(cmd)) {
-            newGame();
-        } else if ("nopost".equals(cmd)) {
-            searchIterator.setPost(false);
-        } else if ("otim".equals(cmd)) {
-        } else if ("perft".equals(cmd)) {
-            perft(input);
-        } else if ("pgn2book".equals(cmd)) {
-            pgn2book(input);
-        } else if ("playother".equals(cmd)) {
-            playother();
-        } else if ("ping".equals(cmd)) {
-            ping(input);
-        } else if ("post".equals(cmd)) {
-            searchIterator.setPost(true);
-        } else if ("protover".equals(cmd)) {
-            protover(input);
-        } else if ("quit".equals(cmd)) {
-            quit();
-        } else if ("random".equals(cmd)) {
-        } else if ("rating".equals(cmd)) {
-        } else if ("rejected".equals(cmd)) {
-        } else if ("remove".equals(cmd)) {
-            remove();
-        } else if ("result".equals(cmd)) {
-            result(input);
-        } else if ("sd".equals(cmd)) {
-            sd(input);
-        } else if ("setboard".equals(cmd)) {
-            setboard(input);
-        } else if ("st".equals(cmd)) {
-        } else if ("time".equals(cmd)) {
-            time(input);
-        } else if ("undo".equals(cmd)) {
-            undo();
-        } else if ("usermove".equals(cmd)) {
-            usermove(input);
-        } else if ("variant".equals(cmd)) {
-            variant(input);
-        } else if ("white".equals(cmd)) {
-        } else if ("xboard".equals(cmd)) {
-        } else if ("?".equals(cmd)) {
-            moveNow();
+
+        if (cmdMap.containsKey(input[0])) {
+            cmdMap.get(input[0]).accept(input);
         } else {
-            throw new ParseException("Invalid command: " + cmd);
+            if ("usermove".equals(cmd)) {
+                usermove(input);
+            } else {
+                throw new ParseException("Invalid command: " + cmd);
+            }
         }
     }
 
-    private void bk() {
+    private static void bk(String[] cmd) {
         if (App.getOpeningBook() != null) {
             List<BookMove> bookMoves = App.getOpeningBook().getMoves(Globals.getBoard());
             bookMoves.sort((BookMove bm1, BookMove bm2) -> bm2.getFrequency() - bm1.getFrequency());
@@ -141,16 +127,7 @@ public class InputParser {
         LOGGER.info(""); // blank line required by protocol
     }
 
-    private void db() {
-        DrawBoard.drawBoard(Globals.getBoard());
-    }
-
-    private void eval() {
-        int eval = Eval.eval(Globals.getBoard());
-        LOGGER.info("eval=" + eval);
-    }
-
-    private void force() {
+    private void force(String[] cmd) {
         stopSearchThread();
         forceMode = true;
     }
@@ -161,16 +138,16 @@ public class InputParser {
      * Start the engine's clock. Start thinking and eventually make a move.
      *
      */
-    private void go() {
+    private void go(String[] cmd) {
         stopSearchThread();
         forceMode = false;
         thinkAndMakeMove();
     }
 
-    private void level(String[] input) {
-        String mps = input[1];
-        String base = input[2];
-        double increment = Double.parseDouble(input[3]);
+    private static void level(String[] cmd) {
+        String mps = cmd[1];
+        String base = cmd[2];
+        double increment = Double.parseDouble(cmd[3]);
         LOGGER.debug("# level: " + mps + ", " + base + ", " + increment);
         increment *= 1000;
         LOGGER.debug("# increment: " + increment + " ms.");
@@ -190,18 +167,17 @@ public class InputParser {
      * of a game, as the first of the commands to relay engine option settings just before each "new"
      * command.
      */
-    int prevMaxMB = 0;
-    private void memory(String[] input) {
-        int maxMemMB = Integer.parseInt(input[1]);
+    // TODO: MemoryCmd
+    private int prevMaxMB = 0;
+    private void memory(String[] cmd) {
+        int maxMemMB = Integer.parseInt(cmd[1]);
 
         LOGGER.debug("# received memory command, N=" + maxMemMB);
 
         if (maxMemMB != prevMaxMB) {
             int maxMemPerTable = maxMemMB * 1024 * 1024 / 3; // DP, AR and pawn
-
             TTHolder.maxEntries = maxMemPerTable / TTHolder.getAlwaysReplaceTransTable().sizeOfEntry(); // note DP and AR are the same
             TTHolder.maxPawnEntries = maxMemPerTable / TTHolder.getPawnTransTable().sizeOfEntry();
-
             TTHolder.initTables();
             prevMaxMB = maxMemMB;
 
@@ -217,13 +193,13 @@ public class InputParser {
      * be ignored (treated as a no-op). It is permissible for your engine to always ignore the ? command.
      * The only bad consequence is that xboard's Move Now menu command will do nothing.
      */
-    private void moveNow() {
+    private void moveNow(String[] cmd) {
 //        if (!SearchIterator.isPondering()) {
             stopSearchThread();
 //        }
     }
 
-    private void newGame() {
+    private void newGame(String[] cmd) {
         stopSearchThread();
         forceMode = false;
         Globals.getBoard().resetBoard();
@@ -232,31 +208,37 @@ public class InputParser {
         searchIterator.setMaxDepth(0);
     }
 
-    private void perft(String[] input) {
-        int depth = Integer.parseInt(input[1]);
+    private static void noOp(String[] cmd) {
+        LOGGER.debug("# no op: " + cmd[0]);
+    }
+
+    // TODO: PerftCmd
+    private static void perft(String[] cmd) {
+        int depth = Integer.parseInt(cmd[1]);
         DrawBoard.drawBoard(Globals.getBoard());
         long start = System.currentTimeMillis();
         long nodes=Perft.perft(Globals.getBoard(), depth);
         long end = System.currentTimeMillis();
-        if (end==start) end=start+1; // HACK to avoid div 0
+        if (end==start) end = start + 1; // HACK to avoid div 0
         DecimalFormat df = new DecimalFormat("0,000");
         LOGGER.info("# nodes: " + df.format(nodes));
         LOGGER.info("# elapsed time: " + (end-start) + " ms");
         LOGGER.info("# rate: " + df.format(nodes*1000/(end-start)) + " n/s\n");
     }
 
-    private void pgn2book(String[] input) {
-        String fName = input[1];
-        java.io.File f = new java.io.File(fName);
-        if (f.exists()) {
+    // TODO: ProcessPgnCmd
+    private static void pgn2book(String[] cmd) {
+        String fName = cmd[1];
+        File pgnFile = new File(fName);
+        if (pgnFile.exists()) {
             long startTime = System.currentTimeMillis();
             LOGGER.info("processing pgn: " + fName + " ...");
             LOGGER.info("doing dry run...");
             int n;
             try {
-                n = processPGNFile(f,true);
+                n = processPGNFile(pgnFile,true);
                 LOGGER.info("\nadding " + n + " games to book...");
-                processPGNFile(f,false);
+                processPGNFile(pgnFile,false);
                 DecimalFormat df = new DecimalFormat("0.00");
                 long elapsed = System.currentTimeMillis() - startTime;
                 LOGGER.info("\nfinished in " + df.format((double) elapsed /1000.0) + " seconds.");
@@ -270,7 +252,7 @@ public class InputParser {
         }
     }
 
-    private int processPGNFile(java.io.File f, boolean dryRun) throws IOException, IllegalMoveException {
+    private static int processPGNFile(File pgnFile, boolean dryRun) throws IOException, IllegalMoveException {
         int n = 0;
 
         try {
@@ -278,7 +260,7 @@ public class InputParser {
                 App.getOpeningBook().dropIndexes();
             }
 
-            FileInputStream fis = new FileInputStream(f);
+            FileInputStream fis = new FileInputStream(pgnFile);
             PGNIterator it = new PGNIterator(fis);
             PGNGame pgnGame;
             while ((pgnGame = it.next()) != null) {
@@ -307,7 +289,7 @@ public class InputParser {
     * pondering is enabled, the engine should begin pondering.  If the engine later
     * receives a move, it should start thinking and eventually reply.
     */
-    private void playother() {
+    private static void playother(String[] cmd) {
         // TODO
     }
 
@@ -321,15 +303,15 @@ public class InputParser {
      * the pong should not be sent until after the move is made.
      *
      */
-    private void ping(String[] input) {
+    private void ping(String[] cmd) {
 //        if (!SearchIterator.isPondering()) {
             stopSearchThread();
 //        }
-        LOGGER.info("pong " + input[1]);
+        LOGGER.info("pong " + cmd[1]);
     }
 
-    private void protover(String[] input) {
-        int version = Integer.parseInt(input[1]);
+    private static void protover(String[] cmd) {
+        int version = Integer.parseInt(cmd[1]);
         if (version < 2) {
             LOGGER.info("Error: invalid protocol version.");
             System.exit(1);
@@ -341,7 +323,7 @@ public class InputParser {
         LOGGER.info("feature done=1"); // must be last
     }
 
-    private void quit() {
+    private void quit(String[] cmd) {
         stopSearchThread();
         LOGGER.info("bye...");
         System.exit(0);
@@ -351,7 +333,7 @@ public class InputParser {
     * Retract a move.  Undoes the last two moves and continues playing the same color.
     * Xboard sends this command only when the user is on move.
     */
-    private void remove() {
+    private void remove(String[] cmd) {
         stopSearchThread();
         Globals.getBoard().undoMove(Globals.gameUndos.remove(Globals.gameUndos.size()-1));
         Globals.getBoard().undoMove(Globals.gameUndos.remove(Globals.gameUndos.size()-1));
@@ -369,10 +351,10 @@ public class InputParser {
      * We will NOT get a RESULT command if the user stops playing by selecting Reset,
      * Edit Game, Exit, or the like.
      */
-    private void result(String[] input) {
+    private void result(String[] cmd) {
         stopSearchThread();
 
-        String result = input[1];
+        String result = cmd[1];
         GameResult gameResult = GameResult.UNKNOWN;
         if ("1-0".equals(result)) {
             gameResult = Color.WHITE.equals(engineColor) ? GameResult.WIN : GameResult.LOSS;
@@ -406,25 +388,25 @@ public class InputParser {
      * any time control restrictions in place.
      *
      */
-    private void sd(String[] input) {
-        int depth = Integer.parseInt(input[1]);
+    private void sd(String[] cmd) {
+        int depth = Integer.parseInt(cmd[1]);
         LOGGER.debug("# setting depth to : " + depth);
         searchIterator.setMaxDepth(depth);
     }
 
-    private void setboard(String[] input) {
+    private static void setboard(String[] cmd) {
         StringBuilder fen = new StringBuilder();
-        for (int i=1;i<input.length;i++) {
+        for (int i=1;i<cmd.length;i++) {
             if (i>1) {
                 fen.append(" ");
             }
-            fen.append(input[i]);
+            fen.append(cmd[i]);
         }
         try {
             Globals.getBoard().setPos(fen.toString());
             Globals.gameUndos.clear();
         } catch (ParseException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // TODO
         }
         DrawBoard.drawBoard(Globals.getBoard());
     }
@@ -432,8 +414,8 @@ public class InputParser {
     /**
      * Read in the engine's remaining time, in centiseconds.
      */
-    private void time(String[] input) {
-        int time = Integer.parseInt(input[1]);
+    private static void time(String[] cmd) {
+        int time = Integer.parseInt(cmd[1]);
         time *= 10; // centiseconds to milliseconds
         LOGGER.debug("# MY TIME: " + time);
         // TODO: timer
@@ -444,7 +426,7 @@ public class InputParser {
     * Back up one move.  Xboard will never send this without putting the engine in
     * "force" mode first.  We don't have to worry about undoing a move the engine made.
     */
-    private void undo() {
+    private static void undo(String[] cmd) {
         Globals.getBoard().undoMove(Globals.gameUndos.remove(Globals.gameUndos.size()-1));
     }
 
@@ -452,8 +434,9 @@ public class InputParser {
      * Sent when the user makes a move and the engine is already playing the opposite color.
      * The engine may or may not be pondering.
      */
-    private void usermove(String[] input) throws IllegalMoveException, ParseException {
-        String strMove = input[1];
+    // TODO: make exceptions unchecked
+    private void usermove(String[] cmd) throws IllegalMoveException, ParseException {
+        String strMove = cmd[1];
         MoveParser mp = new MoveParser();
         Move mv = mp.parseMove(strMove, Globals.getBoard());
         Globals.gameUndos.add(Globals.getBoard().applyMove(mv));
@@ -463,8 +446,8 @@ public class InputParser {
         }
     }
 
-    private void variant(String[] input) {
-        if (! "normal".equals(input[1])) {
+    private static void variant(String[] cmd) {
+        if (! "normal".equals(cmd[1])) {
             LOGGER.info("Error: unsupported variant.");
         }
     }
@@ -503,7 +486,7 @@ public class InputParser {
         }
     }
 
-    private boolean endOfGameCheck() {
+    private static boolean endOfGameCheck() {
         GameStatus gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard(), Globals.gameUndos);
         if (gameStatus != GameStatus.INPROGRESS) {
             PrintGameResult.printResult(gameStatus);
