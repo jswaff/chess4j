@@ -1,6 +1,5 @@
 package com.jamesswafford.chess4j.io;
 
-import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
@@ -34,7 +33,7 @@ public class InputParser {
 
     private static final InputParser INSTANCE = new InputParser();
 
-    private SearchIterator searchIterator = new SearchIterator(); // TODO: this feels misplaced
+    private SearchIterator searchIterator = new SearchIterator(); // TODO: make singleton?
     private CompletableFuture<List<Move>> searchFuture;
     private Color engineColor;
     private boolean forceMode = true;
@@ -175,7 +174,7 @@ public class InputParser {
         stopSearchThread();
         forceMode = false;
         Globals.getBoard().resetBoard();
-        Globals.gameUndos.clear();
+        Globals.getGameUndos().clear();
         engineColor = Color.BLACK;
         searchIterator.setMaxDepth(0);
     }
@@ -185,11 +184,10 @@ public class InputParser {
     }
 
     private static void pgnToBook(String[] cmd) {
-        if (App.getOpeningBook() == null) {
-            LOGGER.warn("No opening book found.");
-        } else {
-            App.getOpeningBook().addToBook(new File(cmd[1]));
-        }
+        Globals.getOpeningBook().ifPresentOrElse(
+                book -> book.addToBook(new File(cmd[1])),
+                () -> LOGGER.error("There is no opening book.")
+        );
     }
 
     /**
@@ -236,8 +234,8 @@ public class InputParser {
     */
     private void remove(String[] cmd) {
         stopSearchThread();
-        Globals.getBoard().undoMove(Globals.gameUndos.remove(Globals.gameUndos.size()-1));
-        Globals.getBoard().undoMove(Globals.gameUndos.remove(Globals.gameUndos.size()-1));
+        Globals.getBoard().undoMove(Globals.getGameUndos().remove(Globals.getGameUndos().size()-1));
+        Globals.getBoard().undoMove(Globals.getGameUndos().remove(Globals.getGameUndos().size()-1));
     }
 
     /**
@@ -271,14 +269,17 @@ public class InputParser {
 
         List<Move> gameMoves = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
-        for (Undo undo : Globals.gameUndos) {
+        for (Undo undo : Globals.getGameUndos()) {
             gameMoves.add(undo.getMove());
             sb.append(undo.getMove().toString()).append(" ");
         }
 
         LOGGER.info("# game moves: " + sb.toString());
 
-        App.getOpeningBook().learn(gameMoves, engineColor, gameResult);
+        GameResult finalGameResult = gameResult;
+        Globals.getOpeningBook().ifPresent(
+                book -> book.learn(gameMoves, engineColor, finalGameResult)
+        );
     }
 
 
@@ -306,7 +307,7 @@ public class InputParser {
         Board board = Globals.getBoard().deepCopy();
         try {
             Globals.getBoard().setPos(fen.toString());
-            Globals.gameUndos.clear();
+            Globals.getGameUndos().clear();
         } catch (ParseException e) {
             LOGGER.info("tellusererror illegal position");
             // TODO: revert back to board
@@ -340,7 +341,7 @@ public class InputParser {
     * "force" mode first.  We don't have to worry about undoing a move the engine made.
     */
     private static void undo(String[] cmd) {
-        Globals.getBoard().undoMove(Globals.gameUndos.remove(Globals.gameUndos.size()-1));
+        Globals.getBoard().undoMove(Globals.getGameUndos().remove(Globals.getGameUndos().size()-1));
     }
 
     /**
@@ -351,7 +352,7 @@ public class InputParser {
         String strMove = cmd[1];
         MoveParser mp = new MoveParser();
         Move mv = mp.parseMove(strMove, Globals.getBoard());
-        Globals.gameUndos.add(Globals.getBoard().applyMove(mv));
+        Globals.getGameUndos().add(Globals.getBoard().applyMove(mv));
 
         if (!forceMode) {
             thinkAndMakeMove();
@@ -380,10 +381,10 @@ public class InputParser {
         engineColor = Globals.getBoard().getPlayerToMove();
 
         if (!endOfGameCheck()) {
-            searchFuture = searchIterator.findPvFuture(Globals.getBoard(), Globals.gameUndos)
+            searchFuture = searchIterator.findPvFuture(Globals.getBoard(), Globals.getGameUndos())
                     .thenApply(
                         pv -> {
-                            Globals.gameUndos.add(Globals.getBoard().applyMove(pv.get(0)));
+                            Globals.getGameUndos().add(Globals.getBoard().applyMove(pv.get(0)));
                             LOGGER.info("move " + pv.get(0));
                             endOfGameCheck();
                             return pv;
@@ -393,7 +394,7 @@ public class InputParser {
     }
 
     private static boolean endOfGameCheck() {
-        GameStatus gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard(), Globals.gameUndos);
+        GameStatus gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard(), Globals.getGameUndos());
         if (gameStatus != GameStatus.INPROGRESS) {
             PrintGameResult.printResult(gameStatus);
             return true;

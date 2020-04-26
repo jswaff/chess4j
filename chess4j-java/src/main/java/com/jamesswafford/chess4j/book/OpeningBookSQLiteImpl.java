@@ -1,12 +1,16 @@
 package com.jamesswafford.chess4j.book;
 
+import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.hash.Zobrist;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.utils.GameResult;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +19,8 @@ import java.util.List;
 import static com.jamesswafford.chess4j.utils.GameResult.*;
 
 public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
+
+    private static final Logger LOGGER = LogManager.getLogger(OpeningBookSQLiteImpl.class);
 
     private Connection conn;
 
@@ -240,6 +246,32 @@ public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
         ps.setInt(7, move.to().value());
         ps.executeUpdate();
         ps.close();
+    }
+
+    public static OpeningBookSQLiteImpl openOrInitialize(String bookPath) throws Exception {
+        LOGGER.debug("# initializing book: " + bookPath);
+
+        File bookFile = new File(bookPath);
+        boolean initBook = !bookFile.exists();
+
+        Class.forName("org.sqlite.JDBC");
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:" + bookPath);
+        OpeningBookSQLiteImpl sqlOpeningBook = new OpeningBookSQLiteImpl(conn);
+
+        if (initBook) {
+            LOGGER.info("# could not find " + bookPath + ", creating...");
+            sqlOpeningBook.initializeBook();
+            LOGGER.info("# ... finished.");
+        } else {
+            sqlOpeningBook.loadZobristKeys();
+        }
+
+        Globals.setOpeningBook(sqlOpeningBook);
+
+        LOGGER.info("# book initialization complete. " +
+                sqlOpeningBook.getTotalMoveCount() + " moves in book file.");
+
+        return sqlOpeningBook;
     }
 
 }

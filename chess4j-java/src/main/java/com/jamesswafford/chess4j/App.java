@@ -1,6 +1,5 @@
 package com.jamesswafford.chess4j;
 
-import com.jamesswafford.chess4j.book.AbstractOpeningBook;
 import com.jamesswafford.chess4j.book.OpeningBookSQLiteImpl;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
@@ -14,16 +13,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.sql.DriverManager;
 
 public final class App {
     private static final  Logger LOGGER = LogManager.getLogger(App.class);
 
-    private static AbstractOpeningBook openingBook;
     private static String bookPath = null;
     private static String testSuiteFile = null;
     private static int testSuiteTime = 10; // default to ten seconds
@@ -99,36 +94,10 @@ public final class App {
         }
 
         if (bookPath != null) {
-            initBook();
+            Globals.setOpeningBook(OpeningBookSQLiteImpl.openOrInitialize(bookPath));
         }
 
         repl();
     }
 
-    public static AbstractOpeningBook getOpeningBook() {
-        return openingBook;
-    }
-
-    private static void initBook() throws Exception {
-        LOGGER.debug("# initializing book: " + bookPath);
-
-        File bookFile = new File(bookPath);
-        boolean initBook = !bookFile.exists();
-
-        Class.forName("org.sqlite.JDBC");
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:" + bookPath);
-        OpeningBookSQLiteImpl sqlOpeningBook = new OpeningBookSQLiteImpl(conn);
-
-        if (initBook) {
-            LOGGER.info("# could not find " + bookPath + ", creating...");
-            sqlOpeningBook.initializeBook();
-            LOGGER.info("# ... finished.");
-        } else {
-            sqlOpeningBook.loadZobristKeys();
-        }
-
-        openingBook = sqlOpeningBook;
-
-        LOGGER.info("# book initialization complete. " + openingBook.getTotalMoveCount() + " moves in book file.");
-    }
 }
