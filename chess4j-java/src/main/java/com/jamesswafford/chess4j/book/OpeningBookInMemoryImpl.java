@@ -28,11 +28,7 @@ public class OpeningBookInMemoryImpl extends AbstractOpeningBook {
     }
 
     private void addToMap(Long key,Move move) {
-        List<BookMove> bms = movesMap.get(key);
-        if (bms==null) {
-            bms = new ArrayList<>();
-            movesMap.put(key, bms);
-        }
+        List<BookMove> bms = movesMap.computeIfAbsent(key, k -> new ArrayList<>());
 
         // is this move already in the list?
         for (BookMove bm : bms) {

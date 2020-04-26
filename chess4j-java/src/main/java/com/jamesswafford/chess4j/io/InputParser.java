@@ -20,7 +20,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,7 +57,7 @@ public class InputParser {
         put("nopost", (String[] cmd) -> searchIterator.setPost(false));
         put("otim", InputParser::noOp);
         put("perft", (String[] cmd) -> Perft.executePerft(Globals.getBoard(), Integer.parseInt(cmd[1])));
-        put("pgn2book", InputParser::pgn2book);
+        put("pgn2book", InputParser::pgnToBook);
         put("ping", InputParser.this::ping);
         put("post", (String[] cmd) -> searchIterator.setPost(true));
         put("protover", InputParser::protover);
@@ -185,58 +184,12 @@ public class InputParser {
         LOGGER.debug("# no op: " + cmd[0]);
     }
 
-    // TODO: ProcessPgnCmd
-    private static void pgn2book(String[] cmd) {
-        String fName = cmd[1];
-        File pgnFile = new File(fName);
-        if (pgnFile.exists()) {
-            long startTime = System.currentTimeMillis();
-            LOGGER.info("processing pgn: " + fName + " ...");
-            LOGGER.info("doing dry run...");
-            int n;
-            try {
-                n = processPGNFile(pgnFile,true);
-                LOGGER.info("\nadding " + n + " games to book...");
-                processPGNFile(pgnFile,false);
-                DecimalFormat df = new DecimalFormat("0.00");
-                long elapsed = System.currentTimeMillis() - startTime;
-                LOGGER.info("\nfinished in " + df.format((double) elapsed /1000.0) + " seconds.");
-            } catch (IOException e) {
-                LOGGER.error("There was an I/O error processing the pgn file", e);
-            } catch (IllegalMoveException e) {
-                LOGGER.error("Illegal move found in PGN file", e);
-            }
+    private static void pgnToBook(String[] cmd) {
+        if (App.getOpeningBook() == null) {
+            LOGGER.warn("No opening book found.");
         } else {
-            LOGGER.warn("file " + fName + " not found.");
+            App.getOpeningBook().addToBook(new File(cmd[1]));
         }
-    }
-
-    private static int processPGNFile(File pgnFile, boolean dryRun) throws IOException, IllegalMoveException {
-        int n = 0;
-
-        try (BufferedReader br = new BufferedReader(new FileReader(pgnFile))) {
-            if (!dryRun) {
-                App.getOpeningBook().dropIndexes();
-            }
-
-            PGNIterator it = new PGNIterator(br);
-            PGNGame pgnGame;
-            while ((pgnGame = it.next()) != null) {
-                if ((n % 1000)==0) {
-                    LOGGER.info(".");
-                }
-                if (!dryRun) {
-                    App.getOpeningBook().addToBook(pgnGame);
-                }
-                n++;
-            }
-        } finally {
-            if (!dryRun) {
-                App.getOpeningBook().addIndexes();
-            }
-        }
-
-        return n;
     }
 
     /**

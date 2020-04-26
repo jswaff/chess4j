@@ -1,7 +1,6 @@
 package com.jamesswafford.chess4j.book;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.File;
 import java.util.List;
 
 import org.junit.BeforeClass;
@@ -10,8 +9,6 @@ import org.junit.Test;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.io.MoveParser;
-import com.jamesswafford.chess4j.io.PGNGame;
-import com.jamesswafford.chess4j.io.PGNIterator;
 
 import static org.junit.Assert.*;
 
@@ -22,17 +19,8 @@ public class OpeningBookInMemoryImplTest {
     @BeforeClass
     public static void setUp() throws Exception {
         book = OpeningBookInMemoryImpl.getInstance();
-
-        try (BufferedReader br = new BufferedReader(
-                new FileReader(OpeningBookInMemoryImplTest.class.getResource("/pgn/small.pgn").getFile()))) {
-
-            PGNIterator it = new PGNIterator(br);
-            PGNGame pgnGame;
-            while((pgnGame = it.next()) != null) {
-                book.addToBook(pgnGame);
-            }
-        }
-
+        File pgnFile = new File(OpeningBookInMemoryImplTest.class.getResource("/pgn/small.pgn").getFile());
+        book.addToBook(pgnFile);
     }
 
     @Test
