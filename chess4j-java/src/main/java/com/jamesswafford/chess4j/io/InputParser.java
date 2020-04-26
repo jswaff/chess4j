@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.io;
 
 import com.jamesswafford.chess4j.App;
 import com.jamesswafford.chess4j.Globals;
+import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
@@ -44,29 +45,23 @@ public class InputParser {
 
     private Map<String, Consumer<String[]>> cmdMap = new HashMap<>() {{
         put("accepted", InputParser::noOp);
-        put("analyze", InputParser::noOp);
-        put("black", InputParser::noOp);
         put("bk", InputParser::bk);
         put("computer", InputParser::noOp);
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
-        put("draw", InputParser::noOp);
         put("easy", InputParser::noOp);
         put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getBoard())));
         put("force", InputParser.this::force);
         put("go", InputParser.this::go);
         put("hard", InputParser::noOp);
         put("hint", InputParser::noOp);
-        put("ics", InputParser::noOp);
         put("level", InputParser::level);
         put("memory", InputParser.this::memory);
-        put("name", InputParser::noOp);
         put("new", InputParser.this::newGame);
         put("nopost", (String[] cmd) -> searchIterator.setPost(false));
         put("otim", InputParser::noOp);
         put("perft", InputParser::perft);
         put("pgn2book", InputParser::pgn2book);
         put("ping", InputParser.this::ping);
-        put("playother", InputParser::playother);
         put("post", (String[] cmd) -> searchIterator.setPost(true));
         put("protover", InputParser::protover);
         put("quit", InputParser.this::quit);
@@ -76,13 +71,11 @@ public class InputParser {
         put("remove", InputParser.this::remove);
         put("result", InputParser.this::result);
         put("sd", InputParser.this::sd);
+        put("st", InputParser.this::st);
         put("setboard", InputParser::setboard);
-        put("st", InputParser::noOp);
         put("time", InputParser::time);
         put("undo", InputParser::undo);
-        //put("usermove", InputParser.this::usermove);
-        put("variant", InputParser::variant);
-        put("white", InputParser::noOp);
+        put("usermove", InputParser.this::usermove);
         put("xboard", InputParser::noOp);
         put("?", InputParser.this::moveNow);
     }};
@@ -102,11 +95,7 @@ public class InputParser {
         if (cmdMap.containsKey(input[0])) {
             cmdMap.get(input[0]).accept(input);
         } else {
-            if ("usermove".equals(cmd)) {
-                usermove(input);
-            } else {
-                throw new ParseException("Invalid command: " + cmd);
-            }
+            throw new ParseException("Invalid command: " + cmd);
         }
     }
 
@@ -144,6 +133,11 @@ public class InputParser {
         thinkAndMakeMove();
     }
 
+    /**
+     * level MPS BASE INC
+     *
+     * Sets the time controls.
+     */
     private static void level(String[] cmd) {
         String mps = cmd[1];
         String base = cmd[2];
@@ -265,7 +259,7 @@ public class InputParser {
             PGNGame pgnGame;
             while ((pgnGame = it.next()) != null) {
                 if ((n % 1000)==0) {
-                    System.out.println(".");
+                    LOGGER.info(".");
                 }
                 if (!dryRun) {
                     App.getOpeningBook().addToBook(pgnGame);
@@ -283,17 +277,6 @@ public class InputParser {
     }
 
     /**
-    * Leave force mode and set the engine to play the color that is not on move.
-    * Associate the opponent's clock with the color that is on move, the engine's
-    * clock with the color that is not on move.  Start the opponent's clock.  If
-    * pondering is enabled, the engine should begin pondering.  If the engine later
-    * receives a move, it should start thinking and eventually reply.
-    */
-    private static void playother(String[] cmd) {
-        // TODO
-    }
-
-    /**
      * Because of the way xboard uses the ping command, we should never see a "ping" command
      * when the engine is on move.  However, if we do, we should not respond with the "pong"
      * until after making the move.  The exception is pondering -- if the engine is pondering
@@ -307,19 +290,21 @@ public class InputParser {
 //        if (!SearchIterator.isPondering()) {
             stopSearchThread();
 //        }
+        // TODO: don't think we should stop the search thread, just wait for it.
         LOGGER.info("pong " + cmd[1]);
     }
 
     private static void protover(String[] cmd) {
         int version = Integer.parseInt(cmd[1]);
         if (version < 2) {
-            LOGGER.info("Error: invalid protocol version.");
+            LOGGER.error("Error: invalid protocol version.");
             System.exit(1);
         }
-        LOGGER.info("feature analyze=0 black=0 colors=0 ping=1 draw=0 debug=1 edit=0 ics=1");
-        LOGGER.info("feature level=0 name=1 nps=0 memory=1 playother=0 pause=0 resume=0 reuse=1 san=0");
-        LOGGER.info("feature setboard=1 sigint=0 sigterm=0 smp=0 st=0 time=1 usermove=1");
-        LOGGER.info("feature white=0 variants=\"normal\" myname=\"chess4j\"");
+        // only sending the features where we want the non-default value
+        LOGGER.info("feature analyze=0 colors=0 ping=1 draw=0 debug=1");
+        LOGGER.info("feature name=0 nps=0 memory=1");
+        LOGGER.info("feature setboard=1 sigint=0 sigterm=0 usermove=1");
+        LOGGER.info("feature variants=\"normal\" myname=\"chess4j\"");
         LOGGER.info("feature done=1"); // must be last
     }
 
@@ -402,13 +387,26 @@ public class InputParser {
             }
             fen.append(cmd[i]);
         }
+
+        Board board = Globals.getBoard().deepCopy();
         try {
             Globals.getBoard().setPos(fen.toString());
             Globals.gameUndos.clear();
         } catch (ParseException e) {
-            e.printStackTrace(); // TODO
+            LOGGER.info("tellusererror illegal position");
+            // TODO: revert back to board
+            Globals.getBoard().resetBoard();
+            throw e;
         }
         DrawBoard.drawBoard(Globals.getBoard());
+    }
+
+    /**
+     * st TIME
+     * Set an exact number of seconds to play per move.
+     */
+    private void st(String[] cmd) {
+        // TODO
     }
 
     /**
@@ -434,8 +432,7 @@ public class InputParser {
      * Sent when the user makes a move and the engine is already playing the opposite color.
      * The engine may or may not be pondering.
      */
-    // TODO: make exceptions unchecked
-    private void usermove(String[] cmd) throws IllegalMoveException, ParseException {
+    private void usermove(String[] cmd)  {
         String strMove = cmd[1];
         MoveParser mp = new MoveParser();
         Move mv = mp.parseMove(strMove, Globals.getBoard());
@@ -443,12 +440,6 @@ public class InputParser {
 
         if (!forceMode) {
             thinkAndMakeMove();
-        }
-    }
-
-    private static void variant(String[] cmd) {
-        if (! "normal".equals(cmd[1])) {
-            LOGGER.info("Error: unsupported variant.");
         }
     }
 

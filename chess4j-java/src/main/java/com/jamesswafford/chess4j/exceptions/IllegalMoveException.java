@@ -1,6 +1,6 @@
 package com.jamesswafford.chess4j.exceptions;
 
-public class IllegalMoveException extends Exception {
+public class IllegalMoveException extends RuntimeException {
 
     private String illegalMove;
     public IllegalMoveException(String illegalMove) {
