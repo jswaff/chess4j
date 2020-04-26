@@ -1,12 +1,15 @@
 package com.jamesswafford.chess4j.utils;
 
+import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
+import com.jamesswafford.chess4j.io.DrawBoard;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -104,4 +107,17 @@ public final class Perft {
         return n;
     }
 
+    public static void executePerft(Board board, int depth) {
+        DrawBoard.drawBoard(board);
+
+        long start = System.currentTimeMillis();
+        long nodes = perft(board, depth);
+        long end = System.currentTimeMillis();
+        if (end==start) end = start + 1; // HACK to avoid div 0
+
+        DecimalFormat df = new DecimalFormat("0,000");
+        LOGGER.info("# nodes: " + df.format(nodes));
+        LOGGER.info("# elapsed time: " + (end-start) + " ms");
+        LOGGER.info("# rate: " + df.format(nodes*1000/(end-start)) + " n/s\n");
+    }
 }

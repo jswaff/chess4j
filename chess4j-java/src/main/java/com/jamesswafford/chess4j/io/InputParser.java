@@ -6,7 +6,6 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
-import com.jamesswafford.chess4j.book.BookMove;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
@@ -38,14 +37,15 @@ public class InputParser {
 
     private static final InputParser INSTANCE = new InputParser();
 
-    private SearchIterator searchIterator = new SearchIterator();
+    private SearchIterator searchIterator = new SearchIterator(); // TODO: this feels misplaced
     private CompletableFuture<List<Move>> searchFuture;
     private Color engineColor;
     private boolean forceMode = true;
+    private int maxMemoryMB = 0;
 
     private Map<String, Consumer<String[]>> cmdMap = new HashMap<>() {{
         put("accepted", InputParser::noOp);
-        put("bk", InputParser::bk);
+        put("bk", (String[] cmd) -> PrintBookMoves.printBookMoves(Globals.getBoard()));
         put("computer", InputParser::noOp);
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
         put("easy", InputParser::noOp);
@@ -59,7 +59,7 @@ public class InputParser {
         put("new", InputParser.this::newGame);
         put("nopost", (String[] cmd) -> searchIterator.setPost(false));
         put("otim", InputParser::noOp);
-        put("perft", InputParser::perft);
+        put("perft", (String[] cmd) -> Perft.executePerft(Globals.getBoard(), Integer.parseInt(cmd[1])));
         put("pgn2book", InputParser::pgn2book);
         put("ping", InputParser.this::ping);
         put("post", (String[] cmd) -> searchIterator.setPost(true));
@@ -97,23 +97,6 @@ public class InputParser {
         } else {
             throw new ParseException("Invalid command: " + cmd);
         }
-    }
-
-    private static void bk(String[] cmd) {
-        if (App.getOpeningBook() != null) {
-            List<BookMove> bookMoves = App.getOpeningBook().getMoves(Globals.getBoard());
-            bookMoves.sort((BookMove bm1, BookMove bm2) -> bm2.getFrequency() - bm1.getFrequency());
-
-            LOGGER.info("# book moves:");
-            for (BookMove bookMove : bookMoves) {
-                LOGGER.info("\t" + bookMove.getMove() + " - freq: " + bookMove.getFrequency()
-                        + ", w/l/d: " + bookMove.getWins() + " / " + bookMove.getLosses()
-                        + " / " + bookMove.getDraws());
-            }
-        } else {
-            LOGGER.info("\tbook not enabled");
-        }
-        LOGGER.info(""); // blank line required by protocol
     }
 
     private void force(String[] cmd) {
@@ -161,19 +144,17 @@ public class InputParser {
      * of a game, as the first of the commands to relay engine option settings just before each "new"
      * command.
      */
-    // TODO: MemoryCmd
-    private int prevMaxMB = 0;
     private void memory(String[] cmd) {
-        int maxMemMB = Integer.parseInt(cmd[1]);
+        int maxMemoryMB = Integer.parseInt(cmd[1]);
 
-        LOGGER.debug("# received memory command, N=" + maxMemMB);
+        LOGGER.debug("# received memory command, N=" + maxMemoryMB);
 
-        if (maxMemMB != prevMaxMB) {
-            int maxMemPerTable = maxMemMB * 1024 * 1024 / 3; // DP, AR and pawn
+        if (maxMemoryMB != this.maxMemoryMB) {
+            int maxMemPerTable = maxMemoryMB * 1024 * 1024 / 3; // DP, AR and pawn
             TTHolder.maxEntries = maxMemPerTable / TTHolder.getAlwaysReplaceTransTable().sizeOfEntry(); // note DP and AR are the same
             TTHolder.maxPawnEntries = maxMemPerTable / TTHolder.getPawnTransTable().sizeOfEntry();
             TTHolder.initTables();
-            prevMaxMB = maxMemMB;
+            this.maxMemoryMB = maxMemoryMB;
 
             // suggest to the JVM that now is good time to garbage collect the previous tables
             System.gc();
@@ -204,20 +185,6 @@ public class InputParser {
 
     private static void noOp(String[] cmd) {
         LOGGER.debug("# no op: " + cmd[0]);
-    }
-
-    // TODO: PerftCmd
-    private static void perft(String[] cmd) {
-        int depth = Integer.parseInt(cmd[1]);
-        DrawBoard.drawBoard(Globals.getBoard());
-        long start = System.currentTimeMillis();
-        long nodes=Perft.perft(Globals.getBoard(), depth);
-        long end = System.currentTimeMillis();
-        if (end==start) end = start + 1; // HACK to avoid div 0
-        DecimalFormat df = new DecimalFormat("0,000");
-        LOGGER.info("# nodes: " + df.format(nodes));
-        LOGGER.info("# elapsed time: " + (end-start) + " ms");
-        LOGGER.info("# rate: " + df.format(nodes*1000/(end-start)) + " n/s\n");
     }
 
     // TODO: ProcessPgnCmd

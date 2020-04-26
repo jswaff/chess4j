@@ -28,23 +28,6 @@ public class PGNIterator {
         return null;
     }
 
-    public void close() {
-        try {
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    protected void finalize() throws Throwable {
-        try {
-            close();
-        } finally {
-            super.finalize();
-        }
-    }
-
-
     /**
      * The first line should be a PGN tag.
      *
@@ -61,7 +44,7 @@ public class PGNIterator {
         while ((line = br.readLine()) != null) {
             if (line.startsWith("[")) {
                 foundTags = true;
-                sb.append(line + "\n");
+                sb.append(line).append("\n");
             } else if (foundTags && "".equals(line.trim())) {
                 // first line after tags, break
                 sb.append("\n");
@@ -75,7 +58,7 @@ public class PGNIterator {
         while ((line = br.readLine()) != null) {
             if (!"".equals(line.trim())) {
                 foundMoveText = true;
-                sb.append(line + "\n");
+                sb.append(line).append("\n");
             } else if (foundMoveText) {
                 break;
             }
