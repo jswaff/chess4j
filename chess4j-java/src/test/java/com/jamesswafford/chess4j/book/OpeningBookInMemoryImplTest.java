@@ -1,7 +1,7 @@
 package com.jamesswafford.chess4j.book;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.List;
 
 import org.junit.BeforeClass;
@@ -22,22 +22,21 @@ public class OpeningBookInMemoryImplTest {
     @BeforeClass
     public static void setUp() throws Exception {
         book = OpeningBookInMemoryImpl.getInstance();
-        FileInputStream fis = new FileInputStream(
-                //new File("src/test/resources/pgn/small.pgn")
-                new File(OpeningBookInMemoryImplTest.class.getResource("/pgn/small.pgn").getFile())
-        );
-        PGNIterator it = new PGNIterator(fis);
 
-        PGNGame pgnGame;
-        while ((pgnGame = it.next()) != null) {
-            book.addToBook(pgnGame);
+        try (BufferedReader br = new BufferedReader(
+                new FileReader(OpeningBookInMemoryImplTest.class.getResource("/pgn/small.pgn").getFile()))) {
+
+            PGNIterator it = new PGNIterator(br);
+            PGNGame pgnGame;
+            while((pgnGame = it.next()) != null) {
+                book.addToBook(pgnGame);
+            }
         }
 
-        fis.close();
     }
 
     @Test
-    public void movesFromInitialPos() throws Exception {
+    public void movesFromInitialPos() {
         Board board = new Board();
         List<BookMove> bookMoves = book.getMoves(board);
         assertEquals(5, bookMoves.size());
@@ -51,7 +50,7 @@ public class OpeningBookInMemoryImplTest {
     }
 
     @Test
-    public void movesAfterF4() throws Exception {
+    public void movesAfterF4() {
         Board board = new Board();
         MoveParser mp = new MoveParser();
         board.applyMove(mp.parseMove("f4", board));
@@ -65,7 +64,7 @@ public class OpeningBookInMemoryImplTest {
     }
 
     @Test
-    public void testWeightedRandomByFrequency() throws Exception {
+    public void testWeightedRandomByFrequency() {
         Board board = new Board();
 
         // we are going to call the function 1000 times from the opening.  expect to get
@@ -80,18 +79,17 @@ public class OpeningBookInMemoryImplTest {
         Move e4 = mp.parseMove("e4", board);
 
         for (int i=0;i<10000;i++) {
-            BookMove bm = book.getMoveWeightedRandomByFrequency(board);
-            assertNotNull(bm);
+            BookMove bookMove = book.getMoveWeightedRandomByFrequency(board).get();
 
-            if (nc3.equals(bm.getMove())) {
+            if (nc3.equals(bookMove.getMove())) {
                 nc3Cnt++;
-            } else if (g3.equals(bm.getMove())) {
+            } else if (g3.equals(bookMove.getMove())) {
                 g3Cnt++;
-            } else if (f4.equals(bm.getMove())) {
+            } else if (f4.equals(bookMove.getMove())) {
                 f4Cnt++;
-            } else if (nf3.equals(bm.getMove())) {
+            } else if (nf3.equals(bookMove.getMove())) {
                 nf3Cnt++;
-            } else if (e4.equals(bm.getMove())) {
+            } else if (e4.equals(bookMove.getMove())) {
                 e4Cnt++;
             }
         }
@@ -105,7 +103,7 @@ public class OpeningBookInMemoryImplTest {
     }
 
     @Test
-    public void testWeightedRandomByFrequency2() throws Exception {
+    public void testWeightedRandomByFrequency2() {
         Board board = new Board();
 
         MoveParser mp = new MoveParser();
@@ -120,14 +118,13 @@ public class OpeningBookInMemoryImplTest {
         Move d5 = mp.parseMove("d5", board);
 
         for (int i=0;i<10000;i++) {
-            BookMove bm = book.getMoveWeightedRandomByFrequency(board);
-            assertNotNull(bm);
+            BookMove bookMove = book.getMoveWeightedRandomByFrequency(board).get();
 
-            if (c5.equals(bm.getMove())) {
+            if (c5.equals(bookMove.getMove())) {
                 c5Cnt++;
-            } else if (e5.equals(bm.getMove())) {
+            } else if (e5.equals(bookMove.getMove())) {
                 e5Cnt++;
-            } else if (d5.equals(bm.getMove())) {
+            } else if (d5.equals(bookMove.getMove())) {
                 d5Cnt++;
             }
         }

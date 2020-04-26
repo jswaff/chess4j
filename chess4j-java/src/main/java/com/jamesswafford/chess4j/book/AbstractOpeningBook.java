@@ -7,6 +7,7 @@ import com.jamesswafford.chess4j.io.PGNGame;
 import com.jamesswafford.chess4j.utils.GameResult;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 public abstract class AbstractOpeningBook {
@@ -47,26 +48,26 @@ public abstract class AbstractOpeningBook {
         // default impl is a no-op
     }
 
-    public BookMove getMoveWeightedRandomByFrequency(Board board) {
-        List<BookMove> bms = getMoves(board);
+    public Optional<BookMove> getMoveWeightedRandomByFrequency(Board board) {
 
-        //LOGGER.debug("# choosing book move from list of " + bms.size() + " candidate moves.");
+        List<BookMove> bookMoves = getMoves(board);
 
-        if (bms.size()==0) return null;
+        if (bookMoves.size()==0) return Optional.empty();
 
-        int totalWeight = bms.stream().mapToInt(bm -> bm.getFrequency()).sum();
+        int totalWeight = bookMoves.stream().mapToInt(BookMove::getFrequency).sum();
 
         int val = r.nextInt(totalWeight)+1;  // e.g. if totalWeight is 10, then 0-9 ==> 1-10
 
         int countWeight = 0;
-        for (BookMove bm : bms) {
-            countWeight += bm.getFrequency();
+        for (BookMove bookMove : bookMoves) {
+            countWeight += bookMove.getFrequency();
             if (countWeight >= val) {
-                return bm;
+                return Optional.of(bookMove);
             }
         }
 
-        throw new RuntimeException("Error in getMoveWeightedRandomByFrequency().  totalWeight=" + totalWeight + ", val=" + val);
+        throw new RuntimeException("Error in getMoveWeightedRandomByFrequency().  totalWeight=" + totalWeight +
+                ", val=" + val);
     }
 
 }

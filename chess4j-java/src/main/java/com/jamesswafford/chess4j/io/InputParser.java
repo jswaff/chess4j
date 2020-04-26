@@ -19,9 +19,7 @@ import com.jamesswafford.chess4j.utils.Perft;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -216,13 +214,12 @@ public class InputParser {
     private static int processPGNFile(File pgnFile, boolean dryRun) throws IOException, IllegalMoveException {
         int n = 0;
 
-        try {
+        try (BufferedReader br = new BufferedReader(new FileReader(pgnFile))) {
             if (!dryRun) {
                 App.getOpeningBook().dropIndexes();
             }
 
-            FileInputStream fis = new FileInputStream(pgnFile);
-            PGNIterator it = new PGNIterator(fis);
+            PGNIterator it = new PGNIterator(br);
             PGNGame pgnGame;
             while ((pgnGame = it.next()) != null) {
                 if ((n % 1000)==0) {
@@ -233,7 +230,6 @@ public class InputParser {
                 }
                 n++;
             }
-            fis.close();
         } finally {
             if (!dryRun) {
                 App.getOpeningBook().addIndexes();
@@ -320,10 +316,9 @@ public class InputParser {
 
         LOGGER.info("# result : " + result + " : " + gameResult);
 
-        List<Undo> undos = Globals.gameUndos;
         List<Move> gameMoves = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
-        for (Undo undo : undos) {
+        for (Undo undo : Globals.gameUndos) {
             gameMoves.add(undo.getMove());
             sb.append(undo.getMove().toString()).append(" ");
         }
