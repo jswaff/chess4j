@@ -91,7 +91,7 @@ public class InputParser {
         if (cmdMap.containsKey(input[0])) {
             cmdMap.get(input[0]).accept(input);
         } else {
-            throw new ParseException("Invalid command: " + cmd);
+            LOGGER.info("Error (unknown command): " + cmd);
         }
     }
 
@@ -351,12 +351,19 @@ public class InputParser {
     private void usermove(String[] cmd)  {
         String strMove = cmd[1];
         MoveParser mp = new MoveParser();
-        Move mv = mp.parseMove(strMove, Globals.getBoard());
-        Globals.getGameUndos().add(Globals.getBoard().applyMove(mv));
-
-        if (!forceMode) {
-            thinkAndMakeMove();
+        Move mv = null;
+        try {
+            mv = mp.parseMove(strMove, Globals.getBoard());
+        } catch (Exception e) {
+            LOGGER.info("Illegal move: " + strMove);
         }
+        if (mv != null) {
+            Globals.getGameUndos().add(Globals.getBoard().applyMove(mv));
+            if (!forceMode) {
+                thinkAndMakeMove();
+            }
+        }
+
     }
 
     /**

@@ -1,8 +1,6 @@
 package com.jamesswafford.chess4j;
 
 import com.jamesswafford.chess4j.book.OpeningBookSQLiteImpl;
-import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
-import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
@@ -62,10 +60,6 @@ public final class App {
 
             try {
                 InputParser.getInstance().parseCommand(input);
-            } catch (IllegalMoveException ime) {
-                LOGGER.info("Illegal move");
-            } catch (ParseException pe) {
-                LOGGER.warn("Parse error: " + pe.getMessage());
             } catch (Exception e) {
                 LOGGER.warn("Caught (hopefully recoverable) exception: " + e.getMessage());
             }
