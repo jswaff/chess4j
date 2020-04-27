@@ -33,7 +33,7 @@ public class InputParser {
 
     private static final InputParser INSTANCE = new InputParser();
 
-    private SearchIterator searchIterator = new SearchIterator(); // TODO: make singleton?
+    private SearchIterator searchIterator = new SearchIterator();
     private CompletableFuture<List<Move>> searchFuture;
     private Color engineColor;
     private boolean forceMode = true;
