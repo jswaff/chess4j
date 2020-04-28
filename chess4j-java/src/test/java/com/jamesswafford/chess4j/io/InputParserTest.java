@@ -46,6 +46,71 @@ public class InputParserTest {
     }
 
     @Test
+    public void acceptedCmd() {
+        inputParser.parseCommand("accepted");
+        assertEquals(0, testAppender.getNonDebugMessages().size());
+    }
+
+    @Test
+    public void bkCmd() {
+        // TODO
+    }
+
+    @Test
+    public void computerCmd() {
+        inputParser.parseCommand("computer");
+        assertEquals(0, testAppender.getNonDebugMessages().size());
+    }
+
+    @Test
+    public void dbCmd() {
+        // TODO
+    }
+
+    @Test
+    public void easyCmd() {
+        inputParser.parseCommand("easy");
+        assertEquals(0, testAppender.getNonDebugMessages().size());
+    }
+
+    @Test
+    public void evalCmd() {
+        // TODO
+    }
+
+    @Test
+    public void forceCmd() {
+        // TODO
+    }
+
+    @Test
+    public void goCmd() {
+        // TODO
+    }
+
+    @Test
+    public void hardCmd() {
+        inputParser.parseCommand("hard");
+        assertEquals(0, testAppender.getNonDebugMessages().size());
+    }
+
+    @Test
+    public void hintCmd() {
+        inputParser.parseCommand("hint");
+        assertEquals(0, testAppender.getNonDebugMessages().size());
+    }
+
+    @Test
+    public void levelCmd() {
+        // TODO
+    }
+
+    @Test
+    public void memoryCmd() {
+        // TODO
+    }
+
+    @Test
     public void newCmd() {
 
         // put the board in a position other than the initial position
@@ -55,6 +120,26 @@ public class InputParserTest {
 
         assertEquals(new Board(), Globals.getBoard());
         assertEquals(0, Globals.getGameUndos().size());
+    }
+
+    @Test
+    public void nopostCmd() {
+        // TODO
+    }
+
+    @Test
+    public void otimCmd() {
+        // TODO
+    }
+
+    @Test
+    public void perftCmd() {
+        // TODO
+    }
+
+    @Test
+    public void pgn2bookCmd() {
+        // TODO
     }
 
     @Test
@@ -71,6 +156,73 @@ public class InputParserTest {
     }
 
     @Test
+    public void postCmd() {
+        // TODO
+    }
+
+    @Test
+    public void protoverCmd() {
+        // TODO
+    }
+
+    @Test
+    public void quitCmd() {
+        // TODO
+    }
+
+    @Test
+    public void randomCmd() {
+        inputParser.parseCommand("random");
+        assertEquals(0, testAppender.getNonDebugMessages().size());
+    }
+
+    @Test
+    public void ratingCmd() {
+        inputParser.parseCommand("rating");
+        assertEquals(0, testAppender.getNonDebugMessages().size());
+    }
+
+    @Test
+    public void rejectedCmd() {
+        // TODO
+    }
+
+    @Test
+    public void removeCmd() {
+        // TODO
+    }
+
+    @Test
+    public void resultCmd() {
+        // TODO
+    }
+
+    @Test
+    public void sdCmd() {
+        // TODO
+    }
+
+    @Test
+    public void stCmd() {
+        // TODO
+    }
+
+    @Test
+    public void setboardCmd() {
+        // TODO
+    }
+
+    @Test
+    public void timeCmd() {
+        // TODO
+    }
+
+    @Test
+    public void undoCmd() {
+        // TODO
+    }
+
+    @Test
     public void userMoveCmd() {
 
         inputParser.parseCommand("new");
@@ -81,6 +233,18 @@ public class InputParserTest {
         assertEquals(WHITE_PAWN, Globals.getBoard().getPiece(E4));
         assertEquals(1, Globals.getGameUndos().size());
     }
+
+    @Test
+    public void xboardCmd() {
+        inputParser.parseCommand("xboard");
+        assertEquals(0, testAppender.getNonDebugMessages().size());
+    }
+
+    @Test
+    public void moveNowCmd() {
+        // TODO
+    }
+
 
     @Test
     public void illegalMove() {
