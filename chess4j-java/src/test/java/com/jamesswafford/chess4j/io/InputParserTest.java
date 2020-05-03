@@ -2,9 +2,12 @@ package com.jamesswafford.chess4j.io;
 
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
+import com.jamesswafford.chess4j.book.OpeningBook;
 import com.jamesswafford.chess4j.search.SearchIterator;
+import com.jamesswafford.chess4j.utils.GameResult;
 import com.jamesswafford.chess4j.utils.GameStatus;
 import com.jamesswafford.chess4j.utils.GameStatusChecker;
 import org.apache.logging.log4j.LogManager;
@@ -14,6 +17,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +32,7 @@ import static org.mockito.Mockito.*;
 public class InputParserTest {
 
     InputParser inputParser;
+    OpeningBook openingBook;
     SearchIterator searchIterator;
 
     private static Logger inputParserLogger;
@@ -46,6 +51,8 @@ public class InputParserTest {
     @Before
     public void setUp() {
         inputParser = new InputParser();
+        openingBook = mock(OpeningBook.class);
+        inputParser.setOpeningBook(openingBook);
         searchIterator = mock(SearchIterator.class);
         inputParser.setSearchIterator(searchIterator);
 
@@ -185,15 +192,13 @@ public class InputParserTest {
 
     @Test
     public void pgn2bookCmd() {
-        // TODO
+        inputParser.parseCommand("pgn2book foo.pgn");
+        verify(openingBook).addToBook(new File("foo.pgn"));
     }
 
     @Test
     public void pingCmd() {
-
         inputParser.parseCommand("ping 1337");
-
-        testAppender.printMessages();
 
         List<String> output = testAppender.getNonDebugMessages();
 
@@ -249,8 +254,34 @@ public class InputParserTest {
     @Test
     public void resultCmd() {
         inputParser.parseCommand("new");
+        inputParser.parseCommand("force");
+        inputParser.parseCommand("usermove e2e4");
+        inputParser.parseCommand("usermove e7e5");
         inputParser.parseCommand("result 1-0 {Black resigns in fear}");
-        // TODO - ensure book learning is triggered
+
+        List<String> messages = testAppender.getMessages();
+        assertTrue(messages.contains("# result: 1-0 - LOSS"));
+        assertTrue(messages.contains("# game moves: e2e4 e7e5 "));
+
+        verify(openingBook).learn(
+                List.of(new Move(WHITE_PAWN, E2, E4), new Move(BLACK_PAWN, E7, E5)),
+                Color.BLACK,
+                GameResult.LOSS);
+
+        /// take 2
+        inputParser.parseCommand("new");
+        inputParser.parseCommand("force");
+        inputParser.parseCommand("usermove c2c4");
+        inputParser.parseCommand("result 1-0 {Black resigns in fear}");
+
+        messages = testAppender.getMessages();
+        assertTrue(messages.contains("# result: 1-0 - LOSS"));
+        assertTrue(messages.contains("# game moves: c2c4 "));
+
+        verify(openingBook).learn(
+                List.of(new Move(WHITE_PAWN, C2, C4)),
+                Color.BLACK,
+                GameResult.LOSS);
     }
 
     @Test

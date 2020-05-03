@@ -5,6 +5,7 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
+import com.jamesswafford.chess4j.book.OpeningBook;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
@@ -32,6 +33,7 @@ public class InputParser {
 
     private static final  Logger LOGGER = LogManager.getLogger(InputParser.class);
 
+    private OpeningBook openingBook;
     private SearchIterator searchIterator;
     private CompletableFuture<List<Move>> searchFuture;
     private Color engineColor;
@@ -55,7 +57,7 @@ public class InputParser {
         put("nopost", (String[] cmd) -> searchIterator.setPost(false));
         put("otim", InputParser::noOp);
         put("perft", (String[] cmd) -> Perft.executePerft(Globals.getBoard(), Integer.parseInt(cmd[1])));
-        put("pgn2book", InputParser::pgnToBook);
+        put("pgn2book", InputParser.this::pgnToBook);
         put("ping", InputParser.this::ping);
         put("post", (String[] cmd) -> searchIterator.setPost(true));
         put("protover", InputParser::protover);
@@ -76,6 +78,7 @@ public class InputParser {
     }};
 
     public InputParser() {
+        Globals.getOpeningBook().ifPresent(openingBook1 -> this.openingBook = openingBook1);
         searchIterator = new SearchIteratorImpl();
     }
 
@@ -85,6 +88,10 @@ public class InputParser {
 
     public boolean isForceMode() {
         return forceMode;
+    }
+
+    public void setOpeningBook(OpeningBook openingBook) {
+        this.openingBook = openingBook;
     }
 
     public void setSearchIterator(SearchIterator searchIterator) {
@@ -192,11 +199,12 @@ public class InputParser {
         LOGGER.debug("# no op: " + cmd[0]);
     }
 
-    private static void pgnToBook(String[] cmd) {
-        Globals.getOpeningBook().ifPresentOrElse(
-                book -> book.addToBook(new File(cmd[1])),
-                () -> LOGGER.error("There is no opening book.")
-        );
+    private void pgnToBook(String[] cmd) {
+        if (openingBook != null) {
+            openingBook.addToBook(new File(cmd[1]));
+        } else {
+            LOGGER.warn("There is no opening book.");
+        }
     }
 
     /**
@@ -274,7 +282,7 @@ public class InputParser {
             gameResult = GameResult.ADJOURNED;
         }
 
-        LOGGER.info("# result : " + result + " : " + gameResult);
+        LOGGER.info("# result: " + result + " - " + gameResult);
 
         List<Move> gameMoves = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
@@ -285,10 +293,9 @@ public class InputParser {
 
         LOGGER.info("# game moves: " + sb.toString());
 
-        GameResult finalGameResult = gameResult;
-        Globals.getOpeningBook().ifPresent(
-                book -> book.learn(gameMoves, engineColor, finalGameResult)
-        );
+        if (openingBook != null) {
+            openingBook.learn(gameMoves, engineColor, gameResult);
+        }
     }
 
 
