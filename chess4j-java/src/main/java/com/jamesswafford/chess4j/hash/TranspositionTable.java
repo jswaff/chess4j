@@ -11,10 +11,10 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     private static final  Logger LOGGER = LogManager.getLogger(TranspositionTable.class);
 
-    private static int DEFAULT_ENTRIES = 1048576; // = 0x100000   ~1 million entries
+    private static final int DEFAULT_ENTRIES = 1048576; // = 0x100000   ~1 million entries
 
-    private boolean depthPreferred;
-    private TranspositionTableEntry[] table;
+    private final boolean depthPreferred;
+    private final TranspositionTableEntry[] table;
 
     public TranspositionTable(boolean depthPreferred) {
         this(depthPreferred,DEFAULT_ENTRIES);
@@ -75,12 +75,6 @@ public class TranspositionTable extends AbstractTranspositionTable {
     /**
      * Store an entry in the transposition table, Gerbil style.  Meaning, for now I'm skirting around
      * dealing with the headache that is storing mate scores by storing them as bounds only.
-     *
-     * @param entryType
-     * @param zobristKey
-     * @param score
-     * @param depth
-     * @param move
      */
     public boolean store(long zobristKey,TranspositionTableEntryType entryType,int score,int depth,Move move) {
 

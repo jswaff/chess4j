@@ -7,9 +7,9 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     private static final  Logger LOGGER = LogManager.getLogger(PawnTranspositionTable.class);
 
-    private static int DEFAULT_ENTRIES = 1048576; // = 0x100000   ~1 million entries
+    private static final int DEFAULT_ENTRIES = 1048576; // = 0x100000   ~1 million entries
 
-    private PawnTranspositionTableEntry[] table;
+    private final PawnTranspositionTableEntry[] table;
 
     public PawnTranspositionTable() {
         this(DEFAULT_ENTRIES);

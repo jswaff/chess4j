@@ -9,11 +9,11 @@ import java.util.Map;
 
 public class TranspositionTableEntry {
 
-    private long zobristKey;
+    private final long zobristKey;
     private long val;
 
-    private static Map<Piece,Long> pieceToLongMap;
-    private static Map<Long,Piece> longToPieceMap;
+    private static final Map<Piece,Long> pieceToLongMap;
+    private static final Map<Long,Piece> longToPieceMap;
 
     static {
         pieceToLongMap = new HashMap<>();
