@@ -79,6 +79,14 @@ public class InputParser {
         searchIterator = new SearchIteratorImpl();
     }
 
+    public Color getEngineColor() {
+        return engineColor;
+    }
+
+    public boolean isForceMode() {
+        return forceMode;
+    }
+
     public void setSearchIterator(SearchIterator searchIterator) {
         this.searchIterator = searchIterator;
     }
@@ -315,7 +323,7 @@ public class InputParser {
             Globals.getBoard().resetBoard();
             throw e;
         }
-        DrawBoard.drawBoard(Globals.getBoard());
+        DrawBoard.drawBoard(Globals.getBoard()); // TODO: if not in xboard mode
     }
 
     /**
@@ -389,7 +397,10 @@ public class InputParser {
         engineColor = Globals.getBoard().getPlayerToMove();
 
         if (!endOfGameCheck()) {
-            searchFuture = searchIterator.findPvFuture(Globals.getBoard(), Globals.getGameUndos())
+            // These are copied for testing purposes.  The iterator will not modify.
+            Board board = Globals.getBoard().deepCopy();
+            List<Undo> undos = new ArrayList<>(Globals.getGameUndos());
+            searchFuture = searchIterator.findPvFuture(board, undos)
                     .thenApply(
                         pv -> {
                             Globals.getGameUndos().add(Globals.getBoard().applyMove(pv.get(0)));

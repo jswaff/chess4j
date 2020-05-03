@@ -31,12 +31,11 @@ import static com.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
 
 public final class Board {
 
-    private static final String INITIAL_POS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    public static final String INITIAL_POS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-    private List<Undo> undoStack = new ArrayList<>();
-    private Map<Square,Piece> pieceMap = new HashMap<>();
-    private Map<Piece,Integer> pieceCountsMap = new HashMap<>();
-    private MyCastlingRights castlingRights = new MyCastlingRights();
+    private final Map<Square,Piece> pieceMap = new HashMap<>();
+    private final Map<Piece,Integer> pieceCountsMap = new HashMap<>();
+    private final MyCastlingRights castlingRights = new MyCastlingRights();
     private Color playerToMove;
     private Square epSquare;
     private int moveCounter;

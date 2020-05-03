@@ -3,7 +3,10 @@ package com.jamesswafford.chess4j.io;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.search.SearchIterator;
+import com.jamesswafford.chess4j.utils.GameStatus;
+import com.jamesswafford.chess4j.utils.GameStatusChecker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.junit.After;
@@ -11,13 +14,15 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
-import static com.jamesswafford.chess4j.board.squares.Square.E2;
-import static com.jamesswafford.chess4j.board.squares.Square.E4;
-import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
+import static com.jamesswafford.chess4j.pieces.Pawn.*;
+import static com.jamesswafford.chess4j.pieces.Queen.*;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class InputParserTest {
@@ -26,11 +31,13 @@ public class InputParserTest {
     SearchIterator searchIterator;
 
     private static Logger inputParserLogger;
+    private static Logger printGameResultLogger;
     private static TestLogAppender testAppender;
 
     @BeforeClass
     public static void setUpClass() {
         inputParserLogger = (Logger) LogManager.getLogger(InputParser.class);
+        printGameResultLogger = (Logger) LogManager.getLogger(PrintGameResult.class);
         testAppender = TestLogAppender.createAppender("TestAppender");
         assertNotNull(testAppender);
         testAppender.start();
@@ -41,13 +48,21 @@ public class InputParserTest {
         inputParser = new InputParser();
         searchIterator = mock(SearchIterator.class);
         inputParser.setSearchIterator(searchIterator);
+
         inputParserLogger.addAppender(testAppender);
         inputParserLogger.setAdditive(false);
+
+        printGameResultLogger.addAppender(testAppender);
+        printGameResultLogger.setAdditive(false);
     }
 
     @After
     public void tearDown() {
         testAppender.clearMessages();
+
+        printGameResultLogger.setAdditive(true);
+        printGameResultLogger.removeAppender(testAppender);
+
         inputParserLogger.setAdditive(true);
         inputParserLogger.removeAppender(testAppender);
     }
@@ -67,12 +82,70 @@ public class InputParserTest {
 
     @Test
     public void forceCmd() {
-        // TODO
+        inputParser.parseCommand("new");
+        assertFalse(inputParser.isForceMode());
+        inputParser.parseCommand("force");
+        assertTrue(inputParser.isForceMode());
+
+        inputParser.parseCommand("usermove e2e4");
+
+        // the global board should have been updated
+        Board board = new Board();
+        Move move = new Move(WHITE_PAWN, E2, E4);
+        Undo undo = board.applyMove(move);
+        assertEquals(board, Globals.getBoard());
+        assertEquals(Collections.singletonList(undo), Globals.getGameUndos());
+
+        // the search should NOT have been called
+        verify(searchIterator, never()).findPvFuture(any(), any());
     }
 
     @Test
     public void goCmd() {
-        // TODO
+        Move move = new Move(WHITE_PAWN, E2, E4);
+        when(searchIterator.findPvFuture(new Board(), new ArrayList<>()))
+                .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(move)));
+
+        inputParser.parseCommand("new");
+        inputParser.parseCommand("go");
+
+        List<String> output = testAppender.getNonDebugMessages();
+        assertEquals(1, output.size());
+        assertEquals("move e2e4", output.get(0));
+
+        // the global board should have been updated
+        Board board = new Board();
+        Undo undo = board.applyMove(move);
+        assertEquals(board, Globals.getBoard());
+        assertEquals(Collections.singletonList(undo), Globals.getGameUndos());
+
+        // the search should have been called
+        verify(searchIterator, times(1)).setMaxDepth(eq(0)); // by NEW command
+        verify(searchIterator, times(1)).findPvFuture(
+                eq(new Board()), eq(new ArrayList<>()));
+    }
+
+    @Test
+    public void goCmd_EndOfGame() {
+
+        inputParser.parseCommand("new");
+
+        // set up Fool's Mate
+        String fen = "rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR b KQkq g3 0 2";
+        inputParser.parseCommand("setboard " + fen);
+
+        Move move = new Move(BLACK_QUEEN, D8, H4);
+        when(searchIterator.findPvFuture(Globals.getBoard().deepCopy(), new ArrayList<>()))
+                .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(move)));
+
+        inputParser.parseCommand("go");
+        assertEquals(GameStatus.CHECKMATED,
+                GameStatusChecker.getGameStatus(Globals.getBoard(), Globals.getGameUndos()));
+
+        List<String> output = testAppender.getNonDebugMessages();
+        assertEquals(2, output.size());
+        assertEquals("move d8h4", output.get(0));
+        assertEquals("RESULT 0-1 {Black mates}\n", output.get(1));
     }
 
     @Test
@@ -136,12 +209,12 @@ public class InputParserTest {
 
     @Test
     public void protoverCmd() {
-        // TODO
-    }
+        inputParser.parseCommand("protover 2");
 
-    @Test
-    public void quitCmd() {
-        // TODO
+        // ensure we sent some 'feature' lines, ending with 'done'
+        List<String> featureStatements = testAppender.getNonDebugMessages();
+        assertTrue(featureStatements.size() > 0);
+        assertEquals("feature done=1", featureStatements.get(featureStatements.size()-1));
     }
 
     @Test
@@ -163,17 +236,27 @@ public class InputParserTest {
 
     @Test
     public void removeCmd() {
-        // TODO
+        inputParser.parseCommand("new");
+        inputParser.parseCommand("force");
+        inputParser.parseCommand("usermove e2e4");
+        inputParser.parseCommand("usermove e7e5");
+        inputParser.parseCommand("remove");
+
+        assertEquals(new Board(), Globals.getBoard());
+        assertEquals(0, Globals.getGameUndos().size());
     }
 
     @Test
     public void resultCmd() {
-        // TODO
+        inputParser.parseCommand("new");
+        inputParser.parseCommand("result 1-0 {Black resigns in fear}");
+        // TODO - ensure book learning is triggered
     }
 
     @Test
     public void sdCmd() {
-        // TODO
+        inputParser.parseCommand("sd 12");
+        verify(searchIterator).setMaxDepth(12);
     }
 
     @Test
@@ -183,6 +266,27 @@ public class InputParserTest {
 
     @Test
     public void setboardCmd() {
+
+        inputParser.parseCommand("new");
+        // play one move just to put an undo in the list
+        inputParser.parseCommand("force");
+        inputParser.parseCommand("usermove a2a3");
+
+        // set up board to compare final result to
+        Board board = new Board();
+        board.applyMove(new Move(WHITE_PAWN, F2, F3));
+        board.applyMove(new Move(BLACK_PAWN, E7, E5));
+        board.applyMove(new Move(WHITE_PAWN, G2, G4));
+
+        String fen = "rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR b KQkq g3 0 2";
+        inputParser.parseCommand("setboard " + fen);
+
+        assertEquals(board, Globals.getBoard());
+        assertEquals(0, Globals.getGameUndos().size());
+    }
+
+    @Test
+    public void setboardCmd_IllegalPos() {
         // TODO
     }
 
@@ -193,7 +297,16 @@ public class InputParserTest {
 
     @Test
     public void undoCmd() {
-        // TODO
+        inputParser.parseCommand("new");
+        inputParser.parseCommand("force");
+        inputParser.parseCommand("usermove e2e4");
+        inputParser.parseCommand("usermove e7e5");
+        inputParser.parseCommand("undo");
+
+        Board board = new Board();
+        board.applyMove(new Move(WHITE_PAWN, E2, E4));
+        assertEquals(board, Globals.getBoard());
+        assertEquals(1, Globals.getGameUndos().size());
     }
 
     @Test

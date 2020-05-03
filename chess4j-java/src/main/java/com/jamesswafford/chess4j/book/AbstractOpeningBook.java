@@ -20,7 +20,7 @@ public abstract class AbstractOpeningBook {
 
     private static final Logger LOGGER = LogManager.getLogger(AbstractOpeningBook.class);
 
-    private Random r = new Random();
+    private final Random random = new Random();
 
     public abstract void addToBook(Board board, Move move);
 
@@ -110,7 +110,7 @@ public abstract class AbstractOpeningBook {
 
         int totalWeight = bookMoves.stream().mapToInt(BookMove::getFrequency).sum();
 
-        int val = r.nextInt(totalWeight)+1;  // e.g. if totalWeight is 10, then 0-9 ==> 1-10
+        int val = random.nextInt(totalWeight)+1;  // e.g. if totalWeight is 10, then 0-9 ==> 1-10
 
         int countWeight = 0;
         for (BookMove bookMove : bookMoves) {

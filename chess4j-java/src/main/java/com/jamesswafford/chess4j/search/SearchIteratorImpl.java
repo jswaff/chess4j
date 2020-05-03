@@ -62,7 +62,7 @@ public class SearchIteratorImpl implements SearchIterator {
     }
 
     @Override
-    public CompletableFuture<List<Move>> findPvFuture(Board board, List<Undo> undos) {
+    public CompletableFuture<List<Move>> findPvFuture(final Board board, final List<Undo> undos) {
         return CompletableFuture.supplyAsync(() -> findPrincipalVariation(
                 board.deepCopy(),
                 new ArrayList<>(undos)));

@@ -13,6 +13,6 @@ public interface SearchIterator {
 
     void setPost(boolean post);
 
-    CompletableFuture<List<Move>> findPvFuture(Board board, List<Undo> undos);
+    CompletableFuture<List<Move>> findPvFuture(final Board board, final List<Undo> undos);
 
 }
