@@ -116,4 +116,17 @@ public class PawnTranspositionTableTest {
         tte = ptable.probe(key2);
         assertEquals(lbe2, tte);
     }
+
+    @Test
+    public void testResize() {
+
+        PawnTranspositionTable ptt = new PawnTranspositionTable(1024);
+        assertEquals(1024, ptt.getNumEntries());
+
+        int fourMb = 4 * 1024 * 1024;
+        ptt.resize(fourMb);
+
+        assertTrue(fourMb / ptt.sizeOfEntry() >= ptt.getNumEntries());
+    }
+
 }

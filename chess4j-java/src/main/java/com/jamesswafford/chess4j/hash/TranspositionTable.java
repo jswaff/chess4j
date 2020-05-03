@@ -11,16 +11,16 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     private static final  Logger LOGGER = LogManager.getLogger(TranspositionTable.class);
 
-    private static final int DEFAULT_ENTRIES = 1048576; // = 0x100000   ~1 million entries
+    public static final int DEFAULT_ENTRIES = 1048576; // = 0x100000   ~1 million entries
 
     private final boolean depthPreferred;
     private final TranspositionTableEntry[] table;
 
     public TranspositionTable(boolean depthPreferred) {
-        this(depthPreferred,DEFAULT_ENTRIES);
+        this(depthPreferred, DEFAULT_ENTRIES);
     }
 
-    public TranspositionTable(boolean depthPreferred,int maxEntries) {
+    public TranspositionTable(boolean depthPreferred, int maxEntries) {
         LOGGER.debug("# initializing transposition table.  maxEntries=" + maxEntries);
 
         this.depthPreferred = depthPreferred;

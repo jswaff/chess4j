@@ -37,8 +37,9 @@ public class TTHolder {
     }
 
     public static void initTables() {
-        alwaysReplaceTransTable = new TranspositionTable(false,maxEntries);
-        depthPreferredTransTable = new TranspositionTable(true,maxEntries);
+        alwaysReplaceTransTable = new TranspositionTable(false, maxEntries);
+        depthPreferredTransTable = new TranspositionTable(true, maxEntries);
         pawnTransTable = new PawnTranspositionTable(maxPawnEntries);
     }
+
 }

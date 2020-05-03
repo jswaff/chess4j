@@ -36,6 +36,10 @@ public abstract class AbstractTranspositionTable {
         return numProbes;
     }
 
+    protected void resize(int maxSizeMB) {
+        setNumEntries(maxSizeMB / sizeOfEntry());
+    }
+
     protected void setNumEntries(int maxEntries) {
         numEntries = 2;
 
