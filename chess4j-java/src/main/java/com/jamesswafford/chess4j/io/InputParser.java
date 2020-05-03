@@ -38,7 +38,7 @@ public class InputParser {
     private boolean forceMode = true;
     private int maxMemoryMB = 0;
 
-    private Map<String, Consumer<String[]>> cmdMap = new HashMap<>() {{
+    private final Map<String, Consumer<String[]>> cmdMap = new HashMap<>() {{
         put("accepted", InputParser::noOp);
         put("bk", (String[] cmd) -> PrintBookMoves.printBookMoves(Globals.getBoard()));
         put("computer", InputParser::noOp);

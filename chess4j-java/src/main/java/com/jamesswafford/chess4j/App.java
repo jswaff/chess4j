@@ -1,6 +1,6 @@
 package com.jamesswafford.chess4j;
 
-import com.jamesswafford.chess4j.book.OpeningBookSQLiteImpl;
+import com.jamesswafford.chess4j.book.SQLiteBook;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
@@ -90,7 +90,7 @@ public final class App {
         }
 
         if (bookPath != null) {
-            Globals.setOpeningBook(OpeningBookSQLiteImpl.openOrInitialize(bookPath));
+            Globals.setOpeningBook(SQLiteBook.openOrInitialize(bookPath));
         }
 
         repl();

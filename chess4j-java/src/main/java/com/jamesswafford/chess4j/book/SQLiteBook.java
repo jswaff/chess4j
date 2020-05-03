@@ -18,13 +18,13 @@ import java.util.List;
 
 import static com.jamesswafford.chess4j.utils.GameResult.*;
 
-public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
+public class SQLiteBook implements OpeningBook {
 
-    private static final Logger LOGGER = LogManager.getLogger(OpeningBookSQLiteImpl.class);
+    private static final Logger LOGGER = LogManager.getLogger(SQLiteBook.class);
 
-    private Connection conn;
+    private final Connection conn;
 
-    public OpeningBookSQLiteImpl(Connection conn) {
+    public SQLiteBook(Connection conn) {
         this.conn = conn;
     }
 
@@ -248,7 +248,7 @@ public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
         ps.close();
     }
 
-    public static OpeningBookSQLiteImpl openOrInitialize(String bookPath) throws Exception {
+    public static SQLiteBook openOrInitialize(String bookPath) throws Exception {
         LOGGER.debug("# initializing book: " + bookPath);
 
         File bookFile = new File(bookPath);
@@ -256,7 +256,7 @@ public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
 
         Class.forName("org.sqlite.JDBC");
         Connection conn = DriverManager.getConnection("jdbc:sqlite:" + bookPath);
-        OpeningBookSQLiteImpl sqlOpeningBook = new OpeningBookSQLiteImpl(conn);
+        SQLiteBook sqlOpeningBook = new SQLiteBook(conn);
 
         if (initBook) {
             LOGGER.info("# could not find " + bookPath + ", creating...");

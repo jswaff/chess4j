@@ -7,38 +7,32 @@ import com.jamesswafford.chess4j.exceptions.PgnToBookException;
 import com.jamesswafford.chess4j.io.PGNGame;
 import com.jamesswafford.chess4j.io.PGNIterator;
 import com.jamesswafford.chess4j.utils.GameResult;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.text.DecimalFormat;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-public abstract class AbstractOpeningBook {
+public interface OpeningBook {
 
-    private static final Logger LOGGER = LogManager.getLogger(AbstractOpeningBook.class);
+    void addToBook(Board board, Move move);
 
-    private final Random random = new Random();
+    List<BookMove> getMoves(Board board);
 
-    public abstract void addToBook(Board board, Move move);
+    long getTotalMoveCount();
 
-    public abstract List<BookMove> getMoves(Board board);
+    void initializeBook();
 
-    public abstract long getTotalMoveCount();
-
-    public abstract void initializeBook();
-
-    public void learn(List<Move> moves, Color engineColor, GameResult gameResult) {
+    default void learn(List<Move> moves, Color engineColor, GameResult gameResult) {
         // default impl is a no-op
     }
 
-    public void addIndexes() {
+    default void addIndexes() {
         // default impl is a no-op
     }
 
-    public void addToBook(PGNGame game) {
+    default void addToBook(PGNGame game) {
 
         Board board = new Board();
 
@@ -52,19 +46,10 @@ public abstract class AbstractOpeningBook {
         }
     }
 
-    public void addToBook(File pgnFile) {
-
-        LOGGER.info("processing pgn: " + pgnFile.getName() + " ...");
-
+    default int addToBook(File pgnFile) {
         try {
-            long startTime = System.currentTimeMillis();
-            LOGGER.info("starting dry run...");
-            int n = processPGNFile(pgnFile,true);
-            LOGGER.info("\ndry run complete.  adding " + n + " games to book.");
-            processPGNFile(pgnFile,false);
-            DecimalFormat df = new DecimalFormat("0.00");
-            long elapsed = System.currentTimeMillis() - startTime;
-            LOGGER.info("\nfinished in " + df.format((double) elapsed /1000.0) + " seconds.");
+            processPGNFile(pgnFile,true);
+            return processPGNFile(pgnFile,false);
         } catch (IOException e) {
             throw new PgnToBookException("Error adding " + pgnFile.getName() + " to opening book", e);
         }
@@ -81,9 +66,6 @@ public abstract class AbstractOpeningBook {
             PGNIterator it = new PGNIterator(br);
             PGNGame pgnGame;
             while ((pgnGame = it.next()) != null) {
-                if ((n % 1000)==0) {
-                    LOGGER.info(".");
-                }
                 if (!dryRun) {
                     addToBook(pgnGame);
                 }
@@ -98,11 +80,11 @@ public abstract class AbstractOpeningBook {
         return n;
     }
 
-    public void dropIndexes() {
+    default void dropIndexes() {
         // default impl is a no-op
     }
 
-    public Optional<BookMove> getMoveWeightedRandomByFrequency(Board board) {
+    default Optional<BookMove> getMoveWeightedRandomByFrequency(Board board) {
 
         List<BookMove> bookMoves = getMoves(board);
 
@@ -110,6 +92,7 @@ public abstract class AbstractOpeningBook {
 
         int totalWeight = bookMoves.stream().mapToInt(BookMove::getFrequency).sum();
 
+        Random random = new SecureRandom();
         int val = random.nextInt(totalWeight)+1;  // e.g. if totalWeight is 10, then 0-9 ==> 1-10
 
         int countWeight = 0;

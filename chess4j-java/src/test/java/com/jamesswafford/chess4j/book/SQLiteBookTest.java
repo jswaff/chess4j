@@ -24,20 +24,20 @@ import com.jamesswafford.chess4j.utils.GameResult;
 import static com.jamesswafford.chess4j.pieces.Pawn.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 
-public class OpeningBookSQLiteImplTest {
+public class SQLiteBookTest {
 
     private final static String smallPGN = "/pgn/small.pgn";
     private final static String tinyPGN = "/pgn/tiny.pgn";
     private final static String testDB = "test.db";
 
-    static OpeningBookSQLiteImpl book;
+    static SQLiteBook book;
     static Connection conn;
 
     @BeforeClass
     public static void setUp() throws Exception {
         Class.forName("org.sqlite.JDBC");
         conn = DriverManager.getConnection("jdbc:sqlite:" + testDB);
-        book = new OpeningBookSQLiteImpl(conn);
+        book = new SQLiteBook(conn);
         book.initializeBook();
     }
 
@@ -327,7 +327,7 @@ Be5 41.Rd2 Bc6 42.b5 Bf3 43.Bf4 1-0
     }
 
     private void populateBook(String pgn) {
-        File pgnFile = new File(OpeningBookSQLiteImplTest.class.getResource(pgn).getFile());
+        File pgnFile = new File(SQLiteBookTest.class.getResource(pgn).getFile());
         book.addToBook(pgnFile);
     }
 

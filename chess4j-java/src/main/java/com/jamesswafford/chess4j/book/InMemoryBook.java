@@ -9,16 +9,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OpeningBookInMemoryImpl extends AbstractOpeningBook {
+public class InMemoryBook implements OpeningBook {
 
-    private static final OpeningBookInMemoryImpl INSTANCE = new OpeningBookInMemoryImpl();
+    private static final InMemoryBook INSTANCE = new InMemoryBook();
 
-    private Map<Long,List<BookMove>> movesMap = new HashMap<>();
+    private final Map<Long,List<BookMove>> movesMap = new HashMap<>();
 
-    private OpeningBookInMemoryImpl() {
+    private InMemoryBook() {
     }
 
-    public static OpeningBookInMemoryImpl getInstance() {
+    public static InMemoryBook getInstance() {
         return INSTANCE;
     }
 

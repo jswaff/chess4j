@@ -12,14 +12,14 @@ import com.jamesswafford.chess4j.io.MoveParser;
 
 import static org.junit.Assert.*;
 
-public class OpeningBookInMemoryImplTest {
+public class InMemoryBookTest {
 
-    static OpeningBookInMemoryImpl book;
+    static InMemoryBook book;
 
     @BeforeClass
     public static void setUp() throws Exception {
-        book = OpeningBookInMemoryImpl.getInstance();
-        File pgnFile = new File(OpeningBookInMemoryImplTest.class.getResource("/pgn/small.pgn").getFile());
+        book = InMemoryBook.getInstance();
+        File pgnFile = new File(InMemoryBookTest.class.getResource("/pgn/small.pgn").getFile());
         book.addToBook(pgnFile);
     }
 
