@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.io;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.search.SearchIterator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.junit.After;
@@ -12,14 +13,17 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
-
-import static com.jamesswafford.chess4j.pieces.Pawn.*;
-import static com.jamesswafford.chess4j.board.squares.Square.*;
+import static com.jamesswafford.chess4j.board.squares.Square.E2;
+import static com.jamesswafford.chess4j.board.squares.Square.E4;
+import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.*;
 
 public class InputParserTest {
 
-    InputParser inputParser = InputParser.getInstance();
+    InputParser inputParser;
+    SearchIterator searchIterator;
 
     private static Logger inputParserLogger;
     private static TestLogAppender testAppender;
@@ -34,6 +38,9 @@ public class InputParserTest {
 
     @Before
     public void setUp() {
+        inputParser = new InputParser();
+        searchIterator = mock(SearchIterator.class);
+        inputParser.setSearchIterator(searchIterator);
         inputParserLogger.addAppender(testAppender);
         inputParserLogger.setAdditive(false);
     }
@@ -52,30 +59,10 @@ public class InputParserTest {
     }
 
     @Test
-    public void bkCmd() {
-        // TODO
-    }
-
-    @Test
-    public void computerCmd() {
-        inputParser.parseCommand("computer");
-        assertEquals(0, testAppender.getNonDebugMessages().size());
-    }
-
-    @Test
-    public void dbCmd() {
-        // TODO
-    }
-
-    @Test
     public void easyCmd() {
         inputParser.parseCommand("easy");
         assertEquals(0, testAppender.getNonDebugMessages().size());
-    }
-
-    @Test
-    public void evalCmd() {
-        // TODO
+        // TODO: ensure pondering was turned off
     }
 
     @Test
@@ -92,12 +79,7 @@ public class InputParserTest {
     public void hardCmd() {
         inputParser.parseCommand("hard");
         assertEquals(0, testAppender.getNonDebugMessages().size());
-    }
-
-    @Test
-    public void hintCmd() {
-        inputParser.parseCommand("hint");
-        assertEquals(0, testAppender.getNonDebugMessages().size());
+        // TODO: ensure pondering turned on
     }
 
     @Test
@@ -124,17 +106,8 @@ public class InputParserTest {
 
     @Test
     public void nopostCmd() {
-        // TODO
-    }
-
-    @Test
-    public void otimCmd() {
-        // TODO
-    }
-
-    @Test
-    public void perftCmd() {
-        // TODO
+        inputParser.parseCommand("nopost");
+        verify(searchIterator).setPost(false);
     }
 
     @Test
@@ -157,7 +130,8 @@ public class InputParserTest {
 
     @Test
     public void postCmd() {
-        // TODO
+        inputParser.parseCommand("post");
+        verify(searchIterator).setPost(true);
     }
 
     @Test

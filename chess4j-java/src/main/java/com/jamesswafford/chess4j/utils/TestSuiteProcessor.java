@@ -9,7 +9,7 @@ import com.jamesswafford.chess4j.io.DrawBoard;
 import com.jamesswafford.chess4j.io.EPDOperation;
 import com.jamesswafford.chess4j.io.EPDParser;
 import com.jamesswafford.chess4j.io.MoveParser;
-import com.jamesswafford.chess4j.search.SearchIterator;
+import com.jamesswafford.chess4j.search.SearchIteratorImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -67,7 +67,7 @@ public class TestSuiteProcessor {
         bms.forEach(bm -> LOGGER.info("\t" + bm));
         TTHolder.clearAllTables();
 
-        SearchIterator searchIterator = new SearchIterator();
+        SearchIteratorImpl searchIterator = new SearchIteratorImpl();
         searchIterator.setEarlyExitOk(false);
         searchIterator.setMaxDepth(maxDepth);
 

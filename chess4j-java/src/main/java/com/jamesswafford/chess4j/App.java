@@ -50,6 +50,8 @@ public final class App {
     private static void repl() {
         BufferedReader bin = new BufferedReader(new InputStreamReader(System.in));
         String input = "";
+        InputParser inputParser = new InputParser();
+
         while (true) {
             try {
                 input = bin.readLine();
@@ -59,7 +61,7 @@ public final class App {
             }
 
             try {
-                InputParser.getInstance().parseCommand(input);
+                inputParser.parseCommand(input);
             } catch (Exception e) {
                 LOGGER.warn("Caught (hopefully recoverable) exception: " + e.getMessage());
             }

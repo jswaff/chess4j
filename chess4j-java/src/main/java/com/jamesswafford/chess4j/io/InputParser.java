@@ -10,6 +10,7 @@ import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.search.SearchIterator;
+import com.jamesswafford.chess4j.search.SearchIteratorImpl;
 import com.jamesswafford.chess4j.utils.GameResult;
 import com.jamesswafford.chess4j.utils.GameStatus;
 import com.jamesswafford.chess4j.utils.GameStatusChecker;
@@ -31,9 +32,7 @@ public class InputParser {
 
     private static final  Logger LOGGER = LogManager.getLogger(InputParser.class);
 
-    private static final InputParser INSTANCE = new InputParser();
-
-    private SearchIterator searchIterator = new SearchIterator();
+    private SearchIterator searchIterator;
     private CompletableFuture<List<Move>> searchFuture;
     private Color engineColor;
     private boolean forceMode = true;
@@ -76,10 +75,12 @@ public class InputParser {
         put("?", InputParser.this::moveNow);
     }};
 
-    private InputParser() { }
+    public InputParser() {
+        searchIterator = new SearchIteratorImpl();
+    }
 
-    public static InputParser getInstance() {
-        return INSTANCE;
+    public void setSearchIterator(SearchIterator searchIterator) {
+        this.searchIterator = searchIterator;
     }
 
     public void parseCommand(String command) throws IllegalMoveException, ParseException {

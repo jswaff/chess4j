@@ -19,13 +19,13 @@ import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
-public class SearchIteratorTest {
+public class SearchIteratorImplTest {
 
-    SearchIterator searchIterator;
+    SearchIteratorImpl searchIterator;
 
     @Before
     public void setUp() {
-        searchIterator = new SearchIterator();
+        searchIterator = new SearchIteratorImpl();
     }
 
     @Test
