@@ -38,7 +38,6 @@ public class InputParser {
     private CompletableFuture<List<Move>> searchFuture;
     private Color engineColor;
     private boolean forceMode = true;
-    private int maxMemoryMB = 0;
 
     private final Map<String, Consumer<String[]>> cmdMap = new HashMap<>() {{
         put("accepted", InputParser::noOp);
@@ -158,21 +157,8 @@ public class InputParser {
      */
     private void memory(String[] cmd) {
         int maxMemoryMB = Integer.parseInt(cmd[1]);
-
         LOGGER.debug("# received memory command, N=" + maxMemoryMB);
-
-        if (maxMemoryMB != this.maxMemoryMB) {
-            int maxMemPerTable = maxMemoryMB * 1024 * 1024 / 3; // DP, AR and pawn
-            TTHolder.maxEntries = maxMemPerTable / TTHolder.getAlwaysReplaceTransTable().sizeOfEntry(); // note DP and AR are the same
-            TTHolder.maxPawnEntries = maxMemPerTable / TTHolder.getPawnTransTable().sizeOfEntry();
-            TTHolder.initTables();
-            this.maxMemoryMB = maxMemoryMB;
-
-            // suggest to the JVM that now is good time to garbage collect the previous tables
-            System.gc();
-        } else {
-            LOGGER.debug("# memory usage unchanged, skipping new table instantiation.");
-        }
+        TTHolder.getInstance().resizeTables(maxMemoryMB * 1024 * 1024);
     }
 
     /**

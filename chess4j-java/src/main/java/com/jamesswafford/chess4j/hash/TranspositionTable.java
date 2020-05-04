@@ -2,41 +2,32 @@ package com.jamesswafford.chess4j.hash;
 
 import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Move;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 public class TranspositionTable extends AbstractTranspositionTable {
 
-    private static final  Logger LOGGER = LogManager.getLogger(TranspositionTable.class);
-
-    public static final int DEFAULT_ENTRIES = 1048576; // = 0x100000   ~1 million entries
+    public static final int DEFAULT_ENTRIES = 1048576;
 
     private final boolean depthPreferred;
-    private final TranspositionTableEntry[] table;
+    private TranspositionTableEntry[] table;
 
     public TranspositionTable(boolean depthPreferred) {
         this(depthPreferred, DEFAULT_ENTRIES);
     }
 
     public TranspositionTable(boolean depthPreferred, int maxEntries) {
-        LOGGER.debug("# initializing transposition table.  maxEntries=" + maxEntries);
-
         this.depthPreferred = depthPreferred;
-        setNumEntries(maxEntries);
-        table = new TranspositionTableEntry[numEntries];
+        int numEntries = calculateNumEntries(maxEntries);
+        allocateTable(numEntries);
         clear();
-
-        LOGGER.info("# " + (depthPreferred?"depth preferred":"always replace")
-                + " transposition table initialized with " + numEntries + " entries.");
     }
 
+    @Override
     public void clear() {
         clearStats();
-        for (int i=0; i<numEntries; i++) {
-            table[i] = null;
-        }
+        Arrays.fill(table, null);
     }
 
     private int getCheckMateBound() {
@@ -110,6 +101,16 @@ public class TranspositionTable extends AbstractTranspositionTable {
         table[getMaskedKey(zobristKey)] = te;
 
         return true;
+    }
+
+    @Override
+    protected void allocateTable(int capacity) {
+        table = new TranspositionTableEntry[capacity];
+    }
+
+    @Override
+    public int tableCapacity() {
+        return table.length;
     }
 
     @Override

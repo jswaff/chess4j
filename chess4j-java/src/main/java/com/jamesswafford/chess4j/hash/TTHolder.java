@@ -2,44 +2,43 @@ package com.jamesswafford.chess4j.hash;
 
 public class TTHolder {
 
-    public static int maxEntries = 1048576; // = 0x100000
-    private static TranspositionTable alwaysReplaceTransTable;
-    private static TranspositionTable depthPreferredTransTable;
+    private static final TTHolder ttHolder = new TTHolder();
 
-    public static int maxPawnEntries = 1048576;
-    private static PawnTranspositionTable pawnTransTable;
+    public static TTHolder getInstance() { return ttHolder; }
 
-    public static TranspositionTable getAlwaysReplaceTransTable() {
-        if (alwaysReplaceTransTable ==null) {
-            alwaysReplaceTransTable = new TranspositionTable(false,maxEntries);
-        }
+    private final TranspositionTable alwaysReplaceTransTable;
+    private final TranspositionTable depthPreferredTransTable;
+    private final PawnTranspositionTable pawnTransTable;
+
+    private TTHolder() {
+        alwaysReplaceTransTable = new TranspositionTable(false);
+        depthPreferredTransTable = new TranspositionTable(true);
+        pawnTransTable = new PawnTranspositionTable();
+    }
+
+    public TranspositionTable getAlwaysReplaceTransTable() {
         return alwaysReplaceTransTable;
     }
 
-    public static TranspositionTable getDepthPreferredTransTable() {
-        if (depthPreferredTransTable==null) {
-            depthPreferredTransTable = new TranspositionTable(true,maxEntries);
-        }
+    public TranspositionTable getDepthPreferredTransTable() {
         return depthPreferredTransTable;
     }
 
-    public static PawnTranspositionTable getPawnTransTable() {
-        if (pawnTransTable==null) {
-            pawnTransTable = new PawnTranspositionTable(maxPawnEntries);
-        }
+    public PawnTranspositionTable getPawnTransTable() {
         return pawnTransTable;
     }
 
-    public static void clearAllTables() {
+    public void clearTables() {
         getAlwaysReplaceTransTable().clear();
         getDepthPreferredTransTable().clear();
         getPawnTransTable().clear();
     }
 
-    public static void initTables() {
-        alwaysReplaceTransTable = new TranspositionTable(false, maxEntries);
-        depthPreferredTransTable = new TranspositionTable(true, maxEntries);
-        pawnTransTable = new PawnTranspositionTable(maxPawnEntries);
+    public void resizeTables(int maxBytes) {
+        int maxBytesPerTable = maxBytes / 3;
+        getAlwaysReplaceTransTable().resize(maxBytesPerTable);
+        getDepthPreferredTransTable().resize(maxBytesPerTable);
+        getPawnTransTable().resize(maxBytesPerTable);
     }
 
 }

@@ -118,15 +118,16 @@ public class PawnTranspositionTableTest {
     }
 
     @Test
-    public void testResize() {
+    public void resize() {
 
         PawnTranspositionTable ptt = new PawnTranspositionTable(1024);
-        assertEquals(1024, ptt.getNumEntries());
+        assertEquals(1024, ptt.tableCapacity());
 
         int fourMb = 4 * 1024 * 1024;
         ptt.resize(fourMb);
 
-        assertTrue(fourMb / ptt.sizeOfEntry() >= ptt.getNumEntries());
+        // that's enough space for 349,525 entries
+        assertEquals(262144, ptt.tableCapacity());
     }
 
 }

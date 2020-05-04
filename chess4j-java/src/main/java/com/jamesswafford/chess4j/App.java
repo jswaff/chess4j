@@ -37,10 +37,12 @@ public final class App {
             bookPath = arg.substring(6);
         } else if (arg.startsWith("-hash=")) {
             int maxMemBytes = Integer.parseInt(arg.substring(6)) * 1024 * 1024;
-            TTHolder.maxEntries = maxMemBytes / TranspositionTableEntry.sizeOf();
+            // FIXME
+//            TTHolder.maxEntries = maxMemBytes / TranspositionTableEntry.sizeOf();
         } else if (arg.startsWith("-phash=")) {
             int maxMemBytes = Integer.parseInt(arg.substring(7)) * 1024 * 1024;
-            TTHolder.maxPawnEntries = maxMemBytes / PawnTranspositionTableEntry.sizeOf();
+            // FIXME
+//            TTHolder.maxPawnEntries = maxMemBytes / PawnTranspositionTableEntry.sizeOf();
         }
     }
 
@@ -81,7 +83,7 @@ public final class App {
         for (String arg : args) {
             processArgument(arg);
         }
-        TTHolder.initTables();
+        TTHolder.getInstance().clearTables(); // warm the tables up
 
         if (testSuiteFile != null) {
             TestSuiteProcessor tp = new TestSuiteProcessor();

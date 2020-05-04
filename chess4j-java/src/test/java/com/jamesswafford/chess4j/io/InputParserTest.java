@@ -6,6 +6,7 @@ import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.book.OpeningBook;
+import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.utils.GameResult;
 import com.jamesswafford.chess4j.utils.GameStatus;
@@ -169,7 +170,15 @@ public class InputParserTest {
 
     @Test
     public void memoryCmd() {
-        // TODO
+        inputParser.parseCommand("memory 6");
+        assertEquals(131072, TTHolder.getInstance().getAlwaysReplaceTransTable().tableCapacity());
+        assertEquals(131072, TTHolder.getInstance().getDepthPreferredTransTable().tableCapacity());
+        assertEquals(131072, TTHolder.getInstance().getPawnTransTable().tableCapacity());
+
+        inputParser.parseCommand("memory 3");
+        assertEquals(65536, TTHolder.getInstance().getAlwaysReplaceTransTable().tableCapacity());
+        assertEquals(65536, TTHolder.getInstance().getDepthPreferredTransTable().tableCapacity());
+        assertEquals(65536, TTHolder.getInstance().getPawnTransTable().tableCapacity());
     }
 
     @Test

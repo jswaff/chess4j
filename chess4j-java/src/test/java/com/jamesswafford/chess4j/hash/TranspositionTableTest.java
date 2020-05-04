@@ -26,22 +26,22 @@ public class TranspositionTableTest {
     private Board board = new Board();
 
     @Test
-    public void numEntriesIsPowerOf2() {
+    public void capacityIsPowerOf2() {
         TranspositionTable tt = new TranspositionTable(false);
-        assertIsPowerOf2(tt.getNumEntries());
+        assertIsPowerOf2(tt.tableCapacity());
 
         tt = new TranspositionTable(false,1000000);
-        assertIsPowerOf2(tt.getNumEntries());
-        assertEquals(524288, tt.getNumEntries());
+        assertIsPowerOf2(tt.tableCapacity());
+        assertEquals(524288, tt.tableCapacity());
 
 
         tt = new TranspositionTable(false,32000);
-        assertIsPowerOf2(tt.getNumEntries());
-        assertEquals(16384, tt.getNumEntries());
+        assertIsPowerOf2(tt.tableCapacity());
+        assertEquals(16384, tt.tableCapacity());
 
         tt = new TranspositionTable(false,65536);
-        assertIsPowerOf2(tt.getNumEntries());
-        assertEquals(65536, tt.getNumEntries());
+        assertIsPowerOf2(tt.tableCapacity());
+        assertEquals(65536, tt.tableCapacity());
     }
 
     private void assertIsPowerOf2(long val) {
@@ -232,7 +232,7 @@ public class TranspositionTableTest {
     }
 
     @Test
-    public void testClearTable() {
+    public void clearTable() {
         ttable.clear();
         board.setPos("3qrrk1/1pp2pp1/1p2bn1p/5N2/2P5/P1P3B1/1P4PP/2Q1RRK1 w - -");
 
@@ -246,7 +246,7 @@ public class TranspositionTableTest {
     }
 
     @Test
-    public void testOverwrite() {
+    public void overwrite() {
         ttable.clear();
         board.setPos("8/k7/p7/3Qp2P/n1P5/3KP3/1q6/8 b - -");
 
@@ -279,7 +279,7 @@ public class TranspositionTableTest {
     }
 
     @Test
-    public void testOverwriteDepthPreferred() {
+    public void overwriteDepthPreferred() {
         ttDPtable.clear();
         board.setPos("8/k7/p7/3Qp2P/n1P5/3KP3/1q6/8 b - -");
         long key = Zobrist.calculateBoardKey(board);
@@ -301,15 +301,15 @@ public class TranspositionTableTest {
     }
 
     @Test
-    public void testResize() {
+    public void resize() {
 
         TranspositionTable tt = new TranspositionTable(false, 1024);
-        assertEquals(1024, tt.getNumEntries());
+        assertEquals(1024, tt.tableCapacity());
 
         int fourMb = 4 * 1024 * 1024;
         tt.resize(fourMb);
 
-        assertEquals(fourMb / tt.sizeOfEntry(), tt.getNumEntries());
+        assertEquals(262144, tt.tableCapacity());
     }
 
 }

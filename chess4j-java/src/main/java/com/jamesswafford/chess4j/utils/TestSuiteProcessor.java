@@ -65,7 +65,7 @@ public class TestSuiteProcessor {
         List<Move> bms = getBestMoves(board, ops);
         LOGGER.info("best moves: ");
         bms.forEach(bm -> LOGGER.info("\t" + bm));
-        TTHolder.clearAllTables();
+        TTHolder.getInstance().clearTables();
 
         SearchIteratorImpl searchIterator = new SearchIteratorImpl();
         searchIterator.setEarlyExitOk(false);
