@@ -30,6 +30,7 @@ public class AlphaBetaSearch implements Search {
     private final List<Move> lastPV;
     private final SearchStats searchStats;
 
+    private boolean stop;
     private Evaluator evaluator;
     private MoveGenerator moveGenerator;
     private MoveScorer moveScorer;
@@ -39,6 +40,7 @@ public class AlphaBetaSearch implements Search {
         this.lastPV = new ArrayList<>();
         this.searchStats = new SearchStats();
 
+        this.stop = false;
         this.evaluator = new Eval();
         this.moveGenerator = new MagicBitboardMoveGenerator();
         this.moveScorer = new MVVLVA();
@@ -80,6 +82,11 @@ public class AlphaBetaSearch implements Search {
         } else {
             return searchWithJavaCode(board, undos, searchParameters);
         }
+    }
+
+    @Override
+    public void stop() {
+        stop = true;
     }
 
     private int searchWithJavaCode(Board board, List<Undo> undos, SearchParameters searchParameters) {
@@ -176,6 +183,10 @@ public class AlphaBetaSearch implements Search {
 
         searchStats.nodes++;
         parentPV.clear();
+
+        if (stop) {
+            return 0;
+        }
 
         if (depth == 0) {
             return evaluator.evaluateBoard(board);

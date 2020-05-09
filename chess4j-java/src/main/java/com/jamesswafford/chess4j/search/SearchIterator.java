@@ -11,6 +11,8 @@ public interface SearchIterator {
 
     void setMaxDepth(int maxDepth);
 
+    void setMaxTime(long maxTimeMs);
+
     void setPost(boolean post);
 
     CompletableFuture<List<Move>> findPvFuture(final Board board, final List<Undo> undos);

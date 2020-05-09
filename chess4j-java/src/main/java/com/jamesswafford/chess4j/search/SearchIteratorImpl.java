@@ -28,6 +28,7 @@ public class SearchIteratorImpl implements SearchIterator {
     private static final  Logger LOGGER = LogManager.getLogger(SearchIteratorImpl.class);
 
     private int maxDepth = 6;
+    private long maxTimeMs = 0;
     private boolean post = true;
     private boolean earlyExitOk = true;
 
@@ -42,6 +43,11 @@ public class SearchIteratorImpl implements SearchIterator {
     @Override
     public void setMaxDepth(int maxDepth) {
         this.maxDepth = maxDepth;
+    }
+
+    @Override
+    public void setMaxTime(long maxTimeMs) {
+        this.maxTimeMs = maxTimeMs;
     }
 
     @Override

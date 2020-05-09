@@ -4,13 +4,19 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
+import org.awaitility.Awaitility;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 import static com.jamesswafford.chess4j.Constants.INFINITY;
@@ -25,6 +31,7 @@ import static com.jamesswafford.chess4j.pieces.Queen.WHITE_QUEEN;
 import static com.jamesswafford.chess4j.pieces.Rook.BLACK_ROOK;
 import static com.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class AlphaBetaSearchTest {
@@ -37,7 +44,7 @@ public class AlphaBetaSearchTest {
     }
 
     @Test
-    public void testSearch_initialPos_depth1() {
+    public void search_initialPos_depth1() {
 
         // given a board in the initial position
         Board board = new Board();
@@ -71,7 +78,7 @@ public class AlphaBetaSearchTest {
     }
 
     @Test
-    public void testMateIn1() {
+    public void mateIn1() {
         Board board = new Board("4k3/8/3Q4/2B5/8/8/1K6/8 w - -");
 
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
@@ -85,7 +92,7 @@ public class AlphaBetaSearchTest {
     }
 
     @Test
-    public void testMateIn1b() {
+    public void mateIn1b() {
         Board board = new Board("4K3/8/8/3n2q1/8/8/3k4/8 b - -");
 
         SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
@@ -99,7 +106,7 @@ public class AlphaBetaSearchTest {
     }
 
     @Test
-    public void testMateIn2() {
+    public void mateIn2() {
         Board board = new Board("r1bq2r1/b4pk1/p1pp1p2/1p2pP2/1P2P1PB/3P4/1PPQ2P1/R3K2R w - -");
 
         SearchParameters params = new SearchParameters(4, -INFINITY, INFINITY);
@@ -115,7 +122,7 @@ public class AlphaBetaSearchTest {
     }
 
     @Test
-    public void testMateIn3() {
+    public void mateIn3() {
         Board board = new Board("r5rk/5p1p/5R2/4B3/8/8/7P/7K w - -");
 
         SearchParameters params = new SearchParameters(6, -INFINITY, INFINITY);
@@ -133,7 +140,7 @@ public class AlphaBetaSearchTest {
     }
 
     @Test
-    public void testStaleMate() {
+    public void staleMate() {
         Board board = new Board("8/6p1/5p2/5k1K/7P/8/8/8 w - -");
 
         SearchParameters params = new SearchParameters(1, -INFINITY, INFINITY);
@@ -149,13 +156,12 @@ public class AlphaBetaSearchTest {
      * follows the example on page 6 of my Master's project paper.
      */
     @Test
-    public void testAlphaBetaCutoffs() {
+    public void alphaBetaCutoffs() {
 
         Board boardA = new Board();
 
         Evaluator evaluator = mock(Evaluator.class);
         MoveGenerator moveGenerator = mock(MoveGenerator.class);
-        KillerMovesStore killerMovesStore = mock(KillerMovesStore.class);
         SearchParameters params = new SearchParameters(3, -INFINITY, INFINITY);
         ArgumentCaptor<Board> boardCaptor = ArgumentCaptor.forClass(Board.class);
 
@@ -284,4 +290,25 @@ public class AlphaBetaSearchTest {
         assertEquals(d7d5, search.getLastPV().get(1));
         assertEquals(b2b4, search.getLastPV().get(2));
     }
+
+    @Test
+    public void stopSearch() {
+
+        // start what would be a long running search in a separate thread
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<Integer> future = executor.submit(() -> search.search(new Board(), new ArrayList<>(),
+                new SearchParameters(8, -INFINITY, INFINITY)));
+
+        long start = System.currentTimeMillis();
+        search.stop();
+
+        Awaitility.await()
+                .atMost(5, TimeUnit.SECONDS)
+                .pollInterval(10, TimeUnit.MILLISECONDS)
+                .until(future::isDone);
+
+        long duration = System.currentTimeMillis() - start;
+        assertTrue(duration < 100);
+    }
+
 }

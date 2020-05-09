@@ -8,21 +8,22 @@ import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.book.OpeningBook;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.search.SearchIterator;
+import com.jamesswafford.chess4j.search.SearchIteratorImpl;
 import com.jamesswafford.chess4j.utils.GameResult;
 import com.jamesswafford.chess4j.utils.GameStatus;
 import com.jamesswafford.chess4j.utils.GameStatusChecker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.awaitility.Awaitility;
+import org.awaitility.Duration;
+import org.junit.*;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.pieces.Pawn.*;
@@ -300,8 +301,30 @@ public class InputParserTest {
     }
 
     @Test
+    @Ignore
+    // FIXME: this should probably be a SearchIterator test
     public void stCmd() {
-        // TODO
+
+        // use the real search iterator for this test
+        inputParser.setSearchIterator(new SearchIteratorImpl());
+
+        inputParser.parseCommand("new");
+        inputParser.parseCommand("st 1");
+
+        Board origBoard = Globals.getBoard().deepCopy();
+        long start = System.currentTimeMillis();
+        inputParser.parseCommand("go");
+
+        // wait for the board to change state
+        Awaitility.await()
+                .atMost(Duration.FIVE_SECONDS)
+                .with()
+                .pollInterval(new Duration(50, TimeUnit.MILLISECONDS))
+                .until(() -> !origBoard.equals(Globals.getBoard()));
+
+        long searchTime = System.currentTimeMillis() - start;
+        assertTrue(searchTime > 1000);
+        assertTrue(searchTime < 1100);
     }
 
     @Test

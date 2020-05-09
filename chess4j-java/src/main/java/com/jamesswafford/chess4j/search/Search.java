@@ -16,4 +16,6 @@ public interface Search {
 
     int search(Board board, List<Undo> undos, SearchParameters searchParameters);
 
+    void stop();
+
 }
