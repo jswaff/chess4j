@@ -472,7 +472,9 @@ public final class Board {
         zobristKey = Zobrist.calculateBoardKey(this);
         pawnKey = Zobrist.calculatePawnKey(this);
 
-        assert(verify());
+        if (!verify()) {
+            throw new ParseException("Invalid position: " + fen);
+        }
     }
 
     public void swapPlayer() {
@@ -899,7 +901,7 @@ public final class Board {
 
     private void setFullMoveCounter(String fenPart) throws ParseException {
         try {
-            int fullMoveCounter = fenPart==null? 1 : Integer.valueOf(fenPart);
+            int fullMoveCounter = fenPart==null? 1 : Integer.parseInt(fenPart);
             moveCounter = (fullMoveCounter-1)*2;
             if (playerToMove == Color.BLACK) {
                 moveCounter++;
@@ -911,7 +913,7 @@ public final class Board {
 
     private void setHalfMoveClock(String fenPart) throws ParseException {
         try {
-            fiftyCounter = fenPart==null ? 0 : Integer.valueOf(fenPart);
+            fiftyCounter = fenPart==null ? 0 : Integer.parseInt(fenPart);
         } catch (NumberFormatException e) {
             throw new ParseException(e);
         }
@@ -932,10 +934,12 @@ public final class Board {
                 addPiece(piece, sq);
                 sqVal++;
             } else if (c >= '1' && c <= '8') {
-                sqVal += Integer.valueOf(String.valueOf(c));
+                sqVal += Integer.parseInt(String.valueOf(c));
             }
         }
-        assert(sqVal == 64);
+        if (sqVal != 64) {
+            throw new ParseException("Did not set 64 squares: " + fenPart);
+        }
     }
 
     private void setPlayer(String fenPart) throws ParseException {

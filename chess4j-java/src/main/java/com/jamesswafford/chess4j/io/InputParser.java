@@ -308,15 +308,13 @@ public class InputParser {
 
         Board board = Globals.getBoard().deepCopy();
         try {
+            // attempt on the copy as a "dry run"
+            board.setPos(fen.toString());
             Globals.getBoard().setPos(fen.toString());
             Globals.getGameUndos().clear();
         } catch (ParseException e) {
-            LOGGER.info("tellusererror illegal position");
-            // TODO: revert back to board
-            Globals.getBoard().resetBoard();
-            throw e;
+            LOGGER.info("tellusererror Illegal position");
         }
-        DrawBoard.drawBoard(Globals.getBoard()); // TODO: if not in xboard mode
     }
 
     /**

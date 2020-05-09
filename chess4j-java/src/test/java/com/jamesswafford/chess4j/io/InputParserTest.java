@@ -327,7 +327,29 @@ public class InputParserTest {
 
     @Test
     public void setboardCmd_IllegalPos() {
-        // TODO
+
+        // set the board to something that is not the initial position
+        inputParser.parseCommand("new");
+        inputParser.parseCommand("force");
+        inputParser.parseCommand("usermove a2a3");
+
+        // create a copy of the position ,we should revert to it later
+        Board expected = Globals.getBoard().deepCopy();
+
+        // attempt to set the board to something illegal
+        inputParser.parseCommand("setboard bla bla bla");
+        List<String> output = testAppender.getNonDebugMessages();
+        assertEquals(1, output.size());
+        assertEquals("tellusererror Illegal position", output.get(0));
+
+        // the board should be unchanged
+        assertEquals(expected, Globals.getBoard());
+
+        // something more subtle - the last rank is missing a square
+        inputParser.parseCommand("setboard rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBN b KQkq g3 0 2");
+        output = testAppender.getNonDebugMessages();
+        assertEquals(2, output.size());
+        assertEquals("tellusererror Illegal position", output.get(1));
     }
 
     @Test
