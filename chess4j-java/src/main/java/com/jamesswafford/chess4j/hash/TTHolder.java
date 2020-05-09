@@ -34,7 +34,17 @@ public class TTHolder {
         getPawnTransTable().clear();
     }
 
-    public void resizeTables(int maxBytes) {
+    public void resizeMainTables(int maxBytes) {
+        int maxBytesPerTable = maxBytes / 2;
+        getAlwaysReplaceTransTable().resize(maxBytesPerTable);
+        getDepthPreferredTransTable().resize(maxBytesPerTable);
+    }
+
+    public void resizePawnTable(int maxBytes) {
+        getPawnTransTable().resize(maxBytes);
+    }
+
+    public void resizeAllTables(int maxBytes) {
         int maxBytesPerTable = maxBytes / 3;
         getAlwaysReplaceTransTable().resize(maxBytesPerTable);
         getDepthPreferredTransTable().resize(maxBytesPerTable);

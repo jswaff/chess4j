@@ -2,11 +2,15 @@ package com.jamesswafford.chess4j.hash;
 
 import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Move;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.Optional;
 
 public class TranspositionTable extends AbstractTranspositionTable {
+
+    private static final Logger LOGGER = LogManager.getLogger(TranspositionTable.class);
 
     public static final int DEFAULT_ENTRIES = 1048576;
 
@@ -105,6 +109,8 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     @Override
     protected void allocateTable(int capacity) {
+        LOGGER.debug("# allocating " + capacity + " elements for " +
+                (depthPreferred? " depth preferred":"always replace") + " table");
         table = new TranspositionTableEntry[capacity];
     }
 

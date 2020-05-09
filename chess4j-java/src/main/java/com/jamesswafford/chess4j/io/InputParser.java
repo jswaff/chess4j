@@ -158,7 +158,7 @@ public class InputParser {
     private void memory(String[] cmd) {
         int maxMemoryMB = Integer.parseInt(cmd[1]);
         LOGGER.debug("# received memory command, N=" + maxMemoryMB);
-        TTHolder.getInstance().resizeTables(maxMemoryMB * 1024 * 1024);
+        TTHolder.getInstance().resizeAllTables(maxMemoryMB * 1024 * 1024);
     }
 
     /**
@@ -306,10 +306,9 @@ public class InputParser {
             fen.append(cmd[i]);
         }
 
-        Board board = Globals.getBoard().deepCopy();
         try {
             // attempt on the copy as a "dry run"
-            board.setPos(fen.toString());
+            Globals.getBoard().deepCopy().setPos(fen.toString());
             Globals.getBoard().setPos(fen.toString());
             Globals.getGameUndos().clear();
         } catch (ParseException e) {

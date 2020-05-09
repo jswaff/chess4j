@@ -1,8 +1,13 @@
 package com.jamesswafford.chess4j.hash;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Arrays;
 
 public class PawnTranspositionTable extends AbstractTranspositionTable {
+
+    private static final Logger LOGGER = LogManager.getLogger(PawnTranspositionTable.class);
 
     private static final int DEFAULT_ENTRIES = 1048576;
 
@@ -49,6 +54,8 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     @Override
     protected void allocateTable(int capacity) {
+        LOGGER.debug("# allocating " + capacity + " elements for pawn table");
+
         table = new PawnTranspositionTableEntry[capacity];
     }
 

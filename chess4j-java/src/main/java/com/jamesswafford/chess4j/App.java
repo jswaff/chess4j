@@ -1,9 +1,7 @@
 package com.jamesswafford.chess4j;
 
 import com.jamesswafford.chess4j.book.SQLiteBook;
-import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
-import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.InputParser;
 import com.jamesswafford.chess4j.utils.TestSuiteProcessor;
@@ -37,12 +35,12 @@ public final class App {
             bookPath = arg.substring(6);
         } else if (arg.startsWith("-hash=")) {
             int maxMemBytes = Integer.parseInt(arg.substring(6)) * 1024 * 1024;
-            // FIXME
-//            TTHolder.maxEntries = maxMemBytes / TranspositionTableEntry.sizeOf();
+            // this command line arg is meant to set the size of the memory per table, but the
+            // TTHolder will split it between both main tables.
+            TTHolder.getInstance().resizeMainTables(2 * maxMemBytes);
         } else if (arg.startsWith("-phash=")) {
             int maxMemBytes = Integer.parseInt(arg.substring(7)) * 1024 * 1024;
-            // FIXME
-//            TTHolder.maxPawnEntries = maxMemBytes / PawnTranspositionTableEntry.sizeOf();
+            TTHolder.getInstance().resizePawnTable(maxMemBytes);
         }
     }
 
@@ -65,18 +63,22 @@ public final class App {
             try {
                 inputParser.parseCommand(input);
             } catch (Exception e) {
-                LOGGER.warn("Caught (hopefully recoverable) exception: " + e.getMessage());
+                LOGGER.warn("# Caught (hopefully recoverable) exception: " + e.getMessage());
             }
         }
     }
 
     private static boolean showDebugMode() {
-        LOGGER.info("**** DEBUG MODE ENABLED ****");
+        LOGGER.info("# **** DEBUG MODE ENABLED ****");
         return true;
     }
 
     public static void main(String[] args) throws Exception {
-        LOGGER.info("Welcome to chess4j!\n\n");
+
+        // send "done=0" to prevent XBoard timing out during the initialization sequence.
+        LOGGER.info("done=0");
+
+        LOGGER.info("# Welcome to chess4j!\n\n");
 
         assert(showDebugMode());
 
