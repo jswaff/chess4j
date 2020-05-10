@@ -77,12 +77,6 @@ public class InputParserTest {
     }
 
     @Test
-    public void acceptedCmd() {
-        inputParser.parseCommand("accepted");
-        assertEquals(0, testAppender.getNonDebugMessages().size());
-    }
-
-    @Test
     public void easyCmd() {
         inputParser.parseCommand("easy");
         assertEquals(0, testAppender.getNonDebugMessages().size());
@@ -242,11 +236,6 @@ public class InputParserTest {
     public void ratingCmd() {
         inputParser.parseCommand("rating");
         assertEquals(0, testAppender.getNonDebugMessages().size());
-    }
-
-    @Test
-    public void rejectedCmd() {
-        // TODO
     }
 
     @Test
@@ -414,7 +403,27 @@ public class InputParserTest {
 
     @Test
     public void moveNowCmd() {
-        // TODO
+
+        // use a real search iterator
+        SearchIterator searchIterator = new SearchIteratorImpl();
+        inputParser.setSearchIterator(searchIterator);
+        inputParser.parseCommand("new");
+        Board origBoard = Globals.getBoard().deepCopy();
+        inputParser.parseCommand("sd 10");
+        inputParser.parseCommand("usermove e2e4");
+        inputParser.parseCommand("?");
+
+        // wait for the board to change state
+        Awaitility.await()
+                .atMost(Duration.ONE_SECOND)
+                .with()
+                .pollInterval(new Duration(50, TimeUnit.MILLISECONDS))
+                .until(() -> !origBoard.equals(Globals.getBoard()));
+
+        // ensure the move command was sent
+        List<String> output = testAppender.getNonDebugMessages();
+        assertEquals(1, output.size());
+        assertTrue(output.get(0).startsWith("move "));
     }
 
 

@@ -20,4 +20,6 @@ public interface Search {
 
     void stop();
 
+    void unstop();
+
 }

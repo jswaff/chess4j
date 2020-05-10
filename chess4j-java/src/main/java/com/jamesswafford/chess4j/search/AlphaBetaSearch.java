@@ -94,6 +94,11 @@ public class AlphaBetaSearch implements Search {
         stop = true;
     }
 
+    @Override
+    public void unstop() {
+        stop = false;
+    }
+
     private int searchWithJavaCode(Board board, List<Undo> undos, SearchParameters searchParameters) {
         killerMovesStore.clear();
         return search(board, undos, pv, true, 0, searchParameters.getDepth(),

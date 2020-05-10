@@ -76,8 +76,18 @@ public class SearchIteratorImpl implements SearchIterator {
     }
 
     @Override
+    public boolean isStopped() {
+        return search.isStopped();
+    }
+
+    @Override
     public void stop() {
         search.stop();
+    }
+
+    @Override
+    public void unstop() {
+        search.unstop();
     }
 
     /**
@@ -139,15 +149,15 @@ public class SearchIteratorImpl implements SearchIterator {
 
         } while (!stopSearching);
 
-        assert(pv.size() > 0);
-        assert(MoveUtils.isLineValid(pv, board));
-
         if (post) {
             printSearchSummary(depth, startTime, search.getSearchStats());
         }
 
+        assert(pv.size() > 0);
+        assert(MoveUtils.isLineValid(pv, board));
         // if we are running with assertions enabled and the native library is loaded, verify equality
         assert(iterationsAreEqual(pv, board, undos));
+
 
         return pv;
     }

@@ -161,7 +161,7 @@ public class SearchIteratorImplTest {
     }
 
     @Test
-    public void stoppedIteratorProducesValidLine() throws Exception {
+    public void stoppedIteratorProducesValidLine() {
 
         searchIterator.stop();
 
@@ -169,7 +169,7 @@ public class SearchIteratorImplTest {
 
         CompletableFuture<List<Move>> future = searchIterator.findPvFuture(board, new ArrayList<>());
 
-        List<Move> pv = future.get();
+        List<Move> pv = future.join();
         assertEquals(1, pv.size());
 
         // ensure the highest scoring move by static analysis was selected

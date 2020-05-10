@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 public class InputParser {
@@ -162,9 +161,8 @@ public class InputParser {
     }
 
     /**
-     * Move now. If your engine is thinking, it should move immediately; otherwise, the command should
-     * be ignored (treated as a no-op). It is permissible for your engine to always ignore the ? command.
-     * The only bad consequence is that xboard's Move Now menu command will do nothing.
+     * Move now. If the engine is thinking and it is its turn, it will stop thinking and move immediately.
+     * If the engine is not thinking (or pondering), the command is ignored.
      */
     private void moveNow(String[] cmd) {
 //        if (!SearchIterator.isPondering()) {
@@ -374,12 +372,9 @@ public class InputParser {
             return;
         }
 
-        try {
-            // TODO: iterator.abort
-            searchFuture.get();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        searchIterator.stop();
+        searchFuture.join();
+        searchIterator.unstop();
     }
 
     private void thinkAndMakeMove() {

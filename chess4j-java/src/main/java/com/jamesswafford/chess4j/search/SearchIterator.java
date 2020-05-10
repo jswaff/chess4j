@@ -17,6 +17,10 @@ public interface SearchIterator {
 
     CompletableFuture<List<Move>> findPvFuture(final Board board, final List<Undo> undos);
 
+    boolean isStopped();
+
     void stop();
+
+    void unstop();
 
 }
