@@ -4,12 +4,15 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
+import org.awaitility.Awaitility;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import static com.jamesswafford.chess4j.board.squares.Square.E2;
 import static com.jamesswafford.chess4j.board.squares.Square.E4;
@@ -80,6 +83,8 @@ public class SearchIteratorImplTest {
         // getLastPV is called after each search in an assert statement
         verify(search, times(7)).getLastPV();
 
+        verify(search, times(3)).isStopped();
+
         verify(search, times(1))
                 .search(board, undos, new SearchParameters(1, -INFINITY, INFINITY));
 
@@ -128,6 +133,8 @@ public class SearchIteratorImplTest {
         // getLastPV is called after each search in an assert statement
         verify(search, times(6)).getLastPV();
 
+        verify(search, times(2)).isStopped();
+
         verify(search, times(1))
                 .search(board, undos, new SearchParameters(1, -INFINITY, INFINITY));
 
@@ -138,5 +145,21 @@ public class SearchIteratorImplTest {
         verifyNoMoreInteractions(search);
     }
 
+    @Test
+    public void stopIterator() throws Exception {
+
+        // start a long running search
+        searchIterator.setMaxDepth(8);
+        searchIterator.setMaxTime(60000);
+
+        CompletableFuture<List<Move>> future = searchIterator.findPvFuture(new Board(), new ArrayList<>());
+
+        searchIterator.stop();
+
+        Awaitility.await()
+                .atMost(5, TimeUnit.SECONDS)
+                .pollInterval(10, TimeUnit.MILLISECONDS)
+                .until(future::isDone);
+    }
 
 }

@@ -74,6 +74,11 @@ public class SearchIteratorImpl implements SearchIterator {
                 new ArrayList<>(undos)));
     }
 
+    @Override
+    public void stop() {
+        search.stop();
+    }
+
     /**
      * Iterate over the given position and return the principal variation.
      * The returned line (PV) is guaranteed to have at least one move.
@@ -102,6 +107,10 @@ public class SearchIteratorImpl implements SearchIterator {
             score = search.search(board, undos, parameters);
 
             assert(search.getLastPV().size()>0);
+
+            if (search.isStopped()) {
+                break;
+            }
 
             if (post) {
                 PrintLine.printLine(search.getLastPV(), depth, score, startTime, search.getSearchStats().nodes);

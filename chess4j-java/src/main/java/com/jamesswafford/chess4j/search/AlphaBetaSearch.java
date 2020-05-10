@@ -85,6 +85,11 @@ public class AlphaBetaSearch implements Search {
     }
 
     @Override
+    public boolean isStopped() {
+        return stop;
+    }
+
+    @Override
     public void stop() {
         stop = true;
     }
@@ -184,10 +189,6 @@ public class AlphaBetaSearch implements Search {
         searchStats.nodes++;
         parentPV.clear();
 
-        if (stop) {
-            return 0;
-        }
-
         if (depth == 0) {
             return evaluator.evaluateBoard(board);
         }
@@ -218,6 +219,12 @@ public class AlphaBetaSearch implements Search {
             int val = -search(board, undos, pv, ply+1, depth-1, -beta, -alpha);
             ++numMovesSearched;
             board.undoMove(undos.remove(undos.size()-1));
+
+            // if the search was stopped we can't trust these results, so don't update the PV
+            if (stop) {
+                return 0;
+            }
+
             if (val >= beta) {
                 searchStats.failHighs++;
                 if (move.captured()==null && move.promotion()==null) {
