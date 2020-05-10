@@ -409,7 +409,7 @@ public class InputParserTest {
         inputParser.setSearchIterator(searchIterator);
         inputParser.parseCommand("new");
         Board origBoard = Globals.getBoard().deepCopy();
-        inputParser.parseCommand("sd 10");
+        inputParser.parseCommand("sd 20");
         inputParser.parseCommand("usermove e2e4");
         inputParser.parseCommand("?");
 
