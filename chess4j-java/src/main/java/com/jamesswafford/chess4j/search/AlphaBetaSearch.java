@@ -27,7 +27,7 @@ public class AlphaBetaSearch implements Search {
         Initializer.init();
     }
 
-    private final List<Move> lastPV;
+    private final List<Move> pv;
     private final SearchStats searchStats;
 
     private boolean stop;
@@ -37,7 +37,7 @@ public class AlphaBetaSearch implements Search {
     private KillerMovesStore killerMovesStore;
 
     public AlphaBetaSearch() {
-        this.lastPV = new ArrayList<>();
+        this.pv = new ArrayList<>();
         this.searchStats = new SearchStats();
 
         this.stop = false;
@@ -51,7 +51,7 @@ public class AlphaBetaSearch implements Search {
         return searchStats;
     }
 
-    public List<Move> getLastPV() { return Collections.unmodifiableList(lastPV); }
+    public List<Move> getPv() { return Collections.unmodifiableList(pv); }
 
 
     public void setEvaluator(Evaluator evaluator) {
@@ -96,7 +96,7 @@ public class AlphaBetaSearch implements Search {
 
     private int searchWithJavaCode(Board board, List<Undo> undos, SearchParameters searchParameters) {
         killerMovesStore.clear();
-        return search(board, undos, lastPV, 0, searchParameters.getDepth(),
+        return search(board, undos, pv, true, 0, searchParameters.getDepth(),
                 searchParameters.getAlpha(), searchParameters.getBeta());
     }
 
@@ -116,12 +116,12 @@ public class AlphaBetaSearch implements Search {
             assert (searchesAreEqual(board, undos, searchParameters, fen, nativeScore, nativePV));
 
             // translate the native PV into the object's PV
-            lastPV.clear();
+            pv.clear();
             for (int i=0; i<nativePV.size(); i++) {
                 Long nativeMv = nativePV.get(i);
                 // which side is moving?  On even moves it is the player on move.
                 Color ptm = (i % 2) == 0 ? board.getPlayerToMove() : Color.swap(board.getPlayerToMove());
-                lastPV.add(MoveUtils.fromNativeMove(nativeMv, ptm));
+                pv.add(MoveUtils.fromNativeMove(nativeMv, ptm));
             }
 
             return nativeScore;
@@ -150,7 +150,7 @@ public class AlphaBetaSearch implements Search {
                 return false;
             }
             // compare the PVs.
-            if (!moveLinesAreEqual(board, nativePV, lastPV)) {
+            if (!moveLinesAreEqual(board, nativePV, pv)) {
                 LOGGER.error("pvs are not equal!"
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
                         + ", params: " + searchParameters + ", fen: " + fen);
@@ -165,7 +165,7 @@ public class AlphaBetaSearch implements Search {
     }
 
     private boolean moveLinesAreEqual(Board board, List<Long> nativePV, List<Move> javaPV) {
-        if (nativePV.size() != lastPV.size()) {
+        if (nativePV.size() != pv.size()) {
             LOGGER.error("nativePV.size: " + nativePV.size() + ", javaPV.size: " + javaPV.size());
             return false;
         }
@@ -184,7 +184,8 @@ public class AlphaBetaSearch implements Search {
         return true;
     }
 
-    private int search(Board board, List<Undo> undos, List<Move> parentPV, int ply, int depth, int alpha, int beta) {
+    private int search(Board board, List<Undo> undos, List<Move> parentPV, boolean first, int ply, int depth,
+                       int alpha, int beta) {
 
         searchStats.nodes++;
         parentPV.clear();
@@ -216,7 +217,9 @@ public class AlphaBetaSearch implements Search {
                 continue;
             }
 
-            int val = -search(board, undos, pv, ply+1, depth-1, -beta, -alpha);
+            boolean pvNode = first && numMovesSearched == 0;
+            int val = -search(board, undos, pv, pvNode, ply+1, depth-1,
+                    -beta, -alpha);
             ++numMovesSearched;
             board.undoMove(undos.remove(undos.size()-1));
 

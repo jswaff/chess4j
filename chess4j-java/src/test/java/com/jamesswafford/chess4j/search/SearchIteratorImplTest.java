@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.jamesswafford.chess4j.board.squares.Square.E2;
-import static com.jamesswafford.chess4j.board.squares.Square.E4;
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 import static com.jamesswafford.chess4j.Constants.INFINITY;
+import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
+import static com.jamesswafford.chess4j.pieces.Queen.WHITE_QUEEN;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -69,7 +69,7 @@ public class SearchIteratorImplTest {
         // set up search PV
         Move e2e4 = new Move(WHITE_PAWN, E2, E4);
         List<Move> expectedPV = Collections.singletonList(e2e4);
-        when(search.getLastPV()).thenReturn(expectedPV);
+        when(search.getPv()).thenReturn(expectedPV);
 
         // when the iterator is invoked
         List<Move> pv = searchIterator.findPvFuture(board, undos).get();
@@ -81,7 +81,7 @@ public class SearchIteratorImplTest {
 
         // then the search will have been invoked three times
         // getLastPV is called after each search in an assert statement
-        verify(search, times(7)).getLastPV();
+        verify(search, times(3)).getPv();
 
         verify(search, times(3)).isStopped();
 
@@ -119,7 +119,7 @@ public class SearchIteratorImplTest {
         // set up search PV
         Move e2e4 = new Move(WHITE_PAWN, E2, E4);
         List<Move> expectedPV = Collections.singletonList(e2e4);
-        when(search.getLastPV()).thenReturn(expectedPV);
+        when(search.getPv()).thenReturn(expectedPV);
 
         // when the iterator is invoked
         List<Move> pv = searchIterator.findPvFuture(board, undos).get();
@@ -129,9 +129,7 @@ public class SearchIteratorImplTest {
         // final search is the one returned from the iterator
         assertEquals(expectedPV, pv);
 
-        // then the search will have been invoked three times
-        // getLastPV is called after each search in an assert statement
-        verify(search, times(6)).getLastPV();
+        verify(search, times(2)).getPv();
 
         verify(search, times(2)).isStopped();
 
@@ -146,7 +144,7 @@ public class SearchIteratorImplTest {
     }
 
     @Test
-    public void stopIterator() throws Exception {
+    public void stopIterator() {
 
         // start a long running search
         searchIterator.setMaxDepth(8);
@@ -160,6 +158,22 @@ public class SearchIteratorImplTest {
                 .atMost(5, TimeUnit.SECONDS)
                 .pollInterval(10, TimeUnit.MILLISECONDS)
                 .until(future::isDone);
+    }
+
+    @Test
+    public void stoppedIteratorProducesValidLine() throws Exception {
+
+        searchIterator.stop();
+
+        Board board = new Board("8/4Pk1p/6p1/1r6/8/5N2/2B2PPP/b5K1 w - -");
+
+        CompletableFuture<List<Move>> future = searchIterator.findPvFuture(board, new ArrayList<>());
+
+        List<Move> pv = future.get();
+        assertEquals(1, pv.size());
+
+        // ensure the highest scoring move by static analysis was selected
+        assertEquals(new Move(WHITE_PAWN, E7, E8, null, WHITE_QUEEN), pv.get(0));
     }
 
 }

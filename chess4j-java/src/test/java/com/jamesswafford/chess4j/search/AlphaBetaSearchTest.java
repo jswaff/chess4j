@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -73,8 +72,8 @@ public class AlphaBetaSearchTest {
         assertEquals(5, score);
 
         // and the PV should have Nc3
-        assertEquals(1, search.getLastPV().size());
-        assertEquals(new Move(WHITE_KNIGHT, B1, C3), search.getLastPV().get(0));
+        assertEquals(1, search.getPv().size());
+        assertEquals(new Move(WHITE_KNIGHT, B1, C3), search.getPv().get(0));
     }
 
     @Test
@@ -86,7 +85,7 @@ public class AlphaBetaSearchTest {
         int score = search.search(board, params);
         assertEquals(CHECKMATE-1, score);
 
-        List<Move> pv = search.getLastPV();
+        List<Move> pv = search.getPv();
         assertEquals(1, pv.size());
         assertEquals(new Move(WHITE_QUEEN, D6, E7), pv.get(0));
     }
@@ -100,7 +99,7 @@ public class AlphaBetaSearchTest {
         int score = search.search(board, params);
         assertEquals(CHECKMATE-1, score);
 
-        List<Move> pv = search.getLastPV();
+        List<Move> pv = search.getPv();
         assertEquals(1, pv.size());
         assertEquals(new Move(BLACK_QUEEN, G5, E7), pv.get(0));
     }
@@ -114,7 +113,7 @@ public class AlphaBetaSearchTest {
         int score = search.search(board, params);
         assertEquals(CHECKMATE-3, score);
 
-        List<Move> pv = search.getLastPV();
+        List<Move> pv = search.getPv();
         assertEquals(3, pv.size());
         assertEquals(new Move(WHITE_QUEEN, D2, H6), pv.get(0));
         assertEquals(new Move(BLACK_KING, G7, H6, WHITE_QUEEN), pv.get(1));
@@ -130,7 +129,7 @@ public class AlphaBetaSearchTest {
         int score = search.search(board, params);
         assertEquals(CHECKMATE-5, score);
 
-        List<Move> pv = search.getLastPV();
+        List<Move> pv = search.getPv();
         assertEquals(5, pv.size());
         assertEquals(new Move(WHITE_ROOK, F6, A6), pv.get(0));
         assertEquals(new Move(BLACK_PAWN, F7, F6), pv.get(1));
@@ -148,7 +147,7 @@ public class AlphaBetaSearchTest {
         int score = search.search(board, params);
         assertEquals(0, score);
 
-        assertEquals(0, search.getLastPV().size());
+        assertEquals(0, search.getPv().size());
     }
 
     /**
@@ -285,10 +284,10 @@ public class AlphaBetaSearchTest {
         assertEquals(3L, search.getSearchStats().failHighs);
 
         // verify the PV follows A -> B -> C -> E
-        assertEquals(3, search.getLastPV().size());
-        assertEquals(e2e3, search.getLastPV().get(0));
-        assertEquals(d7d5, search.getLastPV().get(1));
-        assertEquals(b2b4, search.getLastPV().get(2));
+        assertEquals(3, search.getPv().size());
+        assertEquals(e2e3, search.getPv().get(0));
+        assertEquals(d7d5, search.getPv().get(1));
+        assertEquals(b2b4, search.getPv().get(2));
     }
 
     @Test
@@ -296,7 +295,7 @@ public class AlphaBetaSearchTest {
 
         // start what would be a long running search in a separate thread
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<Integer> future = executor.submit(() -> search.search(new Board(), new ArrayList<>(),
+        Future<Integer> future = executor.submit(() -> search.search(new Board(),
                 new SearchParameters(8, -INFINITY, INFINITY)));
 
         long start = System.currentTimeMillis();
@@ -309,6 +308,18 @@ public class AlphaBetaSearchTest {
 
         long duration = System.currentTimeMillis() - start;
         assertTrue(duration < 100);
+    }
+
+    @Test
+    public void stoppedSearchDoesNotReturnPV() {
+
+        // first a search that has NOT been stopped
+        search.search(new Board(), new SearchParameters(1, -INFINITY, INFINITY));
+        assertEquals(1, search.getPv().size());
+
+        search.stop();
+        search.search(new Board(), new SearchParameters(1, -INFINITY, INFINITY));
+        assertEquals(0, search.getPv().size());
     }
 
 }

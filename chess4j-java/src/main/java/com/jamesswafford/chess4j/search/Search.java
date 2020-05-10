@@ -10,7 +10,7 @@ public interface Search {
 
     SearchStats getSearchStats();
 
-    List<Move> getLastPV();
+    List<Move> getPv();
 
     int search(Board board, SearchParameters searchParameters);
 

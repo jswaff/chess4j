@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -93,6 +94,10 @@ public class SearchIteratorImpl implements SearchIterator {
             return Collections.singletonList(moves.get(0));
         }
 
+        // initialize the PV to ensure we have a valid move to play
+        moves.sort(Comparator.comparingInt(MVVLVA::score).reversed());
+        List<Move> pv = Collections.singletonList(moves.get(0));
+
         long startTime = System.currentTimeMillis();
         int depth = 0, score;
         boolean stopSearching = false;
@@ -106,14 +111,19 @@ public class SearchIteratorImpl implements SearchIterator {
             SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
             score = search.search(board, undos, parameters);
 
-            assert(search.getLastPV().size()>0);
+            // the search may or may not have a PV.  If it does, we can use it as long as the
+            // last iteration's best move was played first
+            List<Move> searchPV = search.getPv();
+            if (searchPV.size() > 0) {
+                pv = new ArrayList<>(searchPV);
+            }
 
             if (search.isStopped()) {
                 break;
             }
 
             if (post) {
-                PrintLine.printLine(search.getLastPV(), depth, score, startTime, search.getSearchStats().nodes);
+                PrintLine.printLine(pv, depth, score, startTime, search.getSearchStats().nodes);
             }
 
             // if this is a mate, stop here
@@ -129,17 +139,17 @@ public class SearchIteratorImpl implements SearchIterator {
 
         } while (!stopSearching);
 
-        assert(search.getLastPV().size()>0);
-        assert(MoveUtils.isLineValid(search.getLastPV(), board));
+        assert(pv.size() > 0);
+        assert(MoveUtils.isLineValid(pv, board));
 
         if (post) {
             printSearchSummary(depth, startTime, search.getSearchStats());
         }
 
         // if we are running with assertions enabled and the native library is loaded, verify equality
-        assert(iterationsAreEqual(search.getLastPV(), board, undos));
+        assert(iterationsAreEqual(pv, board, undos));
 
-        return search.getLastPV();
+        return pv;
     }
 
     private boolean iterationsAreEqual(List<Move> javaPV, Board board, List<Undo> undos) {
