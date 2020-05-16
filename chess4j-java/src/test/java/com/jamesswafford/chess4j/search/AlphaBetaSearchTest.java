@@ -170,7 +170,7 @@ public class AlphaBetaSearchTest {
         Move e2e4 = new Move(WHITE_PAWN, E2, E4);
         Move d2d4 = new Move(WHITE_PAWN, D2, D4);
 
-        when(moveGenerator.generatePseudoLegalCaptures(boardA)).thenReturn(Arrays.asList(e2e3, e2e4, d2d4));
+        when(moveGenerator.generatePseudoLegalNonCaptures(boardA)).thenReturn(Arrays.asList(e2e3, e2e4, d2d4));
         Board boardB = boardA.deepCopy();
         boardB.applyMove(e2e3);
         Board boardI = boardA.deepCopy();
@@ -181,7 +181,7 @@ public class AlphaBetaSearchTest {
         // from position B (1. e3) we need two moves.
         Move d7d5 = new Move(BLACK_PAWN, D7, D5);
         Move d7d6 = new Move(BLACK_PAWN, D7, D6);
-        when(moveGenerator.generatePseudoLegalCaptures(boardB)).thenReturn(Arrays.asList(d7d5, d7d6));
+        when(moveGenerator.generatePseudoLegalNonCaptures(boardB)).thenReturn(Arrays.asList(d7d5, d7d6));
         Board boardC = boardB.deepCopy();
         boardC.applyMove(d7d5);
         Board boardF = boardB.deepCopy();
@@ -190,7 +190,7 @@ public class AlphaBetaSearchTest {
         // from position C (1. e3 d5) we need two moves.
         Move b2b3 = new Move(WHITE_PAWN, B2, B3);
         Move b2b4 = new Move(WHITE_PAWN, B2, B4);
-        when(moveGenerator.generatePseudoLegalCaptures(boardC)).thenReturn(Arrays.asList(b2b3, b2b4));
+        when(moveGenerator.generatePseudoLegalNonCaptures(boardC)).thenReturn(Arrays.asList(b2b3, b2b4));
         Board boardD = boardC.deepCopy();
         boardD.applyMove(b2b3);
         Board boardE = boardC.deepCopy();
@@ -205,7 +205,7 @@ public class AlphaBetaSearchTest {
         // from position F (1. e3 d6) we need two moves.  One will end up being cutoff.
         Move c2c3 = new Move(WHITE_PAWN, C2, C3);
         Move c2c4 = new Move(WHITE_PAWN, C2, C4);
-        when(moveGenerator.generatePseudoLegalCaptures(boardF)).thenReturn(Arrays.asList(c2c3, c2c4));
+        when(moveGenerator.generatePseudoLegalNonCaptures(boardF)).thenReturn(Arrays.asList(c2c3, c2c4));
         Board boardG = boardF.deepCopy();
         boardG.applyMove(c2c3);
         Board boardH = boardF.deepCopy();
@@ -217,7 +217,7 @@ public class AlphaBetaSearchTest {
         // from position I  (1. e4) we need two moves.
         Move c7c5 = new Move(BLACK_PAWN, C7, C5);
         Move c7c6 = new Move(BLACK_PAWN, C7, C6);
-        when(moveGenerator.generatePseudoLegalCaptures(boardI)).thenReturn(Arrays.asList(c7c5, c7c6));
+        when(moveGenerator.generatePseudoLegalNonCaptures(boardI)).thenReturn(Arrays.asList(c7c5, c7c6));
         Board boardJ = boardI.deepCopy();
         boardJ.applyMove(c7c5);
         Board boardL = boardI.deepCopy();
@@ -225,7 +225,7 @@ public class AlphaBetaSearchTest {
 
         // from position J (1. e4 c5) we need one move.
         Move a2a3 = new Move(WHITE_PAWN, A2, A3);
-        when(moveGenerator.generatePseudoLegalCaptures(boardJ)).thenReturn(Collections.singletonList(a2a3));
+        when(moveGenerator.generatePseudoLegalNonCaptures(boardJ)).thenReturn(Collections.singletonList(a2a3));
         Board boardK = boardJ.deepCopy();
         boardK.applyMove(a2a3);
 
@@ -235,7 +235,7 @@ public class AlphaBetaSearchTest {
         // from position O (1. d4)  we need two moves.
         Move g7g5 = new Move(BLACK_PAWN, G7, G5);
         Move g7g6 = new Move(BLACK_PAWN, G7, G6);
-        when(moveGenerator.generatePseudoLegalCaptures(boardO)).thenReturn(Arrays.asList(g7g5, g7g6));
+        when(moveGenerator.generatePseudoLegalNonCaptures(boardO)).thenReturn(Arrays.asList(g7g5, g7g6));
         Board boardP = boardO.deepCopy();
         boardP.applyMove(g7g5);
         Board boardS = boardO.deepCopy();
@@ -244,7 +244,7 @@ public class AlphaBetaSearchTest {
         // from position P (1. d4 g5) we need two moves
         Move h2h4 = new Move(WHITE_PAWN, H2, H4);
         Move h2h3 = new Move(WHITE_PAWN, H2, H3);
-        when(moveGenerator.generatePseudoLegalCaptures(boardP)).thenReturn(Arrays.asList(h2h4, h2h3));
+        when(moveGenerator.generatePseudoLegalNonCaptures(boardP)).thenReturn(Arrays.asList(h2h4, h2h3));
         Board boardQ = boardP.deepCopy();
         boardQ.applyMove(h2h4);
         Board boardR = boardP.deepCopy();
@@ -259,7 +259,7 @@ public class AlphaBetaSearchTest {
         // from position S (1. d4 g6) we need two moves
         Move b1c3 = new Move(WHITE_KNIGHT, B1, C3);
         Move b1a3 = new Move(WHITE_KNIGHT, B1, A3);
-        when(moveGenerator.generatePseudoLegalCaptures(boardS)).thenReturn(Arrays.asList(b1c3, b1a3));
+        when(moveGenerator.generatePseudoLegalNonCaptures(boardS)).thenReturn(Arrays.asList(b1c3, b1a3));
         Board boardT = boardS.deepCopy();
         boardT.applyMove(b1c3);
         Board boardU = boardS.deepCopy();

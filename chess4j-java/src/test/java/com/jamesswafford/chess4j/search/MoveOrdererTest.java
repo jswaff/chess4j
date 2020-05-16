@@ -34,38 +34,15 @@ public class MoveOrdererTest {
     }
 
     @Test
-    public void nonCapturesAreNotGeneratedUntilNeeded() {
-        Board board = new Board( "b2b1r1k/3R1ppp/4qP2/4p1PQ/4P3/5B2/4N1K1/8 w - -");
+    public void pv() {
 
-        // need a mock for the verify() call
-        moveGenerator = mock(MoveGenerator.class);
-        when(moveGenerator.generatePseudoLegalCaptures(board))
-                .thenReturn(MagicBitboardMoveGenerator.genPseudoLegalMoves(board, true, false));
-
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null);
-        mo.selectNextMove();
-
-        assertEquals(CAPTURES_PROMOS, mo.getNextMoveOrderStage());
-
-        verify(moveGenerator, times(1)).generatePseudoLegalCaptures(board);
-        verify(moveGenerator, times(0)).generatePseudoLegalNonCaptures(board);
-    }
-
-    @Test
-    public void nonCapturesPlayedInOrderGenerated() {
-        Board board = new Board();
-
-        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
-        assertEquals(20, moves.size());
-
-        // without a PV or hash the order shouldn't change, since there are no captures
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null);
-        List<Move> moves2 = new ArrayList<>();
-        for (int i=0;i<20;i++) {
-            moves2.add(mo.selectNextMove());
-        }
-
-        assertEquals(moves2, moves);
+        // test that the PV move is played first
+        Board board = new Board("b2b1r1k/3R1ppp/4qP2/4p1PQ/4P3/5B2/4N1K1/8 w - -");
+        List<Move> moves = moveGenerator.generateLegalMoves(board);
+        Move pvMove = moves.get(5); // no particular reason
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, pvMove, null, null);
+        assertEquals(pvMove, mo.selectNextMove());
+        assertEquals(GENCAPS, mo.getNextMoveOrderStage());
     }
 
     @Test
@@ -99,9 +76,9 @@ public class MoveOrdererTest {
         when(moveScorer.calculateStaticScore(d4b6)).thenReturn(-50);
         when(moveScorer.calculateStaticScore(a7a8)).thenReturn(900);
 
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null);
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, null);
 
-        assertEquals(GENCAPS, mo.getNextMoveOrderStage());
+        assertEquals(PV, mo.getNextMoveOrderStage());
         assertEquals(a7a8, mo.selectNextMove());
         assertEquals(CAPTURES_PROMOS, mo.getNextMoveOrderStage());
         assertEquals(e3d4, mo.selectNextMove());
@@ -124,14 +101,13 @@ public class MoveOrdererTest {
 
         List<Move> noncaps = moveGenerator.generatePseudoLegalNonCaptures(board);
 
-
         Move b3b7 = new Move(BLACK_ROOK, B3, B7);
         Move f6e7 = new Move(BLACK_KING, F6, E7);
 
         assertTrue(noncaps.contains(b3b7));
         assertTrue(noncaps.contains(f6e7));
 
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, b3b7, f6e7);
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, b3b7, f6e7);
 
         // first two moves should be the captures Rxa3 and Rxb2
         assertNotNull(mo.selectNextMove().captured());
@@ -159,6 +135,67 @@ public class MoveOrdererTest {
 
         // and all noncaps should have been selected
         assertTrue(selectedNonCaps.containsAll(noncaps));
+    }
+
+    @Test
+    public void nonCapturesAreNotGeneratedUntilNeeded() {
+        Board board = new Board( "b2b1r1k/3R1ppp/4qP2/4p1PQ/4P3/5B2/4N1K1/8 w - -");
+
+        // need a mock for the verify() call
+        moveGenerator = mock(MoveGenerator.class);
+        when(moveGenerator.generatePseudoLegalCaptures(board))
+                .thenReturn(MagicBitboardMoveGenerator.genPseudoLegalMoves(board, true, false));
+
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, null);
+        mo.selectNextMove();
+
+        assertEquals(CAPTURES_PROMOS, mo.getNextMoveOrderStage());
+
+        verify(moveGenerator, times(1)).generatePseudoLegalCaptures(board);
+        verify(moveGenerator, times(0)).generatePseudoLegalNonCaptures(board);
+    }
+
+    @Test
+    public void nonCapturesPlayedInOrderGenerated() {
+        Board board = new Board();
+
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
+        assertEquals(20, moves.size());
+
+        // without a PV or hash the order shouldn't change, since there are no captures
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, null);
+        List<Move> moves2 = new ArrayList<>();
+        for (int i=0;i<20;i++) {
+            moves2.add(mo.selectNextMove());
+        }
+
+        assertEquals(moves2, moves);
+    }
+
+    @Test
+    public void movesAreNotRepeated() {
+
+        // the PV is not repeated
+        Board board = new Board("8/7p/5k2/5p2/p1p2P2/Pr1pPK2/1P1R3P/8 b - - "); // WAC-2
+
+        // choose a non-capture so we can use it again as a killer
+        Move pvMove = moveGenerator.generateLegalMoves(board).stream()
+                .filter(mv -> mv.captured() == null)
+                .peek(System.out::println)
+                .findFirst().get();
+
+        List<Move> noncaps = moveGenerator.generatePseudoLegalNonCaptures(board);
+        Collections.shuffle(noncaps);
+
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, pvMove, pvMove, noncaps.get(0));
+        List<Move> selected = new ArrayList<>();
+        Move selectedMv;
+        while ((selectedMv = mo.selectNextMove()) != null) {
+            selected.add(selectedMv);
+        }
+        assertEquals(1L, selected.stream().filter(mv -> mv.equals(pvMove)).count());
+
+        assertEquals(selected.stream().distinct().count(), selected.size());
     }
 
 }

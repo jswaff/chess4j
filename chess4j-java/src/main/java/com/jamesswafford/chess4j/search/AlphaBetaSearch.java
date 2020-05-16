@@ -209,7 +209,7 @@ public class AlphaBetaSearch implements Search {
 
         int numMovesSearched = 0;
         MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer,
-                killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply));
+                null, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply));
         Move move;
 
         while ((move = moveOrderer.selectNextMove()) != null) {
