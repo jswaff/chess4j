@@ -221,7 +221,7 @@ public class AlphaBetaSearch implements Search {
         List<Move> pv = new ArrayList<>(50);
 
         int numMovesSearched = 0;
-        Move pvMove = null; //first && lastPv.size() > ply ? lastPv.get(ply) : null;
+        Move pvMove = first && lastPv.size() > ply ? lastPv.get(ply) : null;
         MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer,
                 pvMove, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply));
         Move move;

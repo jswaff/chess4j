@@ -322,7 +322,6 @@ public class AlphaBetaSearchTest {
     }
 
     @Test
-    @Ignore
     public void lastPvIsTriedFirst() {
 
         // initialize the search
@@ -345,8 +344,10 @@ public class AlphaBetaSearchTest {
             }
         });
 
-        for (int depth=2; depth <= 5; depth++) {
+        for (int depth=2; depth <= 6; depth++) {
             search.search(board, new SearchParameters(depth, -INFINITY, INFINITY));
+            assertEquals(depth, search.getPv().size());
+            assertEquals(depth-1, visited.keySet().size());
 
             // prepare for next iteration
             visited.clear();
