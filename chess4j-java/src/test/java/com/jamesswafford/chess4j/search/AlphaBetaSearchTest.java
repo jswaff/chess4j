@@ -6,12 +6,11 @@ import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import org.awaitility.Awaitility;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -320,6 +319,40 @@ public class AlphaBetaSearchTest {
         search.stop();
         search.search(new Board(), new SearchParameters(1, -INFINITY, INFINITY));
         assertEquals(0, search.getPv().size());
+    }
+
+    @Test
+    @Ignore
+    public void lastPvIsTriedFirst() {
+
+        // initialize the search
+        Board board = new Board();
+        search.search(board, new SearchParameters(1, -INFINITY, INFINITY));
+        List<Move> lastPv = new ArrayList<>(search.getPv());
+        assertEquals(1, lastPv.size());
+
+        // now try deeper searches.
+        final Map<Integer, Boolean> visited = new HashMap<>();
+        search.setPvCallback(pvUpdate -> {
+            // we expect the first N-1 moves to match the previous PV
+            int ply = pvUpdate.getValue0();
+            if (ply < lastPv.size()) {
+                Move rootMv = pvUpdate.getValue1().get(0);
+                if (visited.get(ply) == null) {
+                    assertEquals(lastPv.get(ply), rootMv);
+                    visited.put(ply, true);
+                }
+            }
+        });
+
+        for (int depth=2; depth <= 5; depth++) {
+            search.search(board, new SearchParameters(depth, -INFINITY, INFINITY));
+
+            // prepare for next iteration
+            visited.clear();
+            lastPv.clear();
+            lastPv.addAll(search.getPv());
+        }
     }
 
 }

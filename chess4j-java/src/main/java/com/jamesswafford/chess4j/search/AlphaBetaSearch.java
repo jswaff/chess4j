@@ -11,10 +11,12 @@ import com.jamesswafford.chess4j.utils.BoardUtils;
 import com.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.javatuples.Quintet;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
@@ -28,6 +30,7 @@ public class AlphaBetaSearch implements Search {
     }
 
     private final List<Move> pv;
+    private final List<Move> lastPv;
     private final SearchStats searchStats;
 
     private boolean stop;
@@ -35,9 +38,11 @@ public class AlphaBetaSearch implements Search {
     private MoveGenerator moveGenerator;
     private MoveScorer moveScorer;
     private KillerMovesStore killerMovesStore;
+    private Consumer<Quintet<Integer, List<Move>, Integer, Integer, Long>> pvCallback;
 
     public AlphaBetaSearch() {
         this.pv = new ArrayList<>();
+        this.lastPv = new ArrayList<>();
         this.searchStats = new SearchStats();
 
         this.stop = false;
@@ -71,6 +76,11 @@ public class AlphaBetaSearch implements Search {
     }
 
     @Override
+    public void setPvCallback(Consumer<Quintet<Integer, List<Move>, Integer, Integer, Long>> pvCallback) {
+        this.pvCallback = pvCallback;
+    }
+
+    @Override
     public int search(Board board, SearchParameters searchParameters) {
         return search(board, new ArrayList<>(), searchParameters);
     }
@@ -101,8 +111,11 @@ public class AlphaBetaSearch implements Search {
 
     private int searchWithJavaCode(Board board, List<Undo> undos, SearchParameters searchParameters) {
         killerMovesStore.clear();
-        return search(board, undos, pv, true, 0, searchParameters.getDepth(),
+        int score = search(board, undos, pv, true, 0, searchParameters.getDepth(),
                 searchParameters.getAlpha(), searchParameters.getBeta());
+        lastPv.clear();
+        lastPv.addAll(pv);
+        return score;
     }
 
     private int searchWithNativeCode(Board board, List<Undo> undos, SearchParameters searchParameters) {
@@ -208,8 +221,9 @@ public class AlphaBetaSearch implements Search {
         List<Move> pv = new ArrayList<>(50);
 
         int numMovesSearched = 0;
+        Move pvMove = null; //first && lastPv.size() > ply ? lastPv.get(ply) : null;
         MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer,
-                null, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply));
+                pvMove, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply));
         Move move;
 
         while ((move = moveOrderer.selectNextMove()) != null) {
@@ -243,6 +257,9 @@ public class AlphaBetaSearch implements Search {
             if (val > alpha) {
                 alpha = val;
                 setParentPV(parentPV, move, pv);
+                if (pvCallback != null) {
+                    pvCallback.accept(Quintet.with(ply, parentPV, depth, alpha, searchStats.nodes));
+                }
             }
         }
 

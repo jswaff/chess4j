@@ -9,7 +9,7 @@ import java.util.List;
 public class PrintLine {
     private static final  Logger LOGGER = LogManager.getLogger(PrintLine.class);
 
-    public static void printLine(List<Move> moves,int depth,int score,long startTime,long nodes) {
+    public static void printLine(List<Move> moves, int depth, int score, long startTime, long nodes) {
         long timeInCentis = (System.currentTimeMillis() - startTime) / 10;
         String line = getMoveString(moves);
         String output = String.format("%2d %5d %5d %7d %s",depth,score,timeInCentis,nodes,line);

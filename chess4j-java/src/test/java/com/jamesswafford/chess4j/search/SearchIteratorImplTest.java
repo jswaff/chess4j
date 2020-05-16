@@ -63,9 +63,6 @@ public class SearchIteratorImplTest {
         Board board = new Board();
         List<Undo> undos = new ArrayList<>();
 
-        // set up search scores
-//        when(search.search(board, undos, new SearchParameters(1, -INFINITY, INFINITY))).thenReturn(1337);
-
         // set up search PV
         Move e2e4 = new Move(WHITE_PAWN, E2, E4);
         List<Move> expectedPV = Collections.singletonList(e2e4);
@@ -81,6 +78,8 @@ public class SearchIteratorImplTest {
 
         // then the search will have been invoked three times
         // getLastPV is called after each search in an assert statement
+        verify(search, times(1)).setPvCallback(any());
+
         verify(search, times(3)).getPv();
 
         verify(search, times(3)).isStopped();
@@ -125,9 +124,9 @@ public class SearchIteratorImplTest {
         List<Move> pv = searchIterator.findPvFuture(board, undos).get();
 
         // then the PV will be the PV returned from the last search
-        // TODO: if PV was returned along with score in a single structure we could ensure the PV from the
-        // final search is the one returned from the iterator
         assertEquals(expectedPV, pv);
+
+        verify(search, times(1)).setPvCallback(any());
 
         verify(search, times(2)).getPv();
 

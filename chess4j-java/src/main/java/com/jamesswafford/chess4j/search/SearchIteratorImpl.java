@@ -54,6 +54,7 @@ public class SearchIteratorImpl implements SearchIterator {
     @Override
     public void setPost(boolean post) {
         this.post = post;
+        if (!post) search.setPvCallback(null);
     }
 
     public void setEarlyExitOk(boolean earlyExitOk) {
@@ -112,6 +113,16 @@ public class SearchIteratorImpl implements SearchIterator {
         int depth = 0, score;
         boolean stopSearching = false;
 
+        if (post) {
+            search.setPvCallback(pvUpdate -> {
+                if (pvUpdate.getValue0() == 0) { // ply 0
+                    PrintLine.printLine(
+                            pvUpdate.getValue1(), pvUpdate.getValue2(), pvUpdate.getValue3(), startTime,
+                            pvUpdate.getValue4());
+                }
+            });
+        }
+
         do {
             ++depth;
 
@@ -121,8 +132,8 @@ public class SearchIteratorImpl implements SearchIterator {
             SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
             score = search.search(board, undos, parameters);
 
-            // the search may or may not have a PV.  If it does, we can use it as long as the
-            // last iteration's best move was played first
+            // the search may or may not have a PV.  If it does, we can use it since the
+            // last iteration's PV was tried first
             List<Move> searchPV = search.getPv();
             if (searchPV.size() > 0) {
                 pv = new ArrayList<>(searchPV);
