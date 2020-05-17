@@ -12,10 +12,7 @@ import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
-import com.jamesswafford.chess4j.utils.GameResult;
-import com.jamesswafford.chess4j.utils.GameStatus;
-import com.jamesswafford.chess4j.utils.GameStatusChecker;
-import com.jamesswafford.chess4j.utils.Perft;
+import com.jamesswafford.chess4j.utils.*;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,6 +34,7 @@ public class InputParser {
     private CompletableFuture<List<Move>> searchFuture;
     private Color engineColor;
     private boolean forceMode = true;
+    private int incrementMs = 0;
 
     private final Map<String, Consumer<String[]>> cmdMap = new HashMap<>() {{
         put("accepted", InputParser::noOp);
@@ -49,7 +47,7 @@ public class InputParser {
         put("go", InputParser.this::go);
         put("hard", InputParser::noOp);
         put("hint", InputParser::noOp);
-        put("level", InputParser::level);
+        put("level", InputParser.this::level);
         put("memory", InputParser.this::memory);
         put("new", InputParser.this::newGame);
         put("nopost", (String[] cmd) -> searchIterator.setPost(false));
@@ -68,7 +66,7 @@ public class InputParser {
         put("sd", InputParser.this::sd);
         put("st", InputParser.this::st);
         put("setboard", InputParser::setboard);
-        put("time", InputParser::time);
+        put("time", InputParser.this::time);
         put("undo", InputParser::undo);
         put("usermove", InputParser.this::usermove);
         put("xboard", InputParser::noOp);
@@ -127,19 +125,14 @@ public class InputParser {
     }
 
     /**
-     * level MPS BASE INC
-     *
-     * Sets the time controls.
+     * Set the time control.
+     * Syntax: level #moves base increment
+     * Examples:
+     *    level 40 5 0 - play 40 moves in 5 minutes (after which another 5 minutes, ad infinitum).
+     *    level 0 2 12 - play the entire game with a 2 minute base + 12 second increment per move.
      */
-    private static void level(String[] cmd) {
-        String mps = cmd[1];
-        String base = cmd[2];
-        double increment = Double.parseDouble(cmd[3]);
-        LOGGER.debug("# level: " + mps + ", " + base + ", " + increment);
-        increment *= 1000;
-        LOGGER.debug("# increment: " + increment + " ms.");
-        // TODO: timer
-        //SearchIterator.incrementMS = increment.intValue();
+    private void level(String[] cmd) {
+        incrementMs = Integer.parseInt(cmd[3]) * 1000;
     }
 
     /**
@@ -331,12 +324,9 @@ public class InputParser {
     /**
      * Read in the engine's remaining time, in centiseconds.
      */
-    private static void time(String[] cmd) {
-        int time = Integer.parseInt(cmd[1]);
-        time *= 10; // centiseconds to milliseconds
-        LOGGER.debug("# MY TIME: " + time);
-        // TODO: timer
-        //SearchIterator.remainingTimeMS = time;
+    private void time(String[] cmd) {
+        int centis = Integer.parseInt(cmd[1]);
+        searchIterator.setMaxTime(TimeUtils.getSearchTime(centis*10, incrementMs));
     }
 
     /**

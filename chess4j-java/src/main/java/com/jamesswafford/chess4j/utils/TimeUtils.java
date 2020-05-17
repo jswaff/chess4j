@@ -2,7 +2,7 @@ package com.jamesswafford.chess4j.utils;
 
 public class TimeUtils {
 
-    public static int getSearchTime(int remainingTime,int increment) {
+    public static int getSearchTime(int remainingTime, int increment) {
         if (remainingTime < 0) {
             remainingTime = 0;
         }

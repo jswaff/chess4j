@@ -159,11 +159,6 @@ public class InputParserTest {
     }
 
     @Test
-    public void levelCmd() {
-        // TODO
-    }
-
-    @Test
     public void memoryCmd() {
         inputParser.parseCommand("memory 6");
         assertEquals(131072, TTHolder.getInstance().getAlwaysReplaceTransTable().tableCapacity());
@@ -345,7 +340,13 @@ public class InputParserTest {
 
     @Test
     public void timeCmd() {
-        // TODO
+        inputParser.parseCommand("level 0 5 0");
+        inputParser.parseCommand("time 2500");
+        verify(searchIterator, times(1)).setMaxTime(1000);
+
+        inputParser.parseCommand("level 0 5 3");
+        inputParser.parseCommand("time 2500");
+        verify(searchIterator, times(1)).setMaxTime(4000);
     }
 
     @Test
