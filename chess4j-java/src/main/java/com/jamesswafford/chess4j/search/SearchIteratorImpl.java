@@ -14,11 +14,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
@@ -28,7 +25,7 @@ public class SearchIteratorImpl implements SearchIterator {
 
     private static final  Logger LOGGER = LogManager.getLogger(SearchIteratorImpl.class);
 
-    private int maxDepth = 6;
+    private int maxDepth = 0;
     private long maxTimeMs = 0;
     private boolean post = true;
     private boolean earlyExitOk = true;
@@ -113,6 +110,7 @@ public class SearchIteratorImpl implements SearchIterator {
         int depth = 0, score;
         boolean stopSearching = false;
 
+        // set a callback to print the updated PV
         if (post) {
             search.setPvCallback(pvUpdate -> {
                 if (pvUpdate.getValue0() == 0) { // ply 0
@@ -123,6 +121,18 @@ public class SearchIteratorImpl implements SearchIterator {
             });
         }
 
+        // add a timer to stop the search
+        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        if (maxTimeMs > 0) {
+            LOGGER.debug("# setting timer task for " + maxTimeMs + " ms.");
+            executorService.schedule(() -> {
+                LOGGER.debug("# stopping search on time.");
+                search.stop();
+            }, maxTimeMs, TimeUnit.MILLISECONDS);
+        }
+
+        search.initialize();
+
         do {
             ++depth;
 
@@ -131,7 +141,6 @@ public class SearchIteratorImpl implements SearchIterator {
 
             SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
             score = search.search(board, undos, parameters);
-
             // the search may or may not have a PV.  If it does, we can use it since the
             // last iteration's PV was tried first
             List<Move> searchPV = search.getPv();
@@ -160,15 +169,21 @@ public class SearchIteratorImpl implements SearchIterator {
 
         } while (!stopSearching);
 
+        // make sure the scheduled timer task has terminated
+        LOGGER.debug("# shutting timer task down.");
+        executorService.shutdownNow();
+        while (!executorService.isTerminated());
+
         if (post) {
             printSearchSummary(depth, startTime, search.getSearchStats());
         }
 
         assert(pv.size() > 0);
         assert(MoveUtils.isLineValid(pv, board));
-        // if we are running with assertions enabled and the native library is loaded, verify equality
-        assert(iterationsAreEqual(pv, board, undos));
 
+        // if we are running with assertions enabled and the native library is loaded, verify equality
+        // we can only do this for fixed depth searches
+        assert(maxTimeMs > 0 || iterationsAreEqual(pv, board, undos));
 
         return pv;
     }
@@ -177,6 +192,8 @@ public class SearchIteratorImpl implements SearchIterator {
 
         if (Initializer.nativeCodeInitialized()) {
 
+            LOGGER.debug("# checking iteration equality with native");
+
             List<Move> nativePV = findPrincipalVariationNative(board, undos);
 
             if (!nativePV.equals(javaPV)) {
@@ -184,6 +201,7 @@ public class SearchIteratorImpl implements SearchIterator {
                         ", nativePV: " + PrintLine.getMoveString(nativePV));
                 return false;
             } else {
+                LOGGER.debug("# finished - iterations produce the same PVs");
                 return true;
             }
 

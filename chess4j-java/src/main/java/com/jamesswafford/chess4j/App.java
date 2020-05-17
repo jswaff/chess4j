@@ -18,7 +18,7 @@ public final class App {
     private static String bookPath = null;
     private static String testSuiteFile = null;
     private static int testSuiteTime = 10; // default to ten seconds
-    private static int maxDepth = 6;
+    private static int maxDepth = 0;
 
     private App() { }
 
@@ -55,15 +55,15 @@ public final class App {
         while (true) {
             try {
                 input = bin.readLine();
-            } catch (IOException e1) {
-                LOGGER.error("Caught nonrecoverable I/O exception: " + e1.getMessage());
+            } catch (IOException e) {
+                LOGGER.error("Caught nonrecoverable I/O exception", e);
                 System.exit(1);
             }
 
             try {
                 inputParser.parseCommand(input);
             } catch (Exception e) {
-                LOGGER.warn("# Caught (hopefully recoverable) exception: " + e.getMessage());
+                LOGGER.warn("# Caught (hopefully recoverable) exception", e);
             }
         }
     }

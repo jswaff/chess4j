@@ -159,11 +159,6 @@ public class InputParserTest {
     }
 
     @Test
-    public void levelCmd() {
-        // TODO
-    }
-
-    @Test
     public void memoryCmd() {
         inputParser.parseCommand("memory 6");
         assertEquals(131072, TTHolder.getInstance().getAlwaysReplaceTransTable().tableCapacity());
@@ -290,30 +285,9 @@ public class InputParserTest {
     }
 
     @Test
-    @Ignore
-    // FIXME: this should probably be a SearchIterator test
     public void stCmd() {
-
-        // use the real search iterator for this test
-        inputParser.setSearchIterator(new SearchIteratorImpl());
-
-        inputParser.parseCommand("new");
-        inputParser.parseCommand("st 1");
-
-        Board origBoard = Globals.getBoard().deepCopy();
-        long start = System.currentTimeMillis();
-        inputParser.parseCommand("go");
-
-        // wait for the board to change state
-        Awaitility.await()
-                .atMost(Duration.FIVE_SECONDS)
-                .with()
-                .pollInterval(new Duration(50, TimeUnit.MILLISECONDS))
-                .until(() -> !origBoard.equals(Globals.getBoard()));
-
-        long searchTime = System.currentTimeMillis() - start;
-        assertTrue(searchTime > 1000);
-        assertTrue(searchTime < 1100);
+        inputParser.parseCommand("st 5");
+        verify(searchIterator).setMaxTime(5000);
     }
 
     @Test
@@ -366,7 +340,18 @@ public class InputParserTest {
 
     @Test
     public void timeCmd() {
-        // TODO
+        inputParser.parseCommand("level 0 5 0");
+        inputParser.parseCommand("time 2500");
+        verify(searchIterator, times(1)).setMaxTime(1000);
+
+        inputParser.parseCommand("level 0 5 3");
+        inputParser.parseCommand("time 2500");
+        verify(searchIterator, times(1)).setMaxTime(4000);
+
+        // fixed time
+        inputParser.parseCommand("st 30");
+        inputParser.parseCommand("time 300");
+        verify(searchIterator, times(1)).setMaxTime(2900);
     }
 
     @Test
@@ -426,6 +411,36 @@ public class InputParserTest {
         assertTrue(output.get(0).startsWith("move "));
     }
 
+    /**
+     * The xboard documentation says you should never see the ping command when it is your move, but if you do...
+     * you must not send the "pong" reply to xboard until after you send your move.
+     */
+    @Test
+    public void moveNow_pingSequence() {
+
+        // use a real search iterator
+        SearchIterator searchIterator = new SearchIteratorImpl();
+        inputParser.setSearchIterator(searchIterator);
+        inputParser.parseCommand("new");
+        Board origBoard = Globals.getBoard().deepCopy();
+        inputParser.parseCommand("sd 20");
+        inputParser.parseCommand("usermove e2e4");
+        inputParser.parseCommand("?");
+        inputParser.parseCommand("ping 1337");
+
+        // wait for the board to change state
+        Awaitility.await()
+                .atMost(Duration.ONE_SECOND)
+                .with()
+                .pollInterval(new Duration(50, TimeUnit.MILLISECONDS))
+                .until(() -> !origBoard.equals(Globals.getBoard()));
+
+        // ensure the move command was sent
+        List<String> output = testAppender.getNonDebugMessages();
+        assertEquals(2, output.size());
+        assertTrue(output.get(0).startsWith("move "));
+        assertTrue(output.get(1).startsWith("pong "));
+    }
 
     @Test
     public void illegalMove() {

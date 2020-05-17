@@ -12,10 +12,7 @@ import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
-import com.jamesswafford.chess4j.utils.GameResult;
-import com.jamesswafford.chess4j.utils.GameStatus;
-import com.jamesswafford.chess4j.utils.GameStatusChecker;
-import com.jamesswafford.chess4j.utils.Perft;
+import com.jamesswafford.chess4j.utils.*;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,6 +34,8 @@ public class InputParser {
     private CompletableFuture<List<Move>> searchFuture;
     private Color engineColor;
     private boolean forceMode = true;
+    private boolean fixedTimePerMove;
+    private int incrementMs;
 
     private final Map<String, Consumer<String[]>> cmdMap = new HashMap<>() {{
         put("accepted", InputParser::noOp);
@@ -49,7 +48,7 @@ public class InputParser {
         put("go", InputParser.this::go);
         put("hard", InputParser::noOp);
         put("hint", InputParser::noOp);
-        put("level", InputParser::level);
+        put("level", InputParser.this::level);
         put("memory", InputParser.this::memory);
         put("new", InputParser.this::newGame);
         put("nopost", (String[] cmd) -> searchIterator.setPost(false));
@@ -68,7 +67,7 @@ public class InputParser {
         put("sd", InputParser.this::sd);
         put("st", InputParser.this::st);
         put("setboard", InputParser::setboard);
-        put("time", InputParser::time);
+        put("time", InputParser.this::time);
         put("undo", InputParser::undo);
         put("usermove", InputParser.this::usermove);
         put("xboard", InputParser::noOp);
@@ -127,19 +126,15 @@ public class InputParser {
     }
 
     /**
-     * level MPS BASE INC
-     *
-     * Sets the time controls.
+     * Set the time control.
+     * Syntax: level #moves base increment
+     * Examples:
+     *    level 40 5 0 - play 40 moves in 5 minutes (after which another 5 minutes, ad infinitum).
+     *    level 0 2 12 - play the entire game with a 2 minute base + 12 second increment per move.
      */
-    private static void level(String[] cmd) {
-        String mps = cmd[1];
-        String base = cmd[2];
-        double increment = Double.parseDouble(cmd[3]);
-        LOGGER.debug("# level: " + mps + ", " + base + ", " + increment);
-        increment *= 1000;
-        LOGGER.debug("# increment: " + increment + " ms.");
-        // TODO: timer
-        //SearchIterator.incrementMS = increment.intValue();
+    private void level(String[] cmd) {
+        incrementMs = Integer.parseInt(cmd[3]) * 1000;
+        fixedTimePerMove = false;
     }
 
     /**
@@ -165,7 +160,7 @@ public class InputParser {
      * If the engine is not thinking (or pondering), the command is ignored.
      */
     private void moveNow(String[] cmd) {
-//        if (!SearchIterator.isPondering()) {
+//        if (!SearchIterator.isPondering()) {  // TODO
             stopSearchThread();
 //        }
     }
@@ -202,10 +197,14 @@ public class InputParser {
      *
      */
     private void ping(String[] cmd) {
-//        if (!SearchIterator.isPondering()) {
-            stopSearchThread();
+//        if (!SearchIterator.isPondering()) { // TODO
+//            stopSearchThread();
 //        }
-        // TODO: don't think we should stop the search thread, just wait for it.
+
+        // wait for any active search to finish
+        if (searchFuture != null) {
+            searchFuture.join();
+        }
         LOGGER.info("pong " + cmd[1]);
     }
 
@@ -291,7 +290,7 @@ public class InputParser {
      */
     private void sd(String[] cmd) {
         int depth = Integer.parseInt(cmd[1]);
-        LOGGER.debug("# setting depth to : " + depth);
+        LOGGER.debug("# setting depth to {}", depth);
         searchIterator.setMaxDepth(depth);
     }
 
@@ -319,18 +318,25 @@ public class InputParser {
      * Set an exact number of seconds to play per move.
      */
     private void st(String[] cmd) {
-        // TODO
+        int seconds = Integer.parseInt(cmd[1]);
+        LOGGER.debug("# setting search time to {} seconds per move", seconds);
+        fixedTimePerMove = true;
+        incrementMs = 0;
+        searchIterator.setMaxTime(seconds * 1000);
     }
 
     /**
      * Read in the engine's remaining time, in centiseconds.
      */
-    private static void time(String[] cmd) {
-        int time = Integer.parseInt(cmd[1]);
-        time *= 10; // centiseconds to milliseconds
-        LOGGER.debug("# MY TIME: " + time);
-        // TODO: timer
-        //SearchIterator.remainingTimeMS = time;
+    private void time(String[] cmd) {
+        int centis = Integer.parseInt(cmd[1]);
+        if (fixedTimePerMove) {
+            int timeMs = centis * 10 - 100; // leave 1/10th of a second for overhead
+            if (timeMs < 0) timeMs = 0;
+            searchIterator.setMaxTime(timeMs);
+        } else {
+            searchIterator.setMaxTime(TimeUtils.getSearchTime(centis * 10, incrementMs));
+        }
     }
 
     /**
@@ -385,6 +391,7 @@ public class InputParser {
             // These are copied for testing purposes.  The iterator will not modify.
             Board board = Globals.getBoard().deepCopy();
             List<Undo> undos = new ArrayList<>(Globals.getGameUndos());
+            searchIterator.unstop();
             searchFuture = searchIterator.findPvFuture(board, undos)
                     .thenApply(
                         pv -> {

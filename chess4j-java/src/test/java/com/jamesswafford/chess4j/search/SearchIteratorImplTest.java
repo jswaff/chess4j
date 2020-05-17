@@ -72,13 +72,12 @@ public class SearchIteratorImplTest {
         List<Move> pv = searchIterator.findPvFuture(board, undos).get();
 
         // then the PV will be the PV returned from the last search
-        // TODO: if PV was returned along with score in a single structure we could ensure the PV from the
-        // final search is the one returned from the iterator
         assertEquals(expectedPV, pv);
 
         // then the search will have been invoked three times
         // getLastPV is called after each search in an assert statement
         verify(search, times(1)).setPvCallback(any());
+        verify(search, times(1)).initialize();
 
         verify(search, times(3)).getPv();
 
@@ -127,6 +126,7 @@ public class SearchIteratorImplTest {
         assertEquals(expectedPV, pv);
 
         verify(search, times(1)).setPvCallback(any());
+        verify(search, times(1)).initialize();
 
         verify(search, times(2)).getPv();
 
@@ -145,9 +145,9 @@ public class SearchIteratorImplTest {
     @Test
     public void stopIterator() {
 
-        // start a long running search
-        searchIterator.setMaxDepth(8);
-        searchIterator.setMaxTime(60000);
+        // start a search with no depth or time limits
+        searchIterator.setMaxDepth(0);
+        searchIterator.setMaxTime(0);
 
         CompletableFuture<List<Move>> future = searchIterator.findPvFuture(new Board(), new ArrayList<>());
 
@@ -158,6 +158,21 @@ public class SearchIteratorImplTest {
                 .pollInterval(10, TimeUnit.MILLISECONDS)
                 .until(future::isDone);
     }
+
+    @Test
+    public void iteratorStopsOnTime() {
+
+        searchIterator.setMaxDepth(0); // no limit
+        searchIterator.setMaxTime(2000);
+
+        CompletableFuture<List<Move>> future = searchIterator.findPvFuture(new Board(), new ArrayList<>());
+
+        Awaitility.await()
+                .atMost(5, TimeUnit.SECONDS)
+                .pollInterval(10, TimeUnit.MILLISECONDS)
+                .until(future::isDone);
+    }
+
 
     @Test
     public void stoppedIteratorProducesValidLine() {
