@@ -34,7 +34,8 @@ public class InputParser {
     private CompletableFuture<List<Move>> searchFuture;
     private Color engineColor;
     private boolean forceMode = true;
-    private int incrementMs = 0;
+    private boolean fixedTimePerMove;
+    private int incrementMs;
 
     private final Map<String, Consumer<String[]>> cmdMap = new HashMap<>() {{
         put("accepted", InputParser::noOp);
@@ -133,6 +134,7 @@ public class InputParser {
      */
     private void level(String[] cmd) {
         incrementMs = Integer.parseInt(cmd[3]) * 1000;
+        fixedTimePerMove = false;
     }
 
     /**
@@ -318,6 +320,8 @@ public class InputParser {
     private void st(String[] cmd) {
         int seconds = Integer.parseInt(cmd[1]);
         LOGGER.debug("# setting search time to {} seconds per move", seconds);
+        fixedTimePerMove = true;
+        incrementMs = 0;
         searchIterator.setMaxTime(seconds * 1000);
     }
 
@@ -326,7 +330,13 @@ public class InputParser {
      */
     private void time(String[] cmd) {
         int centis = Integer.parseInt(cmd[1]);
-        searchIterator.setMaxTime(TimeUtils.getSearchTime(centis*10, incrementMs));
+        if (fixedTimePerMove) {
+            int timeMs = centis * 10 - 100; // leave 1/10th of a second for overhead
+            if (timeMs < 0) timeMs = 0;
+            searchIterator.setMaxTime(timeMs);
+        } else {
+            searchIterator.setMaxTime(TimeUtils.getSearchTime(centis * 10, incrementMs));
+        }
     }
 
     /**
@@ -381,6 +391,7 @@ public class InputParser {
             // These are copied for testing purposes.  The iterator will not modify.
             Board board = Globals.getBoard().deepCopy();
             List<Undo> undos = new ArrayList<>(Globals.getGameUndos());
+            searchIterator.unstop();
             searchFuture = searchIterator.findPvFuture(board, undos)
                     .thenApply(
                         pv -> {

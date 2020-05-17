@@ -347,6 +347,11 @@ public class InputParserTest {
         inputParser.parseCommand("level 0 5 3");
         inputParser.parseCommand("time 2500");
         verify(searchIterator, times(1)).setMaxTime(4000);
+
+        // fixed time
+        inputParser.parseCommand("st 30");
+        inputParser.parseCommand("time 300");
+        verify(searchIterator, times(1)).setMaxTime(2900);
     }
 
     @Test
