@@ -165,7 +165,7 @@ public class InputParser {
      * If the engine is not thinking (or pondering), the command is ignored.
      */
     private void moveNow(String[] cmd) {
-//        if (!SearchIterator.isPondering()) {
+//        if (!SearchIterator.isPondering()) {  // TODO
             stopSearchThread();
 //        }
     }
@@ -202,10 +202,14 @@ public class InputParser {
      *
      */
     private void ping(String[] cmd) {
-//        if (!SearchIterator.isPondering()) {
-            stopSearchThread();
+//        if (!SearchIterator.isPondering()) { // TODO
+//            stopSearchThread();
 //        }
-        // TODO: don't think we should stop the search thread, just wait for it.
+
+        // wait for any active search to finish
+        if (searchFuture != null) {
+            searchFuture.join();
+        }
         LOGGER.info("pong " + cmd[1]);
     }
 

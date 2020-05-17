@@ -14,6 +14,8 @@ public interface Search {
 
     List<Move> getPv();
 
+    void initialize();
+
     int search(Board board, SearchParameters searchParameters);
 
     int search(Board board, List<Undo> undos, SearchParameters searchParameters);

@@ -426,6 +426,36 @@ public class InputParserTest {
         assertTrue(output.get(0).startsWith("move "));
     }
 
+    /**
+     * The xboard documentation says you should never see the ping command when it is your move, but if you do...
+     * you must not send the "pong" reply to xboard until after you send your move.
+     */
+    @Test
+    public void moveNow_pingSequence() {
+
+        // use a real search iterator
+        SearchIterator searchIterator = new SearchIteratorImpl();
+        inputParser.setSearchIterator(searchIterator);
+        inputParser.parseCommand("new");
+        Board origBoard = Globals.getBoard().deepCopy();
+        inputParser.parseCommand("sd 20");
+        inputParser.parseCommand("usermove e2e4");
+        inputParser.parseCommand("?");
+        inputParser.parseCommand("ping 1337");
+
+        // wait for the board to change state
+        Awaitility.await()
+                .atMost(Duration.ONE_SECOND)
+                .with()
+                .pollInterval(new Duration(50, TimeUnit.MILLISECONDS))
+                .until(() -> !origBoard.equals(Globals.getBoard()));
+
+        // ensure the move command was sent
+        List<String> output = testAppender.getNonDebugMessages();
+        assertEquals(2, output.size());
+        assertTrue(output.get(0).startsWith("move "));
+        assertTrue(output.get(1).startsWith("pong "));
+    }
 
     @Test
     public void illegalMove() {

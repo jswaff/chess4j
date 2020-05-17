@@ -61,6 +61,13 @@ public class AlphaBetaSearch implements Search {
 
     public List<Move> getPv() { return Collections.unmodifiableList(pv); }
 
+    @Override
+    public void initialize() {
+        lastPv.clear();
+        if (Initializer.nativeCodeInitialized()) {
+            initializeNativeSearch();
+        }
+    }
 
     public void setEvaluator(Evaluator evaluator) {
         this.evaluator = evaluator;

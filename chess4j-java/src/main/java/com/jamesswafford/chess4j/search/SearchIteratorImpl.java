@@ -5,6 +5,7 @@ import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.io.DrawBoard;
 import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.io.PrintLine;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
@@ -122,6 +123,7 @@ public class SearchIteratorImpl implements SearchIterator {
                 }
             });
         }
+        search.initialize();
 
         do {
             ++depth;
@@ -131,7 +133,6 @@ public class SearchIteratorImpl implements SearchIterator {
 
             SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
             score = search.search(board, undos, parameters);
-
             // the search may or may not have a PV.  If it does, we can use it since the
             // last iteration's PV was tried first
             List<Move> searchPV = search.getPv();
