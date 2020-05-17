@@ -50,8 +50,11 @@ public class AlphaBetaSearch implements Search {
         this.moveGenerator = new MagicBitboardMoveGenerator();
         this.moveScorer = new MVVLVA();
         this.killerMovesStore = KillerMoves.getInstance();
-    }
 
+        if (Initializer.nativeCodeInitialized()) {
+            initializeNativeSearch();
+        }
+    }
     public SearchStats getSearchStats() {
         return searchStats;
     }
@@ -288,6 +291,8 @@ public class AlphaBetaSearch implements Search {
         parentPV.add(head);
         parentPV.addAll(tail);
     }
+
+    private native void initializeNativeSearch();
 
     private native int searchNative(String boardFen, List<Long> prevMoves, List<Long> parentPV, int depth,
                                     int alpha, int beta, SearchStats searchStats);

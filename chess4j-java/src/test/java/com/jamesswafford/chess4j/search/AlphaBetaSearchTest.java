@@ -6,7 +6,6 @@ import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import org.awaitility.Awaitility;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
