@@ -18,7 +18,7 @@ public final class App {
     private static String bookPath = null;
     private static String testSuiteFile = null;
     private static int testSuiteTime = 10; // default to ten seconds
-    private static int maxDepth = 6;
+    private static int maxDepth = 0;
 
     private App() { }
 

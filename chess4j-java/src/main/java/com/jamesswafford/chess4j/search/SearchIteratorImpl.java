@@ -25,7 +25,7 @@ public class SearchIteratorImpl implements SearchIterator {
 
     private static final  Logger LOGGER = LogManager.getLogger(SearchIteratorImpl.class);
 
-    private int maxDepth = 6;
+    private int maxDepth = 0;
     private long maxTimeMs = 0;
     private boolean post = true;
     private boolean earlyExitOk = true;
@@ -180,9 +180,10 @@ public class SearchIteratorImpl implements SearchIterator {
 
         assert(pv.size() > 0);
         assert(MoveUtils.isLineValid(pv, board));
-        // if we are running with assertions enabled and the native library is loaded, verify equality
-        assert(iterationsAreEqual(pv, board, undos));
 
+        // if we are running with assertions enabled and the native library is loaded, verify equality
+        // we can only do this for fixed depth searches
+        assert(maxTimeMs > 0 || iterationsAreEqual(pv, board, undos));
 
         return pv;
     }
@@ -191,6 +192,8 @@ public class SearchIteratorImpl implements SearchIterator {
 
         if (Initializer.nativeCodeInitialized()) {
 
+            LOGGER.debug("# checking iteration equality with native");
+
             List<Move> nativePV = findPrincipalVariationNative(board, undos);
 
             if (!nativePV.equals(javaPV)) {
@@ -198,6 +201,7 @@ public class SearchIteratorImpl implements SearchIterator {
                         ", nativePV: " + PrintLine.getMoveString(nativePV));
                 return false;
             } else {
+                LOGGER.debug("# finished - iterations produce the same PVs");
                 return true;
             }
 

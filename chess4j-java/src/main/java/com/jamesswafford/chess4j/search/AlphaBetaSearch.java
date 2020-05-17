@@ -141,7 +141,8 @@ public class AlphaBetaSearch implements Search {
             int nativeScore = searchNative(fen, prevMoves, nativePV, searchParameters.getDepth(),
                     searchParameters.getAlpha(), searchParameters.getBeta(), searchStats);
 
-            assert (searchesAreEqual(board, undos, searchParameters, fen, nativeScore, nativePV));
+            // if the search completed then verify equality with the Java implementation.
+            assert (stop || searchesAreEqual(board, undos, searchParameters, fen, nativeScore, nativePV));
 
             // translate the native PV into the object's PV
             pv.clear();
@@ -162,6 +163,7 @@ public class AlphaBetaSearch implements Search {
     private boolean searchesAreEqual(Board board, List<Undo> undos, SearchParameters searchParameters,
                                      String fen, int nativeScore, List<Long> nativePV)
     {
+        LOGGER.debug("# checking search equality with java depth {}", searchParameters.getDepth());
         try {
             // copy the search stats for comparison
             SearchStats nativeStats = new SearchStats();
@@ -171,6 +173,10 @@ public class AlphaBetaSearch implements Search {
 
             searchStats.initialize();
             int javaScore = searchWithJavaCode(board, undos, searchParameters);
+
+            // if the search was interrupted we can't compare
+            if (stop) return true;
+
             if (javaScore != nativeScore || !searchStats.equals(nativeStats)) {
                 LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
@@ -185,6 +191,7 @@ public class AlphaBetaSearch implements Search {
                 return false;
             }
 
+            LOGGER.debug("# finished - searches are equivalent");
             return true;
         } catch (IllegalStateException e) {
             LOGGER.error(e);

@@ -42,7 +42,7 @@ public class TestSuiteProcessor {
         return bms;
     }
 
-    private void printSummary(int numProblems,List<String> wrongProblems) {
+    private void printSummary(int numProblems, List<String> wrongProblems) {
         LOGGER.info("\n\ntest suite complete!");
         LOGGER.info("# problems: " + numProblems);
         DecimalFormat df = new DecimalFormat("0.0");
@@ -69,6 +69,7 @@ public class TestSuiteProcessor {
 
         SearchIteratorImpl searchIterator = new SearchIteratorImpl();
         searchIterator.setEarlyExitOk(false);
+        searchIterator.setMaxTime(secondsPerProblem * 1000);
         searchIterator.setMaxDepth(maxDepth);
 
         List<Move> pv = searchIterator.findPvFuture(board, new ArrayList<>()).get();
