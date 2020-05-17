@@ -145,9 +145,9 @@ public class SearchIteratorImplTest {
     @Test
     public void stopIterator() {
 
-        // start a long running search
-        searchIterator.setMaxDepth(8);
-        searchIterator.setMaxTime(60000);
+        // start a search with no depth or time limits
+        searchIterator.setMaxDepth(0);
+        searchIterator.setMaxTime(0);
 
         CompletableFuture<List<Move>> future = searchIterator.findPvFuture(new Board(), new ArrayList<>());
 
@@ -158,6 +158,21 @@ public class SearchIteratorImplTest {
                 .pollInterval(10, TimeUnit.MILLISECONDS)
                 .until(future::isDone);
     }
+
+    @Test
+    public void iteratorStopsOnTime() {
+
+        searchIterator.setMaxDepth(0); // no limit
+        searchIterator.setMaxTime(2000);
+
+        CompletableFuture<List<Move>> future = searchIterator.findPvFuture(new Board(), new ArrayList<>());
+
+        Awaitility.await()
+                .atMost(5, TimeUnit.SECONDS)
+                .pollInterval(10, TimeUnit.MILLISECONDS)
+                .until(future::isDone);
+    }
+
 
     @Test
     public void stoppedIteratorProducesValidLine() {

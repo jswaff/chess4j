@@ -290,30 +290,9 @@ public class InputParserTest {
     }
 
     @Test
-    @Ignore
-    // FIXME: this should probably be a SearchIterator test
     public void stCmd() {
-
-        // use the real search iterator for this test
-        inputParser.setSearchIterator(new SearchIteratorImpl());
-
-        inputParser.parseCommand("new");
-        inputParser.parseCommand("st 1");
-
-        Board origBoard = Globals.getBoard().deepCopy();
-        long start = System.currentTimeMillis();
-        inputParser.parseCommand("go");
-
-        // wait for the board to change state
-        Awaitility.await()
-                .atMost(Duration.FIVE_SECONDS)
-                .with()
-                .pollInterval(new Duration(50, TimeUnit.MILLISECONDS))
-                .until(() -> !origBoard.equals(Globals.getBoard()));
-
-        long searchTime = System.currentTimeMillis() - start;
-        assertTrue(searchTime > 1000);
-        assertTrue(searchTime < 1100);
+        inputParser.parseCommand("st 5");
+        verify(searchIterator).setMaxTime(5000);
     }
 
     @Test

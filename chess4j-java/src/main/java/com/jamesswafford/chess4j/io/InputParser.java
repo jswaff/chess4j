@@ -295,7 +295,7 @@ public class InputParser {
      */
     private void sd(String[] cmd) {
         int depth = Integer.parseInt(cmd[1]);
-        LOGGER.debug("# setting depth to : " + depth);
+        LOGGER.debug("# setting depth to {}", depth);
         searchIterator.setMaxDepth(depth);
     }
 
@@ -323,7 +323,9 @@ public class InputParser {
      * Set an exact number of seconds to play per move.
      */
     private void st(String[] cmd) {
-        // TODO
+        int seconds = Integer.parseInt(cmd[1]);
+        LOGGER.debug("# setting search time to {} seconds per move", seconds);
+        searchIterator.setMaxTime(seconds * 1000);
     }
 
     /**

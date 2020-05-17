@@ -5,7 +5,6 @@ import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.init.Initializer;
-import com.jamesswafford.chess4j.io.DrawBoard;
 import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.io.PrintLine;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
@@ -15,11 +14,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
@@ -114,6 +110,7 @@ public class SearchIteratorImpl implements SearchIterator {
         int depth = 0, score;
         boolean stopSearching = false;
 
+        // set a callback to print the updated PV
         if (post) {
             search.setPvCallback(pvUpdate -> {
                 if (pvUpdate.getValue0() == 0) { // ply 0
@@ -123,6 +120,17 @@ public class SearchIteratorImpl implements SearchIterator {
                 }
             });
         }
+
+        // add a timer to stop the search
+        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        if (maxTimeMs > 0) {
+            LOGGER.debug("# setting timer task for " + maxTimeMs + " ms.");
+            executorService.schedule(() -> {
+                LOGGER.debug("# stopping search on time.");
+                search.stop();
+            }, maxTimeMs, TimeUnit.MILLISECONDS);
+        }
+
         search.initialize();
 
         do {
@@ -160,6 +168,11 @@ public class SearchIteratorImpl implements SearchIterator {
             }
 
         } while (!stopSearching);
+
+        // make sure the scheduled timer task has terminated
+        LOGGER.debug("# shutting timer task down.");
+        executorService.shutdownNow();
+        while (!executorService.isTerminated());
 
         if (post) {
             printSearchSummary(depth, startTime, search.getSearchStats());
