@@ -1,21 +1,19 @@
 package com.jamesswafford.chess4j.io;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 
+import java.io.*;
+
 public class PGNIterator {
 
-    private BufferedReader br;
+    private BufferedReader bufferedReader;
 
-    public PGNIterator(InputStream is) {
-        br = new BufferedReader(new InputStreamReader(is));
+    public PGNIterator(BufferedReader bufferedReader) {
+        this.bufferedReader = bufferedReader;
     }
 
+    // TODO: Optional?
     public PGNGame next() throws IOException, ParseException, IllegalMoveException {
 
         PGNParser parser = new PGNParser();
@@ -28,40 +26,16 @@ public class PGNIterator {
         return null;
     }
 
-    public void close() {
-        try {
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    protected void finalize() throws Throwable {
-        try {
-            close();
-        } finally {
-            super.finalize();
-        }
-    }
-
-
-    /**
-     * The first line should be a PGN tag.
-     *
-     * @return
-     * @throws IOException
-     * @throws ParseException
-     */
     private String getNextPGN() throws IOException, ParseException {
 
         StringBuilder sb = new StringBuilder();
 
         boolean foundTags = false;
         String line;
-        while ((line = br.readLine()) != null) {
+        while ((line = bufferedReader.readLine()) != null) {
             if (line.startsWith("[")) {
                 foundTags = true;
-                sb.append(line + "\n");
+                sb.append(line).append("\n");
             } else if (foundTags && "".equals(line.trim())) {
                 // first line after tags, break
                 sb.append("\n");
@@ -72,10 +46,10 @@ public class PGNIterator {
         if (!foundTags) { return null; }
 
         boolean foundMoveText = false;
-        while ((line = br.readLine()) != null) {
+        while ((line = bufferedReader.readLine()) != null) {
             if (!"".equals(line.trim())) {
                 foundMoveText = true;
-                sb.append(line + "\n");
+                sb.append(line).append("\n");
             } else if (foundMoveText) {
                 break;
             }

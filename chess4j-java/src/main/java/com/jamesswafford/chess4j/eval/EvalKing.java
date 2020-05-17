@@ -1,14 +1,13 @@
 package com.jamesswafford.chess4j.eval;
 
-import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.squares.Square;
 
 import static com.jamesswafford.chess4j.board.squares.File.FILE_D;
 import static com.jamesswafford.chess4j.board.squares.File.FILE_E;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
-import static com.jamesswafford.chess4j.board.squares.Square.A5;
 import static com.jamesswafford.chess4j.pieces.Pawn.BLACK_PAWN;
 import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
 

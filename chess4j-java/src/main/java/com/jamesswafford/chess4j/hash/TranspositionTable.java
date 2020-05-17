@@ -1,43 +1,37 @@
 package com.jamesswafford.chess4j.hash;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Move;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 public class TranspositionTable extends AbstractTranspositionTable {
 
-    private static final Log LOGGER = LogFactory.getLog(TranspositionTable.class);
+    private static final Logger LOGGER = LogManager.getLogger(TranspositionTable.class);
 
-    private static int DEFAULT_ENTRIES = 1048576; // = 0x100000   ~1 million entries
+    public static final int DEFAULT_ENTRIES = 1048576;
 
-    private boolean depthPreferred;
+    private final boolean depthPreferred;
     private TranspositionTableEntry[] table;
 
     public TranspositionTable(boolean depthPreferred) {
-        this(depthPreferred,DEFAULT_ENTRIES);
+        this(depthPreferred, DEFAULT_ENTRIES);
     }
 
-    public TranspositionTable(boolean depthPreferred,int maxEntries) {
-        LOGGER.debug("# initializing transposition table.  maxEntries=" + maxEntries);
-
+    public TranspositionTable(boolean depthPreferred, int maxEntries) {
         this.depthPreferred = depthPreferred;
-        setNumEntries(maxEntries);
-        table = new TranspositionTableEntry[numEntries];
+        int numEntries = calculateNumEntries(maxEntries);
+        allocateTable(numEntries);
         clear();
-
-        LOGGER.info("# " + (depthPreferred?"depth preferred":"always replace")
-                + " transposition table initialized with " + numEntries + " entries.");
     }
 
+    @Override
     public void clear() {
         clearStats();
-        for (int i=0; i<numEntries; i++) {
-            table[i] = null;
-        }
+        Arrays.fill(table, null);
     }
 
     private int getCheckMateBound() {
@@ -76,12 +70,6 @@ public class TranspositionTable extends AbstractTranspositionTable {
     /**
      * Store an entry in the transposition table, Gerbil style.  Meaning, for now I'm skirting around
      * dealing with the headache that is storing mate scores by storing them as bounds only.
-     *
-     * @param entryType
-     * @param zobristKey
-     * @param score
-     * @param depth
-     * @param move
      */
     public boolean store(long zobristKey,TranspositionTableEntryType entryType,int score,int depth,Move move) {
 
@@ -117,6 +105,18 @@ public class TranspositionTable extends AbstractTranspositionTable {
         table[getMaskedKey(zobristKey)] = te;
 
         return true;
+    }
+
+    @Override
+    protected void allocateTable(int capacity) {
+        LOGGER.debug("# allocating " + capacity + " elements for " +
+                (depthPreferred? " depth preferred":"always replace") + " table");
+        table = new TranspositionTableEntry[capacity];
+    }
+
+    @Override
+    public int tableCapacity() {
+        return table.length;
     }
 
     @Override

@@ -1,13 +1,15 @@
 package com.jamesswafford.chess4j.hash;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Arrays;
 
 public class PawnTranspositionTable extends AbstractTranspositionTable {
 
-    private static final Log LOGGER = LogFactory.getLog(PawnTranspositionTable.class);
+    private static final Logger LOGGER = LogManager.getLogger(PawnTranspositionTable.class);
 
-    private static int DEFAULT_ENTRIES = 1048576; // = 0x100000   ~1 million entries
+    private static final int DEFAULT_ENTRIES = 1048576;
 
     private PawnTranspositionTableEntry[] table;
 
@@ -16,22 +18,18 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     }
 
     public PawnTranspositionTable(int maxEntries) {
-        LOGGER.debug("# initializing pawn transposition table.  maxEntries=" + maxEntries);
-
-        setNumEntries(maxEntries);
-        table = new PawnTranspositionTableEntry[numEntries];
+        int numEntries = calculateNumEntries(maxEntries);
+        allocateTable(numEntries);
         clear();
-
-        LOGGER.info("# pawn transposition table initialized with " + numEntries + " entries.");
     }
 
+    @Override
     public void clear() {
         clearStats();
-        for (int i=0; i<numEntries; i++) {
-            table[i] = null;
-        }
+        Arrays.fill(table, null);
     }
 
+    // TODO: Optional
     public PawnTranspositionTableEntry probe(long zobristKey) {
         numProbes++;
         PawnTranspositionTableEntry te = table[getMaskedKey(zobristKey)];
@@ -50,8 +48,20 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     }
 
     public void store(long zobristKey,int score) {
-        PawnTranspositionTableEntry te = new PawnTranspositionTableEntry(zobristKey,score);
+        PawnTranspositionTableEntry te = new PawnTranspositionTableEntry(zobristKey, score);
         table[getMaskedKey(zobristKey)] = te;
+    }
+
+    @Override
+    protected void allocateTable(int capacity) {
+        LOGGER.debug("# allocating " + capacity + " elements for pawn table");
+
+        table = new PawnTranspositionTableEntry[capacity];
+    }
+
+    @Override
+    public int tableCapacity() {
+        return table.length;
     }
 
     @Override

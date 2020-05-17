@@ -1,6 +1,6 @@
 package com.jamesswafford.chess4j.book;
 
-import java.io.FileInputStream;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
@@ -14,39 +14,37 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import com.jamesswafford.chess4j.Color;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.hash.Zobrist;
 import com.jamesswafford.chess4j.io.MoveParser;
-import com.jamesswafford.chess4j.io.PGNGame;
-import com.jamesswafford.chess4j.io.PGNIterator;
 import com.jamesswafford.chess4j.utils.GameResult;
 
 import static com.jamesswafford.chess4j.pieces.Pawn.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 
-public class OpeningBookSQLiteImplTest {
+public class SQLiteBookTest {
 
-    private final static String smallPGN = "pgn/small.pgn";
-    private final static String tinyPGN = "pgn/tiny.pgn";
+    private final static String smallPGN = "/pgn/small.pgn";
+    private final static String tinyPGN = "/pgn/tiny.pgn";
     private final static String testDB = "test.db";
 
-    static OpeningBookSQLiteImpl book;
+    static SQLiteBook book;
     static Connection conn;
 
     @BeforeClass
     public static void setUp() throws Exception {
         Class.forName("org.sqlite.JDBC");
         conn = DriverManager.getConnection("jdbc:sqlite:" + testDB);
-        book = new OpeningBookSQLiteImpl(conn);
+        book = new SQLiteBook(conn);
         book.initializeBook();
     }
 
     @AfterClass
     public static void tearDown() throws Exception {
         conn.close();
-        new java.io.File(testDB).delete();
+        new File(testDB).delete();
     }
 
     @Before
@@ -56,7 +54,7 @@ public class OpeningBookSQLiteImplTest {
     }
 
     @Test
-    public void addMove() throws Exception {
+    public void addMove() {
         Board board = new Board();
 
         List<BookMove> bookMoves = book.getMoves(board);
@@ -75,7 +73,7 @@ public class OpeningBookSQLiteImplTest {
     }
 
     @Test
-    public void addMoveTwice() throws Exception {
+    public void addMoveTwice() {
         Board board = new Board();
 
         List<BookMove> bookMoves = book.getMoves(board);
@@ -95,7 +93,7 @@ public class OpeningBookSQLiteImplTest {
     }
 
     @Test
-    public void addMultipleMoves() throws Exception {
+    public void addMultipleMoves() {
         Board board = new Board();
 
         List<BookMove> bookMoves = book.getMoves(board);
@@ -132,7 +130,7 @@ public class OpeningBookSQLiteImplTest {
     }
 
     @Test
-    public void addSmallPGN() throws Exception {
+    public void addSmallPGN() {
         populateBook(smallPGN);
 
         assertEquals(125, book.getTotalMoveCount()); // 850 for entire PGN
@@ -159,7 +157,7 @@ public class OpeningBookSQLiteImplTest {
     }
 
     @Test
-    public void addReallySmallPGN() throws Exception {
+    public void addReallySmallPGN() {
         populateBook(tinyPGN);
         assertEquals(15, book.getTotalMoveCount()); // 85 for entire game
 
@@ -216,7 +214,7 @@ Be5 41.Rd2 Bc6 42.b5 Bf3 43.Bf4 1-0
     }
 
     @Test
-    public void learnMultipleTimes() throws Exception {
+    public void learnMultipleTimes() {
         populateBook(tinyPGN);
 
         Board board = new Board();
@@ -253,7 +251,7 @@ Be5 41.Rd2 Bc6 42.b5 Bf3 43.Bf4 1-0
     }
 
     @Test
-    public void learn() throws Exception {
+    public void learn() {
         populateBook(tinyPGN);
 
         Board board = new Board();
@@ -328,27 +326,9 @@ Be5 41.Rd2 Bc6 42.b5 Bf3 43.Bf4 1-0
         assertEquals(0, bookMoves.get(0).getDraws());
     }
 
-    private void populateBook(String pgn) throws Exception {
-        System.out.println("populating book using " + pgn);
-
-        book.dropIndexes();
-        long start = System.currentTimeMillis();
-
-        ClassLoader classLoader = getClass().getClassLoader();
-        java.io.File pgnFile = new java.io.File(classLoader.getResource(pgn).getFile());
-
-        FileInputStream fis = new FileInputStream(pgnFile);
-        PGNIterator it = new PGNIterator(fis);
-
-        PGNGame pgnGame;
-        while ((pgnGame = it.next()) != null) {
-            book.addToBook(pgnGame);
-        }
-
-        fis.close();
-        long end = System.currentTimeMillis();
-        book.addIndexes();
-        System.out.println("populated book in " + (end-start) + " ms");
+    private void populateBook(String pgn) {
+        File pgnFile = new File(SQLiteBookTest.class.getResource(pgn).getFile());
+        book.addToBook(pgnFile);
     }
 
 }

@@ -1,10 +1,10 @@
 package com.jamesswafford.chess4j.io;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.exceptions.ParseException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class EPDParser {
 

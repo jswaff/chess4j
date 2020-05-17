@@ -3,7 +3,7 @@ package com.jamesswafford.chess4j.eval;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.Square;
 
-import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.*;
+import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.evalMajorOn7th;
 
 public class EvalQueen {
 

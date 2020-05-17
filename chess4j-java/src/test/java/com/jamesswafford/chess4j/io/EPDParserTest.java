@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.jamesswafford.chess4j.Color;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 

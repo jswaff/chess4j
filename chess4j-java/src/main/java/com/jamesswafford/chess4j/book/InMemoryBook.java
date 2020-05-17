@@ -1,24 +1,24 @@
 package com.jamesswafford.chess4j.book;
 
+import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGen;
+public class InMemoryBook implements OpeningBook {
 
-public class OpeningBookInMemoryImpl extends AbstractOpeningBook {
+    private static final InMemoryBook INSTANCE = new InMemoryBook();
 
-    private static final OpeningBookInMemoryImpl INSTANCE = new OpeningBookInMemoryImpl();
+    private final Map<Long,List<BookMove>> movesMap = new HashMap<>();
 
-    private Map<Long,List<BookMove>> movesMap = new HashMap<>();
-
-    private OpeningBookInMemoryImpl() {
+    private InMemoryBook() {
     }
 
-    public static OpeningBookInMemoryImpl getInstance() {
+    public static InMemoryBook getInstance() {
         return INSTANCE;
     }
 
@@ -28,11 +28,7 @@ public class OpeningBookInMemoryImpl extends AbstractOpeningBook {
     }
 
     private void addToMap(Long key,Move move) {
-        List<BookMove> bms = movesMap.get(key);
-        if (bms==null) {
-            bms = new ArrayList<>();
-            movesMap.put(key, bms);
-        }
+        List<BookMove> bms = movesMap.computeIfAbsent(key, k -> new ArrayList<>());
 
         // is this move already in the list?
         for (BookMove bm : bms) {
@@ -53,7 +49,7 @@ public class OpeningBookInMemoryImpl extends AbstractOpeningBook {
         List<BookMove> bookMoves = movesMap.get(board.getZobristKey());
 
         if (bookMoves != null) {
-            List<Move> lms = MoveGen.genLegalMoves(board);
+            List<Move> lms = MagicBitboardMoveGenerator.genLegalMoves(board);
             for (BookMove bm : bookMoves) {
                 if (lms.contains(bm.getMove())) {
                     legalMoves.add(bm);

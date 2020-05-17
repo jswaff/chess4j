@@ -4,8 +4,8 @@ import java.io.*;
 
 public final class Initializer {
 
-    private static boolean initialized = false;
-    private static boolean useNative = false;
+    public static boolean attemptToUseNative = false;
+    private static boolean nativeCodeInitialized = false;
 
     private Initializer() { }
 
@@ -37,13 +37,13 @@ public final class Initializer {
             if (is != null) {
                 try {
                     is.close();
-                } catch (IOException e) {
+                } catch (IOException ignored) {
                 }
             }
             if (os != null) {
                 try {
                     os.close();
-                } catch (IOException e) {
+                } catch (IOException ignored) {
                 }
             }
             if (libFile != null) {
@@ -54,7 +54,7 @@ public final class Initializer {
 
     public static synchronized void init() {
 
-        if (!initialized) {
+        if (attemptToUseNative && !nativeCodeInitialized) {
             // which OS are we running on?
 
             String os = System.getProperty("os.name");
@@ -63,23 +63,22 @@ public final class Initializer {
             if ("Linux".equals(os)) {
                 System.out.println("# Loading Prophet4 native library.");
                 File libFile = copyLibraryToFile();
-
                 System.load(libFile.getPath());
-
+                System.out.println("# Prophet4 loaded, initializing...");
                 if (!p4Init()) {
+                    attemptToUseNative = false;
                     throw new IllegalStateException("Could not initialize p4!");
                 }
-
-                useNative = true;
+                System.out.println("# Prophet4 initialized.");
             }
 
-            initialized = true;
+            nativeCodeInitialized = true;
         }
     }
 
     private static native boolean p4Init();
 
-    public static boolean useNative() {
-        return useNative;
+    public static boolean nativeCodeInitialized() {
+        return nativeCodeInitialized;
     }
 }

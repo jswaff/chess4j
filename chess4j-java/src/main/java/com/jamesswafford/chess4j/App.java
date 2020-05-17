@@ -1,48 +1,46 @@
 package com.jamesswafford.chess4j;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.sql.DriverManager;
-
-import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
-import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.jamesswafford.chess4j.book.AbstractOpeningBook;
-import com.jamesswafford.chess4j.book.OpeningBookSQLiteImpl;
-import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
-import com.jamesswafford.chess4j.exceptions.ParseException;
+import com.jamesswafford.chess4j.book.SQLiteBook;
 import com.jamesswafford.chess4j.hash.TTHolder;
+import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.InputParser;
 import com.jamesswafford.chess4j.utils.TestSuiteProcessor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public final class App {
-    private static final Log LOGGER = LogFactory.getLog(App.class);
+    private static final  Logger LOGGER = LogManager.getLogger(App.class);
 
-    private static AbstractOpeningBook openingBook;
     private static String bookPath = null;
     private static String testSuiteFile = null;
     private static int testSuiteTime = 10; // default to ten seconds
+    private static int maxDepth = 6;
 
     private App() { }
 
     private static void processArgument(String arg) {
-        if (arg.startsWith("-suite=")) {
-            testSuiteFile = arg.substring(7); // "-suite=" is 7 characters
+        if (arg.startsWith("-native")) {
+            Initializer.attemptToUseNative = true;
+        } else if (arg.startsWith("-suite=")) {
+            testSuiteFile = arg.substring(7);
+        } else if (arg.startsWith("-depth=")) {
+            maxDepth = Integer.parseInt(arg.substring(7));
         } else if (arg.startsWith("-time=")) {
-            testSuiteTime = Integer.valueOf(arg.substring(6));
+            testSuiteTime = Integer.parseInt(arg.substring(6));
         } else if (arg.startsWith("-book=")) {
             bookPath = arg.substring(6);
         } else if (arg.startsWith("-hash=")) {
-            int maxMemBytes = Integer.valueOf(arg.substring(6)) * 1024 * 1024;
-            TTHolder.maxEntries = maxMemBytes / TranspositionTableEntry.sizeOf();
+            int maxMemBytes = Integer.parseInt(arg.substring(6)) * 1024 * 1024;
+            // this command line arg is meant to set the size of the memory per table, but the
+            // TTHolder will split it between both main tables.
+            TTHolder.getInstance().resizeMainTables(2 * maxMemBytes);
         } else if (arg.startsWith("-phash=")) {
-            int maxMemBytes = Integer.valueOf(arg.substring(7)) * 1024 * 1024;
-            TTHolder.maxPawnEntries = maxMemBytes / PawnTranspositionTableEntry.sizeOf();
+            int maxMemBytes = Integer.parseInt(arg.substring(7)) * 1024 * 1024;
+            TTHolder.getInstance().resizePawnTable(maxMemBytes);
         }
     }
 
@@ -52,6 +50,8 @@ public final class App {
     private static void repl() {
         BufferedReader bin = new BufferedReader(new InputStreamReader(System.in));
         String input = "";
+        InputParser inputParser = new InputParser();
+
         while (true) {
             try {
                 input = bin.readLine();
@@ -61,72 +61,43 @@ public final class App {
             }
 
             try {
-                InputParser.getInstance().parseCommand(input);
-            } catch (IllegalMoveException ime) {
-                LOGGER.info("Illegal move");
-            } catch (ParseException pe) {
-                LOGGER.warn("Parse error: " + pe.getMessage());
+                inputParser.parseCommand(input);
             } catch (Exception e) {
-                LOGGER.warn("Caught (hopefully recoverable) exception: " + e.getMessage());
+                LOGGER.warn("# Caught (hopefully recoverable) exception: " + e.getMessage());
             }
         }
     }
 
     private static boolean showDebugMode() {
-        LOGGER.info("**** DEBUG MODE ENABLED ****");
+        LOGGER.info("# **** DEBUG MODE ENABLED ****");
         return true;
     }
 
-    /**
-     * @param args
-     */
     public static void main(String[] args) throws Exception {
-        LOGGER.info("Welcome to chess4j!\n\n");
+
+        // send "done=0" to prevent XBoard timing out during the initialization sequence.
+        LOGGER.info("done=0");
+
+        LOGGER.info("# Welcome to chess4j!\n\n");
 
         assert(showDebugMode());
 
         for (String arg : args) {
             processArgument(arg);
         }
-        TTHolder.initTables();
+        TTHolder.getInstance().clearTables(); // warm the tables up
 
         if (testSuiteFile != null) {
             TestSuiteProcessor tp = new TestSuiteProcessor();
-            tp.processTestSuite(testSuiteFile,testSuiteTime);
+            tp.processTestSuite(testSuiteFile, maxDepth, testSuiteTime);
             System.exit(0);
         }
 
         if (bookPath != null) {
-            initBook();
+            Globals.setOpeningBook(SQLiteBook.openOrInitialize(bookPath));
         }
 
         repl();
     }
 
-    public static AbstractOpeningBook getOpeningBook() {
-        return openingBook;
-    }
-
-    private static void initBook() throws Exception {
-        LOGGER.debug("# initializing book: " + bookPath);
-
-        File bookFile = new File(bookPath);
-        boolean initBook = !bookFile.exists();
-
-        Class.forName("org.sqlite.JDBC");
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:" + bookPath);
-        OpeningBookSQLiteImpl sqlOpeningBook = new OpeningBookSQLiteImpl(conn);
-
-        if (initBook) {
-            LOGGER.info("# could not find " + bookPath + ", creating...");
-            sqlOpeningBook.initializeBook();
-            LOGGER.info("# ... finished.");
-        } else {
-            sqlOpeningBook.loadZobristKeys();
-        }
-
-        openingBook = sqlOpeningBook;
-
-        LOGGER.info("# book initialization complete. " + openingBook.getTotalMoveCount() + " moves in book file.");
-    }
 }

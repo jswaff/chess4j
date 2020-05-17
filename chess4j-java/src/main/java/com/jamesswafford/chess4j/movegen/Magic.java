@@ -1,15 +1,15 @@
 package com.jamesswafford.chess4j.movegen;
 
-import java.util.Optional;
-import java.util.Random;
-import java.util.function.Function;
-
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.utils.BoardUtils;
+
+import java.util.Optional;
+import java.util.Random;
+import java.util.function.Function;
 
 public class Magic {
 

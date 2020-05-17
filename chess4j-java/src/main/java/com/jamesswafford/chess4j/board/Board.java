@@ -1,8 +1,5 @@
 package com.jamesswafford.chess4j.board;
 
-import java.util.*;
-
-import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.exceptions.ParseException;
@@ -12,25 +9,33 @@ import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.utils.BlankRemover;
 import com.jamesswafford.chess4j.utils.PieceFactory;
 
-import static com.jamesswafford.chess4j.pieces.Pawn.*;
-import static com.jamesswafford.chess4j.pieces.Knight.*;
-import static com.jamesswafford.chess4j.pieces.Bishop.*;
-import static com.jamesswafford.chess4j.pieces.Rook.*;
-import static com.jamesswafford.chess4j.pieces.Queen.*;
-import static com.jamesswafford.chess4j.pieces.King.*;
+import java.util.*;
+
 import static com.jamesswafford.chess4j.board.CastlingRights.*;
-import static com.jamesswafford.chess4j.board.squares.Rank.*;
+import static com.jamesswafford.chess4j.board.squares.Rank.RANK_1;
+import static com.jamesswafford.chess4j.board.squares.Rank.RANK_8;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
+import static com.jamesswafford.chess4j.pieces.Bishop.BLACK_BISHOP;
+import static com.jamesswafford.chess4j.pieces.Bishop.WHITE_BISHOP;
+import static com.jamesswafford.chess4j.pieces.King.BLACK_KING;
+import static com.jamesswafford.chess4j.pieces.King.WHITE_KING;
+import static com.jamesswafford.chess4j.pieces.Knight.BLACK_KNIGHT;
+import static com.jamesswafford.chess4j.pieces.Knight.WHITE_KNIGHT;
+import static com.jamesswafford.chess4j.pieces.Pawn.BLACK_PAWN;
+import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
+import static com.jamesswafford.chess4j.pieces.Queen.BLACK_QUEEN;
+import static com.jamesswafford.chess4j.pieces.Queen.WHITE_QUEEN;
+import static com.jamesswafford.chess4j.pieces.Rook.BLACK_ROOK;
+import static com.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
 
 
 public final class Board {
 
-    private static final String INITIAL_POS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    public static final String INITIAL_POS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-    private List<Undo> undoStack = new ArrayList<>();
-    private Map<Square,Piece> pieceMap = new HashMap<>();
-    private Map<Piece,Integer> pieceCountsMap = new HashMap<>();
-    private MyCastlingRights castlingRights = new MyCastlingRights();
+    private final Map<Square,Piece> pieceMap = new HashMap<>();
+    private final Map<Piece,Integer> pieceCountsMap = new HashMap<>();
+    private final MyCastlingRights castlingRights = new MyCastlingRights();
     private Color playerToMove;
     private Square epSquare;
     private int moveCounter;
@@ -467,7 +472,9 @@ public final class Board {
         zobristKey = Zobrist.calculateBoardKey(this);
         pawnKey = Zobrist.calculatePawnKey(this);
 
-        assert(verify());
+        if (!verify()) {
+            throw new ParseException("Invalid position: " + fen);
+        }
     }
 
     public void swapPlayer() {
@@ -894,7 +901,7 @@ public final class Board {
 
     private void setFullMoveCounter(String fenPart) throws ParseException {
         try {
-            int fullMoveCounter = fenPart==null? 1 : Integer.valueOf(fenPart);
+            int fullMoveCounter = fenPart==null? 1 : Integer.parseInt(fenPart);
             moveCounter = (fullMoveCounter-1)*2;
             if (playerToMove == Color.BLACK) {
                 moveCounter++;
@@ -906,7 +913,7 @@ public final class Board {
 
     private void setHalfMoveClock(String fenPart) throws ParseException {
         try {
-            fiftyCounter = fenPart==null ? 0 : Integer.valueOf(fenPart);
+            fiftyCounter = fenPart==null ? 0 : Integer.parseInt(fenPart);
         } catch (NumberFormatException e) {
             throw new ParseException(e);
         }
@@ -927,10 +934,12 @@ public final class Board {
                 addPiece(piece, sq);
                 sqVal++;
             } else if (c >= '1' && c <= '8') {
-                sqVal += Integer.valueOf(String.valueOf(c));
+                sqVal += Integer.parseInt(String.valueOf(c));
             }
         }
-        assert(sqVal == 64);
+        if (sqVal != 64) {
+            throw new ParseException("Did not set 64 squares: " + fenPart);
+        }
     }
 
     private void setPlayer(String fenPart) throws ParseException {

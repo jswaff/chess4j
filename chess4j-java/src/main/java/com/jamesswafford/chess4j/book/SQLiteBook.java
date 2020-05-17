@@ -1,30 +1,30 @@
 package com.jamesswafford.chess4j.book;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import com.jamesswafford.chess4j.Globals;
+import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Color;
+import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.hash.Zobrist;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
+import com.jamesswafford.chess4j.utils.GameResult;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.File;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.jamesswafford.chess4j.Globals;
-
-import com.jamesswafford.chess4j.Color;
-import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGen;
-import com.jamesswafford.chess4j.hash.Zobrist;
-import com.jamesswafford.chess4j.utils.GameResult;
-
 import static com.jamesswafford.chess4j.utils.GameResult.*;
 
-public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
+public class SQLiteBook implements OpeningBook {
 
-    private Connection conn;
+    private static final Logger LOGGER = LogManager.getLogger(SQLiteBook.class);
 
-    public OpeningBookSQLiteImpl(Connection conn) {
+    private final Connection conn;
+
+    public SQLiteBook(Connection conn) {
         this.conn = conn;
     }
 
@@ -73,7 +73,7 @@ public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
 
         List<BookMove> bookMoves = new ArrayList<>();
 
-        List<Move> legalMoves = MoveGen.genLegalMoves(board);
+        List<Move> legalMoves = MagicBitboardMoveGenerator.genLegalMoves(board);
 
         String qry = "select fromsq,tosq,frequency,wins,losses,draws from book_moves where key=?";
         try {
@@ -246,6 +246,32 @@ public class OpeningBookSQLiteImpl extends  AbstractOpeningBook {
         ps.setInt(7, move.to().value());
         ps.executeUpdate();
         ps.close();
+    }
+
+    public static SQLiteBook openOrInitialize(String bookPath) throws Exception {
+        LOGGER.debug("# initializing book: " + bookPath);
+
+        File bookFile = new File(bookPath);
+        boolean initBook = !bookFile.exists();
+
+        Class.forName("org.sqlite.JDBC");
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:" + bookPath);
+        SQLiteBook sqlOpeningBook = new SQLiteBook(conn);
+
+        if (initBook) {
+            LOGGER.info("# could not find " + bookPath + ", creating...");
+            sqlOpeningBook.initializeBook();
+            LOGGER.info("# ... finished.");
+        } else {
+            sqlOpeningBook.loadZobristKeys();
+        }
+
+        Globals.setOpeningBook(sqlOpeningBook);
+
+        LOGGER.info("# book initialization complete. " +
+                sqlOpeningBook.getTotalMoveCount() + " moves in book file.");
+
+        return sqlOpeningBook;
     }
 
 }

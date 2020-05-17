@@ -1,29 +1,45 @@
 package com.jamesswafford.chess4j.movegen;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Square;
+import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.utils.BoardUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import static java.util.stream.Collectors.toList;
+import java.util.ArrayList;
+import java.util.List;
 
-import static com.jamesswafford.chess4j.pieces.Pawn.*;
-import static com.jamesswafford.chess4j.pieces.Knight.*;
-import static com.jamesswafford.chess4j.pieces.Bishop.*;
-import static com.jamesswafford.chess4j.pieces.Rook.*;
-import static com.jamesswafford.chess4j.pieces.Queen.*;
-import static com.jamesswafford.chess4j.pieces.King.*;
-import static com.jamesswafford.chess4j.board.squares.File.*;
+import static com.jamesswafford.chess4j.board.squares.File.FILE_A;
+import static com.jamesswafford.chess4j.board.squares.File.FILE_H;
 import static com.jamesswafford.chess4j.board.squares.Rank.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
+import static com.jamesswafford.chess4j.pieces.Bishop.BLACK_BISHOP;
+import static com.jamesswafford.chess4j.pieces.Bishop.WHITE_BISHOP;
+import static com.jamesswafford.chess4j.pieces.King.BLACK_KING;
+import static com.jamesswafford.chess4j.pieces.King.WHITE_KING;
+import static com.jamesswafford.chess4j.pieces.Knight.BLACK_KNIGHT;
+import static com.jamesswafford.chess4j.pieces.Knight.WHITE_KNIGHT;
+import static com.jamesswafford.chess4j.pieces.Pawn.BLACK_PAWN;
+import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
+import static com.jamesswafford.chess4j.pieces.Queen.BLACK_QUEEN;
+import static com.jamesswafford.chess4j.pieces.Queen.WHITE_QUEEN;
+import static com.jamesswafford.chess4j.pieces.Rook.BLACK_ROOK;
+import static com.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
+import static com.jamesswafford.chess4j.utils.MoveUtils.fromNativeMove;
+import static java.util.stream.Collectors.toList;
 
-public final class MoveGen {
+public final class MagicBitboardMoveGenerator implements MoveGenerator {
+
+    private static final  Logger LOGGER = LogManager.getLogger(MagicBitboardMoveGenerator.class);
+
+    static {
+        Initializer.init();
+    }
 
     public static void genBishopMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
         Piece piece;
@@ -107,7 +123,8 @@ public final class MoveGen {
                     int toSqVal = Bitboard.msb(pmap);
                     Square toSq = Square.valueOf(toSqVal);
                     Piece captured = toSq==board.getEPSquare() ? BLACK_PAWN : board.getPiece(toSq);
-                    addPawnMove(moves,WHITE_PAWN,toSq.southEast().get(),toSq,captured,toSq==board.getEPSquare());
+                    addPawnMove(moves,WHITE_PAWN,toSq.southEast().get(),toSq,captured,
+                            toSq==board.getEPSquare());
                     pmap ^= Bitboard.squares[toSqVal];
                 }
 
@@ -193,14 +210,61 @@ public final class MoveGen {
                 }
             }
         }
-
     }
 
     public static List<Move> genPseudoLegalMoves(Board board) {
         return genPseudoLegalMoves(board,true,true);
     }
 
-    public static List<Move> genPseudoLegalMoves(Board board,boolean caps,boolean noncaps) {
+    private static boolean moveGensAreEqual(List<Move> javaMoves, Board board, boolean caps, boolean noncaps) {
+        if (Initializer.nativeCodeInitialized()) {
+            String fen = FenBuilder.createFen(board, false);
+            List<Long> nativeMoves = new ArrayList<>();
+            try {
+                int nMoves = genPseudoLegalMovesNative(fen, nativeMoves, caps, noncaps);
+                assert (nMoves == nativeMoves.size());
+                if (nMoves != javaMoves.size()) {
+                    LOGGER.error("Move lists not equal! # java moves: " + javaMoves.size()
+                        + ", # native moves: " + nMoves);
+                    return false;
+                }
+                // for every java move, ensure there is exactly one corresponding native move
+                for (Move javaMove : javaMoves) {
+                    if (nativeMoves.stream()
+                            .filter(nativeMove -> javaMove.equals(fromNativeMove(nativeMove, board.getPlayerToMove())))
+                            .count() != 1L)
+                    {
+                        LOGGER.error("No native move found for java move: " + javaMove
+                            + ", fen: " + fen);
+                        return false;
+                    }
+                }
+
+                // sort java moves to match order of native moves
+                List<Move> sortedJavaMoves = new ArrayList<>();
+                for (Long nativeMove : nativeMoves) {
+                    Move matchingMove = javaMoves.stream()
+                            .filter(javaMove -> javaMove.equals(fromNativeMove(nativeMove, board.getPlayerToMove())))
+                            .findFirst().get();
+                    sortedJavaMoves.add(matchingMove);
+                }
+                assert (sortedJavaMoves.size() == javaMoves.size());
+                javaMoves.clear();
+                javaMoves.addAll(sortedJavaMoves);
+
+                return true;
+            } catch (IllegalStateException e) {
+                LOGGER.error(e);
+                throw e;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    private static native int genPseudoLegalMovesNative(String fen, List<Long> moves, boolean caps, boolean noncaps);
+
+    public static List<Move> genPseudoLegalMoves(Board board, boolean caps, boolean noncaps) {
         List<Move> moves = new ArrayList<>(100);
 
         genPawnMoves(board,moves,caps,noncaps);
@@ -209,6 +273,9 @@ public final class MoveGen {
         genRookMoves(board,moves,caps,noncaps);
         genQueenMoves(board,moves,caps,noncaps);
         genKingMoves(board,moves,caps,noncaps);
+
+        assert (moveGensAreEqual(moves, board, caps, noncaps));
+
 
         return moves;
     }
@@ -233,7 +300,7 @@ public final class MoveGen {
         }
     }
 
-    public static void genRookMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
+    public static void genRookMoves(Board board, List<Move> moves, boolean caps, boolean noncaps) {
         Piece piece;
         long pieceMap;
 
@@ -253,8 +320,6 @@ public final class MoveGen {
         }
     }
 
-    private MoveGen() {}
-
     private static void addMoves(Board board, Piece piece, Square fromSq, long moveMap, List<Move> moves) {
         while (moveMap != 0) {
             int toVal = Bitboard.lsb(moveMap);
@@ -265,7 +330,9 @@ public final class MoveGen {
         }
     }
 
-    private static void addPawnMove(List<Move> moves,Pawn movingPawn,Square fromSq,Square toSq,Piece captured,boolean epCapture) {
+    private static void addPawnMove(List<Move> moves, Pawn movingPawn, Square fromSq, Square toSq, Piece captured,
+                                    boolean epCapture)
+    {
         if (toSq.rank()==RANK_1 || toSq.rank()==RANK_8) {
             boolean isWhite = toSq.rank()==RANK_8;
             assert((isWhite && movingPawn==WHITE_PAWN) || (!isWhite && movingPawn==BLACK_PAWN));
@@ -278,7 +345,7 @@ public final class MoveGen {
         }
     }
 
-    private static void genCastlingMoves(Board board,List<Move> moves) {
+    private static void genCastlingMoves(Board board, List<Move> moves) {
         Color player = board.getPlayerToMove();
 
         if (player.isWhite()) {
@@ -321,4 +388,23 @@ public final class MoveGen {
         return legal;
     }
 
+    @Override
+    public List<Move> generateLegalMoves(Board board) {
+        return genLegalMoves(board);
+    }
+
+    @Override
+    public List<Move> generatePseudoLegalMoves(Board board) {
+        return genPseudoLegalMoves(board);
+    }
+
+    @Override
+    public List<Move> generatePseudoLegalCaptures(Board board) {
+        return genPseudoLegalMoves(board, true, false);
+    }
+
+    @Override
+    public List<Move> generatePseudoLegalNonCaptures(Board board) {
+        return genPseudoLegalMoves(board, false, true);
+    }
 }

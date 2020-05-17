@@ -1,6 +1,5 @@
 package com.jamesswafford.chess4j.board;
 
-import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.pieces.Bishop;
 import com.jamesswafford.chess4j.pieces.Knight;
 import com.jamesswafford.chess4j.pieces.Queen;

@@ -1,8 +1,5 @@
 package com.jamesswafford.chess4j.io;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.CastlingRights;
 import com.jamesswafford.chess4j.board.squares.File;
@@ -10,45 +7,49 @@ import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.pieces.Piece;
 
-public class DrawBoard {
-    private static final Log logger = LogFactory.getLog(DrawBoard.class);
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-    public static void drawBoard(Board b) {
-        StringBuffer board = new StringBuffer();
+public class DrawBoard {
+
+    private static final  Logger LOGGER = LogManager.getLogger(DrawBoard.class);
+
+    public static void drawBoard(Board board) {
+        StringBuffer boardBuffer = new StringBuffer();
 
         for (Rank r : Rank.values()) {
             for (File f : File.values()) {
-                Piece p = b.getPiece(Square.valueOf(f, r));
-                board.append(p==null?"-":p.toString());
+                Piece p = board.getPiece(Square.valueOf(f, r));
+                boardBuffer.append(p==null?"-":p.toString());
                 if (f.equals(File.FILE_H)) {
                     if (r.equals(Rank.RANK_7)) {
-                        if (b.getPlayerToMove().isWhite()) {
-                            board.append("\twhite to move");
+                        if (board.getPlayerToMove().isWhite()) {
+                            boardBuffer.append("\twhite to move");
                         } else {
-                            board.append("\tblack to move");
+                            boardBuffer.append("\tblack to move");
                         }
                     } else if (r.equals(Rank.RANK_6)) {
-                        board.append("\tcastling rights: ");
+                        boardBuffer.append("\tcastling rights: ");
                         CastlingRights[] crs = CastlingRights.values();
                         for (CastlingRights cr : crs) {
-                            if (b.hasCastlingRight(cr)) {
-                                board.append(cr.getLabel());
+                            if (board.hasCastlingRight(cr)) {
+                                boardBuffer.append(cr.getLabel());
                             }
                         }
                     } else if (r.equals(Rank.RANK_5)) {
-                        board.append("\t");
-                        board.append(b.getEPSquare()==null?"no ep":("ep=" + b.getEPSquare()));
+                        boardBuffer.append("\t");
+                        boardBuffer.append(board.getEPSquare()==null?"no ep":("ep=" + board.getEPSquare()));
                     } else if (r.equals(Rank.RANK_4)) {
-                        board.append("\tfifty=" + b.getFiftyCounter());
+                        boardBuffer.append("\tfifty=").append(board.getFiftyCounter());
                     } else if (r.equals(Rank.RANK_3)) {
-                        board.append("\tmove counter=" + b.getMoveCounter());
+                        boardBuffer.append("\tmove counter=").append(board.getMoveCounter());
                     }
                 }
             }
-            board.append("\n");
+            boardBuffer.append("\n");
         }
 
-        logger.info(board);
+        LOGGER.info(boardBuffer);
     }
 
 }

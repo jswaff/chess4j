@@ -1,6 +1,5 @@
 package com.jamesswafford.chess4j.board;
 
-import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.squares.Direction;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;

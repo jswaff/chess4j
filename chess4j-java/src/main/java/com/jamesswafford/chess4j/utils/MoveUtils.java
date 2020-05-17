@@ -1,18 +1,35 @@
 package com.jamesswafford.chess4j.utils;
 
+import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Color;
+import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.board.squares.Square;
+import com.jamesswafford.chess4j.io.PrintLine;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
+import com.jamesswafford.chess4j.pieces.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import static com.jamesswafford.chess4j.pieces.Bishop.BLACK_BISHOP;
+import static com.jamesswafford.chess4j.pieces.Bishop.WHITE_BISHOP;
+import static com.jamesswafford.chess4j.pieces.King.BLACK_KING;
+import static com.jamesswafford.chess4j.pieces.King.WHITE_KING;
+import static com.jamesswafford.chess4j.pieces.Knight.BLACK_KNIGHT;
+import static com.jamesswafford.chess4j.pieces.Knight.WHITE_KNIGHT;
+import static com.jamesswafford.chess4j.pieces.Pawn.BLACK_PAWN;
+import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
+import static com.jamesswafford.chess4j.pieces.Queen.BLACK_QUEEN;
+import static com.jamesswafford.chess4j.pieces.Queen.WHITE_QUEEN;
+import static com.jamesswafford.chess4j.pieces.Rook.BLACK_ROOK;
+import static com.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
 
-import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGen;
 
 public final class MoveUtils {
 
-    private static final Log LOGGER = LogFactory.getLog(MoveUtils.class);
+    private static final  Logger LOGGER = LogManager.getLogger(MoveUtils.class);
 
     private MoveUtils() { }
 
@@ -62,22 +79,100 @@ public final class MoveUtils {
         return -1;
     }
 
-    public static boolean isLineValid(List<Move> moveLine,Board board) {
-        Board b = board.deepCopy();
+    public static boolean isLineValid(List<Move> moveLine, Board board) {
+        Board myBoard = board.deepCopy();
 
         for (Move move : moveLine) {
-            if (!isLegalMove(move,b)) {
-                LOGGER.debug("# invalid line!");
+            if (!isLegalMove(move, myBoard)) {
+                LOGGER.debug("# invalid line! - " + PrintLine.getMoveString(moveLine));
                 return false;
             }
-            b.applyMove(move);
+            myBoard.applyMove(move);
         }
 
         return true;
     }
 
-    private static boolean isLegalMove(Move move,Board board) {
-        List<Move> legalMoves = MoveGen.genLegalMoves(board);
+    public static Move fromNativeMove(Long nativeMove, Color ptm) {
+        Square fromSq = Square.valueOf((int)(nativeMove & 0x3F));
+        Square toSq = Square.valueOf((int)((nativeMove >> 6) & 0x3F));
+        Piece piece = fromNativePiece((int)((nativeMove >> 12) & 0x07), ptm);
+        Piece promoPiece = fromNativePiece((int)((nativeMove >> 15) & 0x07), ptm);
+        Piece capturedPiece = fromNativePiece((int)((nativeMove >> 18) & 0x07), Color.swap(ptm));
+        boolean isEpCapture = (int)((nativeMove >> 21) & 0x01) == 1;
+        boolean isCastle = (int)((nativeMove >> 22) & 0x01) == 1;
+
+        Move converted = new Move(piece, fromSq, toSq, capturedPiece, promoPiece, isCastle, isEpCapture);
+
+        assert (toNativeMove(converted).equals(nativeMove));
+
+        return converted;
+    }
+
+    public static Long toNativeMove(Move mv) {
+        Long nativeMv = 0L;
+
+        nativeMv = (long)mv.from().value() & 0x3F;
+        nativeMv |= ((long)mv.to().value() & 0x3F) << 6;
+        nativeMv |= (toNativePiece(mv.piece()) & 0x07) << 12;
+        if (mv.promotion() != null) {
+            nativeMv |= (toNativePiece(mv.promotion()) & 0x07) << 15;
+        }
+        if (mv.captured() != null) {
+            nativeMv |= (toNativePiece(mv.captured()) & 0x07) << 18;
+        }
+        if (mv.isEpCapture()) {
+            nativeMv |= 1L << 21;
+        }
+        if (mv.isCastle()) {
+            nativeMv |= 1L << 22;
+        }
+
+        return nativeMv;
+    }
+
+    private static Piece fromNativePiece(int pieceType, Color pieceColor) {
+        boolean isWhite = pieceColor.isWhite();
+
+        switch (pieceType) {
+            case 0:
+                return null;
+            case 1:
+                return isWhite ? WHITE_PAWN : BLACK_PAWN;
+            case 2:
+                return isWhite ? WHITE_KNIGHT : BLACK_KNIGHT;
+            case 3:
+                return isWhite ? WHITE_BISHOP : BLACK_BISHOP;
+            case 4:
+                return isWhite ? WHITE_ROOK : BLACK_ROOK;
+            case 5:
+                return isWhite ? WHITE_QUEEN : BLACK_QUEEN;
+            case 6:
+                return isWhite ? WHITE_KING : BLACK_KING;
+            default:
+                throw new IllegalArgumentException("Don't know how to translate native piece: " + pieceType);
+        }
+    }
+
+    private static long toNativePiece(Piece piece) {
+        if (piece.getClass() == Pawn.class) {
+            return 1;
+        } else if (piece.getClass() == Knight.class) {
+            return 2;
+        } else if (piece.getClass() == Bishop.class) {
+            return 3;
+        } else if (piece.getClass() == Rook.class) {
+            return 4;
+        } else if (piece.getClass() == Queen.class) {
+            return 5;
+        } else if (piece.getClass() == King.class) {
+            return 6;
+        }
+        throw new IllegalArgumentException("Invalid piece type in toNativePiece: " + piece);
+    }
+
+    private static boolean isLegalMove(Move move, Board board) {
+        List<Move> legalMoves = MagicBitboardMoveGenerator.genLegalMoves(board);
         return legalMoves.contains(move);
     }
 

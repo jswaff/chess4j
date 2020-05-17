@@ -3,8 +3,6 @@ package com.jamesswafford.chess4j.board;
 import com.jamesswafford.chess4j.board.squares.*;
 import org.junit.Test;
 
-import com.jamesswafford.chess4j.Color;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 

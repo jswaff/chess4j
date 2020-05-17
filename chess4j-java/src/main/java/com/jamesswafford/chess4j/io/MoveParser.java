@@ -1,40 +1,54 @@
 package com.jamesswafford.chess4j.io;
 
-import java.util.List;
-import java.util.Optional;
-
-import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGen;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.utils.PieceFactory;
 
-import static com.jamesswafford.chess4j.pieces.Pawn.*;
-import static com.jamesswafford.chess4j.pieces.King.*;
-import static com.jamesswafford.chess4j.board.squares.Rank.*;
+import java.util.List;
+import java.util.Optional;
+
+import static com.jamesswafford.chess4j.board.squares.Rank.RANK_1;
+import static com.jamesswafford.chess4j.board.squares.Rank.RANK_8;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
+import static com.jamesswafford.chess4j.pieces.King.BLACK_KING;
+import static com.jamesswafford.chess4j.pieces.King.WHITE_KING;
+import static com.jamesswafford.chess4j.pieces.Pawn.BLACK_PAWN;
+import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
 
 public final class MoveParser {
 
     private String strMove;
     private Board board;
 
+    public synchronized Move parseMove(String strMove, Board board) throws ParseException, IllegalMoveException {
+        this.board = board;
+        this.strMove = strMove;
+        Move move = parsePseudoMove();
+
+        if (!isLegalMove(move)) {
+            throw new IllegalMoveException(move.toString());
+        }
+        return move;
+    }
+
     private Move getCastlingMove() {
         if (strMove.equalsIgnoreCase("O-O") || strMove.equals("0-0")) {
             if (board.getPlayerToMove().equals(Color.WHITE)) {
-                return new Move(WHITE_KING, E1, G1,true);
+                return new Move(WHITE_KING, E1, G1, true);
             } else {
                 return new Move(BLACK_KING, E8, G8, true);
             }
         } else if (strMove.equalsIgnoreCase("O-O-O") || strMove.equals("0-0-0")) {
             if (board.getPlayerToMove().equals(Color.WHITE)) {
-                return new Move(WHITE_KING, E1, C1,true);
+                return new Move(WHITE_KING, E1, C1, true);
             } else {
                 return new Move(BLACK_KING, E8, C8, true);
             }
@@ -43,29 +57,29 @@ public final class MoveParser {
     }
 
     private Square getDestinationSquare() throws ParseException {
-        Square dst = null;
+        Square dst;
 
-        if (strMove.length()<2) {
+        if (strMove.length() < 2) {
             throw new ParseException("couldn't translate destination (too short).");
         }
 
-        File dstFile = File.file(strMove.substring(strMove.length()-2,strMove.length()-1));
-        Rank dstRank = Rank.rank(strMove.substring(strMove.length()-1));
+        File dstFile = File.file(strMove.substring(strMove.length() - 2, strMove.length() - 1));
+        Rank dstRank = Rank.rank(strMove.substring(strMove.length() - 1));
         dst = Square.valueOf(dstFile, dstRank);
-        strMove = strMove.substring(0,strMove.length()-2);
+        strMove = strMove.substring(0, strMove.length() - 2);
 
         return dst;
     }
 
-    private Move getMatchingMove(File srcFile,Rank srcRank,Square dstSquare,Piece piece,Piece promo)
+    private Move getMatchingMove(File srcFile, Rank srcRank, Square dstSquare, Piece piece, Piece promo)
             throws IllegalMoveException {
 
-        Move move=null;
-        int nMatches=0;
+        Move move = null;
+        int nMatches = 0;
 
-        List<Move> legalMoves = MoveGen.genLegalMoves(board);
+        List<Move> legalMoves = MagicBitboardMoveGenerator.genLegalMoves(board);
         for (Move legalMove : legalMoves) {
-            if (isMatchToMove(srcFile,srcRank,dstSquare,piece,promo,legalMove)) {
+            if (isMatchToMove(srcFile, srcRank, dstSquare, piece, promo, legalMove)) {
                 nMatches++;
                 move = legalMove;
             }
@@ -81,17 +95,17 @@ public final class MoveParser {
         char p = strMove.charAt(0);
         if (isPieceChar(p) && String.valueOf(p).equals(String.valueOf(p).toUpperCase())) {
             boolean wtm = board.getPlayerToMove().equals(Color.WHITE);
-            piece = PieceFactory.getPiece(p,wtm);
+            piece = PieceFactory.getPiece(p, wtm);
             strMove = strMove.substring(1);
         }
         return piece;
     }
 
-    private Move getPawnPush(Square dst,Piece promotion) throws ParseException {
+    private Move getPawnPush(Square dst, Piece promotion) throws ParseException {
 
         boolean wtm = board.getPlayerToMove().equals(Color.WHITE);
         if (wtm) {
-            if (dst.rank().equals(RANK_8) && promotion==null) {
+            if (dst.rank().equals(RANK_8) && promotion == null) {
                 throw new ParseException("white pawn promotion with no promotion piece.");
             }
             Square sq = dst.south().orElseThrow(() -> new ParseException("expected square south of dst"));
@@ -105,12 +119,12 @@ public final class MoveParser {
                 }
             }
         } else {
-            if (dst.rank().equals(RANK_1) && promotion==null) {
+            if (dst.rank().equals(RANK_1) && promotion == null) {
                 throw new ParseException("black pawn promotion with no promotion piece.");
             }
             Square sq = dst.north().orElseThrow(() -> new ParseException("expected square north of dst"));
             if (BLACK_PAWN.equals(board.getPiece(sq))) {
-                return new Move(BLACK_PAWN,sq,dst,null,promotion);
+                return new Move(BLACK_PAWN, sq, dst, null, promotion);
             }
             Optional<Square> optNsq = sq.north();
             if (optNsq.isPresent()) {
@@ -123,24 +137,26 @@ public final class MoveParser {
     }
 
     private Piece getPromotionPiece() {
-        Piece promo=null;
+        Piece promo = null;
 
-        char p=strMove.charAt(strMove.length()-1);
+        char p = strMove.charAt(strMove.length() - 1);
         if (isPieceChar(p)) {
             boolean wtm = board.getPlayerToMove().equals(Color.WHITE);
             promo = PieceFactory.getPiece(p, wtm);
-            strMove = strMove.substring(0, strMove.length()-1);
+            strMove = strMove.substring(0, strMove.length() - 1);
         }
 
         return promo;
     }
 
     private boolean isLegalMove(Move move) {
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
         return moves.contains(move);
     }
 
-    private boolean isMatchToMove(File srcFile,Rank srcRank,Square dstSquare,Piece piece,Piece promo,Move legalMove) {
+    private boolean isMatchToMove(File srcFile, Rank srcRank, Square dstSquare, Piece piece, Piece promo,
+                                  Move legalMove)
+    {
         if (srcFile != null && !srcFile.equals(legalMove.from().file())) {
             return false;
         }
@@ -153,17 +169,12 @@ public final class MoveParser {
         if (!piece.equals(board.getPiece(legalMove.from()))) {
             return false;
         }
-        if (promo==null) {
-            if (legalMove.promotion()!=null) {
-                return false;
-            }
+        if (promo == null) {
+            return legalMove.promotion() == null;
         } else {
-            if (!promo.equals(legalMove.promotion())) {
-                return false;
-            }
+            return promo.equals(legalMove.promotion());
         }
 
-        return true;
     }
 
     private boolean isPieceChar(char p) {
@@ -171,24 +182,13 @@ public final class MoveParser {
         return piece != null;
     }
 
-    public synchronized Move parseMove(String strMove,Board board) throws ParseException, IllegalMoveException {
-        this.board=board;
-        this.strMove=strMove;
-        Move move = parsePseudoMove();
-
-        if (!isLegalMove(move)) {
-            throw new IllegalMoveException(move.toString());
-        }
-        return move;
-    }
-
-    private Move parsePseudoMove() throws ParseException,IllegalMoveException {
+    private Move parsePseudoMove() throws ParseException, IllegalMoveException {
         strMove = strMove.trim();
 
         // get rid of any #, +, or = characters.
-        strMove = strMove.replace("#","");
-        strMove = strMove.replace("+","");
-        strMove = strMove.replace("=","");
+        strMove = strMove.replace("#", "");
+        strMove = strMove.replace("+", "");
+        strMove = strMove.replace("=", "");
 
         // castling move?
         Move castlingMove = getCastlingMove();
@@ -203,8 +203,8 @@ public final class MoveParser {
         Square dst = getDestinationSquare();
 
         // try pawn moves like "e4"
-        if (strMove.length()==0) {
-            return getPawnPush(dst,promotion);
+        if (strMove.length() == 0) {
+            return getPawnPush(dst, promotion);
         }
 
         // set the piece.
@@ -217,13 +217,13 @@ public final class MoveParser {
         File srcFile = setSourceFile();
         Rank srcRank = setSourceRank();
 
-        piece = setPieceIfNotSet(piece,srcFile,srcRank);
+        piece = setPieceIfNotSet(piece, srcFile, srcRank);
 
         // if the piece didn't get set earlier, do it now.
-        return getMatchingMove(srcFile,srcRank,dst,piece,promotion);
+        return getMatchingMove(srcFile, srcRank, dst, piece, promotion);
     }
 
-    private Piece setPieceIfNotSet(Piece piece,File srcFile,Rank srcRank) {
+    private Piece setPieceIfNotSet(Piece piece, File srcFile, Rank srcRank) {
         Piece myPiece = piece;
         if (myPiece == null) {
             if (srcFile != null && srcRank != null) {
@@ -239,7 +239,7 @@ public final class MoveParser {
 
     private File setSourceFile() {
         File file = null;
-        if (strMove.length()>0) {
+        if (strMove.length() > 0) {
             char p = strMove.charAt(0);
             if (p >= 'a' && p <= 'h') {
                 file = File.file(String.valueOf(p));
@@ -252,11 +252,11 @@ public final class MoveParser {
 
     private Rank setSourceRank() {
         Rank rank = null;
-        if (strMove.length()>0) {
+        if (strMove.length() > 0) {
             char p = strMove.charAt(0);
             if (p >= '1' && p <= '8') {
                 rank = Rank.rank(String.valueOf(p));
-                strMove = strMove.substring(0, strMove.length()-1);
+                strMove = strMove.substring(0, strMove.length() - 1);
             }
         }
         return rank;

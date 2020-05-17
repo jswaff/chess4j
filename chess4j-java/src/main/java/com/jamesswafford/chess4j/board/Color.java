@@ -1,4 +1,4 @@
-package com.jamesswafford.chess4j;
+package com.jamesswafford.chess4j.board;
 
 public enum Color {
     BLACK(0),

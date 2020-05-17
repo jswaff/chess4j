@@ -2,8 +2,8 @@ package com.jamesswafford.chess4j.hash;
 
 public class PawnTranspositionTableEntry {
 
-    private long zobristKey;
-    private int score;
+    private final long zobristKey;
+    private final int score;
 
     public PawnTranspositionTableEntry(long zobristKey,int score) {
         this.zobristKey = zobristKey;

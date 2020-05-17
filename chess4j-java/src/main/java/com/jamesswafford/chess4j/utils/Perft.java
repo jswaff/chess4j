@@ -1,20 +1,18 @@
 package com.jamesswafford.chess4j.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-import com.jamesswafford.chess4j.board.Undo;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.board.Undo;
+import com.jamesswafford.chess4j.io.DrawBoard;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
 
 
 /*	Initial position
@@ -54,7 +52,7 @@ class PerftCallable implements Callable<Long> {
             return 1;
         }
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
         long n=0;
 
         for (Move m : moves) {
@@ -74,7 +72,7 @@ class PerftCallable implements Callable<Long> {
 }
 
 public final class Perft {
-    private static final Log LOGGER = LogFactory.getLog(Perft.class);
+    private static final  Logger LOGGER = LogManager.getLogger(Perft.class);
 
     private Perft() { }
 
@@ -87,7 +85,7 @@ public final class Perft {
         LOGGER.info("detected " + processors + " processors.");
         ExecutorService executor = Executors.newFixedThreadPool(processors);
         List<Future<Long>> futures = new ArrayList<>();
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
 
         for (Move m : moves) {
             Board b2 = board.deepCopy();
@@ -109,4 +107,17 @@ public final class Perft {
         return n;
     }
 
+    public static void executePerft(Board board, int depth) {
+        DrawBoard.drawBoard(board);
+
+        long start = System.currentTimeMillis();
+        long nodes = perft(board, depth);
+        long end = System.currentTimeMillis();
+        if (end==start) end = start + 1; // HACK to avoid div 0
+
+        DecimalFormat df = new DecimalFormat("0,000");
+        LOGGER.info("# nodes: " + df.format(nodes));
+        LOGGER.info("# elapsed time: " + (end-start) + " ms");
+        LOGGER.info("# rate: " + df.format(nodes*1000/(end-start)) + " n/s\n");
+    }
 }

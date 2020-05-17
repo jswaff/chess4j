@@ -1,86 +1,53 @@
 package com.jamesswafford.chess4j.search;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.jamesswafford.chess4j.board.Move;
-
-
 public class SearchStats {
 
-    private long failHighs=0;
-    private long failLows=0;
-    private long hashExactScores=0;
+    public long nodes, failHighs, failLows, draws;
 
-    private long nodes=0;
-    private long qnodes=0;
-    private List<Move> lastPV = new ArrayList<>();
-    private List<Move> firstLine = new ArrayList<>();
-    private long prunes=0;
-
-    public long getFailHighs() {
-        return failHighs;
+    public SearchStats() {
+        initialize();
     }
 
-    public long getFailLows() {
-        return failLows;
+    void initialize() {
+        nodes = 0;
+        failHighs = 0;
+        failLows = 0;
+        draws = 0;
     }
 
-    public List<Move> getFirstLine() {
-        return firstLine;
+    @Override
+    public boolean equals(Object obj) {
+        if (! (obj instanceof SearchStats))
+            return false;
+
+        SearchStats that = (SearchStats) obj;
+
+        if (this.nodes != that.nodes) return false;
+        if (this.failHighs != that.failHighs) return false;
+        if (this.failLows != that.failLows) return false;
+        if (this.draws != that.draws) return false;
+
+        return true;
     }
 
-    public long getHashExactScores() {
-        return hashExactScores;
+    @Override
+    public int hashCode() {
+        int hash = 7;
+
+        hash = 31 * hash + Long.valueOf(nodes).hashCode();
+        hash = 31 * hash + Long.valueOf(failHighs).hashCode();
+        hash = 31 * hash + Long.valueOf(failLows).hashCode();
+        hash = 37 * hash + Long.valueOf(draws).hashCode();
+
+        return hash;
     }
 
-    public List<Move> getLastPV() {
-        return lastPV;
-    }
-
-    public long getNodes() {
-        return nodes;
-    }
-
-    public long getQNodes() {
-        return qnodes;
-    }
-
-    public void incFailHighs() {
-        failHighs++;
-    }
-
-    public void incFailLows() {
-        failLows++;
-    }
-
-    public void incHashExactScores() {
-        hashExactScores++;
-    }
-
-    public void incNodes() {
-        nodes++;
-    }
-
-    public void incQNodes() {
-        qnodes++;
-    }
-
-    public void setFirstLine(List<Move> firstLine) {
-        this.firstLine.clear();
-        this.firstLine.addAll(firstLine);
-    }
-
-    public void setLastPV(List<Move> lastPV) {
-        this.lastPV.clear();
-        this.lastPV.addAll(lastPV);
-    }
-
-    public long getPrunes() {
-        return prunes;
-    }
-
-    public void incPrunes() {
-        prunes++;
+    @Override
+    public String toString() {
+        return "SearchStats [nodes: " + nodes
+                + ", failHighs: " + failHighs
+                + ", failLows: " + failLows
+                + ", draws: " + draws
+                + "]";
     }
 }

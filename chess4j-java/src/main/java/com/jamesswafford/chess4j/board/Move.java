@@ -10,34 +10,34 @@ public class Move {
     private Piece piece,captured,promotion;
     private boolean castle,epCapture;
 
-    public Move(Piece piece,Square from,Square to) {
+    public Move(Piece piece, Square from, Square to) {
         this.piece = piece;
         this.from = from;
         this.to = to;
     }
 
-    public Move(Piece piece,Square from,Square to,boolean castle) {
+    public Move(Piece piece, Square from, Square to, boolean castle) {
         this(piece,from,to);
         this.castle = castle;
     }
 
-    public Move(Piece piece,Square from,Square to,Piece captured) {
+    public Move(Piece piece, Square from, Square to, Piece captured) {
         this(piece,from,to);
         this.captured = captured;
     }
 
-    public Move(Piece piece,Square from,Square to,Piece captured,boolean epCapture) {
+    public Move(Piece piece, Square from, Square to, Piece captured, boolean epCapture) {
         this(piece,from,to,captured);
         this.epCapture = epCapture;
     }
 
-    public Move(Piece piece,Square from,Square to,Piece captured,Piece promotion) {
+    public Move(Piece piece, Square from, Square to, Piece captured, Piece promotion) {
         this(piece,from,to,captured);
         this.promotion = promotion;
     }
 
-    public Move(Piece piece,Square from,Square to,Piece captured,Piece promotion,
-        boolean castle,boolean epCapture) {
+    public Move(Piece piece, Square from, Square to, Piece captured, Piece promotion,
+        boolean castle, boolean epCapture) {
 
         this(piece,from,to,captured,promotion);
         this.castle = castle;

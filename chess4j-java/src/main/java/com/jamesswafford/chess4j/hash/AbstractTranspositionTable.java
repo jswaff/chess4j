@@ -2,9 +2,6 @@ package com.jamesswafford.chess4j.hash;
 
 public abstract class AbstractTranspositionTable {
 
-    protected int numEntries;
-    protected int mask;
-
     protected long numProbes;
     protected long numHits;
     protected long numCollisions;
@@ -16,16 +13,11 @@ public abstract class AbstractTranspositionTable {
     }
 
     protected int getMaskedKey(long zobristKey) {
-        int iKey = ((int)zobristKey) & mask;
-        return iKey;
+        return ((int)zobristKey) & (tableCapacity()-1);
     }
 
     public long getNumCollisions() {
         return numCollisions;
-    }
-
-    public int getNumEntries() {
-        return numEntries;
     }
 
     public long getNumHits() {
@@ -36,17 +28,28 @@ public abstract class AbstractTranspositionTable {
         return numProbes;
     }
 
-    protected void setNumEntries(int maxEntries) {
-        numEntries = 2;
-
-        // this loop will set numEntries to a power of 2 > maxEntries
-        while (numEntries <= maxEntries) {
-            numEntries *= 2;
-        }
-        numEntries /= 2;
-
-        mask = numEntries - 1;
+    protected void resize(int maxBytes) {
+        allocateTable(calculateNumEntries(maxBytes / sizeOfEntry()));
+        clear();
     }
 
+    protected int calculateNumEntries(int maxEntries) {
+        int n = 2;
+
+        // this loop will set n to a power of 2 > maxEntries
+        while (n <= maxEntries) {
+            n *= 2;
+        }
+        n /= 2;
+
+        return n;
+    }
+
+    protected abstract void allocateTable(int capacity);
+
+    public abstract int tableCapacity();
+
     public abstract int sizeOfEntry();
+
+    public abstract void clear();
 }

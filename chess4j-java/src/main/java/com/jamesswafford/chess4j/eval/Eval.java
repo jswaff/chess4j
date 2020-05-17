@@ -1,29 +1,29 @@
 package com.jamesswafford.chess4j.eval;
 
-import com.jamesswafford.chess4j.Color;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.io.FenBuilder;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.jamesswafford.chess4j.io.FenBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.function.BiFunction;
 
-import static com.jamesswafford.chess4j.eval.EvalKing.*;
+import static com.jamesswafford.chess4j.eval.EvalKing.evalKing;
 
-public final class Eval {
+public final class Eval implements Evaluator {
 
-    private static final Log LOGGER = LogFactory.getLog(Eval.class);
+    private static final  Logger LOGGER = LogManager.getLogger(Evaluator.class);
 
     static {
         Initializer.init();
     }
 
-    private Eval() { }
+    public Eval() { }
 
     public static int eval(Board board) {
         return eval(board,false);
@@ -56,7 +56,7 @@ public final class Eval {
     }
 
     private static boolean evalsAreEqual(int javaScore, Board board, boolean materialOnly) {
-        if (Initializer.useNative()) {
+        if (Initializer.nativeCodeInitialized()) {
             String fen = FenBuilder.createFen(board, false);
             try {
                 int nativeSccore = evalNative(fen, materialOnly);
@@ -91,7 +91,7 @@ public final class Eval {
     private static int evalPawns(Board board) {
 
         // try the pawn hash
-        PawnTranspositionTableEntry pte = TTHolder.getPawnTransTable().probe(board.getPawnKey());
+        PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnTransTable().probe(board.getPawnKey());
         if (pte != null) {
             assert(pte.getScore() == evalPawnsNoHash(board));
             return pte.getScore();
@@ -99,7 +99,7 @@ public final class Eval {
 
         int score = evalPawnsNoHash(board);
 
-        TTHolder.getPawnTransTable().store(board.getPawnKey(), score);
+        TTHolder.getInstance().getPawnTransTable().store(board.getPawnKey(), score);
 
         return score;
     }
@@ -118,4 +118,8 @@ public final class Eval {
 
     public static native int evalNative(String boardFen, boolean materialOnly);
 
+    @Override
+    public int evaluateBoard(Board board) {
+        return eval(board);
+    }
 }

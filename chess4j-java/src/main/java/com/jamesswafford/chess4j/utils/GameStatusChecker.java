@@ -1,12 +1,12 @@
 package com.jamesswafford.chess4j.utils;
 
-import java.util.List;
-
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Draw;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
-import com.jamesswafford.chess4j.movegen.MoveGen;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
+
+import java.util.List;
 
 public final class GameStatusChecker {
 
@@ -14,7 +14,7 @@ public final class GameStatusChecker {
 
     public static GameStatus getGameStatus(Board board, List<Undo> undos) {
 
-        List<Move> moves = MoveGen.genLegalMoves(board);
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
         if (moves.size()==0) {
             if (BoardUtils.isPlayerInCheck(board)) {
                 return GameStatus.CHECKMATED;
