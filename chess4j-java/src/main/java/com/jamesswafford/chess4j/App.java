@@ -1,9 +1,12 @@
 package com.jamesswafford.chess4j;
 
+import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.book.SQLiteBook;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
-import com.jamesswafford.chess4j.io.InputParser;
+import com.jamesswafford.chess4j.io.XBoardHandler;
+import com.jamesswafford.chess4j.search.AlphaBetaSearch;
+import com.jamesswafford.chess4j.search.SearchParameters;
 import com.jamesswafford.chess4j.utils.TestSuiteProcessor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,7 +53,7 @@ public final class App {
     private static void repl() {
         BufferedReader bin = new BufferedReader(new InputStreamReader(System.in));
         String input = "";
-        InputParser inputParser = new InputParser();
+        XBoardHandler XBoardHandler = new XBoardHandler();
 
         while (true) {
             try {
@@ -61,7 +64,7 @@ public final class App {
             }
 
             try {
-                inputParser.parseCommand(input);
+                XBoardHandler.parseAndDispatch(input);
             } catch (Exception e) {
                 LOGGER.warn("# Caught (hopefully recoverable) exception", e);
             }
@@ -73,6 +76,12 @@ public final class App {
         return true;
     }
 
+    private static void warmUp() {
+        TTHolder.getInstance().clearTables();
+        new AlphaBetaSearch().search(new Board(),
+                new SearchParameters(3, -Constants.INFINITY, Constants.INFINITY));
+    }
+
     public static void main(String[] args) throws Exception {
 
         // send "done=0" to prevent XBoard timing out during the initialization sequence.
@@ -81,11 +90,11 @@ public final class App {
         LOGGER.info("# Welcome to chess4j!\n\n");
 
         assert(showDebugMode());
+        warmUp();
 
         for (String arg : args) {
             processArgument(arg);
         }
-        TTHolder.getInstance().clearTables(); // warm the tables up
 
         if (testSuiteFile != null) {
             TestSuiteProcessor tp = new TestSuiteProcessor();

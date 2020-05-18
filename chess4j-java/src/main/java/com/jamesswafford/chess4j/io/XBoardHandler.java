@@ -18,18 +18,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-public class InputParser {
+public class XBoardHandler {
 
-    private static final  Logger LOGGER = LogManager.getLogger(InputParser.class);
+    private static final  Logger LOGGER = LogManager.getLogger(XBoardHandler.class);
 
     private OpeningBook openingBook;
+    private int bookMisses;
     private SearchIterator searchIterator;
     private CompletableFuture<List<Move>> searchFuture;
     private Color engineColor;
@@ -38,43 +37,43 @@ public class InputParser {
     private int incrementMs;
 
     private final Map<String, Consumer<String[]>> cmdMap = new HashMap<>() {{
-        put("accepted", InputParser::noOp);
+        put("accepted", XBoardHandler::noOp);
         put("bk", (String[] cmd) -> PrintBookMoves.printBookMoves(Globals.getBoard()));
-        put("computer", InputParser::noOp);
+        put("computer", XBoardHandler::noOp);
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
-        put("easy", InputParser::noOp);
+        put("easy", XBoardHandler::noOp);
         put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getBoard())));
-        put("force", InputParser.this::force);
-        put("go", InputParser.this::go);
-        put("hard", InputParser::noOp);
-        put("hint", InputParser::noOp);
-        put("level", InputParser.this::level);
-        put("memory", InputParser.this::memory);
-        put("new", InputParser.this::newGame);
+        put("force", XBoardHandler.this::force);
+        put("go", XBoardHandler.this::go);
+        put("hard", XBoardHandler::noOp);
+        put("hint", XBoardHandler::noOp);
+        put("level", XBoardHandler.this::level);
+        put("memory", XBoardHandler.this::memory);
+        put("new", XBoardHandler.this::newGame);
         put("nopost", (String[] cmd) -> searchIterator.setPost(false));
-        put("otim", InputParser::noOp);
+        put("otim", XBoardHandler::noOp);
         put("perft", (String[] cmd) -> Perft.executePerft(Globals.getBoard(), Integer.parseInt(cmd[1])));
-        put("pgn2book", InputParser.this::pgnToBook);
-        put("ping", InputParser.this::ping);
+        put("pgn2book", XBoardHandler.this::pgnToBook);
+        put("ping", XBoardHandler.this::ping);
         put("post", (String[] cmd) -> searchIterator.setPost(true));
-        put("protover", InputParser::protover);
-        put("quit", InputParser.this::quit);
-        put("random", InputParser::noOp);
-        put("rating", InputParser::noOp);
-        put("rejected", InputParser::noOp);
-        put("remove", InputParser.this::remove);
-        put("result", InputParser.this::result);
-        put("sd", InputParser.this::sd);
-        put("st", InputParser.this::st);
-        put("setboard", InputParser::setboard);
-        put("time", InputParser.this::time);
-        put("undo", InputParser::undo);
-        put("usermove", InputParser.this::usermove);
-        put("xboard", InputParser::noOp);
-        put("?", InputParser.this::moveNow);
+        put("protover", XBoardHandler::protover);
+        put("quit", XBoardHandler.this::quit);
+        put("random", XBoardHandler::noOp);
+        put("rating", XBoardHandler::noOp);
+        put("rejected", XBoardHandler::noOp);
+        put("remove", XBoardHandler.this::remove);
+        put("result", XBoardHandler.this::result);
+        put("sd", XBoardHandler.this::sd);
+        put("st", XBoardHandler.this::st);
+        put("setboard", XBoardHandler::setboard);
+        put("time", XBoardHandler.this::time);
+        put("undo", XBoardHandler::undo);
+        put("usermove", XBoardHandler.this::usermove);
+        put("xboard", XBoardHandler::noOp);
+        put("?", XBoardHandler.this::moveNow);
     }};
 
-    public InputParser() {
+    public XBoardHandler() {
         Globals.getOpeningBook().ifPresent(openingBook1 -> this.openingBook = openingBook1);
         searchIterator = new SearchIteratorImpl();
     }
@@ -95,7 +94,7 @@ public class InputParser {
         this.searchIterator = searchIterator;
     }
 
-    public void parseCommand(String command) throws IllegalMoveException, ParseException {
+    public void parseAndDispatch(String command) throws IllegalMoveException, ParseException {
         LOGGER.debug("# parsing: " + command);
 
         String[] input = command.split("\\s+");
@@ -167,6 +166,7 @@ public class InputParser {
 
     private void newGame(String[] cmd) {
         stopSearchThread();
+        bookMisses = 0;
         forceMode = false;
         Globals.getBoard().resetBoard();
         Globals.getGameUndos().clear();
@@ -388,19 +388,33 @@ public class InputParser {
         engineColor = Globals.getBoard().getPlayerToMove();
 
         if (!endOfGameCheck()) {
-            // These are copied for testing purposes.  The iterator will not modify.
-            Board board = Globals.getBoard().deepCopy();
-            List<Undo> undos = new ArrayList<>(Globals.getGameUndos());
-            searchIterator.unstop();
-            searchFuture = searchIterator.findPvFuture(board, undos)
-                    .thenApply(
-                        pv -> {
-                            Globals.getGameUndos().add(Globals.getBoard().applyMove(pv.get(0)));
-                            LOGGER.info("move " + pv.get(0));
+            AtomicBoolean playedBookMove = new AtomicBoolean(false);
+            if (openingBook != null && bookMisses < 3) {
+                openingBook.getMoveWeightedRandomByFrequency(Globals.getBoard())
+                        .ifPresentOrElse(bookMove -> {
+                            Globals.getGameUndos().add(Globals.getBoard().applyMove(bookMove.getMove()));
+                            LOGGER.debug("# book hit");
+                            LOGGER.info("move " + bookMove.getMove());
                             endOfGameCheck();
-                            return pv;
-                        }
-                    );
+                            playedBookMove.set(true);
+                        }, () -> {
+                            LOGGER.debug("# book miss {}", ++bookMisses);
+                        });
+            }
+            if (!playedBookMove.get()) {
+                // These are copied for testing purposes.  The iterator will not modify.
+                Board board = Globals.getBoard().deepCopy();
+                List<Undo> undos = new ArrayList<>(Globals.getGameUndos());
+                searchIterator.unstop();
+                searchFuture = searchIterator.findPvFuture(board, undos)
+                        .thenApply(
+                                pv -> {
+                                    Globals.getGameUndos().add(Globals.getBoard().applyMove(pv.get(0)));
+                                    LOGGER.info("move " + pv.get(0));
+                                    endOfGameCheck();
+                                    return pv;
+                                });
+            }
         }
     }
 

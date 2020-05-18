@@ -64,6 +64,7 @@ public class AlphaBetaSearch implements Search {
     @Override
     public void initialize() {
         lastPv.clear();
+        searchStats.initialize();
         if (Initializer.nativeCodeInitialized()) {
             initializeNativeSearch();
         }

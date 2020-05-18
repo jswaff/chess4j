@@ -5,6 +5,7 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
+import com.jamesswafford.chess4j.book.BookMove;
 import com.jamesswafford.chess4j.book.OpeningBook;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.search.SearchIterator;
@@ -22,6 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -31,9 +33,9 @@ import static com.jamesswafford.chess4j.pieces.Queen.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-public class InputParserTest {
+public class XBoardHandlerTest {
 
-    InputParser inputParser;
+    XBoardHandler xboardHandler;
     OpeningBook openingBook;
     SearchIterator searchIterator;
 
@@ -43,7 +45,7 @@ public class InputParserTest {
 
     @BeforeClass
     public static void setUpClass() {
-        inputParserLogger = (Logger) LogManager.getLogger(InputParser.class);
+        inputParserLogger = (Logger) LogManager.getLogger(XBoardHandler.class);
         printGameResultLogger = (Logger) LogManager.getLogger(PrintGameResult.class);
         testAppender = TestLogAppender.createAppender("TestAppender");
         assertNotNull(testAppender);
@@ -52,11 +54,11 @@ public class InputParserTest {
 
     @Before
     public void setUp() {
-        inputParser = new InputParser();
+        xboardHandler = new XBoardHandler();
         openingBook = mock(OpeningBook.class);
-        inputParser.setOpeningBook(openingBook);
+        xboardHandler.setOpeningBook(openingBook);
         searchIterator = mock(SearchIterator.class);
-        inputParser.setSearchIterator(searchIterator);
+        xboardHandler.setSearchIterator(searchIterator);
 
         inputParserLogger.addAppender(testAppender);
         inputParserLogger.setAdditive(false);
@@ -78,19 +80,19 @@ public class InputParserTest {
 
     @Test
     public void easyCmd() {
-        inputParser.parseCommand("easy");
+        xboardHandler.parseAndDispatch("easy");
         assertEquals(0, testAppender.getNonDebugMessages().size());
         // TODO: ensure pondering was turned off
     }
 
     @Test
     public void forceCmd() {
-        inputParser.parseCommand("new");
-        assertFalse(inputParser.isForceMode());
-        inputParser.parseCommand("force");
-        assertTrue(inputParser.isForceMode());
+        xboardHandler.parseAndDispatch("new");
+        assertFalse(xboardHandler.isForceMode());
+        xboardHandler.parseAndDispatch("force");
+        assertTrue(xboardHandler.isForceMode());
 
-        inputParser.parseCommand("usermove e2e4");
+        xboardHandler.parseAndDispatch("usermove e2e4");
 
         // the global board should have been updated
         Board board = new Board();
@@ -109,8 +111,8 @@ public class InputParserTest {
         when(searchIterator.findPvFuture(new Board(), new ArrayList<>()))
                 .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(move)));
 
-        inputParser.parseCommand("new");
-        inputParser.parseCommand("go");
+        xboardHandler.parseAndDispatch("new");
+        xboardHandler.parseAndDispatch("go");
 
         List<String> output = testAppender.getNonDebugMessages();
         assertEquals(1, output.size());
@@ -131,17 +133,17 @@ public class InputParserTest {
     @Test
     public void goCmd_EndOfGame() {
 
-        inputParser.parseCommand("new");
+        xboardHandler.parseAndDispatch("new");
 
         // set up Fool's Mate
         String fen = "rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR b KQkq g3 0 2";
-        inputParser.parseCommand("setboard " + fen);
+        xboardHandler.parseAndDispatch("setboard " + fen);
 
         Move move = new Move(BLACK_QUEEN, D8, H4);
         when(searchIterator.findPvFuture(Globals.getBoard().deepCopy(), new ArrayList<>()))
                 .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(move)));
 
-        inputParser.parseCommand("go");
+        xboardHandler.parseAndDispatch("go");
         assertEquals(GameStatus.CHECKMATED,
                 GameStatusChecker.getGameStatus(Globals.getBoard(), Globals.getGameUndos()));
 
@@ -153,19 +155,19 @@ public class InputParserTest {
 
     @Test
     public void hardCmd() {
-        inputParser.parseCommand("hard");
+        xboardHandler.parseAndDispatch("hard");
         assertEquals(0, testAppender.getNonDebugMessages().size());
         // TODO: ensure pondering turned on
     }
 
     @Test
     public void memoryCmd() {
-        inputParser.parseCommand("memory 6");
+        xboardHandler.parseAndDispatch("memory 6");
         assertEquals(131072, TTHolder.getInstance().getAlwaysReplaceTransTable().tableCapacity());
         assertEquals(131072, TTHolder.getInstance().getDepthPreferredTransTable().tableCapacity());
         assertEquals(131072, TTHolder.getInstance().getPawnTransTable().tableCapacity());
 
-        inputParser.parseCommand("memory 3");
+        xboardHandler.parseAndDispatch("memory 3");
         assertEquals(65536, TTHolder.getInstance().getAlwaysReplaceTransTable().tableCapacity());
         assertEquals(65536, TTHolder.getInstance().getDepthPreferredTransTable().tableCapacity());
         assertEquals(65536, TTHolder.getInstance().getPawnTransTable().tableCapacity());
@@ -177,7 +179,7 @@ public class InputParserTest {
         // put the board in a position other than the initial position
         Globals.getBoard().applyMove(new Move(WHITE_PAWN, E2, E4));
 
-        inputParser.parseCommand("new");
+        xboardHandler.parseAndDispatch("new");
 
         assertEquals(new Board(), Globals.getBoard());
         assertEquals(0, Globals.getGameUndos().size());
@@ -185,19 +187,19 @@ public class InputParserTest {
 
     @Test
     public void nopostCmd() {
-        inputParser.parseCommand("nopost");
+        xboardHandler.parseAndDispatch("nopost");
         verify(searchIterator).setPost(false);
     }
 
     @Test
     public void pgn2bookCmd() {
-        inputParser.parseCommand("pgn2book foo.pgn");
+        xboardHandler.parseAndDispatch("pgn2book foo.pgn");
         verify(openingBook).addToBook(new File("foo.pgn"));
     }
 
     @Test
     public void pingCmd() {
-        inputParser.parseCommand("ping 1337");
+        xboardHandler.parseAndDispatch("ping 1337");
 
         List<String> output = testAppender.getNonDebugMessages();
 
@@ -207,13 +209,13 @@ public class InputParserTest {
 
     @Test
     public void postCmd() {
-        inputParser.parseCommand("post");
+        xboardHandler.parseAndDispatch("post");
         verify(searchIterator).setPost(true);
     }
 
     @Test
     public void protoverCmd() {
-        inputParser.parseCommand("protover 2");
+        xboardHandler.parseAndDispatch("protover 2");
 
         // ensure we sent some 'feature' lines, ending with 'done'
         List<String> featureStatements = testAppender.getNonDebugMessages();
@@ -223,23 +225,23 @@ public class InputParserTest {
 
     @Test
     public void randomCmd() {
-        inputParser.parseCommand("random");
+        xboardHandler.parseAndDispatch("random");
         assertEquals(0, testAppender.getNonDebugMessages().size());
     }
 
     @Test
     public void ratingCmd() {
-        inputParser.parseCommand("rating");
+        xboardHandler.parseAndDispatch("rating");
         assertEquals(0, testAppender.getNonDebugMessages().size());
     }
 
     @Test
     public void removeCmd() {
-        inputParser.parseCommand("new");
-        inputParser.parseCommand("force");
-        inputParser.parseCommand("usermove e2e4");
-        inputParser.parseCommand("usermove e7e5");
-        inputParser.parseCommand("remove");
+        xboardHandler.parseAndDispatch("new");
+        xboardHandler.parseAndDispatch("force");
+        xboardHandler.parseAndDispatch("usermove e2e4");
+        xboardHandler.parseAndDispatch("usermove e7e5");
+        xboardHandler.parseAndDispatch("remove");
 
         assertEquals(new Board(), Globals.getBoard());
         assertEquals(0, Globals.getGameUndos().size());
@@ -247,11 +249,11 @@ public class InputParserTest {
 
     @Test
     public void resultCmd() {
-        inputParser.parseCommand("new");
-        inputParser.parseCommand("force");
-        inputParser.parseCommand("usermove e2e4");
-        inputParser.parseCommand("usermove e7e5");
-        inputParser.parseCommand("result 1-0 {Black resigns in fear}");
+        xboardHandler.parseAndDispatch("new");
+        xboardHandler.parseAndDispatch("force");
+        xboardHandler.parseAndDispatch("usermove e2e4");
+        xboardHandler.parseAndDispatch("usermove e7e5");
+        xboardHandler.parseAndDispatch("result 1-0 {Black resigns in fear}");
 
         List<String> messages = testAppender.getMessages();
         assertTrue(messages.contains("# result: 1-0 - LOSS"));
@@ -263,10 +265,10 @@ public class InputParserTest {
                 GameResult.LOSS);
 
         /// take 2
-        inputParser.parseCommand("new");
-        inputParser.parseCommand("force");
-        inputParser.parseCommand("usermove c2c4");
-        inputParser.parseCommand("result 1-0 {Black resigns in fear}");
+        xboardHandler.parseAndDispatch("new");
+        xboardHandler.parseAndDispatch("force");
+        xboardHandler.parseAndDispatch("usermove c2c4");
+        xboardHandler.parseAndDispatch("result 1-0 {Black resigns in fear}");
 
         messages = testAppender.getMessages();
         assertTrue(messages.contains("# result: 1-0 - LOSS"));
@@ -280,23 +282,23 @@ public class InputParserTest {
 
     @Test
     public void sdCmd() {
-        inputParser.parseCommand("sd 12");
+        xboardHandler.parseAndDispatch("sd 12");
         verify(searchIterator).setMaxDepth(12);
     }
 
     @Test
     public void stCmd() {
-        inputParser.parseCommand("st 5");
+        xboardHandler.parseAndDispatch("st 5");
         verify(searchIterator).setMaxTime(5000);
     }
 
     @Test
     public void setboardCmd() {
 
-        inputParser.parseCommand("new");
+        xboardHandler.parseAndDispatch("new");
         // play one move just to put an undo in the list
-        inputParser.parseCommand("force");
-        inputParser.parseCommand("usermove a2a3");
+        xboardHandler.parseAndDispatch("force");
+        xboardHandler.parseAndDispatch("usermove a2a3");
 
         // set up board to compare final result to
         Board board = new Board();
@@ -305,7 +307,7 @@ public class InputParserTest {
         board.applyMove(new Move(WHITE_PAWN, G2, G4));
 
         String fen = "rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR b KQkq g3 0 2";
-        inputParser.parseCommand("setboard " + fen);
+        xboardHandler.parseAndDispatch("setboard " + fen);
 
         assertEquals(board, Globals.getBoard());
         assertEquals(0, Globals.getGameUndos().size());
@@ -315,15 +317,15 @@ public class InputParserTest {
     public void setboardCmd_IllegalPos() {
 
         // set the board to something that is not the initial position
-        inputParser.parseCommand("new");
-        inputParser.parseCommand("force");
-        inputParser.parseCommand("usermove a2a3");
+        xboardHandler.parseAndDispatch("new");
+        xboardHandler.parseAndDispatch("force");
+        xboardHandler.parseAndDispatch("usermove a2a3");
 
         // create a copy of the position ,we should revert to it later
         Board expected = Globals.getBoard().deepCopy();
 
         // attempt to set the board to something illegal
-        inputParser.parseCommand("setboard bla bla bla");
+        xboardHandler.parseAndDispatch("setboard bla bla bla");
         List<String> output = testAppender.getNonDebugMessages();
         assertEquals(1, output.size());
         assertEquals("tellusererror Illegal position", output.get(0));
@@ -332,7 +334,7 @@ public class InputParserTest {
         assertEquals(expected, Globals.getBoard());
 
         // something more subtle - the last rank is missing a square
-        inputParser.parseCommand("setboard rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBN b KQkq g3 0 2");
+        xboardHandler.parseAndDispatch("setboard rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBN b KQkq g3 0 2");
         output = testAppender.getNonDebugMessages();
         assertEquals(2, output.size());
         assertEquals("tellusererror Illegal position", output.get(1));
@@ -340,27 +342,27 @@ public class InputParserTest {
 
     @Test
     public void timeCmd() {
-        inputParser.parseCommand("level 0 5 0");
-        inputParser.parseCommand("time 2500");
+        xboardHandler.parseAndDispatch("level 0 5 0");
+        xboardHandler.parseAndDispatch("time 2500");
         verify(searchIterator, times(1)).setMaxTime(1000);
 
-        inputParser.parseCommand("level 0 5 3");
-        inputParser.parseCommand("time 2500");
+        xboardHandler.parseAndDispatch("level 0 5 3");
+        xboardHandler.parseAndDispatch("time 2500");
         verify(searchIterator, times(1)).setMaxTime(4000);
 
         // fixed time
-        inputParser.parseCommand("st 30");
-        inputParser.parseCommand("time 300");
+        xboardHandler.parseAndDispatch("st 30");
+        xboardHandler.parseAndDispatch("time 300");
         verify(searchIterator, times(1)).setMaxTime(2900);
     }
 
     @Test
     public void undoCmd() {
-        inputParser.parseCommand("new");
-        inputParser.parseCommand("force");
-        inputParser.parseCommand("usermove e2e4");
-        inputParser.parseCommand("usermove e7e5");
-        inputParser.parseCommand("undo");
+        xboardHandler.parseAndDispatch("new");
+        xboardHandler.parseAndDispatch("force");
+        xboardHandler.parseAndDispatch("usermove e2e4");
+        xboardHandler.parseAndDispatch("usermove e7e5");
+        xboardHandler.parseAndDispatch("undo");
 
         Board board = new Board();
         board.applyMove(new Move(WHITE_PAWN, E2, E4));
@@ -371,9 +373,9 @@ public class InputParserTest {
     @Test
     public void userMoveCmd() {
 
-        inputParser.parseCommand("new");
-        inputParser.parseCommand("force");
-        inputParser.parseCommand("usermove e2e4");
+        xboardHandler.parseAndDispatch("new");
+        xboardHandler.parseAndDispatch("force");
+        xboardHandler.parseAndDispatch("usermove e2e4");
 
         assertEquals(0, testAppender.getNonDebugMessages().size());
         assertEquals(WHITE_PAWN, Globals.getBoard().getPiece(E4));
@@ -382,7 +384,7 @@ public class InputParserTest {
 
     @Test
     public void xboardCmd() {
-        inputParser.parseCommand("xboard");
+        xboardHandler.parseAndDispatch("xboard");
         assertEquals(0, testAppender.getNonDebugMessages().size());
     }
 
@@ -391,12 +393,12 @@ public class InputParserTest {
 
         // use a real search iterator
         SearchIterator searchIterator = new SearchIteratorImpl();
-        inputParser.setSearchIterator(searchIterator);
-        inputParser.parseCommand("new");
+        xboardHandler.setSearchIterator(searchIterator);
+        xboardHandler.parseAndDispatch("new");
         Board origBoard = Globals.getBoard().deepCopy();
-        inputParser.parseCommand("sd 20");
-        inputParser.parseCommand("usermove e2e4");
-        inputParser.parseCommand("?");
+        xboardHandler.parseAndDispatch("sd 20");
+        xboardHandler.parseAndDispatch("usermove e2e4");
+        xboardHandler.parseAndDispatch("?");
 
         // wait for the board to change state
         Awaitility.await()
@@ -420,13 +422,13 @@ public class InputParserTest {
 
         // use a real search iterator
         SearchIterator searchIterator = new SearchIteratorImpl();
-        inputParser.setSearchIterator(searchIterator);
-        inputParser.parseCommand("new");
+        xboardHandler.setSearchIterator(searchIterator);
+        xboardHandler.parseAndDispatch("new");
         Board origBoard = Globals.getBoard().deepCopy();
-        inputParser.parseCommand("sd 20");
-        inputParser.parseCommand("usermove e2e4");
-        inputParser.parseCommand("?");
-        inputParser.parseCommand("ping 1337");
+        xboardHandler.parseAndDispatch("sd 20");
+        xboardHandler.parseAndDispatch("usermove e2e4");
+        xboardHandler.parseAndDispatch("?");
+        xboardHandler.parseAndDispatch("ping 1337");
 
         // wait for the board to change state
         Awaitility.await()
@@ -445,8 +447,8 @@ public class InputParserTest {
     @Test
     public void illegalMove() {
 
-        inputParser.parseCommand("new");
-        inputParser.parseCommand("usermove e2e5");
+        xboardHandler.parseAndDispatch("new");
+        xboardHandler.parseAndDispatch("usermove e2e5");
 
         List<String> output = testAppender.getNonDebugMessages();
 
@@ -455,7 +457,7 @@ public class InputParserTest {
 
         // try another non-sense move
         testAppender.clearMessages();
-        inputParser.parseCommand("usermove bla");
+        xboardHandler.parseAndDispatch("usermove bla");
 
         output = testAppender.getNonDebugMessages();
 
@@ -466,11 +468,12 @@ public class InputParserTest {
     @Test
     public void errorMessage() {
 
-        inputParser.parseCommand("foo");
+        xboardHandler.parseAndDispatch("foo");
 
         List<String> output = testAppender.getNonDebugMessages();
 
         assertEquals(1, output.size());
         assertEquals("Error (unknown command): foo", output.get(0));
     }
+
 }
