@@ -90,11 +90,12 @@ public final class App {
         LOGGER.info("# Welcome to chess4j!\n\n");
 
         assert(showDebugMode());
-        warmUp();
 
         for (String arg : args) {
             processArgument(arg);
         }
+
+        warmUp();
 
         if (testSuiteFile != null) {
             TestSuiteProcessor tp = new TestSuiteProcessor();
