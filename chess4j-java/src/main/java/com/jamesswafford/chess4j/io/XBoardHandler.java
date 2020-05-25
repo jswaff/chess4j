@@ -64,8 +64,8 @@ public class XBoardHandler {
         put("remove", XBoardHandler.this::remove);
         put("result", XBoardHandler.this::result);
         put("sd", XBoardHandler.this::sd);
-        put("st", XBoardHandler.this::st);
         put("setboard", XBoardHandler::setboard);
+        put("st", XBoardHandler.this::st);
         put("time", XBoardHandler.this::time);
         put("undo", XBoardHandler::undo);
         put("usermove", XBoardHandler.this::usermove);
