@@ -119,7 +119,6 @@ public class XBoardHandler {
      *
      */
     private void go(String[] cmd) {
-        stopSearchThread();
         forceMode = false;
         thinkAndMakeMove();
     }
@@ -233,7 +232,7 @@ public class XBoardHandler {
     * Xboard sends this command only when the user is on move.
     */
     private void remove(String[] cmd) {
-        stopSearchThread();
+        // TODO: may be pondering
         Globals.getBoard().undoMove(Globals.getGameUndos().remove(Globals.getGameUndos().size()-1));
         Globals.getBoard().undoMove(Globals.getGameUndos().remove(Globals.getGameUndos().size()-1));
     }
@@ -321,7 +320,6 @@ public class XBoardHandler {
         int seconds = Integer.parseInt(cmd[1]);
         LOGGER.debug("# setting search time to {} seconds per move", seconds);
         fixedTimePerMove = true;
-        incrementMs = 0;
         searchIterator.setMaxTime(seconds * 1000);
     }
 
@@ -362,7 +360,7 @@ public class XBoardHandler {
         }
         if (mv != null) {
             Globals.getGameUndos().add(Globals.getBoard().applyMove(mv));
-            if (!forceMode) {
+            if (!endOfGameCheck() && !forceMode) {
                 thinkAndMakeMove();
             }
         }
@@ -380,41 +378,38 @@ public class XBoardHandler {
 
         searchIterator.stop();
         searchFuture.join();
-        searchIterator.unstop();
     }
 
     private void thinkAndMakeMove() {
+        assert(!endOfGameCheck());
+
         // associate clock with player on move
         engineColor = Globals.getBoard().getPlayerToMove();
 
-        if (!endOfGameCheck()) {
-            AtomicBoolean playedBookMove = new AtomicBoolean(false);
-            if (openingBook != null && bookMisses < 3) {
-                openingBook.getMoveWeightedRandomByFrequency(Globals.getBoard())
-                        .ifPresentOrElse(bookMove -> {
-                            Globals.getGameUndos().add(Globals.getBoard().applyMove(bookMove.getMove()));
-                            LOGGER.debug("# book hit");
-                            LOGGER.info("move " + bookMove.getMove());
-                            endOfGameCheck();
-                            playedBookMove.set(true);
-                        }, () -> {
-                            LOGGER.debug("# book miss {}", ++bookMisses);
-                        });
-            }
-            if (!playedBookMove.get()) {
-                // These are copied for testing purposes.  The iterator will not modify.
-                Board board = Globals.getBoard().deepCopy();
-                List<Undo> undos = new ArrayList<>(Globals.getGameUndos());
-                searchIterator.unstop();
-                searchFuture = searchIterator.findPvFuture(board, undos)
-                        .thenApply(
-                                pv -> {
-                                    Globals.getGameUndos().add(Globals.getBoard().applyMove(pv.get(0)));
-                                    LOGGER.info("move " + pv.get(0));
-                                    endOfGameCheck();
-                                    return pv;
-                                });
-            }
+        AtomicBoolean playedBookMove = new AtomicBoolean(false);
+        if (openingBook != null && bookMisses < 3) {
+            openingBook.getMoveWeightedRandomByFrequency(Globals.getBoard())
+                    .ifPresentOrElse(bookMove -> {
+                        Globals.getGameUndos().add(Globals.getBoard().applyMove(bookMove.getMove()));
+                        LOGGER.debug("# book hit");
+                        LOGGER.info("move " + bookMove.getMove());
+                        endOfGameCheck();
+                        playedBookMove.set(true);
+                    }, () -> LOGGER.debug("# book miss {}", ++bookMisses));
+        }
+        if (!playedBookMove.get()) {
+            // These are copied for testing purposes.  The iterator will not modify.
+            Board board = Globals.getBoard().deepCopy();
+            List<Undo> undos = new ArrayList<>(Globals.getGameUndos());
+            searchIterator.unstop();
+            searchFuture = searchIterator.findPvFuture(board, undos)
+                    .thenApply(
+                            pv -> {
+                                Globals.getGameUndos().add(Globals.getBoard().applyMove(pv.get(0)));
+                                LOGGER.info("move " + pv.get(0));
+                                endOfGameCheck();
+                                return pv;
+                            });
         }
     }
 
