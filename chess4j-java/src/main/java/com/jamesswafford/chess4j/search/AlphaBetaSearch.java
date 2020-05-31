@@ -45,7 +45,7 @@ public class AlphaBetaSearch implements Search {
         this.lastPv = new ArrayList<>();
         this.searchStats = new SearchStats();
 
-        this.stop = false;
+        unstop();
         this.evaluator = new Eval();
         this.moveGenerator = new MagicBitboardMoveGenerator();
         this.moveScorer = new MVVLVA();
@@ -113,11 +113,17 @@ public class AlphaBetaSearch implements Search {
     @Override
     public void stop() {
         stop = true;
+        if (Initializer.nativeCodeInitialized()) {
+            stopNative(true);
+        }
     }
 
     @Override
     public void unstop() {
         stop = false;
+        if (Initializer.nativeCodeInitialized()) {
+            stopNative(false);
+        }
     }
 
     private int searchWithJavaCode(Board board, List<Undo> undos, SearchParameters searchParameters) {
@@ -311,5 +317,7 @@ public class AlphaBetaSearch implements Search {
 
     private native int searchNative(String boardFen, List<Long> prevMoves, List<Long> parentPV, int depth,
                                     int alpha, int beta, SearchStats searchStats);
+
+    private native void stopNative(boolean stop);
 
 }

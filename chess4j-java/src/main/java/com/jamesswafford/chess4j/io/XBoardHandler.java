@@ -330,7 +330,7 @@ public class XBoardHandler {
         int centis = Integer.parseInt(cmd[1]);
         if (fixedTimePerMove) {
             int timeMs = centis * 10 - 100; // leave 1/10th of a second for overhead
-            if (timeMs < 0) timeMs = 0;
+            if (timeMs < 1) timeMs = 1;
             searchIterator.setMaxTime(timeMs);
         } else {
             searchIterator.setMaxTime(TimeUtils.getSearchTime(centis * 10, incrementMs));

@@ -81,7 +81,7 @@ public class SearchIteratorImplTest {
 
         verify(search, times(3)).getPv();
 
-        verify(search, times(3)).isStopped();
+        verify(search, times(4)).isStopped();
 
         verify(search, times(1))
                 .search(board, undos, new SearchParameters(1, -INFINITY, INFINITY));
@@ -130,7 +130,7 @@ public class SearchIteratorImplTest {
 
         verify(search, times(2)).getPv();
 
-        verify(search, times(2)).isStopped();
+        verify(search, times(3)).isStopped();
 
         verify(search, times(1))
                 .search(board, undos, new SearchParameters(1, -INFINITY, INFINITY));
