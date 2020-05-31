@@ -86,8 +86,10 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     /* perform the search */
     move_line_t pv;
     stats_t native_stats;
+    search_options_t search_opts;
+    memset(&search_opts, 0, sizeof(search_options_t));
     int32_t native_score = search(&pos, &pv, depth, alpha, beta, moves, undos,
-        &native_stats);
+        &native_stats, &search_opts);
     retval = (jint) native_score;
 
     /* copy the PV to the Java list */

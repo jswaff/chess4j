@@ -182,8 +182,8 @@ public class SearchIteratorImpl implements SearchIterator {
         assert(MoveUtils.isLineValid(pv, board));
 
         // if we are running with assertions enabled and the native library is loaded, verify equality
-        // we can only do this for fixed depth searches
-        assert(maxTimeMs > 0 || iterationsAreEqual(pv, board, undos));
+        // we can only do this for fixed depth searches that have not been interrupted.
+        assert(maxTimeMs > 0 || search.isStopped() || iterationsAreEqual(pv, board, undos));
 
         return pv;
     }
@@ -195,6 +195,12 @@ public class SearchIteratorImpl implements SearchIterator {
             LOGGER.debug("# checking iteration equality with native");
 
             List<Move> nativePV = findPrincipalVariationNative(board, undos);
+
+            // if the search was stopped the comparison won't be valid
+            if (search.isStopped()) {
+                LOGGER.debug("# not comparing incomplete iteration");
+                return true;
+            }
 
             if (!nativePV.equals(javaPV)) {
                 LOGGER.error("PVs are not equal! javaPV: " + PrintLine.getMoveString(javaPV) +
