@@ -341,7 +341,7 @@ public class AlphaBetaSearchTest {
                     visited.put(ply, true);
                 }
             }
-        });
+        }, board.getPlayerToMove());
 
         for (int depth=2; depth <= 6; depth++) {
             search.search(board, new SearchParameters(depth, -INFINITY, INFINITY));

@@ -10,6 +10,7 @@ import com.jamesswafford.chess4j.pieces.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -109,10 +110,21 @@ public final class MoveUtils {
         return converted;
     }
 
-    public static Long toNativeMove(Move mv) {
-        Long nativeMv = 0L;
+    public static List<Move> fromNativeLine(List<Long> nativeMoves, Color ptm) {
+        List<Move> moves = new ArrayList<>();
 
-        nativeMv = (long)mv.from().value() & 0x3F;
+        for (int i=0; i<nativeMoves.size(); i++) {
+            Long nativeMv = nativeMoves.get(i);
+            Color color = (i % 2) == 0 ? ptm : Color.swap(ptm);
+            moves.add(fromNativeMove(nativeMv, color));
+        }
+
+        return moves;
+    }
+
+    public static Long toNativeMove(Move mv) {
+
+        long nativeMv = (long) mv.from().value() & 0x3F;
         nativeMv |= ((long)mv.to().value() & 0x3F) << 6;
         nativeMv |= (toNativePiece(mv.piece()) & 0x07) << 12;
         if (mv.promotion() != null) {

@@ -76,7 +76,7 @@ public class SearchIteratorImplTest {
 
         // then the search will have been invoked three times
         // getLastPV is called after each search in an assert statement
-        verify(search, times(1)).setPvCallback(any());
+        verify(search, times(1)).setPvCallback(any(), any());
         verify(search, times(1)).initialize();
 
         verify(search, times(3)).getPv();
@@ -125,7 +125,7 @@ public class SearchIteratorImplTest {
         // then the PV will be the PV returned from the last search
         assertEquals(expectedPV, pv);
 
-        verify(search, times(1)).setPvCallback(any());
+        verify(search, times(1)).setPvCallback(any(), any());
         verify(search, times(1)).initialize();
 
         verify(search, times(2)).getPv();

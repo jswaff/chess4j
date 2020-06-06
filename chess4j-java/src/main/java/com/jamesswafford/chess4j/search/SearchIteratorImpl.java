@@ -2,7 +2,6 @@ package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.init.Initializer;
@@ -52,7 +51,7 @@ public class SearchIteratorImpl implements SearchIterator {
     @Override
     public void setPost(boolean post) {
         this.post = post;
-        if (!post) search.setPvCallback(null);
+        if (!post) search.setPvCallback(null, null);
     }
 
     public void setEarlyExitOk(boolean earlyExitOk) {
@@ -119,10 +118,11 @@ public class SearchIteratorImpl implements SearchIterator {
                             pvUpdate.getValue1(), pvUpdate.getValue2(), pvUpdate.getValue3(), startTime,
                             pvUpdate.getValue4());
                 }
-            });
+            }, board.getPlayerToMove());
         }
 
         // add a timer to stop the search
+        // TODO: rework this.
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         if (maxTimeMs > 0) {
             LOGGER.debug("# setting timer task for " + maxTimeMs + " ms.");
@@ -232,19 +232,9 @@ public class SearchIteratorImpl implements SearchIterator {
                 .collect(Collectors.toList());
 
         List<Long> nativePV = new ArrayList<>();
-
         try {
             iterateNative(fen, prevMoves, maxDepth, nativePV);
-
-            // translate the native PV
-            List<Move> pv = new ArrayList<>();
-            for (int i=0; i<nativePV.size(); i++) {
-                Long nativeMv = nativePV.get(i);
-                // which side is moving?  On even moves it is the player on move.
-                Color ptm = (i % 2) == 0 ? board.getPlayerToMove() : Color.swap(board.getPlayerToMove());
-                pv.add(MoveUtils.fromNativeMove(nativeMv, ptm));
-            }
-            return pv;
+            return MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove());
         } catch (IllegalStateException e) {
             LOGGER.error(e);
             throw e;

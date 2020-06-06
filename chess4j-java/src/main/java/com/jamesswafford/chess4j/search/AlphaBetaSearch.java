@@ -87,9 +87,19 @@ public class AlphaBetaSearch implements Search {
     }
 
     @Override
-    public void setPvCallback(Consumer<Quintet<Integer, List<Move>, Integer, Integer, Long>> pvCallback) {
-        // TODO: register this with the JNI layer
+    public void setPvCallback(Consumer<Quintet<Integer, List<Move>, Integer, Integer, Long>> pvCallback, Color ptm) {
         this.pvCallback = pvCallback;
+        if (Initializer.nativeCodeInitialized()) {
+            if (pvCallback != null) {
+                setPvCallBackNative(nativePvUpdate -> {
+                    List<Move> convertedPv = MoveUtils.fromNativeLine(nativePvUpdate.getValue1(), ptm);
+                    pvCallback.accept(Quintet.with(nativePvUpdate.getValue0(), convertedPv, nativePvUpdate.getValue2(),
+                            nativePvUpdate.getValue3(), nativePvUpdate.getValue4()));
+                });
+            } else {
+                setPvCallBackNative(null);
+            }
+        }
     }
 
     @Override
@@ -154,12 +164,7 @@ public class AlphaBetaSearch implements Search {
 
             // translate the native PV into the object's PV
             pv.clear();
-            for (int i=0; i<nativePV.size(); i++) {
-                Long nativeMv = nativePV.get(i);
-                // which side is moving?  On even moves it is the player on move.
-                Color ptm = (i % 2) == 0 ? board.getPlayerToMove() : Color.swap(board.getPlayerToMove());
-                pv.add(MoveUtils.fromNativeMove(nativeMv, ptm));
-            }
+            pv.addAll(MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove()));
 
             return nativeScore;
         } catch (IllegalStateException e) {
@@ -192,7 +197,7 @@ public class AlphaBetaSearch implements Search {
                 return false;
             }
             // compare the PVs.
-            if (!moveLinesAreEqual(board, nativePV, pv)) {
+            if (!pv.equals(MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove()))) {
                 LOGGER.error("pvs are not equal!"
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
                         + ", params: " + searchParameters + ", fen: " + fen);
@@ -205,26 +210,6 @@ public class AlphaBetaSearch implements Search {
             LOGGER.error(e);
             throw e;
         }
-    }
-
-    private boolean moveLinesAreEqual(Board board, List<Long> nativePV, List<Move> javaPV) {
-        if (nativePV.size() != pv.size()) {
-            LOGGER.error("nativePV.size: " + nativePV.size() + ", javaPV.size: " + javaPV.size());
-            return false;
-        }
-
-        for (int i=0; i<nativePV.size(); i++) {
-            Long nativeMv = nativePV.get(i);
-            // which side is moving?  On even moves it is the player on move.
-            Color ptm = (i % 2) == 0 ? board.getPlayerToMove() : Color.swap(board.getPlayerToMove());
-            Move convertedMv = MoveUtils.fromNativeMove(nativeMv, ptm);
-            Move javaMv = javaPV.get(i);
-            if (! javaMv.equals(convertedMv)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     private int search(Board board, List<Undo> undos, List<Move> parentPV, boolean first, int ply, int depth,
@@ -322,5 +307,7 @@ public class AlphaBetaSearch implements Search {
                                     int alpha, int beta, SearchStats searchStats);
 
     private native void stopNative(boolean stop);
+
+    private native void setPvCallBackNative(Consumer<Quintet<Integer, List<Long>, Integer, Integer, Long>> pvCallback);
 
 }

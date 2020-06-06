@@ -6,6 +6,8 @@
 
 #include "../../../../java/lang/Long.h"
 #include "../../../../java/util/ArrayList.h"
+#include "../../../../java/util/function/Consumer.h"
+#include "../../../../org/javatuples/Quintet.h"
 
 
 extern int init();
@@ -33,6 +35,23 @@ JNIEXPORT jboolean JNICALL Java_com_jamesswafford_chess4j_init_Initializer_p4Ini
     {
         (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
             "ArrayList not initialized!");
+        return false;
+    }
+
+    if (0 != Consumer_register(env))
+    {
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
+            "Consumer not initialized!");
+        return false;
+    }
+
+    int retval = Quintet_register(env);
+    if (0 != retval)
+    {
+        char error_buffer[255];
+        sprintf(error_buffer, "Quintet not initialized! - retval: %d\n", retval);
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
+            error_buffer);
         return false;
     }
 
