@@ -4,6 +4,7 @@
 jclass ArrayList = NULL;
 jmethodID ArrayList_init = NULL;
 jmethodID ArrayList_add = NULL;
+jmethodID ArrayList_clear = NULL;
 
 
 static volatile bool ArrayList_registered = false;
@@ -32,17 +33,18 @@ int ArrayList_register(JNIEnv* env)
     (*env)->DeleteLocalRef(env, tempClassID);
 
     /* register init() method */
-    ArrayList_init =
-        (*env)->GetMethodID(
-            env, ArrayList, "<init>", "()V");
+    ArrayList_init = (*env)->GetMethodID(env, ArrayList, "<init>", "()V");
     if (NULL == ArrayList_init)
         return 1;
 
     /* register add method */
-    ArrayList_add =
-        (*env)->GetMethodID(
-            env, ArrayList, "add", "(Ljava/lang/Object;)Z");
+    ArrayList_add = (*env)->GetMethodID(env, ArrayList, "add", "(Ljava/lang/Object;)Z");
     if (NULL == ArrayList_add)
+        return 1;
+
+    /* register clear method */
+    ArrayList_clear = (*env)->GetMethodID(env, ArrayList, "clear", "()V");
+    if (NULL == ArrayList_clear)
         return 1;
 
     /* success */

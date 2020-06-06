@@ -12,13 +12,9 @@ extern "C" {
 int ArrayList_register(JNIEnv* env);
 
 extern jclass ArrayList;
-
 extern jmethodID ArrayList_init;
-
-/* public boolean add(E);
- * descriptor: (Ljava/lang/Object;)Z
- */
 extern jmethodID ArrayList_add;
+extern jmethodID ArrayList_clear;
 
 /* make this header C++ friendly */
 #ifdef __cplusplus

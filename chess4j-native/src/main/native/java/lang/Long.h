@@ -11,9 +11,7 @@ extern "C" {
 int Long_register(JNIEnv* env);
 
 extern jclass Long;
-
 extern jmethodID Long_valueOf;
-
 extern jmethodID Long_longValue;
 
 /* make this header C++ friendly */
