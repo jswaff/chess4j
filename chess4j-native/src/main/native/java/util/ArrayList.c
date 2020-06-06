@@ -5,6 +5,8 @@ jclass ArrayList = NULL;
 jmethodID ArrayList_init = NULL;
 jmethodID ArrayList_add = NULL;
 jmethodID ArrayList_clear = NULL;
+jmethodID ArrayList_get = NULL;
+jmethodID ArrayList_size = NULL;
 
 
 static volatile bool ArrayList_registered = false;
@@ -46,6 +48,17 @@ int ArrayList_register(JNIEnv* env)
     ArrayList_clear = (*env)->GetMethodID(env, ArrayList, "clear", "()V");
     if (NULL == ArrayList_clear)
         return 1;
+
+    /* register get method */
+    ArrayList_get = (*env)->GetMethodID(env, ArrayList, "get", "(I)Ljava/lang/Object;");
+    if (NULL == ArrayList_get)
+        return 1;
+
+    /* register size method */
+    ArrayList_size = (*env)->GetMethodID(env, ArrayList, "size", "()I");
+    if (NULL == ArrayList_size)
+        return 1;
+
 
     /* success */
     ArrayList_registered = true;

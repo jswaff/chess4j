@@ -16,18 +16,9 @@ move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
 /* undo stack */
 undo_t undos[MAX_PLY];
 
-/* keep global refs to use in the static helper function */
+/* keep refs to use in the static helper function */
 JNIEnv *g_env;
 jobject g_parent_pv;
-
-/* class interfaces */
-jclass class_List;
-jclass class_Long;
-
-/* method IDs */
-jmethodID mid_List_size;
-jmethodID mid_List_get;
-jmethodID mid_Long_value;
 
 static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
 
@@ -54,20 +45,6 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     g_env = env;
     g_parent_pv = parent_pv;
 
-    /* TODO: move these to a global init */
-    /* retrieve the java.util.List interface class */
-    class_List = (*env)->FindClass(env, "java/util/List");
-
-    /* retrieve the size and get methods */
-    mid_List_size = (*env)->GetMethodID(env, class_List, "size", "()I");
-    mid_List_get = (*env)->GetMethodID(env, class_List, "get", "(I)Ljava/lang/Object;");
-
-    /* retrieve the java.lang.Long class */
-    class_Long = (*env)->FindClass(env, "java/lang/Long");
-
-    /* retrieve the longValue method */
-    mid_Long_value = (*env)->GetMethodID(env, class_Long, "longValue", "()J");
-
 
     /* set the position according to the FEN.  We use the FEN instead of the
      * prev_moves list for test suites, which don't have a move history.
@@ -86,14 +63,14 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     /* replay the previous moves for draw checks */
     position_t replay_pos;
     reset_pos(&replay_pos);    
-    jint size = (*env)->CallIntMethod(env, prev_moves, mid_List_size);
+    jint size = (*env)->CallIntMethod(env, prev_moves, ArrayList_size);
     jvalue arg;
     for (int i=0; i<size; i++)
     {
         arg.i = i;
-        jobject element = (*env)->CallObjectMethodA(env, prev_moves, 
-            mid_List_get, &arg);
-        jlong prev_mv = (*env)->CallLongMethod(env, element, mid_Long_value);
+        jobject element = (*env)->CallObjectMethodA(env, prev_moves, ArrayList_get, 
+            &arg);
+        jlong prev_mv = (*env)->CallLongMethod(env, element, Long_longValue);
 
         /* apply this move */
         apply_move(&replay_pos, (move_t) prev_mv, undos + replay_pos.move_counter);
@@ -154,4 +131,7 @@ static void pv_callback(move_line_t* pv, int32_t UNUSED(depth), int32_t UNUSED(s
         (*g_env)->CallBooleanMethod(g_env, g_parent_pv, ArrayList_add, lval);
         (*g_env)->DeleteLocalRef(g_env, lval);
     }
+
+    /* TODO: if a Java callback was provided, invoke it now */
+
 }

@@ -88,6 +88,7 @@ public class AlphaBetaSearch implements Search {
 
     @Override
     public void setPvCallback(Consumer<Quintet<Integer, List<Move>, Integer, Integer, Long>> pvCallback) {
+        // TODO: register this with the JNI layer
         this.pvCallback = pvCallback;
     }
 
