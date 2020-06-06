@@ -236,10 +236,12 @@ public class AlphaBetaSearch implements Search {
             return evaluator.evaluateBoard(board);
         }
 
-        // Draw check
-        if (Draw.isDraw(board, undos)) {
-            searchStats.draws++;
-            return 0;
+        if (ply > 0) {
+            // Draw check
+            if (Draw.isDraw(board, undos)) {
+                searchStats.draws++;
+                return 0;
+            }
         }
 
         List<Move> pv = new ArrayList<>(50);

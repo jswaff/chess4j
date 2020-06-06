@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.search;
 
+import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
@@ -162,8 +163,14 @@ public class SearchIteratorImpl implements SearchIterator {
                 stopSearching = true;
             }
 
+            // if we've hit the user defined max search depth, stop here
             if (maxDepth > 0 && depth >= maxDepth) {
                 LOGGER.debug("# stopping iterative search on depth");
+                stopSearching = true;
+            }
+
+            // if we've hit the system defined max iterations, stop here
+            if (maxDepth >= Constants.MAX_ITERATIONS) {
                 stopSearching = true;
             }
 
