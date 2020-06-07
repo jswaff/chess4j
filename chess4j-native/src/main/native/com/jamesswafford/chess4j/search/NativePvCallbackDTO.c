@@ -29,8 +29,8 @@ int NativePvCallbackDTO_register(JNIEnv* env)
     /* we don't need this local reference anymore. */
     (*env)->DeleteLocalRef(env, tempClassID);
 
-    /* register accept method */
-    NativePvCallbackDTO_with = (*env)->GetMethodID(env, NativePvCallbackDTO, 
+    /* register "with" method */
+    NativePvCallbackDTO_with = (*env)->GetStaticMethodID(env, NativePvCallbackDTO, 
         "with", "(ILjava/util/List;IIJ)Lcom/jamesswafford/chess4j/search/NativePvCallbackDTO;");
     if (NULL == NativePvCallbackDTO_with)
         return 1;
