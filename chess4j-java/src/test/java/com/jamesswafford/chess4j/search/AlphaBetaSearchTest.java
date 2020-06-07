@@ -333,9 +333,9 @@ public class AlphaBetaSearchTest {
         final Map<Integer, Boolean> visited = new HashMap<>();
         search.setPvCallback(pvUpdate -> {
             // we expect the first N-1 moves to match the previous PV
-            int ply = pvUpdate.getValue0();
+            int ply = pvUpdate.ply;
             if (ply < lastPv.size()) {
-                Move rootMv = pvUpdate.getValue1().get(0);
+                Move rootMv = pvUpdate.pv.get(0);
                 if (visited.get(ply) == null) {
                     assertEquals(lastPv.get(ply), rootMv);
                     visited.put(ply, true);

@@ -113,10 +113,9 @@ public class SearchIteratorImpl implements SearchIterator {
         // set a callback to print the updated PV
         if (post) {
             search.setPvCallback(pvUpdate -> {
-                if (pvUpdate.getValue0() == 0) { // ply 0
+                if (pvUpdate.ply == 0) {
                     PrintLine.printLine(
-                            pvUpdate.getValue1(), pvUpdate.getValue2(), pvUpdate.getValue3(), startTime,
-                            pvUpdate.getValue4());
+                            pvUpdate.pv, pvUpdate.depth, pvUpdate.score, startTime, pvUpdate.nodes);
                 }
             }, board.getPlayerToMove());
         }

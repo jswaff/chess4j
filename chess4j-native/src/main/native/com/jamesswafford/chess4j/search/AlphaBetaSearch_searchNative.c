@@ -7,7 +7,6 @@
 #include "../../../../java/lang/Long.h"
 #include "../../../../java/util/ArrayList.h"
 #include "../../../../java/util/function/Consumer.h"
-#include "../../../../org/javatuples/Quintet.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -120,8 +119,8 @@ cleanup:
 }
 
 
-static void pv_callback(move_line_t* pv, int32_t depth, int32_t score, 
-    uint64_t UNUSED(elapsed), uint64_t num_nodes)
+static void pv_callback(move_line_t* pv, int32_t UNUSED(depth), int32_t UNUSED(score), 
+    uint64_t UNUSED(elapsed), uint64_t UNUSED(num_nodes))
 {
     /* update the parent pv */
     (*g_env)->CallBooleanMethod(g_env, g_parent_pv, ArrayList_clear);
@@ -139,15 +138,15 @@ static void pv_callback(move_line_t* pv, int32_t depth, int32_t score,
     /* if a Java callback was provided, invoke it now */
     if (NULL != g_pv_callback)
     {
-        /* build a Quintet of depth, pv, score, start_time, nodes */
-        jobject qval = (*g_env)->CallStaticObjectMethod(
-            g_env, Quintet, Quintet_with, depth, g_parent_pv, score, 0, num_nodes);
+
+        // jobject qval = (*g_env)->CallStaticObjectMethod(
+        //     g_env, Quintet, Quintet_with, depth, g_parent_pv, score, 0, num_nodes);
 
         /* do the callback */
-        (*g_env)->CallVoidMethod(g_env, g_pv_callback, Consumer_accept, qval);
+        // (*g_env)->CallVoidMethod(g_env, g_pv_callback, Consumer_accept, qval);
 
         /* release */
-        (*g_env)->DeleteLocalRef(g_env, qval);
+        // (*g_env)->DeleteLocalRef(g_env, qval);
     }
 
 }

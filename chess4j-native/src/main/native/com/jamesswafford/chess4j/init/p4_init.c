@@ -7,7 +7,7 @@
 #include "../../../../java/lang/Long.h"
 #include "../../../../java/util/ArrayList.h"
 #include "../../../../java/util/function/Consumer.h"
-#include "../../../../org/javatuples/Quintet.h"
+#include "../search/NativePvCallbackDTO.h"
 
 
 extern int init();
@@ -45,13 +45,10 @@ JNIEXPORT jboolean JNICALL Java_com_jamesswafford_chess4j_init_Initializer_p4Ini
         return false;
     }
 
-    int retval = Quintet_register(env);
-    if (0 != retval)
+    if (0 != NativePvCallbackDTO_register(env))
     {
-        char error_buffer[255];
-        sprintf(error_buffer, "Quintet not initialized! - retval: %d\n", retval);
         (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            error_buffer);
+            "NativePvCallbackDTO not initialized!");
         return false;
     }
 

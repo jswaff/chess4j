@@ -11,7 +11,6 @@ import com.jamesswafford.chess4j.utils.BoardUtils;
 import com.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.javatuples.Quintet;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,7 +37,7 @@ public class AlphaBetaSearch implements Search {
     private MoveGenerator moveGenerator;
     private MoveScorer moveScorer;
     private KillerMovesStore killerMovesStore;
-    private Consumer<Quintet<Integer, List<Move>, Integer, Integer, Long>> pvCallback;
+    private Consumer<PvCallbackDTO> pvCallback;
 
     public AlphaBetaSearch() {
         this.pv = new ArrayList<>();
@@ -87,14 +86,14 @@ public class AlphaBetaSearch implements Search {
     }
 
     @Override
-    public void setPvCallback(Consumer<Quintet<Integer, List<Move>, Integer, Integer, Long>> pvCallback, Color ptm) {
+    public void setPvCallback(Consumer<PvCallbackDTO> pvCallback, Color ptm) {
         this.pvCallback = pvCallback;
         if (Initializer.nativeCodeInitialized()) {
             if (pvCallback != null) {
                 setPvCallBackNative(nativePvUpdate -> {
-                    List<Move> convertedPv = MoveUtils.fromNativeLine(nativePvUpdate.getValue1(), ptm);
-                    pvCallback.accept(Quintet.with(nativePvUpdate.getValue0(), convertedPv, nativePvUpdate.getValue2(),
-                            nativePvUpdate.getValue3(), nativePvUpdate.getValue4()));
+                    List<Move> convertedPv = MoveUtils.fromNativeLine(nativePvUpdate.pv, ptm);
+                    pvCallback.accept(new PvCallbackDTO(nativePvUpdate.ply, convertedPv,
+                            nativePvUpdate.depth, nativePvUpdate.score, nativePvUpdate.nodes));
                 });
             } else {
                 setPvCallBackNative(null);
@@ -270,7 +269,7 @@ public class AlphaBetaSearch implements Search {
                 alpha = val;
                 setParentPV(parentPV, move, pv);
                 if (pvCallback != null) {
-                    pvCallback.accept(Quintet.with(ply, parentPV, depth, alpha, searchStats.nodes));
+                    pvCallback.accept(new PvCallbackDTO(ply, parentPV, depth, alpha, searchStats.nodes));
                 }
             }
         }
@@ -308,6 +307,6 @@ public class AlphaBetaSearch implements Search {
 
     private native void stopNative(boolean stop);
 
-    private native void setPvCallBackNative(Consumer<Quintet<Integer, List<Long>, Integer, Integer, Long>> pvCallback);
+    private native void setPvCallBackNative(Consumer<NativePvCallbackDTO> pvCallback);
 
 }
