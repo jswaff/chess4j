@@ -31,7 +31,7 @@ int PrintLine_register(JNIEnv* env)
 
     /* register "printNativeLine" method */
     PrintLine_printNativeLine = (*env)->GetStaticMethodID(env, PrintLine, 
-        "printNativeLine", "(IIJ)V");
+        "printNativeLine", "(IIJJ)V");
     if (NULL == PrintLine_printNativeLine)
         return 1;
 

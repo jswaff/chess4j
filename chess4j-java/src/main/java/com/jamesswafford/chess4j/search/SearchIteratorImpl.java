@@ -110,9 +110,7 @@ public class SearchIteratorImpl implements SearchIterator {
         long startTime = System.currentTimeMillis();
         Consumer<PvCallbackDTO> rootPvCallback = pvUpdate -> {
             if (pvUpdate.ply == 0) {
-                long elapsed = System.currentTimeMillis() - startTime;
-                //PrintLine.printLine(pvUpdate.pv, depth, alpha, elapsed, searchStats.nodes);
-                PrintLine.printLine(pvUpdate.pv, 0, 0, elapsed, 0L);
+                PrintLine.printLine(pvUpdate.pv, pvUpdate.depth, pvUpdate.score, pvUpdate.elapsedMS, pvUpdate.nodes);
             }
         };
         SearchOptions opts = new SearchOptions(rootPvCallback, startTime);

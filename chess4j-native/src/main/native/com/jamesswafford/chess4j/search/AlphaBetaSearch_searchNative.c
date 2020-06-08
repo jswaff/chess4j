@@ -118,7 +118,7 @@ cleanup:
 
 
 static void pv_callback(move_line_t* pv, int32_t depth, int32_t score, 
-    uint64_t UNUSED(elapsed), uint64_t num_nodes)
+    uint64_t elapsed, uint64_t num_nodes)
 {
     /* update the parent pv */
     (*g_env)->CallBooleanMethod(g_env, *g_parent_pv, ArrayList_clear);
@@ -134,5 +134,5 @@ static void pv_callback(move_line_t* pv, int32_t depth, int32_t score,
     }
 
     (*g_env)->CallStaticVoidMethod(g_env, PrintLine, PrintLine_printNativeLine, 
-        depth, score, num_nodes);
+        depth, score, elapsed, num_nodes);
 }

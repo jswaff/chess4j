@@ -15,7 +15,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
@@ -263,7 +262,12 @@ public class AlphaBetaSearch implements Search {
                 alpha = val;
                 setParentPV(parentPV, move, pv);
                 if (opts.getPvCallback() != null) {
-                    opts.getPvCallback().accept(new PvCallbackDTO(ply, parentPV));
+                    opts.getPvCallback().accept(
+                            PvCallbackDTO.builder()
+                                    .ply(ply).pv(parentPV).depth(depth).score(alpha)
+                                    .elapsedMS(System.currentTimeMillis() - opts.getStartTime())
+                                    .nodes(searchStats.nodes)
+                                    .build());
                 }
             }
         }

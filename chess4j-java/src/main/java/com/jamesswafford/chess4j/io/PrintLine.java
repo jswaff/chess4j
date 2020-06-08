@@ -17,8 +17,8 @@ public class PrintLine {
         LOGGER.info(output);
     }
 
-    public static void printNativeLine(int depth, int score, long nodes) {
-        printLine(Collections.emptyList(), depth, score, 0, nodes);
+    public static void printNativeLine(int depth, int score, long elapsedMS, long nodes) {
+        printLine(Collections.emptyList(), depth, score, elapsedMS, nodes);
     }
 
     public static String getMoveString(List<Move> moves) {
