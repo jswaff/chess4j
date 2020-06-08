@@ -76,7 +76,6 @@ public class SearchIteratorImplTest {
 
         // then the search will have been invoked three times
         // getLastPV is called after each search in an assert statement
-        verify(search, times(1)).setPvCallback(any(), any());
         verify(search, times(1)).initialize();
 
         verify(search, times(3)).getPv();
@@ -84,14 +83,13 @@ public class SearchIteratorImplTest {
         verify(search, times(4)).isStopped();
 
         verify(search, times(1))
-                .search(board, undos, new SearchParameters(1, -INFINITY, INFINITY));
+                .search(eq(board), eq(undos), eq(new SearchParameters(1, -INFINITY, INFINITY)), any());
 
         verify(search, times(1))
-                .search(board, undos, new SearchParameters(2, -INFINITY, INFINITY));
+                .search(eq(board), eq(undos), eq(new SearchParameters(2, -INFINITY, INFINITY)), any());
 
         verify(search, times(1))
-                .search(board, undos, new SearchParameters(3, -INFINITY, INFINITY));
-
+                .search(eq(board), eq(undos), eq(new SearchParameters(3, -INFINITY, INFINITY)), any());
 
         verifyNoMoreInteractions(search);
     }
@@ -111,7 +109,7 @@ public class SearchIteratorImplTest {
         List<Undo> undos = new ArrayList<>();
 
         // return a mate score on the depth 2 search
-        when(search.search(board, undos, new SearchParameters(2, -INFINITY, INFINITY)))
+        when(search.search(any(), any(), eq(new SearchParameters(2, -INFINITY, INFINITY)), any()))
                 .thenReturn(-CHECKMATE+2);
 
         // set up search PV
@@ -125,7 +123,6 @@ public class SearchIteratorImplTest {
         // then the PV will be the PV returned from the last search
         assertEquals(expectedPV, pv);
 
-        verify(search, times(1)).setPvCallback(any(), any());
         verify(search, times(1)).initialize();
 
         verify(search, times(2)).getPv();
@@ -133,13 +130,14 @@ public class SearchIteratorImplTest {
         verify(search, times(3)).isStopped();
 
         verify(search, times(1))
-                .search(board, undos, new SearchParameters(1, -INFINITY, INFINITY));
+                .search(eq(board), eq(undos), eq(new SearchParameters(1, -INFINITY, INFINITY)), any());
 
         verify(search, times(1))
-                .search(board, undos, new SearchParameters(2, -INFINITY, INFINITY));
+                .search(eq(board), eq(undos), eq(new SearchParameters(2, -INFINITY, INFINITY)), any());
 
+        verify(search, times(0))
+                .search(eq(board), eq(undos), eq(new SearchParameters(3, -INFINITY, INFINITY)), any());
 
-        verifyNoMoreInteractions(search);
     }
 
     @Test

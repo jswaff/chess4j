@@ -37,7 +37,6 @@ public class AlphaBetaSearch implements Search {
     private MoveGenerator moveGenerator;
     private MoveScorer moveScorer;
     private KillerMovesStore killerMovesStore;
-    private Consumer<PvCallbackDTO> pvCallback;
 
     public AlphaBetaSearch() {
         this.pv = new ArrayList<>();
@@ -86,32 +85,26 @@ public class AlphaBetaSearch implements Search {
     }
 
     @Override
-    public void setPvCallback(Consumer<PvCallbackDTO> pvCallback, Color ptm) {
-        this.pvCallback = pvCallback;
-        if (Initializer.nativeCodeInitialized()) {
-            if (pvCallback != null) {
-                setPvCallBackNative(nativePvUpdate -> {
-                    List<Move> convertedPv = MoveUtils.fromNativeLine(nativePvUpdate.pv, ptm);
-                    pvCallback.accept(new PvCallbackDTO(nativePvUpdate.ply, convertedPv,
-                            nativePvUpdate.depth, nativePvUpdate.score, nativePvUpdate.nodes));
-                });
-            } else {
-                setPvCallBackNative(null);
-            }
-        }
+    public int search(Board board, SearchParameters searchParameters) {
+        return search(board, searchParameters, new SearchOptions(null, System.currentTimeMillis()));
     }
 
     @Override
-    public int search(Board board, SearchParameters searchParameters) {
-        return search(board, new ArrayList<>(), searchParameters);
+    public int search(Board board, SearchParameters searchParameters, SearchOptions opts) {
+        return search(board, new ArrayList<>(), searchParameters, opts);
     }
 
     @Override
     public int search(Board board, List<Undo> undos, SearchParameters searchParameters) {
+        return search(board, undos, searchParameters, new SearchOptions(null, System.currentTimeMillis()));
+    }
+
+    @Override
+    public int search(Board board, List<Undo> undos, SearchParameters searchParameters, SearchOptions opts) {
         if (Initializer.nativeCodeInitialized()) {
-            return searchWithNativeCode(board, undos, searchParameters);
+            return searchWithNativeCode(board, undos, searchParameters, opts);
         } else {
-            return searchWithJavaCode(board, undos, searchParameters);
+            return searchWithJavaCode(board, undos, searchParameters, opts);
         }
     }
 
@@ -136,16 +129,18 @@ public class AlphaBetaSearch implements Search {
         }
     }
 
-    private int searchWithJavaCode(Board board, List<Undo> undos, SearchParameters searchParameters) {
+    private int searchWithJavaCode(Board board, List<Undo> undos, SearchParameters searchParameters,
+                                   SearchOptions opts) {
         killerMovesStore.clear();
         int score = search(board, undos, pv, true, 0, searchParameters.getDepth(),
-                searchParameters.getAlpha(), searchParameters.getBeta());
+                searchParameters.getAlpha(), searchParameters.getBeta(), opts);
         lastPv.clear();
         lastPv.addAll(pv);
         return score;
     }
 
-    private int searchWithNativeCode(Board board, List<Undo> undos, SearchParameters searchParameters) {
+    private int searchWithNativeCode(Board board, List<Undo> undos, SearchParameters searchParameters,
+                                     SearchOptions opts) {
 
         String fen = FenBuilder.createFen(board, false);
 
@@ -159,7 +154,7 @@ public class AlphaBetaSearch implements Search {
                     searchParameters.getAlpha(), searchParameters.getBeta(), searchStats);
 
             // if the search completed then verify equality with the Java implementation.
-            assert (stop || searchesAreEqual(board, undos, searchParameters, fen, nativeScore, nativePV));
+            assert (stop || searchesAreEqual(board, undos, searchParameters, opts, fen, nativeScore, nativePV));
 
             // translate the native PV into the object's PV
             pv.clear();
@@ -173,7 +168,7 @@ public class AlphaBetaSearch implements Search {
     }
 
     private boolean searchesAreEqual(Board board, List<Undo> undos, SearchParameters searchParameters,
-                                     String fen, int nativeScore, List<Long> nativePV)
+                                     SearchOptions opts, String fen, int nativeScore, List<Long> nativePV)
     {
         LOGGER.debug("# checking search equality with java depth {}", searchParameters.getDepth());
         try {
@@ -184,7 +179,7 @@ public class AlphaBetaSearch implements Search {
             nativeStats.draws = searchStats.draws;
 
             searchStats.initialize();
-            int javaScore = searchWithJavaCode(board, undos, searchParameters);
+            int javaScore = searchWithJavaCode(board, undos, searchParameters, opts);
 
             // if the search was interrupted we can't compare
             if (stop) return true;
@@ -212,7 +207,7 @@ public class AlphaBetaSearch implements Search {
     }
 
     private int search(Board board, List<Undo> undos, List<Move> parentPV, boolean first, int ply, int depth,
-                       int alpha, int beta) {
+                       int alpha, int beta, SearchOptions opts) {
 
         searchStats.nodes++;
         parentPV.clear();
@@ -248,8 +243,7 @@ public class AlphaBetaSearch implements Search {
             }
 
             boolean pvNode = first && numMovesSearched == 0;
-            int val = -search(board, undos, pv, pvNode, ply+1, depth-1,
-                    -beta, -alpha);
+            int val = -search(board, undos, pv, pvNode, ply+1, depth-1,  -beta, -alpha, opts);
             ++numMovesSearched;
             board.undoMove(undos.remove(undos.size()-1));
 
@@ -268,8 +262,8 @@ public class AlphaBetaSearch implements Search {
             if (val > alpha) {
                 alpha = val;
                 setParentPV(parentPV, move, pv);
-                if (pvCallback != null) {
-                    pvCallback.accept(new PvCallbackDTO(ply, parentPV, depth, alpha, searchStats.nodes));
+                if (opts.getPvCallback() != null) {
+                    opts.getPvCallback().accept(new PvCallbackDTO(ply, parentPV));
                 }
             }
         }
@@ -306,7 +300,5 @@ public class AlphaBetaSearch implements Search {
                                     int alpha, int beta, SearchStats searchStats);
 
     private native void stopNative(boolean stop);
-
-    private native void setPvCallBackNative(Consumer<NativePvCallbackDTO> pvCallback);
 
 }

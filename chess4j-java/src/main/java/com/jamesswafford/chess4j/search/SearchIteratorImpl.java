@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
@@ -51,7 +52,6 @@ public class SearchIteratorImpl implements SearchIterator {
     @Override
     public void setPost(boolean post) {
         this.post = post;
-        if (!post) search.setPvCallback(null, null);
     }
 
     public void setEarlyExitOk(boolean earlyExitOk) {
@@ -106,19 +106,18 @@ public class SearchIteratorImpl implements SearchIterator {
         moves.sort(Comparator.comparingInt(MVVLVA::score).reversed());
         List<Move> pv = Collections.singletonList(moves.get(0));
 
+        // create a callback to print the PV when it changes
         long startTime = System.currentTimeMillis();
+        Consumer<PvCallbackDTO> rootPvCallback = pvUpdate -> {
+            if (pvUpdate.ply == 0) {
+                long elapsed = System.currentTimeMillis() - startTime;
+                //PrintLine.printLine(pvUpdate.pv, depth, alpha, elapsed, searchStats.nodes);
+                PrintLine.printLine(pvUpdate.pv, 0, 0, elapsed, 0L);
+            }
+        };
+        SearchOptions opts = new SearchOptions(rootPvCallback, startTime);
         int depth = 0, score;
         boolean stopSearching = false;
-
-        // set a callback to print the updated PV
-        if (post) {
-            search.setPvCallback(pvUpdate -> {
-                if (pvUpdate.ply == 0) {
-                    PrintLine.printLine(
-                            pvUpdate.pv, pvUpdate.depth, pvUpdate.score, startTime, pvUpdate.nodes);
-                }
-            }, board.getPlayerToMove());
-        }
 
         // add a timer to stop the search
         // TODO: rework this.
@@ -140,7 +139,8 @@ public class SearchIteratorImpl implements SearchIterator {
             int betaBound = INFINITY;
 
             SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
-            score = search.search(board, undos, parameters);
+            score = search.search(board, undos, parameters, opts);
+
             // the search may or may not have a PV.  If it does, we can use it since the
             // last iteration's PV was tried first
             List<Move> searchPV = search.getPv();
@@ -153,7 +153,8 @@ public class SearchIteratorImpl implements SearchIterator {
             }
 
             if (post) {
-                PrintLine.printLine(pv, depth, score, startTime, search.getSearchStats().nodes);
+                long elapsed = System.currentTimeMillis() - startTime;
+                PrintLine.printLine(pv, depth, score, elapsed, search.getSearchStats().nodes);
             }
 
             // if this is a mate, stop here

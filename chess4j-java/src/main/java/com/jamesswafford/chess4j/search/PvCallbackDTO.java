@@ -7,20 +7,16 @@ import java.util.List;
 
 public class PvCallbackDTO {
 
-    public int ply, depth, score;
-    public long nodes;
+    public int ply;
     public List<Move> pv;
 
     public PvCallbackDTO() {
         pv = new ArrayList<>();
     }
 
-    public PvCallbackDTO(int ply, List<Move> pv, int depth, int score, long nodes) {
+    public PvCallbackDTO(int ply, List<Move> pv) {
         this.ply = ply;
         this.pv = pv;
-        this.depth = depth;
-        this.score = score;
-        this.nodes = nodes;
     }
 
     public int getPly() {
@@ -29,30 +25,6 @@ public class PvCallbackDTO {
 
     public void setPly(int ply) {
         this.ply = ply;
-    }
-
-    public int getDepth() {
-        return depth;
-    }
-
-    public void setDepth(int depth) {
-        this.depth = depth;
-    }
-
-    public int getScore() {
-        return score;
-    }
-
-    public void setScore(int score) {
-        this.score = score;
-    }
-
-    public long getNodes() {
-        return nodes;
-    }
-
-    public void setNodes(long nodes) {
-        this.nodes = nodes;
     }
 
     public List<Move> getPv() {

@@ -6,9 +6,7 @@
 
 #include "../../../../java/lang/Long.h"
 #include "../../../../java/util/ArrayList.h"
-#include "../../../../java/util/function/Consumer.h"
 #include "../io/PrintLine.h"
-#include "../search/NativePvCallbackDTO.h"
 
 
 extern int init();
@@ -39,24 +37,10 @@ JNIEXPORT jboolean JNICALL Java_com_jamesswafford_chess4j_init_Initializer_p4Ini
         return false;
     }
 
-    if (0 != Consumer_register(env))
-    {
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            "Consumer not initialized!");
-        return false;
-    }
-
     if (0 != PrintLine_register(env))
     {
         (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
             "PrintLine not initialized!");
-        return false;
-    }
-
-    if (0 != NativePvCallbackDTO_register(env))
-    {
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            "NativePvCallbackDTO not initialized!");
         return false;
     }
 

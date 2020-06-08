@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 import static com.jamesswafford.chess4j.Constants.INFINITY;
@@ -331,7 +332,7 @@ public class AlphaBetaSearchTest {
 
         // now try deeper searches.
         final Map<Integer, Boolean> visited = new HashMap<>();
-        search.setPvCallback(pvUpdate -> {
+        Consumer<PvCallbackDTO> pvCallback = pvUpdate -> {
             // we expect the first N-1 moves to match the previous PV
             int ply = pvUpdate.ply;
             if (ply < lastPv.size()) {
@@ -341,10 +342,11 @@ public class AlphaBetaSearchTest {
                     visited.put(ply, true);
                 }
             }
-        }, board.getPlayerToMove());
+        };
 
+        SearchOptions opts = new SearchOptions(pvCallback, System.currentTimeMillis());
         for (int depth=2; depth <= 6; depth++) {
-            search.search(board, new SearchParameters(depth, -INFINITY, INFINITY));
+            search.search(board, new SearchParameters(depth, -INFINITY, INFINITY), opts);
             assertEquals(depth, search.getPv().size());
             assertEquals(depth-1, visited.keySet().size());
 
