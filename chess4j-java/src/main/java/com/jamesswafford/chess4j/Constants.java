@@ -6,4 +6,6 @@ public final class Constants {
 
     public static final int INFINITY  = 200000;
     public static final int CHECKMATE =  65535;
+
+    public static final int MAX_ITERATIONS = 100;
 }

@@ -1,11 +1,13 @@
 #include <prophet/const.h>
 #include <prophet/search.h>
 #include <prophet/parameters.h>
+#include <prophet/util/p4time.h>
 
 #include <com_jamesswafford_chess4j_search_AlphaBetaSearch.h>
 #include "../init/p4_init.h"
-#include "../../../../java/util/ArrayList.h"
+#include "../io/PrintLine.h"
 #include "../../../../java/lang/Long.h"
+#include "../../../../java/util/ArrayList.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -16,14 +18,24 @@ move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
 /* undo stack */
 undo_t undos[MAX_PLY];
 
+/* search stats */
+stats_t native_stats;
+
+/* keep refs to use in the static helper function */
+JNIEnv *g_env;
+jobject *g_parent_pv;
+color_t g_ptm;
+
+static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
+
 /*
  * Class:     com_jamesswafford_chess4j_search_AlphaBetaSearch
  * Method:    searchNative
- * Signature: (Ljava/lang/String;Ljava/util/List;Ljava/util/List;IIILcom/jamesswafford/chess4j/search/SearchStats;)I
+ * Signature: (Ljava/lang/String;Ljava/util/List;Ljava/util/List;IIILcom/jamesswafford/chess4j/search/SearchStats;J)I
  */
 JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_searchNative
   (JNIEnv *env, jobject UNUSED(search_obj), jstring board_fen, jobject prev_moves,
-    jobject parent_pv, jint depth, jint alpha, jint beta, jobject search_stats)
+    jobject parent_pv, jint depth, jint alpha, jint beta, jobject search_stats, jlong start_time)
 
 {
     jint retval = 0;
@@ -36,19 +48,8 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
         return 0;
     }
 
-
-    /* retrieve the java.util.List interface class */
-    jclass class_List = (*env)->FindClass(env, "java/util/List");
-
-    /* retrieve the size and get methods */
-    jmethodID midSize = (*env)->GetMethodID(env, class_List, "size", "()I");
-    jmethodID midGet = (*env)->GetMethodID(env, class_List, "get", "(I)Ljava/lang/Object;");
-
-    /* retrieve the java.lang.Long class */
-    jclass class_Long = (*env)->FindClass(env, "java/lang/Long");
-
-    /* retrieve the longValue method */
-    jmethodID midLongValue = (*env)->GetMethodID(env, class_Long, "longValue", "()J");
+    g_env = env;
+    g_parent_pv = &parent_pv;
 
 
     /* set the position according to the FEN.  We use the FEN instead of the
@@ -68,60 +69,76 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     /* replay the previous moves for draw checks */
     position_t replay_pos;
     reset_pos(&replay_pos);    
-    jint size = (*env)->CallIntMethod(env, prev_moves, midSize);
+    jint size = (*env)->CallIntMethod(env, prev_moves, ArrayList_size);
     jvalue arg;
     for (int i=0; i<size; i++)
     {
         arg.i = i;
-        jobject element = (*env)->CallObjectMethodA(env, prev_moves, midGet, &arg);
-        jlong prev_mv = (*env)->CallLongMethod(env, element, midLongValue);
+        jobject element = (*env)->CallObjectMethodA(env, prev_moves, ArrayList_get, 
+            &arg);
+        jlong prev_mv = (*env)->CallLongMethod(env, element, Long_longValue);
 
         /* apply this move */
         apply_move(&replay_pos, (move_t) prev_mv, undos + replay_pos.move_counter);
 
         (*env)->DeleteLocalRef(env, element);
     }
+    g_ptm = replay_pos.player;
 
 
     /* perform the search */
     move_line_t pv;
-    stats_t native_stats;
     search_options_t search_opts;
     memset(&search_opts, 0, sizeof(search_options_t));
+    search_opts.pv_callback = pv_callback;
+    search_opts.start_time = start_time;
     int32_t native_score = search(&pos, &pv, depth, alpha, beta, moves, undos,
         &native_stats, &search_opts);
     retval = (jint) native_score;
 
-    /* copy the PV to the Java list */
-    for (int i=0; i < pv.n; i++)
-    {
-        /* create Long value representing this move */
-        jobject lval = (*env)->CallStaticObjectMethod(
-            env, Long, Long_valueOf, (jlong)(pv.mv[i]));
-
-        /* add to java list */
-        (*env)->CallBooleanMethod(env, parent_pv, ArrayList_add, lval);
-        (*env)->DeleteLocalRef(env, lval);
-    }
 
     /* copy the search stats to the Java structure */
     jclass class_SearchStats = (*env)->GetObjectClass(env, search_stats);
-    jfieldID fidNodes = (*env)->GetFieldID(env, class_SearchStats, "nodes", "J");
-    (*env)->SetLongField(env, search_stats, fidNodes, native_stats.nodes);
+    jfieldID fid_nodes = (*env)->GetFieldID(env, class_SearchStats, "nodes", "J");
+    (*env)->SetLongField(env, search_stats, fid_nodes, native_stats.nodes);
 
-    jfieldID fidFailHighs = (*env)->GetFieldID(env, class_SearchStats, "failHighs", "J");
-    (*env)->SetLongField(env, search_stats, fidFailHighs, native_stats.fail_highs);
+    jfieldID fid_failHighs = (*env)->GetFieldID(env, class_SearchStats, "failHighs", "J");
+    (*env)->SetLongField(env, search_stats, fid_failHighs, native_stats.fail_highs);
 
-    jfieldID fidFailLows = (*env)->GetFieldID(env, class_SearchStats, "failLows", "J");
-    (*env)->SetLongField(env, search_stats, fidFailLows, native_stats.fail_lows);
+    jfieldID fid_failLows = (*env)->GetFieldID(env, class_SearchStats, "failLows", "J");
+    (*env)->SetLongField(env, search_stats, fid_failLows, native_stats.fail_lows);
 
-    jfieldID fidDraws = (*env)->GetFieldID(env, class_SearchStats, "draws", "J");
-    (*env)->SetLongField(env, search_stats, fidDraws, native_stats.draws);
+    jfieldID fid_draws = (*env)->GetFieldID(env, class_SearchStats, "draws", "J");
+    (*env)->SetLongField(env, search_stats, fid_draws, native_stats.draws);
 
 
     /* free resources */
 cleanup:
     (*env)->ReleaseStringUTFChars(env, board_fen, fen);
 
+    g_parent_pv = 0;
+    g_env = 0;
+
     return retval;
+}
+
+
+static void pv_callback(move_line_t* pv, int32_t depth, int32_t score, 
+    uint64_t elapsed, uint64_t num_nodes)
+{
+    /* update the parent pv */
+    (*g_env)->CallBooleanMethod(g_env, *g_parent_pv, ArrayList_clear);
+    for (int i=0; i < pv->n; i++)
+    {
+        /* create Long value representing this move */
+        jobject lval = (*g_env)->CallStaticObjectMethod(
+            g_env, Long, Long_valueOf, (jlong)(pv->mv[i]));
+
+        /* add to java list */
+        (*g_env)->CallBooleanMethod(g_env, *g_parent_pv, ArrayList_add, lval);
+        (*g_env)->DeleteLocalRef(g_env, lval);
+    }
+
+    (*g_env)->CallStaticVoidMethod(g_env, PrintLine, PrintLine_printNativeLine, 
+        depth, *g_parent_pv, g_ptm==WHITE, score, elapsed, num_nodes);
 }

@@ -37,20 +37,6 @@ JNICALL Java_com_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
     }
 
 
-    /* retrieve the java.util.List interface class */
-    jclass class_List = (*env)->FindClass(env, "java/util/List");
-
-    /* retrieve the size and get methods */
-    jmethodID midSize = (*env)->GetMethodID(env, class_List, "size", "()I");
-    jmethodID midGet = (*env)->GetMethodID(env, class_List, "get", "(I)Ljava/lang/Object;");
-
-    /* retrieve the java.lang.Long class */
-    jclass class_Long = (*env)->FindClass(env, "java/lang/Long");
-
-    /* retrieve the longValue method */
-    jmethodID midLongValue = (*env)->GetMethodID(env, class_Long, "longValue", "()J");
-
-
     /* set the position according to the FEN.  We use the FEN instead of the
      * prev_moves list for test suites, which don't have a move history.
      */
@@ -68,13 +54,14 @@ JNICALL Java_com_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
     /* replay the previous moves for draw checks */
     position_t replay_pos;
     reset_pos(&replay_pos);    
-    jint size = (*env)->CallIntMethod(env, prev_moves, midSize);
+    jint size = (*env)->CallIntMethod(env, prev_moves, ArrayList_size);
     jvalue arg;
     for (int i=0; i<size; i++)
     {
         arg.i = i;
-        jobject element = (*env)->CallObjectMethodA(env, prev_moves, midGet, &arg);
-        jlong prev_mv = (*env)->CallLongMethod(env, element, midLongValue);
+        jobject element = (*env)->CallObjectMethodA(env, prev_moves, 
+            ArrayList_get, &arg);
+        jlong prev_mv = (*env)->CallLongMethod(env, element, Long_longValue);
 
         /* apply this move */
         apply_move(&replay_pos, (move_t) prev_mv, undos + replay_pos.move_counter);
@@ -86,6 +73,7 @@ JNICALL Java_com_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
     iterator_options_t opts;
     opts.early_exit_ok = true;
     opts.max_depth = max_depth;
+    opts.max_time_ms = 0; /* we only call the iterator for fixed depth testing */
     opts.post_mode = false;
 
     iterator_context_t ctx;

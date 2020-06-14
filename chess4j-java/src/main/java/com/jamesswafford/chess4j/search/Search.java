@@ -3,10 +3,8 @@ package com.jamesswafford.chess4j.search;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
-import org.javatuples.Quintet;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 public interface Search {
 
@@ -18,9 +16,11 @@ public interface Search {
 
     int search(Board board, SearchParameters searchParameters);
 
+    int search(Board board, SearchParameters searchParameters, SearchOptions opts);
+
     int search(Board board, List<Undo> undos, SearchParameters searchParameters);
 
-    void setPvCallback(Consumer<Quintet<Integer, List<Move>, Integer, Integer, Long>> pvCallback);
+    int search(Board board, List<Undo> undos, SearchParameters searchParameters, SearchOptions opts);
 
     boolean isStopped();
 

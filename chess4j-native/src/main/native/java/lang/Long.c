@@ -32,13 +32,12 @@ int Long_register(JNIEnv* env)
 
     /* register valueOf method */
     Long_valueOf = (*env)->GetStaticMethodID(
-            env, Long, "valueOf", "(J)Ljava/lang/Long;");
+        env, Long, "valueOf", "(J)Ljava/lang/Long;");
     if (NULL == Long_valueOf)
         return 1;
 
     /* register longValue method */
-    Long_longValue = (*env)->GetMethodID(
-            env, Long, "longValue", "()J");
+    Long_longValue = (*env)->GetMethodID(env, Long, "longValue", "()J");
     if (NULL == Long_longValue)
         return 1;
 

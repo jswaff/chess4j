@@ -131,7 +131,7 @@ public class XBoardHandler {
      *    level 0 2 12 - play the entire game with a 2 minute base + 12 second increment per move.
      */
     private void level(String[] cmd) {
-        incrementMs = Integer.parseInt(cmd[3]) * 1000;
+        incrementMs =  (int)(Float.parseFloat(cmd[3]) * 1000);
         fixedTimePerMove = false;
     }
 

@@ -1,5 +1,6 @@
-#ifndef LONG_HEADER_GUARD
-#define LONG_HEADER_GUARD
+#ifndef PRINTLINE_HEADER_GUARD
+#define PRINTLINE_HEADER_GUARD
+
 
 #include <jni.h>
 
@@ -8,11 +9,10 @@
 extern "C" {
 #endif /*__cplusplus*/
 
-int Long_register(JNIEnv* env);
+int PrintLine_register(JNIEnv* env);
 
-extern jclass Long;
-extern jmethodID Long_valueOf;
-extern jmethodID Long_longValue;
+extern jclass PrintLine;
+extern jmethodID PrintLine_printNativeLine;
 
 /* make this header C++ friendly */
 #ifdef __cplusplus

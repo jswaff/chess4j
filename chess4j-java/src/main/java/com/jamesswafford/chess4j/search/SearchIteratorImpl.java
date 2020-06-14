@@ -1,7 +1,7 @@
 package com.jamesswafford.chess4j.search;
 
+import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.init.Initializer;
@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
@@ -51,7 +52,6 @@ public class SearchIteratorImpl implements SearchIterator {
     @Override
     public void setPost(boolean post) {
         this.post = post;
-        if (!post) search.setPvCallback(null);
     }
 
     public void setEarlyExitOk(boolean earlyExitOk) {
@@ -106,33 +106,34 @@ public class SearchIteratorImpl implements SearchIterator {
         moves.sort(Comparator.comparingInt(MVVLVA::score).reversed());
         List<Move> pv = Collections.singletonList(moves.get(0));
 
+        // create a callback to print the PV when it changes
         long startTime = System.currentTimeMillis();
-        int depth = 0, score;
-        boolean stopSearching = false;
-
-        // set a callback to print the updated PV
+        SearchOptions opts = SearchOptions.builder().startTime(startTime).build();
+        Consumer<PvCallbackDTO> rootPvCallback = pvUpdate -> {
+            if (pvUpdate.ply == 0) {
+                PrintLine.printLine(false, pvUpdate.pv, pvUpdate.depth, pvUpdate.score, pvUpdate.elapsedMS,
+                        pvUpdate.nodes);
+            }
+        };
         if (post) {
-            search.setPvCallback(pvUpdate -> {
-                if (pvUpdate.getValue0() == 0) { // ply 0
-                    PrintLine.printLine(
-                            pvUpdate.getValue1(), pvUpdate.getValue2(), pvUpdate.getValue3(), startTime,
-                            pvUpdate.getValue4());
-                }
-            });
+            opts.setPvCallback(rootPvCallback);
         }
-
-        // add a timer to stop the search
-        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        if (maxTimeMs > 0) {
-            LOGGER.debug("# setting timer task for " + maxTimeMs + " ms.");
-            executorService.schedule(() -> {
-                LOGGER.debug("# stopping search on time.");
-                search.stop();
-            }, maxTimeMs, TimeUnit.MILLISECONDS);
-        }
-
+        int depth = 0, score;
         search.initialize();
 
+        if (maxTimeMs > 0) {
+            opts.setStopTime(opts.getStartTime() + maxTimeMs);
+            opts.setNodesBetweenTimeChecks(50000);
+            // if we're getting low on time, check more often
+            if (maxTimeMs < 10000) {
+                opts.setNodesBetweenTimeChecks(opts.getNodesBetweenTimeChecks() / 10);
+            }
+            if (maxTimeMs < 1000) {
+                opts.setNodesBetweenTimeChecks(opts.getNodesBetweenTimeChecks() / 10);
+            }
+        }
+
+        boolean stopSearching = false;
         do {
             ++depth;
 
@@ -140,7 +141,8 @@ public class SearchIteratorImpl implements SearchIterator {
             int betaBound = INFINITY;
 
             SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
-            score = search.search(board, undos, parameters);
+            score = search.search(board, undos, parameters, opts);
+
             // the search may or may not have a PV.  If it does, we can use it since the
             // last iteration's PV was tried first
             List<Move> searchPV = search.getPv();
@@ -153,7 +155,8 @@ public class SearchIteratorImpl implements SearchIterator {
             }
 
             if (post) {
-                PrintLine.printLine(pv, depth, score, startTime, search.getSearchStats().nodes);
+                long elapsed = System.currentTimeMillis() - startTime;
+                PrintLine.printLine(true, pv, depth, score, elapsed, search.getSearchStats().nodes);
             }
 
             // if this is a mate, stop here
@@ -162,17 +165,18 @@ public class SearchIteratorImpl implements SearchIterator {
                 stopSearching = true;
             }
 
+            // if we've hit the user defined max search depth, stop here
             if (maxDepth > 0 && depth >= maxDepth) {
                 LOGGER.debug("# stopping iterative search on depth");
                 stopSearching = true;
             }
 
-        } while (!stopSearching);
+            // if we've hit the system defined max iterations, stop here
+            if (maxDepth >= Constants.MAX_ITERATIONS) {
+                stopSearching = true;
+            }
 
-        // make sure the scheduled timer task has terminated
-        LOGGER.debug("# shutting timer task down.");
-        executorService.shutdownNow();
-        while (!executorService.isTerminated());
+        } while (!stopSearching);
 
         if (post) {
             printSearchSummary(depth, startTime, search.getSearchStats());
@@ -193,7 +197,6 @@ public class SearchIteratorImpl implements SearchIterator {
         if (Initializer.nativeCodeInitialized()) {
 
             LOGGER.debug("# checking iteration equality with native");
-
             List<Move> nativePV = findPrincipalVariationNative(board, undos);
 
             // if the search was stopped the comparison won't be valid
@@ -225,19 +228,10 @@ public class SearchIteratorImpl implements SearchIterator {
                 .collect(Collectors.toList());
 
         List<Long> nativePV = new ArrayList<>();
-
         try {
+            LOGGER.debug("# starting native iterator maxDepth: {}", maxDepth);
             iterateNative(fen, prevMoves, maxDepth, nativePV);
-
-            // translate the native PV
-            List<Move> pv = new ArrayList<>();
-            for (int i=0; i<nativePV.size(); i++) {
-                Long nativeMv = nativePV.get(i);
-                // which side is moving?  On even moves it is the player on move.
-                Color ptm = (i % 2) == 0 ? board.getPlayerToMove() : Color.swap(board.getPlayerToMove());
-                pv.add(MoveUtils.fromNativeMove(nativeMv, ptm));
-            }
-            return pv;
+            return MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove());
         } catch (IllegalStateException e) {
             LOGGER.error(e);
             throw e;

@@ -12,7 +12,7 @@
 
     <modules>
         <module>chess4j-java</module>
-		<module>chess4j-native</module>
+        <module>chess4j-native</module>
     </modules>
 
     <dependencyManagement>
@@ -23,11 +23,10 @@
                 <version>2.13.2</version>
             </dependency>
             <dependency>
-                <groupId>org.javatuples</groupId>
-                <artifactId>javatuples</artifactId>
-                <version>1.2</version>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.12</version>
             </dependency>
-            
         </dependencies>
     </dependencyManagement>
 
