@@ -150,7 +150,7 @@ public class AlphaBetaSearch implements Search {
         List<Long> nativePV = new ArrayList<>();
         try {
             int nativeScore = searchNative(fen, prevMoves, nativePV, searchParameters.getDepth(),
-                    searchParameters.getAlpha(), searchParameters.getBeta(), searchStats);
+                    searchParameters.getAlpha(), searchParameters.getBeta(), searchStats, opts.getStartTime());
 
             // if the search completed then verify equality with the Java implementation.
             assert (stop || searchesAreEqual(board, undos, searchParameters, opts, fen, nativeScore, nativePV));
@@ -301,7 +301,7 @@ public class AlphaBetaSearch implements Search {
     private native void initializeNativeSearch();
 
     private native int searchNative(String boardFen, List<Long> prevMoves, List<Long> parentPV, int depth,
-                                    int alpha, int beta, SearchStats searchStats);
+                                    int alpha, int beta, SearchStats searchStats, long startTime);
 
     private native void stopNative(boolean stop);
 

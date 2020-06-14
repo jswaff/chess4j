@@ -12,7 +12,7 @@
 
     <modules>
         <module>chess4j-java</module>
-		<module>chess4j-native</module>
+        <module>chess4j-native</module>
     </modules>
 
     <dependencyManagement>
