@@ -79,8 +79,7 @@ public final class App {
 
     private static void warmUp() {
         TTHolder.getInstance().clearTables();
-        SearchOptions opts = new SearchOptions(null, System.currentTimeMillis());
-        opts.setAvoidNative(true); // warm up the JVM
+        SearchOptions opts = SearchOptions.builder().avoidNative(true).build();
         new AlphaBetaSearch().search(new Board(),
                 new SearchParameters(3, -Constants.INFINITY, Constants.INFINITY), opts);
     }

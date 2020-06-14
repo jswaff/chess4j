@@ -85,7 +85,7 @@ public class AlphaBetaSearch implements Search {
 
     @Override
     public int search(Board board, SearchParameters searchParameters) {
-        return search(board, searchParameters, new SearchOptions(null, System.currentTimeMillis()));
+        return search(board, searchParameters, SearchOptions.builder().startTime(System.currentTimeMillis()).build());
     }
 
     @Override
@@ -95,7 +95,8 @@ public class AlphaBetaSearch implements Search {
 
     @Override
     public int search(Board board, List<Undo> undos, SearchParameters searchParameters) {
-        return search(board, undos, searchParameters, new SearchOptions(null, System.currentTimeMillis()));
+        return search(board, undos, searchParameters,
+                SearchOptions.builder().startTime(System.currentTimeMillis()).build());
     }
 
     @Override
@@ -148,11 +149,7 @@ public class AlphaBetaSearch implements Search {
                 .collect(Collectors.toList());
 
         List<Long> nativePV = new ArrayList<>();
-
-        SearchStats nativeStats = new SearchStats();
-        nativeStats.nodes = searchStats.nodes;
-        nativeStats.failHighs = searchStats.failHighs;
-        nativeStats.draws = searchStats.draws;
+        SearchStats nativeStats = new SearchStats(searchStats);
 
         try {
 
@@ -164,9 +161,7 @@ public class AlphaBetaSearch implements Search {
                     nativeStats));
 
             // set the object's stats to the native stats
-            searchStats.nodes = nativeStats.nodes;
-            searchStats.failHighs = nativeStats.failHighs;
-            searchStats.draws = nativeStats.draws;
+            searchStats.set(nativeStats);
 
             // translate the native PV into the object's PV
             pv.clear();
@@ -218,10 +213,18 @@ public class AlphaBetaSearch implements Search {
         searchStats.nodes++;
         parentPV.clear();
 
+        // time check
+        if (stopSearchOnTime(opts)) {
+            stop = true;
+            return 0;
+        }
+
+        // base case
         if (depth == 0) {
             return evaluator.evaluateBoard(board);
         }
 
+        // try for early exit
         if (ply > 0) {
             // Draw check
             if (Draw.isDraw(board, undos)) {
@@ -282,6 +285,24 @@ public class AlphaBetaSearch implements Search {
         alpha = adjustFinalScoreForMates(board, alpha, numMovesSearched, ply);
 
         return alpha;
+    }
+
+    private boolean stopSearchOnTime(SearchOptions opts) {
+
+        // if we don't have a stop time, nevermind!
+        if (opts.getStopTime() == 0) {
+            return false;
+        }
+
+        // avoid doing expensive time checks too often
+        if (searchStats.nodes - opts.getNodeCountLastTimeCheck() < opts.getNodesBetweenTimeChecks()) {
+            return false;
+        }
+
+        // ok, time check
+        opts.setNodeCountLastTimeCheck(searchStats.nodes);
+
+        return System.currentTimeMillis() >= opts.getStopTime();
     }
 
     private int adjustFinalScoreForMates(Board board, int score, int numMovesSearched, int ply) {

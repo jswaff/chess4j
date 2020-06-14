@@ -108,29 +108,32 @@ public class SearchIteratorImpl implements SearchIterator {
 
         // create a callback to print the PV when it changes
         long startTime = System.currentTimeMillis();
+        SearchOptions opts = SearchOptions.builder().startTime(startTime).build();
         Consumer<PvCallbackDTO> rootPvCallback = pvUpdate -> {
             if (pvUpdate.ply == 0) {
                 PrintLine.printLine(false, pvUpdate.pv, pvUpdate.depth, pvUpdate.score, pvUpdate.elapsedMS,
                         pvUpdate.nodes);
             }
         };
-        SearchOptions opts = new SearchOptions(rootPvCallback, startTime);
-        int depth = 0, score;
-        boolean stopSearching = false;
-
-        // add a timer to stop the search
-        // TODO: rework this.
-        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        if (maxTimeMs > 0) {
-            LOGGER.debug("# setting timer task for " + maxTimeMs + " ms.");
-            executorService.schedule(() -> {
-                LOGGER.debug("# stopping search on time.");
-                search.stop();
-            }, maxTimeMs, TimeUnit.MILLISECONDS);
+        if (post) {
+            opts.setPvCallback(rootPvCallback);
         }
-
+        int depth = 0, score;
         search.initialize();
 
+        if (maxTimeMs > 0) {
+            opts.setStopTime(opts.getStartTime() + maxTimeMs);
+            opts.setNodesBetweenTimeChecks(50000);
+            // if we're getting low on time, check more often
+            if (maxTimeMs < 10000) {
+                opts.setNodesBetweenTimeChecks(opts.getNodesBetweenTimeChecks() / 10);
+            }
+            if (maxTimeMs < 1000) {
+                opts.setNodesBetweenTimeChecks(opts.getNodesBetweenTimeChecks() / 10);
+            }
+        }
+
+        boolean stopSearching = false;
         do {
             ++depth;
 
@@ -175,11 +178,6 @@ public class SearchIteratorImpl implements SearchIterator {
 
         } while (!stopSearching);
 
-        // make sure the scheduled timer task has terminated
-        LOGGER.debug("# shutting timer task down.");
-        executorService.shutdownNow();
-        while (!executorService.isTerminated());
-
         if (post) {
             printSearchSummary(depth, startTime, search.getSearchStats());
         }
@@ -199,7 +197,6 @@ public class SearchIteratorImpl implements SearchIterator {
         if (Initializer.nativeCodeInitialized()) {
 
             LOGGER.debug("# checking iteration equality with native");
-
             List<Move> nativePV = findPrincipalVariationNative(board, undos);
 
             // if the search was stopped the comparison won't be valid
@@ -232,6 +229,7 @@ public class SearchIteratorImpl implements SearchIterator {
 
         List<Long> nativePV = new ArrayList<>();
         try {
+            LOGGER.debug("# starting native iterator maxDepth: {}", maxDepth);
             iterateNative(fen, prevMoves, maxDepth, nativePV);
             return MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove());
         } catch (IllegalStateException e) {

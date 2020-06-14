@@ -344,7 +344,8 @@ public class AlphaBetaSearchTest {
             }
         };
 
-        SearchOptions opts = new SearchOptions(pvCallback, System.currentTimeMillis());
+        SearchOptions opts = SearchOptions.builder().pvCallback(pvCallback).startTime(System.currentTimeMillis())
+                .build();
         for (int depth=2; depth <= 6; depth++) {
             search.search(board, new SearchParameters(depth, -INFINITY, INFINITY), opts);
             assertEquals(depth, search.getPv().size());

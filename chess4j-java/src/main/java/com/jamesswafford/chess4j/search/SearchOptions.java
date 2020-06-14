@@ -1,39 +1,19 @@
 package com.jamesswafford.chess4j.search;
 
+import lombok.Builder;
+import lombok.Data;
+
 import java.util.function.Consumer;
 
+@Builder
+@Data
 public class SearchOptions {
 
     private Consumer<PvCallbackDTO> pvCallback;
     private long startTime;
+    private long stopTime;
+    private long nodesBetweenTimeChecks;
+    private long nodeCountLastTimeCheck;
     private boolean avoidNative;
 
-    public SearchOptions(Consumer<PvCallbackDTO> pvCallback, long startTime) {
-        this.pvCallback = pvCallback;
-        this.startTime = startTime;
-    }
-
-    public Consumer<PvCallbackDTO> getPvCallback() {
-        return pvCallback;
-    }
-
-    public void setPvCallback(Consumer<PvCallbackDTO> pvCallback) {
-        this.pvCallback = pvCallback;
-    }
-
-    public long getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
-    }
-
-    public boolean isAvoidNative() {
-        return avoidNative;
-    }
-
-    public void setAvoidNative(boolean avoidNative) {
-        this.avoidNative = avoidNative;
-    }
 }

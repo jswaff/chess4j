@@ -8,11 +8,22 @@ public class SearchStats {
         initialize();
     }
 
+    public SearchStats(SearchStats searchStats) {
+        set(searchStats);
+    }
+
     void initialize() {
         nodes = 0;
         failHighs = 0;
         failLows = 0;
         draws = 0;
+    }
+
+    void set(SearchStats searchStats) {
+        this.nodes = searchStats.nodes;
+        this.failHighs = searchStats.failHighs;
+        this.failLows = searchStats.failLows;
+        this.draws = searchStats.draws;
     }
 
     @Override
