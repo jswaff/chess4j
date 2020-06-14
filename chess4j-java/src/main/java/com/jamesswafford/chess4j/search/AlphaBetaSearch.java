@@ -100,7 +100,7 @@ public class AlphaBetaSearch implements Search {
 
     @Override
     public int search(Board board, List<Undo> undos, SearchParameters searchParameters, SearchOptions opts) {
-        if (Initializer.nativeCodeInitialized()) {
+        if (!opts.isAvoidNative() && Initializer.nativeCodeInitialized()) {
             return searchWithNativeCode(board, undos, searchParameters, opts);
         } else {
             return searchWithJavaCode(board, undos, searchParameters, opts);
@@ -148,12 +148,25 @@ public class AlphaBetaSearch implements Search {
                 .collect(Collectors.toList());
 
         List<Long> nativePV = new ArrayList<>();
+
+        SearchStats nativeStats = new SearchStats();
+        nativeStats.nodes = searchStats.nodes;
+        nativeStats.failHighs = searchStats.failHighs;
+        nativeStats.draws = searchStats.draws;
+
         try {
+
             int nativeScore = searchNative(fen, prevMoves, nativePV, searchParameters.getDepth(),
-                    searchParameters.getAlpha(), searchParameters.getBeta(), searchStats, opts.getStartTime());
+                    searchParameters.getAlpha(), searchParameters.getBeta(), nativeStats, opts.getStartTime());
 
             // if the search completed then verify equality with the Java implementation.
-            assert (stop || searchesAreEqual(board, undos, searchParameters, opts, fen, nativeScore, nativePV));
+            assert (stop || searchesAreEqual(board, undos, searchParameters, opts, fen, nativeScore, nativePV,
+                    nativeStats));
+
+            // set the object's stats to the native stats
+            searchStats.nodes = nativeStats.nodes;
+            searchStats.failHighs = nativeStats.failHighs;
+            searchStats.draws = nativeStats.draws;
 
             // translate the native PV into the object's PV
             pv.clear();
@@ -167,17 +180,11 @@ public class AlphaBetaSearch implements Search {
     }
 
     private boolean searchesAreEqual(Board board, List<Undo> undos, SearchParameters searchParameters,
-                                     SearchOptions opts, String fen, int nativeScore, List<Long> nativePV)
+                                     SearchOptions opts, String fen, int nativeScore, List<Long> nativePV,
+                                     SearchStats nativeStats)
     {
         LOGGER.debug("# checking search equality with java depth {}", searchParameters.getDepth());
         try {
-            // copy the search stats for comparison
-            SearchStats nativeStats = new SearchStats();
-            nativeStats.nodes = searchStats.nodes;
-            nativeStats.failHighs = searchStats.failHighs;
-            nativeStats.draws = searchStats.draws;
-
-            searchStats.initialize();
             int javaScore = searchWithJavaCode(board, undos, searchParameters, opts);
 
             // if the search was interrupted we can't compare

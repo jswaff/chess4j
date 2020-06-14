@@ -18,6 +18,9 @@ move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
 /* undo stack */
 undo_t undos[MAX_PLY];
 
+/* search stats */
+stats_t native_stats;
+
 /* keep refs to use in the static helper function */
 JNIEnv *g_env;
 jobject *g_parent_pv;
@@ -83,7 +86,6 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
 
     /* perform the search */
     move_line_t pv;
-    stats_t native_stats;
     search_options_t search_opts;
     memset(&search_opts, 0, sizeof(search_options_t));
     search_opts.pv_callback = pv_callback;

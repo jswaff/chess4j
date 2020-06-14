@@ -6,6 +6,7 @@ import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.XBoardHandler;
 import com.jamesswafford.chess4j.search.AlphaBetaSearch;
+import com.jamesswafford.chess4j.search.SearchOptions;
 import com.jamesswafford.chess4j.search.SearchParameters;
 import com.jamesswafford.chess4j.utils.TestSuiteProcessor;
 import org.apache.logging.log4j.LogManager;
@@ -78,8 +79,10 @@ public final class App {
 
     private static void warmUp() {
         TTHolder.getInstance().clearTables();
+        SearchOptions opts = new SearchOptions(null, System.currentTimeMillis());
+        opts.setAvoidNative(true); // warm up the JVM
         new AlphaBetaSearch().search(new Board(),
-                new SearchParameters(3, -Constants.INFINITY, Constants.INFINITY));
+                new SearchParameters(3, -Constants.INFINITY, Constants.INFINITY), opts);
     }
 
     public static void main(String[] args) throws Exception {
