@@ -24,6 +24,7 @@ stats_t native_stats;
 /* keep refs to use in the static helper function */
 JNIEnv *g_env;
 jobject *g_parent_pv;
+color_t g_ptm;
 
 static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
 
@@ -82,6 +83,7 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
 
         (*env)->DeleteLocalRef(env, element);
     }
+    g_ptm = replay_pos.player;
 
 
     /* perform the search */
@@ -138,5 +140,5 @@ static void pv_callback(move_line_t* pv, int32_t depth, int32_t score,
     }
 
     (*g_env)->CallStaticVoidMethod(g_env, PrintLine, PrintLine_printNativeLine, 
-        depth, score, elapsed, num_nodes);
+        depth, *g_parent_pv, g_ptm==WHITE, score, elapsed, num_nodes);
 }

@@ -110,7 +110,8 @@ public class SearchIteratorImpl implements SearchIterator {
         long startTime = System.currentTimeMillis();
         Consumer<PvCallbackDTO> rootPvCallback = pvUpdate -> {
             if (pvUpdate.ply == 0) {
-                PrintLine.printLine(pvUpdate.pv, pvUpdate.depth, pvUpdate.score, pvUpdate.elapsedMS, pvUpdate.nodes);
+                PrintLine.printLine(false, pvUpdate.pv, pvUpdate.depth, pvUpdate.score, pvUpdate.elapsedMS,
+                        pvUpdate.nodes);
             }
         };
         SearchOptions opts = new SearchOptions(rootPvCallback, startTime);
@@ -152,7 +153,7 @@ public class SearchIteratorImpl implements SearchIterator {
 
             if (post) {
                 long elapsed = System.currentTimeMillis() - startTime;
-                PrintLine.printLine(pv, depth, score, elapsed, search.getSearchStats().nodes);
+                PrintLine.printLine(true, pv, depth, score, elapsed, search.getSearchStats().nodes);
             }
 
             // if this is a mate, stop here
