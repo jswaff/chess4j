@@ -10,12 +10,11 @@ public class TimeUtilsTest {
 
     @Test
     public void testGetSearchTime() {
-        assertEquals(4, getSearchTime(100, 0));
-        assertEquals(3, getSearchTime(99, 0));
-        assertEquals(1, getSearchTime(25, 0));
-        assertEquals(0, getSearchTime(24, 0));
+        assertEquals(400, getSearchTime(10000, 0));
+        assertEquals(10, getSearchTime(250, 0));
+        assertEquals(11910, getSearchTime(250, 12000));
         assertEquals(3, getSearchTime(0, 3));
-        assertEquals(3, getSearchTime(-1, 3));
-        assertEquals(2, getSearchTime(-25, 2));
+        assertEquals(11900, getSearchTime(-2, 12000));
+        assertEquals(800, getSearchTime(10000, 500));
     }
 }

@@ -38,6 +38,7 @@ public class XBoardHandler {
 
     private final Map<String, Consumer<String[]>> cmdMap = new HashMap<>() {{
         put("accepted", XBoardHandler::noOp);
+        put("analyze", XBoardHandler::analyze);
         put("bk", (String[] cmd) -> PrintBookMoves.printBookMoves(Globals.getBoard()));
         put("computer", XBoardHandler::noOp);
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
@@ -105,6 +106,10 @@ public class XBoardHandler {
         } else {
             LOGGER.info("Error (unknown command): " + cmd);
         }
+    }
+
+    private static void analyze(String[] cmd) {
+
     }
 
     private void force(String[] cmd) {
@@ -214,7 +219,7 @@ public class XBoardHandler {
             System.exit(1);
         }
         // only sending the features where we want the non-default value
-        LOGGER.info("feature analyze=0 colors=0 ping=1 draw=0 debug=1");
+        LOGGER.info("feature analyze=1 colors=0 ping=1 draw=0 debug=1");
         LOGGER.info("feature name=0 nps=0 memory=1");
         LOGGER.info("feature setboard=1 sigint=0 sigterm=0 usermove=1");
         LOGGER.info("feature variants=\"normal\" myname=\"chess4j\"");
