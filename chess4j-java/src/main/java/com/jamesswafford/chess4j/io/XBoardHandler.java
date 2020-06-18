@@ -32,18 +32,20 @@ public class XBoardHandler {
     private SearchIterator searchIterator;
     private CompletableFuture<List<Move>> searchFuture;
     private Color engineColor;
+    private boolean analysisMode = false;
     private boolean forceMode = true;
     private boolean fixedTimePerMove;
     private int incrementMs;
 
     private final Map<String, Consumer<String[]>> cmdMap = new HashMap<>() {{
         put("accepted", XBoardHandler::noOp);
-        put("analyze", XBoardHandler::analyze);
+        put("analyze", XBoardHandler.this::analyze);
         put("bk", (String[] cmd) -> PrintBookMoves.printBookMoves(Globals.getBoard()));
         put("computer", XBoardHandler::noOp);
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
         put("easy", XBoardHandler::noOp);
         put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getBoard())));
+        put("exit",XBoardHandler.this::exit);
         put("force", XBoardHandler.this::force);
         put("go", XBoardHandler.this::go);
         put("hard", XBoardHandler::noOp);
@@ -108,13 +110,22 @@ public class XBoardHandler {
         }
     }
 
-    private static void analyze(String[] cmd) {
+    private void analyze(String[] cmd) {
+        analysisMode = true;
+        forceMode = false;
+        stopSearchThread();
+        searchIterator.setMaxTime(0);
+        searchIterator.setMaxDepth(0);
+        thinkAndMakeMove(); // the "make move" part is skipped in analysis mode
+    }
 
+    private void exit(String[] cmd) {
+        analysisMode = false;
     }
 
     private void force(String[] cmd) {
-        stopSearchThread();
         forceMode = true;
+        stopSearchThread();
     }
 
     /**
@@ -355,6 +366,9 @@ public class XBoardHandler {
      * The engine may or may not be pondering.
      */
     private void usermove(String[] cmd)  {
+        if (analysisMode) {
+            stopSearchThread();
+        }
         String strMove = cmd[1];
         MoveParser mp = new MoveParser();
         Move mv = null;
@@ -392,7 +406,7 @@ public class XBoardHandler {
         engineColor = Globals.getBoard().getPlayerToMove();
 
         AtomicBoolean playedBookMove = new AtomicBoolean(false);
-        if (openingBook != null && bookMisses < 3) {
+        if (!analysisMode && openingBook != null && bookMisses < 3) {
             openingBook.getMoveWeightedRandomByFrequency(Globals.getBoard())
                     .ifPresentOrElse(bookMove -> {
                         Globals.getGameUndos().add(Globals.getBoard().applyMove(bookMove.getMove()));
@@ -410,9 +424,11 @@ public class XBoardHandler {
             searchFuture = searchIterator.findPvFuture(board, undos)
                     .thenApply(
                             pv -> {
-                                Globals.getGameUndos().add(Globals.getBoard().applyMove(pv.get(0)));
-                                LOGGER.info("move " + pv.get(0));
-                                endOfGameCheck();
+                                if (!analysisMode && !forceMode) {
+                                    Globals.getGameUndos().add(Globals.getBoard().applyMove(pv.get(0)));
+                                    LOGGER.info("move " + pv.get(0));
+                                    endOfGameCheck();
+                                }
                                 return pv;
                             });
         }
