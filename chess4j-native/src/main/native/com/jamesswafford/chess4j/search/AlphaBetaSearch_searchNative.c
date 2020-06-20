@@ -31,12 +31,12 @@ static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
 /*
  * Class:     com_jamesswafford_chess4j_search_AlphaBetaSearch
  * Method:    searchNative
- * Signature: (Ljava/lang/String;Ljava/util/List;Ljava/util/List;IIILcom/jamesswafford/chess4j/search/SearchStats;J)I
+ * Signature: (Ljava/lang/String;Ljava/util/List;Ljava/util/List;IIILcom/jamesswafford/chess4j/search/SearchStats;JJ)I
  */
 JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_searchNative
   (JNIEnv *env, jobject UNUSED(search_obj), jstring board_fen, jobject prev_moves,
-    jobject parent_pv, jint depth, jint alpha, jint beta, jobject search_stats, jlong start_time)
-
+    jobject parent_pv, jint depth, jint alpha, jint beta, jobject search_stats, jlong start_time,
+    jlong stop_time)
 {
     jint retval = 0;
 
@@ -92,6 +92,18 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     memset(&search_opts, 0, sizeof(search_options_t));
     search_opts.pv_callback = pv_callback;
     search_opts.start_time = start_time;
+    search_opts.stop_time = stop_time;
+    search_opts.nodes_between_time_checks = 100000UL;
+    /* if we're getting low on time, check more often */
+    if (stop_time > 0 && stop_time - start_time < 10000)
+    {
+        search_opts.nodes_between_time_checks /= 10;
+    }
+    if (stop_time > 0 && stop_time - start_time < 1000)
+    {
+        search_opts.nodes_between_time_checks /= 10;   
+    }
+
     int32_t native_score = search(&pos, &pv, depth, alpha, beta, moves, undos,
         &native_stats, &search_opts);
     retval = (jint) native_score;
