@@ -70,7 +70,7 @@ public class XBoardHandler {
         put("setboard", XBoardHandler::setboard);
         put("st", XBoardHandler.this::st);
         put("time", XBoardHandler.this::time);
-        put("undo", XBoardHandler::undo);
+        put("undo", XBoardHandler.this::undo);
         put("usermove", XBoardHandler.this::usermove);
         put("xboard", XBoardHandler::noOp);
         put("?", XBoardHandler.this::moveNow);
@@ -116,7 +116,9 @@ public class XBoardHandler {
         stopSearchThread();
         searchIterator.setMaxTime(0);
         searchIterator.setMaxDepth(0);
-        thinkAndMakeMove(); // the "make move" part is skipped in analysis mode
+        if (!endOfGameCheck()) {
+            thinkAndMakeMove(); // the "make move" part is skipped in analysis mode
+        }
     }
 
     private void exit(String[] cmd) {
@@ -354,11 +356,16 @@ public class XBoardHandler {
     }
 
     /**
-    * Back up one move.  Xboard will never send this without putting the engine in
-    * "force" mode first.  We don't have to worry about undoing a move the engine made.
+     * Back up one move.  Xboard will never send this without putting the engine in
+     * "force" mode first.  We don't have to worry about undoing a move the engine made.
+     * We may, however, be in analysis mode.
     */
-    private static void undo(String[] cmd) {
+    private void undo(String[] cmd) {
+        stopSearchThread();
         Globals.getBoard().undoMove(Globals.getGameUndos().remove(Globals.getGameUndos().size()-1));
+        if (analysisMode) {
+            thinkAndMakeMove(); // the "make move" part is skipped in analysis mode
+        }
     }
 
     /**
