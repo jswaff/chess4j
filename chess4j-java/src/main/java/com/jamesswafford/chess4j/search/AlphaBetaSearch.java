@@ -154,7 +154,8 @@ public class AlphaBetaSearch implements Search {
         try {
 
             int nativeScore = searchNative(fen, prevMoves, nativePV, searchParameters.getDepth(),
-                    searchParameters.getAlpha(), searchParameters.getBeta(), nativeStats, opts.getStartTime());
+                    searchParameters.getAlpha(), searchParameters.getBeta(), nativeStats, opts.getStartTime(),
+                    opts.getStopTime());
 
             // if the search completed then verify equality with the Java implementation.
             assert (stop || searchesAreEqual(board, undos, searchParameters, opts, fen, nativeScore, nativePV,
@@ -329,7 +330,8 @@ public class AlphaBetaSearch implements Search {
     private native void initializeNativeSearch();
 
     private native int searchNative(String boardFen, List<Long> prevMoves, List<Long> parentPV, int depth,
-                                    int alpha, int beta, SearchStats searchStats, long startTime);
+                                    int alpha, int beta, SearchStats searchStats, long startTime,
+                                    long stopTime);
 
     private native void stopNative(boolean stop);
 

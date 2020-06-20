@@ -346,7 +346,7 @@ public class XBoardHandlerTest {
 
         xboardHandler.parseAndDispatch("level 0 5 3");
         xboardHandler.parseAndDispatch("time 2500");
-        verify(searchIterator, times(1)).setMaxTime(4000);
+        verify(searchIterator, times(1)).setMaxTime(3900);
 
         xboardHandler.parseAndDispatch("level 40    0:30 0 ");
         xboardHandler.parseAndDispatch("time 5000");
@@ -354,7 +354,7 @@ public class XBoardHandlerTest {
 
         xboardHandler.parseAndDispatch("level 0 10 0.5");
         xboardHandler.parseAndDispatch("time 5000");
-        verify(searchIterator, times(1)).setMaxTime(2500);
+        verify(searchIterator, times(1)).setMaxTime(2400);
 
         // fixed time
         xboardHandler.parseAndDispatch("st 30");
