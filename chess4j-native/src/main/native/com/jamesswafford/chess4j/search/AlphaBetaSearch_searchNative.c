@@ -26,6 +26,9 @@ JNIEnv *g_env;
 jobject *g_parent_pv;
 color_t g_ptm;
 
+extern volatile bool stop_search;
+
+
 static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
 
 /*
@@ -34,7 +37,7 @@ static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
  * Signature: (Ljava/lang/String;Ljava/util/List;Ljava/util/List;IIILcom/jamesswafford/chess4j/search/SearchStats;JJ)I
  */
 JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_searchNative
-  (JNIEnv *env, jobject UNUSED(search_obj), jstring board_fen, jobject prev_moves,
+  (JNIEnv *env, jobject search_obj, jstring board_fen, jobject prev_moves,
     jobject parent_pv, jint depth, jint alpha, jint beta, jobject search_stats, jlong start_time,
     jlong stop_time)
 {
@@ -86,15 +89,13 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     g_ptm = replay_pos.player;
 
 
-    /* perform the search */
-    move_line_t pv;
+    /* set up the search options */
     search_options_t search_opts;
     memset(&search_opts, 0, sizeof(search_options_t));
     search_opts.pv_callback = pv_callback;
     search_opts.start_time = start_time;
     search_opts.stop_time = stop_time;
     search_opts.nodes_between_time_checks = 100000UL;
-    /* if we're getting low on time, check more often */
     if (stop_time > 0 && stop_time - start_time < 10000)
     {
         search_opts.nodes_between_time_checks /= 10;
@@ -104,9 +105,28 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
         search_opts.nodes_between_time_checks /= 10;   
     }
 
+    /* perform the search */
+    move_line_t pv;
     int32_t native_score = search(&pos, &pv, depth, alpha, beta, moves, undos,
         &native_stats, &search_opts);
     retval = (jint) native_score;
+
+
+    /* set the stop flag in the Java code to match the native code's.  This will 
+     * prompt the iterative deepening driver to stop. */
+    jclass class_AlphaBetaSearch = (*env)->GetObjectClass(env, search_obj);
+    if (stop_search)
+    {
+        jmethodID AlphaBetaSearch_stop = (*env)->GetMethodID(
+            env, class_AlphaBetaSearch, "stop", "()V");
+        (*env)->CallVoidMethod(env, search_obj, AlphaBetaSearch_stop);
+    }
+    else
+    {
+        jmethodID AlphaBetaSearch_unstop = (*env)->GetMethodID(
+            env, class_AlphaBetaSearch, "unstop", "()V");
+        (*env)->CallVoidMethod(env, search_obj, AlphaBetaSearch_unstop);
+    }
 
 
     /* copy the search stats to the Java structure */
