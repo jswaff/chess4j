@@ -15,6 +15,8 @@ public interface SearchIterator {
 
     void setPost(boolean post);
 
+    void setSkipTimeChecks(boolean skipTimeChecks);
+
     CompletableFuture<List<Move>> findPvFuture(final Board board, final List<Undo> undos);
 
     boolean isStopped();

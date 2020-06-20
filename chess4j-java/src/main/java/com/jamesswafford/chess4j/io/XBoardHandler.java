@@ -23,6 +23,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+import static com.jamesswafford.chess4j.utils.GameStatusChecker.getGameStatus;
+
 public class XBoardHandler {
 
     private static final  Logger LOGGER = LogManager.getLogger(XBoardHandler.class);
@@ -34,8 +36,13 @@ public class XBoardHandler {
     private Color engineColor;
     private boolean analysisMode = false;
     private boolean forceMode = true;
+    private boolean ponderingEnabled = false;
+    private boolean ponderMode = false;
+    private boolean ponderMiss = false;
+    private Move ponderMove;
     private boolean fixedTimePerMove;
     private int incrementMs;
+    private boolean setBoard = false;
 
     private final Map<String, Consumer<String[]>> cmdMap = new HashMap<>() {{
         put("accepted", XBoardHandler::noOp);
@@ -43,12 +50,12 @@ public class XBoardHandler {
         put("bk", (String[] cmd) -> PrintBookMoves.printBookMoves(Globals.getBoard()));
         put("computer", XBoardHandler::noOp);
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
-        put("easy", XBoardHandler::noOp);
+        put("easy", (String[] cmd) -> ponderingEnabled = false);
         put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getBoard())));
         put("exit",XBoardHandler.this::exit);
         put("force", XBoardHandler.this::force);
         put("go", XBoardHandler.this::go);
-        put("hard", XBoardHandler::noOp);
+        put("hard", (String[] cmd) -> ponderingEnabled = true);
         put("hint", XBoardHandler::noOp);
         put("level", XBoardHandler.this::level);
         put("memory", XBoardHandler.this::memory);
@@ -67,7 +74,7 @@ public class XBoardHandler {
         put("remove", XBoardHandler.this::remove);
         put("result", XBoardHandler.this::result);
         put("sd", XBoardHandler.this::sd);
-        put("setboard", XBoardHandler::setboard);
+        put("setboard", XBoardHandler.this::setboard);
         put("st", XBoardHandler.this::st);
         put("time", XBoardHandler.this::time);
         put("undo", XBoardHandler.this::undo);
@@ -113,9 +120,11 @@ public class XBoardHandler {
     private void analyze(String[] cmd) {
         analysisMode = true;
         forceMode = false;
+        ponderMode = false;
         stopSearchThread();
         searchIterator.setMaxTime(0);
         searchIterator.setMaxDepth(0);
+        searchIterator.setSkipTimeChecks(true);
         if (!endOfGameCheck()) {
             thinkAndMakeMove(); // the "make move" part is skipped in analysis mode
         }
@@ -123,10 +132,12 @@ public class XBoardHandler {
 
     private void exit(String[] cmd) {
         analysisMode = false;
+        searchIterator.setSkipTimeChecks(false);
     }
 
     private void force(String[] cmd) {
         forceMode = true;
+        leavePonderMode();
         stopSearchThread();
     }
 
@@ -138,6 +149,8 @@ public class XBoardHandler {
      */
     private void go(String[] cmd) {
         forceMode = false;
+        assert (!ponderMode);
+        engineColor = Globals.getBoard().getPlayerToMove();
         thinkAndMakeMove();
     }
 
@@ -176,19 +189,21 @@ public class XBoardHandler {
      * If the engine is not thinking (or pondering), the command is ignored.
      */
     private void moveNow(String[] cmd) {
-//        if (!SearchIterator.isPondering()) {  // TODO
+        if (!ponderMode) {
             stopSearchThread();
-//        }
+        }
     }
 
     private void newGame(String[] cmd) {
         stopSearchThread();
         bookMisses = 0;
         forceMode = false;
+        leavePonderMode();
         Globals.getBoard().resetBoard();
         Globals.getGameUndos().clear();
         engineColor = Color.BLACK;
         searchIterator.setMaxDepth(0);
+        setBoard = false;
     }
 
     private static void noOp(String[] cmd) {
@@ -214,12 +229,8 @@ public class XBoardHandler {
      *
      */
     private void ping(String[] cmd) {
-//        if (!SearchIterator.isPondering()) { // TODO
-//            stopSearchThread();
-//        }
-
         // wait for any active search to finish
-        if (searchFuture != null) {
+        if (!ponderMode && searchFuture != null) {
             searchFuture.join();
         }
         LOGGER.info("pong " + cmd[1]);
@@ -250,7 +261,12 @@ public class XBoardHandler {
     * Xboard sends this command only when the user is on move.
     */
     private void remove(String[] cmd) {
-        // TODO: may be pondering
+        synchronized (XBoardHandler.this) {
+            if (ponderMode) {
+                stopSearchThread();
+                leavePonderMode();
+            }
+        }
         Globals.getBoard().undoMove(Globals.getGameUndos().remove(Globals.getGameUndos().size()-1));
         Globals.getBoard().undoMove(Globals.getGameUndos().remove(Globals.getGameUndos().size()-1));
     }
@@ -293,7 +309,8 @@ public class XBoardHandler {
 
         LOGGER.info("# game moves: " + sb.toString());
 
-        if (openingBook != null) {
+        // don't call book learning unless we started from the initial position
+        if (openingBook != null && !setBoard) {
             openingBook.learn(gameMoves, engineColor, gameResult);
         }
     }
@@ -311,7 +328,8 @@ public class XBoardHandler {
         searchIterator.setMaxDepth(depth);
     }
 
-    private static void setboard(String[] cmd) {
+    private void setboard(String[] cmd) {
+        this.setBoard = true;
         StringBuilder fen = new StringBuilder();
         for (int i=1;i<cmd.length;i++) {
             if (i>1) {
@@ -361,6 +379,7 @@ public class XBoardHandler {
      * We may, however, be in analysis mode.
     */
     private void undo(String[] cmd) {
+        assert (forceMode);
         stopSearchThread();
         Globals.getBoard().undoMove(Globals.getGameUndos().remove(Globals.getGameUndos().size()-1));
         if (analysisMode) {
@@ -386,11 +405,29 @@ public class XBoardHandler {
         }
         if (mv != null) {
             Globals.getGameUndos().add(Globals.getBoard().applyMove(mv));
-            if (!endOfGameCheck() && !forceMode) {
-                thinkAndMakeMove();
+
+            boolean startNewSearch;
+            synchronized (XBoardHandler.this) {
+                if (ponderMode) {
+                    assert(!forceMode);
+                    boolean predicted = mv.equals(ponderMove);
+                    LOGGER.debug("# pondering - predicted correctly: {}", predicted);
+                    leavePonderMode();
+                    ponderMiss = !predicted;
+                    startNewSearch = !predicted;
+                } else {
+                    ponderMiss = false; // be sure to print
+                    startNewSearch = true;
+                }
+            }
+
+            if (startNewSearch) {
+                stopSearchThread();
+                if (!endOfGameCheck() && !forceMode) {
+                    thinkAndMakeMove();
+                }
             }
         }
-
     }
 
     /**
@@ -409,9 +446,6 @@ public class XBoardHandler {
     private void thinkAndMakeMove() {
         assert(!endOfGameCheck());
 
-        // associate clock with player on move
-        engineColor = Globals.getBoard().getPlayerToMove();
-
         AtomicBoolean playedBookMove = new AtomicBoolean(false);
         if (!analysisMode && openingBook != null && bookMisses < 3) {
             openingBook.getMoveWeightedRandomByFrequency(Globals.getBoard())
@@ -424,29 +458,65 @@ public class XBoardHandler {
                     }, () -> LOGGER.debug("# book miss {}", ++bookMisses));
         }
         if (!playedBookMove.get()) {
-            // These are copied for testing purposes.  The iterator will not modify.
             Board board = Globals.getBoard().deepCopy();
             List<Undo> undos = new ArrayList<>(Globals.getGameUndos());
-            searchIterator.unstop();
-            searchFuture = searchIterator.findPvFuture(board, undos)
-                    .thenApply(
-                            pv -> {
-                                if (!analysisMode && !forceMode) {
-                                    Globals.getGameUndos().add(Globals.getBoard().applyMove(pv.get(0)));
-                                    LOGGER.info("move " + pv.get(0));
-                                    endOfGameCheck();
-                                }
-                                return pv;
-                            });
+            startSearchThread(board, undos);
         }
     }
 
+    private void startSearchThread(Board board, List<Undo> undos) {
+        assert(!endOfGameCheck());
+
+        searchIterator.unstop();
+        ponderMiss = false;
+        searchFuture = searchIterator.findPvFuture(board, undos)
+                .thenApply(
+                        pv -> {
+                            synchronized (XBoardHandler.this) {
+                                LOGGER.debug("# analysis: {}, force: {}, ponder: {}, ponderMiss: {}",
+                                        analysisMode, forceMode, ponderMode, ponderMiss);
+                                if (!analysisMode && !forceMode && !ponderMode && !ponderMiss) {
+                                    Globals.getGameUndos().add(Globals.getBoard().applyMove(pv.get(0)));
+                                    LOGGER.info("move " + pv.get(0));
+                                    if (!endOfGameCheck() && ponderingEnabled && pv.size() > 1) {
+                                        Move ponderMove = pv.get(1);
+                                        Board ponderBoard = Globals.getBoard().deepCopy();
+                                        List<Undo> ponderUndos = new ArrayList<>(Globals.getGameUndos());
+                                        ponderUndos.add(ponderBoard.applyMove(ponderMove));
+                                        // does the move we want to ponder end the game?
+                                        if (getGameStatus(ponderBoard, ponderUndos) == GameStatus.INPROGRESS) {
+                                            LOGGER.info("# pondering move: " + ponderMove);
+                                            enterPonderMode(ponderMove);
+                                            startSearchThread(ponderBoard, ponderUndos);
+                                        }
+                                    }
+                                } else {
+                                    leavePonderMode();
+                                }
+                            }
+                            return pv;
+                        });
+    }
+
     private static boolean endOfGameCheck() {
-        GameStatus gameStatus = GameStatusChecker.getGameStatus(Globals.getBoard(), Globals.getGameUndos());
+        GameStatus gameStatus = getGameStatus(Globals.getBoard(), Globals.getGameUndos());
         if (gameStatus != GameStatus.INPROGRESS) {
             PrintGameResult.printResult(gameStatus);
             return true;
         }
         return false;
     }
+
+    private void enterPonderMode(Move ponderMove) {
+        assert(!forceMode);
+        this.ponderMove = ponderMove;
+        this.ponderMode = true;
+        searchIterator.setSkipTimeChecks(true);
+    }
+
+    private void leavePonderMode() {
+        this.ponderMode = false;
+        searchIterator.setSkipTimeChecks(false);
+    }
+
 }

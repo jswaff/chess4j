@@ -32,6 +32,7 @@ public class AlphaBetaSearch implements Search {
     private final SearchStats searchStats;
 
     private boolean stop;
+    private boolean skipTimeChecks;
     private Evaluator evaluator;
     private MoveGenerator moveGenerator;
     private MoveScorer moveScorer;
@@ -129,6 +130,12 @@ public class AlphaBetaSearch implements Search {
         }
     }
 
+    @Override
+    public void setSkipTimeChecks(boolean skipTimeChecks) {
+        this.skipTimeChecks = skipTimeChecks;
+        // TODO: set in native code
+    }
+
     private int searchWithJavaCode(Board board, List<Undo> undos, SearchParameters searchParameters,
                                    SearchOptions opts) {
         killerMovesStore.clear();
@@ -215,7 +222,7 @@ public class AlphaBetaSearch implements Search {
         parentPV.clear();
 
         // time check
-        if (stopSearchOnTime(opts)) {
+        if (!skipTimeChecks && stopSearchOnTime(opts)) {
             stop = true;
             return 0;
         }
