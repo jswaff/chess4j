@@ -133,7 +133,9 @@ public class AlphaBetaSearch implements Search {
     @Override
     public void setSkipTimeChecks(boolean skipTimeChecks) {
         this.skipTimeChecks = skipTimeChecks;
-        // TODO: set in native code
+        if (Initializer.nativeCodeInitialized()) {
+            skipTimeChecksNative(skipTimeChecks);
+        }
     }
 
     private int searchWithJavaCode(Board board, List<Undo> undos, SearchParameters searchParameters,
@@ -341,5 +343,7 @@ public class AlphaBetaSearch implements Search {
                                     long stopTime);
 
     private native void stopNative(boolean stop);
+
+    private native void skipTimeChecksNative(boolean skipTimeChecks);
 
 }
