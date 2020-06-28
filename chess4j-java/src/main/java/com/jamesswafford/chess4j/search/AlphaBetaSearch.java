@@ -151,7 +151,7 @@ public class AlphaBetaSearch implements Search {
     private int searchWithNativeCode(Board board, List<Undo> undos, SearchParameters searchParameters,
                                      SearchOptions opts) {
 
-        String fen = FenBuilder.createFen(board, false);
+        String fen = FenBuilder.createFen(board, true);
 
         List<Long> prevMoves = undos.stream()
                 .map(undo -> MoveUtils.toNativeMove(undo.getMove()))
