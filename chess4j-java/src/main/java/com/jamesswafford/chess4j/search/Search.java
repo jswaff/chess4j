@@ -28,4 +28,6 @@ public interface Search {
 
     void unstop();
 
+    void setSkipTimeChecks(boolean skipTimeChecks);
+
 }

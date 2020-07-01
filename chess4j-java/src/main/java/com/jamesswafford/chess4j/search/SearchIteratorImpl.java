@@ -54,6 +54,11 @@ public class SearchIteratorImpl implements SearchIterator {
         this.post = post;
     }
 
+    @Override
+    public void setSkipTimeChecks(boolean skipTimeChecks) {
+        search.setSkipTimeChecks(skipTimeChecks);
+    }
+
     public void setEarlyExitOk(boolean earlyExitOk) {
         this.earlyExitOk = earlyExitOk;
     }

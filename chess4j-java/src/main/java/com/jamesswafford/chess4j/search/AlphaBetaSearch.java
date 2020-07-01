@@ -32,6 +32,7 @@ public class AlphaBetaSearch implements Search {
     private final SearchStats searchStats;
 
     private boolean stop;
+    private boolean skipTimeChecks;
     private Evaluator evaluator;
     private MoveGenerator moveGenerator;
     private MoveScorer moveScorer;
@@ -129,6 +130,14 @@ public class AlphaBetaSearch implements Search {
         }
     }
 
+    @Override
+    public void setSkipTimeChecks(boolean skipTimeChecks) {
+        this.skipTimeChecks = skipTimeChecks;
+        if (Initializer.nativeCodeInitialized()) {
+            skipTimeChecksNative(skipTimeChecks);
+        }
+    }
+
     private int searchWithJavaCode(Board board, List<Undo> undos, SearchParameters searchParameters,
                                    SearchOptions opts) {
         killerMovesStore.clear();
@@ -142,7 +151,7 @@ public class AlphaBetaSearch implements Search {
     private int searchWithNativeCode(Board board, List<Undo> undos, SearchParameters searchParameters,
                                      SearchOptions opts) {
 
-        String fen = FenBuilder.createFen(board, false);
+        String fen = FenBuilder.createFen(board, true);
 
         List<Long> prevMoves = undos.stream()
                 .map(undo -> MoveUtils.toNativeMove(undo.getMove()))
@@ -215,7 +224,7 @@ public class AlphaBetaSearch implements Search {
         parentPV.clear();
 
         // time check
-        if (stopSearchOnTime(opts)) {
+        if (!skipTimeChecks && stopSearchOnTime(opts)) {
             stop = true;
             return 0;
         }
@@ -334,5 +343,7 @@ public class AlphaBetaSearch implements Search {
                                     long stopTime);
 
     private native void stopNative(boolean stop);
+
+    private native void skipTimeChecksNative(boolean skipTimeChecks);
 
 }
