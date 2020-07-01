@@ -29,11 +29,13 @@ public class AlphaBetaSearch implements Search {
 
     private final List<Move> pv;
     private final List<Move> lastPv;
+    // TODO: pass options in constructor
     private final SearchStats searchStats;
 
     private boolean stop;
     private boolean skipTimeChecks;
-    private Evaluator evaluator;
+    private Evaluator evaluator; // TODO: remove
+    private QSearch qSearch;
     private MoveGenerator moveGenerator;
     private MoveScorer moveScorer;
     private KillerMovesStore killerMovesStore;
@@ -44,6 +46,7 @@ public class AlphaBetaSearch implements Search {
         this.searchStats = new SearchStats();
 
         unstop();
+        this.qSearch = new QSearch(this, searchStats);
         this.evaluator = new Eval();
         this.moveGenerator = new MagicBitboardMoveGenerator();
         this.moveScorer = new MVVLVA();
@@ -231,7 +234,7 @@ public class AlphaBetaSearch implements Search {
 
         // base case
         if (depth == 0) {
-            return evaluator.evaluateBoard(board);
+            return qSearch.quiescenceSearch(board, undos, alpha, beta, false, opts); // TODO: "inCheck"
         }
 
         // try for early exit
@@ -305,12 +308,13 @@ public class AlphaBetaSearch implements Search {
         }
 
         // avoid doing expensive time checks too often
-        if (searchStats.nodes - opts.getNodeCountLastTimeCheck() < opts.getNodesBetweenTimeChecks()) {
+        long visitedNodes = searchStats.nodes + searchStats.qnodes;
+        if (visitedNodes - opts.getNodeCountLastTimeCheck() < opts.getNodesBetweenTimeChecks()) {
             return false;
         }
 
         // ok, time check
-        opts.setNodeCountLastTimeCheck(searchStats.nodes);
+        opts.setNodeCountLastTimeCheck(visitedNodes); // TODO: don't use options for state?
 
         return System.currentTimeMillis() >= opts.getStopTime();
     }
