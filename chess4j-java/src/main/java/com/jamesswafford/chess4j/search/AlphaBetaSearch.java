@@ -324,6 +324,7 @@ public class AlphaBetaSearch implements Search {
 
         while ((move = moveOrderer.selectNextMove()) != null) {
             assert(BoardUtils.isPseudoLegalMove(board, move));
+            assert(move.captured() != null || move.promotion() != null);
 
             undos.add(board.applyMove(move));
             // check if move was legal
@@ -334,8 +335,7 @@ public class AlphaBetaSearch implements Search {
 
             // TODO: possibly prune
 
-            // TODO: recurse
-            int val = alpha;
+            int val = -quiescenceSearch(board, undos, -beta, -alpha, opts);
             board.undoMove(undos.remove(undos.size()-1));
 
             // if the search was stopped we can't trust these results, so don't update the PV

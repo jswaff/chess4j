@@ -247,15 +247,15 @@ public class SearchIteratorImpl implements SearchIterator {
         DecimalFormat df = new DecimalFormat("0.00");
         DecimalFormat df2 = new DecimalFormat("#,###,##0");
 
-        long totalNodes = stats.nodes; // + stats.getQNodes();
+        long totalNodes = stats.nodes + stats.qnodes;
         double interiorPct = stats.nodes / (totalNodes/100.0);
-        double qnodePct = 0.0; //stats.getQNodes() / (totalNodes/100.0);
+        double qnodePct = stats.qnodes / (totalNodes/100.0);
 
         LOGGER.info("\n");
         LOGGER.info("# depth: " + lastDepth);
         LOGGER.info("# nodes: " + df2.format(totalNodes) + ", interior: "
                 + df2.format(stats.nodes) + " (" + df.format(interiorPct) + "%)"
-                + ", quiescence: " + df2.format(0.0) + " (" + df.format(qnodePct) + "%)");
+                + ", quiescence: " + df2.format(stats.qnodes) + " (" + df.format(qnodePct) + "%)");
 
         long totalSearchTime = System.currentTimeMillis() - startTime;
         LOGGER.info("# search time: " + totalSearchTime/1000.0 + " seconds"

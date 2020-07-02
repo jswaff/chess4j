@@ -308,7 +308,7 @@ public class AlphaBetaSearchTest {
 
         long duration = System.currentTimeMillis() - start;
         System.out.println("duration: " + duration);
-        assertTrue(duration < 100);
+        assertTrue(duration < 250);
     }
 
     @Test
