@@ -248,7 +248,7 @@ public class AlphaBetaSearch implements Search {
         int numMovesSearched = 0;
         Move pvMove = first && lastPv.size() > ply ? lastPv.get(ply) : null;
         MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer,
-                pvMove, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply));
+                pvMove, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply), true);
         Move move;
 
         while ((move = moveOrderer.selectNextMove()) != null) {
@@ -319,10 +319,10 @@ public class AlphaBetaSearch implements Search {
         }
 
         MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer,
-                null, null, null);
+                null, null, null, false);
         Move move;
 
-        while ((move = moveOrderer.selectNextMove()) != null) { // TODO: capture only
+        while ((move = moveOrderer.selectNextMove()) != null) {
             assert(BoardUtils.isPseudoLegalMove(board, move));
 
             undos.add(board.applyMove(move));
