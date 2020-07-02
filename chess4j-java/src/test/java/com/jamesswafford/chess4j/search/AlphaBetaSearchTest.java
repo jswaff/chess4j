@@ -6,7 +6,6 @@ import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import org.awaitility.Awaitility;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -42,7 +41,6 @@ public class AlphaBetaSearchTest {
         search = new AlphaBetaSearch();
     }
 
-    @Ignore // FIXME
     @Test
     public void search_initialPos_depth1() {
 
@@ -67,8 +65,7 @@ public class AlphaBetaSearchTest {
         int score = search.search(board, params);
 
         // then the evaluator should have been invoked for each move
-        // FIXME
-        //verify(evaluator, times(20)).evaluateBoard(any(Board.class));
+        verify(evaluator, times(20)).evaluateBoard(any(Board.class));
 
         // and the score should be the highest returned score
         assertEquals(5, score);
@@ -156,7 +153,6 @@ public class AlphaBetaSearchTest {
      * Test that the search is making the correct cutoffs using the alpha/beta algorithm.  This example
      * follows the example on page 6 of my Master's project paper.
      */
-    @Ignore // FIXME
     @Test
     public void alphaBetaCutoffs() {
 
@@ -277,8 +273,7 @@ public class AlphaBetaSearchTest {
         assertEquals(3, score);
 
         // ensure the proper nodes were evaluated
-        // FIXME
-        //verify(evaluator, times(6)).evaluateBoard(boardCaptor.capture());
+        verify(evaluator, times(6)).evaluateBoard(boardCaptor.capture());
         // it would be nice to verify the actual boards that were evaluated but they are
         // all board A since we don't copy the board when evaluating.
         assertEquals(boardA, boardCaptor.getAllValues().get(0));
@@ -294,6 +289,7 @@ public class AlphaBetaSearchTest {
         assertEquals(b2b4, search.getPv().get(2));
     }
 
+    // this test is highly sensitive to the JVM being "warmed up"
     @Test
     public void stopSearch() {
 
@@ -311,6 +307,7 @@ public class AlphaBetaSearchTest {
                 .until(future::isDone);
 
         long duration = System.currentTimeMillis() - start;
+        System.out.println("duration: " + duration);
         assertTrue(duration < 100);
     }
 

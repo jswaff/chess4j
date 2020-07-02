@@ -29,13 +29,11 @@ public class AlphaBetaSearch implements Search {
 
     private final List<Move> pv;
     private final List<Move> lastPv;
-    // TODO: pass options in constructor
     private final SearchStats searchStats;
 
     private boolean stop;
     private boolean skipTimeChecks;
-    private Evaluator evaluator; // TODO: remove
-    private QSearch qSearch;
+    private Evaluator evaluator;
     private MoveGenerator moveGenerator;
     private MoveScorer moveScorer;
     private KillerMovesStore killerMovesStore;
@@ -46,7 +44,6 @@ public class AlphaBetaSearch implements Search {
         this.searchStats = new SearchStats();
 
         unstop();
-        this.qSearch = new QSearch(this, searchStats);
         this.evaluator = new Eval();
         this.moveGenerator = new MagicBitboardMoveGenerator();
         this.moveScorer = new MVVLVA();
@@ -234,7 +231,7 @@ public class AlphaBetaSearch implements Search {
 
         // base case
         if (depth == 0) {
-            return qSearch.quiescenceSearch(board, undos, alpha, beta, false, opts); // TODO: "inCheck"
+            return quiescenceSearch(board, undos, alpha, beta, opts);
         }
 
         // try for early exit
@@ -296,6 +293,64 @@ public class AlphaBetaSearch implements Search {
         }
 
         alpha = adjustFinalScoreForMates(board, alpha, numMovesSearched, ply);
+
+        return alpha;
+    }
+
+    public int quiescenceSearch(Board board, List<Undo> undos, int alpha, int beta, SearchOptions opts) {
+
+        assert(alpha < beta);
+
+        searchStats.qnodes++;
+
+        // time check
+        if (!skipTimeChecks && stopSearchOnTime(opts)) {
+            stop = true;
+            return 0;
+        }
+
+        int standPat = evaluator.evaluateBoard(board);
+        if (standPat > alpha) {
+            if (standPat >= beta) {
+                return beta;
+            }
+            // our static evaluation will serve as the lower bound
+            alpha = standPat;
+        }
+
+        MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer,
+                null, null, null);
+        Move move;
+
+        while ((move = moveOrderer.selectNextMove()) != null) { // TODO: capture only
+            assert(BoardUtils.isPseudoLegalMove(board, move));
+
+            undos.add(board.applyMove(move));
+            // check if move was legal
+            if (BoardUtils.isOpponentInCheck(board)) {
+                board.undoMove(undos.remove(undos.size()-1));
+                continue;
+            }
+
+            // TODO: possibly prune
+
+            // TODO: recurse
+            int val = alpha;
+            board.undoMove(undos.remove(undos.size()-1));
+
+            // if the search was stopped we can't trust these results, so don't update the PV
+            if (stop) {
+                return 0;
+            }
+
+            if (val >= beta) {
+                searchStats.failHighs++;
+                return beta;
+            }
+            if (val > alpha) {
+                alpha = val;
+            }
+        }
 
         return alpha;
     }
