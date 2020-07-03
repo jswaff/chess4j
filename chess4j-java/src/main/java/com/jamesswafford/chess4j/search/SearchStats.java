@@ -7,7 +7,8 @@ import lombok.ToString;
 @ToString
 public class SearchStats {
 
-    public long nodes, qnodes, failHighs, failLows, draws;
+    public long nodes, qnodes;
+    public long failHighs, failLows, draws;
 
     public SearchStats() {
         initialize();

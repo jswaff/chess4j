@@ -220,7 +220,6 @@ public class AlphaBetaSearch implements Search {
     private int search(Board board, List<Undo> undos, List<Move> parentPV, boolean first, int ply, int depth,
                        int alpha, int beta, SearchOptions opts) {
 
-        searchStats.nodes++;
         parentPV.clear();
 
         // time check
@@ -233,6 +232,9 @@ public class AlphaBetaSearch implements Search {
         if (depth == 0) {
             return quiescenceSearch(board, undos, alpha, beta, opts);
         }
+
+        // this is an interior node
+        searchStats.nodes++;
 
         // try for early exit
         if (ply > 0) {
@@ -301,13 +303,13 @@ public class AlphaBetaSearch implements Search {
 
         assert(alpha < beta);
 
-        searchStats.qnodes++;
-
         // time check
         if (!skipTimeChecks && stopSearchOnTime(opts)) {
             stop = true;
             return 0;
         }
+
+        searchStats.qnodes++;
 
         int standPat = evaluator.evaluateBoard(board);
         if (standPat > alpha) {

@@ -279,7 +279,9 @@ public class AlphaBetaSearchTest {
         assertEquals(boardA, boardCaptor.getAllValues().get(0));
 
         // verify 14 nodes visited and 3 fail highs
-        assertEquals(14L, search.getSearchStats().nodes);
+        // 8 of those nodes are "interior" nodes and 6 are leaf nodes
+        assertEquals(8L, search.getSearchStats().nodes);
+        assertEquals(6L, search.getSearchStats().qnodes);
         assertEquals(3L, search.getSearchStats().failHighs);
 
         // verify the PV follows A -> B -> C -> E
