@@ -340,7 +340,7 @@ public class AlphaBetaSearch implements Search {
             int val = -quiescenceSearch(board, undos, -beta, -alpha, opts);
             board.undoMove(undos.remove(undos.size()-1));
 
-            // if the search was stopped we can't trust these results, so don't update the PV
+            // if the search was stopped just unwind back up
             if (stop) {
                 return 0;
             }
