@@ -18,6 +18,7 @@ public class MoveOrderer {
     private final MoveScorer moveScorer;
 
     private final Move pvMove, killer1, killer2;
+    private boolean generateNonCaptures;
     private final Set<Move> specialMovesPlayed;
 
     private Move[] captures;
@@ -29,7 +30,7 @@ public class MoveOrderer {
     private MoveOrderStage nextMoveOrderStage = MoveOrderStage.PV;
 
     public MoveOrderer(Board board, MoveGenerator moveGenerator, MoveScorer moveScorer,
-                       Move pvMove, Move killer1, Move killer2)
+                       Move pvMove, Move killer1, Move killer2, boolean generateNonCaptures)
     {
         this.board = board;
         this.moveGenerator = moveGenerator;
@@ -38,6 +39,7 @@ public class MoveOrderer {
         this.pvMove = pvMove;
         this.killer1 = killer1;
         this.killer2 = killer2;
+        this.generateNonCaptures = generateNonCaptures;
         this.specialMovesPlayed = new HashSet<>();
     }
 
@@ -103,26 +105,28 @@ public class MoveOrderer {
         }
 
         // generate non-captures
-        if (nextMoveOrderStage == MoveOrderStage.GENNONCAPS) {
-            nextMoveOrderStage = MoveOrderStage.REMAINING;
-            List<Move> myNoncaps = moveGenerator.generatePseudoLegalNonCaptures(board);
-            noncaptures =  myNoncaps.toArray(new Move[0]);
-            // avoid playing special moves again
-            for (int i=0;i<noncaptures.length;i++) {
-                if (specialMovesPlayed.contains(noncaptures[i])) {
-                    noncaptures[i] = null;
+        if (generateNonCaptures) {
+            if (nextMoveOrderStage == MoveOrderStage.GENNONCAPS) {
+                nextMoveOrderStage = MoveOrderStage.REMAINING;
+                List<Move> myNoncaps = moveGenerator.generatePseudoLegalNonCaptures(board);
+                noncaptures = myNoncaps.toArray(new Move[0]);
+                // avoid playing special moves again
+                for (int i = 0; i < noncaptures.length; i++) {
+                    if (specialMovesPlayed.contains(noncaptures[i])) {
+                        noncaptures[i] = null;
+                    }
                 }
+
+                noncaptureIndex = 0;
             }
 
-            noncaptureIndex = 0;
-        }
-
-        // just play them as they come
-        if (noncaptureIndex < noncaptures.length) {
-            int ind = getIndexOfFirstNonCapture(noncaptureIndex);
-            if (ind != -1) {
-                swap(noncaptures, noncaptureIndex,ind);
-                return noncaptures[noncaptureIndex++];
+            // just play them as they come
+            if (noncaptureIndex < noncaptures.length) {
+                int ind = getIndexOfFirstNonCapture(noncaptureIndex);
+                if (ind != -1) {
+                    swap(noncaptures, noncaptureIndex, ind);
+                    return noncaptures[noncaptureIndex++];
+                }
             }
         }
 

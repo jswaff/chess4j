@@ -220,7 +220,6 @@ public class AlphaBetaSearch implements Search {
     private int search(Board board, List<Undo> undos, List<Move> parentPV, boolean first, int ply, int depth,
                        int alpha, int beta, SearchOptions opts) {
 
-        searchStats.nodes++;
         parentPV.clear();
 
         // time check
@@ -231,8 +230,11 @@ public class AlphaBetaSearch implements Search {
 
         // base case
         if (depth == 0) {
-            return evaluator.evaluateBoard(board);
+            return quiescenceSearch(board, undos, alpha, beta, opts);
         }
+
+        // this is an interior node
+        searchStats.nodes++;
 
         // try for early exit
         if (ply > 0) {
@@ -248,7 +250,7 @@ public class AlphaBetaSearch implements Search {
         int numMovesSearched = 0;
         Move pvMove = first && lastPv.size() > ply ? lastPv.get(ply) : null;
         MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer,
-                pvMove, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply));
+                pvMove, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply), true);
         Move move;
 
         while ((move = moveOrderer.selectNextMove()) != null) {
@@ -297,6 +299,64 @@ public class AlphaBetaSearch implements Search {
         return alpha;
     }
 
+    public int quiescenceSearch(Board board, List<Undo> undos, int alpha, int beta, SearchOptions opts) {
+
+        assert(alpha < beta);
+
+        // time check
+        if (!skipTimeChecks && stopSearchOnTime(opts)) {
+            stop = true;
+            return 0;
+        }
+
+        searchStats.qnodes++;
+
+        int standPat = evaluator.evaluateBoard(board);
+        if (standPat > alpha) {
+            if (standPat >= beta) {
+                return beta;
+            }
+            // our static evaluation will serve as the lower bound
+            alpha = standPat;
+        }
+
+        MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer,
+                null, null, null, false);
+        Move move;
+
+        while ((move = moveOrderer.selectNextMove()) != null) {
+            assert(BoardUtils.isPseudoLegalMove(board, move));
+            assert(move.captured() != null || move.promotion() != null);
+
+            undos.add(board.applyMove(move));
+            // check if move was legal
+            if (BoardUtils.isOpponentInCheck(board)) {
+                board.undoMove(undos.remove(undos.size()-1));
+                continue;
+            }
+
+            // TODO: possibly prune
+
+            int val = -quiescenceSearch(board, undos, -beta, -alpha, opts);
+            board.undoMove(undos.remove(undos.size()-1));
+
+            // if the search was stopped just unwind back up
+            if (stop) {
+                return 0;
+            }
+
+            if (val >= beta) {
+                searchStats.failHighs++;
+                return beta;
+            }
+            if (val > alpha) {
+                alpha = val;
+            }
+        }
+
+        return alpha;
+    }
+
     private boolean stopSearchOnTime(SearchOptions opts) {
 
         // if we don't have a stop time, nevermind!
@@ -305,12 +365,13 @@ public class AlphaBetaSearch implements Search {
         }
 
         // avoid doing expensive time checks too often
-        if (searchStats.nodes - opts.getNodeCountLastTimeCheck() < opts.getNodesBetweenTimeChecks()) {
+        long visitedNodes = searchStats.nodes + searchStats.qnodes;
+        if (visitedNodes - opts.getNodeCountLastTimeCheck() < opts.getNodesBetweenTimeChecks()) {
             return false;
         }
 
         // ok, time check
-        opts.setNodeCountLastTimeCheck(searchStats.nodes);
+        opts.setNodeCountLastTimeCheck(visitedNodes); // TODO: don't use options for state?
 
         return System.currentTimeMillis() >= opts.getStopTime();
     }

@@ -31,6 +31,18 @@ public final class Eval implements Evaluator {
 
     public static int eval(Board board, boolean materialOnly) {
 
+        int evalScore = evalHelper(board, materialOnly);
+
+        // if we are running with assertions enabled, test symmetry
+        assert(ensureEvalSymmetry(evalScore, board, materialOnly));
+
+        // if we are running with assertions enabled and the native library is loaded, verify equality
+        assert(evalsAreEqual(evalScore, board, materialOnly));
+
+        return evalScore;
+    }
+
+    private static int evalHelper(Board board, boolean materialOnly) {
         int score = EvalMaterial.evalMaterial(board);
 
         if (!materialOnly) {
@@ -47,12 +59,7 @@ public final class Eval implements Evaluator {
                     - evalKing(board, board.getKingSquare(Color.BLACK));
         }
 
-        int retVal = board.getPlayerToMove() == Color.WHITE ? score : -score;
-
-        // if we are running with assertions enabled and the native library is loaded, verify equality
-        assert(evalsAreEqual(retVal, board, materialOnly));
-
-        return retVal;
+        return board.getPlayerToMove() == Color.WHITE ? score : -score;
     }
 
     private static boolean evalsAreEqual(int javaScore, Board board, boolean materialOnly) {
@@ -122,4 +129,24 @@ public final class Eval implements Evaluator {
     public int evaluateBoard(Board board) {
         return eval(board);
     }
+
+    /**
+     * Helper method to test eval symmetry
+     *
+     * @param evalScore - the score the board has been evaulated at
+     * @param board - the chess board
+     * @param materialOnly - whether to evaulate material only
+     *
+     * @return - true if the eval is symmetric in the given position
+     */
+    private static boolean ensureEvalSymmetry(int evalScore, Board board, boolean materialOnly) {
+        Board flipBoard = board.deepCopy();
+        flipBoard.flipVertical();
+        int flipScore = evalHelper(flipBoard, materialOnly);
+        boolean retVal = flipScore == evalScore;
+        flipBoard.flipVertical();
+        assert(board.equals(flipBoard));
+        return retVal;
+    }
+
 }
