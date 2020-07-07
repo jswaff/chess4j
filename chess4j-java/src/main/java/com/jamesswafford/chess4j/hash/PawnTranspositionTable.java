@@ -29,7 +29,6 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         Arrays.fill(table, null);
     }
 
-    // TODO: Optional
     public PawnTranspositionTableEntry probe(long zobristKey) {
         numProbes++;
         PawnTranspositionTableEntry te = table[getMaskedKey(zobristKey)];

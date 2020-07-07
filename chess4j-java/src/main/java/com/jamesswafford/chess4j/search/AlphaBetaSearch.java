@@ -3,6 +3,9 @@ package com.jamesswafford.chess4j.search;
 import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.Evaluator;
+import com.jamesswafford.chess4j.hash.TTHolder;
+import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
+import com.jamesswafford.chess4j.hash.TranspositionTableEntryType;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
@@ -18,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
+import static com.jamesswafford.chess4j.hash.TranspositionTableEntryType.*;
 
 public class AlphaBetaSearch implements Search {
 
@@ -243,6 +247,26 @@ public class AlphaBetaSearch implements Search {
                 searchStats.draws++;
                 return 0;
             }
+
+            // probe the hash table
+            TranspositionTableEntry tte = TTHolder.getInstance().getAlwaysReplaceTransTable().probe(
+                    board.getZobristKey());
+            if (tte != null && tte.getDepth() >= depth) {
+                if (tte.getType() == LOWER_BOUND) {
+                    if (tte.getScore() >= beta) {
+                        searchStats.failHighs++;
+                        return beta;
+                    }
+                } else if (tte.getType() == UPPER_BOUND) {
+                    if (tte.getScore() <= alpha) {
+                        searchStats.failLows++;
+                        return alpha;
+                    }
+                } else if (tte.getType() == EXACT_MATCH) {
+                    // TODO: exact matches
+                    return tte.getScore();
+                }
+            }
         }
 
         List<Move> pv = new ArrayList<>(50);
@@ -251,8 +275,9 @@ public class AlphaBetaSearch implements Search {
         Move pvMove = first && lastPv.size() > ply ? lastPv.get(ply) : null;
         MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer,
                 pvMove, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply), true);
-        Move move;
 
+        Move bestMove = null;
+        Move move;
         while ((move = moveOrderer.selectNextMove()) != null) {
             assert(BoardUtils.isPseudoLegalMove(board, move));
 
@@ -275,6 +300,8 @@ public class AlphaBetaSearch implements Search {
 
             if (val >= beta) {
                 searchStats.failHighs++;
+                TTHolder.getInstance().getAlwaysReplaceTransTable().store(board.getZobristKey(), LOWER_BOUND, beta,
+                        depth, move);
                 if (move.captured()==null && move.promotion()==null) {
                     killerMovesStore.addKiller(ply, move);
                 }
@@ -282,6 +309,7 @@ public class AlphaBetaSearch implements Search {
             }
             if (val > alpha) {
                 alpha = val;
+                bestMove = move;
                 setParentPV(parentPV, move, pv);
                 if (opts.getPvCallback() != null) {
                     opts.getPvCallback().accept(
@@ -295,6 +323,12 @@ public class AlphaBetaSearch implements Search {
         }
 
         alpha = adjustFinalScoreForMates(board, alpha, numMovesSearched, ply);
+
+        TranspositionTableEntryType tet = bestMove == null ?
+                TranspositionTableEntryType.UPPER_BOUND : // fail low node - we didn't find a move > alpha
+                TranspositionTableEntryType.EXACT_MATCH;
+
+        TTHolder.getInstance().getAlwaysReplaceTransTable().store(board.getZobristKey(), tet, alpha, depth, bestMove);
 
         return alpha;
     }

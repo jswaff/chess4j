@@ -6,7 +6,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 public class TranspositionTable extends AbstractTranspositionTable {
 
@@ -50,7 +49,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
         return score >= getCheckMateBound();
     }
 
-    public Optional<TranspositionTableEntry> probe(long zobristKey) {
+    public TranspositionTableEntry probe(long zobristKey) {
         numProbes++;
         TranspositionTableEntry te = table[getMaskedKey(zobristKey)];
 
@@ -58,13 +57,13 @@ public class TranspositionTable extends AbstractTranspositionTable {
             // compare full signature to avoid collisions
             if (te.getZobristKey() != zobristKey) {
                 numCollisions++;
-                return Optional.empty();
+                return null;
             } else {
                 numHits++;
             }
         }
 
-        return Optional.ofNullable(te);
+        return te;
     }
 
     /**
