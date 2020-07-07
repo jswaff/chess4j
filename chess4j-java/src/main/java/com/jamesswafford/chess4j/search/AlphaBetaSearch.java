@@ -255,15 +255,17 @@ public class AlphaBetaSearch implements Search {
                 if (tte.getType() == LOWER_BOUND) {
                     if (tte.getScore() >= beta) {
                         searchStats.failHighs++;
+                        searchStats.hashFailHighs++;
                         return beta;
                     }
                 } else if (tte.getType() == UPPER_BOUND) {
                     if (tte.getScore() <= alpha) {
                         searchStats.failLows++;
+                        searchStats.hashFailLows++;
                         return alpha;
                     }
                 } else if (tte.getType() == EXACT_MATCH) {
-                    // TODO: exact matches
+                    searchStats.hashExactScores++;
                     return tte.getScore();
                 }
             }
@@ -300,8 +302,8 @@ public class AlphaBetaSearch implements Search {
 
             if (val >= beta) {
                 searchStats.failHighs++;
-                TTHolder.getInstance().getAlwaysReplaceTransTable().store(board.getZobristKey(), LOWER_BOUND, beta,
-                        depth, move);
+                TTHolder.getInstance().getAlwaysReplaceTransTable().store(
+                        board.getZobristKey(), LOWER_BOUND, beta, depth, move);
                 if (move.captured()==null && move.promotion()==null) {
                     killerMovesStore.addKiller(ply, move);
                 }
@@ -324,11 +326,16 @@ public class AlphaBetaSearch implements Search {
 
         alpha = adjustFinalScoreForMates(board, alpha, numMovesSearched, ply);
 
-        TranspositionTableEntryType tet = bestMove == null ?
-                TranspositionTableEntryType.UPPER_BOUND : // fail low node - we didn't find a move > alpha
-                TranspositionTableEntryType.EXACT_MATCH;
+        TranspositionTableEntryType tableEntryType;
+        if (bestMove == null) {
+            tableEntryType = UPPER_BOUND; // fail low
+            searchStats.failLows++;
+        } else {
+            tableEntryType = EXACT_MATCH;
+        }
 
-        TTHolder.getInstance().getAlwaysReplaceTransTable().store(board.getZobristKey(), tet, alpha, depth, bestMove);
+        TTHolder.getInstance().getAlwaysReplaceTransTable().store(
+                board.getZobristKey(), tableEntryType, alpha, depth, bestMove);
 
         return alpha;
     }

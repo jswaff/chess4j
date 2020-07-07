@@ -276,6 +276,16 @@ public class SearchIteratorImpl implements SearchIterator {
                 + ", hits: " + df2.format(hashHits) + " (" + df.format(hashHitPct) + "%)"
                 + ", collisions: " + df2.format(hashCollisions) + " (" + df.format(hashCollisionPct) + "%)");
 
+        double hashFailHighPct = stats.hashFailHighs / (hashProbes/100.0);
+        double hashFailLowPct = stats.hashFailLows / (hashProbes/100.0);
+        double hashExactScorePct = stats.hashExactScores / (hashProbes/100.0);
+        LOGGER.info("# hash fail highs: " + df2.format(stats.hashFailHighs)
+                + " (" + df.format(hashFailHighPct) + "%)"
+                + ", hash fail lows: " + df2.format(stats.hashFailLows)
+                + " (" + df.format(hashFailLowPct) + "%)"
+                + ", hash exact scores: " + df2.format(stats.hashExactScores)
+                + " (" + df.format(hashExactScorePct) + "%)");
+
         PawnTranspositionTable pawnTbl = TTHolder.getInstance().getPawnTransTable();
         long pawnHashHits = pawnTbl.getNumHits();
         long pawnHashProbes = pawnTbl.getNumProbes();
@@ -287,13 +297,7 @@ public class SearchIteratorImpl implements SearchIterator {
                 + ", hits: " + df2.format(pawnHashHits) + " (" + df.format(pawnHashHitPct) + "%)"
                 + ", collisions: " + df2.format(pawnHashCollisions) + " (" + df.format(pawnHashCollisionPct) + "%)");
 
-//        double failHighPct = stats.getFailHighs() / (hashProbes/100.0);
-//        double failLowPct = stats.getFailLows() / (hashProbes/100.0);
-//        double exactScorePct = stats.getHashExactScores() / (hashProbes/100.0);
-//        LOGGER.info("# fail highs: " + df2.format(stats.getFailHighs()) + " (" + df.format(failHighPct) + "%)"
-//                + ", fail lows: " + df2.format(stats.getFailLows()) + " (" + df.format(failLowPct) + "%)"
-//                + ", exact scores: " + df2.format(stats.getHashExactScores()) + " (" + df.format(exactScorePct) + "%)");
-//
+
 //        LOGGER.info("# prunes: " + stats.getPrunes());
     }
 
