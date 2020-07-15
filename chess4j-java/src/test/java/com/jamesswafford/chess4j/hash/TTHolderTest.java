@@ -9,17 +9,13 @@ public class TTHolderTest {
     @Test
     public void resizeMainTables() {
 
-        // with 2 mb, each table gets 1 mb
-        TTHolder.getInstance().resizeMainTables(2 * 1024 * 1024);
+        // with 2 mb
+        TTHolder.getInstance().resizeMainTable(2 * 1024 * 1024);
+        assertEquals(131072, TTHolder.getInstance().getHashTable().tableCapacity());
 
-        assertEquals(65536, TTHolder.getInstance().getAlwaysReplaceTransTable().tableCapacity());
-        assertEquals(65536, TTHolder.getInstance().getDepthPreferredTransTable().tableCapacity());
-
-        // with 4 mb, each table gets 2 mb
-        TTHolder.getInstance().resizeMainTables(4 * 1024 * 1024);
-
-        assertEquals(131072, TTHolder.getInstance().getAlwaysReplaceTransTable().tableCapacity());
-        assertEquals(131072, TTHolder.getInstance().getDepthPreferredTransTable().tableCapacity());
+        // with 4 mb
+        TTHolder.getInstance().resizeMainTable(4 * 1024 * 1024);
+        assertEquals(262144, TTHolder.getInstance().getHashTable().tableCapacity());
     }
 
     @Test
@@ -27,29 +23,26 @@ public class TTHolderTest {
 
         // size to 1 mb
         TTHolder.getInstance().resizePawnTable(1024 * 1024);
-        assertEquals(65536, TTHolder.getInstance().getPawnTransTable().tableCapacity());
+        assertEquals(87381, TTHolder.getInstance().getPawnHashTable().tableCapacity());
 
         // size to 2 mb
         TTHolder.getInstance().resizePawnTable(2 * 1024 * 1024);
-        assertEquals(131072, TTHolder.getInstance().getPawnTransTable().tableCapacity());
+        assertEquals(174762, TTHolder.getInstance().getPawnHashTable().tableCapacity());
     }
 
     @Test
     public void resizeAllTables() {
 
-        // with 3 mb, each table gets 1 mb
-        TTHolder.getInstance().resizeAllTables(3 * 1024 * 1024);
+        // with 4 mb, each table gets 2 mb
+        TTHolder.getInstance().resizeAllTables(4 * 1024 * 1024);
 
-        assertEquals(65536, TTHolder.getInstance().getAlwaysReplaceTransTable().tableCapacity());
-        assertEquals(65536, TTHolder.getInstance().getDepthPreferredTransTable().tableCapacity());
-        assertEquals(65536, TTHolder.getInstance().getPawnTransTable().tableCapacity());
+        assertEquals(131072, TTHolder.getInstance().getHashTable().tableCapacity());
+        assertEquals(174762, TTHolder.getInstance().getPawnHashTable().tableCapacity());
 
-        // with 6 mb, each table gets 2 mb
+        // with 6 mb, each table gets 3 mb
         TTHolder.getInstance().resizeAllTables(6 * 1024 * 1024);
-
-        assertEquals(131072, TTHolder.getInstance().getAlwaysReplaceTransTable().tableCapacity());
-        assertEquals(131072, TTHolder.getInstance().getDepthPreferredTransTable().tableCapacity());
-        assertEquals(131072, TTHolder.getInstance().getPawnTransTable().tableCapacity());
+        assertEquals(196608, TTHolder.getInstance().getHashTable().tableCapacity());
+        assertEquals(262144, TTHolder.getInstance().getPawnHashTable().tableCapacity());
     }
 
 }

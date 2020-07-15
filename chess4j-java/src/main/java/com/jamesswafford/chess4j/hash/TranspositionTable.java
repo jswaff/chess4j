@@ -11,20 +11,16 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     private static final Logger LOGGER = LogManager.getLogger(TranspositionTable.class);
 
-    public static final int DEFAULT_ENTRIES = 1048576;
+    public static final int DEFAULT_ENTRIES = 8388608; // 128 MB
 
-    private final boolean depthPreferred;
     private TranspositionTableEntry[] table;
 
-    public TranspositionTable(boolean depthPreferred) {
-        this(depthPreferred, DEFAULT_ENTRIES);
+    public TranspositionTable() {
+        this(DEFAULT_ENTRIES);
     }
 
-    public TranspositionTable(boolean depthPreferred, int maxEntries) {
-        this.depthPreferred = depthPreferred;
-        int numEntries = calculateNumEntries(maxEntries);
-        allocateTable(numEntries);
-        clear();
+    public TranspositionTable(int numEntries) {
+        super(numEntries);
     }
 
     @Override
@@ -51,7 +47,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     public TranspositionTableEntry probe(long zobristKey) {
         numProbes++;
-        TranspositionTableEntry te = table[getMaskedKey(zobristKey)];
+        TranspositionTableEntry te = table[getTableIndex(zobristKey)];
 
         if (te != null) {
             // compare full signature to avoid collisions
@@ -70,15 +66,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
      * Store an entry in the transposition table, Gerbil style.  Meaning, for now I'm skirting around
      * dealing with the headache that is storing mate scores by storing them as bounds only.
      */
-    public boolean store(long zobristKey,TranspositionTableEntryType entryType,int score,int depth,Move move) {
-
-        // if this is a depth preferred table, we don't overwrite entries stored from a deeper search
-        if (depthPreferred) {
-            TranspositionTableEntry currentEntry = table[getMaskedKey(zobristKey)];
-            if (currentEntry != null &&  currentEntry.getDepth() > depth) {
-                return false;
-            }
-        }
+    public void store(long zobristKey, TranspositionTableEntryType entryType, int score, int depth, Move move) {
 
         if (isMateScore(score)) {
             if (entryType==TranspositionTableEntryType.UPPER_BOUND) {
@@ -100,16 +88,13 @@ public class TranspositionTable extends AbstractTranspositionTable {
             }
         }
 
-        TranspositionTableEntry te = new TranspositionTableEntry(zobristKey,entryType,score,depth,move);
-        table[getMaskedKey(zobristKey)] = te;
-
-        return true;
+        TranspositionTableEntry te = new TranspositionTableEntry(zobristKey, entryType, score, depth, move);
+        table[getTableIndex(zobristKey)] = te;
     }
 
     @Override
     protected void allocateTable(int capacity) {
-        LOGGER.debug("# allocating " + capacity + " elements for " +
-                (depthPreferred? " depth preferred":"always replace") + " table");
+        LOGGER.debug("# allocating " + capacity + " elements for hash table");
         table = new TranspositionTableEntry[capacity];
     }
 

@@ -19,8 +19,8 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public class PawnTranspositionTableTest {
 
-    private PawnTranspositionTable ptable = new PawnTranspositionTable();
-    private Board board = new Board();
+    private final PawnTranspositionTable ptable = new PawnTranspositionTable();
+    private final Board board = new Board();
 
     @Before
     public void setUp() {
@@ -127,7 +127,7 @@ public class PawnTranspositionTableTest {
         ptt.resize(fourMb);
 
         // that's enough space for 349,525 entries
-        assertEquals(262144, ptt.tableCapacity());
+        assertEquals(349525, ptt.tableCapacity());
     }
 
 }

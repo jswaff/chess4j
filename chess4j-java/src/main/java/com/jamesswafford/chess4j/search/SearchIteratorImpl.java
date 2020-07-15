@@ -264,11 +264,10 @@ public class SearchIteratorImpl implements SearchIterator {
         LOGGER.info("# search time: " + totalSearchTime/1000.0 + " seconds"
                 + ", rate: " + df2.format(totalNodes / (totalSearchTime/1000.0)) + " nodes per second");
 
-        TranspositionTable dpTbl = TTHolder.getInstance().getDepthPreferredTransTable();
-        TranspositionTable arTbl = TTHolder.getInstance().getAlwaysReplaceTransTable();
-        long hashHits = dpTbl.getNumHits() + arTbl.getNumHits();
-        long hashProbes = dpTbl.getNumProbes() + arTbl.getNumProbes();
-        long hashCollisions = dpTbl.getNumCollisions() + arTbl.getNumCollisions();
+        TranspositionTable htbl = TTHolder.getInstance().getHashTable();
+        long hashHits = htbl.getNumHits();
+        long hashProbes = htbl.getNumProbes();
+        long hashCollisions = htbl.getNumCollisions();
         double hashHitPct = hashHits / (hashProbes/100.0);
         double hashCollisionPct = hashCollisions / (hashProbes/100.0);
 
@@ -286,7 +285,7 @@ public class SearchIteratorImpl implements SearchIterator {
                 + ", hash exact scores: " + df2.format(stats.hashExactScores)
                 + " (" + df.format(hashExactScorePct) + "%)");
 
-        PawnTranspositionTable pawnTbl = TTHolder.getInstance().getPawnTransTable();
+        PawnTranspositionTable pawnTbl = TTHolder.getInstance().getPawnHashTable();
         long pawnHashHits = pawnTbl.getNumHits();
         long pawnHashProbes = pawnTbl.getNumProbes();
         long pawnHashCollisions = pawnTbl.getNumCollisions();
@@ -297,14 +296,8 @@ public class SearchIteratorImpl implements SearchIterator {
                 + ", hits: " + df2.format(pawnHashHits) + " (" + df.format(pawnHashHitPct) + "%)"
                 + ", collisions: " + df2.format(pawnHashCollisions) + " (" + df.format(pawnHashCollisionPct) + "%)");
 
-
 //        LOGGER.info("# prunes: " + stats.getPrunes());
     }
-
-//        private List<Move> findPrincipalVariationWithNativeCode(Board board, List<Undo> undos) {
-//
-//
-//        }
 
         private native void iterateNative(String boardFen, List<Long> prevMoves, int maxDepth, List<Long> pv);
 

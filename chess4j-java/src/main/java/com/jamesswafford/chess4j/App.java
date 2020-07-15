@@ -41,7 +41,7 @@ public final class App {
             int maxMemBytes = Integer.parseInt(arg.substring(6)) * 1024 * 1024;
             // this command line arg is meant to set the size of the memory per table, but the
             // TTHolder will split it between both main tables.
-            TTHolder.getInstance().resizeMainTables(2 * maxMemBytes);
+            TTHolder.getInstance().resizeMainTable(2 * maxMemBytes);
         } else if (arg.startsWith("-phash=")) {
             int maxMemBytes = Integer.parseInt(arg.substring(7)) * 1024 * 1024;
             TTHolder.getInstance().resizePawnTable(maxMemBytes);

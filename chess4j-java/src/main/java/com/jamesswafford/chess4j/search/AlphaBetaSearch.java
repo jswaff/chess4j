@@ -249,7 +249,7 @@ public class AlphaBetaSearch implements Search {
             }
 
             // probe the hash table
-            TranspositionTableEntry tte = TTHolder.getInstance().getAlwaysReplaceTransTable().probe(
+            TranspositionTableEntry tte = TTHolder.getInstance().getHashTable().probe(
                     board.getZobristKey());
             if (tte != null && tte.getDepth() >= depth) {
                 if (tte.getType() == LOWER_BOUND) {
@@ -302,7 +302,7 @@ public class AlphaBetaSearch implements Search {
 
             if (val >= beta) {
                 searchStats.failHighs++;
-                TTHolder.getInstance().getAlwaysReplaceTransTable().store(
+                TTHolder.getInstance().getHashTable().store(
                         board.getZobristKey(), LOWER_BOUND, beta, depth, move);
                 if (move.captured()==null && move.promotion()==null) {
                     killerMovesStore.addKiller(ply, move);
@@ -334,7 +334,7 @@ public class AlphaBetaSearch implements Search {
             tableEntryType = EXACT_MATCH;
         }
 
-        TTHolder.getInstance().getAlwaysReplaceTransTable().store(
+        TTHolder.getInstance().getHashTable().store(
                 board.getZobristKey(), tableEntryType, alpha, depth, bestMove);
 
         return alpha;

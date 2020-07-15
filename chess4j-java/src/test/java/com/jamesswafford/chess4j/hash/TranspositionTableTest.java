@@ -21,31 +21,22 @@ import static com.jamesswafford.chess4j.hash.TranspositionTableEntryType.*;
 
 public class TranspositionTableTest {
 
-    private final TranspositionTable ttable = new TranspositionTable(false);
-    private final TranspositionTable ttDPtable = new TranspositionTable(true);
+    private final TranspositionTable ttable = new TranspositionTable();
     private final Board board = new Board();
 
     @Test
-    public void capacityIsPowerOf2() {
-        TranspositionTable tt = new TranspositionTable(false);
-        assertIsPowerOf2(tt.tableCapacity());
+    public void capacity() {
+        TranspositionTable tt = new TranspositionTable();
+        assertEquals(TranspositionTable.DEFAULT_ENTRIES, tt.tableCapacity());
 
-        tt = new TranspositionTable(false,1000000);
-        assertIsPowerOf2(tt.tableCapacity());
-        assertEquals(524288, tt.tableCapacity());
+        tt = new TranspositionTable(1000000);
+        assertEquals(1000000, tt.tableCapacity());
 
+        tt = new TranspositionTable(32000);
+        assertEquals(32000, tt.tableCapacity());
 
-        tt = new TranspositionTable(false,32000);
-        assertIsPowerOf2(tt.tableCapacity());
-        assertEquals(16384, tt.tableCapacity());
-
-        tt = new TranspositionTable(false,65536);
-        assertIsPowerOf2(tt.tableCapacity());
+        tt = new TranspositionTable(65536);
         assertEquals(65536, tt.tableCapacity());
-    }
-
-    private void assertIsPowerOf2(long val) {
-        assertEquals(0, (val & (val - 1)));
     }
 
     @Test
@@ -279,31 +270,9 @@ public class TranspositionTableTest {
     }
 
     @Test
-    public void overwriteDepthPreferred() {
-        ttDPtable.clear();
-        board.setPos("8/k7/p7/3Qp2P/n1P5/3KP3/1q6/8 b - -");
-        long key = Zobrist.calculateBoardKey(board);
-        Move m = new Move(BLACK_PAWN, E5, E4);
-        ttDPtable.store(key, LOWER_BOUND,1001, 5, m);
-        TranspositionTableEntry tte = ttDPtable.probe(key);
-        TranspositionTableEntry origEntry = new TranspositionTableEntry(key, LOWER_BOUND,1001,5,m);
-        assertEquals(origEntry, tte);
-
-        // overwrite with a different score and shallower depth
-        ttDPtable.store(key, LOWER_BOUND,900, 4, m);
-        tte = ttDPtable.probe(key);
-        assertEquals(origEntry, tte);
-
-        // overwrite with yet another score but a deeper depth
-        ttDPtable.store(key, LOWER_BOUND,800, 6, m);
-        tte = ttDPtable.probe(key);
-        assertEquals(6, tte.getDepth());
-    }
-
-    @Test
     public void resize() {
 
-        TranspositionTable tt = new TranspositionTable(false, 1024);
+        TranspositionTable tt = new TranspositionTable(1024);
         assertEquals(1024, tt.tableCapacity());
 
         int fourMb = 4 * 1024 * 1024;

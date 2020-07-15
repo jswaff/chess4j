@@ -6,49 +6,39 @@ public class TTHolder {
 
     public static TTHolder getInstance() { return ttHolder; }
 
-    private final TranspositionTable alwaysReplaceTransTable;
-    private final TranspositionTable depthPreferredTransTable;
-    private final PawnTranspositionTable pawnTransTable;
+    private final TranspositionTable hashTable;
+    private final PawnTranspositionTable pawnHashTable;
 
     private TTHolder() {
-        alwaysReplaceTransTable = new TranspositionTable(false);
-        depthPreferredTransTable = new TranspositionTable(true);
-        pawnTransTable = new PawnTranspositionTable();
+        hashTable = new TranspositionTable();
+        pawnHashTable = new PawnTranspositionTable();
     }
 
-    public TranspositionTable getAlwaysReplaceTransTable() {
-        return alwaysReplaceTransTable;
+    public TranspositionTable getHashTable() {
+        return hashTable;
     }
 
-    public TranspositionTable getDepthPreferredTransTable() {
-        return depthPreferredTransTable;
-    }
-
-    public PawnTranspositionTable getPawnTransTable() {
-        return pawnTransTable;
+    public PawnTranspositionTable getPawnHashTable() {
+        return pawnHashTable;
     }
 
     public void clearTables() {
-        getAlwaysReplaceTransTable().clear();
-        getDepthPreferredTransTable().clear();
-        getPawnTransTable().clear();
+        getHashTable().clear();
+        getPawnHashTable().clear();
     }
 
-    public void resizeMainTables(int maxBytes) {
-        int maxBytesPerTable = maxBytes / 2;
-        getAlwaysReplaceTransTable().resize(maxBytesPerTable);
-        getDepthPreferredTransTable().resize(maxBytesPerTable);
+    public void resizeMainTable(int maxBytes) {
+        getHashTable().resize(maxBytes);
     }
 
     public void resizePawnTable(int maxBytes) {
-        getPawnTransTable().resize(maxBytes);
+        getPawnHashTable().resize(maxBytes);
     }
 
     public void resizeAllTables(int maxBytes) {
-        int maxBytesPerTable = maxBytes / 3;
-        getAlwaysReplaceTransTable().resize(maxBytesPerTable);
-        getDepthPreferredTransTable().resize(maxBytesPerTable);
-        getPawnTransTable().resize(maxBytesPerTable);
+        int maxBytesPerTable = maxBytes / 2;
+        getHashTable().resize(maxBytesPerTable);
+        getPawnHashTable().resize(maxBytesPerTable);
     }
 
 }

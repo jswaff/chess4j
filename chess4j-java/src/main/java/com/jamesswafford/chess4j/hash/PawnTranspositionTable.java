@@ -9,7 +9,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     private static final Logger LOGGER = LogManager.getLogger(PawnTranspositionTable.class);
 
-    private static final int DEFAULT_ENTRIES = 1048576;
+    private static final int DEFAULT_ENTRIES = 11184810; // 128 MB
 
     private PawnTranspositionTableEntry[] table;
 
@@ -17,10 +17,8 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         this(DEFAULT_ENTRIES);
     }
 
-    public PawnTranspositionTable(int maxEntries) {
-        int numEntries = calculateNumEntries(maxEntries);
-        allocateTable(numEntries);
-        clear();
+    public PawnTranspositionTable(int numEntries) {
+        super(numEntries);
     }
 
     @Override
@@ -31,7 +29,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     public PawnTranspositionTableEntry probe(long zobristKey) {
         numProbes++;
-        PawnTranspositionTableEntry te = table[getMaskedKey(zobristKey)];
+        PawnTranspositionTableEntry te = table[getTableIndex(zobristKey)];
 
         if (te != null) {
             // compare full signature to avoid collisions
@@ -46,9 +44,9 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         return te;
     }
 
-    public void store(long zobristKey,int score) {
+    public void store(long zobristKey, int score) {
         PawnTranspositionTableEntry te = new PawnTranspositionTableEntry(zobristKey, score);
-        table[getMaskedKey(zobristKey)] = te;
+        table[getTableIndex(zobristKey)] = te;
     }
 
     @Override

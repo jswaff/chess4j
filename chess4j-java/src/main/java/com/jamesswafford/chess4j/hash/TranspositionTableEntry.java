@@ -51,7 +51,7 @@ public class TranspositionTableEntry {
         buildStoredValue(entryType,score,depth,move);
     }
 
-    private void buildStoredValue(TranspositionTableEntryType entryType,int score,int depth,Move move) {
+    private void buildStoredValue(TranspositionTableEntryType entryType, int score, int depth, Move move) {
         // bits 0-1 are the entry type
         val = entryType.ordinal();
         assert(val <= 3);
@@ -123,7 +123,7 @@ public class TranspositionTableEntry {
             boolean castle = ((val >> 61) & 1)==1;
             boolean epCapture = ((val >> 62) & 1)==1;
 
-            move = new Move(piece,fromSq,toSq,captured,promotion,castle,epCapture);
+            move = new Move(piece, fromSq, toSq, captured, promotion, castle, epCapture);
         }
 
         return move;
