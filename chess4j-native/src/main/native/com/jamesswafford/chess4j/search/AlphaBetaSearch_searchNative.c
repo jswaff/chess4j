@@ -146,6 +146,14 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     jfieldID fid_draws = (*env)->GetFieldID(env, class_SearchStats, "draws", "J");
     (*env)->SetLongField(env, search_stats, fid_draws, native_stats.draws);
 
+    jfieldID fid_hashFailHighs = (*env)->GetFieldID(env, class_SearchStats, "hashFailHighs", "J");
+    (*env)->SetLongField(env, search_stats, fid_hashFailHighs, native_stats.hash_fail_highs);
+
+    jfieldID fid_hashFailLows = (*env)->GetFieldID(env, class_SearchStats, "hashFailLows", "J");
+    (*env)->SetLongField(env, search_stats, fid_hashFailLows, native_stats.hash_fail_lows);
+
+    jfieldID fid_hashExactScores = (*env)->GetFieldID(env, class_SearchStats, "hashExactScores", "J");
+    (*env)->SetLongField(env, search_stats, fid_hashExactScores, native_stats.hash_exact_scores);
 
     /* free resources */
 cleanup:
