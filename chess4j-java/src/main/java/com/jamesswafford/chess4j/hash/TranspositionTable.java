@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.hash;
 
 import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.init.Initializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,6 +13,10 @@ public class TranspositionTable extends AbstractTranspositionTable {
     private static final Logger LOGGER = LogManager.getLogger(TranspositionTable.class);
 
     public static final int DEFAULT_ENTRIES = 8388608; // 128 MB
+
+    static {
+        Initializer.init();
+    }
 
     private TranspositionTableEntry[] table;
 
@@ -27,6 +32,30 @@ public class TranspositionTable extends AbstractTranspositionTable {
     public void clear() {
         clearStats();
         Arrays.fill(table, null);
+    }
+
+    @Override
+    public long getNumCollisions() {
+        if (Initializer.nativeCodeInitialized()) {
+            return getNumCollisionsNative();
+        }
+        return numCollisions;
+    }
+
+    @Override
+    public long getNumHits() {
+        if (Initializer.nativeCodeInitialized()) {
+            return getNumHitsNative();
+        }
+        return numHits;
+    }
+
+    @Override
+    public long getNumProbes() {
+        if (Initializer.nativeCodeInitialized()) {
+            return getNumProbesNative();
+        }
+        return numProbes;
     }
 
     private int getCheckMateBound() {
@@ -107,4 +136,11 @@ public class TranspositionTable extends AbstractTranspositionTable {
     public int sizeOfEntry() {
         return TranspositionTableEntry.sizeOf();
     }
+
+    private native long getNumCollisionsNative();
+
+    private native long getNumHitsNative();
+
+    private native long getNumProbesNative();
+
 }

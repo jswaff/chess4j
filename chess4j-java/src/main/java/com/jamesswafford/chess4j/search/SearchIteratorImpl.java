@@ -29,6 +29,10 @@ public class SearchIteratorImpl implements SearchIterator {
 
     private static final  Logger LOGGER = LogManager.getLogger(SearchIteratorImpl.class);
 
+    static {
+        Initializer.init();
+    }
+
     private int maxDepth = 0;
     private long maxTimeMs = 0;
     private boolean post = true;
