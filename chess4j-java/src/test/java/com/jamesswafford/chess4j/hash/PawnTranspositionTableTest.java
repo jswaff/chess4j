@@ -121,13 +121,12 @@ public class PawnTranspositionTableTest {
     public void resize() {
 
         PawnTranspositionTable ptt = new PawnTranspositionTable(1024);
-        assertEquals(1024, ptt.tableCapacity());
+        assertEquals(1024 / 12, ptt.tableCapacity());
 
         int fourMb = 4 * 1024 * 1024;
-        ptt.resize(fourMb);
+        ptt.resizeTable(fourMb);
 
-        // that's enough space for 349,525 entries
-        assertEquals(349525, ptt.tableCapacity());
+        assertEquals(fourMb / 12, ptt.tableCapacity());
     }
 
 }

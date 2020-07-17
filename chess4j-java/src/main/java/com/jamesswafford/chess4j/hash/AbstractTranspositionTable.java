@@ -6,9 +6,8 @@ public abstract class AbstractTranspositionTable {
     protected long numHits;
     protected long numCollisions;
 
-    public AbstractTranspositionTable(int numEntries) {
-        allocateTable(numEntries);
-        clear();
+    public AbstractTranspositionTable(int maxBytes) {
+        createTable(maxBytes);
     }
 
     public void clearStats() {
@@ -33,12 +32,9 @@ public abstract class AbstractTranspositionTable {
         return numProbes;
     }
 
-    protected void resize(int maxBytes) {
-        allocateTable(maxBytes / sizeOfEntry());
-        clear();
-    }
+    protected abstract void createTable(int maxBytes);
 
-    protected abstract void allocateTable(int capacity);
+    protected abstract void resizeTable(int maxBytes);
 
     public abstract int tableCapacity();
 

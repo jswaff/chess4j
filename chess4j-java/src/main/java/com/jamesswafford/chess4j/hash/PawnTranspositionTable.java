@@ -10,23 +10,23 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     private static final Logger LOGGER = LogManager.getLogger(PawnTranspositionTable.class);
 
-    private static final int DEFAULT_ENTRIES = 11184810; // 128 MB
+    private static final int DEFAULT_SIZE_BYTES = 128 * 1024 * 1024;
 
     private PawnTranspositionTableEntry[] table;
 
-    public static int getDefaultEntries() {
+    public static int getDefaultSizeBytes() {
         if (Initializer.nativeCodeInitialized()) {
-            return DEFAULT_ENTRIES; // TODO - when pawn hash is implemented in P4 make this 0
+            return DEFAULT_SIZE_BYTES; // TODO - when pawn hash is implemented in P4 make this 0
         }
-        return DEFAULT_ENTRIES;
+        return DEFAULT_SIZE_BYTES;
     }
 
     public PawnTranspositionTable() {
-        this(getDefaultEntries());
+        this(getDefaultSizeBytes());
     }
 
-    public PawnTranspositionTable(int numEntries) {
-        super(numEntries);
+    public PawnTranspositionTable(int sizeBytes) {
+        super(sizeBytes);
     }
 
     @Override
@@ -58,10 +58,15 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     }
 
     @Override
-    protected void allocateTable(int capacity) {
-        LOGGER.debug("# allocating " + capacity + " elements for pawn table");
+    protected void createTable(int sizeBytes) {
+        int numEntries = sizeBytes / sizeOfEntry();
+        LOGGER.debug("# c4j pawn hash size: " + sizeBytes + " bytes ==> " + numEntries + " elements.");
+        table = new PawnTranspositionTableEntry[numEntries];
+    }
 
-        table = new PawnTranspositionTableEntry[capacity];
+    @Override
+    protected void resizeTable(int sizeBytes) {
+        createTable(sizeBytes);
     }
 
     @Override

@@ -15,7 +15,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     private static final Logger LOGGER = LogManager.getLogger(TranspositionTable.class);
 
-    private static final int DEFAULT_ENTRIES = 8388608; // 128 MB
+    private static final int DEFAULT_SIZE_BYTES = 128 * 1024 * 1024;
 
     static {
         Initializer.init();
@@ -23,19 +23,19 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     private TranspositionTableEntry[] table;
 
-    public static int getDefaultEntries() {
+    public static int getDefaultSizeBytes() {
         if (Initializer.nativeCodeInitialized()) {
             return 0;
         }
-        return DEFAULT_ENTRIES;
+        return DEFAULT_SIZE_BYTES;
     }
 
     public TranspositionTable() {
-        this(getDefaultEntries());
+        this(getDefaultSizeBytes());
     }
 
-    public TranspositionTable(int numEntries) {
-        super(numEntries);
+    public TranspositionTable(int sizeBytes) {
+        super(sizeBytes);
     }
 
     @Override
@@ -155,7 +155,6 @@ public class TranspositionTable extends AbstractTranspositionTable {
      * to verify search equality.
      */
     public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move) {
-
         if (Initializer.nativeCodeInitialized()) {
             String fen = FenBuilder.createFen(board, true);
             Long nativeMove = MoveUtils.toNativeMove(move);
@@ -168,9 +167,19 @@ public class TranspositionTable extends AbstractTranspositionTable {
     private native void storeNative(String fen, int entryType, int score, int depth, long move);
 
     @Override
-    protected void allocateTable(int capacity) {
-        LOGGER.debug("# allocating " + capacity + " elements for hash table");
-        table = new TranspositionTableEntry[capacity];
+    protected void createTable(int sizeBytes) {
+        int numEntries = sizeBytes / sizeOfEntry();
+        LOGGER.debug("# c4j hash size: " + sizeBytes + " bytes ==> " + numEntries + " elements.");
+        table = new TranspositionTableEntry[numEntries];
+    }
+
+    @Override
+    protected void resizeTable(int sizeBytes) {
+        if (Initializer.nativeCodeInitialized()) {
+            resizeNative(sizeBytes);
+        } else {
+            createTable(sizeBytes);
+        }
     }
 
     @Override
@@ -189,4 +198,5 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     private native long getNumProbesNative();
 
+    private native void resizeNative(int sizeBytes);
 }

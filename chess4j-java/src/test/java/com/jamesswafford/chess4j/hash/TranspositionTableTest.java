@@ -27,16 +27,16 @@ public class TranspositionTableTest {
     @Test
     public void capacity() {
         TranspositionTable tt = new TranspositionTable();
-        assertEquals(TranspositionTable.getDefaultEntries(), tt.tableCapacity());
+        assertEquals(TranspositionTable.getDefaultSizeBytes() / 16, tt.tableCapacity());
 
         tt = new TranspositionTable(1000000);
-        assertEquals(1000000, tt.tableCapacity());
+        assertEquals(1000000 / 16, tt.tableCapacity());
 
         tt = new TranspositionTable(32000);
-        assertEquals(32000, tt.tableCapacity());
+        assertEquals(32000 / 16, tt.tableCapacity());
 
         tt = new TranspositionTable(65536);
-        assertEquals(65536, tt.tableCapacity());
+        assertEquals(65536 / 16, tt.tableCapacity());
     }
 
     @Test
@@ -273,12 +273,12 @@ public class TranspositionTableTest {
     public void resize() {
 
         TranspositionTable tt = new TranspositionTable(1024);
-        assertEquals(1024, tt.tableCapacity());
+        assertEquals(1024 / 16, tt.tableCapacity());
 
         int fourMb = 4 * 1024 * 1024;
-        tt.resize(fourMb);
+        tt.resizeTable(fourMb);
 
-        assertEquals(262144, tt.tableCapacity());
+        assertEquals(fourMb / 16, tt.tableCapacity());
     }
 
 }

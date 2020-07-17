@@ -28,17 +28,17 @@ public class TTHolder {
     }
 
     public void resizeMainTable(int maxBytes) {
-        getHashTable().resize(maxBytes);
+        getHashTable().resizeTable(maxBytes);
     }
 
     public void resizePawnTable(int maxBytes) {
-        getPawnHashTable().resize(maxBytes);
+        getPawnHashTable().resizeTable(maxBytes);
     }
 
     public void resizeAllTables(int maxBytes) {
         int maxBytesPerTable = maxBytes / 2;
-        getHashTable().resize(maxBytesPerTable);
-        getPawnHashTable().resize(maxBytesPerTable);
+        getHashTable().resizeTable(maxBytesPerTable);
+        getPawnHashTable().resizeTable(maxBytesPerTable);
     }
 
 }
