@@ -165,7 +165,7 @@ public class AlphaBetaSearch implements Search {
         SearchStats nativeStats = new SearchStats(searchStats);
 
         try {
-
+            assert(clearTableWrapper());
             int nativeScore = searchNative(fen, prevMoves, nativePV, searchParameters.getDepth(),
                     searchParameters.getAlpha(), searchParameters.getBeta(), nativeStats, opts.getStartTime(),
                     opts.getStopTime());
@@ -188,16 +188,40 @@ public class AlphaBetaSearch implements Search {
         }
     }
 
+    // wrapper so we can clear table when asserts are enabled
+    private boolean clearTableWrapper() {
+        TTHolder.getInstance().getHashTable().clear();
+        return true;
+    }
+
     private boolean searchesAreEqual(Board board, List<Undo> undos, SearchParameters searchParameters,
                                      SearchOptions opts, String fen, int nativeScore, List<Long> nativePV,
                                      SearchStats nativeStats)
     {
         LOGGER.debug("# checking search equality with java depth {}", searchParameters.getDepth());
         try {
+            long nativeProbes = TTHolder.getInstance().getHashTable().getNumProbes();
+            long nativeHits = TTHolder.getInstance().getHashTable().getNumHits();
+            long nativeCollisions = TTHolder.getInstance().getHashTable().getNumCollisions();
+
+            assert(clearTableWrapper());
             int javaScore = searchWithJavaCode(board, undos, searchParameters, opts);
 
             // if the search was interrupted we can't compare
             if (stop) return true;
+
+            // compare the hash table stats
+            long javaProbes = TTHolder.getInstance().getHashTable().getNumProbes();
+            long javaHits = TTHolder.getInstance().getHashTable().getNumHits();
+            long javaCollisions = TTHolder.getInstance().getHashTable().getNumCollisions();
+            if (javaProbes != nativeProbes || javaHits != nativeHits || javaCollisions != nativeCollisions) {
+                LOGGER.error("hash stats not equal!"
+                        + ", java probes: " + javaProbes + ", native probes: " + nativeProbes
+                        + ", java hits: " + javaHits + ", native hits: " + nativeHits
+                        + ", java collisions: " + javaCollisions + ", native collisions: " + nativeCollisions
+                        + ", params: " + searchParameters + ", fen: " + fen);
+                return false;
+            }
 
             if (javaScore != nativeScore || !searchStats.equals(nativeStats)) {
                 LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
@@ -249,8 +273,7 @@ public class AlphaBetaSearch implements Search {
             }
 
             // probe the hash table
-            TranspositionTableEntry tte = TTHolder.getInstance().getHashTable().probe(
-                    board.getZobristKey());
+            TranspositionTableEntry tte = TTHolder.getInstance().getHashTable().probe(board);
             if (tte != null && tte.getDepth() >= depth) {
                 if (tte.getType() == LOWER_BOUND) {
                     if (tte.getScore() >= beta) {
@@ -302,8 +325,7 @@ public class AlphaBetaSearch implements Search {
 
             if (val >= beta) {
                 searchStats.failHighs++;
-                TTHolder.getInstance().getHashTable().store(
-                        board.getZobristKey(), LOWER_BOUND, beta, depth, move);
+                TTHolder.getInstance().getHashTable().store(board, LOWER_BOUND, beta, depth, move);
                 if (move.captured()==null && move.promotion()==null) {
                     killerMovesStore.addKiller(ply, move);
                 }
@@ -334,8 +356,7 @@ public class AlphaBetaSearch implements Search {
             tableEntryType = EXACT_MATCH;
         }
 
-        TTHolder.getInstance().getHashTable().store(
-                board.getZobristKey(), tableEntryType, alpha, depth, bestMove);
+        TTHolder.getInstance().getHashTable().store(board, tableEntryType, alpha, depth, bestMove);
 
         return alpha;
     }

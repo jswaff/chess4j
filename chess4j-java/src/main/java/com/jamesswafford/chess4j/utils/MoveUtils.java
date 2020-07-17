@@ -123,6 +123,7 @@ public final class MoveUtils {
     }
 
     public static Long toNativeMove(Move mv) {
+        if (mv==null) return 0L;
 
         long nativeMv = (long) mv.from().value() & 0x3F;
         nativeMv |= ((long)mv.to().value() & 0x3F) << 6;

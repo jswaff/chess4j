@@ -45,10 +45,15 @@ public class TranspositionTableEntry {
     }
 
 
-    public TranspositionTableEntry(long zobristKey,
-            TranspositionTableEntryType entryType,int score,int depth,Move move) {
-        this.zobristKey=zobristKey;
+    public TranspositionTableEntry(long zobristKey, TranspositionTableEntryType entryType, int score, int depth,
+                                   Move move) {
+        this.zobristKey = zobristKey;
         buildStoredValue(entryType,score,depth,move);
+    }
+
+    public TranspositionTableEntry(long zobristKey, long val) {
+        this.zobristKey = zobristKey;
+        this.val = val;
     }
 
     private void buildStoredValue(TranspositionTableEntryType entryType, int score, int depth, Move move) {

@@ -1,8 +1,11 @@
 package com.jamesswafford.chess4j.hash;
 
 import com.jamesswafford.chess4j.Constants;
+import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.io.FenBuilder;
+import com.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,7 +35,12 @@ public class TranspositionTable extends AbstractTranspositionTable {
     public void clear() {
         clearStats();
         Arrays.fill(table, null);
+        if (Initializer.nativeCodeInitialized()) {
+            clearNative();
+        }
     }
+
+    private native void clearNative();
 
     @Override
     public long getNumCollisions() {
@@ -91,6 +99,19 @@ public class TranspositionTable extends AbstractTranspositionTable {
         return te;
     }
 
+    public TranspositionTableEntry probe(Board board) {
+
+        if (Initializer.nativeCodeInitialized()) {
+            String fen = FenBuilder.createFen(board, true);
+            long nativeVal = probeNative(fen);
+            return new TranspositionTableEntry(board.getZobristKey(), nativeVal);
+        } else {
+            return probe(board.getZobristKey());
+        }
+    }
+
+    private native long probeNative(String fen);
+
     /**
      * Store an entry in the transposition table, Gerbil style.  Meaning, for now I'm skirting around
      * dealing with the headache that is storing mate scores by storing them as bounds only.
@@ -120,6 +141,24 @@ public class TranspositionTable extends AbstractTranspositionTable {
         TranspositionTableEntry te = new TranspositionTableEntry(zobristKey, entryType, score, depth, move);
         table[getTableIndex(zobristKey)] = te;
     }
+
+    /*
+     * This is a convenience method, wrapping the previous "store".  It also serves as a hook into the native
+     * code.  The only time this method would be used when native code is enabled is when assertions are on,
+     * to verify search equality.
+     */
+    public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move) {
+
+        if (Initializer.nativeCodeInitialized()) {
+            String fen = FenBuilder.createFen(board, true);
+            Long nativeMove = MoveUtils.toNativeMove(move);
+            storeNative(fen, entryType.ordinal(), score, depth, nativeMove);
+        } else {
+            store(board.getZobristKey(), entryType, score, depth, move);
+        }
+    }
+
+    private native void storeNative(String fen, int entryType, int score, int depth, long move);
 
     @Override
     protected void allocateTable(int capacity) {
