@@ -23,5 +23,10 @@ JNIEXPORT void JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_re
     }
     
 
-    resize_hash_table(&htbl, (uint32_t) size_bytes);
+    int retval = resize_hash_table(&htbl, (uint32_t) size_bytes);
+    if (0 != retval)
+    {
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
+            "Failed to (re)allocate hash table");
+    }
 }
