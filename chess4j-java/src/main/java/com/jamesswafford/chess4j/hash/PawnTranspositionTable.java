@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.hash;
 
+import com.jamesswafford.chess4j.init.Initializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,8 +14,15 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     private PawnTranspositionTableEntry[] table;
 
+    public static int getDefaultEntries() {
+        if (Initializer.nativeCodeInitialized()) {
+            return DEFAULT_ENTRIES; // TODO - when pawn hash is implemented in P4 make this 0
+        }
+        return DEFAULT_ENTRIES;
+    }
+
     public PawnTranspositionTable() {
-        this(DEFAULT_ENTRIES);
+        this(getDefaultEntries());
     }
 
     public PawnTranspositionTable(int numEntries) {

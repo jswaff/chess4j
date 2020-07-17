@@ -45,4 +45,5 @@ public abstract class AbstractTranspositionTable {
     public abstract int sizeOfEntry();
 
     public abstract void clear();
+
 }

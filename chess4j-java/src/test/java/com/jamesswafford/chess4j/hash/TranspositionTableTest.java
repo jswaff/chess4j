@@ -27,7 +27,7 @@ public class TranspositionTableTest {
     @Test
     public void capacity() {
         TranspositionTable tt = new TranspositionTable();
-        assertEquals(TranspositionTable.DEFAULT_ENTRIES, tt.tableCapacity());
+        assertEquals(TranspositionTable.getDefaultEntries(), tt.tableCapacity());
 
         tt = new TranspositionTable(1000000);
         assertEquals(1000000, tt.tableCapacity());

@@ -15,7 +15,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     private static final Logger LOGGER = LogManager.getLogger(TranspositionTable.class);
 
-    public static final int DEFAULT_ENTRIES = 8388608; // 128 MB
+    private static final int DEFAULT_ENTRIES = 8388608; // 128 MB
 
     static {
         Initializer.init();
@@ -23,8 +23,15 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     private TranspositionTableEntry[] table;
 
+    public static int getDefaultEntries() {
+        if (Initializer.nativeCodeInitialized()) {
+            return 0;
+        }
+        return DEFAULT_ENTRIES;
+    }
+
     public TranspositionTable() {
-        this(DEFAULT_ENTRIES);
+        this(getDefaultEntries());
     }
 
     public TranspositionTable(int numEntries) {
