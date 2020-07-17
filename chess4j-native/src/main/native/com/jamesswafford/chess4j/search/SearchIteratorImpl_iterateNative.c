@@ -75,6 +75,7 @@ JNICALL Java_com_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
     opts.max_depth = max_depth;
     opts.max_time_ms = 0; /* we only call the iterator for fixed depth testing */
     opts.post_mode = false;
+    opts.clear_hash_each_search = true;
 
     iterator_context_t ctx;
     ctx.pos = &pos;
