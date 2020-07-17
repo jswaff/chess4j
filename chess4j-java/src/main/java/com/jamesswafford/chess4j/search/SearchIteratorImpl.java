@@ -220,20 +220,6 @@ public class SearchIteratorImpl implements SearchIterator {
             if (!nativePV.equals(javaPV)) {
                 LOGGER.error("PVs are not equal! javaPV: " + PrintLine.getMoveString(javaPV) +
                         ", nativePV: " + PrintLine.getMoveString(nativePV));
-
-                // is one a sub-list of the other?
-                /*if (nativePV.size() < javaPV.size()) {
-                    if (javaPV.subList(0, nativePV.size()).equals(nativePV)) {
-                        LOGGER.debug("native PV is sublist of Java PV, continuing.");
-                        return true;
-                    }
-                } else if (javaPV.size() < nativePV.size()) {
-                    if (nativePV.subList(0, javaPV.size()).equals(javaPV)) {
-                        LOGGER.debug("Java PV is sublist of native PV, continuing.");
-                        return true;
-                    }
-                }*/
-
                 return false;
             } else {
                 LOGGER.debug("# finished - iterations produce the same PVs");
