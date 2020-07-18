@@ -41,8 +41,8 @@ public final class App {
             int szBytes = Integer.parseInt(arg.substring(6)) * 1024 * 1024;
             TTHolder.getInstance().resizeMainTable(szBytes);
         } else if (arg.startsWith("-phash=")) {
-            int szMemBytes = Integer.parseInt(arg.substring(7)) * 1024 * 1024;
-            TTHolder.getInstance().resizePawnTable(szMemBytes);
+            int szBytes = Integer.parseInt(arg.substring(7)) * 1024 * 1024;
+            TTHolder.getInstance().resizePawnTable(szBytes);
         }
     }
 
