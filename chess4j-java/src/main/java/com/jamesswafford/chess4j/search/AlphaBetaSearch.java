@@ -3,6 +3,9 @@ package com.jamesswafford.chess4j.search;
 import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.Evaluator;
+import com.jamesswafford.chess4j.hash.TTHolder;
+import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
+import com.jamesswafford.chess4j.hash.TranspositionTableEntryType;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
@@ -18,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
+import static com.jamesswafford.chess4j.hash.TranspositionTableEntryType.*;
 
 public class AlphaBetaSearch implements Search {
 
@@ -161,7 +165,7 @@ public class AlphaBetaSearch implements Search {
         SearchStats nativeStats = new SearchStats(searchStats);
 
         try {
-
+            assert(clearTableWrapper());
             int nativeScore = searchNative(fen, prevMoves, nativePV, searchParameters.getDepth(),
                     searchParameters.getAlpha(), searchParameters.getBeta(), nativeStats, opts.getStartTime(),
                     opts.getStopTime());
@@ -184,16 +188,41 @@ public class AlphaBetaSearch implements Search {
         }
     }
 
+    // wrapper so we can clear hash tables when asserts are enabled
+    private boolean clearTableWrapper() {
+        TTHolder.getInstance().getHashTable().clear();
+        TTHolder.getInstance().getPawnHashTable().clear();
+        return true;
+    }
+
     private boolean searchesAreEqual(Board board, List<Undo> undos, SearchParameters searchParameters,
                                      SearchOptions opts, String fen, int nativeScore, List<Long> nativePV,
                                      SearchStats nativeStats)
     {
         LOGGER.debug("# checking search equality with java depth {}", searchParameters.getDepth());
         try {
+            long nativeProbes = TTHolder.getInstance().getHashTable().getNumProbes();
+            long nativeHits = TTHolder.getInstance().getHashTable().getNumHits();
+            long nativeCollisions = TTHolder.getInstance().getHashTable().getNumCollisions();
+
+            assert(clearTableWrapper());
             int javaScore = searchWithJavaCode(board, undos, searchParameters, opts);
 
             // if the search was interrupted we can't compare
             if (stop) return true;
+
+            // compare the hash table stats
+            long javaProbes = TTHolder.getInstance().getHashTable().getNumProbes();
+            long javaHits = TTHolder.getInstance().getHashTable().getNumHits();
+            long javaCollisions = TTHolder.getInstance().getHashTable().getNumCollisions();
+            if (javaProbes != nativeProbes || javaHits != nativeHits || javaCollisions != nativeCollisions) {
+                LOGGER.error("hash stats not equal!"
+                        + ", java probes: " + javaProbes + ", native probes: " + nativeProbes
+                        + ", java hits: " + javaHits + ", native hits: " + nativeHits
+                        + ", java collisions: " + javaCollisions + ", native collisions: " + nativeCollisions
+                        + ", params: " + searchParameters + ", fen: " + fen);
+                return false;
+            }
 
             if (javaScore != nativeScore || !searchStats.equals(nativeStats)) {
                 LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
@@ -243,6 +272,27 @@ public class AlphaBetaSearch implements Search {
                 searchStats.draws++;
                 return 0;
             }
+
+            // probe the hash table
+            TranspositionTableEntry tte = TTHolder.getInstance().getHashTable().probe(board);
+            if (tte != null && tte.getDepth() >= depth) {
+                if (tte.getType() == LOWER_BOUND) {
+                    if (tte.getScore() >= beta) {
+                        searchStats.failHighs++;
+                        searchStats.hashFailHighs++;
+                        return beta;
+                    }
+                } else if (tte.getType() == UPPER_BOUND) {
+                    if (tte.getScore() <= alpha) {
+                        searchStats.failLows++;
+                        searchStats.hashFailLows++;
+                        return alpha;
+                    }
+                } else if (tte.getType() == EXACT_MATCH) {
+                    searchStats.hashExactScores++;
+                    return tte.getScore();
+                }
+            }
         }
 
         List<Move> pv = new ArrayList<>(50);
@@ -251,8 +301,9 @@ public class AlphaBetaSearch implements Search {
         Move pvMove = first && lastPv.size() > ply ? lastPv.get(ply) : null;
         MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer,
                 pvMove, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply), true);
-        Move move;
 
+        Move bestMove = null;
+        Move move;
         while ((move = moveOrderer.selectNextMove()) != null) {
             assert(BoardUtils.isPseudoLegalMove(board, move));
 
@@ -275,6 +326,7 @@ public class AlphaBetaSearch implements Search {
 
             if (val >= beta) {
                 searchStats.failHighs++;
+                TTHolder.getInstance().getHashTable().store(board, LOWER_BOUND, beta, depth, move);
                 if (move.captured()==null && move.promotion()==null) {
                     killerMovesStore.addKiller(ply, move);
                 }
@@ -282,6 +334,7 @@ public class AlphaBetaSearch implements Search {
             }
             if (val > alpha) {
                 alpha = val;
+                bestMove = move;
                 setParentPV(parentPV, move, pv);
                 if (opts.getPvCallback() != null) {
                     opts.getPvCallback().accept(
@@ -295,6 +348,16 @@ public class AlphaBetaSearch implements Search {
         }
 
         alpha = adjustFinalScoreForMates(board, alpha, numMovesSearched, ply);
+
+        TranspositionTableEntryType tableEntryType;
+        if (bestMove == null) {
+            tableEntryType = UPPER_BOUND; // fail low
+            searchStats.failLows++;
+        } else {
+            tableEntryType = EXACT_MATCH;
+        }
+
+        TTHolder.getInstance().getHashTable().store(board, tableEntryType, alpha, depth, bestMove);
 
         return alpha;
     }

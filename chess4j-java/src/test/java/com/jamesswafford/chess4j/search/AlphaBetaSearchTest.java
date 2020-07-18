@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.search;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.eval.Evaluator;
+import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import org.awaitility.Awaitility;
 import org.junit.Before;
@@ -39,6 +40,7 @@ public class AlphaBetaSearchTest {
     @Before
     public void setUp() {
         search = new AlphaBetaSearch();
+        TTHolder.getInstance().clearTables();
     }
 
     @Test

@@ -38,13 +38,11 @@ public final class App {
         } else if (arg.startsWith("-book=")) {
             bookPath = arg.substring(6);
         } else if (arg.startsWith("-hash=")) {
-            int maxMemBytes = Integer.parseInt(arg.substring(6)) * 1024 * 1024;
-            // this command line arg is meant to set the size of the memory per table, but the
-            // TTHolder will split it between both main tables.
-            TTHolder.getInstance().resizeMainTables(2 * maxMemBytes);
+            int szBytes = Integer.parseInt(arg.substring(6)) * 1024 * 1024;
+            TTHolder.getInstance().resizeMainTable(szBytes);
         } else if (arg.startsWith("-phash=")) {
-            int maxMemBytes = Integer.parseInt(arg.substring(7)) * 1024 * 1024;
-            TTHolder.getInstance().resizePawnTable(maxMemBytes);
+            int szBytes = Integer.parseInt(arg.substring(7)) * 1024 * 1024;
+            TTHolder.getInstance().resizePawnTable(szBytes);
         }
     }
 
@@ -78,10 +76,10 @@ public final class App {
     }
 
     private static void warmUp() {
-        TTHolder.getInstance().clearTables();
         SearchOptions opts = SearchOptions.builder().avoidNative(true).build();
         new AlphaBetaSearch().search(new Board(),
                 new SearchParameters(3, -Constants.INFINITY, Constants.INFINITY), opts);
+        TTHolder.getInstance().clearTables();
     }
 
     public static void main(String[] args) throws Exception {

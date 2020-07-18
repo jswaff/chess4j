@@ -98,7 +98,7 @@ public final class Eval implements Evaluator {
     private static int evalPawns(Board board) {
 
         // try the pawn hash
-        PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnTransTable().probe(board.getPawnKey());
+        PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board.getPawnKey());
         if (pte != null) {
             assert(pte.getScore() == evalPawnsNoHash(board));
             return pte.getScore();
@@ -106,7 +106,7 @@ public final class Eval implements Evaluator {
 
         int score = evalPawnsNoHash(board);
 
-        TTHolder.getInstance().getPawnTransTable().store(board.getPawnKey(), score);
+        TTHolder.getInstance().getPawnHashTable().store(board.getPawnKey(), score);
 
         return score;
     }

@@ -21,31 +21,22 @@ import static com.jamesswafford.chess4j.hash.TranspositionTableEntryType.*;
 
 public class TranspositionTableTest {
 
-    private TranspositionTable ttable = new TranspositionTable(false);
-    private TranspositionTable ttDPtable = new TranspositionTable(true);
-    private Board board = new Board();
+    private final TranspositionTable ttable = new TranspositionTable();
+    private final Board board = new Board();
 
     @Test
-    public void capacityIsPowerOf2() {
-        TranspositionTable tt = new TranspositionTable(false);
-        assertIsPowerOf2(tt.tableCapacity());
+    public void capacity() {
+        TranspositionTable tt = new TranspositionTable();
+        assertEquals(TranspositionTable.getDefaultSizeBytes() / 16, tt.tableCapacity());
 
-        tt = new TranspositionTable(false,1000000);
-        assertIsPowerOf2(tt.tableCapacity());
-        assertEquals(524288, tt.tableCapacity());
+        tt = new TranspositionTable(1000000);
+        assertEquals(1000000 / 16, tt.tableCapacity());
 
+        tt = new TranspositionTable(32000);
+        assertEquals(32000 / 16, tt.tableCapacity());
 
-        tt = new TranspositionTable(false,32000);
-        assertIsPowerOf2(tt.tableCapacity());
-        assertEquals(16384, tt.tableCapacity());
-
-        tt = new TranspositionTable(false,65536);
-        assertIsPowerOf2(tt.tableCapacity());
-        assertEquals(65536, tt.tableCapacity());
-    }
-
-    private void assertIsPowerOf2(long val) {
-        assertEquals(0, (val & (val - 1)));
+        tt = new TranspositionTable(65536);
+        assertEquals(65536 / 16, tt.tableCapacity());
     }
 
     @Test
@@ -54,12 +45,12 @@ public class TranspositionTableTest {
         board.resetBoard();
         long key = Zobrist.calculateBoardKey(board);
         // shouldn't be anything
-        assertFalse(ttable.probe(key).isPresent());
+        assertNull(ttable.probe(key));
 
         // now store and reload
         Move m = new Move(WHITE_PAWN, E2, E4);
         ttable.store(key, LOWER_BOUND, -100, 3, m);
-        TranspositionTableEntry tte = ttable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
+        TranspositionTableEntry tte = ttable.probe(key);
         assertEquals( LOWER_BOUND, tte.getType());
         assertEquals(-100, tte.getScore());
         assertEquals(3, tte.getDepth());
@@ -71,12 +62,12 @@ public class TranspositionTableTest {
         // now make move and reprobe
         Undo u = board.applyMove(m);
         key = Zobrist.calculateBoardKey(board);
-        assertFalse(ttable.probe(key).isPresent());
+        assertNull(ttable.probe(key));
 
         // finally undo move and reprobe again
         board.undoMove(u);
         key = Zobrist.calculateBoardKey(board);
-        tte = ttable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
+        tte = ttable.probe(key);
         assertEquals(lbe, tte);
     }
 
@@ -90,10 +81,10 @@ public class TranspositionTableTest {
                 .orElseThrow(() -> new RuntimeException("expected capture"));
 
         long key = Zobrist.calculateBoardKey(board);
-        assertFalse(ttable.probe(key).isPresent());
+        assertNull(ttable.probe(key));
 
         ttable.store(key,EXACT_MATCH,100,3,capture);
-        Move capture2 = ttable.probe(key).get().getMove();
+        Move capture2 = ttable.probe(key).getMove();
         assertNotNull(capture2.captured());
         assertEquals(capture, capture2);
     }
@@ -108,10 +99,10 @@ public class TranspositionTableTest {
                 .orElseThrow(() -> new RuntimeException("expected promotion"));
 
         long key = Zobrist.calculateBoardKey(board);
-        assertFalse(ttable.probe(key).isPresent());
+        assertNull(ttable.probe(key));
 
         ttable.store(key, EXACT_MATCH,100,3,promotion);
-        assertEquals(promotion, ttable.probe(key).get().getMove());
+        assertEquals(promotion, ttable.probe(key).getMove());
     }
 
     @Test
@@ -124,10 +115,10 @@ public class TranspositionTableTest {
                 .orElseThrow(() -> new RuntimeException("expected castle"));
 
         long key = Zobrist.calculateBoardKey(board);
-        assertFalse(ttable.probe(key).isPresent());
+        assertNull(ttable.probe(key));
 
         ttable.store(key, EXACT_MATCH,100,3,castle);
-        assertEquals(castle, ttable.probe(key).get().getMove());
+        assertEquals(castle, ttable.probe(key).getMove());
     }
 
     @Test
@@ -140,10 +131,10 @@ public class TranspositionTableTest {
                 .orElseThrow(() -> new RuntimeException("expected ep capture"));
 
         long key = Zobrist.calculateBoardKey(board);
-        assertFalse(ttable.probe(key).isPresent());
+        assertNull(ttable.probe(key));
 
         ttable.store(key, EXACT_MATCH,100,3,epCapture);
-        assertEquals(epCapture, ttable.probe(key).get().getMove());
+        assertEquals(epCapture, ttable.probe(key).getMove());
     }
 
     @Test
@@ -154,7 +145,7 @@ public class TranspositionTableTest {
         Move m = new Move(BLACK_PAWN, C6, C4);
         ttable.store(key, LOWER_BOUND,CHECKMATE-3, 5, m);
 
-        TranspositionTableEntry tte = ttable.probe(key).orElseThrow(() -> new RuntimeException("Expected move"));
+        TranspositionTableEntry tte = ttable.probe(key);
         assertEquals(tte.getMove(), m);
 
         // the idea here is to not deal with mate score adjustments!  Just say "it's at least a mate"
@@ -168,7 +159,7 @@ public class TranspositionTableTest {
         long key = Zobrist.calculateBoardKey(board);
         Move m = new Move(WHITE_ROOK, F1, E1);
         ttable.store(key, UPPER_BOUND, CHECKMATE-3, 5, m);
-        TranspositionTableEntry tte = ttable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
+        TranspositionTableEntry tte = ttable.probe(key);
         assertEquals(MOVE_ONLY, tte.getType());
         assertEquals(m, tte.getMove());
         assertEquals(5, tte.getDepth());
@@ -181,7 +172,7 @@ public class TranspositionTableTest {
         long key = Zobrist.calculateBoardKey(board);
         Move m = new Move(BLACK_KING, G8, F8);
         ttable.store(key,EXACT_MATCH,CHECKMATE-7, 5, m);
-        TranspositionTableEntry tte = ttable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
+        TranspositionTableEntry tte = ttable.probe(key);
         assertEquals(LOWER_BOUND, tte.getType());
         assertEquals(m, tte.getMove());
         assertEquals(CHECKMATE-500, tte.getScore());
@@ -196,7 +187,7 @@ public class TranspositionTableTest {
         long key = Zobrist.calculateBoardKey(board);
         Move m = new Move(WHITE_ROOK, D1, A1);
         ttable.store(key,LOWER_BOUND,-CHECKMATE+10, 8, m);
-        TranspositionTableEntry tte = ttable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
+        TranspositionTableEntry tte = ttable.probe(key);
         assertEquals(MOVE_ONLY, tte.getType());
         assertEquals(8, tte.getDepth());
         assertEquals(-CHECKMATE+10, tte.getScore()); // note the negative score
@@ -210,7 +201,7 @@ public class TranspositionTableTest {
         long key = Zobrist.calculateBoardKey(board);
         Move m = new Move(BLACK_KING, G7, G6);
         ttable.store(key, EXACT_MATCH,-CHECKMATE+12, 10, m);
-        TranspositionTableEntry tte = ttable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
+        TranspositionTableEntry tte = ttable.probe(key);
         assertEquals(UPPER_BOUND, tte.getType());
         assertEquals(m, tte.getMove());
         assertEquals(10, tte.getDepth());
@@ -224,7 +215,7 @@ public class TranspositionTableTest {
         long key = Zobrist.calculateBoardKey(board);
         Move m = new Move(WHITE_KING, G1, H1);
         ttable.store(key,UPPER_BOUND,-CHECKMATE+8, 7, m);
-        TranspositionTableEntry tte = ttable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
+        TranspositionTableEntry tte = ttable.probe(key);
         assertEquals(UPPER_BOUND, tte.getType());
         assertEquals(m, tte.getMove());
         assertEquals(7, tte.getDepth());
@@ -239,10 +230,10 @@ public class TranspositionTableTest {
         long key = Zobrist.calculateBoardKey(board);
         Move m = new Move(WHITE_KNIGHT, F5, D4);
         ttable.store(key,LOWER_BOUND,-93, 4, m);
-        ttable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
+        ttable.probe(key);
 
         ttable.clear();
-        assertFalse(ttable.probe(key).isPresent());
+        assertNull(ttable.probe(key));
     }
 
     @Test
@@ -253,63 +244,41 @@ public class TranspositionTableTest {
         long key = Zobrist.calculateBoardKey(board);
         Move m = new Move(BLACK_PAWN, E5, E4);
         ttable.store(key, LOWER_BOUND,1001, 5, m);
-        TranspositionTableEntry tte = ttable.probe(key).get();
+        TranspositionTableEntry tte = ttable.probe(key);
         TranspositionTableEntry lbe = new TranspositionTableEntry(key, LOWER_BOUND,1001,5,m);
         assertEquals(lbe, tte);
 
         // overwrite with different score/depth
         ttable.store(key, LOWER_BOUND,900, 6, m);
-        tte = ttable.probe(key).get();
+        tte = ttable.probe(key);
         assertNotEquals(lbe, tte);
         lbe = new TranspositionTableEntry(key, LOWER_BOUND,900,6,m);
         assertEquals(lbe, tte);
 
         // use different key to store new entry
         long key2 = ~key;
-        assertFalse(ttable.probe(key2).isPresent());
+        assertNull(ttable.probe(key2));
         ttable.store(key2, LOWER_BOUND, 800, 7, m);
 
         // now make sure we didn't overwrite lbe
-        tte = ttable.probe(key).orElseThrow(() -> new RuntimeException("Expected Move"));
+        tte = ttable.probe(key);
         assertEquals(lbe, tte);
 
         TranspositionTableEntry lbe2 = new TranspositionTableEntry(key2, LOWER_BOUND,800,7,m);
-        tte = ttable.probe(key2).get();
+        tte = ttable.probe(key2);
         assertEquals(lbe2, tte);
-    }
-
-    @Test
-    public void overwriteDepthPreferred() {
-        ttDPtable.clear();
-        board.setPos("8/k7/p7/3Qp2P/n1P5/3KP3/1q6/8 b - -");
-        long key = Zobrist.calculateBoardKey(board);
-        Move m = new Move(BLACK_PAWN, E5, E4);
-        ttDPtable.store(key, LOWER_BOUND,1001, 5, m);
-        TranspositionTableEntry tte = ttDPtable.probe(key).get();
-        TranspositionTableEntry origEntry = new TranspositionTableEntry(key, LOWER_BOUND,1001,5,m);
-        assertEquals(origEntry, tte);
-
-        // overwrite with a different score and shallower depth
-        ttDPtable.store(key, LOWER_BOUND,900, 4, m);
-        tte = ttDPtable.probe(key).get();
-        assertEquals(origEntry, tte);
-
-        // overwrite with yet another score but a deeper depth
-        ttDPtable.store(key, LOWER_BOUND,800, 6, m);
-        tte = ttDPtable.probe(key).get();
-        assertEquals(6, tte.getDepth());
     }
 
     @Test
     public void resize() {
 
-        TranspositionTable tt = new TranspositionTable(false, 1024);
-        assertEquals(1024, tt.tableCapacity());
+        TranspositionTable tt = new TranspositionTable(1024);
+        assertEquals(1024 / 16, tt.tableCapacity());
 
         int fourMb = 4 * 1024 * 1024;
-        tt.resize(fourMb);
+        tt.resizeTable(fourMb);
 
-        assertEquals(262144, tt.tableCapacity());
+        assertEquals(fourMb / 16, tt.tableCapacity());
     }
 
 }

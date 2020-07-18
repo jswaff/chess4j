@@ -161,14 +161,12 @@ public class XBoardHandlerTest {
     @Test
     public void memoryCmd() {
         xboardHandler.parseAndDispatch("memory 6");
-        assertEquals(131072, TTHolder.getInstance().getAlwaysReplaceTransTable().tableCapacity());
-        assertEquals(131072, TTHolder.getInstance().getDepthPreferredTransTable().tableCapacity());
-        assertEquals(131072, TTHolder.getInstance().getPawnTransTable().tableCapacity());
+        assertEquals(196608, TTHolder.getInstance().getHashTable().tableCapacity());
+        assertEquals(262144, TTHolder.getInstance().getPawnHashTable().tableCapacity());
 
         xboardHandler.parseAndDispatch("memory 3");
-        assertEquals(65536, TTHolder.getInstance().getAlwaysReplaceTransTable().tableCapacity());
-        assertEquals(65536, TTHolder.getInstance().getDepthPreferredTransTable().tableCapacity());
-        assertEquals(65536, TTHolder.getInstance().getPawnTransTable().tableCapacity());
+        assertEquals(98304, TTHolder.getInstance().getHashTable().tableCapacity());
+        assertEquals(131072, TTHolder.getInstance().getPawnHashTable().tableCapacity());
     }
 
     @Test

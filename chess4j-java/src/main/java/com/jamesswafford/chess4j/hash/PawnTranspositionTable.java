@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.hash;
 
+import com.jamesswafford.chess4j.init.Initializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -9,18 +10,23 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     private static final Logger LOGGER = LogManager.getLogger(PawnTranspositionTable.class);
 
-    private static final int DEFAULT_ENTRIES = 1048576;
+    private static final int DEFAULT_SIZE_BYTES = 128 * 1024 * 1024;
 
     private PawnTranspositionTableEntry[] table;
 
-    public PawnTranspositionTable() {
-        this(DEFAULT_ENTRIES);
+    public static int getDefaultSizeBytes() {
+        if (Initializer.nativeCodeInitialized()) {
+            return DEFAULT_SIZE_BYTES; // TODO - when pawn hash is implemented in P4 make this 0
+        }
+        return DEFAULT_SIZE_BYTES;
     }
 
-    public PawnTranspositionTable(int maxEntries) {
-        int numEntries = calculateNumEntries(maxEntries);
-        allocateTable(numEntries);
-        clear();
+    public PawnTranspositionTable() {
+        this(getDefaultSizeBytes());
+    }
+
+    public PawnTranspositionTable(int sizeBytes) {
+        super(sizeBytes);
     }
 
     @Override
@@ -29,10 +35,9 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         Arrays.fill(table, null);
     }
 
-    // TODO: Optional
     public PawnTranspositionTableEntry probe(long zobristKey) {
         numProbes++;
-        PawnTranspositionTableEntry te = table[getMaskedKey(zobristKey)];
+        PawnTranspositionTableEntry te = table[getTableIndex(zobristKey)];
 
         if (te != null) {
             // compare full signature to avoid collisions
@@ -47,16 +52,21 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         return te;
     }
 
-    public void store(long zobristKey,int score) {
+    public void store(long zobristKey, int score) {
         PawnTranspositionTableEntry te = new PawnTranspositionTableEntry(zobristKey, score);
-        table[getMaskedKey(zobristKey)] = te;
+        table[getTableIndex(zobristKey)] = te;
     }
 
     @Override
-    protected void allocateTable(int capacity) {
-        LOGGER.debug("# allocating " + capacity + " elements for pawn table");
+    protected void createTable(int sizeBytes) {
+        int numEntries = sizeBytes / sizeOfEntry();
+        LOGGER.debug("# c4j pawn hash size: " + sizeBytes + " bytes ==> " + numEntries + " elements.");
+        table = new PawnTranspositionTableEntry[numEntries];
+    }
 
-        table = new PawnTranspositionTableEntry[capacity];
+    @Override
+    protected void resizeTable(int sizeBytes) {
+        createTable(sizeBytes);
     }
 
     @Override

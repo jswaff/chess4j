@@ -1,37 +1,76 @@
 package com.jamesswafford.chess4j.hash;
 
 import com.jamesswafford.chess4j.Constants;
+import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.io.FenBuilder;
+import com.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 public class TranspositionTable extends AbstractTranspositionTable {
 
     private static final Logger LOGGER = LogManager.getLogger(TranspositionTable.class);
 
-    public static final int DEFAULT_ENTRIES = 1048576;
+    private static final int DEFAULT_SIZE_BYTES = 128 * 1024 * 1024;
 
-    private final boolean depthPreferred;
-    private TranspositionTableEntry[] table;
-
-    public TranspositionTable(boolean depthPreferred) {
-        this(depthPreferred, DEFAULT_ENTRIES);
+    static {
+        Initializer.init();
     }
 
-    public TranspositionTable(boolean depthPreferred, int maxEntries) {
-        this.depthPreferred = depthPreferred;
-        int numEntries = calculateNumEntries(maxEntries);
-        allocateTable(numEntries);
-        clear();
+    private TranspositionTableEntry[] table;
+
+    public static int getDefaultSizeBytes() {
+        if (Initializer.nativeCodeInitialized()) {
+            return 0;
+        }
+        return DEFAULT_SIZE_BYTES;
+    }
+
+    public TranspositionTable() {
+        this(getDefaultSizeBytes());
+    }
+
+    public TranspositionTable(int sizeBytes) {
+        super(sizeBytes);
     }
 
     @Override
     public void clear() {
         clearStats();
         Arrays.fill(table, null);
+        if (Initializer.nativeCodeInitialized()) {
+            clearNative();
+        }
+    }
+
+    private native void clearNative();
+
+    @Override
+    public long getNumCollisions() {
+        if (Initializer.nativeCodeInitialized()) {
+            return getNumCollisionsNative();
+        }
+        return numCollisions;
+    }
+
+    @Override
+    public long getNumHits() {
+        if (Initializer.nativeCodeInitialized()) {
+            return getNumHitsNative();
+        }
+        return numHits;
+    }
+
+    @Override
+    public long getNumProbes() {
+        if (Initializer.nativeCodeInitialized()) {
+            return getNumProbesNative();
+        }
+        return numProbes;
     }
 
     private int getCheckMateBound() {
@@ -50,36 +89,41 @@ public class TranspositionTable extends AbstractTranspositionTable {
         return score >= getCheckMateBound();
     }
 
-    public Optional<TranspositionTableEntry> probe(long zobristKey) {
+    public TranspositionTableEntry probe(long zobristKey) {
         numProbes++;
-        TranspositionTableEntry te = table[getMaskedKey(zobristKey)];
+        TranspositionTableEntry te = table[getTableIndex(zobristKey)];
 
         if (te != null) {
             // compare full signature to avoid collisions
             if (te.getZobristKey() != zobristKey) {
                 numCollisions++;
-                return Optional.empty();
+                return null;
             } else {
                 numHits++;
             }
         }
 
-        return Optional.ofNullable(te);
+        return te;
     }
+
+    public TranspositionTableEntry probe(Board board) {
+
+        if (Initializer.nativeCodeInitialized()) {
+            String fen = FenBuilder.createFen(board, true);
+            long nativeVal = probeNative(fen);
+            return new TranspositionTableEntry(board.getZobristKey(), nativeVal);
+        } else {
+            return probe(board.getZobristKey());
+        }
+    }
+
+    private native long probeNative(String fen);
 
     /**
      * Store an entry in the transposition table, Gerbil style.  Meaning, for now I'm skirting around
      * dealing with the headache that is storing mate scores by storing them as bounds only.
      */
-    public boolean store(long zobristKey,TranspositionTableEntryType entryType,int score,int depth,Move move) {
-
-        // if this is a depth preferred table, we don't overwrite entries stored from a deeper search
-        if (depthPreferred) {
-            TranspositionTableEntry currentEntry = table[getMaskedKey(zobristKey)];
-            if (currentEntry != null &&  currentEntry.getDepth() > depth) {
-                return false;
-            }
-        }
+    public void store(long zobristKey, TranspositionTableEntryType entryType, int score, int depth, Move move) {
 
         if (isMateScore(score)) {
             if (entryType==TranspositionTableEntryType.UPPER_BOUND) {
@@ -101,17 +145,41 @@ public class TranspositionTable extends AbstractTranspositionTable {
             }
         }
 
-        TranspositionTableEntry te = new TranspositionTableEntry(zobristKey,entryType,score,depth,move);
-        table[getMaskedKey(zobristKey)] = te;
+        TranspositionTableEntry te = new TranspositionTableEntry(zobristKey, entryType, score, depth, move);
+        table[getTableIndex(zobristKey)] = te;
+    }
 
-        return true;
+    /*
+     * This is a convenience method, wrapping the previous "store".  It also serves as a hook into the native
+     * code.  The only time this method would be used when native code is enabled is when assertions are on,
+     * to verify search equality.
+     */
+    public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move) {
+        if (Initializer.nativeCodeInitialized()) {
+            String fen = FenBuilder.createFen(board, true);
+            Long nativeMove = MoveUtils.toNativeMove(move);
+            storeNative(fen, entryType.ordinal(), score, depth, nativeMove);
+        } else {
+            store(board.getZobristKey(), entryType, score, depth, move);
+        }
+    }
+
+    private native void storeNative(String fen, int entryType, int score, int depth, long move);
+
+    @Override
+    protected void createTable(int sizeBytes) {
+        int numEntries = sizeBytes / sizeOfEntry();
+        LOGGER.debug("# c4j hash size: " + sizeBytes + " bytes ==> " + numEntries + " elements.");
+        table = new TranspositionTableEntry[numEntries];
     }
 
     @Override
-    protected void allocateTable(int capacity) {
-        LOGGER.debug("# allocating " + capacity + " elements for " +
-                (depthPreferred? " depth preferred":"always replace") + " table");
-        table = new TranspositionTableEntry[capacity];
+    protected void resizeTable(int sizeBytes) {
+        if (Initializer.nativeCodeInitialized()) {
+            resizeNative(sizeBytes);
+        } else {
+            createTable(sizeBytes);
+        }
     }
 
     @Override
@@ -123,4 +191,12 @@ public class TranspositionTable extends AbstractTranspositionTable {
     public int sizeOfEntry() {
         return TranspositionTableEntry.sizeOf();
     }
+
+    private native long getNumCollisionsNative();
+
+    private native long getNumHitsNative();
+
+    private native long getNumProbesNative();
+
+    private native void resizeNative(int sizeBytes);
 }

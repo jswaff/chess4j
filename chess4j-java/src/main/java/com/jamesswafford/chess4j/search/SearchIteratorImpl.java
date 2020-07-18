@@ -4,6 +4,9 @@ import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
+import com.jamesswafford.chess4j.hash.PawnTranspositionTable;
+import com.jamesswafford.chess4j.hash.TTHolder;
+import com.jamesswafford.chess4j.hash.TranspositionTable;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.io.PrintLine;
@@ -25,6 +28,10 @@ import static com.jamesswafford.chess4j.Constants.INFINITY;
 public class SearchIteratorImpl implements SearchIterator {
 
     private static final  Logger LOGGER = LogManager.getLogger(SearchIteratorImpl.class);
+
+    static {
+        Initializer.init();
+    }
 
     private int maxDepth = 0;
     private long maxTimeMs = 0;
@@ -261,43 +268,40 @@ public class SearchIteratorImpl implements SearchIterator {
         LOGGER.info("# search time: " + totalSearchTime/1000.0 + " seconds"
                 + ", rate: " + df2.format(totalNodes / (totalSearchTime/1000.0)) + " nodes per second");
 
-//        long hashHits = TTHolder.getDepthPreferredTransTable().getNumHits()
-//                + TTHolder.getAlwaysReplaceTransTable().getNumHits();
-//        long hashProbes = TTHolder.getDepthPreferredTransTable().getNumProbes()
-//                + TTHolder.getAlwaysReplaceTransTable().getNumProbes();
-//        long hashCollisions = TTHolder.getDepthPreferredTransTable().getNumCollisions()
-//                + TTHolder.getAlwaysReplaceTransTable().getNumCollisions();
-//        double hashHitPct = hashHits / (hashProbes/100.0);
-//        double hashCollisionPct = hashCollisions / (hashProbes/100.0);
-//
-//        LOGGER.info("# hash probes: " + df2.format(hashProbes)
-//                + ", hits: " + df2.format(hashHits) + " (" + df.format(hashHitPct) + "%)"
-//                + ", collisions: " + df2.format(hashCollisions) + " (" + df.format(hashCollisionPct) + "%)");
-//
-//        long pawnHashHits = TTHolder.getPawnTransTable().getNumHits();
-//        long pawnHashProbes = TTHolder.getPawnTransTable().getNumProbes();
-//        long pawnHashCollisions = TTHolder.getPawnTransTable().getNumCollisions();
-//        double pawnHashHitPct = pawnHashHits / (pawnHashProbes/100.0);
-//        double pawnHashCollisionPct = pawnHashCollisions / (pawnHashProbes/100.0);
-//
-//        LOGGER.info("# pawn hash probes: " + df2.format(pawnHashProbes)
-//                + ", hits: " + df2.format(pawnHashHits) + " (" + df.format(pawnHashHitPct) + "%)"
-//                + ", collisions: " + df2.format(pawnHashCollisions) + " (" + df.format(pawnHashCollisionPct) + "%)");
+        TranspositionTable htbl = TTHolder.getInstance().getHashTable();
+        long hashHits = htbl.getNumHits();
+        long hashProbes = htbl.getNumProbes();
+        long hashCollisions = htbl.getNumCollisions();
+        double hashHitPct = hashHits / (hashProbes/100.0);
+        double hashCollisionPct = hashCollisions / (hashProbes/100.0);
 
-//        double failHighPct = stats.getFailHighs() / (hashProbes/100.0);
-//        double failLowPct = stats.getFailLows() / (hashProbes/100.0);
-//        double exactScorePct = stats.getHashExactScores() / (hashProbes/100.0);
-//        LOGGER.info("# fail highs: " + df2.format(stats.getFailHighs()) + " (" + df.format(failHighPct) + "%)"
-//                + ", fail lows: " + df2.format(stats.getFailLows()) + " (" + df.format(failLowPct) + "%)"
-//                + ", exact scores: " + df2.format(stats.getHashExactScores()) + " (" + df.format(exactScorePct) + "%)");
-//
+        LOGGER.info("# hash probes: " + df2.format(hashProbes)
+                + ", hits: " + df2.format(hashHits) + " (" + df.format(hashHitPct) + "%)"
+                + ", collisions: " + df2.format(hashCollisions) + " (" + df.format(hashCollisionPct) + "%)");
+
+        double hashFailHighPct = stats.hashFailHighs / (hashProbes/100.0);
+        double hashFailLowPct = stats.hashFailLows / (hashProbes/100.0);
+        double hashExactScorePct = stats.hashExactScores / (hashProbes/100.0);
+        LOGGER.info("# hash fail highs: " + df2.format(stats.hashFailHighs)
+                + " (" + df.format(hashFailHighPct) + "%)"
+                + ", hash fail lows: " + df2.format(stats.hashFailLows)
+                + " (" + df.format(hashFailLowPct) + "%)"
+                + ", hash exact scores: " + df2.format(stats.hashExactScores)
+                + " (" + df.format(hashExactScorePct) + "%)");
+
+        PawnTranspositionTable pawnTbl = TTHolder.getInstance().getPawnHashTable();
+        long pawnHashHits = pawnTbl.getNumHits();
+        long pawnHashProbes = pawnTbl.getNumProbes();
+        long pawnHashCollisions = pawnTbl.getNumCollisions();
+        double pawnHashHitPct = pawnHashHits / (pawnHashProbes/100.0);
+        double pawnHashCollisionPct = pawnHashCollisions / (pawnHashProbes/100.0);
+
+        LOGGER.info("# pawn hash probes: " + df2.format(pawnHashProbes)
+                + ", hits: " + df2.format(pawnHashHits) + " (" + df.format(pawnHashHitPct) + "%)"
+                + ", collisions: " + df2.format(pawnHashCollisions) + " (" + df.format(pawnHashCollisionPct) + "%)");
+
 //        LOGGER.info("# prunes: " + stats.getPrunes());
     }
-
-//        private List<Move> findPrincipalVariationWithNativeCode(Board board, List<Undo> undos) {
-//
-//
-//        }
 
         private native void iterateNative(String boardFen, List<Long> prevMoves, int maxDepth, List<Long> pv);
 
