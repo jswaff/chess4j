@@ -40,10 +40,92 @@ public class MoveOrdererTest {
         Board board = new Board("b2b1r1k/3R1ppp/4qP2/4p1PQ/4P3/5B2/4N1K1/8 w - -");
         List<Move> moves = moveGenerator.generateLegalMoves(board);
         Move pvMove = moves.get(5); // no particular reason
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, pvMove, null, null,
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, pvMove, null, null, null,
                 true);
         assertEquals(pvMove, mo.selectNextMove());
+        assertEquals(HASH_MOVE, mo.getNextMoveOrderStage());
+    }
+
+    @Test
+    public void noPvThenHash() {
+        Board board = new Board("1R6/1brk2p1/4p2p/p1P1Pp2/P7/6P1/1P4P1/2R3K1 w - -");
+        List<Move> moves = moveGenerator.generateLegalMoves(board);
+
+        // randomly make the 5th move the hash move
+        Move hashMove = moves.get(4);
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, hashMove, null, null,
+                true);
+        Move nextMv = mo.selectNextMove();
         assertEquals(GENCAPS, mo.getNextMoveOrderStage());
+        assertEquals(hashMove, nextMv);
+    }
+
+    @Test
+    public void pvThenHash() {
+        Board board = new Board("6k1/p4p1p/1p3np1/2q5/4p3/4P1N1/PP3PPP/3Q2K1 w - -");
+        List<Move> moves = moveGenerator.generateLegalMoves(board);
+
+        // make move 4 the PV move and move 2 the hash move
+        Move pvMove = moves.get(4);
+        Move hashMove = moves.get(2);
+
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, pvMove, hashMove, null, null,
+                true);
+        Move nextMv = mo.selectNextMove();
+        assertEquals(HASH_MOVE, mo.getNextMoveOrderStage());
+        assertEquals(pvMove, nextMv);
+
+        nextMv = mo.selectNextMove();
+        assertEquals(GENCAPS, mo.getNextMoveOrderStage());
+        assertEquals(hashMove, nextMv);
+    }
+
+    @Test
+    public void pvAndHashSameMove() {
+        Board board = new Board();
+        List<Move> moves = moveGenerator.generateLegalMoves(board);
+        Collections.shuffle(moves);
+
+        Move pv = moves.get(9);
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, pv, pv,null,null,
+                true);
+        Move nextMv = mo.selectNextMove();
+        assertEquals(pv, nextMv);
+
+        for (int i=1;i<20;i++) {
+            nextMv = mo.selectNextMove();
+            assertNotNull(nextMv);
+            assertNotEquals(pv, nextMv);
+        }
+
+        assertNull(mo.selectNextMove());
+    }
+
+    @Test
+    public void pvThenHashThenCaptures() {
+        Board board = new Board("6R1/kp6/8/1KpP4/8/8/8/6B1 w - c6");
+
+        List<Move> moves = moveGenerator.generateLegalMoves(board);
+        Move d5c6 = new Move(WHITE_PAWN, D5, C6, BLACK_PAWN, true);
+        Move b5c5 = new Move(WHITE_KING, B5, C5, BLACK_PAWN);
+        Move g1c5 = new Move(WHITE_BISHOP, G1, C5, BLACK_PAWN);
+        Move g8g7 = new Move(WHITE_ROOK, G8, G7);
+
+        assertTrue(moves.contains(d5c6));
+        assertTrue(moves.contains(b5c5));
+        assertTrue(moves.contains(g1c5));
+        assertTrue(moves.contains(g8g7));
+
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, g8g7, d5c6,null,null,
+                true);
+        Move nextMv = mo.selectNextMove();
+        assertEquals(g8g7, nextMv);
+        nextMv = mo.selectNextMove();
+        assertEquals(d5c6, nextMv);
+        nextMv = mo.selectNextMove();
+        assertTrue(g1c5.equals(nextMv) || b5c5.equals(nextMv));
+        nextMv = mo.selectNextMove();
+        assertTrue(g1c5.equals(nextMv) || b5c5.equals(nextMv));
     }
 
     @Test
@@ -78,7 +160,7 @@ public class MoveOrdererTest {
         when(moveScorer.calculateStaticScore(a7a8)).thenReturn(900);
 
         MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, null,
-                true);
+                null,true);
 
         assertEquals(PV, mo.getNextMoveOrderStage());
         assertEquals(a7a8, mo.selectNextMove());
@@ -109,7 +191,7 @@ public class MoveOrdererTest {
         assertTrue(noncaps.contains(b3b7));
         assertTrue(noncaps.contains(f6e7));
 
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, b3b7, f6e7,
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, b3b7, f6e7,
                 true);
 
         // first two moves should be the captures Rxa3 and Rxb2
@@ -150,7 +232,7 @@ public class MoveOrdererTest {
                 .thenReturn(MagicBitboardMoveGenerator.genPseudoLegalMoves(board, true, false));
 
         MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, null,
-                true);
+                null,true);
         mo.selectNextMove();
 
         assertEquals(CAPTURES_PROMOS, mo.getNextMoveOrderStage());
@@ -167,11 +249,11 @@ public class MoveOrdererTest {
         moveGenerator = mock(MoveGenerator.class);
 
         MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, null,
-                true);
+                null,true);
         mo.selectNextMove();
 
         /// this time do not request non-captures
-        mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, null,
+        mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, null, null,
                 false);
         mo.selectNextMove();
 
@@ -188,7 +270,7 @@ public class MoveOrdererTest {
 
         // without a PV or hash the order shouldn't change, since there are no captures
         MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, null,
-                true);
+                null,true);
         List<Move> moves2 = new ArrayList<>();
         for (int i=0;i<20;i++) {
             moves2.add(mo.selectNextMove());
@@ -212,8 +294,8 @@ public class MoveOrdererTest {
         List<Move> noncaps = moveGenerator.generatePseudoLegalNonCaptures(board);
         Collections.shuffle(noncaps);
 
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, pvMove, pvMove, noncaps.get(0),
-                true);
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, pvMove, null, pvMove,
+                noncaps.get(0),true);
         List<Move> selected = new ArrayList<>();
         Move selectedMv;
         while ((selectedMv = mo.selectNextMove()) != null) {

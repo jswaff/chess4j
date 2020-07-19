@@ -83,7 +83,7 @@ public class TranspositionTableTest {
         long key = Zobrist.calculateBoardKey(board);
         assertNull(ttable.probe(key));
 
-        ttable.store(key,EXACT_MATCH,100,3,capture);
+        ttable.store(key, EXACT_SCORE,100,3,capture);
         Move capture2 = ttable.probe(key).getMove();
         assertNotNull(capture2.captured());
         assertEquals(capture, capture2);
@@ -101,7 +101,7 @@ public class TranspositionTableTest {
         long key = Zobrist.calculateBoardKey(board);
         assertNull(ttable.probe(key));
 
-        ttable.store(key, EXACT_MATCH,100,3,promotion);
+        ttable.store(key, EXACT_SCORE,100,3,promotion);
         assertEquals(promotion, ttable.probe(key).getMove());
     }
 
@@ -117,7 +117,7 @@ public class TranspositionTableTest {
         long key = Zobrist.calculateBoardKey(board);
         assertNull(ttable.probe(key));
 
-        ttable.store(key, EXACT_MATCH,100,3,castle);
+        ttable.store(key, EXACT_SCORE,100,3,castle);
         assertEquals(castle, ttable.probe(key).getMove());
     }
 
@@ -133,7 +133,7 @@ public class TranspositionTableTest {
         long key = Zobrist.calculateBoardKey(board);
         assertNull(ttable.probe(key));
 
-        ttable.store(key, EXACT_MATCH,100,3,epCapture);
+        ttable.store(key, EXACT_SCORE,100,3,epCapture);
         assertEquals(epCapture, ttable.probe(key).getMove());
     }
 
@@ -171,7 +171,7 @@ public class TranspositionTableTest {
         board.setPos("3r2k1/p6p/2Q3p1/4q3/2P1p3/P3Pb2/1P3P1P/2K2BR1 b - -");
         long key = Zobrist.calculateBoardKey(board);
         Move m = new Move(BLACK_KING, G8, F8);
-        ttable.store(key,EXACT_MATCH,CHECKMATE-7, 5, m);
+        ttable.store(key, EXACT_SCORE,CHECKMATE-7, 5, m);
         TranspositionTableEntry tte = ttable.probe(key);
         assertEquals(LOWER_BOUND, tte.getType());
         assertEquals(m, tte.getMove());
@@ -200,7 +200,7 @@ public class TranspositionTableTest {
 
         long key = Zobrist.calculateBoardKey(board);
         Move m = new Move(BLACK_KING, G7, G6);
-        ttable.store(key, EXACT_MATCH,-CHECKMATE+12, 10, m);
+        ttable.store(key, EXACT_SCORE,-CHECKMATE+12, 10, m);
         TranspositionTableEntry tte = ttable.probe(key);
         assertEquals(UPPER_BOUND, tte.getType());
         assertEquals(m, tte.getMove());

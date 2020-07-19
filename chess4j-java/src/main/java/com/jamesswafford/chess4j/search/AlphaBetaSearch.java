@@ -265,6 +265,9 @@ public class AlphaBetaSearch implements Search {
         // this is an interior node
         searchStats.nodes++;
 
+        // probe the hash table
+        TranspositionTableEntry tte = TTHolder.getInstance().getHashTable().probe(board);
+
         // try for early exit
         if (ply > 0) {
             // Draw check
@@ -273,8 +276,7 @@ public class AlphaBetaSearch implements Search {
                 return 0;
             }
 
-            // probe the hash table
-            TranspositionTableEntry tte = TTHolder.getInstance().getHashTable().probe(board);
+            // is the hash entry useful?
             if (tte != null && tte.getDepth() >= depth) {
                 if (tte.getType() == LOWER_BOUND) {
                     if (tte.getScore() >= beta) {
@@ -288,7 +290,7 @@ public class AlphaBetaSearch implements Search {
                         searchStats.hashFailLows++;
                         return alpha;
                     }
-                } else if (tte.getType() == EXACT_MATCH) {
+                } else if (tte.getType() == EXACT_SCORE) {
                     searchStats.hashExactScores++;
                     return tte.getScore();
                 }
@@ -299,8 +301,10 @@ public class AlphaBetaSearch implements Search {
 
         int numMovesSearched = 0;
         Move pvMove = first && lastPv.size() > ply ? lastPv.get(ply) : null;
+        Move hashMove = tte == null ? null : tte.getMove();
         MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer,
-                pvMove, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply), true);
+                pvMove, hashMove, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply),
+                true);
 
         Move bestMove = null;
         Move move;
@@ -354,7 +358,7 @@ public class AlphaBetaSearch implements Search {
             tableEntryType = UPPER_BOUND; // fail low
             searchStats.failLows++;
         } else {
-            tableEntryType = EXACT_MATCH;
+            tableEntryType = EXACT_SCORE;
         }
 
         TTHolder.getInstance().getHashTable().store(board, tableEntryType, alpha, depth, bestMove);
@@ -384,7 +388,7 @@ public class AlphaBetaSearch implements Search {
         }
 
         MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer,
-                null, null, null, false);
+                null, null, null, null, false);
         Move move;
 
         while ((move = moveOrderer.selectNextMove()) != null) {

@@ -17,8 +17,8 @@ public class MoveOrderer {
     private final MoveGenerator moveGenerator;
     private final MoveScorer moveScorer;
 
-    private final Move pvMove, killer1, killer2;
-    private boolean generateNonCaptures;
+    private final Move pvMove, hashMove, killer1, killer2;
+    private final boolean generateNonCaptures;
     private final Set<Move> specialMovesPlayed;
 
     private Move[] captures;
@@ -30,13 +30,14 @@ public class MoveOrderer {
     private MoveOrderStage nextMoveOrderStage = MoveOrderStage.PV;
 
     public MoveOrderer(Board board, MoveGenerator moveGenerator, MoveScorer moveScorer,
-                       Move pvMove, Move killer1, Move killer2, boolean generateNonCaptures)
+                       Move pvMove, Move hashMove, Move killer1, Move killer2, boolean generateNonCaptures)
     {
         this.board = board;
         this.moveGenerator = moveGenerator;
         this.moveScorer = moveScorer;
 
         this.pvMove = pvMove;
+        this.hashMove = hashMove;
         this.killer1 = killer1;
         this.killer2 = killer2;
         this.generateNonCaptures = generateNonCaptures;
@@ -51,11 +52,21 @@ public class MoveOrderer {
 
         // pv move
         if (nextMoveOrderStage == MoveOrderStage.PV) {
-            nextMoveOrderStage = MoveOrderStage.GENCAPS;
+            nextMoveOrderStage = MoveOrderStage.HASH_MOVE;
             if (pvMove != null) {
                 assert(moveGenerator.generateLegalMoves(board).contains(pvMove));
                 specialMovesPlayed.add(pvMove);
                 return pvMove;
+            }
+        }
+
+        // hash move
+        if (nextMoveOrderStage == MoveOrderStage.HASH_MOVE) {
+            nextMoveOrderStage = MoveOrderStage.GENCAPS;
+            if (hashMove != null && !specialMovesPlayed.contains(hashMove) && isPseudoLegalMove(board, hashMove)) {
+                assert(moveGenerator.generateLegalMoves(board).contains(hashMove));
+                specialMovesPlayed.add(hashMove);
+                return hashMove;
             }
         }
 

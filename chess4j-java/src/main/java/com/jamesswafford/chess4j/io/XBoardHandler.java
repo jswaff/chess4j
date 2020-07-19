@@ -201,6 +201,7 @@ public class XBoardHandler {
         leavePonderMode();
         Globals.getBoard().resetBoard();
         Globals.getGameUndos().clear();
+        TTHolder.getInstance().clearTables();
         engineColor = Color.BLACK;
         searchIterator.setMaxDepth(0);
         setBoard = false;
