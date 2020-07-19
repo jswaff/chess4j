@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.board.*;
+import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.hash.TTHolder;
@@ -145,8 +146,9 @@ public class AlphaBetaSearch implements Search {
     private int searchWithJavaCode(Board board, List<Undo> undos, SearchParameters searchParameters,
                                    SearchOptions opts) {
         killerMovesStore.clear();
+        boolean inCheck = BoardUtils.isPlayerInCheck(board);
         int score = search(board, undos, pv, true, 0, searchParameters.getDepth(),
-                searchParameters.getAlpha(), searchParameters.getBeta(), opts);
+                searchParameters.getAlpha(), searchParameters.getBeta(), inCheck, false, opts);
         lastPv.clear();
         lastPv.addAll(pv);
         return score;
@@ -247,9 +249,12 @@ public class AlphaBetaSearch implements Search {
     }
 
     private int search(Board board, List<Undo> undos, List<Move> parentPV, boolean first, int ply, int depth,
-                       int alpha, int beta, SearchOptions opts) {
+                       int alpha, int beta, boolean inCheck, boolean nullMoveOk, SearchOptions opts) {
 
         parentPV.clear();
+
+        assert(alpha < beta);
+        assert(inCheck == BoardUtils.isPlayerInCheck(board));
 
         // time check
         if (!skipTimeChecks && stopSearchOnTime(opts)) {
@@ -295,6 +300,42 @@ public class AlphaBetaSearch implements Search {
                     return tte.getScore();
                 }
             }
+
+            // try a "null move".  The idea here is that if this position is so good that we can give the opponent
+            // an extra turn and it _still_ fails high, it will almost surely fail high in a normal search.  This
+            // is based on the "Null Move Observation," which says that "doing something is almost always better than
+            // doing nothing."  This isn't entirely sound, but on the whole is a huge time saver.  We avoid the null
+            // move when in check, and during zugzwang positions where making a move is actually harmful.
+            // Since we are only trying to determine if the position will fail high or not, we search with a
+            // minimal search window.
+            if (!first && !inCheck && nullMoveOk && depth >= 3 && !ZugzwangDetector.isZugzwang(board)) {
+
+                Square nullEp = board.clearEPSquare();
+                board.swapPlayer();
+
+                // set the reduced depth.  For now we are using a static R=3.  It's important to ensure there is at
+                // least one ply of full width depth remaining, since we aren't doing anything with checks in the
+                // qsearch.
+                int nullDepth = depth - 4; // R = 3
+                if (nullDepth < 1) {
+                    nullDepth = 1;
+                }
+
+                int nullScore = -search(board, undos, new ArrayList<>(), false, ply+1, nullDepth, -beta,
+                        -beta+1,false, false, opts);
+
+                board.swapPlayer();
+                if (nullEp != null) {
+                    board.setEP(nullEp);
+                }
+                if (stop) {
+                    return 0;
+                }
+                if (nullScore >= beta) {
+                    return beta;
+                }
+            }
+
         }
 
         List<Move> pv = new ArrayList<>(50);
@@ -319,7 +360,12 @@ public class AlphaBetaSearch implements Search {
             }
 
             boolean pvNode = first && numMovesSearched == 0;
-            int val = -search(board, undos, pv, pvNode, ply+1, depth-1,  -beta, -alpha, opts);
+
+            // determine if the move we're about to explore gives check
+            boolean givesCheck = BoardUtils.isPlayerInCheck(board);
+
+            int val = -search(board, undos, pv, pvNode, ply+1, depth-1,  -beta, -alpha, givesCheck,
+                    true, opts);
             ++numMovesSearched;
             board.undoMove(undos.remove(undos.size()-1));
 
