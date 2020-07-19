@@ -48,7 +48,7 @@ public class TranspositionTableEntry {
     public TranspositionTableEntry(long zobristKey, TranspositionTableEntryType entryType, int score, int depth,
                                    Move move) {
         this.zobristKey = zobristKey;
-        buildStoredValue(entryType,score,depth,move);
+        buildStoredValue(entryType, score, depth, move);
     }
 
     public TranspositionTableEntry(long zobristKey, long val) {
@@ -100,6 +100,8 @@ public class TranspositionTableEntry {
         return zobristKey;
     }
 
+    public long getVal() { return val; }
+
     public int getScore() {
         int score = (int)((val >> 18) & 0xFFFF);
         if (((val >> 34) & 1) == 1) {
@@ -111,7 +113,7 @@ public class TranspositionTableEntry {
     public Move getMove() {
         Move move = null;
 
-        if (((val >> 35) & 67108863) > 0) { // 2^26 - 1
+        if ((val >> 35)  > 0) { // TODO: mask this
             Square fromSq = Square.valueOf((int)(val >> 35) & 63);
             Square toSq = Square.valueOf((int)(val >> 41) & 63);
             Piece piece = longToPieceMap.get((val >> 47) & 15L);

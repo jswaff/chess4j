@@ -5,7 +5,6 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.FenBuilder;
-import com.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -124,7 +123,27 @@ public class TranspositionTable extends AbstractTranspositionTable {
      * dealing with the headache that is storing mate scores by storing them as bounds only.
      */
     public void store(long zobristKey, TranspositionTableEntryType entryType, int score, int depth, Move move) {
+        table[getTableIndex(zobristKey)] = buildHashTableEntry(zobristKey, entryType, score, depth, move);
+    }
 
+    /*
+     * This is a convenience method, wrapping the previous "store".  It also serves as a hook into the native
+     * code.  The only time this method would be used when native code is enabled is when assertions are on,
+     * to verify search equality.
+     */
+    public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move) {
+        if (Initializer.nativeCodeInitialized()) {
+            String fen = FenBuilder.createFen(board, true);
+            TranspositionTableEntry entry = buildHashTableEntry(board.getZobristKey(), entryType, score, depth, move);
+            storeNative(fen, entry.getVal());
+        } else {
+            store(board.getZobristKey(), entryType, score, depth, move);
+        }
+    }
+
+    private TranspositionTableEntry buildHashTableEntry(long zobristKey, TranspositionTableEntryType entryType,
+                                                        int score, int depth, Move move)
+    {
         if (isMateScore(score)) {
             if (entryType==TranspositionTableEntryType.UPPER_BOUND) {
                 // failing low on mate.  don't allow a cutoff, just store any associated move
@@ -145,26 +164,10 @@ public class TranspositionTable extends AbstractTranspositionTable {
             }
         }
 
-        TranspositionTableEntry te = new TranspositionTableEntry(zobristKey, entryType, score, depth, move);
-        table[getTableIndex(zobristKey)] = te;
+        return new TranspositionTableEntry(zobristKey, entryType, score, depth, move);
     }
 
-    /*
-     * This is a convenience method, wrapping the previous "store".  It also serves as a hook into the native
-     * code.  The only time this method would be used when native code is enabled is when assertions are on,
-     * to verify search equality.
-     */
-    public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move) {
-        if (Initializer.nativeCodeInitialized()) {
-            String fen = FenBuilder.createFen(board, true);
-            Long nativeMove = MoveUtils.toNativeMove(move);
-            storeNative(fen, entryType.ordinal(), score, depth, nativeMove);
-        } else {
-            store(board.getZobristKey(), entryType, score, depth, move);
-        }
-    }
-
-    private native void storeNative(String fen, int entryType, int score, int depth, long move);
+    private native void storeNative(String fen, long val);
 
     @Override
     protected void createTable(int sizeBytes) {

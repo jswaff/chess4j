@@ -10,10 +10,10 @@ extern hash_table_t htbl;
 /*
  * Class:     com_jamesswafford_chess4j_hash_TranspositionTable
  * Method:    storeNative
- * Signature: (Ljava/lang/String;IIIJ)V
+ * Signature: (Ljava/lang/String;J)V
  */
 JNIEXPORT void JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_storeNative
-  (JNIEnv *env, jobject UNUSED(htable), jstring board_fen, jint entry_type, jint score, jint depth, jlong mv)
+  (JNIEnv *env, jobject UNUSED(htable), jstring board_fen, jlong val)
 {
     /* ensure the static library is initialized */
     if (!p4_initialized) 
@@ -35,11 +35,8 @@ JNIEXPORT void JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_st
         goto cleanup;
     }
 
-    /* build the hash value */
-    uint64_t val = build_hash_val(entry_type, depth, score, (move_t)mv);
-
     /* store the value in the hash table */
-    store_hash_entry(&htbl, pos.hash_key, val);
+    store_hash_entry(&htbl, pos.hash_key, (uint64_t)val);
 
     /* free resources */
 cleanup:

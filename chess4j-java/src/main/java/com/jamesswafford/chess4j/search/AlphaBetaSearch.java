@@ -290,7 +290,7 @@ public class AlphaBetaSearch implements Search {
                         searchStats.hashFailLows++;
                         return alpha;
                     }
-                } else if (tte.getType() == EXACT_MATCH) {
+                } else if (tte.getType() == EXACT_SCORE) {
                     searchStats.hashExactScores++;
                     return tte.getScore();
                 }
@@ -358,7 +358,7 @@ public class AlphaBetaSearch implements Search {
             tableEntryType = UPPER_BOUND; // fail low
             searchStats.failLows++;
         } else {
-            tableEntryType = EXACT_MATCH;
+            tableEntryType = EXACT_SCORE;
         }
 
         TTHolder.getInstance().getHashTable().store(board, tableEntryType, alpha, depth, bestMove);
