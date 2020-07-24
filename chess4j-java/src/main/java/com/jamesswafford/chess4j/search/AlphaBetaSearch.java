@@ -310,9 +310,6 @@ public class AlphaBetaSearch implements Search {
             // minimal search window.
             if (!first && !inCheck && nullMoveOk && depth >= 3 /*&& !ZugzwangDetector.isZugzwang(board)*/) {
 
-                long origHashVal = board.hashCode();
-                long origZKey = board.getZobristKey();
-
                 Square nullEp = board.clearEPSquare();
                 board.swapPlayer();
 
@@ -331,9 +328,6 @@ public class AlphaBetaSearch implements Search {
                 if (nullEp != null) {
                     board.setEP(nullEp);
                 }
-
-                assert (origHashVal == board.hashCode());
-                assert (origZKey == board.getZobristKey());
 
                 if (stop) {
                     return 0;
