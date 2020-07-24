@@ -308,14 +308,17 @@ public class AlphaBetaSearch implements Search {
             // move when in check, and during zugzwang positions where making a move is actually harmful.
             // Since we are only trying to determine if the position will fail high or not, we search with a
             // minimal search window.
-            if (!first && !inCheck && nullMoveOk && depth >= 3 && !ZugzwangDetector.isZugzwang(board)) {
+            if (!first && !inCheck && nullMoveOk && depth >= 3 /*&& !ZugzwangDetector.isZugzwang(board)*/) {
+
+                long origHashVal = board.hashCode();
+                long origZKey = board.getZobristKey();
 
                 Square nullEp = board.clearEPSquare();
                 board.swapPlayer();
 
-                // set the reduced depth.  For now we are using a static R=3.  It's important to ensure there is at
-                // least one ply of full width depth remaining, since we aren't doing anything with checks in the
-                // qsearch.
+                // set the reduced depth.  For now we are using a static R=3, except near the leaves.  It's important
+                // to ensure there is at least one ply of full width depth remaining, since we aren't doing anything
+                // with checks in the qsearch.
                 int nullDepth = depth - 4; // R = 3
                 if (nullDepth < 1) {
                     nullDepth = 1;
@@ -328,6 +331,10 @@ public class AlphaBetaSearch implements Search {
                 if (nullEp != null) {
                     board.setEP(nullEp);
                 }
+
+                assert (origHashVal == board.hashCode());
+                assert (origZKey == board.getZobristKey());
+
                 if (stop) {
                     return 0;
                 }

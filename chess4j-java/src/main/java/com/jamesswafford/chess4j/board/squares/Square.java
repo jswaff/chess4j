@@ -13,7 +13,7 @@ public final class Square {
     private static final Map<File,List<Square>> FILE_SQUARES = new HashMap<>();
     private static final Map<Rank,List<Square>> RANK_SQUARES = new HashMap<>();
 
-    private static Square[][] squares_arr = new Square[8][8];
+    private static final Square[][] squares_arr = new Square[8][8];
 
     public static final Square
             A8, B8, C8, D8, E8, F8, G8, H8,

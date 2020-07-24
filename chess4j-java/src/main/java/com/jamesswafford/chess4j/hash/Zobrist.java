@@ -11,10 +11,10 @@ import java.util.*;
 
 public final class Zobrist {
 
-    private static Map<Piece,Long[]> pieceMap = new HashMap<>();
-    private static Map<Color,Long> playerMap = new HashMap<>();
-    private static Map<CastlingRights,Long> castlingMap = new HashMap<>();
-    private static Map<Square,Long> epMap = new HashMap<>();
+    private static final Map<Piece,Long[]> pieceMap = new HashMap<>();
+    private static final Map<Color,Long> playerMap = new HashMap<>();
+    private static final Map<CastlingRights,Long> castlingMap = new HashMap<>();
+    private static final Map<Square,Long> epMap = new HashMap<>();
 
     private Zobrist() {	}
 
