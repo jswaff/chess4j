@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.board.*;
+import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.hash.TTHolder;
@@ -298,34 +299,34 @@ public class AlphaBetaSearch implements Search {
             // move when in check, and during zugzwang positions where making a move is actually harmful.
             // Since we are only trying to determine if the position will fail high or not, we search with a
             // minimal search window.
-//            if (!first && !inCheck && nullMoveOk && depth >= 3 /*&& !ZugzwangDetector.isZugzwang(board)*/) {
-//
-//                Square nullEp = board.clearEPSquare();
-//                board.swapPlayer();
-//
-//                // set the reduced depth.  For now we are using a static R=3, except near the leaves.  It's important
-//                // to ensure there is at least one ply of full width depth remaining, since we aren't doing anything
-//                // with checks in the qsearch.
-//                int nullDepth = depth - 4; // R = 3
-//                if (nullDepth < 1) {
-//                    nullDepth = 1;
-//                }
-//
-//                int nullScore = -search(board, undos, new ArrayList<>(), false, ply+1, nullDepth, -beta,
-//                        -beta+1,false, false, opts);
-//
-//                board.swapPlayer();
-//                if (nullEp != null) {
-//                    board.setEP(nullEp);
-//                }
-//
-//                if (stop) {
-//                    return 0;
-//                }
-//                if (nullScore >= beta) {
-//                    return beta;
-//                }
-//            }
+            if (!first && !inCheck && nullMoveOk && depth >= 3 /*&& !ZugzwangDetector.isZugzwang(board)*/) {
+
+                Square nullEp = board.clearEPSquare();
+                board.swapPlayer();
+
+                // set the reduced depth.  For now we are using a static R=3, except near the leaves.  It's important
+                // to ensure there is at least one ply of full width depth remaining, since we aren't doing anything
+                // with checks in the qsearch.
+                int nullDepth = depth - 4; // R = 3
+                if (nullDepth < 1) {
+                    nullDepth = 1;
+                }
+
+                int nullScore = -search(board, undos, new ArrayList<>(), false, ply+1, nullDepth, -beta,
+                        -beta+1,false, false, opts);
+
+                board.swapPlayer();
+                if (nullEp != null) {
+                    board.setEP(nullEp);
+                }
+
+                if (stop) {
+                    return 0;
+                }
+                if (nullScore >= beta) {
+                    return beta;
+                }
+            }
         }
 
         List<Move> pv = new ArrayList<>(50);
