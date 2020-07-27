@@ -356,6 +356,10 @@ public final class Board {
         return pieceMap.get(square);
     }
 
+    public Piece getPiece(int sqVal) {
+        return getPiece(Square.valueOf(sqVal));
+    }
+
     public Color getPlayerToMove() {
         return playerToMove;
     }
@@ -401,6 +405,23 @@ public final class Board {
         } else {
             throw new IllegalArgumentException("unknown castling right: " + cr);
         }
+    }
+
+    // convenience functions
+    public boolean hasWKCastlingRight() {
+        return castlingRights.isWhiteKingside();
+    }
+
+    public boolean hasWQCastlingRight() {
+        return castlingRights.isWhiteQueenside();
+    }
+
+    public boolean hasBKCastlingRight() {
+        return castlingRights.isBlackKingside();
+    }
+
+    public boolean hasBQCastlingRight() {
+        return castlingRights.isBlackQueenside();
     }
 
     @Override

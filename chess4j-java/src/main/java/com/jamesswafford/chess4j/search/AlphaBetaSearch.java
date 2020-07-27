@@ -8,6 +8,7 @@ import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TranspositionTableEntryType;
 import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.io.DrawBoard;
 import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
@@ -168,7 +169,7 @@ public class AlphaBetaSearch implements Search {
 
         try {
             assert(clearTableWrapper());
-            int nativeScore = searchNative(fen, prevMoves, nativePV, searchParameters.getDepth(),
+            int nativeScore = searchNative(board, fen, prevMoves, nativePV, searchParameters.getDepth(),
                     searchParameters.getAlpha(), searchParameters.getBeta(), nativeStats, opts.getStartTime(),
                     opts.getStopTime());
 
@@ -185,6 +186,7 @@ public class AlphaBetaSearch implements Search {
 
             return nativeScore;
         } catch (IllegalStateException e) {
+            DrawBoard.drawBoard(board);
             LOGGER.error(e);
             throw e;
         }
@@ -308,35 +310,34 @@ public class AlphaBetaSearch implements Search {
             // move when in check, and during zugzwang positions where making a move is actually harmful.
             // Since we are only trying to determine if the position will fail high or not, we search with a
             // minimal search window.
-            if (!first && !inCheck && nullMoveOk && depth >= 3 /*&& !ZugzwangDetector.isZugzwang(board)*/) {
-
-                Square nullEp = board.clearEPSquare();
-                board.swapPlayer();
-
-                // set the reduced depth.  For now we are using a static R=3, except near the leaves.  It's important
-                // to ensure there is at least one ply of full width depth remaining, since we aren't doing anything
-                // with checks in the qsearch.
-                int nullDepth = depth - 4; // R = 3
-                if (nullDepth < 1) {
-                    nullDepth = 1;
-                }
-
-                int nullScore = -search(board, undos, new ArrayList<>(), false, ply+1, nullDepth, -beta,
-                        -beta+1,false, false, opts);
-
-                board.swapPlayer();
-                if (nullEp != null) {
-                    board.setEP(nullEp);
-                }
-
-                if (stop) {
-                    return 0;
-                }
-                if (nullScore >= beta) {
-                    return beta;
-                }
-            }
-
+//            if (!first && !inCheck && nullMoveOk && depth >= 3 /*&& !ZugzwangDetector.isZugzwang(board)*/) {
+//
+//                Square nullEp = board.clearEPSquare();
+//                board.swapPlayer();
+//
+//                // set the reduced depth.  For now we are using a static R=3, except near the leaves.  It's important
+//                // to ensure there is at least one ply of full width depth remaining, since we aren't doing anything
+//                // with checks in the qsearch.
+//                int nullDepth = depth - 4; // R = 3
+//                if (nullDepth < 1) {
+//                    nullDepth = 1;
+//                }
+//
+//                int nullScore = -search(board, undos, new ArrayList<>(), false, ply+1, nullDepth, -beta,
+//                        -beta+1,false, false, opts);
+//
+//                board.swapPlayer();
+//                if (nullEp != null) {
+//                    board.setEP(nullEp);
+//                }
+//
+//                if (stop) {
+//                    return 0;
+//                }
+//                if (nullScore >= beta) {
+//                    return beta;
+//                }
+//            }
         }
 
         List<Move> pv = new ArrayList<>(50);
@@ -513,7 +514,7 @@ public class AlphaBetaSearch implements Search {
 
     private native void initializeNativeSearch();
 
-    private native int searchNative(String boardFen, List<Long> prevMoves, List<Long> parentPV, int depth,
+    private native int searchNative(Board board, String boardFen, List<Long> prevMoves, List<Long> parentPV, int depth,
                                     int alpha, int beta, SearchStats searchStats, long startTime,
                                     long stopTime);
 

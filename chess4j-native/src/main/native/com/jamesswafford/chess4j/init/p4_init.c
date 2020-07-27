@@ -6,6 +6,7 @@
 
 #include "../../../../java/lang/Long.h"
 #include "../../../../java/util/ArrayList.h"
+#include "../pieces/Piece.h"
 #include "../io/PrintLine.h"
 
 
@@ -41,6 +42,13 @@ JNIEXPORT jboolean JNICALL Java_com_jamesswafford_chess4j_init_Initializer_p4Ini
     {
         (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
             "PrintLine not initialized!");
+        return false;
+    }
+
+    if (0 != Piece_register(env))
+    {
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
+            "Piece not initialized!");
         return false;
     }
 

@@ -15,7 +15,7 @@ int PrintLine_register(JNIEnv* env)
         return 0;
     }
 
-    /* register Long class */
+    /* register PrintLine class */
     tempClassID = (*env)->FindClass(env, 
         "com/jamesswafford/chess4j/io/PrintLine");
     if (NULL == tempClassID)

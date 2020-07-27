@@ -89,7 +89,7 @@ public final class Zobrist {
 
         key = EnumSet.allOf(CastlingRights.class).stream()
                 .filter(b::hasCastlingRight)
-                .map(cr -> castlingMap.get(cr))
+                .map(castlingMap::get)
                 .reduce(key, (x,y) -> x ^ y);
 
         if (b.getEPSquare() != null) {
