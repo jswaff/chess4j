@@ -27,22 +27,26 @@ JNIEnv *g_env;
 jobject *g_parent_pv;
 color_t g_ptm;
 
-void add_piece(position_t* p, int32_t piece, square_t sq);
-
+/* flag to stop the search, or in our case as notification the search was stopped */
 extern volatile bool stop_search;
 
+/* TODO: these methods are marked "internal" */
+void add_piece(position_t* p, int32_t piece, square_t sq);
+bool verify_pos(const position_t* pos);
+uint64_t build_hash_key(const position_t* pos);
+uint64_t build_pawn_key(const position_t* pos);
 
 static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
+
 
 /*
  * Class:     com_jamesswafford_chess4j_search_AlphaBetaSearch
  * Method:    searchNative
- * Signature: (Ljava/lang/String;Ljava/util/List;Ljava/util/List;IIILcom/jamesswafford/chess4j/search/SearchStats;JJ)I
+ * Signature: (Lcom/jamesswafford/chess4j/board/Board;Ljava/util/List;IIILcom/jamesswafford/chess4j/search/SearchStats;JJ)I
  */
 JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_searchNative
-  (JNIEnv *env, jobject search_obj, jobject board_obj, jstring board_fen, jobject prev_moves,
-    jobject parent_pv, jint depth, jint alpha, jint beta, jobject search_stats, jlong start_time,
-    jlong stop_time)
+  (JNIEnv *env, jobject search_obj, jobject board_obj, jobject parent_pv, jint depth, 
+    jint alpha, jint beta, jobject search_stats, jlong start_time, jlong stop_time)
 {
     jint retval = 0;
 
@@ -56,40 +60,6 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
 
     g_env = env;
     g_parent_pv = &parent_pv;
-
-
-    /* set the position according to the FEN.  We use the FEN instead of the
-     * prev_moves list for test suites, which don't have a move history.
-     */
-    const char* fen = (*env)->GetStringUTFChars(env, board_fen, 0);
-    position_t pos;
-    if (!set_pos(&pos, fen))
-    {
-        char error_buffer[255];
-        sprintf(error_buffer, "Could not set position: %s\n", fen);
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            error_buffer);
-        goto cleanup;
-    }
-
-    /* replay the previous moves for draw checks */
-    position_t replay_pos;
-    reset_pos(&replay_pos);    
-    jint size = (*env)->CallIntMethod(env, prev_moves, ArrayList_size);
-    jvalue arg;
-    for (int i=0; i<size; i++)
-    {
-        arg.i = i;
-        jobject element = (*env)->CallObjectMethodA(env, prev_moves, ArrayList_get, 
-            &arg);
-        jlong prev_mv = (*env)->CallLongMethod(env, element, Long_longValue);
-
-        /* apply this move */
-        apply_move(&replay_pos, (move_t) prev_mv, undos + replay_pos.move_counter);
-
-        (*env)->DeleteLocalRef(env, element);
-    }
-    g_ptm = replay_pos.player;
 
     /* set the position */
     jclass class_Board = (*env)->GetObjectClass(env, board_obj);
@@ -105,6 +75,7 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     jmethodID Color_isWhite = (*env)->GetMethodID(env, class_Color, "isWhite", "()Z");
     bool is_white = (*env)->CallBooleanMethod(env, player_obj, Color_isWhite);
     c4j_pos.player = is_white ? WHITE : BLACK;
+    g_ptm = c4j_pos.player;
 
 
     /* set the EP square */
@@ -149,7 +120,6 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
         c4j_pos.castling_rights |= CASTLE_BQ;
     }
 
-
     /* set the 50 move counter */
     jmethodID Board_getFiftyCounter = (*env)->GetMethodID(
         env, class_Board, "getFiftyCounter", "()I");
@@ -159,11 +129,10 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     /* set the full move counter */
     jmethodID Board_getMoveCounter = (*env)->GetMethodID(
         env, class_Board, "getMoveCounter", "()I");
-    c4j_pos.move_counter = (*env)->CallIntMethod(
-        env, board_obj, Board_getMoveCounter);
+    c4j_pos.move_counter = (*env)->CallIntMethod(env, board_obj, Board_getMoveCounter);
 
 
-    /* loop over the pieces */
+    /* add the pieces */
     jmethodID Board_getPiece = (*env)->GetMethodID(
         env, class_Board, "getPiece", "(I)Lcom/jamesswafford/chess4j/pieces/Piece;");
     for (int i=0;i<64;i++)
@@ -207,6 +176,16 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
         }
     }
 
+    /* set the hash keys */
+    c4j_pos.hash_key = build_hash_key(&c4j_pos);
+    c4j_pos.pawn_key = build_pawn_key(&c4j_pos);
+
+    if (!verify_pos(&c4j_pos))
+    {
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
+            "Position is not consistent");
+        return 0;
+    }
 
 
     /* set up the search options */
@@ -275,10 +254,8 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     jfieldID fid_hashExactScores = (*env)->GetFieldID(env, class_SearchStats, "hashExactScores", "J");
     (*env)->SetLongField(env, search_stats, fid_hashExactScores, native_stats.hash_exact_scores);
 
-    /* free resources */
-cleanup:
-    (*env)->ReleaseStringUTFChars(env, board_fen, fen);
 
+    /* cleanup and get out */
     g_parent_pv = 0;
     g_env = 0;
 

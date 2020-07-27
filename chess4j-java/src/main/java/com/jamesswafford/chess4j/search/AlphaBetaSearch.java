@@ -1,7 +1,6 @@
 package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.board.*;
-import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.hash.TTHolder;
@@ -9,7 +8,6 @@ import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TranspositionTableEntryType;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.DrawBoard;
-import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import com.jamesswafford.chess4j.utils.BoardUtils;
@@ -20,7 +18,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 import static com.jamesswafford.chess4j.hash.TranspositionTableEntryType.*;
@@ -158,24 +155,16 @@ public class AlphaBetaSearch implements Search {
     private int searchWithNativeCode(Board board, List<Undo> undos, SearchParameters searchParameters,
                                      SearchOptions opts) {
 
-        String fen = FenBuilder.createFen(board, true);
-
-        List<Long> prevMoves = undos.stream()
-                .map(undo -> MoveUtils.toNativeMove(undo.getMove()))
-                .collect(Collectors.toList());
-
         List<Long> nativePV = new ArrayList<>();
         SearchStats nativeStats = new SearchStats(searchStats);
 
         try {
             assert(clearTableWrapper());
-            int nativeScore = searchNative(board, fen, prevMoves, nativePV, searchParameters.getDepth(),
-                    searchParameters.getAlpha(), searchParameters.getBeta(), nativeStats, opts.getStartTime(),
-                    opts.getStopTime());
+            int nativeScore = searchNative(board, nativePV, searchParameters.getDepth(), searchParameters.getAlpha(),
+                    searchParameters.getBeta(), nativeStats, opts.getStartTime(), opts.getStopTime());
 
             // if the search completed then verify equality with the Java implementation.
-            assert (stop || searchesAreEqual(board, undos, searchParameters, opts, fen, nativeScore, nativePV,
-                    nativeStats));
+            assert (stop || searchesAreEqual(board, undos, searchParameters, opts, nativeScore, nativePV, nativeStats));
 
             // set the object's stats to the native stats
             searchStats.set(nativeStats);
@@ -200,8 +189,7 @@ public class AlphaBetaSearch implements Search {
     }
 
     private boolean searchesAreEqual(Board board, List<Undo> undos, SearchParameters searchParameters,
-                                     SearchOptions opts, String fen, int nativeScore, List<Long> nativePV,
-                                     SearchStats nativeStats)
+                                     SearchOptions opts, int nativeScore, List<Long> nativePV, SearchStats nativeStats)
     {
         LOGGER.debug("# checking search equality with java depth {}", searchParameters.getDepth());
         try {
@@ -224,21 +212,21 @@ public class AlphaBetaSearch implements Search {
                         + ", java probes: " + javaProbes + ", native probes: " + nativeProbes
                         + ", java hits: " + javaHits + ", native hits: " + nativeHits
                         + ", java collisions: " + javaCollisions + ", native collisions: " + nativeCollisions
-                        + ", params: " + searchParameters + ", fen: " + fen);
+                        + ", params: " + searchParameters);
                 return false;
             }
 
             if (javaScore != nativeScore || !searchStats.equals(nativeStats)) {
                 LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
-                        + ", params: " + searchParameters + ", fen: " + fen);
+                        + ", params: " + searchParameters);
                 return false;
             }
             // compare the PVs.
             if (!pv.equals(MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove()))) {
                 LOGGER.error("pvs are not equal!"
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
-                        + ", params: " + searchParameters + ", fen: " + fen);
+                        + ", params: " + searchParameters);
                 return false;
             }
 
@@ -514,9 +502,8 @@ public class AlphaBetaSearch implements Search {
 
     private native void initializeNativeSearch();
 
-    private native int searchNative(Board board, String boardFen, List<Long> prevMoves, List<Long> parentPV, int depth,
-                                    int alpha, int beta, SearchStats searchStats, long startTime,
-                                    long stopTime);
+    private native int searchNative(Board board, List<Long> parentPV, int depth, int alpha, int beta,
+                                    SearchStats searchStats, long startTime, long stopTime);
 
     private native void stopNative(boolean stop);
 
