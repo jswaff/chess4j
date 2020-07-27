@@ -4,9 +4,9 @@
 #include <prophet/util/p4time.h>
 
 #include <com_jamesswafford_chess4j_search_AlphaBetaSearch.h>
+#include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../io/PrintLine.h"
-#include "../pieces/Piece.h"
 #include "../../../../java/lang/Long.h"
 #include "../../../../java/util/ArrayList.h"
 
@@ -30,11 +30,6 @@ color_t g_ptm;
 /* flag to stop the search, or in our case as notification the search was stopped */
 extern volatile bool stop_search;
 
-/* TODO: these methods are marked "internal" */
-void add_piece(position_t* p, int32_t piece, square_t sq);
-bool verify_pos(const position_t* pos);
-uint64_t build_hash_key(const position_t* pos);
-uint64_t build_pawn_key(const position_t* pos);
 
 static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
 
@@ -58,135 +53,19 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
         return 0;
     }
 
-    g_env = env;
-    g_parent_pv = &parent_pv;
-
     /* set the position */
-    jclass class_Board = (*env)->GetObjectClass(env, board_obj);
     position_t c4j_pos;
-    memset(&c4j_pos, 0, sizeof(position_t));
-
-
-    /* set the player */
-    jmethodID Board_getPlayerToMove = (*env)->GetMethodID(
-        env, class_Board, "getPlayerToMove", "()Lcom/jamesswafford/chess4j/board/Color;");
-    jobject player_obj = (*env)->CallObjectMethod(env, board_obj, Board_getPlayerToMove);
-    jclass class_Color = (*env)->GetObjectClass(env, player_obj);
-    jmethodID Color_isWhite = (*env)->GetMethodID(env, class_Color, "isWhite", "()Z");
-    bool is_white = (*env)->CallBooleanMethod(env, player_obj, Color_isWhite);
-    c4j_pos.player = is_white ? WHITE : BLACK;
-    g_ptm = c4j_pos.player;
-
-
-    /* set the EP square */
-    jmethodID Board_getEPSquare = (*env)->GetMethodID(
-        env, class_Board, "getEPSquare", "()Lcom/jamesswafford/chess4j/board/squares/Square;");
-    jobject ep_sq_obj = (*env)->CallObjectMethod(
-        env, board_obj, Board_getEPSquare);
-    if (ep_sq_obj == NULL)
-    {
-        c4j_pos.ep_sq = NO_SQUARE;
-    }
-    else
-    {
-        jclass class_Square = (*env)->GetObjectClass(env, ep_sq_obj);
-        jmethodID Square_value = (*env)->GetMethodID(env, class_Square, "value", "()I");
-        c4j_pos.ep_sq = (*env)->CallIntMethod(env, ep_sq_obj, Square_value);
-    }
-
-    /* set the castling rights */
-    jmethodID Board_hasWKCastlingRight = (*env)->GetMethodID(
-        env, class_Board, "hasWKCastlingRight", "()Z");
-    if ((*env)->CallBooleanMethod(env, board_obj, Board_hasWKCastlingRight))
-    {
-        c4j_pos.castling_rights |= CASTLE_WK;
-    }
-    jmethodID Board_hasWQCastlingRight = (*env)->GetMethodID(
-        env, class_Board, "hasWQCastlingRight", "()Z");
-    if ((*env)->CallBooleanMethod(env, board_obj, Board_hasWQCastlingRight))
-    {
-        c4j_pos.castling_rights |= CASTLE_WQ;
-    }
-    jmethodID Board_hasBKCastlingRight = (*env)->GetMethodID(
-        env, class_Board, "hasBKCastlingRight", "()Z");
-    if ((*env)->CallBooleanMethod(env, board_obj, Board_hasBKCastlingRight))
-    {
-        c4j_pos.castling_rights |= CASTLE_BK;
-    }
-    jmethodID Board_hasBQCastlingRight = (*env)->GetMethodID(
-        env, class_Board, "hasBQCastlingRight", "()Z");
-    if ((*env)->CallBooleanMethod(env, board_obj, Board_hasBQCastlingRight))
-    {
-        c4j_pos.castling_rights |= CASTLE_BQ;
-    }
-
-    /* set the 50 move counter */
-    jmethodID Board_getFiftyCounter = (*env)->GetMethodID(
-        env, class_Board, "getFiftyCounter", "()I");
-    c4j_pos.fifty_counter = (*env)->CallIntMethod(
-        env, board_obj, Board_getFiftyCounter);
-
-    /* set the full move counter */
-    jmethodID Board_getMoveCounter = (*env)->GetMethodID(
-        env, class_Board, "getMoveCounter", "()I");
-    c4j_pos.move_counter = (*env)->CallIntMethod(env, board_obj, Board_getMoveCounter);
-
-
-    /* add the pieces */
-    jmethodID Board_getPiece = (*env)->GetMethodID(
-        env, class_Board, "getPiece", "(I)Lcom/jamesswafford/chess4j/pieces/Piece;");
-    for (int i=0;i<64;i++)
-    {
-        jobject piece_obj = (*env)->CallObjectMethod(env, board_obj, Board_getPiece, i);
-        if (piece_obj != NULL)
-        {
-            bool is_white = (*env)->CallBooleanMethod(env, piece_obj, Piece_isWhite);
-            if ((*env)->IsInstanceOf(env, piece_obj, Bishop))
-            {
-                add_piece(&c4j_pos, is_white ? BISHOP : -BISHOP, i);
-            }
-            else if ((*env)->IsInstanceOf(env, piece_obj, King))
-            {
-                add_piece(&c4j_pos, is_white ? KING : -KING, i);
-                if (is_white)
-                {
-                    c4j_pos.white_king = i;
-                }
-                else
-                {
-                    c4j_pos.black_king = i;
-                }
-            }
-            else if ((*env)->IsInstanceOf(env, piece_obj, Knight))
-            {
-                add_piece(&c4j_pos, is_white ? KNIGHT : -KNIGHT, i);
-            }
-            else if ((*env)->IsInstanceOf(env, piece_obj, Pawn))
-            {
-                add_piece(&c4j_pos, is_white ? PAWN : -PAWN, i);
-            }
-            else if ((*env)->IsInstanceOf(env, piece_obj, Queen))
-            {
-                add_piece(&c4j_pos, is_white ? QUEEN : -QUEEN, i);
-            }
-            else if ((*env)->IsInstanceOf(env, piece_obj, Rook))
-            {
-                add_piece(&c4j_pos, is_white ? ROOK : -ROOK, i);
-            }
-        }
-    }
-
-    /* set the hash keys */
-    c4j_pos.hash_key = build_hash_key(&c4j_pos);
-    c4j_pos.pawn_key = build_pawn_key(&c4j_pos);
-
-    if (!verify_pos(&c4j_pos))
+    if (0 != convert(env, board_obj, &c4j_pos))
     {
         (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            "Position is not consistent");
+            "An error was encountered while converting a position.");
         return 0;
     }
 
+    /* remember some variables to use in the PV callback */
+    g_env = env;
+    g_parent_pv = &parent_pv;
+    g_ptm = c4j_pos.player;
 
     /* set up the search options */
     search_options_t search_opts;
