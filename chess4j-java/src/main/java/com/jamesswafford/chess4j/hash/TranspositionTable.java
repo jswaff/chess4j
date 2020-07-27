@@ -4,7 +4,6 @@ import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.init.Initializer;
-import com.jamesswafford.chess4j.io.FenBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -108,15 +107,14 @@ public class TranspositionTable extends AbstractTranspositionTable {
     public TranspositionTableEntry probe(Board board) {
 
         if (Initializer.nativeCodeInitialized()) {
-            String fen = FenBuilder.createFen(board, true);
-            long nativeVal = probeNative(fen);
+            long nativeVal = probeNative(board);
             return new TranspositionTableEntry(board.getZobristKey(), nativeVal);
         } else {
             return probe(board.getZobristKey());
         }
     }
 
-    private native long probeNative(String fen);
+    private native long probeNative(Board board);
 
     /**
      * Store an entry in the transposition table, Gerbil style.  Meaning, for now I'm skirting around
@@ -133,9 +131,8 @@ public class TranspositionTable extends AbstractTranspositionTable {
      */
     public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move) {
         if (Initializer.nativeCodeInitialized()) {
-            String fen = FenBuilder.createFen(board, true);
             TranspositionTableEntry entry = buildHashTableEntry(board.getZobristKey(), entryType, score, depth, move);
-            storeNative(fen, entry.getVal());
+            storeNative(board, entry.getVal());
         } else {
             store(board.getZobristKey(), entryType, score, depth, move);
         }
@@ -167,7 +164,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
         return new TranspositionTableEntry(zobristKey, entryType, score, depth, move);
     }
 
-    private native void storeNative(String fen, long val);
+    private native void storeNative(Board board, long val);
 
     @Override
     protected void createTable(int sizeBytes) {
