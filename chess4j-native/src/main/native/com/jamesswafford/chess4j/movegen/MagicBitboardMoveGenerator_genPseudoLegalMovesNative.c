@@ -5,6 +5,7 @@
 #include <com_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator.h>
 #include "../init/p4_init.h"
 #include "../../../../java/util/ArrayList.h"
+#include "../../../../java/lang/IllegalStateException.h"
 #include "../../../../java/lang/Long.h"
 
 #include <stdlib.h>
@@ -25,8 +26,7 @@ JNICALL Java_com_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator_genPse
     /* ensure the static library is initialized */
     if (!p4_initialized) 
     {
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            "Prophet4 not initialized!");
+        (*env)->ThrowNew(env, IllegalStateException, "Prophet4 not initialized!");
         return 0;
     }
 
@@ -37,8 +37,7 @@ JNICALL Java_com_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator_genPse
     {
         char error_buffer[255];
         sprintf(error_buffer, "Could not set position: %s\n", fen);
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            error_buffer);
+        (*env)->ThrowNew(env, IllegalStateException, error_buffer);
         goto cleanup;
     }
 

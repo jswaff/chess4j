@@ -3,6 +3,7 @@
 
 #include <com_jamesswafford_chess4j_eval_Eval.h>
 #include "../init/p4_init.h"
+#include "../../../../java/lang/IllegalStateException.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -20,8 +21,7 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_eval_Eval_evalNative
 
     if (!p4_initialized) 
     {
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            "Prophet4 not initialized!");
+        (*env)->ThrowNew(env, IllegalStateException, "Prophet4 not initialized!");
         return 0;
     }
 
@@ -32,11 +32,9 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_eval_Eval_evalNative
     {
         char error_buffer[255];
         sprintf(error_buffer, "Could not set position: %s\n", fen);
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            error_buffer);
+        (*env)->ThrowNew(env, IllegalStateException, error_buffer);
         goto cleanup;
     }
-
 
     int32_t native_score = eval(&pos, (bool)material_only);
     retval = (jint) native_score;

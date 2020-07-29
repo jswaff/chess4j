@@ -5,7 +5,7 @@
 #include <com_jamesswafford_chess4j_hash_TranspositionTable.h>
 #include "../board/Board.h"
 #include "../init/p4_init.h"
-
+#include "../../../../java/lang/IllegalStateException.h"
 
 extern hash_table_t htbl;
 
@@ -20,8 +20,7 @@ JNIEXPORT void JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_st
     /* ensure the static library is initialized */
     if (!p4_initialized) 
     {
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            "Prophet4 not initialized!");
+        (*env)->ThrowNew(env, IllegalStateException, "Prophet4 not initialized!");
         return;
     }
     
@@ -29,7 +28,7 @@ JNIEXPORT void JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_st
     position_t c4j_pos;
     if (0 != convert(env, board_obj, &c4j_pos))
     {
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
+        (*env)->ThrowNew(env, IllegalStateException, 
             "An error was encountered while converting a position.");
         return;
     }

@@ -7,6 +7,7 @@
 #include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../io/PrintLine.h"
+#include "../../../../java/lang/IllegalStateException.h"
 #include "../../../../java/lang/Long.h"
 #include "../../../../java/util/ArrayList.h"
 
@@ -48,8 +49,7 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     /* ensure the static library is initialized */
     if (!p4_initialized) 
     {
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            "Prophet4 not initialized!");
+        (*env)->ThrowNew(env, IllegalStateException, "Prophet4 not initialized!");
         return 0;
     }
 
@@ -57,8 +57,7 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     position_t c4j_pos;
     if (0 != convert(env, board_obj, &c4j_pos))
     {
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            "An error was encountered while converting a position.");
+        (*env)->ThrowNew(env, IllegalStateException, "An error was encountered while converting a position.");
         return 0;
     }
 
