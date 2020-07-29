@@ -299,7 +299,7 @@ public class AlphaBetaSearch implements Search {
             // move when in check, and during zugzwang positions where making a move is actually harmful.
             // Since we are only trying to determine if the position will fail high or not, we search with a
             // minimal search window.
-            if (!first && !inCheck && nullMoveOk && depth >= 3 /*&& !ZugzwangDetector.isZugzwang(board)*/) {
+            if (!first && !inCheck && nullMoveOk && depth >= 3 && !ZugzwangDetector.isZugzwang(board)) {
 
                 Square nullEp = board.clearEPSquare();
                 board.swapPlayer();
