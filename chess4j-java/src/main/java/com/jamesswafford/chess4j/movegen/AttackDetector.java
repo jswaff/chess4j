@@ -14,20 +14,25 @@ public final class AttackDetector {
     /**
      * Get a bitmap representation of all pieces of a specific color that are attacking a specific square.
      *
-     * @param board
-     * @param sq
-     * @param color
-     * @return
+     * @param board - the chess board
+     * @param sq - the square we want to know is attacked or not
+     * @param color - the player that would do the attacking
+     *
+     * @return - bitmap representation of all attackers
      */
     public static long getAttackers(Board board, Square sq, Color color) {
         int sqVal = sq.value();
-        long attackers = Bitboard.knightMoves[sqVal] & (color==Color.WHITE ? board.getWhiteKnights() : board.getBlackKnights());
+        long attackers = Bitboard.knightMoves[sqVal] &
+                (color==Color.WHITE ? board.getWhiteKnights() : board.getBlackKnights());
         attackers |= Bitboard.kingMoves[sqVal] & Bitboard.squares[board.getKingSquare(color).value()];
 
-        attackers |= Magic.getRookMoves(board, sqVal, (color==Color.WHITE ? board.getWhiteRooks() : board.getBlackRooks()));
+        attackers |= Magic.getRookMoves(board, sqVal,
+                (color==Color.WHITE ? board.getWhiteRooks() : board.getBlackRooks()));
 
-        attackers |= Magic.getBishopMoves(board, sqVal, (color==Color.WHITE ? board.getWhiteBishops() : board.getBlackBishops()));
-        attackers |= Magic.getQueenMoves(board, sqVal, (color==Color.WHITE ? board.getWhiteQueens() : board.getBlackQueens()));
+        attackers |= Magic.getBishopMoves(board, sqVal,
+                (color==Color.WHITE ? board.getWhiteBishops() : board.getBlackBishops()));
+        attackers |= Magic.getQueenMoves(board, sqVal,
+                (color==Color.WHITE ? board.getWhiteQueens() : board.getBlackQueens()));
 
         if (color==Color.WHITE) {
             attackers |=  ((Bitboard.squares[sqVal] & ~Bitboard.files[File.FILE_A.getValue()]) << 7)
@@ -47,20 +52,19 @@ public final class AttackDetector {
     /**
      * Is <sq> attacked by <player>?
      *
-     * @param board
-     * @param sq
-     * @param player
-     * @return
+     * @param board - the chess board
+     * @param sq - the square we want to know is attacked or not
+     * @param player - the player that would do the attacking
+     *
+     * @return - true if player is attacking square, otherwise false
      */
-    public static boolean attacked(Board board,Square sq,Color player) {
+    public static boolean attacked(Board board, Square sq, Color player) {
         if (attackedByPawn(board,sq,player)) { return true; }
         if (attackedByRook(board,sq,player)) { return true; }
         if (attackedByKnight(board,sq,player)) { return true; }
         if (attackedByBishop(board,sq,player)) { return true; }
         if (attackedByQueen(board,sq,player)) { return true; }
-        if (attackedByKing(board,sq,player)) { return true; }
-
-        return false;
+        return attackedByKing(board, sq, player);
     }
 
     private static boolean attackedByBishop(Board board,Square sq,Color player) {
@@ -85,25 +89,17 @@ public final class AttackDetector {
             {
                 return true;
             }
-            if ((((board.getWhitePawns() & ~Bitboard.files[File.FILE_H.getValue()]) >> 7)
-                    & Bitboard.squares[sq.value()]) != 0)
-            {
-                return true;
-            }
+            return (((board.getWhitePawns() & ~Bitboard.files[File.FILE_H.getValue()]) >> 7)
+                    & Bitboard.squares[sq.value()]) != 0;
         } else {
             if ((((board.getBlackPawns() & ~Bitboard.files[File.FILE_A.getValue()]) << 7)
                     & Bitboard.squares[sq.value()]) != 0)
             {
                 return true;
             }
-            if ((((board.getBlackPawns() & ~Bitboard.files[File.FILE_H.getValue()]) << 9)
-                    & Bitboard.squares[sq.value()]) != 0)
-            {
-                return true;
-            }
+            return (((board.getBlackPawns() & ~Bitboard.files[File.FILE_H.getValue()]) << 9)
+                    & Bitboard.squares[sq.value()]) != 0;
         }
-
-        return false;
     }
 
     private static boolean attackedByQueen(Board board,Square sq,Color player) {

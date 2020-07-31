@@ -6,7 +6,7 @@ public enum CastlingRights {
     BLACK_KINGSIDE("k"),
     BLACK_QUEENSIDE("q");
 
-    private String label;
+    private final String label;
 
     CastlingRights(String label) {
         this.label=label;

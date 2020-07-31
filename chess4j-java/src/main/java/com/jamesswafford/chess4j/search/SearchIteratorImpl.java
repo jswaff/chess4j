@@ -8,7 +8,6 @@ import com.jamesswafford.chess4j.hash.PawnTranspositionTable;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.hash.TranspositionTable;
 import com.jamesswafford.chess4j.init.Initializer;
-import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.io.PrintLine;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
@@ -20,7 +19,6 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 import static com.jamesswafford.chess4j.Constants.INFINITY;
@@ -199,17 +197,17 @@ public class SearchIteratorImpl implements SearchIterator {
 
         // if we are running with assertions enabled and the native library is loaded, verify equality
         // we can only do this for fixed depth searches that have not been interrupted.
-        assert(maxTimeMs > 0 || search.isStopped() || iterationsAreEqual(pv, board, undos));
+        assert(maxTimeMs > 0 || search.isStopped() || iterationsAreEqual(pv, board));
 
         return pv;
     }
 
-    private boolean iterationsAreEqual(List<Move> javaPV, Board board, List<Undo> undos) {
+    private boolean iterationsAreEqual(List<Move> javaPV, Board board) {
 
         if (Initializer.nativeCodeInitialized()) {
 
             LOGGER.debug("# checking iteration equality with native");
-            List<Move> nativePV = findPrincipalVariationNative(board, undos);
+            List<Move> nativePV = findPrincipalVariationNative(board);
 
             // if the search was stopped the comparison won't be valid
             if (search.isStopped()) {
@@ -232,17 +230,11 @@ public class SearchIteratorImpl implements SearchIterator {
         }
     }
 
-    private List<Move> findPrincipalVariationNative(Board board, List<Undo> undos) {
-        String fen = FenBuilder.createFen(board, false);
-
-        List<Long> prevMoves = undos.stream()
-                .map(undo -> MoveUtils.toNativeMove(undo.getMove()))
-                .collect(Collectors.toList());
-
+    private List<Move> findPrincipalVariationNative(Board board) {
         List<Long> nativePV = new ArrayList<>();
         try {
             LOGGER.debug("# starting native iterator maxDepth: {}", maxDepth);
-            iterateNative(fen, prevMoves, maxDepth, nativePV);
+            iterateNative(board, maxDepth, nativePV);
             return MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove());
         } catch (IllegalStateException e) {
             LOGGER.error(e);
@@ -299,10 +291,8 @@ public class SearchIteratorImpl implements SearchIterator {
         LOGGER.info("# pawn hash probes: " + df2.format(pawnHashProbes)
                 + ", hits: " + df2.format(pawnHashHits) + " (" + df.format(pawnHashHitPct) + "%)"
                 + ", collisions: " + df2.format(pawnHashCollisions) + " (" + df.format(pawnHashCollisionPct) + "%)");
-
-//        LOGGER.info("# prunes: " + stats.getPrunes());
     }
 
-        private native void iterateNative(String boardFen, List<Long> prevMoves, int maxDepth, List<Long> pv);
+        private native void iterateNative(Board board, int maxDepth, List<Long> pv);
 
 }

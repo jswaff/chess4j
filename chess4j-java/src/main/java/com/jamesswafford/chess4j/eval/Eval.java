@@ -7,7 +7,6 @@ import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
-import com.jamesswafford.chess4j.io.FenBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -64,12 +63,11 @@ public final class Eval implements Evaluator {
 
     private static boolean evalsAreEqual(int javaScore, Board board, boolean materialOnly) {
         if (Initializer.nativeCodeInitialized()) {
-            String fen = FenBuilder.createFen(board, false);
             try {
-                int nativeSccore = evalNative(fen, materialOnly);
+                int nativeSccore = evalNative(board, materialOnly);
                 if (javaScore != nativeSccore) {
                     LOGGER.error("evals not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeSccore +
-                            ", materialOnly: " + materialOnly + ", fen: " + fen);
+                            ", materialOnly: " + materialOnly);
                     return false;
                 }
                 return true;
@@ -123,7 +121,7 @@ public final class Eval implements Evaluator {
         return score * material / ALL_NONPAWN_PIECES_VAL;
     }
 
-    public static native int evalNative(String boardFen, boolean materialOnly);
+    public static native int evalNative(Board board, boolean materialOnly);
 
     @Override
     public int evaluateBoard(Board board) {

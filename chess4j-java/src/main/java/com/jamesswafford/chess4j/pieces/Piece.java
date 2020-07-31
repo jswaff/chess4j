@@ -4,7 +4,7 @@ import com.jamesswafford.chess4j.board.Color;
 
 public abstract class Piece {
 
-    private Color color;
+    private final Color color;
 
     public Piece(Color color) {
         this.color=color;

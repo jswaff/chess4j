@@ -11,10 +11,10 @@ import java.util.*;
 
 public final class Zobrist {
 
-    private static Map<Piece,Long[]> pieceMap = new HashMap<>();
-    private static Map<Color,Long> playerMap = new HashMap<>();
-    private static Map<CastlingRights,Long> castlingMap = new HashMap<>();
-    private static Map<Square,Long> epMap = new HashMap<>();
+    private static final Map<Piece,Long[]> pieceMap = new HashMap<>();
+    private static final Map<Color,Long> playerMap = new HashMap<>();
+    private static final Map<CastlingRights,Long> castlingMap = new HashMap<>();
+    private static final Map<Square,Long> epMap = new HashMap<>();
 
     private Zobrist() {	}
 
@@ -89,7 +89,7 @@ public final class Zobrist {
 
         key = EnumSet.allOf(CastlingRights.class).stream()
                 .filter(b::hasCastlingRight)
-                .map(cr -> castlingMap.get(cr))
+                .map(castlingMap::get)
                 .reduce(key, (x,y) -> x ^ y);
 
         if (b.getEPSquare() != null) {

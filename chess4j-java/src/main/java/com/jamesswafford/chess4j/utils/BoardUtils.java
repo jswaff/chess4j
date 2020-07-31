@@ -87,17 +87,13 @@ public class BoardUtils {
         }
 
         if (mover==WHITE_KNIGHT || mover==BLACK_KNIGHT) {
-            if ((Bitboard.squares[m.to().value()] & Bitboard.knightMoves[m.from().value()]) != 0)
-                return true;
+            return (Bitboard.squares[m.to().value()] & Bitboard.knightMoves[m.from().value()]) != 0;
         } else if (mover==WHITE_BISHOP || mover==BLACK_BISHOP) {
-            if ((Bitboard.squares[m.to().value()] & Magic.getBishopMoves(board, m.from().value(), ~0L)) != 0)
-                return true;
+            return (Bitboard.squares[m.to().value()] & Magic.getBishopMoves(board, m.from().value(), ~0L)) != 0;
         } else if (mover==WHITE_ROOK || mover==BLACK_ROOK) {
-            if ((Bitboard.squares[m.to().value()] & Magic.getRookMoves(board, m.from().value(), ~0L)) != 0)
-                return true;
+            return (Bitboard.squares[m.to().value()] & Magic.getRookMoves(board, m.from().value(), ~0L)) != 0;
         } else if (mover==WHITE_QUEEN || mover==BLACK_QUEEN) {
-            if ((Bitboard.squares[m.to().value()] & Magic.getQueenMoves(board, m.from().value(), ~0L)) != 0)
-                return true;
+            return (Bitboard.squares[m.to().value()] & Magic.getQueenMoves(board, m.from().value(), ~0L)) != 0;
         } else if (mover==WHITE_KING || mover==BLACK_KING) {
             if ((Bitboard.squares[m.to().value()] & Bitboard.kingMoves[m.from().value()]) != 0)
                 return true;
@@ -109,9 +105,7 @@ public class BoardUtils {
                     return true;
                 } else if (m.to() == G8 && blackCanCastleKingSide(board)) {
                     return true;
-                } else if (m.to() == C8 && blackCanCastleQueenSide(board)) {
-                    return true;
-                }
+                } else return m.to() == C8 && blackCanCastleQueenSide(board);
             }
         }
 
@@ -220,17 +214,15 @@ public class BoardUtils {
 
             if (board.getPlayerToMove()==Color.WHITE) {
                 if (m.isEpCapture()) {
-                    if (m.to()==board.getEPSquare() && board.getPiece(m.to().south().get())==BLACK_PAWN)
-                        return true;
+                    return m.to() == board.getEPSquare() && board.getPiece(m.to().south().get()) == BLACK_PAWN;
                 } else {
-                    if (board.getPiece(m.to())==m.captured()) return true;
+                    return board.getPiece(m.to()) == m.captured();
                 }
             } else {
                 if (m.isEpCapture()) {
-                    if (m.to()==board.getEPSquare() && board.getPiece(m.to().north().get())==WHITE_PAWN)
-                        return true;
+                    return m.to() == board.getEPSquare() && board.getPiece(m.to().north().get()) == WHITE_PAWN;
                 } else {
-                    if (board.getPiece(m.to())==m.captured()) return true;
+                    return board.getPiece(m.to()) == m.captured();
                 }
             }
         }

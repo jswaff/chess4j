@@ -1,13 +1,14 @@
 package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.board.*;
+import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TranspositionTableEntryType;
 import com.jamesswafford.chess4j.init.Initializer;
-import com.jamesswafford.chess4j.io.FenBuilder;
+import com.jamesswafford.chess4j.io.DrawBoard;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import com.jamesswafford.chess4j.utils.BoardUtils;
@@ -18,7 +19,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 import static com.jamesswafford.chess4j.hash.TranspositionTableEntryType.*;
@@ -145,8 +145,9 @@ public class AlphaBetaSearch implements Search {
     private int searchWithJavaCode(Board board, List<Undo> undos, SearchParameters searchParameters,
                                    SearchOptions opts) {
         killerMovesStore.clear();
+        boolean inCheck = BoardUtils.isPlayerInCheck(board);
         int score = search(board, undos, pv, true, 0, searchParameters.getDepth(),
-                searchParameters.getAlpha(), searchParameters.getBeta(), opts);
+                searchParameters.getAlpha(), searchParameters.getBeta(), inCheck, false, opts);
         lastPv.clear();
         lastPv.addAll(pv);
         return score;
@@ -155,24 +156,16 @@ public class AlphaBetaSearch implements Search {
     private int searchWithNativeCode(Board board, List<Undo> undos, SearchParameters searchParameters,
                                      SearchOptions opts) {
 
-        String fen = FenBuilder.createFen(board, true);
-
-        List<Long> prevMoves = undos.stream()
-                .map(undo -> MoveUtils.toNativeMove(undo.getMove()))
-                .collect(Collectors.toList());
-
         List<Long> nativePV = new ArrayList<>();
         SearchStats nativeStats = new SearchStats(searchStats);
 
         try {
             assert(clearTableWrapper());
-            int nativeScore = searchNative(fen, prevMoves, nativePV, searchParameters.getDepth(),
-                    searchParameters.getAlpha(), searchParameters.getBeta(), nativeStats, opts.getStartTime(),
-                    opts.getStopTime());
+            int nativeScore = searchNative(board, nativePV, searchParameters.getDepth(), searchParameters.getAlpha(),
+                    searchParameters.getBeta(), nativeStats, opts.getStartTime(), opts.getStopTime());
 
             // if the search completed then verify equality with the Java implementation.
-            assert (stop || searchesAreEqual(board, undos, searchParameters, opts, fen, nativeScore, nativePV,
-                    nativeStats));
+            assert (stop || searchesAreEqual(board, undos, searchParameters, opts, nativeScore, nativePV, nativeStats));
 
             // set the object's stats to the native stats
             searchStats.set(nativeStats);
@@ -183,6 +176,7 @@ public class AlphaBetaSearch implements Search {
 
             return nativeScore;
         } catch (IllegalStateException e) {
+            DrawBoard.drawBoard(board);
             LOGGER.error(e);
             throw e;
         }
@@ -196,8 +190,7 @@ public class AlphaBetaSearch implements Search {
     }
 
     private boolean searchesAreEqual(Board board, List<Undo> undos, SearchParameters searchParameters,
-                                     SearchOptions opts, String fen, int nativeScore, List<Long> nativePV,
-                                     SearchStats nativeStats)
+                                     SearchOptions opts, int nativeScore, List<Long> nativePV, SearchStats nativeStats)
     {
         LOGGER.debug("# checking search equality with java depth {}", searchParameters.getDepth());
         try {
@@ -220,21 +213,21 @@ public class AlphaBetaSearch implements Search {
                         + ", java probes: " + javaProbes + ", native probes: " + nativeProbes
                         + ", java hits: " + javaHits + ", native hits: " + nativeHits
                         + ", java collisions: " + javaCollisions + ", native collisions: " + nativeCollisions
-                        + ", params: " + searchParameters + ", fen: " + fen);
+                        + ", params: " + searchParameters);
                 return false;
             }
 
             if (javaScore != nativeScore || !searchStats.equals(nativeStats)) {
                 LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
-                        + ", params: " + searchParameters + ", fen: " + fen);
+                        + ", params: " + searchParameters);
                 return false;
             }
             // compare the PVs.
             if (!pv.equals(MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove()))) {
                 LOGGER.error("pvs are not equal!"
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
-                        + ", params: " + searchParameters + ", fen: " + fen);
+                        + ", params: " + searchParameters);
                 return false;
             }
 
@@ -247,9 +240,12 @@ public class AlphaBetaSearch implements Search {
     }
 
     private int search(Board board, List<Undo> undos, List<Move> parentPV, boolean first, int ply, int depth,
-                       int alpha, int beta, SearchOptions opts) {
+                       int alpha, int beta, boolean inCheck, boolean nullMoveOk, SearchOptions opts) {
 
         parentPV.clear();
+
+        assert(alpha < beta);
+        assert(inCheck == BoardUtils.isPlayerInCheck(board));
 
         // time check
         if (!skipTimeChecks && stopSearchOnTime(opts)) {
@@ -295,6 +291,42 @@ public class AlphaBetaSearch implements Search {
                     return tte.getScore();
                 }
             }
+
+            // try a "null move".  The idea here is that if this position is so good that we can give the opponent
+            // an extra turn and it _still_ fails high, it will almost surely fail high in a normal search.  This
+            // is based on the "Null Move Observation," which says that "doing something is almost always better than
+            // doing nothing."  This isn't entirely sound, but on the whole is a huge time saver.  We avoid the null
+            // move when in check, and during zugzwang positions where making a move is actually harmful.
+            // Since we are only trying to determine if the position will fail high or not, we search with a
+            // minimal search window.
+            if (!first && !inCheck && nullMoveOk && depth >= 3 && !ZugzwangDetector.isZugzwang(board)) {
+
+                Square nullEp = board.clearEPSquare();
+                board.swapPlayer();
+
+                // set the reduced depth.  For now we are using a static R=3, except near the leaves.  It's important
+                // to ensure there is at least one ply of full width depth remaining, since we aren't doing anything
+                // with checks in the qsearch.
+                int nullDepth = depth - 4; // R = 3
+                if (nullDepth < 1) {
+                    nullDepth = 1;
+                }
+
+                int nullScore = -search(board, undos, new ArrayList<>(), false, ply+1, nullDepth, -beta,
+                        -beta+1,false, false, opts);
+
+                board.swapPlayer();
+                if (nullEp != null) {
+                    board.setEP(nullEp);
+                }
+
+                if (stop) {
+                    return 0;
+                }
+                if (nullScore >= beta) {
+                    return beta;
+                }
+            }
         }
 
         List<Move> pv = new ArrayList<>(50);
@@ -319,7 +351,12 @@ public class AlphaBetaSearch implements Search {
             }
 
             boolean pvNode = first && numMovesSearched == 0;
-            int val = -search(board, undos, pv, pvNode, ply+1, depth-1,  -beta, -alpha, opts);
+
+            // determine if the move we're about to explore gives check
+            boolean givesCheck = BoardUtils.isPlayerInCheck(board);
+
+            int val = -search(board, undos, pv, pvNode, ply+1, depth-1,  -beta, -alpha, givesCheck,
+                    true, opts);
             ++numMovesSearched;
             board.undoMove(undos.remove(undos.size()-1));
 
@@ -466,9 +503,8 @@ public class AlphaBetaSearch implements Search {
 
     private native void initializeNativeSearch();
 
-    private native int searchNative(String boardFen, List<Long> prevMoves, List<Long> parentPV, int depth,
-                                    int alpha, int beta, SearchStats searchStats, long startTime,
-                                    long stopTime);
+    private native int searchNative(Board board, List<Long> parentPV, int depth, int alpha, int beta,
+                                    SearchStats searchStats, long startTime, long stopTime);
 
     private native void stopNative(boolean stop);
 

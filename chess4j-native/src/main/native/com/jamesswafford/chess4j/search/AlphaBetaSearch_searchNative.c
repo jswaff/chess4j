@@ -4,8 +4,10 @@
 #include <prophet/util/p4time.h>
 
 #include <com_jamesswafford_chess4j_search_AlphaBetaSearch.h>
+#include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../io/PrintLine.h"
+#include "../../../../java/lang/IllegalStateException.h"
 #include "../../../../java/lang/Long.h"
 #include "../../../../java/util/ArrayList.h"
 
@@ -26,68 +28,43 @@ JNIEnv *g_env;
 jobject *g_parent_pv;
 color_t g_ptm;
 
+/* flag to stop the search, or in our case as notification the search was stopped */
 extern volatile bool stop_search;
 
 
 static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
 
+
 /*
  * Class:     com_jamesswafford_chess4j_search_AlphaBetaSearch
  * Method:    searchNative
- * Signature: (Ljava/lang/String;Ljava/util/List;Ljava/util/List;IIILcom/jamesswafford/chess4j/search/SearchStats;JJ)I
+ * Signature: (Lcom/jamesswafford/chess4j/board/Board;Ljava/util/List;IIILcom/jamesswafford/chess4j/search/SearchStats;JJ)I
  */
 JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_searchNative
-  (JNIEnv *env, jobject search_obj, jstring board_fen, jobject prev_moves,
-    jobject parent_pv, jint depth, jint alpha, jint beta, jobject search_stats, jlong start_time,
-    jlong stop_time)
+  (JNIEnv *env, jobject search_obj, jobject board_obj, jobject parent_pv, jint depth, 
+    jint alpha, jint beta, jobject search_stats, jlong start_time, jlong stop_time)
 {
     jint retval = 0;
 
     /* ensure the static library is initialized */
     if (!p4_initialized) 
     {
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            "Prophet4 not initialized!");
+        (*env)->ThrowNew(env, IllegalStateException, "Prophet4 not initialized!");
         return 0;
     }
 
+    /* set the position */
+    position_t c4j_pos;
+    if (0 != convert(env, board_obj, &c4j_pos))
+    {
+        (*env)->ThrowNew(env, IllegalStateException, "An error was encountered while converting a position.");
+        return 0;
+    }
+
+    /* remember some variables to use in the PV callback */
     g_env = env;
     g_parent_pv = &parent_pv;
-
-
-    /* set the position according to the FEN.  We use the FEN instead of the
-     * prev_moves list for test suites, which don't have a move history.
-     */
-    const char* fen = (*env)->GetStringUTFChars(env, board_fen, 0);
-    position_t pos;
-    if (!set_pos(&pos, fen))
-    {
-        char error_buffer[255];
-        sprintf(error_buffer, "Could not set position: %s\n", fen);
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            error_buffer);
-        goto cleanup;
-    }
-
-    /* replay the previous moves for draw checks */
-    position_t replay_pos;
-    reset_pos(&replay_pos);    
-    jint size = (*env)->CallIntMethod(env, prev_moves, ArrayList_size);
-    jvalue arg;
-    for (int i=0; i<size; i++)
-    {
-        arg.i = i;
-        jobject element = (*env)->CallObjectMethodA(env, prev_moves, ArrayList_get, 
-            &arg);
-        jlong prev_mv = (*env)->CallLongMethod(env, element, Long_longValue);
-
-        /* apply this move */
-        apply_move(&replay_pos, (move_t) prev_mv, undos + replay_pos.move_counter);
-
-        (*env)->DeleteLocalRef(env, element);
-    }
-    g_ptm = replay_pos.player;
-
+    g_ptm = c4j_pos.player;
 
     /* set up the search options */
     search_options_t search_opts;
@@ -107,7 +84,7 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
 
     /* perform the search */
     move_line_t pv;
-    int32_t native_score = search(&pos, &pv, depth, alpha, beta, moves, undos,
+    int32_t native_score = search(&c4j_pos, &pv, depth, alpha, beta, moves, undos,
         &native_stats, &search_opts);
     retval = (jint) native_score;
 
@@ -155,10 +132,8 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     jfieldID fid_hashExactScores = (*env)->GetFieldID(env, class_SearchStats, "hashExactScores", "J");
     (*env)->SetLongField(env, search_stats, fid_hashExactScores, native_stats.hash_exact_scores);
 
-    /* free resources */
-cleanup:
-    (*env)->ReleaseStringUTFChars(env, board_fen, fen);
 
+    /* cleanup and get out */
     g_parent_pv = 0;
     g_env = 0;
 

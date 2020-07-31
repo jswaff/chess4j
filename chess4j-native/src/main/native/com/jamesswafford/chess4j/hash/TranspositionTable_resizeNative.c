@@ -3,6 +3,8 @@
 
 #include <com_jamesswafford_chess4j_hash_TranspositionTable.h>
 #include "../init/p4_init.h"
+#include "../../../../java/lang/IllegalStateException.h"
+
 
 extern hash_table_t htbl;
 
@@ -17,8 +19,7 @@ JNIEXPORT void JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_re
     /* ensure the static library is initialized */
     if (!p4_initialized) 
     {
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            "Prophet4 not initialized!");
+        (*env)->ThrowNew(env, IllegalStateException, "Prophet4 not initialized!");
         return;
     }
     
@@ -26,7 +27,6 @@ JNIEXPORT void JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_re
     int retval = resize_hash_table(&htbl, (uint32_t) size_bytes);
     if (0 != retval)
     {
-        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/IllegalStateException"), 
-            "Failed to (re)allocate hash table");
+        (*env)->ThrowNew(env, IllegalStateException, "Failed to (re)allocate hash table");
     }
 }
