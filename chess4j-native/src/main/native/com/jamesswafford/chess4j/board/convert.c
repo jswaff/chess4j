@@ -10,6 +10,16 @@ bool verify_pos(const position_t* pos);
 uint64_t build_hash_key(const position_t* pos);
 uint64_t build_pawn_key(const position_t* pos);
 
+/**
+ * \brief - convert a chess4j (Java) position into a Prophet4 (C) data 
+ * structure.
+ *
+ * \param env           the JNI environment
+ * \param board_obj     the Java position
+ * \param pos           pointer to a P4 chess position
+ *
+ * \return - 0 on success, non-zero on failure
+ */
 int convert(JNIEnv *env, jobject board_obj, position_t* pos)
 {
     memset(pos, 0, sizeof(position_t));
