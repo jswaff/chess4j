@@ -35,6 +35,7 @@ public class SearchIteratorImpl implements SearchIterator {
     private long maxTimeMs = 0;
     private boolean post = true;
     private boolean earlyExitOk = true;
+    private boolean skipTimeChecks = false;
 
     private MoveGenerator moveGenerator;
     private Search search;
@@ -61,6 +62,7 @@ public class SearchIteratorImpl implements SearchIterator {
 
     @Override
     public void setSkipTimeChecks(boolean skipTimeChecks) {
+        this.skipTimeChecks = skipTimeChecks;
         search.setSkipTimeChecks(skipTimeChecks);
     }
 
@@ -164,8 +166,8 @@ public class SearchIteratorImpl implements SearchIterator {
                 break;
             }
 
+            long elapsed = System.currentTimeMillis() - startTime;
             if (post) {
-                long elapsed = System.currentTimeMillis() - startTime;
                 PrintLine.printLine(true, pv, depth, score, elapsed, search.getSearchStats().nodes);
             }
 
@@ -183,6 +185,12 @@ public class SearchIteratorImpl implements SearchIterator {
 
             // if we've hit the system defined max iterations, stop here
             if (maxDepth >= Constants.MAX_ITERATIONS) {
+                stopSearching = true;
+            }
+
+            // if we've used more than half our time, don't start a new iteration
+            if (earlyExitOk && !skipTimeChecks && (elapsed > maxTimeMs / 2)) {
+                LOGGER.debug(" # stopping iterative search because half time expired.");
                 stopSearching = true;
             }
 
