@@ -37,7 +37,7 @@ Clone the repository and go into the chess4j/chess4j-java directory.
 
 Once this process is complete you should see the build artifact in the target directory, e.g. chess4j-java-4.0-uber.jar.  Verify everything is working:
 
-```java -jar chess4j-java-4.0-uber.jar -suite=../src/test/resources/suites.wac2.epd```
+```java -jar chess4j-java-4.0-uber.jar -suite=../src/test/resources/suites/wac2.epd```
 
 You should see the program search for about 10 seconds and display the result.  
 
@@ -60,7 +60,7 @@ You now have the option to run with or without the native (Prophet4) code enable
 
 Verify everything is working:
 
-```java -jar chess4j-java-4.0-uber.jar -suite=../src/test/resources/suites.wac2.epd -native```
+```java -jar chess4j-java-4.0-uber.jar -suite=../src/test/resources/suites/wac2.epd -native```
 
 (Note the '-native' argument.)  
 
