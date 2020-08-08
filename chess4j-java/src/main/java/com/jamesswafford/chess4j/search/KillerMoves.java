@@ -7,8 +7,8 @@ public class KillerMoves implements KillerMovesStore {
     private static final KillerMoves INSTANCE = new KillerMoves();
 
     private final int NUM_ENTRIES = 1000;
-    private Move[] killer1;
-    private Move[] killer2;
+    private final Move[] killer1;
+    private final Move[] killer2;
 
     private KillerMoves() {
         killer1 = new Move[NUM_ENTRIES];
