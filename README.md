@@ -1,6 +1,6 @@
 # chess4j
 
-a Java based chess engine
+an XBoard compatible Java based chess engine
 
 ## Introduction 
 
@@ -97,7 +97,7 @@ Winboard / XBoard has an option to specify the maximum memory usage, and chess4j
 You can run EPD formatted test suites with chess4j using the 'suite' command line argument.  The default time per problem is 10 seconds, but that can also be changed with the 'time' argument.
 
 ```
-java -jar chess4j-4.0-uber.jar -suite=wac.epd  -time=30
+java -jar chess4j-java-4.0-uber.jar -suite=wac.epd  -time=30
 ```
 
 The command above would start chess4j to process the Win At Chess (WAC) test suite, giving it 30 seconds per problem.  (A few test suites can be found in the test/resources folder.)
