@@ -9,6 +9,8 @@ import java.util.concurrent.CompletableFuture;
 
 public interface SearchIterator {
 
+    void setEarlyExitOk(boolean earlyExitOk);
+
     void setMaxDepth(int maxDepth);
 
     void setMaxTime(long maxTimeMs);

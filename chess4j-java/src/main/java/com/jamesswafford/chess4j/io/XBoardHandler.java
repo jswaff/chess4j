@@ -164,6 +164,7 @@ public class XBoardHandler {
     private void level(String[] cmd) {
         incrementMs =  (int)(Float.parseFloat(cmd[3]) * 1000);
         fixedTimePerMove = false;
+        searchIterator.setEarlyExitOk(true);
     }
 
     /**
@@ -358,6 +359,7 @@ public class XBoardHandler {
         LOGGER.debug("# setting search time to {} seconds per move", seconds);
         fixedTimePerMove = true;
         searchIterator.setMaxTime(seconds * 1000);
+        searchIterator.setEarlyExitOk(false);
     }
 
     /**
