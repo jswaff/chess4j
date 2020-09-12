@@ -46,7 +46,7 @@ JNICALL Java_com_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
 
     /* call the search iterator */
     iterator_options_t opts;
-    opts.early_exit_ok = true;
+    opts.early_exit_ok = false;
     opts.max_depth = max_depth;
     opts.max_time_ms = 0; /* we only call the iterator for fixed depth testing */
     opts.post_mode = false;

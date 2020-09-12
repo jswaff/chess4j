@@ -56,7 +56,7 @@ public class SearchIteratorImplTest {
         // given an iterator and a board to search
         Search search = mock(Search.class);
         searchIterator.setSearch(search);
-        searchIterator.setEarlyExitOk(true);
+        searchIterator.setEarlyExitOk(false);
         searchIterator.setMaxDepth(3);
         searchIterator.setPost(false);
         
@@ -101,7 +101,7 @@ public class SearchIteratorImplTest {
         // given an iterator and a board to search
         Search search = mock(Search.class);
         searchIterator.setSearch(search);
-        searchIterator.setEarlyExitOk(true);
+        searchIterator.setEarlyExitOk(false);
         searchIterator.setMaxDepth(3);
         searchIterator.setPost(false);
 
