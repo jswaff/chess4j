@@ -4,6 +4,7 @@ import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
+import com.jamesswafford.chess4j.eval.EvalMaterial;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTable;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.hash.TranspositionTable;
@@ -131,7 +132,7 @@ public class SearchIteratorImpl implements SearchIterator {
         if (post) {
             opts.setPvCallback(rootPvCallback);
         }
-        int depth = 0, score;
+        int depth = 0, score = 0;
         search.initialize();
 
         if (maxTimeMs > 0) {
@@ -152,9 +153,18 @@ public class SearchIteratorImpl implements SearchIterator {
 
             int alphaBound = -INFINITY;
             int betaBound = INFINITY;
+            if (depth > 2) {
+                alphaBound = score - EvalMaterial.PAWN_VAL / 3;
+                betaBound = score + EvalMaterial.PAWN_VAL / 3;
+            }
 
             SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
             score = search.search(board, undos, parameters, opts);
+
+            if ((score <= alphaBound || score >= betaBound) && !search.isStopped()) {
+                parameters = new SearchParameters(depth, -INFINITY, INFINITY);
+                score = search.search(board, undos, parameters, opts);
+            }
 
             // the search may or may not have a PV.  If it does, we can use it since the
             // last iteration's PV was tried first

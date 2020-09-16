@@ -6,6 +6,7 @@ import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import org.awaitility.Awaitility;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ public class SearchIteratorImplTest {
         assertEquals(pv, Collections.singletonList(e2e4));
     }
 
+    @Ignore
     @Test
     public void iterateUntilMaxDepth() throws Exception {
 
