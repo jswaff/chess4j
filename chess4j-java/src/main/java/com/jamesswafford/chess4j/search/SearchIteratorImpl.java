@@ -153,18 +153,21 @@ public class SearchIteratorImpl implements SearchIterator {
 
             int alphaBound = -INFINITY;
             int betaBound = INFINITY;
-            if (depth > 2) {
+            /*if (depth > 2) {
                 alphaBound = score - EvalMaterial.PAWN_VAL / 3;
                 betaBound = score + EvalMaterial.PAWN_VAL / 3;
-            }
+            }*/
 
             SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
             score = search.search(board, undos, parameters, opts);
 
-            if ((score <= alphaBound || score >= betaBound) && !search.isStopped()) {
+            // TODO: this is a failed first attempt at aspiration windows, but I intend to revisit it after
+            // the search matures a little more.
+            /*if ((score <= alphaBound || score >= betaBound) && !search.isStopped()) {
+                LOGGER.debug("# researching; score: " + score + ", a: " + alphaBound + ", b: " + betaBound);
                 parameters = new SearchParameters(depth, -INFINITY, INFINITY);
                 score = search.search(board, undos, parameters, opts);
-            }
+            }*/
 
             // the search may or may not have a PV.  If it does, we can use it since the
             // last iteration's PV was tried first
