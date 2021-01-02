@@ -86,7 +86,7 @@ public class SEETest {
     }
 
     @Test
-    public void testKnightTakesDefendedPawnAsWhite() throws Exception {
+    public void testKnightTakesDefendedPawnAsWhite() {
         Board board = new Board("k7/8/5n2/3p4/8/2N2B2/8/K7 w - -");
 
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
@@ -100,7 +100,7 @@ public class SEETest {
     }
 
     @Test
-    public void testKnightTakesDefendedPawnAsBlack() throws Exception {
+    public void testKnightTakesDefendedPawnAsBlack() {
         Board board = new Board("K7/8/5N2/3P4/8/2n2b2/8/k7 b - -");
 
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
@@ -114,7 +114,7 @@ public class SEETest {
     }
 
     @Test
-    public void testCrazyRooks() throws Exception {
+    public void testCrazyRooks() {
         Board board = new Board("2K5/8/8/3pRrRr/8/8/8/2k5 w - -");
 
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
@@ -128,7 +128,7 @@ public class SEETest {
     }
 
     @Test
-    public void testCrazyRooks2() throws Exception {
+    public void testCrazyRooks2() {
         Board board = new Board("2K5/8/8/3pRrR1/8/8/8/2k5 w - -");
 
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
@@ -142,7 +142,7 @@ public class SEETest {
     }
 
     @Test
-    public void testKnightTakesDefendedPawn() throws Exception {
+    public void testKnightTakesDefendedPawn() {
         Board board = new Board("1K1k4/8/5n2/3p4/8/1BN5/8/8 w - -");
 
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
@@ -156,7 +156,7 @@ public class SEETest {
     }
 
     @Test
-    public void testBishopTakesDefendedPawn() throws Exception {
+    public void testBishopTakesDefendedPawn() {
         Board board = new Board("1K1k4/8/5n2/3p4/8/1BN5/8/8 w - -");
 
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
@@ -170,7 +170,7 @@ public class SEETest {
     }
 
     @Test
-    public void testKnightTakesDefendedPawnWithCrazyBishops() throws Exception {
+    public void testKnightTakesDefendedPawnWithCrazyBishops() {
         Board board = new Board("1K1k4/8/5n2/3p4/8/2N2B2/6b1/7b w - -");
 
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);

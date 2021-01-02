@@ -17,7 +17,7 @@ import java.util.Optional;
 
 public class SEE {
 
-    private static Map<Class<?>,Integer> pieceMap;
+    private static final Map<Class<?>,Integer> pieceMap;
 
     static {
         pieceMap = new HashMap<>();
@@ -50,17 +50,17 @@ public class SEE {
         return 10000 + promoVal;
     }
 
-    private static int scoreCapture(Board b,Move m) {
+    private static int scoreCapture(Board b, Move m) {
         assert(m.captured() != null);
         assert(b.getPiece(m.from())==null);
 
-        int scores[] = new int[32];
+        int[] scores = new int[32];
         scores[0] = EvalMaterial.evalPiece(m.captured());
         int scoresInd = 1;
 
         // play out the sequence
-        long whiteAttackersMap = AttackDetector.getAttackers(b,m.to(),Color.WHITE);
-        long blackAttackersMap = AttackDetector.getAttackers(b,m.to(),Color.BLACK);
+        long whiteAttackersMap = AttackDetector.getAttackers(b, m.to(), Color.WHITE);
+        long blackAttackersMap = AttackDetector.getAttackers(b, m.to(), Color.BLACK);
 
         Color sideToMove = b.getPlayerToMove();
         Square currentSq = m.from();
@@ -71,7 +71,7 @@ public class SEE {
             // add any x-ray attackers back in, behind currentPiece in
             // the direction of m.to -> currentSq
             if (!(currentPiece instanceof Knight) && !(currentPiece instanceof King)) {
-                Optional<Direction> dir = Direction.getDirectionTo(m.to(),currentSq);
+                Optional<Direction> dir = Direction.getDirectionTo(m.to(), currentSq);
 
                 assert(dir.isPresent());
                 long targetSquares = Bitboard.rays[currentSq.value()][dir.get().value()];
