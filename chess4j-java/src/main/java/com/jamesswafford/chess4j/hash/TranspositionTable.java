@@ -111,12 +111,13 @@ public class TranspositionTable extends AbstractTranspositionTable {
         // mate scores are stored relative to the position they occurred.  translate that into a score that is
         // relative to the root by inserting the distance from the root to the current position.
         if (te != null && ply > 0) {
-            if (isMateScore(te.getScore())) {
+            int score = te.getScore();
+            if (isMateScore(score)) {
                 return new TranspositionTableEntry(
-                        te.getZobristKey(), te.getType(), te.getScore()-ply, te.getDepth(), te.getMove());
-            } else if (isMatedScore(te.getScore())) {
+                        te.getZobristKey(), te.getType(), score-ply, te.getDepth(), te.getMove());
+            } else if (isMatedScore(score)) {
                 return new TranspositionTableEntry(
-                        te.getZobristKey(), te.getType(), te.getScore()+ply, te.getDepth(), te.getMove());
+                        te.getZobristKey(), te.getType(), score+ply, te.getDepth(), te.getMove());
             }
         }
 
@@ -151,10 +152,6 @@ public class TranspositionTable extends AbstractTranspositionTable {
      * code.  The only time this method would be used when native code is enabled is when assertions are on,
      * to verify search equality.
      */
-    public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move) {
-        store(board, entryType, score, depth, move, 0);
-    }
-
     public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move, int ply) {
         if (Initializer.nativeCodeInitialized()) {
             TranspositionTableEntry entry = buildHashTableEntry(board.getZobristKey(), entryType, score, depth, move, ply);

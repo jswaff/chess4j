@@ -3,7 +3,6 @@ package com.jamesswafford.chess4j.hash;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
@@ -138,95 +137,41 @@ public class TranspositionTableTest {
         assertEquals(epCapture, ttable.probe(key).getMove());
     }
 
-    @Ignore
     @Test
     public void storeMateScore() {
         ttable.clear();
         board.setPos("5k2/6pp/p1qN4/1p1p4/3P4/2PKP2Q/PP3r2/3R4 b - -");
         long key = Zobrist.calculateBoardKey(board);
         Move m = new Move(BLACK_PAWN, C6, C4);
-        ttable.store(key, LOWER_BOUND,CHECKMATE-3, 5, m);
+        // store a mate in 10 (half) moves 7 ply from the root
+        // it should be stored as mate in 3 from the current position
+        ttable.store(key, LOWER_BOUND,CHECKMATE-10, 5, m, 7);
 
-        TranspositionTableEntry tte = ttable.probe(key);
-        assertEquals(tte.getMove(), m);
-
-        // the idea here is to not deal with mate score adjustments!  Just say "it's at least a mate"
-        assertEquals(tte.getScore(),CHECKMATE-500);
-    }
-
-    @Ignore
-    @Test
-    public void transformUpperBoundMate() {
-        ttable.clear();
-        board.setPos("r4rk1/ppp2ppp/2n5/2bqp3/8/P2PB3/1PP1NPPP/R2Q1RK1 w - -");
-        long key = Zobrist.calculateBoardKey(board);
-        Move m = new Move(WHITE_ROOK, F1, E1);
-        ttable.store(key, UPPER_BOUND, CHECKMATE-3, 5, m);
-        TranspositionTableEntry tte = ttable.probe(key);
-        assertEquals(MOVE_ONLY, tte.getType());
+        TranspositionTableEntry tte = ttable.probe(key, 0);
         assertEquals(m, tte.getMove());
-        assertEquals(5, tte.getDepth());
+        assertEquals(CHECKMATE-3, tte.getScore());
+
+        // when probed from 3 moves down, the returned score should reflect being 6 moves from the root
+        assertEquals(CHECKMATE-6, ttable.probe(key, 3).getScore());
     }
 
-    @Ignore
     @Test
-    public void transformExactScoreMate() {
-        ttable.clear();
-        board.setPos("3r2k1/p6p/2Q3p1/4q3/2P1p3/P3Pb2/1P3P1P/2K2BR1 b - -");
-        long key = Zobrist.calculateBoardKey(board);
-        Move m = new Move(BLACK_KING, G8, F8);
-        ttable.store(key, EXACT_SCORE,CHECKMATE-7, 5, m);
-        TranspositionTableEntry tte = ttable.probe(key);
-        assertEquals(LOWER_BOUND, tte.getType());
-        assertEquals(m, tte.getMove());
-        assertEquals(CHECKMATE-500, tte.getScore());
-        assertEquals(5, tte.getDepth());
-    }
-
-    @Ignore
-    @Test
-    public void transformLowerBoundMated() {
-        ttable.clear();
-        board.setPos("2rq1bk1/p4p1p/1p4p1/3b4/3B1Q2/8/P4PpP/3RR1K1 w - -");
-
-        long key = Zobrist.calculateBoardKey(board);
-        Move m = new Move(WHITE_ROOK, D1, A1);
-        ttable.store(key,LOWER_BOUND,-CHECKMATE+10, 8, m);
-        TranspositionTableEntry tte = ttable.probe(key);
-        assertEquals(MOVE_ONLY, tte.getType());
-        assertEquals(8, tte.getDepth());
-        assertEquals(-CHECKMATE+10, tte.getScore()); // note the negative score
-    }
-
-    @Ignore
-    @Test
-    public void transformExactScoreMated() {
-        ttable.clear();
-        board.setPos("4r1k1/5bpp/2p5/3pr3/8/1B3pPq/PPR2P2/2R2QK1 b - -");
-
-        long key = Zobrist.calculateBoardKey(board);
-        Move m = new Move(BLACK_KING, G7, G6);
-        ttable.store(key, EXACT_SCORE,-CHECKMATE+12, 10, m);
-        TranspositionTableEntry tte = ttable.probe(key);
-        assertEquals(UPPER_BOUND, tte.getType());
-        assertEquals(m, tte.getMove());
-        assertEquals(10, tte.getDepth());
-        assertEquals(-(CHECKMATE-500), tte.getScore());
-    }
-
-    @Ignore
-    @Test
-    public void transformUpperBoundMated() {
+    public void storeMatedScore() {
         ttable.clear();
         board.setPos("r1b1k2r/1pp1q2p/p1n3p1/3QPp2/8/1BP3B1/P5PP/3R1RK1 w kq -");
         long key = Zobrist.calculateBoardKey(board);
         Move m = new Move(WHITE_KING, G1, H1);
-        ttable.store(key,UPPER_BOUND,-CHECKMATE+8, 7, m);
-        TranspositionTableEntry tte = ttable.probe(key);
+        // store as mated-in-12 from ply 4, which should get translated into mated-in-8
+        ttable.store(key,UPPER_BOUND,-CHECKMATE+12, 7, m, 4);
+
+        TranspositionTableEntry tte = ttable.probe(key, 0);
         assertEquals(UPPER_BOUND, tte.getType());
         assertEquals(m, tte.getMove());
         assertEquals(7, tte.getDepth());
-        assertEquals(-(CHECKMATE-500), tte.getScore());
+        assertEquals(-(CHECKMATE-8), tte.getScore());
+
+        // from ply 2, the mated score should be mated-in-10 from root
+        assertEquals(-(CHECKMATE-10), ttable.probe(key, 2).getScore());
     }
 
     @Test
