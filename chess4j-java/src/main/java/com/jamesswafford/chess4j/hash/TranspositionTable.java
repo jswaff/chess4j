@@ -104,24 +104,46 @@ public class TranspositionTable extends AbstractTranspositionTable {
         return te;
     }
 
-    public TranspositionTableEntry probe(Board board) {
+    public TranspositionTableEntry probe(long zobristKey, int ply) {
+
+        TranspositionTableEntry te = probe(zobristKey);
+
+        // mate scores are stored relative to the position they occurred.  translate that into a score that is
+        // relative to the root by inserting the distance from the root to the current position.
+        if (te != null && ply > 0) {
+            if (isMateScore(te.getScore())) {
+                return new TranspositionTableEntry(
+                        te.getZobristKey(), te.getType(), te.getScore()-ply, te.getDepth(), te.getMove());
+            } else if (isMatedScore(te.getScore())) {
+                return new TranspositionTableEntry(
+                        te.getZobristKey(), te.getType(), te.getScore()+ply, te.getDepth(), te.getMove());
+            }
+        }
+
+        return te;
+    }
+
+    public TranspositionTableEntry probe(Board board, int ply) {
 
         if (Initializer.nativeCodeInitialized()) {
-            long nativeVal = probeNative(board);
+            long nativeVal = probeNative(board); // TODO
             return new TranspositionTableEntry(board.getZobristKey(), nativeVal);
         } else {
-            return probe(board.getZobristKey());
+            return probe(board.getZobristKey(), ply);
         }
     }
 
     private native long probeNative(Board board);
 
     /**
-     * Store an entry in the transposition table, Gerbil style.  Meaning, for now I'm skirting around
-     * dealing with the headache that is storing mate scores by storing them as bounds only.
+     * Store an entry in the transposition table
      */
     public void store(long zobristKey, TranspositionTableEntryType entryType, int score, int depth, Move move) {
-        table[getTableIndex(zobristKey)] = buildHashTableEntry(zobristKey, entryType, score, depth, move);
+        store(zobristKey, entryType, score, depth, move, 0);
+    }
+
+    public void store(long zobristKey, TranspositionTableEntryType entryType, int score, int depth, Move move, int ply) {
+        table[getTableIndex(zobristKey)] = buildHashTableEntry(zobristKey, entryType, score, depth, move, ply);
     }
 
     /*
@@ -130,35 +152,30 @@ public class TranspositionTable extends AbstractTranspositionTable {
      * to verify search equality.
      */
     public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move) {
+        store(board, entryType, score, depth, move, 0);
+    }
+
+    public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move, int ply) {
         if (Initializer.nativeCodeInitialized()) {
-            TranspositionTableEntry entry = buildHashTableEntry(board.getZobristKey(), entryType, score, depth, move);
-            storeNative(board, entry.getVal());
+            TranspositionTableEntry entry = buildHashTableEntry(board.getZobristKey(), entryType, score, depth, move, ply);
+            storeNative(board, entry.getVal()); // TODO
         } else {
-            store(board.getZobristKey(), entryType, score, depth, move);
+            store(board.getZobristKey(), entryType, score, depth, move, ply);
         }
     }
 
     private TranspositionTableEntry buildHashTableEntry(long zobristKey, TranspositionTableEntryType entryType,
-                                                        int score, int depth, Move move)
+                                                        int score, int depth, Move move, int ply)
     {
         if (isMateScore(score)) {
-            if (entryType==TranspositionTableEntryType.UPPER_BOUND) {
-                // failing low on mate.  don't allow a cutoff, just store any associated move
-                entryType = TranspositionTableEntryType.MOVE_ONLY;
-            } else {
-                // convert to fail high
-                entryType = TranspositionTableEntryType.LOWER_BOUND;
-                score = getCheckMateBound();
-            }
+            // this score is Mate in N from the root.  We want Mate in M from the current position.
+            // e.g. Mate in 5 (from root) ==> Mate in 3 (from current position)
+            // therefore, we remove the distance between the root and the current node
+            score += ply;
         } else if (isMatedScore(score)) {
-            if (entryType==TranspositionTableEntryType.LOWER_BOUND) {
-                // failing high on -mate.
-                entryType = TranspositionTableEntryType.MOVE_ONLY;
-            } else {
-                // convert to fail low
-                entryType = TranspositionTableEntryType.UPPER_BOUND;
-                score = getCheckMatedBound();
-            }
+            // this score is Mated in N from the root, and we want Mated in M from the current position.
+            // e.g. Mated in 6 (from root) ==> Mated in 4 (from current position)
+            score -= ply;
         }
 
         return new TranspositionTableEntry(zobristKey, entryType, score, depth, move);

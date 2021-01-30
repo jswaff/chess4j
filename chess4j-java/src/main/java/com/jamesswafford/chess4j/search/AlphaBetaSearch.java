@@ -262,7 +262,7 @@ public class AlphaBetaSearch implements Search {
         searchStats.nodes++;
 
         // probe the hash table
-        TranspositionTableEntry tte = TTHolder.getInstance().getHashTable().probe(board);
+        TranspositionTableEntry tte = TTHolder.getInstance().getHashTable().probe(board, ply);
 
         // try for early exit
         if (ply > 0) {
@@ -274,19 +274,19 @@ public class AlphaBetaSearch implements Search {
 
             // is the hash entry useful?
             if (tte != null && tte.getDepth() >= depth) {
-                if (tte.getType() == LOWER_BOUND) {
+                if (LOWER_BOUND.equals(tte.getType())) {
                     if (tte.getScore() >= beta) {
                         searchStats.failHighs++;
                         searchStats.hashFailHighs++;
                         return beta;
                     }
-                } else if (tte.getType() == UPPER_BOUND) {
+                } else if (UPPER_BOUND.equals(tte.getType())) {
                     if (tte.getScore() <= alpha) {
                         searchStats.failLows++;
                         searchStats.hashFailLows++;
                         return alpha;
                     }
-                } else if (tte.getType() == EXACT_SCORE) {
+                } else if (EXACT_SCORE.equals(tte.getType())) {
                     searchStats.hashExactScores++;
                     return tte.getScore();
                 }
@@ -367,7 +367,7 @@ public class AlphaBetaSearch implements Search {
 
             if (val >= beta) {
                 searchStats.failHighs++;
-                TTHolder.getInstance().getHashTable().store(board, LOWER_BOUND, beta, depth, move);
+                TTHolder.getInstance().getHashTable().store(board, LOWER_BOUND, beta, depth, move, ply);
                 if (move.captured()==null && move.promotion()==null) {
                     killerMovesStore.addKiller(ply, move);
                 }
@@ -398,7 +398,7 @@ public class AlphaBetaSearch implements Search {
             tableEntryType = EXACT_SCORE;
         }
 
-        TTHolder.getInstance().getHashTable().store(board, tableEntryType, alpha, depth, bestMove);
+        TTHolder.getInstance().getHashTable().store(board, tableEntryType, alpha, depth, bestMove, ply);
 
         return alpha;
     }
