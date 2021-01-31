@@ -105,9 +105,10 @@ public class TranspositionTable extends AbstractTranspositionTable {
     }
 
     public TranspositionTableEntry probe(long zobristKey, int ply) {
+        return adjustForMate(probe(zobristKey), ply);
+    }
 
-        TranspositionTableEntry te = probe(zobristKey);
-
+    private TranspositionTableEntry adjustForMate(TranspositionTableEntry te, int ply) {
         // mate scores are stored relative to the position they occurred.  translate that into a score that is
         // relative to the root by inserting the distance from the root to the current position.
         if (te != null && ply > 0) {
@@ -120,15 +121,14 @@ public class TranspositionTable extends AbstractTranspositionTable {
                         te.getZobristKey(), te.getType(), score+ply, te.getDepth(), te.getMove());
             }
         }
-
         return te;
     }
 
     public TranspositionTableEntry probe(Board board, int ply) {
 
         if (Initializer.nativeCodeInitialized()) {
-            long nativeVal = probeNative(board); // TODO
-            return new TranspositionTableEntry(board.getZobristKey(), nativeVal);
+            long nativeVal = probeNative(board);
+            return adjustForMate(new TranspositionTableEntry(board.getZobristKey(), nativeVal), ply);
         } else {
             return probe(board.getZobristKey(), ply);
         }
@@ -155,7 +155,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
     public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move, int ply) {
         if (Initializer.nativeCodeInitialized()) {
             TranspositionTableEntry entry = buildHashTableEntry(board.getZobristKey(), entryType, score, depth, move, ply);
-            storeNative(board, entry.getVal()); // TODO
+            storeNative(board, entry.getVal());
         } else {
             store(board.getZobristKey(), entryType, score, depth, move, ply);
         }
@@ -165,14 +165,27 @@ public class TranspositionTable extends AbstractTranspositionTable {
                                                         int score, int depth, Move move, int ply)
     {
         if (isMateScore(score)) {
-            // this score is Mate in N from the root.  We want Mate in M from the current position.
-            // e.g. Mate in 5 (from root) ==> Mate in 3 (from current position)
-            // therefore, we remove the distance between the root and the current node
-            score += ply;
+            if (TranspositionTableEntryType.UPPER_BOUND.equals(entryType)) {
+                // failing low on mate?
+                entryType = TranspositionTableEntryType.MOVE_ONLY;
+            } else {
+                // convert to fail high
+                entryType = TranspositionTableEntryType.LOWER_BOUND;
+                score += ply; // make relative to current position
+                assert (score <= Constants.CHECKMATE);
+            }
         } else if (isMatedScore(score)) {
             // this score is Mated in N from the root, and we want Mated in M from the current position.
             // e.g. Mated in 6 (from root) ==> Mated in 4 (from current position)
-            score -= ply;
+            if (TranspositionTableEntryType.LOWER_BOUND.equals(entryType)) {
+                // failing high on -mate.
+                entryType = TranspositionTableEntryType.MOVE_ONLY;
+            } else {
+                // convert to fail low
+                entryType = TranspositionTableEntryType.UPPER_BOUND;
+                score -= ply;
+                assert (score >= -Constants.CHECKMATE);
+            }
         }
 
         return new TranspositionTableEntry(zobristKey, entryType, score, depth, move);

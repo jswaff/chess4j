@@ -10,11 +10,6 @@
 
 extern hash_table_t htbl;
 
-/*
- * Class:     com_jamesswafford_chess4j_hash_TranspositionTable
- * Method:    probeNative
- * Signature: (Lcom/jamesswafford/chess4j/board/Board;)J
- */
 JNIEXPORT jlong JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_probeNative
   (JNIEnv *env, jobject UNUSED(htable), jobject board_obj)
 {

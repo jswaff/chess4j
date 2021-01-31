@@ -35,5 +35,4 @@ JNIEXPORT void JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_st
 
     /* store the value in the hash table */
     store_hash_entry(&htbl, c4j_pos.hash_key, (uint64_t)val);
-
 }
