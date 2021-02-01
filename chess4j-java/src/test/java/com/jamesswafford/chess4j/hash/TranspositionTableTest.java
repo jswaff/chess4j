@@ -3,7 +3,6 @@ package com.jamesswafford.chess4j.hash;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
@@ -13,7 +12,6 @@ import static org.junit.Assert.*;
 
 import static com.jamesswafford.chess4j.pieces.Pawn.*;
 import static com.jamesswafford.chess4j.pieces.Knight.*;
-import static com.jamesswafford.chess4j.pieces.Rook.*;
 import static com.jamesswafford.chess4j.pieces.King.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 
@@ -138,7 +136,6 @@ public class TranspositionTableTest {
         assertEquals(epCapture, ttable.probe(key).getMove());
     }
 
-    @Ignore
     @Test
     public void storeMateScore() {
         ttable.clear();
@@ -157,7 +154,6 @@ public class TranspositionTableTest {
         assertEquals(CHECKMATE-6, ttable.probe(key, 3).getScore());
     }
 
-    @Ignore
     @Test
     public void storeMatedScore() {
         ttable.clear();
