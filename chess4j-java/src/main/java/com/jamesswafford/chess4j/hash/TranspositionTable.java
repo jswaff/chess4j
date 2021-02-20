@@ -165,26 +165,18 @@ public class TranspositionTable extends AbstractTranspositionTable {
                                                         int score, int depth, Move move, int ply)
     {
         if (isMateScore(score)) {
-            if (TranspositionTableEntryType.UPPER_BOUND.equals(entryType)) {
-                // failing low on mate?
+            score += ply; // make relative to current position
+            if (score > Constants.CHECKMATE) {
                 entryType = TranspositionTableEntryType.MOVE_ONLY;
-            } else {
-                // convert to fail high
-                entryType = TranspositionTableEntryType.LOWER_BOUND;
-                score += ply; // make relative to current position
-                assert (score <= Constants.CHECKMATE);
+                score = 0;
             }
         } else if (isMatedScore(score)) {
             // this score is Mated in N from the root, and we want Mated in M from the current position.
             // e.g. Mated in 6 (from root) ==> Mated in 4 (from current position)
-            if (TranspositionTableEntryType.LOWER_BOUND.equals(entryType)) {
-                // failing high on -mate.
+            score -= ply;
+            if (score < -Constants.CHECKMATE) {
                 entryType = TranspositionTableEntryType.MOVE_ONLY;
-            } else {
-                // convert to fail low
-                entryType = TranspositionTableEntryType.UPPER_BOUND;
-                score -= ply;
-                assert (score >= -Constants.CHECKMATE);
+                score = 0;
             }
         }
 

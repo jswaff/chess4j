@@ -300,7 +300,7 @@ public class AlphaBetaSearch implements Search {
             // Since we are only trying to determine if the position will fail high or not, we search with a
             // minimal search window.
             if (!first && !inCheck && nullMoveOk && depth >= 3 && alpha > -(CHECKMATE-500) &&
-                    beta < (CHECKMATE-500) && !ZugzwangDetector.isZugzwang(board)) {
+                    !ZugzwangDetector.isZugzwang(board)) {
 
                 Square nullEp = board.clearEPSquare();
                 board.swapPlayer();
