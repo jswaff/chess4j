@@ -27,7 +27,7 @@ public class EvalMaterial {
     public static final int BISHOP_VAL = 320;
     public static final int PAWN_VAL   = 100;
 
-    private static Map<Piece, Integer> pieceValMap;
+    private static final Map<Piece, Integer> pieceValMap;
 
     static {
         pieceValMap = new HashMap<>();
