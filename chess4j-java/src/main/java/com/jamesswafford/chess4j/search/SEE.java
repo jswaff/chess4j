@@ -6,9 +6,14 @@ import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.squares.Direction;
 import com.jamesswafford.chess4j.board.squares.Square;
+import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.io.DrawBoard;
 import com.jamesswafford.chess4j.movegen.AttackDetector;
 import com.jamesswafford.chess4j.movegen.Magic;
 import com.jamesswafford.chess4j.pieces.*;
+import com.jamesswafford.chess4j.utils.MoveUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Optional;
 
@@ -16,19 +21,32 @@ import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
 
 public class SEE {
 
+    private static final Logger LOGGER = LogManager.getLogger(SEE.class);
+
+    static {
+        Initializer.init();
+    }
+
     // note m should already be applied
-    public static int see(Board b,Move m) {
+    public static int see(Board b, Move m) {
+        assert(m.captured() != null || m.promotion() != null);
+
         int score = 0;
 
         if (m.promotion() != null) {
             score = scorePromotion(m);
         }
         else if (m.captured() != null) {
-            score += scoreCapture(b,m);
+            score = scoreCapture(b,m);
         }
+
+        // if we are running with assertions enabled and the native library is loaded, verify equality
+        assert(seesAreEqual(score, b, m));
 
         return score;
     }
+
+    public static native int seeNative(Board b, long nativeMv);
 
     private static int scorePromotion(Move m) {
         return evalPiece(m.promotion()) - PAWN_VAL;
@@ -118,6 +136,26 @@ public class SEE {
         }
 
         return lvSq;
+    }
+
+    private static boolean seesAreEqual(int javaScore, Board board, Move mv) {
+        if (Initializer.nativeCodeInitialized()) {
+            try {
+                int nativeSccore = seeNative(board, MoveUtils.toNativeMove(mv));
+                if (javaScore != nativeSccore) {
+                    LOGGER.error("sees not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeSccore
+                            + ", mv: " + mv);
+                    DrawBoard.drawBoard(board);
+                    return false;
+                }
+                return true;
+            } catch (IllegalStateException e) {
+                LOGGER.error(e);
+                throw e;
+            }
+        } else {
+            return true;
+        }
     }
 
 }
