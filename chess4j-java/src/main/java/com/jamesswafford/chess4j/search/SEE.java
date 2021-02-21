@@ -145,6 +145,8 @@ public class SEE {
                 if (javaScore != nativeSccore) {
                     LOGGER.error("sees not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeSccore
                             + ", mv: " + mv);
+                    LOGGER.error("moving piece: " + mv.piece() + "; captured: " + mv.captured()
+                            + "; ep?: " + mv.isEpCapture());
                     DrawBoard.drawBoard(board);
                     return false;
                 }

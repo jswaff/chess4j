@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.eval;
 
+import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.pieces.Piece;
 
@@ -31,14 +32,14 @@ public class EvalMaterial {
 
     static {
         pieceValMap = new HashMap<>();
-        pieceValMap.put(WHITE_KING, Integer.MAX_VALUE);
+        pieceValMap.put(WHITE_KING, Constants.INFINITY);
         pieceValMap.put(WHITE_QUEEN, QUEEN_VAL);
         pieceValMap.put(WHITE_ROOK, ROOK_VAL);
         pieceValMap.put(WHITE_BISHOP, BISHOP_VAL);
         pieceValMap.put(WHITE_KNIGHT, KNIGHT_VAL);
         pieceValMap.put(WHITE_PAWN, PAWN_VAL);
 
-        pieceValMap.put(BLACK_KING, Integer.MAX_VALUE);
+        pieceValMap.put(BLACK_KING, Constants.INFINITY);
         pieceValMap.put(BLACK_QUEEN, QUEEN_VAL);
         pieceValMap.put(BLACK_ROOK, ROOK_VAL);
         pieceValMap.put(BLACK_BISHOP, BISHOP_VAL);

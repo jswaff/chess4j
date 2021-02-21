@@ -199,6 +199,36 @@ public class SEETest {
         assertEquals(QUEEN_VAL - PAWN_VAL, score);
     }
 
+    @Test
+    public void integration1() {
+        Board board = new Board("8/8/8/3k1p1p/p1p1PP1P/Pr1p1K2/1P4R1/8 b - -");
+        DrawBoard.drawBoard(board);
+
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
+        MoveParser mp = new MoveParser();
+        Move move = mp.parseMove("f5e4", board);
+        assertTrue(moves.contains(move));
+        board.applyMove(move);
+
+        int score = SEE.see(board, move);
+        assertEquals(PAWN_VAL, score);
+    }
+
+    @Test
+    public void integration2() {
+        Board board = new Board("8/8/5k2/7p/p1p1KP2/r2p4/1p1R3P/8 w - -");
+        DrawBoard.drawBoard(board);
+
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
+        MoveParser mp = new MoveParser();
+        Move move = mp.parseMove("d2d3", board);
+        assertTrue(moves.contains(move));
+        board.applyMove(move);
+
+        int score = SEE.see(board, move);
+        assertEquals(PAWN_VAL-ROOK_VAL, score);
+    }
+
     // these tests from Arasan... though some expected scores are different
     @Test
     public void testSEE(){
