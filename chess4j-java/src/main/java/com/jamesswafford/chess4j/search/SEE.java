@@ -6,48 +6,50 @@ import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.squares.Direction;
 import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.eval.EvalMaterial;
+import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.io.DrawBoard;
 import com.jamesswafford.chess4j.movegen.AttackDetector;
 import com.jamesswafford.chess4j.movegen.Magic;
 import com.jamesswafford.chess4j.pieces.*;
+import com.jamesswafford.chess4j.utils.MoveUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
+
+import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
 
 public class SEE {
 
-    private static final Map<Class<?>,Integer> pieceMap;
+    private static final Logger LOGGER = LogManager.getLogger(SEE.class);
 
     static {
-        pieceMap = new HashMap<>();
-        pieceMap.put(King.class, 6);
-        pieceMap.put(Queen.class, 5);
-        pieceMap.put(Rook.class, 4);
-        pieceMap.put(Bishop.class, 3);
-        pieceMap.put(Knight.class, 2);
-        pieceMap.put(Pawn.class, 1);
+        Initializer.init();
     }
 
     // note m should already be applied
-    public static int see(Board b,Move m) {
+    public static int see(Board b, Move m) {
+        assert(m.captured() != null || m.promotion() != null);
+
         int score = 0;
 
         if (m.promotion() != null) {
             score = scorePromotion(m);
         }
-
-        if (m.captured() != null) {
-            score += scoreCapture(b,m);
+        else if (m.captured() != null) {
+            score = scoreCapture(b,m);
         }
+
+        // if we are running with assertions enabled and the native library is loaded, verify equality
+        assert(seesAreEqual(score, b, m));
 
         return score;
     }
 
-    private static int scorePromotion(Move m) {
-        int promoVal = pieceMap.get(m.promotion().getClass());
+    public static native int seeNative(Board b, long nativeMv);
 
-        return 10000 + promoVal;
+    private static int scorePromotion(Move m) {
+        return evalPiece(m.promotion()) - PAWN_VAL;
     }
 
     private static int scoreCapture(Board b, Move m) {
@@ -55,7 +57,7 @@ public class SEE {
         assert(b.getPiece(m.from())==null);
 
         int[] scores = new int[32];
-        scores[0] = EvalMaterial.evalPiece(m.captured());
+        scores[0] = evalPiece(m.captured());
         int scoresInd = 1;
 
         // play out the sequence
@@ -65,7 +67,7 @@ public class SEE {
         Color sideToMove = b.getPlayerToMove();
         Square currentSq = m.from();
         Piece currentPiece = b.getPiece(m.to());
-        int attackedPieceVal = EvalMaterial.evalPiece(currentPiece);
+        int attackedPieceVal = evalPiece(currentPiece);
 
         while (true) {
             // add any x-ray attackers back in, behind currentPiece in
@@ -104,7 +106,7 @@ public class SEE {
 
             scores[scoresInd] = attackedPieceVal - scores[scoresInd-1];
             scoresInd++;
-            attackedPieceVal = EvalMaterial.evalPiece(currentPiece);
+            attackedPieceVal = evalPiece(currentPiece);
             sideToMove = Color.swap(sideToMove);
         }
 
@@ -125,7 +127,7 @@ public class SEE {
         while (attackers != 0) {
             int sqInd = Bitboard.lsb(attackers);
             Square sq = Square.valueOf(sqInd);
-            int myVal = EvalMaterial.evalPiece(board.getPiece(sq));
+            int myVal = evalPiece(board.getPiece(sq));
             if (lvSq==null || myVal < lvScore) {
                 lvSq = sq;
                 lvScore = myVal;
@@ -134,6 +136,28 @@ public class SEE {
         }
 
         return lvSq;
+    }
+
+    private static boolean seesAreEqual(int javaScore, Board board, Move mv) {
+        if (Initializer.nativeCodeInitialized()) {
+            try {
+                int nativeSccore = seeNative(board, MoveUtils.toNativeMove(mv));
+                if (javaScore != nativeSccore) {
+                    LOGGER.error("sees not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeSccore
+                            + ", mv: " + mv);
+                    LOGGER.error("moving piece: " + mv.piece() + "; captured: " + mv.captured()
+                            + "; ep?: " + mv.isEpCapture());
+                    DrawBoard.drawBoard(board);
+                    return false;
+                }
+                return true;
+            } catch (IllegalStateException e) {
+                LOGGER.error(e);
+                throw e;
+            }
+        } else {
+            return true;
+        }
     }
 
 }

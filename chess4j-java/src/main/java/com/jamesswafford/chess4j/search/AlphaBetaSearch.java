@@ -439,7 +439,12 @@ public class AlphaBetaSearch implements Search {
                 continue;
             }
 
-            // TODO: possibly prune
+            // prune
+            /*int staticScore = SEE.see(board, move);
+            if (staticScore < 0) {
+                board.undoMove(undos.remove(undos.size()-1));
+                continue;
+            }*/
 
             int val = -quiescenceSearch(board, undos, -beta, -alpha, opts);
             board.undoMove(undos.remove(undos.size()-1));
