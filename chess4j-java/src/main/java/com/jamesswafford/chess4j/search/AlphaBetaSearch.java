@@ -355,7 +355,10 @@ public class AlphaBetaSearch implements Search {
             // determine if the move we're about to explore gives check
             boolean givesCheck = BoardUtils.isPlayerInCheck(board);
 
-            int val = -search(board, undos, pv, pvNode, ply+1, depth-1,  -beta, -alpha, givesCheck,
+            // extensions
+            int ext = givesCheck ? 1 : 0;
+
+            int val = -search(board, undos, pv, pvNode, ply+1, depth-1+ext,  -beta, -alpha, givesCheck,
                     true, opts);
             ++numMovesSearched;
             board.undoMove(undos.remove(undos.size()-1));
