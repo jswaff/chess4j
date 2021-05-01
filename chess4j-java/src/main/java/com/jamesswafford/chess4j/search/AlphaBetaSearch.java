@@ -209,20 +209,39 @@ public class AlphaBetaSearch implements Search {
             long javaHits = TTHolder.getInstance().getHashTable().getNumHits();
             long javaCollisions = TTHolder.getInstance().getHashTable().getNumCollisions();
             if (javaProbes != nativeProbes || javaHits != nativeHits || javaCollisions != nativeCollisions) {
-                LOGGER.error("hash stats not equal!"
-                        + ", java probes: " + javaProbes + ", native probes: " + nativeProbes
+                LOGGER.error("hash stats not equal! "
+                        + "java probes: " + javaProbes + ", native probes: " + nativeProbes
                         + ", java hits: " + javaHits + ", native hits: " + nativeHits
                         + ", java collisions: " + javaCollisions + ", native collisions: " + nativeCollisions
                         + ", params: " + searchParameters);
                 return false;
             }
 
-            if (javaScore != nativeScore || !searchStats.equals(nativeStats)) {
-                LOGGER.error("searches not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
-                        + ", java stats: " + searchStats + ", native stats: " + nativeStats
-                        + ", params: " + searchParameters);
+            // compare node counts
+            if (searchStats.nodes != nativeStats.nodes || searchStats.qnodes != nativeStats.qnodes) {
+                LOGGER.error("node counts not equal!  java nodes: " + searchStats.nodes
+                        + ", native nodes:" + nativeStats.nodes);
                 return false;
             }
+
+            // compare fail highs
+            if (searchStats.failHighs != nativeStats.failHighs) {
+                LOGGER.error("fail highs not equal!  java fail highs: " + searchStats.failHighs
+                        + ", native fail highs: " + nativeStats.failHighs);
+            }
+
+            // compare fail lows
+            if (searchStats.failLows != nativeStats.failLows) {
+                LOGGER.error("fail lows not equal!  java fail lows: " + searchStats.failLows
+                        + ", native fail lows: " + nativeStats.failLows);
+            }
+
+            // compare draws
+            if (searchStats.draws != nativeStats.draws) {
+                LOGGER.error("draws not equal!  java draws: " + searchStats.draws
+                        + ", native draws: " + nativeStats.draws);
+            }
+
             // compare the PVs.
             if (!pv.equals(MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove()))) {
                 LOGGER.error("pvs are not equal!"
@@ -324,6 +343,8 @@ public class AlphaBetaSearch implements Search {
                     return 0;
                 }
                 if (nullScore >= beta) {
+                    searchStats.failHighs++;
+                    searchStats.nullMvFailHighs++;
                     return beta;
                 }
             }
@@ -370,6 +391,7 @@ public class AlphaBetaSearch implements Search {
 
             if (val >= beta) {
                 searchStats.failHighs++;
+                searchStats.failHighByMove.computeIfPresent(numMovesSearched, (k, v) -> v + 1);
                 TTHolder.getInstance().getHashTable().store(board, LOWER_BOUND, beta, depth, move);
                 if (move.captured()==null && move.promotion()==null) {
                     killerMovesStore.addKiller(ply, move);
@@ -458,7 +480,6 @@ public class AlphaBetaSearch implements Search {
             }
 
             if (val >= beta) {
-                searchStats.failHighs++;
                 return beta;
             }
             if (val > alpha) {

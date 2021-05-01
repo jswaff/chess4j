@@ -313,6 +313,22 @@ public class SearchIteratorImpl implements SearchIterator {
         LOGGER.info("# pawn hash probes: " + df2.format(pawnHashProbes)
                 + ", hits: " + df2.format(pawnHashHits) + " (" + df.format(pawnHashHitPct) + "%)"
                 + ", collisions: " + df2.format(pawnHashCollisions) + " (" + df.format(pawnHashCollisionPct) + "%)");
+
+        /// move ordering metrics
+        long failHighs = stats.failHighs - stats.hashFailHighs - stats.nullMvFailHighs;
+        long fh1 = stats.failHighByMove.get(1);
+        long fh2 = fh1 + stats.failHighByMove.get(2);
+        long fh3 = fh2 + stats.failHighByMove.get(3);
+        long fh4 = fh3 + stats.failHighByMove.get(4);
+        double failHigh1stPct = fh1 / (failHighs / 100.0);
+        double failHigh2ndPct = fh2 / (failHighs / 100.0);
+        double failHigh3rdPct = fh3 / (failHighs / 100.0);
+        double failHigh4thPct = fh4 / (failHighs / 100.0);
+        LOGGER.info("# fail high mv1: " + df2.format(fh1) + " (" + df.format(failHigh1stPct) + "%)"
+                + ", mv2: " + df2.format(fh2) + " (" + df.format(failHigh2ndPct) + "%)"
+                + ", mv3: " + df2.format(fh3) + " (" + df.format(failHigh3rdPct) + "%)"
+                + ", mv4: " + df2.format(fh4) + " (" + df.format(failHigh4thPct) + "%)"
+        );
     }
 
         private native void iterateNative(Board board, int maxDepth, List<Long> pv);
