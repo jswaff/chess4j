@@ -55,6 +55,7 @@ public class SearchIteratorImplTest {
 
         // given an iterator and a board to search
         Search search = mock(Search.class);
+        when(search.getSearchStats()).thenReturn(new SearchStats());
         searchIterator.setSearch(search);
         searchIterator.setEarlyExitOk(false);
         searchIterator.setMaxDepth(3);
@@ -90,8 +91,6 @@ public class SearchIteratorImplTest {
 
         verify(search, times(1))
                 .search(eq(board), eq(undos), eq(new SearchParameters(3, -INFINITY, INFINITY)), any());
-
-        verifyNoMoreInteractions(search);
     }
 
 
@@ -100,6 +99,8 @@ public class SearchIteratorImplTest {
 
         // given an iterator and a board to search
         Search search = mock(Search.class);
+        when(search.getSearchStats()).thenReturn(new SearchStats());
+
         searchIterator.setSearch(search);
         searchIterator.setEarlyExitOk(false);
         searchIterator.setMaxDepth(3);
