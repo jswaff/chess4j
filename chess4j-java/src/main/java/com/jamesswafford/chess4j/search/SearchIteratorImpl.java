@@ -185,6 +185,10 @@ public class SearchIteratorImpl implements SearchIterator {
                 PrintLine.printLine(true, pv, depth, score, elapsed, search.getSearchStats().nodes);
             }
 
+            // track the number of nodes computed in this iteration
+            long nodesPrevDepth = search.getSearchStats().nodesByIteration.computeIfAbsent(depth - 1, k -> 0L);
+            search.getSearchStats().nodesByIteration.put(depth, search.getSearchStats().nodes - nodesPrevDepth);
+
             // if this is a mate, stop here
             if (Math.abs(score) > CHECKMATE-500) {
                 LOGGER.debug("# stopping iterative search because mate found");
@@ -313,6 +317,33 @@ public class SearchIteratorImpl implements SearchIterator {
         LOGGER.info("# pawn hash probes: " + df2.format(pawnHashProbes)
                 + ", hits: " + df2.format(pawnHashHits) + " (" + df.format(pawnHashHitPct) + "%)"
                 + ", collisions: " + df2.format(pawnHashCollisions) + " (" + df.format(pawnHashCollisionPct) + "%)");
+
+        // fail high metrics
+        long failHighs = stats.failHighs - stats.hashFailHighs - stats.nullMvFailHighs;
+        long fh1 = stats.failHighByMove.get(1);
+        long fh2 = fh1 + stats.failHighByMove.get(2);
+        long fh3 = fh2 + stats.failHighByMove.get(3);
+        long fh4 = fh3 + stats.failHighByMove.get(4);
+        double failHigh1stPct = fh1 / (failHighs / 100.0);
+        double failHigh2ndPct = fh2 / (failHighs / 100.0);
+        double failHigh3rdPct = fh3 / (failHighs / 100.0);
+        double failHigh4thPct = fh4 / (failHighs / 100.0);
+        LOGGER.info("# fail high mv1: " + df2.format(fh1) + " (" + df.format(failHigh1stPct) + "%)"
+                + ", mv2: " + df2.format(fh2) + " (" + df.format(failHigh2ndPct) + "%)"
+                + ", mv3: " + df2.format(fh3) + " (" + df.format(failHigh3rdPct) + "%)"
+                + ", mv4: " + df2.format(fh4) + " (" + df.format(failHigh4thPct) + "%)"
+        );
+
+        // effective branching factor metrics
+        StringBuilder sb = new StringBuilder("");
+        double totalEbf = 0.0;
+        for (int i=2;i<=Math.min(lastDepth, 12);i++) {
+            double ebf = stats.nodesByIteration.get(i) / Double.valueOf(stats.nodesByIteration.get(i-1));
+            totalEbf += ebf;
+            sb.append(", i" + i + ": " + df.format(ebf));
+        }
+        double avgEbf = totalEbf / (lastDepth-1);
+        LOGGER.info("# ebf avg: " + df.format(avgEbf) + sb.toString());
     }
 
         private native void iterateNative(Board board, int maxDepth, List<Long> pv);
