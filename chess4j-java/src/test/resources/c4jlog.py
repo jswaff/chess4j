@@ -1,9 +1,14 @@
+#!/usr/bin/python
+
 # Extract metrics from chess4j log file
 import re
+import sys
 
 print('Executing c4jlog.py')
 
-logfile = open('sbd.log', 'r')
+print ('Argument List:' + str(sys.argv))
+
+logfile = open(sys.argv[1], 'r')
 Lines  = logfile.readlines()
 
 count = 0
