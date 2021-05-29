@@ -1,9 +1,6 @@
 package com.jamesswafford.chess4j.search;
 
-import com.jamesswafford.chess4j.board.Bitboard;
-import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Color;
-import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.board.squares.Direction;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.init.Initializer;
@@ -53,8 +50,11 @@ public class SEE {
     }
 
     private static int scoreCapture(Board b, Move m) {
+        assert(b.getPiece(m.from()) != null);
         assert(m.captured() != null);
-        assert(b.getPiece(m.from())==null);
+
+        ///// FIXME: should not have to play move
+        Undo u = b.applyMove(m);
 
         int[] scores = new int[32];
         scores[0] = evalPiece(m.captured());
@@ -116,6 +116,8 @@ public class SEE {
             scores[scoresInd-1] = -Math.max(-scores[scoresInd-1], scores[scoresInd]);
         }
 
+        // FIXME : undo move
+        b.undoMove(u);
 
         return scores[0];
     }

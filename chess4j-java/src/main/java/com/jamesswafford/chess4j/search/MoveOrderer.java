@@ -2,8 +2,10 @@ package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.eval.EvalMaterial;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,26 +17,25 @@ public class MoveOrderer {
 
     private final Board board;
     private final MoveGenerator moveGenerator;
-    private final MoveScorer moveScorer;
 
     private final Move pvMove, hashMove, killer1, killer2;
     private final boolean generateNonCaptures;
     private final Set<Move> specialMovesPlayed;
+    private final List<Move> deferredCaptures;
 
     private Move[] captures;
     private int captureIndex;
-    private Integer[] captureScores;
+    private Integer[] mvvlvaScores;
     private Move[] noncaptures;
     private int noncaptureIndex;
 
     private MoveOrderStage nextMoveOrderStage = MoveOrderStage.PV;
 
-    public MoveOrderer(Board board, MoveGenerator moveGenerator, MoveScorer moveScorer,
-                       Move pvMove, Move hashMove, Move killer1, Move killer2, boolean generateNonCaptures)
+    public MoveOrderer(Board board, MoveGenerator moveGenerator, Move pvMove, Move hashMove, Move killer1,
+                       Move killer2, boolean generateNonCaptures)
     {
         this.board = board;
         this.moveGenerator = moveGenerator;
-        this.moveScorer = moveScorer;
 
         this.pvMove = pvMove;
         this.hashMove = hashMove;
@@ -42,6 +43,7 @@ public class MoveOrderer {
         this.killer2 = killer2;
         this.generateNonCaptures = generateNonCaptures;
         this.specialMovesPlayed = new HashSet<>();
+        this.deferredCaptures = new ArrayList<>();
     }
 
     public MoveOrderStage getNextMoveOrderStage() {
@@ -72,27 +74,36 @@ public class MoveOrderer {
 
         // generate and score captures and promotions
         if (nextMoveOrderStage == MoveOrderStage.GENCAPS) {
-            nextMoveOrderStage = MoveOrderStage.CAPTURES_PROMOS;
+            nextMoveOrderStage = MoveOrderStage.GOOD_CAPTURES_PROMOS;
             List<Move> myCaptures = moveGenerator.generatePseudoLegalCaptures(board);
             captures =  myCaptures.toArray(new Move[0]);
             captureIndex = 0;
-            captureScores = new Integer[myCaptures.size()];
+            mvvlvaScores = new Integer[myCaptures.size()];
             for (int i=0;i<captures.length;i++) {
                 if (specialMovesPlayed.contains(captures[i])) {
                     captures[i] = null;
                 } else {
-                    captureScores[i] = moveScorer.calculateStaticScore(captures[i]);
+                    mvvlvaScores[i] = MVVLVA.score(captures[i]);
                 }
             }
         }
 
-        // captures and promotions
-        if (nextMoveOrderStage == MoveOrderStage.CAPTURES_PROMOS) {
-            int bestInd = getIndexOfBestCapture(captureIndex);
-            if (bestInd != -1) {
-                swap(captures, captureIndex, bestInd);
-                swapScores(captureIndex, bestInd);
-                return captures[captureIndex++];
+        // good captures and promotions
+        if (nextMoveOrderStage == MoveOrderStage.GOOD_CAPTURES_PROMOS) {
+            int bestInd = getIndexOfBestCaptureByMvvLva(captureIndex);
+            while (bestInd != -1) {
+                // the best by MVV/LVA doesn't mean the move is good
+                if (isPromotionOrGoodCapture(captures[bestInd])) {
+                    swap(captures, captureIndex, bestInd);
+                    swapMvvLvaScores(captureIndex, bestInd);
+                    return captures[captureIndex++];
+                } else {
+                    // add to "deferred" list, then go to the next item
+                    swap(captures, captureIndex, bestInd);
+                    swapMvvLvaScores(captureIndex, bestInd);
+                    deferredCaptures.add(captures[captureIndex++]);
+                    bestInd = getIndexOfBestCaptureByMvvLva(captureIndex);
+                }
             }
             nextMoveOrderStage = MoveOrderStage.KILLER1;
         }
@@ -107,7 +118,7 @@ public class MoveOrderer {
         }
 
         if (nextMoveOrderStage == MoveOrderStage.KILLER2) {
-            nextMoveOrderStage = MoveOrderStage.GENNONCAPS;
+            nextMoveOrderStage = generateNonCaptures ? MoveOrderStage.GENNONCAPS : MoveOrderStage.SORT_BAD_CAPTURES;
             if (killer2 != null && !specialMovesPlayed.contains(killer2) && isPseudoLegalMove(board, killer2)) {
                 assert(killer2.captured()==null);
                 specialMovesPlayed.add(killer2);
@@ -118,7 +129,7 @@ public class MoveOrderer {
         // generate non-captures
         if (generateNonCaptures) {
             if (nextMoveOrderStage == MoveOrderStage.GENNONCAPS) {
-                nextMoveOrderStage = MoveOrderStage.REMAINING;
+                nextMoveOrderStage = MoveOrderStage.NONCAPS;
                 List<Move> myNoncaps = moveGenerator.generatePseudoLegalNonCaptures(board);
                 noncaptures = myNoncaps.toArray(new Move[0]);
                 // avoid playing special moves again
@@ -131,17 +142,44 @@ public class MoveOrderer {
                 noncaptureIndex = 0;
             }
 
-            // just play them as they come
-            if (noncaptureIndex < noncaptures.length) {
-                int ind = getIndexOfFirstNonCapture(noncaptureIndex);
-                if (ind != -1) {
-                    swap(noncaptures, noncaptureIndex, ind);
-                    return noncaptures[noncaptureIndex++];
+            if (nextMoveOrderStage == MoveOrderStage.NONCAPS) {
+                if (noncaptureIndex < noncaptures.length) {
+                    int ind = getIndexOfFirstNonCapture(noncaptureIndex);
+                    if (ind != -1) {
+                        swap(noncaptures, noncaptureIndex, ind);
+                        return noncaptures[noncaptureIndex++];
+                    }
                 }
+                nextMoveOrderStage = MoveOrderStage.SORT_BAD_CAPTURES;
             }
         }
 
+        if (nextMoveOrderStage == MoveOrderStage.SORT_BAD_CAPTURES) {
+            nextMoveOrderStage = MoveOrderStage.BAD_CAPTURES;
+            // TODO: sort using SEE
+        }
+
+        if (deferredCaptures.size() > 0) {
+            System.out.println("deferred moves: ");
+            deferredCaptures.forEach(System.out::println);
+            Move mv = deferredCaptures.get(0);
+            deferredCaptures.remove(0);
+            return mv;
+        }
+
         return null;
+    }
+
+    private boolean isPromotionOrGoodCapture(Move mv) {
+        assert (mv.promotion() != null || mv.captured() != null);
+
+        if (mv.promotion() != null) return true;
+
+        // if the value of the captured piece is equal to or greater than the capturing piece, it can't be bad
+        if (EvalMaterial.evalPiece(mv.captured()) >= EvalMaterial.evalPiece(mv.piece())) return true;
+
+        // otherwise, fall back to SEE to figure it out
+        return SEE.see(board, mv) >= 0;
     }
 
     private int getIndexOfFirstNonCapture(int startIndex) {
@@ -149,7 +187,9 @@ public class MoveOrderer {
 
         for (int i=startIndex;i<noncaptures.length;i++) {
             Move m = noncaptures[i];
-            if (m != null && m.captured()==null) {
+            if (m != null) {
+                assert(m.captured()==null);
+                assert(m.promotion()==null);
                 index = i;
                 break;
             }
@@ -158,22 +198,22 @@ public class MoveOrderer {
         return index;
     }
 
-    private void swapScores(int ind1, int ind2) {
-        Integer tmp = captureScores[ind1];
-        captureScores[ind1] = captureScores[ind2];
-        captureScores[ind2] = tmp;
+    private void swapMvvLvaScores(int ind1, int ind2) {
+        Integer tmp = mvvlvaScores[ind1];
+        mvvlvaScores[ind1] = mvvlvaScores[ind2];
+        mvvlvaScores[ind2] = tmp;
     }
 
-    private int getIndexOfBestCapture(int startIndex) {
+    private int getIndexOfBestCaptureByMvvLva(int startIndex) {
         int bestIndex = -1;
         int bestScore = -9999;
 
         for (int i=startIndex;i<captures.length;i++) {
             Move m = captures[i];
             if (m != null && (m.captured() != null || m.promotion() != null)) {
-                if (captureScores[i] > bestScore) {
+                if (mvvlvaScores[i] > bestScore) {
                     bestIndex = i;
-                    bestScore = captureScores[i];
+                    bestScore = mvvlvaScores[i];
                 }
             }
         }

@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class MVVLVA implements MoveScorer {
 
-    private static Map<Class<?>,Integer> pieceMap;
+    private static final Map<Class<?>,Integer> pieceMap;
 
     static {
         pieceMap = new HashMap<>();
@@ -34,8 +34,8 @@ public class MVVLVA implements MoveScorer {
      *
      * The remaining (non-capturing) moves are next, in no particular order.
      *
-     * @param m
-     * @return
+     * @param m - the move to score
+     * @return - the score
      */
     public static int score(Move m) {
         int score = 0;
