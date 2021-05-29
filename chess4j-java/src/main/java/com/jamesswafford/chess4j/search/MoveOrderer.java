@@ -99,9 +99,8 @@ public class MoveOrderer {
                     return captures[captureIndex++];
                 } else {
                     // add to "deferred" list, then go to the next item
-                    swap(captures, captureIndex, bestInd);
-                    swapMvvLvaScores(captureIndex, bestInd);
-                    deferredCaptures.add(captures[captureIndex++]);
+                    deferredCaptures.add(captures[bestInd]);
+                    captures[bestInd] = null;
                     bestInd = getIndexOfBestCaptureByMvvLva(captureIndex);
                 }
             }
@@ -160,7 +159,6 @@ public class MoveOrderer {
         }
 
         if (deferredCaptures.size() > 0) {
-            System.out.println("deferred moves: ");
             deferredCaptures.forEach(System.out::println);
             Move mv = deferredCaptures.get(0);
             deferredCaptures.remove(0);

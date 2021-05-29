@@ -18,9 +18,7 @@ import static org.mockito.Mockito.*;
 import static com.jamesswafford.chess4j.search.MoveOrderStage.*;
 import static com.jamesswafford.chess4j.pieces.Bishop.*;
 import static com.jamesswafford.chess4j.pieces.King.*;
-import static com.jamesswafford.chess4j.pieces.Knight.*;
 import static com.jamesswafford.chess4j.pieces.Pawn.*;
-import static com.jamesswafford.chess4j.pieces.Queen.*;
 import static com.jamesswafford.chess4j.pieces.Rook.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 
@@ -133,9 +131,6 @@ public class MoveOrdererTest {
 
         Board board = new Board("5k1r/8/4R2N/5P2/p7/1N2r2Q/2p5/1B2BK2 b - -");
         DrawBoard.drawBoard(board);
-
-        List<Move> moves = moveGenerator.generateLegalMoves(board);
-        moves.forEach(System.out::println);
 
         MoveOrderer mo = new MoveOrderer(board, moveGenerator, null, null,null,null,
                 true);
