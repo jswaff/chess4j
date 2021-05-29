@@ -36,6 +36,7 @@ public class SEETest {
     @Test
     public void testQueenTakesDefendedPawn() {
         Board board = new Board("7k/p7/1p6/8/8/1Q6/8/7K w - -");
+        DrawBoard.drawBoard(board);
 
         Move move = new Move(WHITE_QUEEN, B3, B6, BLACK_PAWN);
 

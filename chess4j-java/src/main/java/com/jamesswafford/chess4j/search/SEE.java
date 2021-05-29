@@ -24,7 +24,6 @@ public class SEE {
         Initializer.init();
     }
 
-    // note m should already be applied
     public static int see(Board b, Move m) {
         assert(m.captured() != null || m.promotion() != null);
 
@@ -51,22 +50,24 @@ public class SEE {
 
     private static int scoreCapture(Board b, Move m) {
         assert(b.getPiece(m.from()) != null);
+        assert(m.piece()==b.getPiece(m.from()));
         assert(m.captured() != null);
-
-        ///// FIXME: should not have to play move
-        Undo u = b.applyMove(m);
 
         int[] scores = new int[32];
         scores[0] = evalPiece(m.captured());
         int scoresInd = 1;
 
-        // play out the sequence
         long whiteAttackersMap = AttackDetector.getAttackers(b, m.to(), Color.WHITE);
         long blackAttackersMap = AttackDetector.getAttackers(b, m.to(), Color.BLACK);
+        if (b.getPlayerToMove()==Color.WHITE) {
+            whiteAttackersMap ^= Bitboard.squares[m.from().value()];
+        } else {
+            blackAttackersMap ^= Bitboard.squares[m.from().value()];
+        }
 
-        Color sideToMove = b.getPlayerToMove();
+        Color sideToMove = Color.swap(b.getPlayerToMove());
         Square currentSq = m.from();
-        Piece currentPiece = b.getPiece(m.to());
+        Piece currentPiece = m.piece();
         int attackedPieceVal = evalPiece(currentPiece);
 
         while (true) {
@@ -93,7 +94,7 @@ public class SEE {
                 }
             }
 
-            currentSq = findLeastValuable(b,sideToMove==Color.WHITE ? whiteAttackersMap : blackAttackersMap);
+            currentSq = findLeastValuable(b, sideToMove==Color.WHITE ? whiteAttackersMap : blackAttackersMap);
             if (currentSq==null) break;
 
             if (sideToMove==Color.WHITE) {
@@ -115,9 +116,6 @@ public class SEE {
             scoresInd--;
             scores[scoresInd-1] = -Math.max(-scores[scoresInd-1], scores[scoresInd]);
         }
-
-        // FIXME : undo move
-        b.undoMove(u);
 
         return scores[0];
     }
