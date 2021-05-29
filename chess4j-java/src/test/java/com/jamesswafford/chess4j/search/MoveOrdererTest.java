@@ -7,7 +7,6 @@ import com.jamesswafford.chess4j.io.MoveParser;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
@@ -130,7 +129,6 @@ public class MoveOrdererTest {
     public void goodCapturesThenNonCapturesThenBadCaptures() {
 
         Board board = new Board("5k1r/8/4R2N/5P2/p7/1N2r2Q/2p5/1B2BK2 b - -");
-        DrawBoard.drawBoard(board);
 
         MoveOrderer mo = new MoveOrderer(board, moveGenerator, null, null,null,null,
                 true);
@@ -173,12 +171,12 @@ public class MoveOrdererTest {
         assertNull(mo.selectNextMove());
     }
 
-    // TODO: killers after WINNING captures
-    @Ignore
     @Test
-    public void killersAfterCaps() {
+    public void losingCapturesAfterKillers() {
 
         Board board = new Board("8/7p/5k2/5p2/p1p2P2/Pr1pPK2/1P1R3P/8 b - - "); // WAC-2
+
+        DrawBoard.drawBoard(board);
 
         List<Move> noncaps = moveGenerator.generatePseudoLegalNonCaptures(board);
 
@@ -188,26 +186,23 @@ public class MoveOrdererTest {
         assertTrue(noncaps.contains(b3b7));
         assertTrue(noncaps.contains(f6e7));
 
+        List<Move> caps = moveGenerator.generatePseudoLegalCaptures(board);
+        assertEquals(2, caps.size());
+
         MoveOrderer mo = new MoveOrderer(board, moveGenerator, null, null, b3b7, f6e7,
                 true);
 
-        // first two moves should be the captures Rxa3 and Rxb2
-        assertNotNull(mo.selectNextMove().captured());
-        assertNotNull(mo.selectNextMove().captured());
-
-        // the next move should be our first killer
+        // there are two captures, but both are losing, so killers first
         assertEquals(b3b7, mo.selectNextMove());
-
-        // and then our second killer
         assertEquals(f6e7, mo.selectNextMove());
 
         List<Move> selectedNonCaps = new ArrayList<>();
         selectedNonCaps.add(b3b7);
         selectedNonCaps.add(f6e7);
 
-        // the killers shouldn't be selected again
+        // now non-captures, but not the killers as they've already been played
         Move nextMv = mo.selectNextMove();
-        while(nextMv != null) {
+        while (nextMv.captured() == null) {
             assertNotEquals(b3b7, nextMv);
             assertNotEquals(f6e7, nextMv);
             assertTrue(noncaps.contains(nextMv));
@@ -215,8 +210,14 @@ public class MoveOrdererTest {
             nextMv = mo.selectNextMove();
         }
 
-        // and all noncaps should have been selected
+        // all noncaps should have been selected
         assertTrue(selectedNonCaps.containsAll(noncaps));
+
+        // we just selected a capture, should be one more
+        assertNotNull(mo.selectNextMove().captured());
+
+        // and no more moves
+        assertNull(mo.selectNextMove());
     }
 
     @Test
