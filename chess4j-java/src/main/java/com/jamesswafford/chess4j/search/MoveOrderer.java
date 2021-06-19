@@ -3,8 +3,12 @@ package com.jamesswafford.chess4j.search;
 import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.eval.EvalMaterial;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
+import com.jamesswafford.chess4j.pieces.Pawn;
+import com.jamesswafford.chess4j.pieces.Piece;
+import com.jamesswafford.chess4j.pieces.Rook;
 
 import java.util.HashSet;
 import java.util.List;
@@ -105,8 +109,8 @@ public class MoveOrderer {
                 // only do SEE if necessary, but if we do, keep the score for sorting bad captures later on.
                 Move mv = captures[bestInd];
                 int seeScore = -Constants.INFINITY;
-                boolean goodCap = mv.promotion() != null ||
-                        EvalMaterial.evalPiece(mv.captured()) >= EvalMaterial.evalPiece(mv.piece());
+                boolean goodCap = mv.promotion() != null  ||
+                        (EvalMaterial.evalPiece(mv.captured()) >= EvalMaterial.evalPiece(mv.piece()));
                 if (!goodCap) {
                     seeScore = SEE.see(board, mv);
                     goodCap = seeScore >= 0;
@@ -116,15 +120,16 @@ public class MoveOrderer {
                     swap(captures, capturesIndex, bestInd);
                     swapScores(captureMvvLvaScores, capturesIndex, bestInd);
                     return captures[capturesIndex++];
-                } else {
-                    // add to "deferred" list, then go to the next item
-                    badcaptures[numBadCaptures] = mv;
-                    assert(seeScore > -Constants.INFINITY);
-                    badCaptureSeeScores[numBadCaptures] = seeScore;
-                    ++numBadCaptures;
-                    captures[bestInd] = null;
-                    bestInd = getIndexOfBestCaptureByMvvLva(capturesIndex);
                 }
+
+                // add to "deferred" list, then go to the next item
+                badcaptures[numBadCaptures] = mv;
+                assert(seeScore > -Constants.INFINITY);
+                badCaptureSeeScores[numBadCaptures] = seeScore;
+                ++numBadCaptures;
+                ++capturesIndex;
+                bestInd = getIndexOfBestCaptureByMvvLva(capturesIndex);
+                bestInd = -1;
             }
             nextMoveOrderStage = MoveOrderStage.KILLER1;
         }
@@ -167,22 +172,22 @@ public class MoveOrderer {
                 if (noncapturesIndex < noncaptures.length) {
                     int ind = getIndexOfFirstNonCapture(noncapturesIndex);
                     if (ind != -1) {
-                        swap(noncaptures, noncapturesIndex, ind);
-                        return noncaptures[noncapturesIndex++];
+                        noncapturesIndex = ind + 1;
+                        return noncaptures[ind];
                     }
                 }
                 nextMoveOrderStage = MoveOrderStage.BAD_CAPTURES;
             }
         }
 
-        if (badCapturesIndex < numBadCaptures) {
+        /*if (badCapturesIndex < numBadCaptures) {
             int bestInd = getIndexOfBestBadCaptureBySee(badCapturesIndex, numBadCaptures);
             assert (bestInd >= badCapturesIndex);
             assert (bestInd < numBadCaptures);
             swap(badcaptures, badCapturesIndex, bestInd);
             swapScores(badCaptureSeeScores, badCapturesIndex, bestInd);
             return badcaptures[badCapturesIndex++];
-        }
+        }*/
 
         return null;
     }
@@ -233,8 +238,8 @@ public class MoveOrderer {
         for (int i=startIndex;i<numBadCaptures;i++) {
             Move m = badcaptures[i];
             assert (m != null);
-            assert (m.promotion() == null);
-            assert (m.captured() != null);
+            //assert (m.promotion() == null);
+            //assert (m.captured() != null);
             if (badCaptureSeeScores[i] > bestScore) {
                 bestIndex = i;
                 bestScore = badCaptureSeeScores[i];

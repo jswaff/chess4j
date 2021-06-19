@@ -172,7 +172,6 @@ public class SearchIteratorImplTest {
                 .until(future::isDone);
     }
 
-
     @Test
     public void stoppedIteratorProducesValidLine() {
 

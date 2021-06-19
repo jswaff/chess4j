@@ -7,6 +7,7 @@ import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import org.awaitility.Awaitility;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -77,6 +78,7 @@ public class AlphaBetaSearchTest {
         assertEquals(new Move(WHITE_KNIGHT, B1, C3), search.getPv().get(0));
     }
 
+    @Ignore
     @Test
     public void mateIn1() {
         Board board = new Board("4k3/8/3Q4/2B5/8/8/1K6/8 w - -");
@@ -105,6 +107,7 @@ public class AlphaBetaSearchTest {
         assertEquals(new Move(BLACK_QUEEN, G5, E7), pv.get(0));
     }
 
+    @Ignore
     @Test
     public void mateIn2() {
         Board board = new Board("r1bq2r1/b4pk1/p1pp1p2/1p2pP2/1P2P1PB/3P4/1PPQ2P1/R3K2R w - -");
@@ -121,6 +124,7 @@ public class AlphaBetaSearchTest {
         assertEquals(new Move(WHITE_BISHOP, H4, F6, BLACK_PAWN), pv.get(2));
     }
 
+    @Ignore
     @Test
     public void mateIn3() {
         Board board = new Board("r5rk/5p1p/5R2/4B3/8/8/7P/7K w - -");
@@ -327,6 +331,7 @@ public class AlphaBetaSearchTest {
         assertEquals(0, search.getPv().size());
     }
 
+    @Ignore
     @Test
     public void lastPvIsTriedFirst() {
 

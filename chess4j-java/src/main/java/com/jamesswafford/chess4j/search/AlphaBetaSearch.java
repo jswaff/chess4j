@@ -214,7 +214,9 @@ public class AlphaBetaSearch implements Search {
             // compare node counts
             if (searchStats.nodes != nativeStats.nodes || searchStats.qnodes != nativeStats.qnodes) {
                 LOGGER.error("node counts not equal!  java nodes: " + searchStats.nodes
-                        + ", native nodes:" + nativeStats.nodes);
+                        + ", native nodes:" + nativeStats.nodes
+                        + ", java qnodes: " + searchStats.qnodes
+                        + ", native qnodes: " + nativeStats.qnodes);
                 return false;
             }
 
