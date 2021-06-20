@@ -116,7 +116,7 @@ public class MoveOrderer {
                 boolean goodCap = mv.promotion() != null ||
                         (EvalMaterial.evalPiece(mv.captured()) >= EvalMaterial.evalPiece(mv.piece()));
                 if (!goodCap) {
-                    seeScore = -1; //SEE.see(board, mv);
+                    seeScore = SEE.see(board, mv);
                     goodCap = seeScore >= 0;
                 }
 

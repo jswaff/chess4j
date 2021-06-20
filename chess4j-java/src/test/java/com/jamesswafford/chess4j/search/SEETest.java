@@ -215,9 +215,22 @@ public class SEETest {
     }
 
     @Test
+    public void integration3() {
+        Board board = new Board("r4rk1/2p2pp1/P2b1n2/8/3P4/1B1PN2q/1P2QP1p/R1B2RKb w - -");
+        DrawBoard.drawBoard(board);
+
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
+        MoveParser mp = new MoveParser();
+        Move move = mp.parseMove("g1h1", board);
+        assertTrue(moves.contains(move));
+
+        int score = SEE.see(board, move);
+        assertEquals(BISHOP_VAL, score);
+    }
+
+    @Test
     public void someRandomPosition() {
         Board board = new Board("5k1r/8/4R2N/5P2/p7/1N2r2Q/2p5/1B2BK2 b - -");
-        DrawBoard.drawBoard(board);
 
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
         MoveParser mp = new MoveParser();

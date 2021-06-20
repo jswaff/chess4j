@@ -53,4 +53,15 @@ public class AttackDetectorTest {
         assertTrue((attackers & Bitboard.squares[D4.value()]) != 0);
         assertEquals(3, Long.bitCount(attackers));
     }
+
+    @Test
+    public void testGetAttackers5() {
+        Board board = new Board("r4rk1/2p2pp1/P2b1n2/8/3P4/1B1PN2q/1P2QP1p/R1B2RKb w - -");
+        long attackers = AttackDetector.getAttackers(board, H1, Color.WHITE);
+
+        assertEquals(Bitboard.squares[G1.value()], attackers);
+
+        attackers = AttackDetector.getAttackers(board, H1, Color.BLACK);
+        assertEquals(0L, attackers);
+    }
 }
