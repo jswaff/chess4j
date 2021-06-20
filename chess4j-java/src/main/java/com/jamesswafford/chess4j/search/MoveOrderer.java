@@ -6,9 +6,7 @@ import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.eval.EvalMaterial;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
-import com.jamesswafford.chess4j.pieces.Pawn;
-import com.jamesswafford.chess4j.pieces.Piece;
-import com.jamesswafford.chess4j.pieces.Rook;
+import com.jamesswafford.chess4j.pieces.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -102,34 +100,36 @@ public class MoveOrderer {
         if (nextMoveOrderStage == MoveOrderStage.GOOD_CAPTURES_PROMOS) {
             int bestInd = getIndexOfBestCaptureByMvvLva(capturesIndex);
             while (bestInd != -1) {
+                Move mv = captures[bestInd];
+
+                // put the best move at the top of the list
+                swap(captures, capturesIndex, bestInd);
+                swapScores(captureMvvLvaScores, capturesIndex, bestInd);
+                ++capturesIndex;
+
                 // the best by MVV/LVA doesn't mean the move is good.  A move is "good" if:
                 // 1) it's a promotion
                 // 2) the value of the captured piece is >= the value of the capturing piece
                 // 3) SEE analysis gives a non-negative score
                 // only do SEE if necessary, but if we do, keep the score for sorting bad captures later on.
-                Move mv = captures[bestInd];
                 int seeScore = -Constants.INFINITY;
-                boolean goodCap = mv.promotion() != null  ||
+                boolean goodCap = mv.promotion() != null ||
                         (EvalMaterial.evalPiece(mv.captured()) >= EvalMaterial.evalPiece(mv.piece()));
                 if (!goodCap) {
-                    seeScore = SEE.see(board, mv);
+                    seeScore = -1; //SEE.see(board, mv);
                     goodCap = seeScore >= 0;
                 }
 
+                // if the capture is "good", play it now.  Otherwise, put it in the "bad captures list"
+                // and move on to the next item.
                 if (goodCap) {
-                    swap(captures, capturesIndex, bestInd);
-                    swapScores(captureMvvLvaScores, capturesIndex, bestInd);
-                    return captures[capturesIndex++];
+                    return mv;
+                } else {
+                    badcaptures[numBadCaptures] = mv;
+                    badCaptureSeeScores[numBadCaptures] = seeScore;
+                    ++numBadCaptures;
+                    bestInd = getIndexOfBestCaptureByMvvLva(capturesIndex);
                 }
-
-                // add to "deferred" list, then go to the next item
-                badcaptures[numBadCaptures] = mv;
-                assert(seeScore > -Constants.INFINITY);
-                badCaptureSeeScores[numBadCaptures] = seeScore;
-                ++numBadCaptures;
-                ++capturesIndex;
-                bestInd = getIndexOfBestCaptureByMvvLva(capturesIndex);
-                bestInd = -1;
             }
             nextMoveOrderStage = MoveOrderStage.KILLER1;
         }

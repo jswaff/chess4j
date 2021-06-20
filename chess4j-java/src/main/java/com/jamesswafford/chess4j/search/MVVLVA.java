@@ -59,6 +59,7 @@ public class MVVLVA implements MoveScorer {
 
     private static int scoreCapture(Move m) {
         int capturedVal = pieceMap.get(m.captured().getClass());
+        assert(!m.isEpCapture() || capturedVal==1);
         int moverVal = pieceMap.get(m.piece().getClass());
         return 1000 + (capturedVal * 10) - moverVal;
     }
