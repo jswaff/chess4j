@@ -169,25 +169,23 @@ public class MoveOrderer {
             }
 
             if (nextMoveOrderStage == MoveOrderStage.NONCAPS) {
-                if (noncapturesIndex < noncaptures.length) {
-                    int ind = getIndexOfFirstNonCapture(noncapturesIndex);
-                    if (ind != -1) {
-                        noncapturesIndex = ind + 1;
-                        return noncaptures[ind];
-                    }
+                int ind = getIndexOfFirstNonCapture(noncapturesIndex);
+                if (ind != -1) {
+                    noncapturesIndex = ind + 1;
+                    return noncaptures[ind];
                 }
                 nextMoveOrderStage = MoveOrderStage.BAD_CAPTURES;
             }
         }
 
-        /*if (badCapturesIndex < numBadCaptures) {
-            int bestInd = getIndexOfBestBadCaptureBySee(badCapturesIndex, numBadCaptures);
-            assert (bestInd >= badCapturesIndex);
-            assert (bestInd < numBadCaptures);
+        int bestInd = getIndexOfBestBadCaptureBySee(badCapturesIndex, numBadCaptures);
+        if (bestInd != -1) {
+            assert(bestInd >= badCapturesIndex);
+            assert(bestInd < numBadCaptures);
             swap(badcaptures, badCapturesIndex, bestInd);
             swapScores(badCaptureSeeScores, badCapturesIndex, bestInd);
             return badcaptures[badCapturesIndex++];
-        }*/
+        }
 
         return null;
     }
@@ -237,9 +235,10 @@ public class MoveOrderer {
 
         for (int i=startIndex;i<numBadCaptures;i++) {
             Move m = badcaptures[i];
-            assert (m != null);
-            //assert (m.promotion() == null);
-            //assert (m.captured() != null);
+            assert(m != null);
+            assert(m.promotion() == null);
+            assert(m.captured() != null);
+            assert(badCaptureSeeScores[i] < 0);
             if (badCaptureSeeScores[i] > bestScore) {
                 bestIndex = i;
                 bestScore = badCaptureSeeScores[i];
