@@ -3,10 +3,8 @@ package com.jamesswafford.chess4j.search;
 import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.eval.EvalMaterial;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
-import com.jamesswafford.chess4j.pieces.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -184,7 +182,10 @@ public class MoveOrderer {
             assert(bestInd < numBadCaptures);
             swap(badcaptures, badCapturesIndex, bestInd);
             swapScores(badCaptureSeeScores, badCapturesIndex, bestInd);
-            return badcaptures[badCapturesIndex++];
+            Move badcap = badcaptures[badCapturesIndex];
+            assert(badCaptureSeeScores[badCapturesIndex] == SEE.see(board, badcap));
+            ++badCapturesIndex;
+            return badcap;
         }
 
         return null;

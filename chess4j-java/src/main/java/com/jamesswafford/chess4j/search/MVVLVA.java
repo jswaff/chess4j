@@ -1,12 +1,22 @@
 package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.pieces.*;
+import com.jamesswafford.chess4j.utils.MoveUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class MVVLVA implements MoveScorer {
+public class MVVLVA {
+
+    private static final Logger LOGGER = LogManager.getLogger(MVVLVA.class);
+
+    static {
+        Initializer.init();
+    }
 
     private static final Map<Class<?>,Integer> pieceMap;
 
@@ -48,6 +58,9 @@ public class MVVLVA implements MoveScorer {
             score += scoreCapture(m);
         }
 
+        // if we are running with assertions enabled and the native library is loaded, verify equality
+        assert(mvvlvaAreEqual(score, m));
+
         return score;
     }
 
@@ -64,8 +77,27 @@ public class MVVLVA implements MoveScorer {
         return 1000 + (capturedVal * 10) - moverVal;
     }
 
-    @Override
-    public int calculateStaticScore(Move mv) {
-        return score(mv);
+    public static native int mvvlvaNative(long nativeMv);
+
+    private static boolean mvvlvaAreEqual(int javaScore, Move mv) {
+        if (Initializer.nativeCodeInitialized()) {
+            try {
+                int nativeScore = mvvlvaNative(MoveUtils.toNativeMove(mv));
+                if (javaScore != nativeScore) {
+                    LOGGER.error("mvvlva not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
+                            + ", mv: " + mv);
+                    LOGGER.error("moving piece: " + mv.piece() + "; captured: " + mv.captured()
+                            + "; ep?: " + mv.isEpCapture());
+                    return false;
+                }
+                return true;
+            } catch (IllegalStateException e) {
+                LOGGER.error(e);
+                throw e;
+            }
+        } else {
+            return true;
+        }
     }
+
 }

@@ -141,9 +141,9 @@ public class SEE {
     private static boolean seesAreEqual(int javaScore, Board board, Move mv) {
         if (Initializer.nativeCodeInitialized()) {
             try {
-                int nativeSccore = seeNative(board, MoveUtils.toNativeMove(mv));
-                if (javaScore != nativeSccore) {
-                    LOGGER.error("sees not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeSccore
+                int nativeScore = seeNative(board, MoveUtils.toNativeMove(mv));
+                if (javaScore != nativeScore) {
+                    LOGGER.error("sees not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                             + ", mv: " + mv);
                     LOGGER.error("moving piece: " + mv.piece() + "; captured: " + mv.captured()
                             + "; ep?: " + mv.isEpCapture());

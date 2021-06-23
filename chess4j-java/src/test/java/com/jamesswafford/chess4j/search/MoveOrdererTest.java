@@ -2,12 +2,10 @@ package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.io.DrawBoard;
 import com.jamesswafford.chess4j.io.MoveParser;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
@@ -99,7 +97,6 @@ public class MoveOrdererTest {
         assertNull(mo.selectNextMove());
     }
 
-    @Ignore
     @Test
     public void pvThenHashThenCaptures() {
         Board board = new Board("6R1/kp6/8/1KpP4/8/8/8/6B1 w - c6");
@@ -127,7 +124,6 @@ public class MoveOrdererTest {
         assertTrue(g1c5.equals(nextMv) || b5c5.equals(nextMv));
     }
 
-    @Ignore
     @Test
     public void goodCapturesThenNonCapturesThenBadCaptures() {
 
@@ -174,13 +170,10 @@ public class MoveOrdererTest {
         assertNull(mo.selectNextMove());
     }
 
-    @Ignore
     @Test
     public void losingCapturesAfterKillers() {
 
         Board board = new Board("8/7p/5k2/5p2/p1p2P2/Pr1pPK2/1P1R3P/8 b - - "); // WAC-2
-
-        DrawBoard.drawBoard(board);
 
         List<Move> noncaps = moveGenerator.generatePseudoLegalNonCaptures(board);
 
@@ -224,7 +217,6 @@ public class MoveOrdererTest {
         assertNull(mo.selectNextMove());
     }
 
-    @Ignore
     @Test
     public void nonCapturesAreNotGeneratedUntilNeeded() {
         Board board = new Board( "b2b1r1k/3R1ppp/4qP2/4p1PQ/4P3/5B2/4N1K1/8 w - -");
