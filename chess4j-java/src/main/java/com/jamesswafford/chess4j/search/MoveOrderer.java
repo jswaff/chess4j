@@ -182,10 +182,7 @@ public class MoveOrderer {
             assert(bestInd < numBadCaptures);
             swap(badcaptures, badCapturesIndex, bestInd);
             swapScores(badCaptureSeeScores, badCapturesIndex, bestInd);
-            Move badcap = badcaptures[badCapturesIndex];
-            assert(badCaptureSeeScores[badCapturesIndex] == SEE.see(board, badcap));
-            ++badCapturesIndex;
-            return badcap;
+            return badcaptures[badCapturesIndex++];
         }
 
         return null;

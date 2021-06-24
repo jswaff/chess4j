@@ -45,12 +45,12 @@ public final class AttackDetector {
                     & board.getWhitePawns();
         } else {
             // attacked by black pawn from NE?
-            attackers |=  (Bitboard.squares[sqVal] >> 9)
-                    & ~Bitboard.files[File.FILE_H.getValue()]
-                    & board.getBlackPawns();
-            // attacked by black pawn from NW?
             attackers |=  (Bitboard.squares[sqVal] >> 7)
                     & ~Bitboard.files[File.FILE_A.getValue()]
+                    & board.getBlackPawns();
+            // attacked by black pawn from NW?
+            attackers |=  (Bitboard.squares[sqVal] >> 9)
+                    & ~Bitboard.files[File.FILE_H.getValue()]
                     & board.getBlackPawns();
         }
 
