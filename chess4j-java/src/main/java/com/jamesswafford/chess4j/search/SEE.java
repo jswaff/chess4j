@@ -1,9 +1,6 @@
 package com.jamesswafford.chess4j.search;
 
-import com.jamesswafford.chess4j.board.Bitboard;
-import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Color;
-import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.board.squares.Direction;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.init.Initializer;
@@ -27,7 +24,6 @@ public class SEE {
         Initializer.init();
     }
 
-    // note m should already be applied
     public static int see(Board b, Move m) {
         assert(m.captured() != null || m.promotion() != null);
 
@@ -53,20 +49,25 @@ public class SEE {
     }
 
     private static int scoreCapture(Board b, Move m) {
+        assert(b.getPiece(m.from()) != null);
+        assert(m.piece()==b.getPiece(m.from()));
         assert(m.captured() != null);
-        assert(b.getPiece(m.from())==null);
 
         int[] scores = new int[32];
         scores[0] = evalPiece(m.captured());
         int scoresInd = 1;
 
-        // play out the sequence
         long whiteAttackersMap = AttackDetector.getAttackers(b, m.to(), Color.WHITE);
         long blackAttackersMap = AttackDetector.getAttackers(b, m.to(), Color.BLACK);
+        if (b.getPlayerToMove()==Color.WHITE) {
+            whiteAttackersMap ^= Bitboard.squares[m.from().value()];
+        } else {
+            blackAttackersMap ^= Bitboard.squares[m.from().value()];
+        }
 
-        Color sideToMove = b.getPlayerToMove();
+        Color sideToMove = Color.swap(b.getPlayerToMove());
         Square currentSq = m.from();
-        Piece currentPiece = b.getPiece(m.to());
+        Piece currentPiece = m.piece();
         int attackedPieceVal = evalPiece(currentPiece);
 
         while (true) {
@@ -93,7 +94,7 @@ public class SEE {
                 }
             }
 
-            currentSq = findLeastValuable(b,sideToMove==Color.WHITE ? whiteAttackersMap : blackAttackersMap);
+            currentSq = findLeastValuable(b, sideToMove==Color.WHITE ? whiteAttackersMap : blackAttackersMap);
             if (currentSq==null) break;
 
             if (sideToMove==Color.WHITE) {
@@ -115,7 +116,6 @@ public class SEE {
             scoresInd--;
             scores[scoresInd-1] = -Math.max(-scores[scoresInd-1], scores[scoresInd]);
         }
-
 
         return scores[0];
     }
@@ -141,9 +141,9 @@ public class SEE {
     private static boolean seesAreEqual(int javaScore, Board board, Move mv) {
         if (Initializer.nativeCodeInitialized()) {
             try {
-                int nativeSccore = seeNative(board, MoveUtils.toNativeMove(mv));
-                if (javaScore != nativeSccore) {
-                    LOGGER.error("sees not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeSccore
+                int nativeScore = seeNative(board, MoveUtils.toNativeMove(mv));
+                if (javaScore != nativeScore) {
+                    LOGGER.error("sees not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                             + ", mv: " + mv);
                     LOGGER.error("moving piece: " + mv.piece() + "; captured: " + mv.captured()
                             + "; ep?: " + mv.isEpCapture());

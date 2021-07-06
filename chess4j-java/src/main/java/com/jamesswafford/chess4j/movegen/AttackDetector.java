@@ -35,14 +35,22 @@ public final class AttackDetector {
                 (color==Color.WHITE ? board.getWhiteQueens() : board.getBlackQueens()));
 
         if (color==Color.WHITE) {
-            attackers |=  ((Bitboard.squares[sqVal] & ~Bitboard.files[File.FILE_A.getValue()]) << 7)
+            // attacked by white pawn from SW?
+            attackers |= (Bitboard.squares[sqVal] << 7)
+                    & ~Bitboard.files[File.FILE_H.getValue()]
                     & board.getWhitePawns();
-            attackers |=  ((Bitboard.squares[sqVal] & ~Bitboard.files[File.FILE_H.getValue()]) << 9)
+            // attacked by white pawn from SE?
+            attackers |= (Bitboard.squares[sqVal] << 9)
+                    & ~Bitboard.files[File.FILE_A.getValue()]
                     & board.getWhitePawns();
         } else {
-            attackers |=  ((Bitboard.squares[sqVal] & ~Bitboard.files[File.FILE_A.getValue()]) >> 9)
+            // attacked by black pawn from NE?
+            attackers |=  (Bitboard.squares[sqVal] >> 7)
+                    & ~Bitboard.files[File.FILE_A.getValue()]
                     & board.getBlackPawns();
-            attackers |=  ((Bitboard.squares[sqVal] & ~Bitboard.files[File.FILE_H.getValue()]) >> 7)
+            // attacked by black pawn from NW?
+            attackers |=  (Bitboard.squares[sqVal] >> 9)
+                    & ~Bitboard.files[File.FILE_H.getValue()]
                     & board.getBlackPawns();
         }
 

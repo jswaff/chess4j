@@ -28,7 +28,6 @@ public class SEETest {
         Board board = new Board("7k/8/1p6/8/8/1Q6/8/7K w - -");
 
         Move move = new Move(WHITE_QUEEN, B3, B6, BLACK_PAWN);
-        board.applyMove(move);
 
         int score = SEE.see(board, move);
         assertEquals(PAWN_VAL, score);
@@ -37,9 +36,9 @@ public class SEETest {
     @Test
     public void testQueenTakesDefendedPawn() {
         Board board = new Board("7k/p7/1p6/8/8/1Q6/8/7K w - -");
+        DrawBoard.drawBoard(board);
 
         Move move = new Move(WHITE_QUEEN, B3, B6, BLACK_PAWN);
-        board.applyMove(move);
 
         int score = SEE.see(board, move);
         assertEquals(PAWN_VAL - QUEEN_VAL, score);
@@ -53,7 +52,6 @@ public class SEETest {
 
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
         assertTrue(moves.contains(move));
-        board.applyMove(move);
 
         int score = SEE.see(board, move);
         assertEquals(PAWN_VAL, score);
@@ -67,7 +65,6 @@ public class SEETest {
 
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
         assertTrue(moves.contains(move));
-        board.applyMove(move);
 
         int score = SEE.see(board, move);
         assertEquals(PAWN_VAL - KNIGHT_VAL, score);
@@ -81,7 +78,6 @@ public class SEETest {
 
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
         assertTrue(moves.contains(move));
-        board.applyMove(move);
 
         int score = SEE.see(board, move);
         assertEquals(PAWN_VAL, score);
@@ -95,7 +91,6 @@ public class SEETest {
         MoveParser mp = new MoveParser();
         Move m = mp.parseMove("c3d5", board);
         assertTrue(moves.contains(m));
-        board.applyMove(m);
 
         int score = SEE.see(board, m);
         assertEquals(PAWN_VAL, score);
@@ -109,7 +104,6 @@ public class SEETest {
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("c3d5", board);
         assertTrue(moves.contains(move));
-        board.applyMove(move);
 
         int score = SEE.see(board, move);
         assertEquals(PAWN_VAL, score);
@@ -123,7 +117,6 @@ public class SEETest {
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("e5d5", board);
         assertTrue(moves.contains(move));
-        board.applyMove(move);
 
         int score = SEE.see(board, move);
         assertEquals(PAWN_VAL - ROOK_VAL, score);
@@ -137,7 +130,6 @@ public class SEETest {
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("e5d5", board);
         assertTrue(moves.contains(move));
-        board.applyMove(move);
 
         int score = SEE.see(board, move);
         assertEquals(PAWN_VAL, score);
@@ -151,7 +143,6 @@ public class SEETest {
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("c3d5", board);
         assertTrue(moves.contains(move));
-        board.applyMove(move);
 
         int score = SEE.see(board, move);
         assertEquals(PAWN_VAL, score);
@@ -165,7 +156,6 @@ public class SEETest {
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("b3d5", board);
         assertTrue(moves.contains(move));
-        board.applyMove(move);
 
         int score = SEE.see(board, move);
         assertEquals(PAWN_VAL-BISHOP_VAL+KNIGHT_VAL, score);
@@ -179,7 +169,6 @@ public class SEETest {
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("c3d5", board);
         assertTrue(moves.contains(move));
-        board.applyMove(move);
 
         int score = SEE.see(board, move);
         assertEquals(PAWN_VAL - KNIGHT_VAL, score);
@@ -193,7 +182,6 @@ public class SEETest {
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("f8=Q", board);
         assertTrue(moves.contains(move));
-        board.applyMove(move);
 
         int score = SEE.see(board, move);
         assertEquals(QUEEN_VAL - PAWN_VAL, score);
@@ -208,7 +196,6 @@ public class SEETest {
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("f5e4", board);
         assertTrue(moves.contains(move));
-        board.applyMove(move);
 
         int score = SEE.see(board, move);
         assertEquals(PAWN_VAL, score);
@@ -217,16 +204,48 @@ public class SEETest {
     @Test
     public void integration2() {
         Board board = new Board("8/8/5k2/7p/p1p1KP2/r2p4/1p1R3P/8 w - -");
-        DrawBoard.drawBoard(board);
 
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
         MoveParser mp = new MoveParser();
         Move move = mp.parseMove("d2d3", board);
         assertTrue(moves.contains(move));
-        board.applyMove(move);
 
         int score = SEE.see(board, move);
         assertEquals(PAWN_VAL-ROOK_VAL, score);
+    }
+
+    @Test
+    public void integration3() {
+        Board board = new Board("r4rk1/2p2pp1/P2b1n2/8/3P4/1B1PN2q/1P2QP1p/R1B2RKb w - -");
+        DrawBoard.drawBoard(board);
+
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
+        MoveParser mp = new MoveParser();
+        Move move = mp.parseMove("g1h1", board);
+        assertTrue(moves.contains(move));
+
+        int score = SEE.see(board, move);
+        assertEquals(BISHOP_VAL, score);
+    }
+
+    @Test
+    public void someRandomPosition() {
+        Board board = new Board("5k1r/8/4R2N/5P2/p7/1N2r2Q/2p5/1B2BK2 b - -");
+
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
+        MoveParser mp = new MoveParser();
+
+        Move move = mp.parseMove("e3e1", board);
+        assertTrue(moves.contains(move));
+        assertEquals(BISHOP_VAL-ROOK_VAL, SEE.see(board, move));
+
+        Move move2 = mp.parseMove("e3b3", board);
+        assertTrue(moves.contains(move2));
+        assertEquals(KNIGHT_VAL, SEE.see(board, move2));
+
+        Move move3 = mp.parseMove("h8h6", board);
+        assertTrue(moves.contains(move3));
+        assertEquals(KNIGHT_VAL-ROOK_VAL, SEE.see(board, move3));
     }
 
     // these tests from Arasan... though some expected scores are different
@@ -281,7 +300,6 @@ public class SEETest {
         }
 
         assertTrue(MagicBitboardMoveGenerator.genLegalMoves(board).contains(move));
-        board.applyMove(move);
 
         int myScore = SEE.see(board, move);
         assertEquals(score, myScore);

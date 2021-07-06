@@ -337,12 +337,16 @@ public class SearchIteratorImpl implements SearchIterator {
         // effective branching factor metrics
         StringBuilder sb = new StringBuilder("");
         double totalEbf = 0.0;
+        int numEbfs = 0;
         for (int i=2;i<=Math.min(lastDepth, 12);i++) {
-            double ebf = stats.nodesByIteration.get(i) / Double.valueOf(stats.nodesByIteration.get(i-1));
-            totalEbf += ebf;
-            sb.append(", i" + i + ": " + df.format(ebf));
+            if (stats.nodesByIteration.get(i) != null) {
+                double ebf = stats.nodesByIteration.get(i) / Double.valueOf(stats.nodesByIteration.get(i - 1));
+                totalEbf += ebf;
+                ++numEbfs;
+                sb.append(", i" + i + ": " + df.format(ebf));
+            }
         }
-        double avgEbf = totalEbf / (lastDepth-1);
+        double avgEbf = totalEbf / numEbfs;
         LOGGER.info("# ebf avg: " + df.format(avgEbf) + sb.toString());
     }
 

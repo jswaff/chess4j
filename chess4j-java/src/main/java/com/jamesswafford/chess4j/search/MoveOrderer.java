@@ -1,7 +1,9 @@
 package com.jamesswafford.chess4j.search;
 
+import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.eval.EvalMaterial;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 
 import java.util.HashSet;
@@ -15,26 +17,28 @@ public class MoveOrderer {
 
     private final Board board;
     private final MoveGenerator moveGenerator;
-    private final MoveScorer moveScorer;
 
     private final Move pvMove, hashMove, killer1, killer2;
     private final boolean generateNonCaptures;
     private final Set<Move> specialMovesPlayed;
 
     private Move[] captures;
-    private int captureIndex;
-    private Integer[] captureScores;
+    private int capturesIndex;
+    private Integer[] captureMvvLvaScores;
     private Move[] noncaptures;
-    private int noncaptureIndex;
+    private int noncapturesIndex;
+    private Move[] badcaptures;
+    private Integer[] badCaptureSeeScores;
+    private int badCapturesIndex;
+    private int numBadCaptures;
 
     private MoveOrderStage nextMoveOrderStage = MoveOrderStage.PV;
 
-    public MoveOrderer(Board board, MoveGenerator moveGenerator, MoveScorer moveScorer,
-                       Move pvMove, Move hashMove, Move killer1, Move killer2, boolean generateNonCaptures)
+    public MoveOrderer(Board board, MoveGenerator moveGenerator, Move pvMove, Move hashMove, Move killer1,
+                       Move killer2, boolean generateNonCaptures)
     {
         this.board = board;
         this.moveGenerator = moveGenerator;
-        this.moveScorer = moveScorer;
 
         this.pvMove = pvMove;
         this.hashMove = hashMove;
@@ -72,27 +76,58 @@ public class MoveOrderer {
 
         // generate and score captures and promotions
         if (nextMoveOrderStage == MoveOrderStage.GENCAPS) {
-            nextMoveOrderStage = MoveOrderStage.CAPTURES_PROMOS;
+            nextMoveOrderStage = MoveOrderStage.GOOD_CAPTURES_PROMOS;
             List<Move> myCaptures = moveGenerator.generatePseudoLegalCaptures(board);
             captures =  myCaptures.toArray(new Move[0]);
-            captureIndex = 0;
-            captureScores = new Integer[myCaptures.size()];
+            captureMvvLvaScores = new Integer[myCaptures.size()];
+            capturesIndex = 0;
+            badcaptures = new Move[captures.length];
+            badCaptureSeeScores = new Integer[captures.length];
+            badCapturesIndex = 0;
+            numBadCaptures = 0;
             for (int i=0;i<captures.length;i++) {
                 if (specialMovesPlayed.contains(captures[i])) {
                     captures[i] = null;
                 } else {
-                    captureScores[i] = moveScorer.calculateStaticScore(captures[i]);
+                    captureMvvLvaScores[i] = MVVLVA.score(captures[i]);
                 }
             }
         }
 
-        // captures and promotions
-        if (nextMoveOrderStage == MoveOrderStage.CAPTURES_PROMOS) {
-            int bestInd = getIndexOfBestCapture(captureIndex);
-            if (bestInd != -1) {
-                swap(captures, captureIndex, bestInd);
-                swapScores(captureIndex, bestInd);
-                return captures[captureIndex++];
+        // good captures and promotions
+        if (nextMoveOrderStage == MoveOrderStage.GOOD_CAPTURES_PROMOS) {
+            int bestInd = getIndexOfBestCaptureByMvvLva(capturesIndex);
+            while (bestInd != -1) {
+                Move mv = captures[bestInd];
+
+                // put the best move at the top of the list
+                swap(captures, capturesIndex, bestInd);
+                swapScores(captureMvvLvaScores, capturesIndex, bestInd);
+                ++capturesIndex;
+
+                // the best by MVV/LVA doesn't mean the move is good.  A move is "good" if:
+                // 1) it's a promotion
+                // 2) the value of the captured piece is >= the value of the capturing piece
+                // 3) SEE analysis gives a non-negative score
+                // only do SEE if necessary, but if we do, keep the score for sorting bad captures later on.
+                int seeScore = -Constants.INFINITY;
+                boolean goodCap = mv.promotion() != null ||
+                        (EvalMaterial.evalPiece(mv.captured()) >= EvalMaterial.evalPiece(mv.piece()));
+                if (!goodCap) {
+                    seeScore = SEE.see(board, mv);
+                    goodCap = seeScore >= 0;
+                }
+
+                // if the capture is "good", play it now.  Otherwise, put it in the "bad captures list"
+                // and move on to the next item.
+                if (goodCap) {
+                    return mv;
+                } else {
+                    badcaptures[numBadCaptures] = mv;
+                    badCaptureSeeScores[numBadCaptures] = seeScore;
+                    ++numBadCaptures;
+                    bestInd = getIndexOfBestCaptureByMvvLva(capturesIndex);
+                }
             }
             nextMoveOrderStage = MoveOrderStage.KILLER1;
         }
@@ -107,7 +142,7 @@ public class MoveOrderer {
         }
 
         if (nextMoveOrderStage == MoveOrderStage.KILLER2) {
-            nextMoveOrderStage = MoveOrderStage.GENNONCAPS;
+            nextMoveOrderStage = generateNonCaptures ? MoveOrderStage.GENNONCAPS : MoveOrderStage.BAD_CAPTURES;
             if (killer2 != null && !specialMovesPlayed.contains(killer2) && isPseudoLegalMove(board, killer2)) {
                 assert(killer2.captured()==null);
                 specialMovesPlayed.add(killer2);
@@ -118,7 +153,7 @@ public class MoveOrderer {
         // generate non-captures
         if (generateNonCaptures) {
             if (nextMoveOrderStage == MoveOrderStage.GENNONCAPS) {
-                nextMoveOrderStage = MoveOrderStage.REMAINING;
+                nextMoveOrderStage = MoveOrderStage.NONCAPS;
                 List<Move> myNoncaps = moveGenerator.generatePseudoLegalNonCaptures(board);
                 noncaptures = myNoncaps.toArray(new Move[0]);
                 // avoid playing special moves again
@@ -128,17 +163,26 @@ public class MoveOrderer {
                     }
                 }
 
-                noncaptureIndex = 0;
+                noncapturesIndex = 0;
             }
 
-            // just play them as they come
-            if (noncaptureIndex < noncaptures.length) {
-                int ind = getIndexOfFirstNonCapture(noncaptureIndex);
+            if (nextMoveOrderStage == MoveOrderStage.NONCAPS) {
+                int ind = getIndexOfFirstNonCapture(noncapturesIndex);
                 if (ind != -1) {
-                    swap(noncaptures, noncaptureIndex, ind);
-                    return noncaptures[noncaptureIndex++];
+                    noncapturesIndex = ind + 1;
+                    return noncaptures[ind];
                 }
+                nextMoveOrderStage = MoveOrderStage.BAD_CAPTURES;
             }
+        }
+
+        int bestInd = getIndexOfBestBadCaptureBySee(badCapturesIndex, numBadCaptures);
+        if (bestInd != -1) {
+            assert(bestInd >= badCapturesIndex);
+            assert(bestInd < numBadCaptures);
+            swap(badcaptures, badCapturesIndex, bestInd);
+            swapScores(badCaptureSeeScores, badCapturesIndex, bestInd);
+            return badcaptures[badCapturesIndex++];
         }
 
         return null;
@@ -149,7 +193,9 @@ public class MoveOrderer {
 
         for (int i=startIndex;i<noncaptures.length;i++) {
             Move m = noncaptures[i];
-            if (m != null && m.captured()==null) {
+            if (m != null) {
+                assert(m.captured()==null);
+                assert(m.promotion()==null);
                 index = i;
                 break;
             }
@@ -158,26 +204,45 @@ public class MoveOrderer {
         return index;
     }
 
-    private void swapScores(int ind1, int ind2) {
-        Integer tmp = captureScores[ind1];
-        captureScores[ind1] = captureScores[ind2];
-        captureScores[ind2] = tmp;
+    private void swapScores(Integer[] arr, int ind1, int ind2) {
+        Integer tmp = arr[ind1];
+        arr[ind1] = arr[ind2];
+        arr[ind2] = tmp;
     }
 
-    private int getIndexOfBestCapture(int startIndex) {
+    private int getIndexOfBestCaptureByMvvLva(int startIndex) {
         int bestIndex = -1;
-        int bestScore = -9999;
+        int bestScore = -Constants.INFINITY;
 
         for (int i=startIndex;i<captures.length;i++) {
             Move m = captures[i];
-            if (m != null && (m.captured() != null || m.promotion() != null)) {
-                if (captureScores[i] > bestScore) {
+            if (m != null) {
+                assert (m.captured() != null || m.promotion() != null);
+                if (captureMvvLvaScores[i] > bestScore) {
                     bestIndex = i;
-                    bestScore = captureScores[i];
+                    bestScore = captureMvvLvaScores[i];
                 }
             }
         }
         return bestIndex;
     }
 
+    private int getIndexOfBestBadCaptureBySee(int startIndex, int numBadCaptures) {
+        int bestIndex = -1;
+        int bestScore = -Constants.INFINITY;
+
+        for (int i=startIndex;i<numBadCaptures;i++) {
+            Move m = badcaptures[i];
+            assert(m != null);
+            assert(m.promotion() == null);
+            assert(m.captured() != null);
+            assert(badCaptureSeeScores[i] < 0);
+            if (badCaptureSeeScores[i] > bestScore) {
+                bestIndex = i;
+                bestScore = badCaptureSeeScores[i];
+            }
+        }
+
+        return bestIndex;
+    }
 }

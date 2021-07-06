@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.io.MoveParser;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import org.junit.Before;
@@ -15,22 +16,17 @@ import static org.mockito.Mockito.*;
 import static com.jamesswafford.chess4j.search.MoveOrderStage.*;
 import static com.jamesswafford.chess4j.pieces.Bishop.*;
 import static com.jamesswafford.chess4j.pieces.King.*;
-import static com.jamesswafford.chess4j.pieces.Knight.*;
 import static com.jamesswafford.chess4j.pieces.Pawn.*;
-import static com.jamesswafford.chess4j.pieces.Queen.*;
 import static com.jamesswafford.chess4j.pieces.Rook.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public class MoveOrdererTest {
 
     private MoveGenerator moveGenerator;
-    private MoveScorer moveScorer;
 
     @Before
     public void setUp() {
-        // default impls
         moveGenerator = new MagicBitboardMoveGenerator();
-        moveScorer = new MVVLVA();
     }
 
     @Test
@@ -40,7 +36,7 @@ public class MoveOrdererTest {
         Board board = new Board("b2b1r1k/3R1ppp/4qP2/4p1PQ/4P3/5B2/4N1K1/8 w - -");
         List<Move> moves = moveGenerator.generateLegalMoves(board);
         Move pvMove = moves.get(5); // no particular reason
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, pvMove, null, null, null,
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, pvMove, null, null, null,
                 true);
         assertEquals(pvMove, mo.selectNextMove());
         assertEquals(HASH_MOVE, mo.getNextMoveOrderStage());
@@ -53,7 +49,7 @@ public class MoveOrdererTest {
 
         // randomly make the 5th move the hash move
         Move hashMove = moves.get(4);
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, hashMove, null, null,
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, null, hashMove, null, null,
                 true);
         Move nextMv = mo.selectNextMove();
         assertEquals(GENCAPS, mo.getNextMoveOrderStage());
@@ -69,7 +65,7 @@ public class MoveOrdererTest {
         Move pvMove = moves.get(4);
         Move hashMove = moves.get(2);
 
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, pvMove, hashMove, null, null,
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, pvMove, hashMove, null, null,
                 true);
         Move nextMv = mo.selectNextMove();
         assertEquals(HASH_MOVE, mo.getNextMoveOrderStage());
@@ -87,7 +83,7 @@ public class MoveOrdererTest {
         Collections.shuffle(moves);
 
         Move pv = moves.get(9);
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, pv, pv,null,null,
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, pv, pv,null,null,
                 true);
         Move nextMv = mo.selectNextMove();
         assertEquals(pv, nextMv);
@@ -116,7 +112,7 @@ public class MoveOrdererTest {
         assertTrue(moves.contains(g1c5));
         assertTrue(moves.contains(g8g7));
 
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, g8g7, d5c6,null,null,
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, g8g7, d5c6,null,null,
                 true);
         Move nextMv = mo.selectNextMove();
         assertEquals(g8g7, nextMv);
@@ -129,57 +125,53 @@ public class MoveOrdererTest {
     }
 
     @Test
-    public void capturesBeforeNonCaptures() {
+    public void goodCapturesThenNonCapturesThenBadCaptures() {
 
-        Board board = new Board();
+        Board board = new Board("5k1r/8/4R2N/5P2/p7/1N2r2Q/2p5/1B2BK2 b - -");
 
-        MoveGenerator moveGenerator = mock(MoveGenerator.class);
-        MoveScorer moveScorer = mock(MoveScorer.class);
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, null, null,null,null,
+                true);
 
-        // create two non-caps
-        Move e2e4 = new Move(WHITE_PAWN, E2, E4);
-        Move e2e3 = new Move(WHITE_PAWN, E2, E3);
-        List<Move> noncaps = Arrays.asList(e2e4, e2e3);
-        Collections.shuffle(noncaps);
+        // the capturing promotions should be first
+        MoveParser parser = new MoveParser();
+        assertEquals(parser.parseMove("c2b1q", board), mo.selectNextMove());
+        assertEquals(parser.parseMove("c2b1r", board), mo.selectNextMove());
+        assertEquals(parser.parseMove("c2b1b", board), mo.selectNextMove());
+        assertEquals(parser.parseMove("c2b1n", board), mo.selectNextMove());
 
-        // create two captures.  these aren't really captures but it doesn't matter.
-        Move e3d4 = new Move(WHITE_PAWN, E3, D4, BLACK_PAWN);
-        Move d4b6 = new Move(WHITE_BISHOP, D4, B6, BLACK_KNIGHT);
+        // non-capturing promotions next
+        assertEquals(parser.parseMove("c2c1q", board), mo.selectNextMove());
+        assertEquals(parser.parseMove("c2c1r", board), mo.selectNextMove());
+        assertEquals(parser.parseMove("c2c1b", board), mo.selectNextMove());
+        assertEquals(parser.parseMove("c2c1n", board), mo.selectNextMove());
 
-        // and one promotion
-        Move a7a8 = new Move(WHITE_PAWN, A7, A8, null, WHITE_QUEEN);
-        List<Move> caps = Arrays.asList(e3d4, d4b6, a7a8);
-        Collections.shuffle(caps);
+        // Queen captures
+        assertEquals(parser.parseMove("Rxh3", board), mo.selectNextMove());
+        assertEquals(parser.parseMove("Rxe6", board), mo.selectNextMove());
 
-        when(moveGenerator.generatePseudoLegalCaptures(board)).thenReturn(caps);
-        when(moveGenerator.generatePseudoLegalNonCaptures(board)).thenReturn(noncaps);
+        // MVV/LVA says Rxe1 (capturing bishop) should be next, but it's a losing capture
 
-        // assign scores to captures
-        when(moveScorer.calculateStaticScore(e3d4)).thenReturn(100);
-        when(moveScorer.calculateStaticScore(d4b6)).thenReturn(-50);
-        when(moveScorer.calculateStaticScore(a7a8)).thenReturn(900);
+        // Knight captures  RxN is a losing capture due to queen defender
+        assertEquals(parser.parseMove("axb3", board), mo.selectNextMove());
+        assertEquals(parser.parseMove("Rxb3", board), mo.selectNextMove());
 
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, null,
-                null,true);
+        // those include one pawn push, 9 rook moves, and 5 king moves, total 13 moves
+        for (int i=0;i<15;i++) {
+            Move nextMv = mo.selectNextMove();
+            assertNotNull(nextMv);
+            assertNull(nextMv.captured());
+        }
 
-        assertEquals(PV, mo.getNextMoveOrderStage());
-        assertEquals(a7a8, mo.selectNextMove());
-        assertEquals(CAPTURES_PROMOS, mo.getNextMoveOrderStage());
-        assertEquals(e3d4, mo.selectNextMove());
-        assertEquals(d4b6, mo.selectNextMove());
+        // now the losing capture
+        assertEquals(parser.parseMove("Rxe1", board), mo.selectNextMove()); // rook for bishop
+        assertEquals(parser.parseMove("Rxh6", board), mo.selectNextMove()); // rook for knight
 
-        // that's all the captures, now for a noncapture in the order generated
-        assertEquals(noncaps.get(0), mo.selectNextMove());
-        assertEquals(REMAINING, mo.getNextMoveOrderStage());
-        assertEquals(noncaps.get(1), mo.selectNextMove());
-
-        // we should have called the move generator once for caps and once for noncaps
-        verify(moveGenerator, times(1)).generatePseudoLegalCaptures(board);
-        verify(moveGenerator, times(1)).generatePseudoLegalNonCaptures(board);
+        // no more moves
+        assertNull(mo.selectNextMove());
     }
 
     @Test
-    public void killersAfterCaps() {
+    public void losingCapturesAfterKillers() {
 
         Board board = new Board("8/7p/5k2/5p2/p1p2P2/Pr1pPK2/1P1R3P/8 b - - "); // WAC-2
 
@@ -191,26 +183,23 @@ public class MoveOrdererTest {
         assertTrue(noncaps.contains(b3b7));
         assertTrue(noncaps.contains(f6e7));
 
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, b3b7, f6e7,
+        List<Move> caps = moveGenerator.generatePseudoLegalCaptures(board);
+        assertEquals(2, caps.size());
+
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, null, null, b3b7, f6e7,
                 true);
 
-        // first two moves should be the captures Rxa3 and Rxb2
-        assertNotNull(mo.selectNextMove().captured());
-        assertNotNull(mo.selectNextMove().captured());
-
-        // the next move should be our first killer
+        // there are two captures, but both are losing, so killers first
         assertEquals(b3b7, mo.selectNextMove());
-
-        // and then our second killer
         assertEquals(f6e7, mo.selectNextMove());
 
         List<Move> selectedNonCaps = new ArrayList<>();
         selectedNonCaps.add(b3b7);
         selectedNonCaps.add(f6e7);
 
-        // the killers shouldn't be selected again
+        // now non-captures, but not the killers as they've already been played
         Move nextMv = mo.selectNextMove();
-        while(nextMv != null) {
+        while (nextMv.captured() == null) {
             assertNotEquals(b3b7, nextMv);
             assertNotEquals(f6e7, nextMv);
             assertTrue(noncaps.contains(nextMv));
@@ -218,8 +207,14 @@ public class MoveOrdererTest {
             nextMv = mo.selectNextMove();
         }
 
-        // and all noncaps should have been selected
+        // all noncaps should have been selected
         assertTrue(selectedNonCaps.containsAll(noncaps));
+
+        // we just selected a capture, should be one more
+        assertNotNull(mo.selectNextMove().captured());
+
+        // and no more moves
+        assertNull(mo.selectNextMove());
     }
 
     @Test
@@ -231,11 +226,11 @@ public class MoveOrdererTest {
         when(moveGenerator.generatePseudoLegalCaptures(board))
                 .thenReturn(MagicBitboardMoveGenerator.genPseudoLegalMoves(board, true, false));
 
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, null,
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, null, null, null,
                 null,true);
         mo.selectNextMove();
 
-        assertEquals(CAPTURES_PROMOS, mo.getNextMoveOrderStage());
+        assertEquals(GOOD_CAPTURES_PROMOS, mo.getNextMoveOrderStage());
 
         verify(moveGenerator, times(1)).generatePseudoLegalCaptures(board);
         verify(moveGenerator, times(0)).generatePseudoLegalNonCaptures(board);
@@ -248,12 +243,12 @@ public class MoveOrdererTest {
 
         moveGenerator = mock(MoveGenerator.class);
 
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, null,
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, null, null, null,
                 null,true);
         mo.selectNextMove();
 
         /// this time do not request non-captures
-        mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, null, null,
+        mo = new MoveOrderer(board, moveGenerator, null, null, null, null,
                 false);
         mo.selectNextMove();
 
@@ -269,7 +264,7 @@ public class MoveOrdererTest {
         assertEquals(20, moves.size());
 
         // without a PV or hash the order shouldn't change, since there are no captures
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, null, null, null,
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, null, null, null,
                 null,true);
         List<Move> moves2 = new ArrayList<>();
         for (int i=0;i<20;i++) {
@@ -294,7 +289,7 @@ public class MoveOrdererTest {
         List<Move> noncaps = moveGenerator.generatePseudoLegalNonCaptures(board);
         Collections.shuffle(noncaps);
 
-        MoveOrderer mo = new MoveOrderer(board, moveGenerator, moveScorer, pvMove, null, pvMove,
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, pvMove, null, pvMove,
                 noncaps.get(0),true);
         List<Move> selected = new ArrayList<>();
         Move selectedMv;

@@ -39,7 +39,6 @@ public class AlphaBetaSearch implements Search {
     private boolean skipTimeChecks;
     private Evaluator evaluator;
     private MoveGenerator moveGenerator;
-    private MoveScorer moveScorer;
     private KillerMovesStore killerMovesStore;
 
     public AlphaBetaSearch() {
@@ -50,7 +49,6 @@ public class AlphaBetaSearch implements Search {
         unstop();
         this.evaluator = new Eval();
         this.moveGenerator = new MagicBitboardMoveGenerator();
-        this.moveScorer = new MVVLVA();
         this.killerMovesStore = KillerMoves.getInstance();
 
         if (Initializer.nativeCodeInitialized()) {
@@ -78,10 +76,6 @@ public class AlphaBetaSearch implements Search {
 
     public void setMoveGenerator(MoveGenerator moveGenerator) {
         this.moveGenerator = moveGenerator;
-    }
-
-    public void setMoveScorer(MoveScorer moveScorer) {
-        this.moveScorer = moveScorer;
     }
 
     public void setKillerMovesStore(KillerMovesStore killerMovesStore) {
@@ -220,7 +214,9 @@ public class AlphaBetaSearch implements Search {
             // compare node counts
             if (searchStats.nodes != nativeStats.nodes || searchStats.qnodes != nativeStats.qnodes) {
                 LOGGER.error("node counts not equal!  java nodes: " + searchStats.nodes
-                        + ", native nodes:" + nativeStats.nodes);
+                        + ", native nodes:" + nativeStats.nodes
+                        + ", java qnodes: " + searchStats.qnodes
+                        + ", native qnodes: " + nativeStats.qnodes);
                 return false;
             }
 
@@ -355,7 +351,7 @@ public class AlphaBetaSearch implements Search {
         int numMovesSearched = 0;
         Move pvMove = first && lastPv.size() > ply ? lastPv.get(ply) : null;
         Move hashMove = tte == null ? null : tte.getMove();
-        MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer,
+        MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator,
                 pvMove, hashMove, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply),
                 true);
 
@@ -449,7 +445,7 @@ public class AlphaBetaSearch implements Search {
             alpha = standPat;
         }
 
-        MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator, moveScorer,
+        MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator,
                 null, null, null, null, false);
         Move move;
 

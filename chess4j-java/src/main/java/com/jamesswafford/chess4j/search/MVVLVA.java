@@ -1,14 +1,24 @@
 package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.board.Move;
+import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.pieces.*;
+import com.jamesswafford.chess4j.utils.MoveUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class MVVLVA implements MoveScorer {
+public class MVVLVA {
 
-    private static Map<Class<?>,Integer> pieceMap;
+    private static final Logger LOGGER = LogManager.getLogger(MVVLVA.class);
+
+    static {
+        Initializer.init();
+    }
+
+    private static final Map<Class<?>,Integer> pieceMap;
 
     static {
         pieceMap = new HashMap<>();
@@ -34,8 +44,8 @@ public class MVVLVA implements MoveScorer {
      *
      * The remaining (non-capturing) moves are next, in no particular order.
      *
-     * @param m
-     * @return
+     * @param m - the move to score
+     * @return - the score
      */
     public static int score(Move m) {
         int score = 0;
@@ -48,6 +58,9 @@ public class MVVLVA implements MoveScorer {
             score += scoreCapture(m);
         }
 
+        // if we are running with assertions enabled and the native library is loaded, verify equality
+        assert(mvvlvaAreEqual(score, m));
+
         return score;
     }
 
@@ -59,12 +72,32 @@ public class MVVLVA implements MoveScorer {
 
     private static int scoreCapture(Move m) {
         int capturedVal = pieceMap.get(m.captured().getClass());
+        assert(!m.isEpCapture() || capturedVal==1);
         int moverVal = pieceMap.get(m.piece().getClass());
         return 1000 + (capturedVal * 10) - moverVal;
     }
 
-    @Override
-    public int calculateStaticScore(Move mv) {
-        return score(mv);
+    public static native int mvvlvaNative(long nativeMv);
+
+    private static boolean mvvlvaAreEqual(int javaScore, Move mv) {
+        if (Initializer.nativeCodeInitialized()) {
+            try {
+                int nativeScore = mvvlvaNative(MoveUtils.toNativeMove(mv));
+                if (javaScore != nativeScore) {
+                    LOGGER.error("mvvlva not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
+                            + ", mv: " + mv);
+                    LOGGER.error("moving piece: " + mv.piece() + "; captured: " + mv.captured()
+                            + "; ep?: " + mv.isEpCapture());
+                    return false;
+                }
+                return true;
+            } catch (IllegalStateException e) {
+                LOGGER.error(e);
+                throw e;
+            }
+        } else {
+            return true;
+        }
     }
+
 }
