@@ -20,6 +20,7 @@ public class MoveOrderer {
 
     private final Move pvMove, hashMove, killer1, killer2;
     private final boolean generateNonCaptures;
+    private final boolean playBadCaptures;
     private final Set<Move> specialMovesPlayed;
 
     private Move[] captures;
@@ -35,7 +36,7 @@ public class MoveOrderer {
     private MoveOrderStage nextMoveOrderStage = MoveOrderStage.PV;
 
     public MoveOrderer(Board board, MoveGenerator moveGenerator, Move pvMove, Move hashMove, Move killer1,
-                       Move killer2, boolean generateNonCaptures)
+                       Move killer2, boolean generateNonCaptures, boolean playBadCaptures)
     {
         this.board = board;
         this.moveGenerator = moveGenerator;
@@ -45,6 +46,7 @@ public class MoveOrderer {
         this.killer1 = killer1;
         this.killer2 = killer2;
         this.generateNonCaptures = generateNonCaptures;
+        this.playBadCaptures = playBadCaptures;
         this.specialMovesPlayed = new HashSet<>();
     }
 
@@ -176,13 +178,15 @@ public class MoveOrderer {
             }
         }
 
-        int bestInd = getIndexOfBestBadCaptureBySee(badCapturesIndex, numBadCaptures);
-        if (bestInd != -1) {
-            assert(bestInd >= badCapturesIndex);
-            assert(bestInd < numBadCaptures);
-            swap(badcaptures, badCapturesIndex, bestInd);
-            swapScores(badCaptureSeeScores, badCapturesIndex, bestInd);
-            return badcaptures[badCapturesIndex++];
+        if (playBadCaptures) {
+            int bestInd = getIndexOfBestBadCaptureBySee(badCapturesIndex, numBadCaptures);
+            if (bestInd != -1) {
+                assert (bestInd >= badCapturesIndex);
+                assert (bestInd < numBadCaptures);
+                swap(badcaptures, badCapturesIndex, bestInd);
+                swapScores(badCaptureSeeScores, badCapturesIndex, bestInd);
+                return badcaptures[badCapturesIndex++];
+            }
         }
 
         return null;

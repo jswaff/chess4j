@@ -353,7 +353,7 @@ public class AlphaBetaSearch implements Search {
         Move hashMove = tte == null ? null : tte.getMove();
         MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator,
                 pvMove, hashMove, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply),
-                true);
+                true, true);
 
         Move bestMove = null;
         Move move;
@@ -446,7 +446,7 @@ public class AlphaBetaSearch implements Search {
         }
 
         MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator,
-                null, null, null, null, false);
+                null, null, null, null, false, false);
         Move move;
 
         while ((move = moveOrderer.selectNextMove()) != null) {
@@ -459,13 +459,6 @@ public class AlphaBetaSearch implements Search {
                 board.undoMove(undos.remove(undos.size()-1));
                 continue;
             }
-
-            // prune
-            /*int staticScore = SEE.see(board, move);
-            if (staticScore < 0) {
-                board.undoMove(undos.remove(undos.size()-1));
-                continue;
-            }*/
 
             int val = -quiescenceSearch(board, undos, -beta, -alpha, opts);
             board.undoMove(undos.remove(undos.size()-1));
