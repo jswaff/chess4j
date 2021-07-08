@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.search;
 
+import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.board.squares.Direction;
 import com.jamesswafford.chess4j.board.squares.Square;
@@ -12,13 +13,51 @@ import com.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
-import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
+import static com.jamesswafford.chess4j.pieces.Bishop.BLACK_BISHOP;
+import static com.jamesswafford.chess4j.pieces.Bishop.WHITE_BISHOP;
+import static com.jamesswafford.chess4j.pieces.King.BLACK_KING;
+import static com.jamesswafford.chess4j.pieces.King.WHITE_KING;
+import static com.jamesswafford.chess4j.pieces.Knight.BLACK_KNIGHT;
+import static com.jamesswafford.chess4j.pieces.Knight.WHITE_KNIGHT;
+import static com.jamesswafford.chess4j.pieces.Pawn.BLACK_PAWN;
+import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
+import static com.jamesswafford.chess4j.pieces.Queen.BLACK_QUEEN;
+import static com.jamesswafford.chess4j.pieces.Queen.WHITE_QUEEN;
+import static com.jamesswafford.chess4j.pieces.Rook.BLACK_ROOK;
+import static com.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
 
 public class SEE {
 
     private static final Logger LOGGER = LogManager.getLogger(SEE.class);
+
+    public static final int QUEEN_VAL  = 1000;
+    public static final int ROOK_VAL   = 500;
+    public static final int KNIGHT_VAL = 300;
+    public static final int BISHOP_VAL = 300;
+    public static final int PAWN_VAL   = 100;
+
+    private static final Map<Piece, Integer> pieceValMap;
+
+    static {
+        pieceValMap = new HashMap<>();
+        pieceValMap.put(WHITE_KING, Constants.INFINITY);
+        pieceValMap.put(WHITE_QUEEN, QUEEN_VAL);
+        pieceValMap.put(WHITE_ROOK, ROOK_VAL);
+        pieceValMap.put(WHITE_BISHOP, BISHOP_VAL);
+        pieceValMap.put(WHITE_KNIGHT, KNIGHT_VAL);
+        pieceValMap.put(WHITE_PAWN, PAWN_VAL);
+
+        pieceValMap.put(BLACK_KING, Constants.INFINITY);
+        pieceValMap.put(BLACK_QUEEN, QUEEN_VAL);
+        pieceValMap.put(BLACK_ROOK, ROOK_VAL);
+        pieceValMap.put(BLACK_BISHOP, BISHOP_VAL);
+        pieceValMap.put(BLACK_KNIGHT, KNIGHT_VAL);
+        pieceValMap.put(BLACK_PAWN, PAWN_VAL);
+    }
 
     static {
         Initializer.init();
@@ -45,7 +84,7 @@ public class SEE {
     public static native int seeNative(Board b, long nativeMv);
 
     private static int scorePromotion(Move m) {
-        return evalPiece(m.promotion()) - PAWN_VAL;
+        return seePieceVal(m.promotion()) - PAWN_VAL;
     }
 
     private static int scoreCapture(Board b, Move m) {
@@ -54,7 +93,7 @@ public class SEE {
         assert(m.captured() != null);
 
         int[] scores = new int[32];
-        scores[0] = evalPiece(m.captured());
+        scores[0] = seePieceVal(m.captured());
         int scoresInd = 1;
 
         long whiteAttackersMap = AttackDetector.getAttackers(b, m.to(), Color.WHITE);
@@ -68,7 +107,7 @@ public class SEE {
         Color sideToMove = Color.swap(b.getPlayerToMove());
         Square currentSq = m.from();
         Piece currentPiece = m.piece();
-        int attackedPieceVal = evalPiece(currentPiece);
+        int attackedPieceVal = seePieceVal(currentPiece);
 
         while (true) {
             // add any x-ray attackers back in, behind currentPiece in
@@ -107,7 +146,7 @@ public class SEE {
 
             scores[scoresInd] = attackedPieceVal - scores[scoresInd-1];
             scoresInd++;
-            attackedPieceVal = evalPiece(currentPiece);
+            attackedPieceVal = seePieceVal(currentPiece);
             sideToMove = Color.swap(sideToMove);
         }
 
@@ -120,6 +159,10 @@ public class SEE {
         return scores[0];
     }
 
+    public static int seePieceVal(Piece piece) {
+        return pieceValMap.get(piece);
+    }
+
     private static Square findLeastValuable(Board board, long attackers) {
         Square lvSq = null;
         int lvScore = 0;
@@ -127,7 +170,7 @@ public class SEE {
         while (attackers != 0) {
             int sqInd = Bitboard.lsb(attackers);
             Square sq = Square.valueOf(sqInd);
-            int myVal = evalPiece(board.getPiece(sq));
+            int myVal = seePieceVal(board.getPiece(sq));
             if (lvSq==null || myVal < lvScore) {
                 lvSq = sq;
                 lvScore = myVal;
@@ -159,5 +202,6 @@ public class SEE {
             return true;
         }
     }
+
 
 }
