@@ -376,7 +376,7 @@ public class AlphaBetaSearch implements Search {
             int ext = givesCheck ? 1 : 0;
 
             int val;
-            if (numMovesSearched==0) {
+            if (numMovesSearched==0 || opts.isAvoidResearches()) {
                 val = -search(board, undos, pv, pvNode, ply+1, depth-1+ext,  -beta, -alpha, givesCheck,
                         true, opts);
             } else {

@@ -7,7 +7,6 @@ import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import org.awaitility.Awaitility;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -44,7 +43,6 @@ public class AlphaBetaSearchTest {
         TTHolder.getInstance().clearTables();
     }
 
-    @Ignore
     @Test
     public void search_initialPos_depth1() {
 
@@ -66,7 +64,10 @@ public class AlphaBetaSearchTest {
         // when the search is invoked
         search.setEvaluator(evaluator);
 
-        int score = search.search(board, params);
+        int score = search.search(board, params,
+                SearchOptions.builder().startTime(System.currentTimeMillis())
+                        .avoidResearches(true)
+                        .build());
 
         // then the evaluator should have been invoked for each move
         verify(evaluator, times(20)).evaluateBoard(any(Board.class));
@@ -158,7 +159,6 @@ public class AlphaBetaSearchTest {
      * follows the example on page 6 of my Master's project paper.
      */
     @Test
-    @Ignore
     public void alphaBetaCutoffs() {
 
         Board boardA = new Board();
@@ -274,7 +274,11 @@ public class AlphaBetaSearchTest {
         search.setMoveGenerator(moveGenerator);
         search.setKillerMovesStore(mock(KillerMovesStore.class));
 
-        int score = search.search(boardA, params);
+        int score = search.search(boardA, params,
+                SearchOptions.builder().startTime(System.currentTimeMillis())
+                    .avoidResearches(true)
+                    .build());
+
         assertEquals(3, score);
 
         // ensure the proper nodes were evaluated

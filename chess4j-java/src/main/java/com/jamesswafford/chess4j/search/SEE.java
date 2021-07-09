@@ -34,6 +34,7 @@ public class SEE {
 
     private static final Logger LOGGER = LogManager.getLogger(SEE.class);
 
+    // note- these values are for move ordering only, not material evaluation
     public static final int QUEEN_VAL  = 1000;
     public static final int ROOK_VAL   = 500;
     public static final int KNIGHT_VAL = 300;
