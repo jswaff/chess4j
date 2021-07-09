@@ -7,6 +7,7 @@ import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import org.awaitility.Awaitility;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -43,6 +44,7 @@ public class AlphaBetaSearchTest {
         TTHolder.getInstance().clearTables();
     }
 
+    @Ignore
     @Test
     public void search_initialPos_depth1() {
 
@@ -156,6 +158,7 @@ public class AlphaBetaSearchTest {
      * follows the example on page 6 of my Master's project paper.
      */
     @Test
+    @Ignore
     public void alphaBetaCutoffs() {
 
         Board boardA = new Board();
