@@ -375,8 +375,20 @@ public class AlphaBetaSearch implements Search {
             // extensions
             int ext = givesCheck ? 1 : 0;
 
-            int val = -search(board, undos, pv, pvNode, ply+1, depth-1+ext,  -beta, -alpha, givesCheck,
-                    true, opts);
+            int val;
+            if (numMovesSearched==0 || ply==0 || opts.isAvoidResearches()) {
+                val = -search(board, undos, pv, pvNode, ply+1, depth-1+ext,  -beta, -alpha, givesCheck,
+                        true, opts);
+            } else {
+                // try a PVS (zero width) search
+                val = -search(board, undos, pv, pvNode, ply+1, depth-1+ext,  -(alpha+1), -alpha, givesCheck,
+                        true, opts);
+                if (val > alpha && val < beta) {
+                    val = -search(board, undos, pv, pvNode, ply+1, depth-1+ext,  -beta, -alpha, givesCheck,
+                            true, opts);
+                }
+            }
+
             ++numMovesSearched;
             board.undoMove(undos.remove(undos.size()-1));
 

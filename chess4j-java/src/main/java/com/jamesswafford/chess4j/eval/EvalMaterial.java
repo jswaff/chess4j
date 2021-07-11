@@ -84,4 +84,5 @@ public class EvalMaterial {
     public static int evalPiece(Piece piece) {
         return pieceValMap.get(piece);
     }
+
 }

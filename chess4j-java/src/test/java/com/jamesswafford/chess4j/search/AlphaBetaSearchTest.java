@@ -64,7 +64,10 @@ public class AlphaBetaSearchTest {
         // when the search is invoked
         search.setEvaluator(evaluator);
 
-        int score = search.search(board, params);
+        int score = search.search(board, params,
+                SearchOptions.builder().startTime(System.currentTimeMillis())
+                        .avoidResearches(true)
+                        .build());
 
         // then the evaluator should have been invoked for each move
         verify(evaluator, times(20)).evaluateBoard(any(Board.class));
@@ -271,7 +274,11 @@ public class AlphaBetaSearchTest {
         search.setMoveGenerator(moveGenerator);
         search.setKillerMovesStore(mock(KillerMovesStore.class));
 
-        int score = search.search(boardA, params);
+        int score = search.search(boardA, params,
+                SearchOptions.builder().startTime(System.currentTimeMillis())
+                    .avoidResearches(true)
+                    .build());
+
         assertEquals(3, score);
 
         // ensure the proper nodes were evaluated

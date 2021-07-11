@@ -18,7 +18,7 @@ import static com.jamesswafford.chess4j.pieces.Knight.*;
 import static com.jamesswafford.chess4j.pieces.Rook.*;
 import static com.jamesswafford.chess4j.pieces.Queen.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
-import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
+import static com.jamesswafford.chess4j.search.SEE.*;
 
 
 public class SEETest {

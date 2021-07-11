@@ -3,7 +3,6 @@ package com.jamesswafford.chess4j.search;
 import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.eval.EvalMaterial;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
 
 import java.util.HashSet;
@@ -113,8 +112,7 @@ public class MoveOrderer {
                 // 3) SEE analysis gives a non-negative score
                 // only do SEE if necessary, but if we do, keep the score for sorting bad captures later on.
                 int seeScore = -Constants.INFINITY;
-                boolean goodCap = mv.promotion() != null ||
-                        (EvalMaterial.evalPiece(mv.captured()) >= EvalMaterial.evalPiece(mv.piece()));
+                boolean goodCap = mv.promotion() != null || SEE.seePieceVal(mv.captured()) >= SEE.seePieceVal(mv.piece());
                 if (!goodCap) {
                     seeScore = SEE.see(board, mv);
                     goodCap = seeScore >= 0;
