@@ -374,18 +374,37 @@ public class AlphaBetaSearch implements Search {
 
             // extensions
             int ext = givesCheck ? 1 : 0;
+            boolean tryNull = ext == 0;
 
             int val;
             if (numMovesSearched==0 || ply==0 || opts.isAvoidResearches()) {
                 val = -search(board, undos, pv, pvNode, ply+1, depth-1+ext,  -beta, -alpha, givesCheck,
                         true, opts);
             } else {
-                // try a PVS (zero width) search
-                val = -search(board, undos, pv, pvNode, ply+1, depth-1+ext,  -(alpha+1), -alpha, givesCheck,
-                        true, opts);
-                if (val > alpha && val < beta) {
-                    val = -search(board, undos, pv, pvNode, ply+1, depth-1+ext,  -beta, -alpha, givesCheck,
-                            true, opts);
+
+                // If we've already searched a few moves, chances are this is an ALL node, and we're not going to get
+                // a beta cutoff.  Unless the move looks "interesting" in some way, just search to a reduced depth.
+                // If we're surprised by the score, we'll research it to the normal depth.
+
+                if (numMovesSearched >= 4 && depth >= 3 && !pvNode && !inCheck && !givesCheck && ext==0 &&
+                        move.captured()==null && move.promotion()==null &&
+                        !move.equals(killerMovesStore.getKiller1(ply)) && !move.equals(killerMovesStore.getKiller2(ply)))
+                {
+                    val = -search(board, undos, pv, pvNode, ply+1, depth-2,  -(alpha+1), -alpha, givesCheck,
+                            tryNull, opts);
+                }
+                else {
+                    val = alpha + 1; // ensure a search
+                }
+
+                if (val > alpha) {
+                    // try a PVS (zero width) search
+                    val = -search(board, undos, pv, pvNode, ply + 1, depth - 1 + ext, -(alpha + 1), -alpha, givesCheck,
+                            tryNull, opts);
+                    if (val > alpha && val < beta) {
+                        val = -search(board, undos, pv, pvNode, ply + 1, depth - 1 + ext, -beta, -alpha, givesCheck,
+                                tryNull, opts);
+                    }
                 }
             }
 
