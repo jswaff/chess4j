@@ -151,8 +151,8 @@ public class SearchIteratorImpl implements SearchIterator {
         do {
             ++depth;
 
-            int alphaBound = -INFINITY;
-            int betaBound = INFINITY;
+            int alphaBound = -CHECKMATE;
+            int betaBound = CHECKMATE;
             /*if (depth > 2) {
                 alphaBound = score - EvalMaterial.PAWN_VAL / 3;
                 betaBound = score + EvalMaterial.PAWN_VAL / 3;
