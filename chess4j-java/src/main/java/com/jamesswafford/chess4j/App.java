@@ -78,7 +78,7 @@ public final class App {
     private static void warmUp() {
         SearchOptions opts = SearchOptions.builder().avoidNative(true).build();
         new AlphaBetaSearch().search(new Board(),
-                new SearchParameters(3, -Constants.INFINITY, Constants.INFINITY), opts);
+                new SearchParameters(3, -Constants.CHECKMATE, Constants.CHECKMATE), opts);
         TTHolder.getInstance().clearTables();
     }
 

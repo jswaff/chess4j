@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
-import static com.jamesswafford.chess4j.Constants.INFINITY;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.pieces.Bishop.WHITE_BISHOP;
 import static com.jamesswafford.chess4j.pieces.King.BLACK_KING;
@@ -49,7 +48,7 @@ public class AlphaBetaSearchTest {
         // given a board in the initial position
         Board board = new Board();
         Evaluator evaluator = mock(Evaluator.class);
-        SearchParameters params = new SearchParameters(1, -INFINITY, INFINITY);
+        SearchParameters params = new SearchParameters(1, -CHECKMATE, CHECKMATE);
 
         // set up the return scores for a couple of moves.  all others default to score=0.
         // the returned scores are from black's point-of-view so the lower the better for white.
@@ -84,7 +83,7 @@ public class AlphaBetaSearchTest {
     public void mateIn1() {
         Board board = new Board("4k3/8/3Q4/2B5/8/8/1K6/8 w - -");
 
-        SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
+        SearchParameters params = new SearchParameters(2, -CHECKMATE, CHECKMATE);
 
         int score = search.search(board, params);
         assertEquals(CHECKMATE-1, score);
@@ -98,7 +97,7 @@ public class AlphaBetaSearchTest {
     public void mateIn1b() {
         Board board = new Board("4K3/8/8/3n2q1/8/8/3k4/8 b - -");
 
-        SearchParameters params = new SearchParameters(2, -INFINITY, INFINITY);
+        SearchParameters params = new SearchParameters(2, -CHECKMATE, CHECKMATE);
 
         int score = search.search(board, params);
         assertEquals(CHECKMATE-1, score);
@@ -112,7 +111,7 @@ public class AlphaBetaSearchTest {
     public void mateIn2() {
         Board board = new Board("r1bq2r1/b4pk1/p1pp1p2/1p2pP2/1P2P1PB/3P4/1PPQ2P1/R3K2R w - -");
 
-        SearchParameters params = new SearchParameters(4, -INFINITY, INFINITY);
+        SearchParameters params = new SearchParameters(4, -CHECKMATE, CHECKMATE);
 
         int score = search.search(board, params);
         assertEquals(CHECKMATE-3, score);
@@ -128,7 +127,7 @@ public class AlphaBetaSearchTest {
     public void mateIn3() {
         Board board = new Board("r5rk/5p1p/5R2/4B3/8/8/7P/7K w - -");
 
-        SearchParameters params = new SearchParameters(6, -INFINITY, INFINITY);
+        SearchParameters params = new SearchParameters(6, -CHECKMATE, CHECKMATE);
 
         int score = search.search(board, params);
         assertEquals(CHECKMATE-5, score);
@@ -146,7 +145,7 @@ public class AlphaBetaSearchTest {
     public void staleMate() {
         Board board = new Board("8/6p1/5p2/5k1K/7P/8/8/8 w - -");
 
-        SearchParameters params = new SearchParameters(1, -INFINITY, INFINITY);
+        SearchParameters params = new SearchParameters(1, -CHECKMATE, CHECKMATE);
 
         int score = search.search(board, params);
         assertEquals(0, score);
@@ -165,7 +164,7 @@ public class AlphaBetaSearchTest {
 
         Evaluator evaluator = mock(Evaluator.class);
         MoveGenerator moveGenerator = mock(MoveGenerator.class);
-        SearchParameters params = new SearchParameters(3, -INFINITY, INFINITY);
+        SearchParameters params = new SearchParameters(3, -CHECKMATE, CHECKMATE);
         ArgumentCaptor<Board> boardCaptor = ArgumentCaptor.forClass(Board.class);
 
         // from position A we need three moves.  It doesn't matter what the moves
@@ -307,7 +306,7 @@ public class AlphaBetaSearchTest {
         // start what would be a long running search in a separate thread
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Future<Integer> future = executor.submit(() -> search.search(new Board(),
-                new SearchParameters(8, -INFINITY, INFINITY)));
+                new SearchParameters(8, -CHECKMATE, CHECKMATE)));
 
         long start = System.currentTimeMillis();
         search.stop();
@@ -326,11 +325,11 @@ public class AlphaBetaSearchTest {
     public void stoppedSearchDoesNotReturnPV() {
 
         // first a search that has NOT been stopped
-        search.search(new Board(), new SearchParameters(1, -INFINITY, INFINITY));
+        search.search(new Board(), new SearchParameters(1, -CHECKMATE, CHECKMATE));
         assertEquals(1, search.getPv().size());
 
         search.stop();
-        search.search(new Board(), new SearchParameters(1, -INFINITY, INFINITY));
+        search.search(new Board(), new SearchParameters(1, -CHECKMATE, CHECKMATE));
         assertEquals(0, search.getPv().size());
     }
 
@@ -339,7 +338,7 @@ public class AlphaBetaSearchTest {
 
         // initialize the search
         Board board = new Board();
-        search.search(board, new SearchParameters(1, -INFINITY, INFINITY));
+        search.search(board, new SearchParameters(1, -CHECKMATE, CHECKMATE));
         List<Move> lastPv = new ArrayList<>(search.getPv());
         assertEquals(1, lastPv.size());
 
@@ -360,7 +359,7 @@ public class AlphaBetaSearchTest {
         SearchOptions opts = SearchOptions.builder().pvCallback(pvCallback).startTime(System.currentTimeMillis())
                 .build();
         for (int depth=2; depth <= 6; depth++) {
-            search.search(board, new SearchParameters(depth, -INFINITY, INFINITY), opts);
+            search.search(board, new SearchParameters(depth, -CHECKMATE, CHECKMATE), opts);
             assertEquals(depth, search.getPv().size());
             assertEquals(depth-1, visited.keySet().size());
 

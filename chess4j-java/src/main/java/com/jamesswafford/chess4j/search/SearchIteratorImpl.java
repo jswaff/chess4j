@@ -22,7 +22,6 @@ import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
-import static com.jamesswafford.chess4j.Constants.INFINITY;
 
 public class SearchIteratorImpl implements SearchIterator {
 

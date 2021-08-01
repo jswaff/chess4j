@@ -419,7 +419,7 @@ public class AlphaBetaSearch implements Search {
             if (val >= beta) {
                 searchStats.failHighs++;
                 searchStats.failHighByMove.computeIfPresent(numMovesSearched, (k, v) -> v + 1);
-                TTHolder.getInstance().getHashTable().store(board, LOWER_BOUND, beta, depth, move);
+                TTHolder.getInstance().getHashTable().store(board, LOWER_BOUND, beta, depth, move, 0);
                 if (move.captured()==null && move.promotion()==null) {
                     killerMovesStore.addKiller(ply, move);
                 }
@@ -450,7 +450,7 @@ public class AlphaBetaSearch implements Search {
             tableEntryType = EXACT_SCORE;
         }
 
-        TTHolder.getInstance().getHashTable().store(board, tableEntryType, alpha, depth, bestMove);
+        TTHolder.getInstance().getHashTable().store(board, tableEntryType, alpha, depth, bestMove, 0);
 
         return alpha;
     }
