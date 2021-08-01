@@ -122,7 +122,8 @@ public class TranspositionTable extends AbstractTranspositionTable {
      */
     public void store(long zobristKey, TranspositionTableEntryType entryType, int score, int depth, Move move,
                       int hashAge) {
-        table[getTableIndex(zobristKey)] = buildHashTableEntry(zobristKey, entryType, score, depth, move, hashAge);
+        table[getTableIndex(zobristKey)] = buildHashTableEntry(zobristKey, entryType, score, depth, move,
+                hashAge);
     }
 
     /*
