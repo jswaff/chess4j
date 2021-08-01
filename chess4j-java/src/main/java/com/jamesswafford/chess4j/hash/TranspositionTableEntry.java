@@ -46,9 +46,9 @@ public class TranspositionTableEntry {
 
 
     public TranspositionTableEntry(long zobristKey, TranspositionTableEntryType entryType, int score, int depth,
-                                   Move move, int hashAge) {
+                                   Move move) {
         this.zobristKey = zobristKey;
-        buildStoredValue(entryType, score, depth, move, hashAge);
+        buildStoredValue(entryType, score, depth, move);
     }
 
     public TranspositionTableEntry(long zobristKey, long val) {
@@ -56,8 +56,7 @@ public class TranspositionTableEntry {
         this.val = val;
     }
 
-    private void buildStoredValue(TranspositionTableEntryType entryType, int score, int depth, Move move,
-                                  int hashAge) {
+    private void buildStoredValue(TranspositionTableEntryType entryType, int score, int depth, Move move) {
         // bits 0-1 are the entry type
         val = entryType.ordinal();
         assert(val <= 3);
@@ -88,11 +87,6 @@ public class TranspositionTableEntry {
                 val |= 1L << 51;
             }
         }
-
-        // age
-        assert(hashAge >= 0);
-        assert(hashAge < 1024);
-        val |= ((long)hashAge) << 52;
     }
 
     public TranspositionTableEntryType getType() {
@@ -138,8 +132,6 @@ public class TranspositionTableEntry {
     public int getDepth() {
         return (int)((val >> 2) & 0xFF);
     }
-
-    public int getAge() { return (int)((val >> 52) & 0x3FF); }
 
     @Override
     public boolean equals(Object obj) {

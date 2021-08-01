@@ -38,7 +38,7 @@ JNIEXPORT jlong JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_p
     
 
     /* probe the table */
-    uint64_t val = probe_hash(&htbl, c4j_pos.hash_key, 0);
+    uint64_t val = probe_hash(&htbl, c4j_pos.hash_key);
     retval = (jlong) val;
 
 

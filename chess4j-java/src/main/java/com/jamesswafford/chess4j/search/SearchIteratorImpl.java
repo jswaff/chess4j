@@ -4,7 +4,6 @@ import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
-import com.jamesswafford.chess4j.eval.EvalMaterial;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTable;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.hash.TranspositionTable;
@@ -292,9 +291,15 @@ public class SearchIteratorImpl implements SearchIterator {
         double hashHitPct = hashHits / (hashProbes/100.0);
         double hashCollisionPct = hashCollisions / (hashProbes/100.0);
 
-        LOGGER.info("# hash probes: " + df2.format(hashProbes)
-                + ", hits: " + df2.format(hashHits) + " (" + df.format(hashHitPct) + "%)"
-                + ", collisions: " + df2.format(hashCollisions) + " (" + df.format(hashCollisionPct) + "%)");
+        // native code is not measuring collisions
+        if (Initializer.nativeCodeInitialized()) {
+            LOGGER.info("# hash probes: " + df2.format(hashProbes)
+                    + ", hits: " + df2.format(hashHits) + " (" + df.format(hashHitPct) + "%)");
+        } else {
+            LOGGER.info("# hash probes: " + df2.format(hashProbes)
+                    + ", hits: " + df2.format(hashHits) + " (" + df.format(hashHitPct) + "%)"
+                    + ", collisions: " + df2.format(hashCollisions) + " (" + df.format(hashCollisionPct) + "%)");
+        }
 
         double hashFailHighPct = stats.hashFailHighs / (hashProbes/100.0);
         double hashFailLowPct = stats.hashFailLows / (hashProbes/100.0);
@@ -349,6 +354,6 @@ public class SearchIteratorImpl implements SearchIterator {
         LOGGER.info("# ebf avg: " + df.format(avgEbf) + sb.toString());
     }
 
-        private native void iterateNative(Board board, int maxDepth, List<Long> pv);
+    private native void iterateNative(Board board, int maxDepth, List<Long> pv);
 
 }

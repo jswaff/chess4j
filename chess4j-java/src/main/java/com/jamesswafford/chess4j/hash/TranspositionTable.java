@@ -120,10 +120,8 @@ public class TranspositionTable extends AbstractTranspositionTable {
      * Store an entry in the transposition table, Gerbil style.  Meaning, for now I'm skirting around
      * dealing with the headache that is storing mate scores by storing them as bounds only.
      */
-    public void store(long zobristKey, TranspositionTableEntryType entryType, int score, int depth, Move move,
-                      int hashAge) {
-        table[getTableIndex(zobristKey)] = buildHashTableEntry(zobristKey, entryType, score, depth, move,
-                hashAge);
+    public void store(long zobristKey, TranspositionTableEntryType entryType, int score, int depth, Move move) {
+        table[getTableIndex(zobristKey)] = buildHashTableEntry(zobristKey, entryType, score, depth, move);
     }
 
     /*
@@ -131,19 +129,17 @@ public class TranspositionTable extends AbstractTranspositionTable {
      * code.  The only time this method would be used when native code is enabled is when assertions are on,
      * to verify search equality.
      */
-    public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move,
-                      int hashAge) {
+    public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move) {
         if (Initializer.nativeCodeInitialized()) {
-            TranspositionTableEntry entry = buildHashTableEntry(board.getZobristKey(), entryType, score, depth, move,
-                    hashAge);
+            TranspositionTableEntry entry = buildHashTableEntry(board.getZobristKey(), entryType, score, depth, move);
             storeNative(board, entry.getVal());
         } else {
-            store(board.getZobristKey(), entryType, score, depth, move, hashAge);
+            store(board.getZobristKey(), entryType, score, depth, move);
         }
     }
 
     private TranspositionTableEntry buildHashTableEntry(long zobristKey, TranspositionTableEntryType entryType,
-                                                        int score, int depth, Move move, int hashAge)
+                                                        int score, int depth, Move move)
     {
         if (isMateScore(score)) {
             if (entryType==TranspositionTableEntryType.UPPER_BOUND) {
@@ -165,7 +161,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
             }
         }
 
-        return new TranspositionTableEntry(zobristKey, entryType, score, depth, move, hashAge);
+        return new TranspositionTableEntry(zobristKey, entryType, score, depth, move);
     }
 
     private native void storeNative(Board board, long val);
