@@ -69,7 +69,7 @@ public class TranspositionTableEntry {
         assert(score <= 32767);
         val |= ((long)score + 32767) << 10;
 
-        // move from square
+        // move
         if (move != null) {
             val |= ((long)move.from().value()) << 26;
             val |= ((long)move.to().value()) << 32;
