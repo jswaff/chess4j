@@ -190,7 +190,6 @@ public class AlphaBetaSearch implements Search {
         try {
             long nativeProbes = TTHolder.getInstance().getHashTable().getNumProbes();
             long nativeHits = TTHolder.getInstance().getHashTable().getNumHits();
-            long nativeCollisions = TTHolder.getInstance().getHashTable().getNumCollisions();
 
             assert(clearTableWrapper());
             int javaScore = searchWithJavaCode(board, undos, searchParameters, opts);
@@ -198,15 +197,18 @@ public class AlphaBetaSearch implements Search {
             // if the search was interrupted we can't compare
             if (stop) return true;
 
+            if (javaScore != nativeScore) {
+                LOGGER.error("scores not equal! java score: " + javaScore + ", native score: " + nativeScore);
+                return false;
+            }
+
             // compare the hash table stats
             long javaProbes = TTHolder.getInstance().getHashTable().getNumProbes();
             long javaHits = TTHolder.getInstance().getHashTable().getNumHits();
-            long javaCollisions = TTHolder.getInstance().getHashTable().getNumCollisions();
-            if (javaProbes != nativeProbes || javaHits != nativeHits || javaCollisions != nativeCollisions) {
+            if (javaProbes != nativeProbes || javaHits != nativeHits) {
                 LOGGER.error("hash stats not equal! "
                         + "java probes: " + javaProbes + ", native probes: " + nativeProbes
                         + ", java hits: " + javaHits + ", native hits: " + nativeHits
-                        + ", java collisions: " + javaCollisions + ", native collisions: " + nativeCollisions
                         + ", params: " + searchParameters);
                 return false;
             }
@@ -287,7 +289,7 @@ public class AlphaBetaSearch implements Search {
                 return 0;
             }
 
-            // is the hash entry useful?
+            // try the hash table
             if (tte != null && tte.getDepth() >= depth) {
                 if (tte.getType() == LOWER_BOUND) {
                     if (tte.getScore() >= beta) {

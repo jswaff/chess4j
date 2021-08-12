@@ -124,7 +124,7 @@ public class MoveOrderer {
                     return mv;
                 } else {
                     badcaptures[numBadCaptures] = mv;
-                    badCaptureSeeScores[numBadCaptures] = seeScore;
+                    badCaptureSeeScores[numBadCaptures] = Math.max(seeScore, -Constants.CHECKMATE);
                     ++numBadCaptures;
                     bestInd = getIndexOfBestCaptureByMvvLva(capturesIndex);
                 }

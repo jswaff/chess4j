@@ -20,23 +20,23 @@ public class TranspositionTableEntry {
         longToPieceMap = new HashMap<>();
 
         // first three bits are for piece.  4th bit is for color (1=White)
-        pieceToLongMap.put(Pawn.BLACK_PAWN, 0L);
-        pieceToLongMap.put(Pawn.WHITE_PAWN, 8L);
+        pieceToLongMap.put(Pawn.BLACK_PAWN, 1L);
+        pieceToLongMap.put(Pawn.WHITE_PAWN, 9L);
 
-        pieceToLongMap.put(Knight.BLACK_KNIGHT, 1L);
-        pieceToLongMap.put(Knight.WHITE_KNIGHT, 9L);
+        pieceToLongMap.put(Knight.BLACK_KNIGHT, 2L);
+        pieceToLongMap.put(Knight.WHITE_KNIGHT, 10L);
 
-        pieceToLongMap.put(Bishop.BLACK_BISHOP, 2L);
-        pieceToLongMap.put(Bishop.WHITE_BISHOP, 10L);
+        pieceToLongMap.put(Bishop.BLACK_BISHOP, 3L);
+        pieceToLongMap.put(Bishop.WHITE_BISHOP, 11L);
 
-        pieceToLongMap.put(Rook.BLACK_ROOK, 3L);
-        pieceToLongMap.put(Rook.WHITE_ROOK, 11L);
+        pieceToLongMap.put(Rook.BLACK_ROOK, 4L);
+        pieceToLongMap.put(Rook.WHITE_ROOK, 12L);
 
-        pieceToLongMap.put(Queen.BLACK_QUEEN, 4L);
-        pieceToLongMap.put(Queen.WHITE_QUEEN, 12L);
+        pieceToLongMap.put(Queen.BLACK_QUEEN, 5L);
+        pieceToLongMap.put(Queen.WHITE_QUEEN, 13L);
 
-        pieceToLongMap.put(King.BLACK_KING, 5L);
-        pieceToLongMap.put(King.WHITE_KING, 13L);
+        pieceToLongMap.put(King.BLACK_KING, 6L);
+        pieceToLongMap.put(King.WHITE_KING, 14L);
 
         // create the map linking the other direction
         for (Piece p : pieceToLongMap.keySet()) {
@@ -61,33 +61,30 @@ public class TranspositionTableEntry {
         val = entryType.ordinal();
         assert(val <= 3);
 
+        assert(depth >= 0);
+        assert(depth < 256);
         val |= ((long)depth) << 2;
 
-        if (score > 0) {
-            val |= ((long)score)<<18;
-        } else {
-            val |= ((long)-score)<<18;
-            val |= 1L << 34;
-        }
+        assert(score >= -32767);
+        assert(score <= 32767);
+        val |= ((long)score + 32767) << 10;
 
-        // move from square
+        // move
         if (move != null) {
-            val |= ((long)move.from().value()) << 35;
-            val |= ((long)move.to().value()) << 41;
-            val |= pieceToLongMap.get(move.piece()) << 47;
+            val |= ((long)move.from().value()) << 26;
+            val |= ((long)move.to().value()) << 32;
+            val |= pieceToLongMap.get(move.piece()) << 38;
             if (move.captured() != null) {
-                val |= 1L << 51;
-                val |= pieceToLongMap.get(move.captured()) << 52;
+                val |= pieceToLongMap.get(move.captured()) << 42;
             }
             if (move.promotion() != null) {
-                val |= 1L << 56;
-                val |= pieceToLongMap.get(move.promotion()) << 57;
+                val |= pieceToLongMap.get(move.promotion()) << 46;
             }
             if (move.isCastle()) {
-                val |= 1L << 61;
+                val |= 1L << 50;
             }
             if (move.isEpCapture()) {
-                val |= 1L << 62;
+                val |= 1L << 51;
             }
         }
     }
@@ -103,32 +100,28 @@ public class TranspositionTableEntry {
     public long getVal() { return val; }
 
     public int getScore() {
-        int score = (int)((val >> 18) & 0xFFFF);
-        if (((val >> 34) & 1) == 1) {
-            score = -score;
-        }
-        return score;
+        return (int)((val >> 10) & 0xFFFF) - 32767;
     }
 
     public Move getMove() {
         Move move = null;
 
-        if ((val >> 35)  > 0) { // TODO: mask this
-            Square fromSq = Square.valueOf((int)(val >> 35) & 63);
-            Square toSq = Square.valueOf((int)(val >> 41) & 63);
-            Piece piece = longToPieceMap.get((val >> 47) & 15L);
+        if (((val >> 26) & 0x3FFFFFF) > 0) {
+            Square fromSq = Square.valueOf((int)(val >> 26) & 0x3F);
+            Square toSq = Square.valueOf((int)(val >> 32) & 0x3F);
+            Piece piece = longToPieceMap.get((val >> 38) & 0xF);
             Piece captured = null;
-            if (((val >> 51) & 1) == 1) {
-                captured = longToPieceMap.get((val >> 52) & 15L);
+            if (((val >> 42) & 0xF) > 0) {
+                captured = longToPieceMap.get((val >> 42) & 0xF);
             }
 
             Piece promotion = null;
-            if (((val >> 56) & 1) == 1) {
-                promotion = longToPieceMap.get((val >> 57) & 15L);
+            if (((val >> 46) & 0xF) > 0) {
+                promotion = longToPieceMap.get((val >> 46) & 0xF);
             }
 
-            boolean castle = ((val >> 61) & 1)==1;
-            boolean epCapture = ((val >> 62) & 1)==1;
+            boolean castle = ((val >> 50) & 1)==1;
+            boolean epCapture = ((val >> 51) & 1)==1;
 
             move = new Move(piece, fromSq, toSq, captured, promotion, castle, epCapture);
         }
@@ -137,7 +130,7 @@ public class TranspositionTableEntry {
     }
 
     public int getDepth() {
-        return (int)((val >> 2) & 0xFFFF);
+        return (int)((val >> 2) & 0xFF);
     }
 
     @Override

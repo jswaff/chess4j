@@ -15,7 +15,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
-import static com.jamesswafford.chess4j.Constants.INFINITY;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
 import static com.jamesswafford.chess4j.pieces.Queen.WHITE_QUEEN;
@@ -84,13 +83,13 @@ public class SearchIteratorImplTest {
         verify(search, times(4)).isStopped();
 
         verify(search, times(1))
-                .search(eq(board), eq(undos), eq(new SearchParameters(1, -INFINITY, INFINITY)), any());
+                .search(eq(board), eq(undos), eq(new SearchParameters(1, -CHECKMATE, CHECKMATE)), any());
 
         verify(search, times(1))
-                .search(eq(board), eq(undos), eq(new SearchParameters(2, -INFINITY, INFINITY)), any());
+                .search(eq(board), eq(undos), eq(new SearchParameters(2, -CHECKMATE, CHECKMATE)), any());
 
         verify(search, times(1))
-                .search(eq(board), eq(undos), eq(new SearchParameters(3, -INFINITY, INFINITY)), any());
+                .search(eq(board), eq(undos), eq(new SearchParameters(3, -CHECKMATE, CHECKMATE)), any());
     }
 
 
@@ -110,7 +109,7 @@ public class SearchIteratorImplTest {
         List<Undo> undos = new ArrayList<>();
 
         // return a mate score on the depth 2 search
-        when(search.search(any(), any(), eq(new SearchParameters(2, -INFINITY, INFINITY)), any()))
+        when(search.search(any(), any(), eq(new SearchParameters(2, -CHECKMATE, CHECKMATE)), any()))
                 .thenReturn(-CHECKMATE+2);
 
         // set up search PV
@@ -131,13 +130,13 @@ public class SearchIteratorImplTest {
         verify(search, times(3)).isStopped();
 
         verify(search, times(1))
-                .search(eq(board), eq(undos), eq(new SearchParameters(1, -INFINITY, INFINITY)), any());
+                .search(eq(board), eq(undos), eq(new SearchParameters(1, -CHECKMATE, CHECKMATE)), any());
 
         verify(search, times(1))
-                .search(eq(board), eq(undos), eq(new SearchParameters(2, -INFINITY, INFINITY)), any());
+                .search(eq(board), eq(undos), eq(new SearchParameters(2, -CHECKMATE, CHECKMATE)), any());
 
         verify(search, times(0))
-                .search(eq(board), eq(undos), eq(new SearchParameters(3, -INFINITY, INFINITY)), any());
+                .search(eq(board), eq(undos), eq(new SearchParameters(3, -CHECKMATE, CHECKMATE)), any());
 
     }
 

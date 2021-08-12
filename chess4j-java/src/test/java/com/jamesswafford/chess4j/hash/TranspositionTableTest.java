@@ -56,7 +56,7 @@ public class TranspositionTableTest {
         assertEquals(3, tte.getDepth());
         assertEquals(m, tte.getMove());
 
-        TranspositionTableEntry lbe = new TranspositionTableEntry(key,  LOWER_BOUND,-100,3,m);
+        TranspositionTableEntry lbe = new TranspositionTableEntry(key,  LOWER_BOUND,-100,3, m);
         assertEquals(tte, lbe);
 
         // now make move and reprobe
@@ -245,14 +245,14 @@ public class TranspositionTableTest {
         Move m = new Move(BLACK_PAWN, E5, E4);
         ttable.store(key, LOWER_BOUND,1001, 5, m);
         TranspositionTableEntry tte = ttable.probe(key);
-        TranspositionTableEntry lbe = new TranspositionTableEntry(key, LOWER_BOUND,1001,5,m);
+        TranspositionTableEntry lbe = new TranspositionTableEntry(key, LOWER_BOUND,1001,5, m);
         assertEquals(lbe, tte);
 
         // overwrite with different score/depth
         ttable.store(key, LOWER_BOUND,900, 6, m);
         tte = ttable.probe(key);
         assertNotEquals(lbe, tte);
-        lbe = new TranspositionTableEntry(key, LOWER_BOUND,900,6,m);
+        lbe = new TranspositionTableEntry(key, LOWER_BOUND,900,6, m);
         assertEquals(lbe, tte);
 
         // use different key to store new entry
@@ -264,7 +264,7 @@ public class TranspositionTableTest {
         tte = ttable.probe(key);
         assertEquals(lbe, tte);
 
-        TranspositionTableEntry lbe2 = new TranspositionTableEntry(key2, LOWER_BOUND,800,7,m);
+        TranspositionTableEntry lbe2 = new TranspositionTableEntry(key2, LOWER_BOUND,800,7, m);
         tte = ttable.probe(key2);
         assertEquals(lbe2, tte);
     }

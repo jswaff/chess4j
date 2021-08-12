@@ -21,12 +21,12 @@ public class PruneTest {
         Board board = new Board();
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
 
-        assertFalse(Prune.prune(board,moves.get(0),false,false,0,-INFINITY,
-                INFINITY,3));
+        assertFalse(Prune.prune(board,moves.get(0),false,false,0,-CHECKMATE,
+                CHECKMATE,3));
 
         // now raise alpha to it's impossible to get to it
         assertFalse(Prune.prune(board,moves.get(0),false,false,0, QUEEN_VAL,
-                INFINITY,3));
+                CHECKMATE,3));
 
         // lower beta
         assertFalse(Prune.prune(board,moves.get(0),false,false,0, QUEEN_VAL,
