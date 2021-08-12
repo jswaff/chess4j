@@ -279,7 +279,7 @@ public class AlphaBetaSearch implements Search {
         searchStats.nodes++;
 
         // probe the hash table
-        TranspositionTableEntry tte = null;
+        TranspositionTableEntry tte = TTHolder.getInstance().getHashTable().probe(board);
 
         // try for early exit
         if (ply > 0) {
@@ -290,7 +290,6 @@ public class AlphaBetaSearch implements Search {
             }
 
             // try the hash table
-            tte = TTHolder.getInstance().getHashTable().probe(board);
             if (tte != null && tte.getDepth() >= depth) {
                 if (tte.getType() == LOWER_BOUND) {
                     if (tte.getScore() >= beta) {
