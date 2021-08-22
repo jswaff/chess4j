@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.search;
 import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.eval.Eval;
+import com.jamesswafford.chess4j.eval.EvalMaterial;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
@@ -485,6 +486,12 @@ public class AlphaBetaSearch implements Search {
         while ((move = moveOrderer.selectNextMove()) != null) {
             assert(BoardUtils.isPseudoLegalMove(board, move));
             assert(move.captured() != null || move.promotion() != null);
+
+            // if this is a capture, can it possibly raise alpha? (delta pruning)
+            if (move.captured() != null && move.promotion()==null &&
+                    standPat + EvalMaterial.evalPiece(move.captured()) + EvalMaterial.PAWN_VAL * 2 < alpha) {
+                continue;
+            }
 
             undos.add(board.applyMove(move));
             // check if move was legal
