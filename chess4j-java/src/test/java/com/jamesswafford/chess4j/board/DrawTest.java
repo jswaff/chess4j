@@ -131,40 +131,40 @@ public class DrawTest {
         Board board = new Board();
         List<Undo> undos = new ArrayList<>();
 
-        assertFalse(isDrawByRep(board, undos));
+        assertFalse(isDrawByRep(board, undos, 2));
 
         undos.add(board.applyMove(new Move(WHITE_PAWN, E2, E4)));
-        assertFalse(isDrawByRep(board, undos));
+        assertFalse(isDrawByRep(board, undos, 2));
 
         undos.add(board.applyMove(new Move(BLACK_KNIGHT, G8, F6)));
-        assertFalse(isDrawByRep(board, undos));
+        assertFalse(isDrawByRep(board, undos, 2));
 
         undos.add(board.applyMove(new Move(WHITE_KNIGHT, G1, F3)));
-        assertFalse(isDrawByRep(board, undos));
+        assertFalse(isDrawByRep(board, undos, 2));
 
         undos.add(board.applyMove(new Move(BLACK_KNIGHT, F6, G8)));
-        assertFalse(isDrawByRep(board, undos));
+        assertFalse(isDrawByRep(board, undos, 2));
 
         undos.add(board.applyMove(new Move(WHITE_KNIGHT, F3, G1)));
-        assertFalse(isDrawByRep(board, undos));  // still 1 (first has ep square)
+        assertFalse(isDrawByRep(board, undos, 2));  // still 1 (first has ep square)
 
         undos.add(board.applyMove(new Move(BLACK_KNIGHT, G8, F6)));
-        assertFalse(isDrawByRep(board, undos)); // 2
+        assertFalse(isDrawByRep(board, undos, 2)); // 2
 
         undos.add(board.applyMove(new Move(WHITE_KNIGHT, G1, F3)));
-        assertFalse(isDrawByRep(board, undos));
+        assertFalse(isDrawByRep(board, undos, 2));
 
         undos.add(board.applyMove(new Move(BLACK_KNIGHT, F6, G8)));
-        assertFalse(isDrawByRep(board, undos)); // 2
+        assertFalse(isDrawByRep(board, undos, 2)); // 2
 
         undos.add(board.applyMove(new Move(WHITE_KNIGHT, F3, G1)));
-        assertFalse(isDrawByRep(board, undos)); // 2
+        assertFalse(isDrawByRep(board, undos, 2)); // 2
 
         undos.add(board.applyMove(new Move(BLACK_KNIGHT, G8, F6)));
-        assertTrue(isDrawByRep(board, undos)); // 3
+        assertTrue(isDrawByRep(board, undos, 2)); // 3
 
         undos.add(board.applyMove(new Move(WHITE_PAWN, D2, D4)));
-        assertFalse(isDrawByRep(board, undos));
+        assertFalse(isDrawByRep(board, undos, 2));
     }
 
     @Test
@@ -173,31 +173,31 @@ public class DrawTest {
         List<Undo> undos = new ArrayList<>();
 
         assertEquals(92, board.getMoveCounter());
-        assertFalse(isDrawByRep(board, undos));
+        assertFalse(isDrawByRep(board, undos, 2));
 
         undos.add(board.applyMove(new Move(BLACK_KING, H8, G8)));
-        assertFalse(isDrawByRep(board, undos));
+        assertFalse(isDrawByRep(board, undos, 2));
 
         undos.add(board.applyMove(new Move(WHITE_KING, H1, G1)));
-        assertFalse(isDrawByRep(board, undos));
+        assertFalse(isDrawByRep(board, undos, 2));
 
         undos.add(board.applyMove(new Move(BLACK_KING, G8, H8)));
-        assertFalse(isDrawByRep(board, undos));
+        assertFalse(isDrawByRep(board, undos, 2));
 
         undos.add(board.applyMove(new Move(WHITE_KING, G1, H1)));
-        assertFalse(isDrawByRep(board, undos));
+        assertFalse(isDrawByRep(board, undos, 2));
 
         undos.add(board.applyMove(new Move(BLACK_KING, H8, G8)));
-        assertFalse(isDrawByRep(board, undos));
+        assertFalse(isDrawByRep(board, undos, 2));
 
         undos.add(board.applyMove(new Move(WHITE_KING, H1, G1)));
-        assertFalse(isDrawByRep(board, undos));
+        assertFalse(isDrawByRep(board, undos, 2));
 
         undos.add(board.applyMove(new Move(BLACK_KING, G8, H8)));
-        assertFalse(isDrawByRep(board, undos));
+        assertFalse(isDrawByRep(board, undos, 2));
 
         undos.add(board.applyMove(new Move(WHITE_KING, G1, H1)));
-        assertTrue(isDrawByRep(board, undos));
+        assertTrue(isDrawByRep(board, undos, 2));
 
         assertEquals(100, board.getMoveCounter());
         assertEquals(20, board.getFiftyCounter());

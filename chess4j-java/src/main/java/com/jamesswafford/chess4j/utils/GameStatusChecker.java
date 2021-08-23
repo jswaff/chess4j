@@ -27,7 +27,7 @@ public final class GameStatusChecker {
             return GameStatus.DRAW_MATERIAL;
         }
 
-        if (Draw.isDrawByRep(board, undos)) {
+        if (Draw.isDrawByRep(board, undos, 2)) {
             return GameStatus.DRAW_REP;
         }
 

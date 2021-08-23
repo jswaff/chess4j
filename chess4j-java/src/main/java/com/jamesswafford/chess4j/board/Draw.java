@@ -19,7 +19,7 @@ public class Draw {
 
     public static boolean isDraw(Board board, List<Undo> undos) {
         return isDrawBy50MoveRule(board) || isDrawLackOfMaterial(board) ||
-                isDrawByRep(board, undos);
+                isDrawByRep(board, undos, 1);
     }
 
     public static boolean isDrawBy50MoveRule(Board board) {
@@ -38,8 +38,8 @@ public class Draw {
      * interfaces, so do not claim in such positions, but just offer a draw or play
      * on.
      *
-     * @param board
-     * @return
+     * @param board - the board
+     * @return - if the position is drawn by lack of mating material
      */
     public static boolean isDrawLackOfMaterial(Board board) {
 
@@ -85,14 +85,14 @@ public class Draw {
         return true;
     }
 
-    public static boolean isDrawByRep(Board board, List<Undo> undos) {
+    public static boolean isDrawByRep(Board board, List<Undo> undos, int numPrev) {
         long currentZobristKey = board.getZobristKey();
 
         long numPrevVisits = undos.stream()
                 .filter(u -> u.getZobristKey() == currentZobristKey)
                 .count();
 
-        return numPrevVisits >= 2L;
+        return numPrevVisits >= numPrev;
     }
 
 }
