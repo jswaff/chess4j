@@ -296,13 +296,13 @@ public class AlphaBetaSearch implements Search {
                     if (tte.getScore() >= beta) {
                         searchStats.failHighs++;
                         searchStats.hashFailHighs++;
-                        return beta;
+                        return tte.getScore();
                     }
                 } else if (tte.getType() == UPPER_BOUND) {
                     if (tte.getScore() <= alpha) {
                         searchStats.failLows++;
                         searchStats.hashFailLows++;
-                        return alpha;
+                        return tte.getScore();
                     }
                 } else if (tte.getType() == EXACT_SCORE) {
                     searchStats.hashExactScores++;
@@ -344,7 +344,7 @@ public class AlphaBetaSearch implements Search {
                 if (nullScore >= beta) {
                     searchStats.failHighs++;
                     searchStats.nullMvFailHighs++;
-                    return beta;
+                    return nullScore;
                 }
             }
         }
@@ -426,7 +426,7 @@ public class AlphaBetaSearch implements Search {
                 if (move.captured()==null && move.promotion()==null) {
                     killerMovesStore.addKiller(ply, move);
                 }
-                return beta;
+                return val;
             }
             if (val > alpha) {
                 alpha = val;
@@ -473,7 +473,7 @@ public class AlphaBetaSearch implements Search {
         int standPat = evaluator.evaluateBoard(board);
         if (standPat > alpha) {
             if (standPat >= beta) {
-                return beta;
+                return standPat;
             }
             // our static evaluation will serve as the lower bound
             alpha = standPat;
@@ -509,7 +509,7 @@ public class AlphaBetaSearch implements Search {
             }
 
             if (val >= beta) {
-                return beta;
+                return val;
             }
             if (val > alpha) {
                 alpha = val;
