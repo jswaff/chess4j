@@ -10,8 +10,8 @@ import com.jamesswafford.chess4j.board.squares.Square;
 
 public class PawnUtils {
 
-    private static long[] isolated = new long[64];
-    private static long[][] passed = new long[64][2];
+    private static final long[] isolated = new long[64];
+    private static final long[][] passed = new long[64][2];
 
     static {
         for (int i=0;i<64;i++) {
@@ -43,9 +43,9 @@ public class PawnUtils {
      * with no opposing pawns to prevent it from advancing to the eighth rank.  i.e. there are no opposing pawns
      * in front of it on the same file nor on an adjacent file. (//http://en.wikipedia.org/wiki/Passed_pawn)
      *
-     * @param board
-     * @param pawnSq
-     * @return
+     * @param board - the board
+     * @param pawnSq - the square the pawn to be evaluated is on
+     * @return - the score
      */
     public static boolean isPassedPawn(Board board, final Square pawnSq, boolean isWhite) {
         long enemies = isWhite ? board.getBlackPawns() : board.getWhitePawns();
@@ -56,12 +56,10 @@ public class PawnUtils {
 
         long fileMask = Bitboard.files[pawnSq.file().getValue()] ^ Bitboard.squares[pawnSq.value()];
         if (isWhite) {
-            if ((fileMask & board.getWhitePawns()) != 0) return true;
+            return (fileMask & board.getWhitePawns()) != 0;
         } else {
-            if ((fileMask & board.getBlackPawns()) != 0) return true;
+            return (fileMask & board.getBlackPawns()) != 0;
         }
-
-        return false;
     }
 
     public static boolean isIsolated(Board board, Square pawnSq, boolean isWhite) {

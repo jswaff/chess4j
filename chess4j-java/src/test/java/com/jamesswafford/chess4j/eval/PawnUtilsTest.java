@@ -153,12 +153,12 @@ public class PawnUtilsTest {
 
     @Test
     public void testDoubled() {
-        Board board = new Board("k7/p1p3p1/3p3p/1P5P/1PP1P1P1/8/8/K7 w - - 0 1");
+        Board board = new Board("k7/p1p3p1/3p2pp/1P5P/1PP1P1P1/8/8/K7 w - - 0 1");
 
         /*
         k - - - - - - -
         p - p - - - p -
-        - - - p - - - p    white to move
+        - - - p - - p p    white to move
         - P - - - - - P    no ep
         - P P - P - P -    no castling rights
         - - - - - - - -
@@ -173,7 +173,8 @@ public class PawnUtilsTest {
         assertFalse(isDoubled(board, C7,false));
         assertFalse(isDoubled(board, D6,false));
         assertFalse(isDoubled(board, E4,true));
-        assertFalse(isDoubled(board, G7,false));
+        assertTrue(isDoubled(board, G7,false));
+        assertTrue(isDoubled(board, G6,false));
         assertFalse(isDoubled(board, G4,true));
         assertFalse(isDoubled(board, H6,false));
         assertFalse(isDoubled(board, H5,true));

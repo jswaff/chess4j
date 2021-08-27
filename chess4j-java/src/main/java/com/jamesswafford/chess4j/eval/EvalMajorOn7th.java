@@ -11,7 +11,6 @@ import static com.jamesswafford.chess4j.board.squares.Rank.*;
 
 public class EvalMajorOn7th {
 
-    // having majors on the 7th is huge advantage.  This might actually be too small.
     public static final int MAJOR_ON_7TH = 50;
     public static final int CONNECTED_MAJORS_ON_7TH = 80;
 
@@ -21,12 +20,12 @@ public class EvalMajorOn7th {
         if (isWhite) {
             if (sq.rank() == RANK_7 && board.getKingSquare(Color.BLACK).rank() == RANK_8) {
                 score += MAJOR_ON_7TH;
-                score += evalConnectedMajorOn7th(board, isWhite, sq);
+                score += evalConnectedMajorOn7th(board, true, sq);
             }
         } else {
             if (sq.rank() == RANK_2 && board.getKingSquare(Color.WHITE).rank() == RANK_1) {
                 score += MAJOR_ON_7TH;
-                score += evalConnectedMajorOn7th(board,isWhite,sq);
+                score += evalConnectedMajorOn7th(board,false, sq);
             }
         }
 
