@@ -363,6 +363,19 @@ public class AlphaBetaSearch implements Search {
         while ((move = moveOrderer.selectNextMove()) != null) {
             assert(BoardUtils.isPseudoLegalMove(board, move));
 
+            // futility pruning.  if the move appears unlikely to help, just skip it.
+            if (numMovesSearched > 0 && !inCheck && depth < 3 && alpha > (-CHECKMATE + 500) && beta < (CHECKMATE - 500) &&
+                    move.promotion()==null && !move.equals(killerMovesStore.getKiller1(ply)) &&
+                    !move.equals(killerMovesStore.getKiller2(ply)))
+            {
+                int material = Eval.eval(board, true);
+                int materialGain = move.captured()==null ? 0 : EvalMaterial.evalPiece(move.captured());
+                int futilityMargin = depth==1 ? (EvalMaterial.PAWN_VAL * 2) : EvalMaterial.ROOK_VAL;
+                if (material + materialGain + futilityMargin <= alpha) {
+                    continue;
+                }
+            }
+
             undos.add(board.applyMove(move));
             // check if move was legal
             if (BoardUtils.isOpponentInCheck(board)) {
