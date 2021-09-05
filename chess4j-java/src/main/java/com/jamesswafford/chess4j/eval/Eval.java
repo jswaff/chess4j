@@ -50,6 +50,7 @@ public final class Eval implements Evaluator {
                     - evalPieces(board.getBlackKnights(), board, EvalKnight::evalKnight);
             score += evalPieces(board.getWhiteBishops(), board, EvalBishop::evalBishop)
                     - evalPieces(board.getBlackBishops(), board, EvalBishop::evalBishop);
+            score += EvalBishop.evalBishopPair(board);
             score += evalPieces(board.getWhiteRooks(), board, EvalRook::evalRook)
                     - evalPieces(board.getBlackRooks(), board, EvalRook::evalRook);
             score += evalPieces(board.getWhiteQueens(), board, EvalQueen::evalQueen)
