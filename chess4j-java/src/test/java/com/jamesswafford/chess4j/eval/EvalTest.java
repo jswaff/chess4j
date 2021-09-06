@@ -79,6 +79,13 @@ public class EvalTest {
     }
 
     @Test
+    public void testEvalPhase() {
+        assertEquals(0, Eval.phase(new Board()));
+        assertEquals(24, Eval.phase(new Board("k7/8/8/8/8/8/8/K7 w - -")));
+        assertEquals(18, Eval.phase(new Board("kq6/8/8/8/8/8/8/KR6 b - -")));
+    }
+
+    @Test
     public void testEvalScale_largeVal() {
 
         assertEquals(100, scale(100,
