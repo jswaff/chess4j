@@ -71,7 +71,8 @@ public final class Eval implements Evaluator {
         int phase = phase(board);
 
         // calculate the overall evaluation in the range [mgScore, egScore], based on phase
-        phase = (phase * 256 + 12) / 24;
+        // http://www.talkchess.com/forum3/viewtopic.php?t=65466
+        phase = (phase * 256 + 12) / 24; // [0, 256]
         int score = (mgScore * (256 - phase) + egScore * phase) / 256;
 
         return board.getPlayerToMove() == Color.WHITE ? score : -score;
