@@ -30,6 +30,10 @@ public final class Eval implements Evaluator {
 
     public static int eval(Board board, boolean materialOnly) {
 
+        if (EvalDraw.evalDraw(board)) {
+            return 0;
+        }
+
         int evalScore = evalHelper(board, materialOnly);
 
         // if we are running with assertions enabled, test symmetry
