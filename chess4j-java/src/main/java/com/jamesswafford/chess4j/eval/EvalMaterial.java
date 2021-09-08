@@ -22,11 +22,12 @@ import static com.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
 
 public class EvalMaterial {
 
-    public static final int QUEEN_VAL  = 900;
+    public static final int QUEEN_VAL  = 975;
     public static final int ROOK_VAL   = 500;
-    public static final int KNIGHT_VAL = 300;
-    public static final int BISHOP_VAL = 320;
+    public static final int KNIGHT_VAL = 325;
+    public static final int BISHOP_VAL = 325;
     public static final int PAWN_VAL   = 100;
+    public static final int BISHOP_PAIR = 50;
 
     private static final Map<Piece, Integer> pieceValMap;
 
@@ -54,7 +55,8 @@ public class EvalMaterial {
             (board.getNumPieces(WHITE_ROOK) - board.getNumPieces(BLACK_ROOK))  * ROOK_VAL +
             (board.getNumPieces(WHITE_BISHOP) - board.getNumPieces(BLACK_BISHOP))  * BISHOP_VAL +
             (board.getNumPieces(WHITE_KNIGHT) - board.getNumPieces(BLACK_KNIGHT))  * KNIGHT_VAL +
-            (board.getNumPieces(WHITE_PAWN) - board.getNumPieces(BLACK_PAWN))  * PAWN_VAL;
+            (board.getNumPieces(WHITE_PAWN) - board.getNumPieces(BLACK_PAWN))  * PAWN_VAL +
+            evalBishopPair(board);
     }
 
     public static int evalNonPawnMaterial(Board board, boolean forWhite) {
@@ -63,13 +65,22 @@ public class EvalMaterial {
             return board.getNumPieces(WHITE_QUEEN) * QUEEN_VAL
                     + board.getNumPieces(WHITE_ROOK) * ROOK_VAL
                     + board.getNumPieces(WHITE_KNIGHT) * KNIGHT_VAL
-                    + board.getNumPieces(WHITE_BISHOP) * BISHOP_VAL;
+                    + board.getNumPieces(WHITE_BISHOP) * BISHOP_VAL
+                    + (board.getNumPieces(WHITE_BISHOP) > 1 ? BISHOP_PAIR : 0);
         } else {
             return board.getNumPieces(BLACK_QUEEN) * QUEEN_VAL
                     + board.getNumPieces(BLACK_ROOK) * ROOK_VAL
                     + board.getNumPieces(BLACK_KNIGHT) * KNIGHT_VAL
-                    + board.getNumPieces(BLACK_BISHOP) * BISHOP_VAL;
+                    + board.getNumPieces(BLACK_BISHOP) * BISHOP_VAL
+                    + (board.getNumPieces(BLACK_BISHOP) > 1 ? BISHOP_PAIR: 0);
         }
+    }
+
+    public static int evalBishopPair(Board board) {
+        int score = 0;
+        if (Long.bitCount(board.getWhiteBishops()) > 1) score += BISHOP_PAIR;
+        if (Long.bitCount(board.getBlackBishops()) > 1) score -= BISHOP_PAIR;
+        return score;
     }
 
     public static int evalPawnMaterial(Board board, boolean forWhite) {

@@ -50,7 +50,6 @@ public final class Eval implements Evaluator {
                     - evalPieces(board.getBlackKnights(), board, EvalKnight::evalKnight);
             score += evalPieces(board.getWhiteBishops(), board, EvalBishop::evalBishop)
                     - evalPieces(board.getBlackBishops(), board, EvalBishop::evalBishop);
-            score += EvalBishop.evalBishopPair(board);
             score += evalPieces(board.getWhiteRooks(), board, EvalRook::evalRook)
                     - evalPieces(board.getBlackRooks(), board, EvalRook::evalRook);
             score += evalPieces(board.getWhiteQueens(), board, EvalQueen::evalQueen)
@@ -117,7 +116,8 @@ public final class Eval implements Evaluator {
 
     public static int scale(int score, int material) {
         final int ALL_NONPAWN_PIECES_VAL = EvalMaterial.QUEEN_VAL +
-                EvalMaterial.ROOK_VAL*2 + EvalMaterial.KNIGHT_VAL*2 + EvalMaterial.BISHOP_VAL*2;
+                EvalMaterial.ROOK_VAL*2 + EvalMaterial.KNIGHT_VAL*2 + EvalMaterial.BISHOP_VAL*2 +
+                EvalMaterial.BISHOP_PAIR;
 
         return score * material / ALL_NONPAWN_PIECES_VAL;
     }
