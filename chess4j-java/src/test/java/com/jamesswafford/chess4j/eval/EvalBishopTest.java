@@ -21,5 +21,4 @@ public class EvalBishopTest {
         assertEquals(evalBishop(board, C1), evalBishop(board, C8));
     }
 
-
 }

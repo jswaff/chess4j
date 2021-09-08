@@ -116,7 +116,8 @@ public final class Eval implements Evaluator {
 
     public static int scale(int score, int material) {
         final int ALL_NONPAWN_PIECES_VAL = EvalMaterial.QUEEN_VAL +
-                EvalMaterial.ROOK_VAL*2 + EvalMaterial.KNIGHT_VAL*2 + EvalMaterial.BISHOP_VAL*2;
+                EvalMaterial.ROOK_VAL*2 + EvalMaterial.KNIGHT_VAL*2 + EvalMaterial.BISHOP_VAL*2 +
+                EvalMaterial.BISHOP_PAIR;
 
         return score * material / ALL_NONPAWN_PIECES_VAL;
     }
