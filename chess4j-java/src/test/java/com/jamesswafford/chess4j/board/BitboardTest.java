@@ -196,6 +196,6 @@ public class BitboardTest {
 
         assertEquals(squares[G6.value()],
                 pawnAttacks[H7.value()][Color.BLACK.getColor()]);
-
     }
+
 }

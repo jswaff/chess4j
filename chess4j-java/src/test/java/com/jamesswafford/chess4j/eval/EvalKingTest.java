@@ -10,7 +10,7 @@ import static com.jamesswafford.chess4j.eval.EvalKing.*;
 
 public class EvalKingTest {
 
-    private Board board = new Board();
+    private final Board board = new Board();
 
     @Test
     public void testEvalKing() {
