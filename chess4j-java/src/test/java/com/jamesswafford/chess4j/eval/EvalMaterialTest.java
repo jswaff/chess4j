@@ -14,7 +14,7 @@ import static com.jamesswafford.chess4j.pieces.Queen.*;
 
 public class EvalMaterialTest {
 
-    private Board board = new Board();
+    private final Board board = new Board();
 
     @Test
     public void testEvalMaterial_initialPos() {
@@ -54,6 +54,18 @@ public class EvalMaterialTest {
 
         assertEquals(0, evalPawnMaterial(board, true));
         assertEquals(PAWN_VAL, evalPawnMaterial(board, false));
+    }
+
+    @Test
+    public void testBishopPair() {
+
+        Board board = new Board();
+
+        assertEquals(0, evalBishopPair(board));
+
+        board.setPos("1rb1r1k1/2q2pb1/pp1p4/2n1pPPQ/Pn1BP3/1NN4R/1PP4P/R5K1 b - -");
+
+        assertEquals(-BISHOP_PAIR, evalBishopPair(board));
     }
 
     @Test

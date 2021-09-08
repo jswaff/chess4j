@@ -89,14 +89,14 @@ public class EvalTest {
     public void testEvalScale_largeVal() {
 
         assertEquals(100, scale(100,
-                QUEEN_VAL + ROOK_VAL*2 + KNIGHT_VAL*2 + BISHOP_VAL*2));
+                QUEEN_VAL + ROOK_VAL*2 + KNIGHT_VAL*2 + BISHOP_VAL*2 + BISHOP_PAIR));
 
         // we expect the term to be scaled down progressively as material is
         // removed from the board
-        assertEquals(89, scale(100,
+        assertEquals(88, scale(100,
                 QUEEN_VAL + ROOK_VAL*2 + BISHOP_VAL + KNIGHT_VAL*2));
 
-        assertEquals(80, scale(100,
+        assertEquals(78, scale(100,
                 QUEEN_VAL + ROOK_VAL*2 + BISHOP_VAL + KNIGHT_VAL));
 
         assertEquals(44, scale(100,
@@ -111,14 +111,14 @@ public class EvalTest {
     public void testEvalScale_smallVal() {
 
         assertEquals(5, scale(5,
-                QUEEN_VAL + ROOK_VAL*2 + KNIGHT_VAL*2 + BISHOP_VAL*2));
+                QUEEN_VAL + ROOK_VAL*2 + KNIGHT_VAL*2 + BISHOP_VAL*2 + BISHOP_PAIR));
 
         // we expect the term to be scaled down progressively as material is
         // removed from the board
         assertEquals(4, scale(5,
                 QUEEN_VAL + ROOK_VAL*2 + BISHOP_VAL + KNIGHT_VAL*2));
 
-        assertEquals(4, scale(5,
+        assertEquals(3, scale(5,
                 QUEEN_VAL + ROOK_VAL*2 + BISHOP_VAL + KNIGHT_VAL));
 
         assertEquals(2, scale(5,
@@ -134,7 +134,7 @@ public class EvalTest {
     public void testEvalScale_negativeVal() {
 
         assertEquals(-33, scale(-33,
-                QUEEN_VAL + ROOK_VAL*2 + KNIGHT_VAL*2 + BISHOP_VAL*2));
+                QUEEN_VAL + ROOK_VAL*2 + KNIGHT_VAL*2 + BISHOP_VAL*2 + BISHOP_PAIR));
 
         // we expect the term to be scaled down progressively as material is
         // removed from the board
@@ -147,7 +147,7 @@ public class EvalTest {
         assertEquals(-14, scale(-33,
                 QUEEN_VAL + ROOK_VAL));
 
-        assertEquals(-5, scale(-33, ROOK_VAL));
+        assertEquals(-4, scale(-33, ROOK_VAL));
 
         assertEquals(-3, scale(-33, KNIGHT_VAL));
     }
