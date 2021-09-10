@@ -7,7 +7,6 @@ import com.jamesswafford.chess4j.board.Board;
 import static org.junit.Assert.*;
 
 import static com.jamesswafford.chess4j.eval.Eval.*;
-import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
 
 /**
  * Test the evaluator.  We only do a few basic sanity checks here.  Most of the
@@ -78,77 +77,4 @@ public class EvalTest {
         assertEquals(eval, eval2);
     }
 
-    @Test
-    public void testEvalPhase() {
-        assertEquals(0, Eval.phase(new Board()));
-        assertEquals(24, Eval.phase(new Board("k7/8/8/8/8/8/8/K7 w - -")));
-        assertEquals(18, Eval.phase(new Board("kq6/8/8/8/8/8/8/KR6 b - -")));
-    }
-
-    @Test
-    public void testEvalScale_largeVal() {
-
-        assertEquals(100, scale(100,
-                QUEEN_VAL + ROOK_VAL*2 + KNIGHT_VAL*2 + BISHOP_VAL*2 + BISHOP_PAIR));
-
-        // we expect the term to be scaled down progressively as material is
-        // removed from the board
-        assertEquals(88, scale(100,
-                QUEEN_VAL + ROOK_VAL*2 + BISHOP_VAL + KNIGHT_VAL*2));
-
-        assertEquals(78, scale(100,
-                QUEEN_VAL + ROOK_VAL*2 + BISHOP_VAL + KNIGHT_VAL));
-
-        assertEquals(44, scale(100,
-                QUEEN_VAL + ROOK_VAL));
-
-        assertEquals(15, scale(100, ROOK_VAL));
-
-        assertEquals(9, scale(100, KNIGHT_VAL));
-    }
-
-    @Test
-    public void testEvalScale_smallVal() {
-
-        assertEquals(5, scale(5,
-                QUEEN_VAL + ROOK_VAL*2 + KNIGHT_VAL*2 + BISHOP_VAL*2 + BISHOP_PAIR));
-
-        // we expect the term to be scaled down progressively as material is
-        // removed from the board
-        assertEquals(4, scale(5,
-                QUEEN_VAL + ROOK_VAL*2 + BISHOP_VAL + KNIGHT_VAL*2));
-
-        assertEquals(3, scale(5,
-                QUEEN_VAL + ROOK_VAL*2 + BISHOP_VAL + KNIGHT_VAL));
-
-        assertEquals(2, scale(5,
-                QUEEN_VAL + ROOK_VAL));
-
-        assertEquals(0, scale(5, ROOK_VAL));
-
-        assertEquals(0, scale(5, KNIGHT_VAL));
-    }
-
-
-    @Test
-    public void testEvalScale_negativeVal() {
-
-        assertEquals(-33, scale(-33,
-                QUEEN_VAL + ROOK_VAL*2 + KNIGHT_VAL*2 + BISHOP_VAL*2 + BISHOP_PAIR));
-
-        // we expect the term to be scaled down progressively as material is
-        // removed from the board
-        assertEquals(-29, scale(-33,
-                QUEEN_VAL + ROOK_VAL*2 + BISHOP_VAL + KNIGHT_VAL*2));
-
-        assertEquals(-26, scale(-33,
-                QUEEN_VAL + ROOK_VAL*2 + BISHOP_VAL + KNIGHT_VAL));
-
-        assertEquals(-14, scale(-33,
-                QUEEN_VAL + ROOK_VAL));
-
-        assertEquals(-4, scale(-33, ROOK_VAL));
-
-        assertEquals(-3, scale(-33, KNIGHT_VAL));
-    }
 }
