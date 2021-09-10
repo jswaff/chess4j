@@ -13,7 +13,7 @@ public class EvalKingTest {
     private final Board board = new Board();
 
     @Test
-    public void testEvalKing() {
+    public void testEvalKing_middleGame() {
 
         // as odd as this position is, it has all material on the board.
         // therefore, there should be no scaling of king safety.
@@ -21,10 +21,10 @@ public class EvalKingTest {
         board.setPos("rnbq1rk1/pppppppp/bn6/8/BN6/5P2/PPPPP1PP/RNBQ1RK1 w - - 0 1");
 
         assertEquals(KING_PST[G1.value()] + evalKingSafety(board, true),
-                evalKing(board, G1));
+                evalKing(board, G1, false));
 
         assertEquals(KING_PST[G1.value()] + evalKingSafety(board, false),
-                evalKing(board, G8));
+                evalKing(board, G8, false));
     }
 
     @Test
@@ -32,10 +32,10 @@ public class EvalKingTest {
 
         board.setPos("8/p3k3/8/8/8/8/4K3/8 w - - 0 1");
 
-        assertEquals(KING_ENDGAME_PST[E2.value()], evalKing(board, E2));
+        assertEquals(KING_ENDGAME_PST[E2.value()], evalKing(board, E2, true));
 
         // test the symmetry
-        assertEquals(evalKing(board, E2), evalKing(board, E7));
+        assertEquals(evalKing(board, E2, true), evalKing(board, E7, true));
     }
 
     @Test

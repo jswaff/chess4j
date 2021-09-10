@@ -41,32 +41,27 @@ public class EvalKing {
     public static final int KING_SAFETY_MIDDLE_OPEN_FILE = -50;
 
     // returns a score from the perspective of white
-    public static int evalKing(Board b, Square kingSq) {
+    public static int evalKing(Board b, Square kingSq, boolean endGame) {
 
         assert(kingSq == b.getKingSquare(Color.WHITE) || kingSq == b.getKingSquare(Color.BLACK));
 
         int score = 0;
 
-        final int ENDGAME_THRESHOLD = EvalMaterial.KNIGHT_VAL * 2 + EvalMaterial.ROOK_VAL;
-
         if (kingSq == b.getKingSquare(Color.WHITE)) {
-
-            // if black has little material then skip the king safety eval and centralize the king.
-            int enemyNonPawnMat = EvalMaterial.evalNonPawnMaterial(b, false);
-            if (enemyNonPawnMat >= ENDGAME_THRESHOLD) {
+            if (endGame) {
+                score += KING_ENDGAME_PST[kingSq.value()];
+            } else {
+                int enemyNonPawnMat = EvalMaterial.evalNonPawnMaterial(b, false);
                 score += KING_PST[kingSq.value()];
                 score += Eval.scale(evalKingSafety(b, true), enemyNonPawnMat);
-            } else {
-                score += KING_ENDGAME_PST[kingSq.value()];
             }
         } else {
-
-            int enemyNonPawnMat = EvalMaterial.evalNonPawnMaterial(b, true);
-            if (enemyNonPawnMat >= ENDGAME_THRESHOLD) {
+            if (endGame) {
+                score += KING_ENDGAME_PST[kingSq.flipVertical().value()];
+            } else {
+                int enemyNonPawnMat = EvalMaterial.evalNonPawnMaterial(b, true);
                 score += KING_PST[kingSq.flipVertical().value()];
                 score += Eval.scale(evalKingSafety(b, false), enemyNonPawnMat);
-            } else {
-                score += KING_ENDGAME_PST[kingSq.flipVertical().value()];
             }
         }
 
