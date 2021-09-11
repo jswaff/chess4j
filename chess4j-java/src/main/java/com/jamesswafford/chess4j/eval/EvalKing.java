@@ -51,17 +51,15 @@ public class EvalKing {
             if (endGame) {
                 score += KING_ENDGAME_PST[kingSq.value()];
             } else {
-                int enemyNonPawnMat = EvalMaterial.evalNonPawnMaterial(b, false);
                 score += KING_PST[kingSq.value()];
-                score += Eval.scale(evalKingSafety(b, true), enemyNonPawnMat);
+                score += evalKingSafety(b, true);
             }
         } else {
             if (endGame) {
                 score += KING_ENDGAME_PST[kingSq.flipVertical().value()];
             } else {
-                int enemyNonPawnMat = EvalMaterial.evalNonPawnMaterial(b, true);
                 score += KING_PST[kingSq.flipVertical().value()];
-                score += Eval.scale(evalKingSafety(b, false), enemyNonPawnMat);
+                score += evalKingSafety(b, false);
             }
         }
 
