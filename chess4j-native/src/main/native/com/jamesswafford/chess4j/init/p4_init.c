@@ -10,6 +10,7 @@
 #include "../io/PrintLine.h"
 #include "../pieces/Piece.h"
 
+extern bool logging_enabled;
 extern int init();
 
 volatile bool p4_initialized = false;
@@ -22,6 +23,7 @@ volatile bool p4_initialized = false;
 JNIEXPORT jboolean JNICALL Java_com_jamesswafford_chess4j_init_Initializer_p4Init
   (JNIEnv* env, jclass UNUSED(clazz))
 {
+    logging_enabled = false;
     init();
 
     if (0 != IllegalStateException_register(env))
