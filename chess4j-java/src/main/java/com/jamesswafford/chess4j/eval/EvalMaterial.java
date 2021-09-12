@@ -49,28 +49,45 @@ public class EvalMaterial {
     }
 
     public static int evalMaterial(Board board) {
-
-        return
-            (board.getNumPieces(WHITE_QUEEN) - board.getNumPieces(BLACK_QUEEN)) * QUEEN_VAL  +
-            (board.getNumPieces(WHITE_ROOK) - board.getNumPieces(BLACK_ROOK))  * ROOK_VAL +
-            (board.getNumPieces(WHITE_BISHOP) - board.getNumPieces(BLACK_BISHOP))  * BISHOP_VAL +
-            (board.getNumPieces(WHITE_KNIGHT) - board.getNumPieces(BLACK_KNIGHT))  * KNIGHT_VAL +
-            (board.getNumPieces(WHITE_PAWN) - board.getNumPieces(BLACK_PAWN))  * PAWN_VAL +
-            evalBishopPair(board);
+        int pawnMaterial =
+                (board.getNumPieces(WHITE_PAWN) - board.getNumPieces(BLACK_PAWN))  * PAWN_VAL;
+        return pawnMaterial
+                + evalNonPawnMaterial(board, true)
+                - evalNonPawnMaterial(board, false);
     }
 
     public static int evalNonPawnMaterial(Board board, boolean forWhite) {
 
         if (forWhite) {
+            int numPawns = board.getNumPieces(WHITE_PAWN);
+
+            // raise the knight's value 1/16 for each pawn above 5, and lower for each
+            // pawn below 5.
+            int knightAdj = (numPawns - 5) * 6;
+
+            // lower the rook's value 1/8 for each pawn above 5, and raise for each
+            // pawn above 5.
+            int rookAdj = (numPawns - 5) * -12;
+
             return board.getNumPieces(WHITE_QUEEN) * QUEEN_VAL
-                    + board.getNumPieces(WHITE_ROOK) * ROOK_VAL
-                    + board.getNumPieces(WHITE_KNIGHT) * KNIGHT_VAL
+                    + board.getNumPieces(WHITE_ROOK) * (ROOK_VAL + rookAdj)
+                    + board.getNumPieces(WHITE_KNIGHT) * (KNIGHT_VAL + knightAdj)
                     + board.getNumPieces(WHITE_BISHOP) * BISHOP_VAL
                     + (board.getNumPieces(WHITE_BISHOP) > 1 ? BISHOP_PAIR : 0);
         } else {
+            int numPawns = board.getNumPieces(BLACK_PAWN);
+
+            // raise the knight's value 1/16 for each pawn above 5, and lower for each
+            // pawn below 5.
+            int knightAdj = (numPawns - 5) * 6;
+
+            // lower the rook's value 1/8 for each pawn above 5, and raise for each
+            // pawn below 5.
+            int rookAdj = (numPawns - 5) * -12;
+
             return board.getNumPieces(BLACK_QUEEN) * QUEEN_VAL
-                    + board.getNumPieces(BLACK_ROOK) * ROOK_VAL
-                    + board.getNumPieces(BLACK_KNIGHT) * KNIGHT_VAL
+                    + board.getNumPieces(BLACK_ROOK) * (ROOK_VAL + rookAdj)
+                    + board.getNumPieces(BLACK_KNIGHT) * (KNIGHT_VAL + knightAdj)
                     + board.getNumPieces(BLACK_BISHOP) * BISHOP_VAL
                     + (board.getNumPieces(BLACK_BISHOP) > 1 ? BISHOP_PAIR: 0);
         }
