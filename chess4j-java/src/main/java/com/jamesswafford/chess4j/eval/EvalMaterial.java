@@ -19,6 +19,7 @@ import static com.jamesswafford.chess4j.pieces.Queen.BLACK_QUEEN;
 import static com.jamesswafford.chess4j.pieces.Queen.WHITE_QUEEN;
 import static com.jamesswafford.chess4j.pieces.Rook.BLACK_ROOK;
 import static com.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
+import static com.jamesswafford.chess4j.eval.MaterialType.*;
 
 public class EvalMaterial {
 
@@ -113,4 +114,66 @@ public class EvalMaterial {
         return pieceValMap.get(piece);
     }
 
+    public static MaterialType calculateMaterialType(Board board) {
+
+        int numWhitePawns = board.getNumPieces(WHITE_PAWN);
+        int numWhiteBishops = board.getNumPieces(WHITE_BISHOP);
+        int numWhiteKnights = board.getNumPieces(WHITE_KNIGHT);
+        int numWhiteRooks = board.getNumPieces(WHITE_ROOK);
+        int numWhiteQueens = board.getNumPieces(WHITE_QUEEN);
+        int numWhiteTotal = numWhitePawns + numWhiteBishops + numWhiteKnights + numWhiteRooks + numWhiteQueens;
+
+        int numBlackPawns = board.getNumPieces(BLACK_PAWN);
+        int numBlackBishops = board.getNumPieces(BLACK_BISHOP);
+        int numBlackKnights = board.getNumPieces(BLACK_KNIGHT);
+        int numBlackRooks = board.getNumPieces(BLACK_ROOK);
+        int numBlackQueens = board.getNumPieces(BLACK_QUEEN);
+        int numBlackTotal = numBlackPawns + numBlackBishops + numBlackKnights + numBlackRooks + numBlackQueens;
+
+        if (numWhiteTotal > 2 || numBlackTotal > 2) return OTHER;
+
+        if (numWhiteTotal + numBlackTotal == 0) return KK;
+
+        if (numWhiteTotal == 0) {
+            if (numBlackTotal == 1) {
+                if (numBlackKnights == 1) {
+                    return KNK;
+                } else if (numBlackBishops == 1) {
+                    return KBK;
+                }
+            }
+        } else if (numWhiteTotal == 1) {
+            if (numWhiteBishops == 1) {
+                if (numBlackTotal == 1 && numBlackPawns == 1) {
+                    return KBKP;
+                }
+            } else if (numWhiteKnights == 1) {
+                if (numBlackTotal == 1 && numBlackPawns == 1) {
+                    return KNKP;
+                }
+            }
+        }
+
+        if (numBlackTotal == 0) {
+            if (numWhiteTotal == 1) {
+                if (numWhiteKnights == 1) {
+                    return KNK;
+                } else if (numWhiteBishops == 1) {
+                    return KBK;
+                }
+            }
+        } else if (numBlackTotal == 1) {
+            if (numBlackBishops == 1) {
+                if (numWhiteTotal == 1 && numWhitePawns == 1) {
+                    return KBKP;
+                }
+            } else if (numBlackKnights == 1) {
+                if (numWhiteTotal == 1 && numWhitePawns == 1) {
+                    return KNKP;
+                }
+            }
+        }
+
+        return OTHER;
+    }
 }

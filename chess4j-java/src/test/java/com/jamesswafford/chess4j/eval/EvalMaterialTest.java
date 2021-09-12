@@ -11,6 +11,7 @@ import static com.jamesswafford.chess4j.pieces.Knight.*;
 import static com.jamesswafford.chess4j.pieces.Bishop.*;
 import static com.jamesswafford.chess4j.pieces.Rook.*;
 import static com.jamesswafford.chess4j.pieces.Queen.*;
+import static com.jamesswafford.chess4j.eval.MaterialType.*;
 
 public class EvalMaterialTest {
 
@@ -79,5 +80,22 @@ public class EvalMaterialTest {
         assertEquals(BISHOP_VAL, evalPiece(BLACK_BISHOP));
         assertEquals(KNIGHT_VAL, evalPiece(WHITE_KNIGHT));
         assertEquals(PAWN_VAL, evalPiece(WHITE_PAWN));
+    }
+
+    @Test
+    public void testCalculateMaterialType() {
+        testMaterialTypeWithSymmetry(Board.INITIAL_POS, OTHER);
+        testMaterialTypeWithSymmetry("k7/8/8/8/8/8/8/K7 w - -", KK);
+        testMaterialTypeWithSymmetry("kn6/8/8/8/8/8/8/K7 w - -", KNK);
+        testMaterialTypeWithSymmetry("kb6/8/8/8/8/8/8/K7 w - -", KBK);
+        testMaterialTypeWithSymmetry("kb6/8/8/8/8/8/P7/K7 w - -", KBKP);
+        testMaterialTypeWithSymmetry("kn6/8/8/8/8/8/P7/K7 w - -", KNKP);
+    }
+
+    private void testMaterialTypeWithSymmetry(String fen, MaterialType materialType) {
+        Board board = new Board(fen);
+        assertEquals(materialType, calculateMaterialType(board));
+        board.flipVertical();
+        assertEquals(materialType, calculateMaterialType(board));
     }
 }
