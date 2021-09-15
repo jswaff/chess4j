@@ -2,6 +2,10 @@ package com.jamesswafford.chess4j.eval;
 
 public enum MaterialType {
 
-    KK, KNK, KBK, KBKP, KNKP, OTHER
+    KK, KKN, KKB, KKNN,
+    KPKN, KPKB,
+    KNK, KNKP, KNKN, KNKB, KNNK,
+    KBK, KBKP, KBKN, KBKB,
+    OTHER
 
 }

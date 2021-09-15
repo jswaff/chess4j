@@ -132,44 +132,58 @@ public class EvalMaterial {
 
         if (numWhiteTotal > 2 || numBlackTotal > 2) return OTHER;
 
-        if (numWhiteTotal + numBlackTotal == 0) return KK;
-
         if (numWhiteTotal == 0) {
-            if (numBlackTotal == 1) {
+            if (numBlackTotal == 0) {
+                return KK;
+            } else if (numBlackTotal == 1) {
                 if (numBlackKnights == 1) {
-                    return KNK;
+                    return KKN;
                 } else if (numBlackBishops == 1) {
-                    return KBK;
+                    return KKB;
+                }
+            } else if (numBlackTotal == 2) {
+                if (numBlackKnights == 2) {
+                    return KKNN;
                 }
             }
         } else if (numWhiteTotal == 1) {
-            if (numWhiteBishops == 1) {
-                if (numBlackTotal == 1 && numBlackPawns == 1) {
-                    return KBKP;
+            if (numWhitePawns == 1) {
+                if (numBlackTotal == 1) {
+                    if (numBlackKnights == 1) {
+                        return KPKN;
+                    } else if (numBlackBishops == 1) {
+                        return KPKB;
+                    }
                 }
             } else if (numWhiteKnights == 1) {
-                if (numBlackTotal == 1 && numBlackPawns == 1) {
-                    return KNKP;
-                }
-            }
-        }
-
-        if (numBlackTotal == 0) {
-            if (numWhiteTotal == 1) {
-                if (numWhiteKnights == 1) {
+                if (numBlackTotal == 0) {
                     return KNK;
-                } else if (numWhiteBishops == 1) {
+                } else if (numBlackTotal == 1) {
+                    if (numBlackPawns == 1) {
+                        return KNKP;
+                    } else if (numBlackKnights == 1) {
+                        return KNKN;
+                    } else if (numBlackBishops == 1) {
+                        return KNKB;
+                    }
+                }
+            } else if (numWhiteBishops == 1) {
+                if (numBlackTotal == 0) {
                     return KBK;
+                } else if (numBlackTotal == 1) {
+                    if (numBlackPawns == 1) {
+                        return KBKP;
+                    } else if (numBlackKnights == 1) {
+                        return KBKN;
+                    } else if (numBlackBishops == 1) {
+                        return KBKB;
+                    }
                 }
             }
-        } else if (numBlackTotal == 1) {
-            if (numBlackBishops == 1) {
-                if (numWhiteTotal == 1 && numWhitePawns == 1) {
-                    return KBKP;
-                }
-            } else if (numBlackKnights == 1) {
-                if (numWhiteTotal == 1 && numWhitePawns == 1) {
-                    return KNKP;
+        } else if (numWhiteTotal == 2) {
+            if (numWhiteKnights == 2) {
+                if (numBlackTotal == 0) {
+                    return KNNK;
                 }
             }
         }

@@ -84,18 +84,22 @@ public class EvalMaterialTest {
 
     @Test
     public void testCalculateMaterialType() {
-        testMaterialTypeWithSymmetry(Board.INITIAL_POS, OTHER);
-        testMaterialTypeWithSymmetry("k7/8/8/8/8/8/8/K7 w - -", KK);
-        testMaterialTypeWithSymmetry("kn6/8/8/8/8/8/8/K7 w - -", KNK);
-        testMaterialTypeWithSymmetry("kb6/8/8/8/8/8/8/K7 w - -", KBK);
-        testMaterialTypeWithSymmetry("kb6/8/8/8/8/8/P7/K7 w - -", KBKP);
-        testMaterialTypeWithSymmetry("kn6/8/8/8/8/8/P7/K7 w - -", KNKP);
+        testMaterialTypeWithSymmetry(Board.INITIAL_POS, OTHER, OTHER);
+        testMaterialTypeWithSymmetry("k7/8/8/8/8/8/8/K7 w - -", KK, KK);
+        testMaterialTypeWithSymmetry("kn6/8/8/8/8/8/8/K7 w - -", KKN, KNK);
+        testMaterialTypeWithSymmetry("kb6/8/8/8/8/8/8/K7 w - -", KKB, KBK);
+        testMaterialTypeWithSymmetry("kb6/8/8/8/8/8/P7/K7 w - -", KPKB, KBKP);
+        testMaterialTypeWithSymmetry("kn6/8/8/8/8/8/P7/K7 w - -", KPKN, KNKP);
+        testMaterialTypeWithSymmetry("kn6/8/8/8/8/8/8/KN6 w - -", KNKN, KNKN);
+        testMaterialTypeWithSymmetry("kb6/8/8/8/8/8/8/KB6 w - -", KBKB, KBKB);
+        testMaterialTypeWithSymmetry("kb6/8/8/8/8/8/8/KN6 w - -", KNKB, KBKN);
+        testMaterialTypeWithSymmetry("knn5/8/8/8/8/8/8/K7 w - -", KKNN, KNNK);
     }
 
-    private void testMaterialTypeWithSymmetry(String fen, MaterialType materialType) {
+    private void testMaterialTypeWithSymmetry(String fen, MaterialType materialType, MaterialType invType) {
         Board board = new Board(fen);
         assertEquals(materialType, calculateMaterialType(board));
         board.flipVertical();
-        assertEquals(materialType, calculateMaterialType(board));
+        assertEquals(invType, calculateMaterialType(board));
     }
 }
