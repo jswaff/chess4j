@@ -137,7 +137,7 @@ public class EvalTest {
 
     @Test
     public void testKBKB() {
-        String fen = "kb6/8/8/8/8/8/8/KB6 w - -";
+        String fen = "k7/b7/8/8/8/8/8/KB6 w - -";
         Board board = new Board(fen);
         assertEquals(0, eval(board));
         testCaseSymmetry(fen);
