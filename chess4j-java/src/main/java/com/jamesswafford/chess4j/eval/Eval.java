@@ -10,13 +10,25 @@ import com.jamesswafford.chess4j.init.Initializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 import static com.jamesswafford.chess4j.eval.EvalKing.evalKing;
+import static com.jamesswafford.chess4j.eval.MaterialType.*;
 
 public final class Eval implements Evaluator {
 
     private static final  Logger LOGGER = LogManager.getLogger(Evaluator.class);
+
+    private static final Set<MaterialType> immediateDraws = new HashSet<>();
+    private static final Set<MaterialType> factor8Draws = new HashSet<>();
+
+    static {
+        immediateDraws.addAll(Arrays.asList(KK, KKN, KKNN, KKB, KNK, KNKN, KNNK, KNKB, KBK, KBKN, KBKB));
+        factor8Draws.addAll(Arrays.asList(KPKN, KPKB, KNKP, KBKP));
+    }
 
     static {
         Initializer.init();
@@ -29,10 +41,6 @@ public final class Eval implements Evaluator {
     }
 
     public static int eval(Board board, boolean materialOnly) {
-
-        /*if (EvalDraw.evalDraw(board)) {
-            return 0;
-        }*/
 
         int evalScore = evalHelper(board, materialOnly);
 
@@ -49,6 +57,17 @@ public final class Eval implements Evaluator {
         int matScore = EvalMaterial.evalMaterial(board);
         if (materialOnly) {
             return board.getPlayerToMove() == Color.WHITE ? matScore : -matScore;
+        }
+
+        // evaluate for a draw.  positions that are drawn by rule are immediately returned.  others
+        // that are "drawish" are further evaluated but later tapered down.
+        MaterialType materialType = EvalMaterial.calculateMaterialType(board);
+        int drawFactor = 1;
+        if (immediateDraws.contains(materialType)) {
+            return 0;
+        }
+        if (factor8Draws.contains(materialType)) {
+            drawFactor = 8;
         }
 
         // calculate a middle game score and end game score based on positional features
@@ -71,8 +90,8 @@ public final class Eval implements Evaluator {
         egScore += evalKing(board, board.getKingSquare(Color.WHITE), true)
                 - evalKing(board, board.getKingSquare(Color.BLACK), true);
 
-        // blend the middle game score and end game score
-        int taperedScore = EvalTaper.taper(board, mgScore, egScore);
+        // blend the middle game score and end game score, and divide by the draw factor
+        int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
 
         // return the score from the perspective of the player on move
         return board.getPlayerToMove() == Color.WHITE ? taperedScore : -taperedScore;

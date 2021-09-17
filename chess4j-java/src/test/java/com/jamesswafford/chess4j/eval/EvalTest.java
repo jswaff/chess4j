@@ -69,6 +69,80 @@ public class EvalTest {
         }
     }
 
+    @Test
+    public void testKK() {
+        String fen = "k7/8/8/8/8/8/8/K7 w - -";
+        Board board = new Board(fen);
+        assertEquals(0, eval(board));
+        testCaseSymmetry(fen);
+    }
+
+    @Test
+    public void testKNK() {
+        String fen = "kn6/8/8/8/8/8/8/K7 w - -";
+        Board board = new Board(fen);
+        assertEquals(0, eval(board));
+        testCaseSymmetry(fen);
+    }
+
+    @Test
+    public void testKNKP() {
+        String fen = "kn6/8/8/8/8/8/P7/K7 w - -";
+        Board board = new Board(fen);
+        int eval = eval(board);
+        assertTrue(eval > -50 && eval < 0);
+        testCaseSymmetry(fen);
+    }
+
+    @Test
+    public void testKNKN() {
+        String fen = "k7/n7/8/8/8/8/8/KN6 w - -";
+        Board board = new Board(fen);
+        assertEquals(0, eval(board));
+        testCaseSymmetry(fen);
+    }
+
+    @Test
+    public void testKNNK() {
+        String fen = "knn5/8/8/8/8/8/8/K7 w - -";
+        Board board = new Board(fen);
+        assertEquals(0, eval(board));
+        testCaseSymmetry(fen);
+    }
+
+    @Test
+    public void testKNKB() {
+        String fen = "kb6/8/8/8/8/8/8/KN6 w - -";
+        Board board = new Board(fen);
+        assertEquals(0, eval(board));
+        testCaseSymmetry(fen);
+    }
+
+    @Test
+    public void testKBK() {
+        String fen = "kb6/8/8/8/8/8/8/K7 w - -";
+        Board board = new Board(fen);
+        assertEquals(0, eval(board));
+        testCaseSymmetry(fen);
+    }
+
+    @Test
+    public void testKBKP() {
+        String fen = "kb6/8/8/8/8/8/P7/K7 w - -";
+        Board board = new Board(fen);
+        int eval = eval(board);
+        assertTrue(eval > -50 && eval < 0);
+        testCaseSymmetry(fen);
+    }
+
+    @Test
+    public void testKBKB() {
+        String fen = "k7/b7/8/8/8/8/8/KB6 w - -";
+        Board board = new Board(fen);
+        assertEquals(0, eval(board));
+        testCaseSymmetry(fen);
+    }
+
     private void testCaseSymmetry(String fen) {
         board.setPos(fen);
         int eval = eval(board);
