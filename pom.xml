@@ -11,8 +11,8 @@
     <version>4.0</version>
 
     <modules>
-        <module>chess4j-java</module>
         <module>chess4j-native</module>
+        <module>chess4j-java</module>
     </modules>
 
     <dependencyManagement>
