@@ -15,10 +15,10 @@
 #include <string.h>
 
 /* move stack */
-move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
+extern move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
 
 /* undo stack */
-undo_t undos[MAX_HALF_MOVES_PER_GAME];
+extern undo_t undos[MAX_HALF_MOVES_PER_GAME];
 
 /* search stats */
 stats_t native_stats;

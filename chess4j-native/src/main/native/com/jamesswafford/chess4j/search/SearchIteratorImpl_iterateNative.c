@@ -17,7 +17,7 @@
 move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
 
 /* undo stack */
-undo_t undos[MAX_PLY];
+undo_t undos[MAX_HALF_MOVES_PER_GAME];
 
 /*
  * Class:     com_jamesswafford_chess4j_search_SearchIteratorImpl
