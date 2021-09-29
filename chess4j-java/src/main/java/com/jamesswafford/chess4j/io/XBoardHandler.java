@@ -107,7 +107,7 @@ public class XBoardHandler {
     public void parseAndDispatch(String command) throws IllegalMoveException, ParseException {
         if (command == null) return;
 
-        LOGGER.debug("# parsing: " + command);
+        LOGGER.debug("# parsing command: " + command);
 
         String[] input = command.split("\\s+");
         String cmd = input[0];
