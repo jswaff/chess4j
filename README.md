@@ -16,7 +16,7 @@ https://www.oracle.com/java/technologies/javase-downloads.html
 
 See http://www.gnu.org/software/xboard for details on installing Winboard or Xboard.
 
-Once those prerequisites are met you can download the latest release and extract the zipfile.  Once you extract the zipfile, open the 'chess4j.bat' file and modify the path to match the location you just unzipped to.
+Once those prerequisites are met you can download the latest release and extract the zipfile.  Once you extract the zipfile, open the 'chess4j-4.0-winboard.bat' file (or chess4j-4.0-xboard.sh on Linux) and modify the path to match the location you just unzipped to.
 
 ## Building from Source
 
