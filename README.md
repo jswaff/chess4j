@@ -6,8 +6,6 @@ an XBoard compatible Java based chess engine
 
 chess4j is a chess program written using Java technologies. It is not meant to be super competitive, but just a test bed of sorts for various interests. Those interests include experimenting with different JVM based languages, parallel and distributed computing, and machine learning.
 
-You can read more about chess4j at http://www.jamesswafford.com/chess4j/ .
-
 ## Installing
 
 To play chess4j, you'll need a Java 11 or later JRE and Winboard or Xboard.
@@ -22,13 +20,12 @@ Once those prerequisites are met you can download the latest release and extract
 
 ## Building from Source
 
-chess4j can be built with or without <a href="https://github.com/jswaff/prophet4" target="_blank">Prophet4</a> bundled as a static library.  The benefit of bundling Prophet4 is simply speed.  When Prophet is bundled and activated (using the '-native' command line argument), chess4j will leverage Prophet when "thinking."  Since Prophet is written in C and is native, it will execute about 2-3 times faster.  It doesn't move any faster, but it will "see further" and therefore play stronger moves.  Otherwise, the algorithms are the same.  Just keep in mind that native code is platform dependent.  Currently the only platform supported for bundling Prophet is Linux, but it may work on Mac as well.  I do plan to add support for Windows in the future.
-
+chess4j can be built with or without <a href="https://github.com/jswaff/prophet" target="_blank">Prophet</a> bundled as a static library.  The benefit of bundling Prophet is simply speed.  When Prophet is bundled and activated (using the '-native' command line argument), chess4j will leverage Prophet when "thinking."  Since Prophet is written in C and is native, it will execute about 2-3 times faster.  It doesn't move any faster, but it will "see further" and therefore play stronger moves.  Otherwise, the algorithms are the same.  Just keep in mind that native code is platform dependent.  Currently the only platform supported for bundling Prophet is Linux.
 
 Whether you want to bundle Prophet or not, you will need a Java 11 (or better) SDK and Maven.  You will probably also need to ensure the JAVA_HOME environment variable is properly set.
 
 
-### Without the Prophet4 Engine
+### Without the Prophet Engine
 
 
 Clone the repository and go into the chess4j/chess4j-java directory.
@@ -42,7 +39,7 @@ Once this process is complete you should see the build artifact in the target di
 You should see the program search for about 10 seconds and display the result.  
 
 
-### With the Prophet4 Engine
+### With the Prophet Engine
 
 This option is slighly more complex.  In addition to the other prerequisites, you'll also need a working C/C++ toolchain.  I always use gcc / g++.  Others may work but have not been tested.  You'll also need 'make' and a copy of  Google Test from https://github.com/google/googletest .  Finally, set an environment variable GTEST_DIR to point to the 'googletest' project (we don't need the googlemock stuff).
 
@@ -50,13 +47,13 @@ Once you have the prerequisites, clone the chess4j repository.  Since Prophet4 i
 
 ```git clone --recurse-submodules git@github.com:jswaff/chess4j.git```
 
-If that worked you should see the contents of chess4j/lib/prophet4 populated.  Now, just go into the top level 'chess4j' directory and execute:
+If that worked you should see the contents of chess4j/lib/prophet populated.  Now, just go into the top level 'chess4j' directory and execute:
 
 ```make```
 
 That will kick off the build process, first building Prophet, then the JNI code that is the "bridge" between the Java and C layer, and finally chess4j itself.  The final build artifact will be in the chess4j-java/target directory.
 
-You now have the option to run with or without the native (Prophet4) code enabled by using the '-native' command line argument.  If you omit that argument, the native code will not be enabled.
+You now have the option to run with or without the native (Prophet) code enabled by using the '-native' command line argument.  If you omit that argument, the native code will not be enabled.
 
 Verify everything is working:
 
