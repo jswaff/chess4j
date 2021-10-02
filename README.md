@@ -98,3 +98,11 @@ java -jar chess4j-java-4.0-uber.jar -suite=wac.epd  -time=30
 ```
 
 The command above would start chess4j to process the Win At Chess (WAC) test suite, giving it 30 seconds per problem.  (A few test suites can be found in the test/resources folder.)
+
+
+## Status and Roadmap
+
+I plan to focus on improving the evaluation function for a while. At some point I'd like to try my hand at implementing a neural network, but in the short term I want to improve the "Hand Crafted Evaluation". The first step in doing that will be to add some automated tuning using logistic regression ("Texel Tuning"). Once the existing weights are optimized, I can think of several new terms that need to be added. chess4j doesn't understand pawns very well, and king safety is crude. It lacks knowledge of even basic endgames.
+
+You can see the combined Prophet / chess4j backlog here: https://trello.com/b/dhcOEaCO/chess4j-board .
+
