@@ -15,7 +15,7 @@
     </parent>
 
     <properties>
-        <P4_DIR>${project.basedir}/../lib/prophet4</P4_DIR>
+        <P4_DIR>${project.basedir}/../lib/prophet</P4_DIR>
         <P4_INCLUDE_PATH>${P4_DIR}/include</P4_INCLUDE_PATH>
         <P4_CFLAGS>-I ${P4_INCLUDE_PATH}</P4_CFLAGS>
         <P4_RELEASE_LIB_DIR>${P4_DIR}</P4_RELEASE_LIB_DIR>
