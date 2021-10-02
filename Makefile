@@ -15,11 +15,11 @@ mvn-clean:
 
 clean: prophet-clean
 
-prophet4-clean: mvn-clean
+prophet-clean: mvn-clean
 	(cd lib/prophet && $(MAKE) clean)
 
-prophet4-test: prophet-build
+prophet-test: prophet-build
 	(cd lib/prophet && $(MAKE) test && ./prophet4_test)
 
-prophet4-build:
+prophet-build:
 	(cd lib/prophet && $(MAKE))
