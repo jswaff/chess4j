@@ -89,7 +89,8 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         stmt.close();
     }
 
-    private long getFenCount(String fen) {
+    @Override
+    public long getFenCount(String fen) {
         long cnt = 0;
         String sql = "select count(*) cnt from tuner_pos where fen = ?";
 

@@ -22,6 +22,8 @@ public interface TunerDatasource {
 
     long getTotalPositionsCount();
 
+    long getFenCount(String fen);
+
     default void addToTunerDS(PGNGame game) {
 
         // don't process games that don't have an outcome!
@@ -34,7 +36,7 @@ public interface TunerDatasource {
         int i=0;
         while (i<gameMoves.size()) {
             Move gameMove = gameMoves.get(i);
-            if (i > 10) { // skip opening moves
+            if (i >= 10) { // skip opening moves
                 addToTunerDS(board, game.getResult());
             }
             board.applyMove(gameMove);
