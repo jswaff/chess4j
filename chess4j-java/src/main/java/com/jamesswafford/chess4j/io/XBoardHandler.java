@@ -12,6 +12,7 @@ import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
+import com.jamesswafford.chess4j.tuner.TunerDatasource;
 import com.jamesswafford.chess4j.utils.*;
 
 import org.apache.logging.log4j.LogManager;
@@ -30,6 +31,7 @@ public class XBoardHandler {
     private static final  Logger LOGGER = LogManager.getLogger(XBoardHandler.class);
 
     private OpeningBook openingBook;
+    private TunerDatasource tunerDatasource;
     private int bookMisses;
     private SearchIterator searchIterator;
     private CompletableFuture<List<Move>> searchFuture;
@@ -64,6 +66,7 @@ public class XBoardHandler {
         put("otim", XBoardHandler::noOp);
         put("perft", (String[] cmd) -> Perft.executePerft(Globals.getBoard(), Integer.parseInt(cmd[1])));
         put("pgn2book", XBoardHandler.this::pgnToBook);
+        put("pgn2tuner", XBoardHandler.this::pgnToTunerDS);
         put("ping", XBoardHandler.this::ping);
         put("post", (String[] cmd) -> searchIterator.setPost(true));
         put("protover", XBoardHandler::protover);
@@ -85,6 +88,7 @@ public class XBoardHandler {
 
     public XBoardHandler() {
         Globals.getOpeningBook().ifPresent(openingBook1 -> this.openingBook = openingBook1);
+        Globals.getTunerDatasource().ifPresent(tunerDatasource1 -> this.tunerDatasource = tunerDatasource1);
         searchIterator = new SearchIteratorImpl();
     }
 
@@ -219,6 +223,14 @@ public class XBoardHandler {
             openingBook.addToBook(new File(cmd[1]));
         } else {
             LOGGER.warn("There is no opening book.");
+        }
+    }
+
+    private void pgnToTunerDS(String[] cmd) {
+        if (tunerDatasource != null) {
+            tunerDatasource.addToTunerDS(new File(cmd[1]));
+        } else {
+            LOGGER.warn("There is no tuner datasource.");
         }
     }
 

@@ -36,7 +36,7 @@ public class SQLiteBook implements OpeningBook {
             stmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -52,7 +52,7 @@ public class SQLiteBook implements OpeningBook {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -64,7 +64,7 @@ public class SQLiteBook implements OpeningBook {
             stmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -97,7 +97,7 @@ public class SQLiteBook implements OpeningBook {
             }
             ps.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
 
         return bookMoves;
@@ -116,8 +116,7 @@ public class SQLiteBook implements OpeningBook {
             }
             ps.close();
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
 
         return cnt;
@@ -130,7 +129,7 @@ public class SQLiteBook implements OpeningBook {
             writeZobristKeys();
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -151,7 +150,7 @@ public class SQLiteBook implements OpeningBook {
                 board.applyMove(move);
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 

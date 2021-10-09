@@ -8,9 +8,9 @@ import java.util.List;
 
 public class PGNGame {
 
-    private List<PGNTag> tags = new ArrayList<>();
-    private List<Move> moves = new ArrayList<>();
-    private PGNResult result;
+    private final List<PGNTag> tags = new ArrayList<>();
+    private final List<Move> moves = new ArrayList<>();
+    private final PGNResult result;
 
     public PGNGame(List<PGNTag> tags,List<Move> moves,PGNResult result) {
         this.tags.addAll(tags);

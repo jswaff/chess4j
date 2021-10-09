@@ -3,7 +3,7 @@ package com.jamesswafford.chess4j.book;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.exceptions.PgnToBookException;
+import com.jamesswafford.chess4j.exceptions.PgnProcessingException;
 import com.jamesswafford.chess4j.io.PGNGame;
 import com.jamesswafford.chess4j.io.PGNIterator;
 import com.jamesswafford.chess4j.utils.GameResult;
@@ -51,7 +51,7 @@ public interface OpeningBook {
             processPGNFile(pgnFile,true);
             return processPGNFile(pgnFile,false);
         } catch (IOException e) {
-            throw new PgnToBookException("Error adding " + pgnFile.getName() + " to opening book", e);
+            throw new PgnProcessingException("Error adding " + pgnFile.getName() + " to opening book", e);
         }
     }
 

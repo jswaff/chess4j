@@ -7,13 +7,12 @@ import java.io.*;
 
 public class PGNIterator {
 
-    private BufferedReader bufferedReader;
+    private final BufferedReader bufferedReader;
 
     public PGNIterator(BufferedReader bufferedReader) {
         this.bufferedReader = bufferedReader;
     }
 
-    // TODO: Optional?
     public PGNGame next() throws IOException, ParseException, IllegalMoveException {
 
         PGNParser parser = new PGNParser();
