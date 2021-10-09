@@ -100,8 +100,14 @@ public class XBoardHandler {
         return forceMode;
     }
 
+    public boolean isPonderingEnabled() { return ponderingEnabled; }
+
     public void setOpeningBook(OpeningBook openingBook) {
         this.openingBook = openingBook;
+    }
+
+    public void setTunerDatasource(TunerDatasource tunerDatasource) {
+        this.tunerDatasource = tunerDatasource;
     }
 
     public void setSearchIterator(SearchIterator searchIterator) {

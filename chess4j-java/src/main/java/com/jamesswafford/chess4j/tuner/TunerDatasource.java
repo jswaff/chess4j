@@ -18,6 +18,10 @@ public interface TunerDatasource {
 
     void addToTunerDS(Board board, PGNResult pgnResult);
 
+    void initializeDatasource();
+
+    long getTotalPositionsCount();
+
     default void addToTunerDS(PGNGame game) {
 
         // don't process games that don't have an outcome!

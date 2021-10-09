@@ -128,7 +128,6 @@ public class SQLiteBook implements OpeningBook {
             createTables();
             writeZobristKeys();
         } catch (SQLException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

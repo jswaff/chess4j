@@ -29,6 +29,34 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         }
     }
 
+    @Override
+    public void initializeDatasource() {
+        try {
+            createTables();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public long getTotalPositionsCount() {
+        long cnt = 0;
+        String sql = "select count(*) cnt from tuner_pos";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                cnt = rs.getLong("cnt");
+            }
+            ps.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return cnt;
+    }
+
     public static SQLiteTunerDatasource openOrInitialize(String tunerDSPath) throws Exception {
         LOGGER.debug("# initializing tuner datasource: " + tunerDSPath);
 
@@ -41,7 +69,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
 
         if (initDS) {
             LOGGER.info("# could not find " + tunerDSPath + ", creating...");
-            sqLiteTunerDatasource.createTables();
+            sqLiteTunerDatasource.initializeDatasource();
             LOGGER.info("# ... finished.");
         }
 
@@ -51,6 +79,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
 
         return sqLiteTunerDatasource;
     }
+
 
 
     private void createTables() throws SQLException {
