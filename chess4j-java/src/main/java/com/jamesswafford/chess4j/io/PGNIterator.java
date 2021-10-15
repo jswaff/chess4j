@@ -4,16 +4,19 @@ import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 
 public class PGNIterator {
 
-    private final BufferedReader bufferedReader;
+    private final Scanner scanner;
 
-    public PGNIterator(BufferedReader bufferedReader) {
-        this.bufferedReader = bufferedReader;
+    public PGNIterator(File pgnFile) throws FileNotFoundException {
+        FileInputStream pgnFileInputStream = new FileInputStream(pgnFile);
+        scanner = new Scanner(pgnFileInputStream, StandardCharsets.UTF_8);
     }
 
-    public PGNGame next() throws IOException, ParseException, IllegalMoveException {
+    public PGNGame next() throws ParseException, IllegalMoveException {
 
         PGNParser parser = new PGNParser();
         String nextGame = getNextPGN();
@@ -25,13 +28,13 @@ public class PGNIterator {
         return null;
     }
 
-    private String getNextPGN() throws IOException, ParseException {
+    private String getNextPGN() throws ParseException {
 
         StringBuilder sb = new StringBuilder();
 
         boolean foundTags = false;
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
             if (line.startsWith("[")) {
                 foundTags = true;
                 sb.append(line).append("\n");
@@ -45,7 +48,8 @@ public class PGNIterator {
         if (!foundTags) { return null; }
 
         boolean foundMoveText = false;
-        while ((line = bufferedReader.readLine()) != null) {
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
             if (!"".equals(line.trim())) {
                 foundMoveText = true;
                 sb.append(line).append("\n");

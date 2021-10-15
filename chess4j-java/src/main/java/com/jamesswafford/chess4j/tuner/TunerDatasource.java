@@ -7,9 +7,7 @@ import com.jamesswafford.chess4j.io.PGNGame;
 import com.jamesswafford.chess4j.io.PGNIterator;
 import com.jamesswafford.chess4j.io.PGNResult;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -56,15 +54,13 @@ public interface TunerDatasource {
     private int processPGNFile(File pgnFile, boolean dryRun) throws IOException {
         int n = 0;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(pgnFile))) {
-            PGNIterator it = new PGNIterator(br);
-            PGNGame pgnGame;
-            while ((pgnGame = it.next()) != null) {
-                if (!dryRun) {
-                    addToTunerDS(pgnGame);
-                }
-                n++;
+        PGNIterator it = new PGNIterator(pgnFile);
+        PGNGame pgnGame;
+        while ((pgnGame = it.next()) != null) {
+            if (!dryRun) {
+                addToTunerDS(pgnGame);
             }
+            n++;
         }
 
         return n;

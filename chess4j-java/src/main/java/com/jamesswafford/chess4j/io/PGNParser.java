@@ -17,15 +17,15 @@ import java.util.regex.Pattern;
  */
 public final class PGNParser {
 
-    private static final String tagPattern = "\\[([A-Za-z0-9_]+)\\s+\\\"(.*?)\\\"\\]";
+    private static final String tagPattern = "\\[([A-Za-z0-9_]+)\\s+\"(.*?)\"]";
 
     private List<Move> getMoves(String pgn) throws ParseException, IllegalMoveException {
-        List<Move> moves = new ArrayList<Move>();
+        List<Move> moves = new ArrayList<>();
 
         String moveText = getMoveText(pgn);
 
         // get rid of comments
-        moveText = moveText.replaceAll("\\{(.*)?\\}", "");
+        moveText = moveText.replaceAll("\\{(.*)?}", "");
 
         // get rid of move indicators
         moveText = moveText.replaceAll("\\d+\\.", "");
@@ -53,7 +53,7 @@ public final class PGNParser {
 
     private String getMoveText(String pgn) {
 
-        Pattern p = Pattern.compile("\\[(.*)?\\]");
+        Pattern p = Pattern.compile("\\[(.*)?]");
         Matcher m = p.matcher(pgn);
 
         return m.replaceAll("").replaceAll("\n", " ").replaceAll("\r", " ").trim();

@@ -58,12 +58,12 @@ public interface OpeningBook {
     private int processPGNFile(File pgnFile, boolean dryRun) throws IOException {
         int n = 0;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(pgnFile))) {
+        try {
             if (!dryRun) {
                 dropIndexes();
             }
 
-            PGNIterator it = new PGNIterator(br);
+            PGNIterator it = new PGNIterator(pgnFile);
             PGNGame pgnGame;
             while ((pgnGame = it.next()) != null) {
                 if (!dryRun) {
