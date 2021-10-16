@@ -23,7 +23,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     @Override
     public void addToTunerDS(Board board, PGNResult pgnResult) {
         String fen = FenBuilder.createFen(board, false);
-        LOGGER.info("adding " + fen);
+        LOGGER.info("adding " + fen + " with result " + pgnResult);
         if (getFenCount(fen)==0) {
             insert(fen, pgnResult);
         }

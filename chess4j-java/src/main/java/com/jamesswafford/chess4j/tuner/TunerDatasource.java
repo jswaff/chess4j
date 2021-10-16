@@ -6,6 +6,8 @@ import com.jamesswafford.chess4j.exceptions.PgnProcessingException;
 import com.jamesswafford.chess4j.io.PGNGame;
 import com.jamesswafford.chess4j.io.PGNIterator;
 import com.jamesswafford.chess4j.io.PGNResult;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public interface TunerDatasource {
+
+    static final Logger LOGGER = LogManager.getLogger(TunerDatasource.class);
 
     void addToTunerDS(Board board, PGNResult pgnResult);
 
@@ -57,6 +61,7 @@ public interface TunerDatasource {
         PGNIterator it = new PGNIterator(pgnFile);
         PGNGame pgnGame;
         while ((pgnGame = it.next()) != null) {
+            LOGGER.info("processing game " + n + (dryRun? " (dry run)":""));
             if (!dryRun) {
                 addToTunerDS(pgnGame);
             }
