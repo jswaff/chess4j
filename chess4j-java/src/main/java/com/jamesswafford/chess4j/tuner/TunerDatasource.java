@@ -61,7 +61,7 @@ public interface TunerDatasource {
         PGNIterator it = new PGNIterator(pgnFile);
         PGNGame pgnGame;
         while ((pgnGame = it.next()) != null) {
-            LOGGER.info("processing game " + n + (dryRun? " (dry run)":""));
+            LOGGER.info("processing game " + n + " with " + pgnGame.getMoves().size() + " moves " + (dryRun? " (dry run)":""));
             if (!dryRun) {
                 addToTunerDS(pgnGame);
             }
