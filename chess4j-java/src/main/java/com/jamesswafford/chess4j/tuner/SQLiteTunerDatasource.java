@@ -1,8 +1,6 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
-import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.io.PGNResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,11 +19,26 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     }
 
     @Override
-    public void addToTunerDS(Board board, PGNResult pgnResult) {
-        String fen = FenBuilder.createFen(board, false);
+    public void addToTunerDS(String fen, PGNResult pgnResult) {
         LOGGER.info("adding " + fen + " with result " + pgnResult);
         if (getFenCount(fen)==0) {
             insert(fen, pgnResult);
+        }
+    }
+
+    @Override
+    public void update(String fen, int evalDepth, int evalScore) {
+        String qry = "update tuner_pos set eval_depth=?, eval_score=? where fen = ?";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(qry);
+            ps.setInt(1, evalDepth);
+            ps.setInt(2, evalScore);
+            ps.setString(3, fen);
+            ps.executeUpdate();
+            ps.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -84,7 +97,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
 
     private void createTables() throws SQLException {
         Statement stmt = conn.createStatement();
-        stmt.execute("create table tuner_pos(fen text, outcome integer, processed integer, eval_depth integer, eval_score integer)");
+        stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer, processed integer, eval_depth integer, eval_score integer)");
         stmt.execute("create index idx_tuner_pos_fen on tuner_pos(fen)");
         stmt.close();
     }
@@ -107,6 +120,46 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         }
 
         return cnt;
+    }
+
+    @Override
+    public int getEvalDepth(String fen) {
+        String sql = "select eval_depth from tuner_pos where fen = ?";
+
+        int depth = 0;
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, fen);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                depth = rs.getInt("eval_depth");
+            }
+            ps.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return depth;
+    }
+
+    @Override
+    public int getEvalScore(String fen) {
+        String sql = "select eval_score from tuner_pos where fen = ?";
+
+        int score = 0;
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, fen);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                score = rs.getInt("eval_score");
+            }
+            ps.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return score;
     }
 
     private void insert(String fen, PGNResult pgnResult) {

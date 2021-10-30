@@ -121,4 +121,16 @@ public class PGNMoveTextTokenizerTest {
         assertEquals(new PGNMoveTextToken(MOVE, "Nf3"), tokens.get(6));
     }
 
+    @Test
+    public void test8() {
+        String moveText = "1. ... e5 2.f3";
+        List<PGNMoveTextToken> tokens = PGNMoveTextTokenizer.tokenize(moveText);
+
+        assertEquals(4, tokens.size());
+        assertEquals(new PGNMoveTextToken(MOVE_NUMBER, "1."), tokens.get(0));
+        assertEquals(new PGNMoveTextToken(MOVE, "e5"), tokens.get(1));
+        assertEquals(new PGNMoveTextToken(MOVE_NUMBER, "2."), tokens.get(2));
+        assertEquals(new PGNMoveTextToken(MOVE, "f3"), tokens.get(3));
+    }
+
 }

@@ -3,10 +3,7 @@ package com.jamesswafford.chess4j.tuner;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.exceptions.PgnProcessingException;
-import com.jamesswafford.chess4j.io.MoveWithNAG;
-import com.jamesswafford.chess4j.io.PGNGame;
-import com.jamesswafford.chess4j.io.PGNIterator;
-import com.jamesswafford.chess4j.io.PGNResult;
+import com.jamesswafford.chess4j.io.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,13 +16,19 @@ public interface TunerDatasource {
 
     static final Logger LOGGER = LogManager.getLogger(TunerDatasource.class);
 
-    void addToTunerDS(Board board, PGNResult pgnResult);
+    void addToTunerDS(String fen, PGNResult pgnResult);
+
+    void update(String fen, int evalDepth, int evalScore);
 
     void initializeDatasource();
 
     long getTotalPositionsCount();
 
     long getFenCount(String fen);
+
+    int getEvalDepth(String fen);
+
+    int getEvalScore(String fen);
 
     default void addToTunerDS(PGNGame game) {
 
@@ -38,11 +41,15 @@ public interface TunerDatasource {
         List<MoveWithNAG> gameMoves = game.getMoves();
         int i=0;
         while (i<gameMoves.size()) {
-            Move gameMove = gameMoves.get(i).getMove();
+            MoveWithNAG gameMove = gameMoves.get(i);
+            // if the eval depth and score were given in the NAG, parse them out
+            // {+0.30/7 0.065s}
+            // {-0.45/7 0.099s}
             if (i >= 10) { // skip opening moves
-                addToTunerDS(board, game.getResult());
+                String fen = FenBuilder.createFen(board, false);
+                addToTunerDS(fen, game.getResult());
             }
-            board.applyMove(gameMove);
+            board.applyMove(gameMove.getMove());
             i++;
         }
     }

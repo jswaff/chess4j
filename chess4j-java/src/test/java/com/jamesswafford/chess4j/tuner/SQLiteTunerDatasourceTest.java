@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.tuner;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.squares.Square;
+import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.io.MoveParser;
 import com.jamesswafford.chess4j.io.PGNResult;
 import com.jamesswafford.chess4j.pieces.Pawn;
@@ -17,9 +18,7 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 
 import static com.jamesswafford.chess4j.io.FenBuilder.createFen;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class SQLiteTunerDatasourceTest {
 
@@ -56,11 +55,11 @@ public class SQLiteTunerDatasourceTest {
         assertEquals(0, tunerDatasource.getTotalPositionsCount());
 
         Board board = new Board();
-        tunerDatasource.addToTunerDS(board, PGNResult.WHITE_WINS);
+        tunerDatasource.addToTunerDS(FenBuilder.createFen(board, false), PGNResult.WHITE_WINS);
         assertEquals(1, tunerDatasource.getTotalPositionsCount());
 
         board.applyMove(new Move(Pawn.WHITE_PAWN, Square.E2, Square.E4));
-        tunerDatasource.addToTunerDS(board, PGNResult.WHITE_WINS);
+        tunerDatasource.addToTunerDS(FenBuilder.createFen(board, false), PGNResult.WHITE_WINS);
         assertEquals(2, tunerDatasource.getTotalPositionsCount());
     }
 
@@ -69,10 +68,10 @@ public class SQLiteTunerDatasourceTest {
         assertEquals(0, tunerDatasource.getTotalPositionsCount());
 
         Board board = new Board();
-        tunerDatasource.addToTunerDS(board, PGNResult.WHITE_WINS);
+        tunerDatasource.addToTunerDS(FenBuilder.createFen(board, false), PGNResult.WHITE_WINS);
         assertEquals(1, tunerDatasource.getTotalPositionsCount());
 
-        tunerDatasource.addToTunerDS(board, PGNResult.WHITE_WINS);
+        tunerDatasource.addToTunerDS(FenBuilder.createFen(board, false), PGNResult.WHITE_WINS);
         assertEquals(1, tunerDatasource.getTotalPositionsCount());
     }
 
@@ -82,11 +81,27 @@ public class SQLiteTunerDatasourceTest {
 
         Board board = new Board();
         try {
-            tunerDatasource.addToTunerDS(board, PGNResult.ADJOURNED);
+            tunerDatasource.addToTunerDS(FenBuilder.createFen(board, false), PGNResult.ADJOURNED);
             fail();
         } catch (IllegalStateException e) { /* good */ }
 
         assertEquals(0, tunerDatasource.getTotalPositionsCount());
+    }
+
+    @Test
+    public void updateWithScoreAndDepth() {
+        Board board = new Board();
+        String fen = FenBuilder.createFen(board, false);
+        tunerDatasource.addToTunerDS(fen, PGNResult.WHITE_WINS);
+        assertEquals(1, tunerDatasource.getTotalPositionsCount());
+
+        assertEquals(0, tunerDatasource.getEvalDepth(fen));
+        assertEquals(0, tunerDatasource.getEvalScore(fen));
+
+        tunerDatasource.update(fen, 12, 930);
+
+        assertEquals(12, tunerDatasource.getEvalDepth(fen));
+        assertEquals(930, tunerDatasource.getEvalScore(fen));
     }
 
     @Test
