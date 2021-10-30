@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
 public class PGNParserTest {
 
     @Test
-    public void testSimplePGN() throws Exception {
+    public void testSimplePGN() {
         String pgn = "[Event \"F/S Return Match\"]\n"
             + "[Site \"Belgrade, Serbia Yugoslavia|JUG\"]\n"
             + "[Date \"1992.11.04\"]\n"
@@ -45,7 +45,7 @@ public class PGNParserTest {
     }
 
     @Test
-    public void testPGNWithComments() throws Exception {
+    public void testPGNWithComments() {
         String pgn = "[Event \"F/S Return Match\"]\n"
             + "[Site \"Belgrade, Serbia Yugoslavia|JUG\"]\n"
             + "[Date \"1992.11.04\"]\n"
@@ -71,7 +71,7 @@ public class PGNParserTest {
     }
 
     @Test
-    public void testICCGame() throws Exception {
+    public void testICCGame() {
         String pgn = "[Event \"ICC 5 3\"]\n"
             + "[Site \"Internet Chess Club\"]\n"
             + "[Date \"2014.09.02\"]\n"
