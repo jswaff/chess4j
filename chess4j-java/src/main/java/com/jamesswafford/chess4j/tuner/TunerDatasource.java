@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.tuner;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.exceptions.PgnProcessingException;
+import com.jamesswafford.chess4j.io.MoveWithNAG;
 import com.jamesswafford.chess4j.io.PGNGame;
 import com.jamesswafford.chess4j.io.PGNIterator;
 import com.jamesswafford.chess4j.io.PGNResult;
@@ -34,10 +35,10 @@ public interface TunerDatasource {
         }
         Board board = new Board();
 
-        List<Move> gameMoves = game.getMoves();
+        List<MoveWithNAG> gameMoves = game.getMoves();
         int i=0;
         while (i<gameMoves.size()) {
-            Move gameMove = gameMoves.get(i);
+            Move gameMove = gameMoves.get(i).getMove();
             if (i >= 10) { // skip opening moves
                 addToTunerDS(board, game.getResult());
             }

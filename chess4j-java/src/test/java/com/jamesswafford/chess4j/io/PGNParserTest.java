@@ -24,7 +24,7 @@ public class PGNParserTest {
             + "[Black \"Spassky, Boris V.\"]\n"
             + "[Result \"1/2-1/2\"]\n"
             + "\n"
-            + "1. e4 e5 1/2-1/2\n";
+            + "1. e4 e5 {what a move!} 1/2-1/2\n";
 
         List<PGNTag> tags = new ArrayList<>();
         tags.add(new PGNTag("Event","F/S Return Match"));
@@ -35,11 +35,11 @@ public class PGNParserTest {
         tags.add(new PGNTag("Black","Spassky, Boris V."));
         tags.add(new PGNTag("Result","1/2-1/2"));
 
-        List<Move> moves = new ArrayList<>();
-        moves.add(new Move(WHITE_PAWN, E2, E4));
-        moves.add(new Move(BLACK_PAWN, E7, E5));
+        List<MoveWithNAG> moves = new ArrayList<>();
+        moves.add(new MoveWithNAG(new Move(WHITE_PAWN, E2, E4), null));
+        moves.add(new MoveWithNAG(new Move(BLACK_PAWN, E7, E5), "{what a move!}"));
 
-        PGNGame pgnGame = new PGNGame(tags,moves,PGNResult.DRAW);
+        PGNGame pgnGame = new PGNGame(tags, moves, PGNResult.DRAW);
 
         assertEquals(pgnGame, new PGNParser().parseGame(pgn));
     }

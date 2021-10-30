@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public final class PGNParser {
 
@@ -17,7 +16,7 @@ public final class PGNParser {
 
     public PGNGame parseGame(String pgn) throws ParseException, IllegalMoveException {
         List<PGNTag> tags = getPGNTags(pgn);
-        List<Move> moves = getMoves(pgn).stream().map(MoveWithNAG::getMove).collect(Collectors.toList()); // TODO
+        List<MoveWithNAG> moves = getMoves(pgn);
         PGNResult result = getResult(pgn);
 
         return new PGNGame(tags,moves,result);
@@ -34,10 +33,16 @@ public final class PGNParser {
 
         Board board = new Board();
 
-        for (PGNMoveTextToken token : tokens) {
+        for (int i=0;i<tokens.size();i++) {
+            PGNMoveTextToken token = tokens.get(i);
             if (PGNMoveTextTokenType.MOVE.equals(token.getTokenType())) {
                 Move m = mp.parseMove(token.getValue(), board);
-                moves.add(new MoveWithNAG(m, null));
+                // if the next token is a NAG (annotation), include it
+                String nag = null;
+                if (i < tokens.size()-1 && PGNMoveTextTokenType.NAG.equals(tokens.get(i+1).getTokenType())) {
+                    nag = tokens.get(i+1).getValue();
+                }
+                moves.add(new MoveWithNAG(m, nag));
                 board.applyMove(m);
             }
         }
@@ -50,6 +55,7 @@ public final class PGNParser {
         Pattern p = Pattern.compile("\\[(.*)?]");
         Matcher m = p.matcher(pgn);
 
+        // TODO: this breaks "end of line comments"
         return m.replaceAll("").replaceAll("\n", " ").replaceAll("\r", " ").trim();
     }
 
@@ -84,10 +90,10 @@ public final class PGNParser {
     }
 
     /**
-     * Parse the text to get a PGNTag  , or return null if it doesn't represent a PGN tag.
+     * Parse text to get a PGNTag
      *
-     * @param tagTxt
-     * @return
+     * @param tagTxt - text , possibly with PGN tag
+     * @return - the PGN tag, or null if the text doesn't represent a PGN tag
      */
     private PGNTag parseTag(String tagTxt) {
         Pattern r = Pattern.compile(tagPattern);

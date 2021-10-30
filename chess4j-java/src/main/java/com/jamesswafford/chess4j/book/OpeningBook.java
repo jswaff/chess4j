@@ -4,6 +4,7 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.exceptions.PgnProcessingException;
+import com.jamesswafford.chess4j.io.MoveWithNAG;
 import com.jamesswafford.chess4j.io.PGNGame;
 import com.jamesswafford.chess4j.io.PGNIterator;
 import com.jamesswafford.chess4j.utils.GameResult;
@@ -36,10 +37,10 @@ public interface OpeningBook {
 
         Board board = new Board();
 
-        List<Move> gameMoves = game.getMoves();
+        List<MoveWithNAG> gameMoves = game.getMoves();
         int i=0;
         while (i<15 && i<gameMoves.size()) {
-            Move gameMove = gameMoves.get(i);
+            Move gameMove = gameMoves.get(i).getMove();
             addToBook(board, gameMove);
             board.applyMove(gameMove);
             i++;

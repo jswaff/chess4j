@@ -1,7 +1,5 @@
 package com.jamesswafford.chess4j.io;
 
-import com.jamesswafford.chess4j.board.Move;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,10 +7,10 @@ import java.util.List;
 public class PGNGame {
 
     private final List<PGNTag> tags = new ArrayList<>();
-    private final List<Move> moves = new ArrayList<>();
+    private final List<MoveWithNAG> moves = new ArrayList<>();
     private final PGNResult result;
 
-    public PGNGame(List<PGNTag> tags,List<Move> moves,PGNResult result) {
+    public PGNGame(List<PGNTag> tags, List<MoveWithNAG> moves, PGNResult result) {
         this.tags.addAll(tags);
         this.moves.addAll(moves);
         this.result = result;
@@ -22,7 +20,7 @@ public class PGNGame {
         return Collections.unmodifiableList(tags);
     }
 
-    public List<Move> getMoves() {
+    public List<MoveWithNAG> getMoves() {
         return Collections.unmodifiableList(moves);
     }
 
