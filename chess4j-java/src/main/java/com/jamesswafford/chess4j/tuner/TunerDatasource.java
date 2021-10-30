@@ -18,7 +18,7 @@ public interface TunerDatasource {
 
     void addToTunerDS(String fen, PGNResult pgnResult);
 
-    void update(String fen, int evalDepth, int evalScore);
+    void update(String fen, int evalDepth, float evalScore);
 
     void initializeDatasource();
 
@@ -28,7 +28,7 @@ public interface TunerDatasource {
 
     int getEvalDepth(String fen);
 
-    int getEvalScore(String fen);
+    float getEvalScore(String fen);
 
     default void addToTunerDS(PGNGame game) {
 
@@ -42,14 +42,18 @@ public interface TunerDatasource {
         int i=0;
         while (i<gameMoves.size()) {
             MoveWithNAG gameMove = gameMoves.get(i);
-            // if the eval depth and score were given in the NAG, parse them out
-            // {+0.30/7 0.065s}
-            // {-0.45/7 0.099s}
-            if (i >= 10) { // skip opening moves
+            board.applyMove(gameMove.getMove());
+            if (i >= 10) { // skip first 5 complete moves
                 String fen = FenBuilder.createFen(board, false);
                 addToTunerDS(fen, game.getResult());
+                // if we have the depth/score in the annotation, use it
+                if (gameMove.getNag() != null) {
+                    CutechessNagParser cutechessNagParser = new CutechessNagParser(gameMove.getNag());
+                    if (cutechessNagParser.isValid()) {
+                        update(fen, cutechessNagParser.depth(), cutechessNagParser.score());
+                    }
+                }
             }
-            board.applyMove(gameMove.getMove());
             i++;
         }
     }

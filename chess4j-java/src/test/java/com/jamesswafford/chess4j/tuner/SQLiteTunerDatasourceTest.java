@@ -96,12 +96,13 @@ public class SQLiteTunerDatasourceTest {
         assertEquals(1, tunerDatasource.getTotalPositionsCount());
 
         assertEquals(0, tunerDatasource.getEvalDepth(fen));
-        assertEquals(0, tunerDatasource.getEvalScore(fen));
 
-        tunerDatasource.update(fen, 12, 930);
+        tunerDatasource.update(fen, 12, 9.30F);
 
         assertEquals(12, tunerDatasource.getEvalDepth(fen));
-        assertEquals(930, tunerDatasource.getEvalScore(fen));
+        float foundScore = tunerDatasource.getEvalScore(fen);
+        assertTrue(foundScore > 9.29999);
+        assertTrue(foundScore < 9.30001);
     }
 
     @Test
@@ -114,7 +115,7 @@ public class SQLiteTunerDatasourceTest {
         MoveParser mp = new MoveParser();
 
         /*
-         * 1.f4 e5 2.fxe5 d6 3.exd6 Bxd6 4.Nf3 g5 5.g3 g4 6.Nh4 Ne7 7.d4 Ng6 8.Nxg6
+         * 1.f4 e5 2.fxe5 d6 3.exd6 Bxd6 4.Nf3 g5 5.g3 g4 6.Nh4 Ne7 7.d4 {-2.65/14 0.12s} Ng6 8.Nxg6
             hxg6 9.Qd3 Nc6 10.c3 Bf5 11.e4 Qe7 12.Bg2 O-O-O 13.Be3 Rde8 14.Nd2 f6 15.
             O-O-O Bd7 16.Nc4 Kb8 17.e5 fxe5 18.dxe5 Nxe5 19.Qd4 b6 20.Nxe5 Qxe5 21.
             Qxe5 Rxe5 22.Bd4 Re2 23.Bxh8 Rxg2 24.Rd2 Rxd2 25.Kxd2 b5 26.Re1 a5 27.Bf6
@@ -125,10 +126,13 @@ public class SQLiteTunerDatasourceTest {
 
         // first ten moves skipped
         assertEquals(0, tunerDatasource.getFenCount(createFen(board, false)));
+
         board.applyMove(mp.parseMove("f4", board));
         assertEquals(0, tunerDatasource.getFenCount(createFen(board, false)));
+
         board.applyMove(mp.parseMove("e5", board));
         assertEquals(0, tunerDatasource.getFenCount(createFen(board, false)));
+
         board.applyMove(mp.parseMove("fxe5", board));
         assertEquals(0, tunerDatasource.getFenCount(createFen(board, false)));
         board.applyMove(mp.parseMove("d6", board));
@@ -144,14 +148,21 @@ public class SQLiteTunerDatasourceTest {
         board.applyMove(mp.parseMove("g3", board));
         assertEquals(0, tunerDatasource.getFenCount(createFen(board, false)));
         board.applyMove(mp.parseMove("g4", board));
+        assertEquals(0, tunerDatasource.getFenCount(createFen(board, false)));
 
         // starting here we should find an entry
-        assertEquals(1, tunerDatasource.getFenCount(createFen(board, false)));
         board.applyMove(mp.parseMove("Nh4", board));
         assertEquals(1, tunerDatasource.getFenCount(createFen(board, false)));
         board.applyMove(mp.parseMove("Ne7", board));
         assertEquals(1, tunerDatasource.getFenCount(createFen(board, false)));
+
         board.applyMove(mp.parseMove("d4", board));
+        String fen = createFen(board, false);
+        assertEquals(1, tunerDatasource.getFenCount(fen));
+        assertEquals(14, tunerDatasource.getEvalDepth(fen));
+        float evalScore = tunerDatasource.getEvalScore(fen);
+        assertTrue(evalScore < -2.64999);
+        assertTrue(evalScore > -2.65001);
     }
 
     private void populateTunerDatasource(String pgn) {

@@ -27,13 +27,13 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     }
 
     @Override
-    public void update(String fen, int evalDepth, int evalScore) {
+    public void update(String fen, int evalDepth, float evalScore) {
         String qry = "update tuner_pos set eval_depth=?, eval_score=? where fen = ?";
 
         try {
             PreparedStatement ps = conn.prepareStatement(qry);
             ps.setInt(1, evalDepth);
-            ps.setInt(2, evalScore);
+            ps.setFloat(2, evalScore);
             ps.setString(3, fen);
             ps.executeUpdate();
             ps.close();
@@ -97,7 +97,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
 
     private void createTables() throws SQLException {
         Statement stmt = conn.createStatement();
-        stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer, processed integer, eval_depth integer, eval_score integer)");
+        stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer, processed integer, eval_depth integer, eval_score real)");
         stmt.execute("create index idx_tuner_pos_fen on tuner_pos(fen)");
         stmt.close();
     }
@@ -143,16 +143,16 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     }
 
     @Override
-    public int getEvalScore(String fen) {
+    public float getEvalScore(String fen) {
         String sql = "select eval_score from tuner_pos where fen = ?";
 
-        int score = 0;
+        float score = 0;
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, fen);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                score = rs.getInt("eval_score");
+                score = rs.getFloat("eval_score");
             }
             ps.close();
         } catch (SQLException e) {
