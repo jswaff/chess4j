@@ -56,35 +56,29 @@ public class SQLiteTunerDatasource implements TunerDatasource {
 
     @Override
     public void insert(String fen, PGNResult pgnResult) {
-        LOGGER.info("inserting " + fen + " with result " + pgnResult);
+        if (getFenCount(fen) == 0) {
+            int outcome;
+            if (PGNResult.WHITE_WINS.equals(pgnResult)) {
+                outcome = 1;
+            } else if (PGNResult.BLACK_WINS.equals(pgnResult)) {
+                outcome = -1;
+            } else if (PGNResult.DRAW.equals(pgnResult)) {
+                outcome = 0;
+            } else {
+                throw new IllegalStateException("Illegal value for argument pgnResult " + pgnResult);
+            }
 
-        if (getFenCount(fen) > 0) {
-            LOGGER.warn("record for " + fen + " already exist, skipping");
-            return;
+            try {
+                String sql = "insert into tuner_pos(fen, outcome, processed) values (? ,?, 0)";
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ps.setString(1, fen);
+                ps.setInt(2, outcome);
+                ps.executeUpdate();
+                ps.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
-
-        int outcome;
-        if (PGNResult.WHITE_WINS.equals(pgnResult)) {
-            outcome = 1;
-        } else if (PGNResult.BLACK_WINS.equals(pgnResult)) {
-            outcome = -1;
-        } else if (PGNResult.DRAW.equals(pgnResult)) {
-            outcome = 0;
-        } else {
-            throw new IllegalStateException("Illegal value for argument pgnResult " + pgnResult);
-        }
-
-        try {
-            String sql = "insert into tuner_pos(fen, outcome, processed) values (? ,?, 0)";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, fen);
-            ps.setInt(2, outcome);
-            ps.executeUpdate();
-            ps.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
     }
 
     @Override
