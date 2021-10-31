@@ -18,58 +18,6 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         this.conn = conn;
     }
 
-    @Override
-    public void addToTunerDS(String fen, PGNResult pgnResult) {
-        LOGGER.info("adding " + fen + " with result " + pgnResult);
-        if (getFenCount(fen)==0) {
-            insert(fen, pgnResult);
-        }
-    }
-
-    @Override
-    public void update(String fen, int evalDepth, float evalScore) {
-        String qry = "update tuner_pos set eval_depth=?, eval_score=? where fen = ?";
-
-        try {
-            PreparedStatement ps = conn.prepareStatement(qry);
-            ps.setInt(1, evalDepth);
-            ps.setFloat(2, evalScore);
-            ps.setString(3, fen);
-            ps.executeUpdate();
-            ps.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void initializeDatasource() {
-        try {
-            createTables();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public long getTotalPositionsCount() {
-        long cnt = 0;
-        String sql = "select count(*) cnt from tuner_pos";
-
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                cnt = rs.getLong("cnt");
-            }
-            ps.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        return cnt;
-    }
-
     public static SQLiteTunerDatasource openOrInitialize(String tunerDSPath) throws Exception {
         LOGGER.debug("# initializing tuner datasource: " + tunerDSPath);
 
@@ -93,12 +41,88 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         return sqLiteTunerDatasource;
     }
 
-    private void createTables() throws SQLException {
-        Statement stmt = conn.createStatement();
-        stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer, processed integer, " +
-                "eval_depth integer, eval_score real)");
-        stmt.execute("create index idx_tuner_pos_fen on tuner_pos(fen)");
-        stmt.close();
+    @Override
+    public void initializeDatasource() {
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer, processed integer, " +
+                    "eval_depth integer, eval_score real)");
+            stmt.execute("create index idx_tuner_pos_fen on tuner_pos(fen)");
+            stmt.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void insert(String fen, PGNResult pgnResult) {
+        LOGGER.info("inserting " + fen + " with result " + pgnResult);
+
+        if (getFenCount(fen) > 0) {
+            LOGGER.warn("record for " + fen + " already exist, skipping");
+            return;
+        }
+
+        int outcome;
+        if (PGNResult.WHITE_WINS.equals(pgnResult)) {
+            outcome = 1;
+        } else if (PGNResult.BLACK_WINS.equals(pgnResult)) {
+            outcome = -1;
+        } else if (PGNResult.DRAW.equals(pgnResult)) {
+            outcome = 0;
+        } else {
+            throw new IllegalStateException("Illegal value for argument pgnResult " + pgnResult);
+        }
+
+        try {
+            String sql = "insert into tuner_pos(fen, outcome, processed) values (? ,?, 0)";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, fen);
+            ps.setInt(2, outcome);
+            ps.executeUpdate();
+            ps.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @Override
+    public void update(String fen, int evalDepth, float evalScore) {
+        int currentDepth = getEvalDepth(fen);
+        if (evalDepth >= currentDepth) {
+            String qry = "update tuner_pos set eval_depth=?, eval_score=? where fen = ?";
+
+            try {
+                PreparedStatement ps = conn.prepareStatement(qry);
+                ps.setInt(1, evalDepth);
+                ps.setFloat(2, evalScore);
+                ps.setString(3, fen);
+                ps.executeUpdate();
+                ps.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    @Override
+    public long getTotalPositionsCount() {
+        long cnt = 0;
+        String sql = "select count(*) cnt from tuner_pos";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                cnt = rs.getLong("cnt");
+            }
+            ps.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return cnt;
     }
 
     @Override
@@ -159,30 +183,6 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         }
 
         return score;
-    }
-
-    private void insert(String fen, PGNResult pgnResult) {
-        int outcome;
-        if (PGNResult.WHITE_WINS.equals(pgnResult)) {
-            outcome = 1;
-        } else if (PGNResult.BLACK_WINS.equals(pgnResult)) {
-            outcome = -1;
-        } else if (PGNResult.DRAW.equals(pgnResult)) {
-            outcome = 0;
-        } else {
-            throw new IllegalStateException("Illegal value for argument pgnResult " + pgnResult);
-        }
-
-        try {
-            String sql = "insert into tuner_pos(fen, outcome, processed) values (? ,?, 0)";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, fen);
-            ps.setInt(2, outcome);
-            ps.executeUpdate();
-            ps.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }

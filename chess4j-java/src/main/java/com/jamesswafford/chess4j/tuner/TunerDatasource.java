@@ -13,13 +13,13 @@ import java.util.List;
 
 public interface TunerDatasource {
 
-    static final Logger LOGGER = LogManager.getLogger(TunerDatasource.class);
-
-    void addToTunerDS(String fen, PGNResult pgnResult);
-
-    void update(String fen, int evalDepth, float evalScore);
+    Logger LOGGER = LogManager.getLogger(TunerDatasource.class);
 
     void initializeDatasource();
+
+    void insert(String fen, PGNResult pgnResult);
+
+    void update(String fen, int evalDepth, float evalScore);
 
     long getTotalPositionsCount();
 
@@ -29,7 +29,16 @@ public interface TunerDatasource {
 
     float getEvalScore(String fen);
 
-    default void addToTunerDS(PGNGame game) {
+    default void addFile(File pgnFile) {
+        try {
+            processPGNFile(pgnFile,true);
+            processPGNFile(pgnFile,false);
+        } catch (IOException e) {
+            throw new PgnProcessingException("Error adding " + pgnFile.getName() + " to tuner", e);
+        }
+    }
+
+    default void addGame(PGNGame game) {
 
         // don't process games that don't have an outcome!
         if (!Arrays.asList(PGNResult.WHITE_WINS, PGNResult.BLACK_WINS, PGNResult.DRAW).contains(game.getResult())) {
@@ -44,7 +53,7 @@ public interface TunerDatasource {
             board.applyMove(gameMove.getMove());
             if (i >= 10) { // skip first 5 complete moves
                 String fen = FenBuilder.createFen(board, false);
-                addToTunerDS(fen, game.getResult());
+                insert(fen, game.getResult());
                 // if we have the depth/score in the annotation, use it
                 if (gameMove.getNag() != null) {
                     CutechessNagParser cutechessNagParser = new CutechessNagParser(gameMove.getNag());
@@ -57,16 +66,7 @@ public interface TunerDatasource {
         }
     }
 
-    default int addToTunerDS(File pgnFile) {
-        try {
-            processPGNFile(pgnFile,true);
-            return processPGNFile(pgnFile,false);
-        } catch (IOException e) {
-            throw new PgnProcessingException("Error adding " + pgnFile.getName() + " to tuner", e);
-        }
-    }
-
-    private int processPGNFile(File pgnFile, boolean dryRun) throws IOException {
+    private void processPGNFile(File pgnFile, boolean dryRun) throws IOException {
         int n = 0;
 
         PGNIterator it = new PGNIterator(pgnFile);
@@ -74,12 +74,10 @@ public interface TunerDatasource {
         while ((pgnGame = it.next()) != null) {
             LOGGER.info("processing game " + n + " with " + pgnGame.getMoves().size() + " moves " + (dryRun? " (dry run)":""));
             if (!dryRun) {
-                addToTunerDS(pgnGame);
+                addGame(pgnGame);
             }
             n++;
         }
-
-        return n;
     }
 
 }

@@ -234,7 +234,7 @@ public class XBoardHandler {
 
     private void pgnToTunerDS(String[] cmd) {
         if (tunerDatasource != null) {
-            tunerDatasource.addToTunerDS(new File(cmd[1]));
+            tunerDatasource.addFile(new File(cmd[1]));
         } else {
             LOGGER.warn("There is no tuner datasource.");
         }

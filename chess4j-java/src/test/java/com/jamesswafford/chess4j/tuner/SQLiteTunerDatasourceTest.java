@@ -55,11 +55,11 @@ public class SQLiteTunerDatasourceTest {
         assertEquals(0, tunerDatasource.getTotalPositionsCount());
 
         Board board = new Board();
-        tunerDatasource.addToTunerDS(FenBuilder.createFen(board, false), PGNResult.WHITE_WINS);
+        tunerDatasource.insert(FenBuilder.createFen(board, false), PGNResult.WHITE_WINS);
         assertEquals(1, tunerDatasource.getTotalPositionsCount());
 
         board.applyMove(new Move(Pawn.WHITE_PAWN, Square.E2, Square.E4));
-        tunerDatasource.addToTunerDS(FenBuilder.createFen(board, false), PGNResult.WHITE_WINS);
+        tunerDatasource.insert(FenBuilder.createFen(board, false), PGNResult.WHITE_WINS);
         assertEquals(2, tunerDatasource.getTotalPositionsCount());
     }
 
@@ -68,10 +68,10 @@ public class SQLiteTunerDatasourceTest {
         assertEquals(0, tunerDatasource.getTotalPositionsCount());
 
         Board board = new Board();
-        tunerDatasource.addToTunerDS(FenBuilder.createFen(board, false), PGNResult.WHITE_WINS);
+        tunerDatasource.insert(FenBuilder.createFen(board, false), PGNResult.WHITE_WINS);
         assertEquals(1, tunerDatasource.getTotalPositionsCount());
 
-        tunerDatasource.addToTunerDS(FenBuilder.createFen(board, false), PGNResult.WHITE_WINS);
+        tunerDatasource.insert(FenBuilder.createFen(board, false), PGNResult.WHITE_WINS);
         assertEquals(1, tunerDatasource.getTotalPositionsCount());
     }
 
@@ -81,7 +81,7 @@ public class SQLiteTunerDatasourceTest {
 
         Board board = new Board();
         try {
-            tunerDatasource.addToTunerDS(FenBuilder.createFen(board, false), PGNResult.ADJOURNED);
+            tunerDatasource.insert(FenBuilder.createFen(board, false), PGNResult.ADJOURNED);
             fail();
         } catch (IllegalStateException e) { /* good */ }
 
@@ -92,7 +92,7 @@ public class SQLiteTunerDatasourceTest {
     public void updateWithScoreAndDepth() {
         Board board = new Board();
         String fen = FenBuilder.createFen(board, false);
-        tunerDatasource.addToTunerDS(fen, PGNResult.WHITE_WINS);
+        tunerDatasource.insert(fen, PGNResult.WHITE_WINS);
         assertEquals(1, tunerDatasource.getTotalPositionsCount());
 
         assertEquals(0, tunerDatasource.getEvalDepth(fen));
@@ -167,7 +167,7 @@ public class SQLiteTunerDatasourceTest {
 
     private void populateTunerDatasource(String pgn) {
         File pgnFile = new File(SQLiteTunerDatasourceTest.class.getResource(pgn).getFile());
-        tunerDatasource.addToTunerDS(pgnFile);
+        tunerDatasource.addFile(pgnFile);
     }
 
 }
