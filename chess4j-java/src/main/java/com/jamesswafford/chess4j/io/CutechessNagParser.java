@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public class CutechessNagParser {
 
-    private static final Pattern pattern = Pattern.compile("\\{([+|-]\\d+.\\d+)/(\\d+) \\d+.\\d+s(.*)}");
+    private static final Pattern pattern = Pattern.compile("\\{([+|-]?\\d+.\\d+)/(\\d+) \\d+.\\d+s(.*)}");
 
     private final String nag;
 

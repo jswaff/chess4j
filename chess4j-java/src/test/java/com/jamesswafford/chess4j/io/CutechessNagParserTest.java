@@ -33,4 +33,13 @@ public class CutechessNagParserTest {
         assertEquals(12, parser.depth());
     }
 
+    @Test
+    public void test4() {
+        CutechessNagParser parser = new CutechessNagParser("{0.00/7 0.095s}");
+        assertTrue(parser.isValid());
+        assertTrue(parser.score() > -0.00001);
+        assertTrue(parser.score() < 0.00001);
+        assertEquals(7, parser.depth());
+    }
+
 }

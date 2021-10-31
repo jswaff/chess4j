@@ -1,7 +1,6 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.exceptions.PgnProcessingException;
 import com.jamesswafford.chess4j.io.*;
 import org.apache.logging.log4j.LogManager;
