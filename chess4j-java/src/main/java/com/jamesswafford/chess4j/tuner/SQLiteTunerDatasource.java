@@ -92,9 +92,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
 
         return sqLiteTunerDatasource;
     }
-
-
-
+    
     private void createTables() throws SQLException {
         Statement stmt = conn.createStatement();
         stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer, processed integer, eval_depth integer, eval_score real)");
