@@ -15,28 +15,6 @@ import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
 
 public class EvalKing {
 
-    public static final int[] KING_PST = {
-            -30,-30,-30,-30,-30,-30,-30,-30,
-            -30,-30,-30,-30,-30,-30,-30,-30,
-            -30,-30,-30,-30,-30,-30,-30,-30,
-            -30,-30,-30,-30,-30,-30,-30,-30,
-            -30,-30,-30,-30,-30,-30,-30,-30,
-            -20,-20,-20,-20,-20,-20,-20,-20,
-            -10,-10,-10,-10,-10,-10,-10,-10,
-              0, 10, 20,-25,  0,-25, 20,  0
-    };
-
-    public static final int[] KING_ENDGAME_PST = {
-              0,  0,  0,  0,  0,  0,  0,  0,
-              0, 10, 10, 10, 10, 10, 10,  0,
-              0, 10, 20, 20, 20, 20, 10,  0,
-              0, 10, 20, 25, 25, 20, 10,  0,
-              0, 10, 20, 25, 25, 20, 10,  0,
-              0, 10, 20, 20, 20, 20, 10,  0,
-              0, 10, 10, 10, 10, 10, 10,  0,
-              0,  0,  0,  0,  0,  0,  0,  0 };
-
-
     // returns a score from the perspective of white
     public static int evalKing(EvalTermsVector etv, Board b, Square kingSq, boolean endGame) {
 
@@ -46,16 +24,16 @@ public class EvalKing {
 
         if (kingSq == b.getKingSquare(Color.WHITE)) {
             if (endGame) {
-                score += KING_ENDGAME_PST[kingSq.value()];
+                score += etv.terms[KING_ENDGAME_PST_IND + kingSq.value()];
             } else {
-                score += KING_PST[kingSq.value()];
+                score += etv.terms[KING_PST_IND + kingSq.value()];
                 score += evalKingSafety(etv, b, true);
             }
         } else {
             if (endGame) {
-                score += KING_ENDGAME_PST[kingSq.flipVertical().value()];
+                score += etv.terms[KING_ENDGAME_PST_IND + kingSq.flipVertical().value()];
             } else {
-                score += KING_PST[kingSq.flipVertical().value()];
+                score += etv.terms[KING_PST_IND + kingSq.flipVertical().value()];
                 score += evalKingSafety(etv, b, false);
             }
         }

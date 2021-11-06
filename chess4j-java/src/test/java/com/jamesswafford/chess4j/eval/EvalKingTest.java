@@ -23,10 +23,10 @@ public class EvalKingTest {
 
         board.setPos("rnbq1rk1/pppppppp/bn6/8/BN6/5P2/PPPPP1PP/RNBQ1RK1 w - - 0 1");
 
-        assertEquals(KING_PST[G1.value()] + evalKingSafety(etv, board, true),
+        assertEquals(etv.terms[KING_PST_IND + G1.value()] + evalKingSafety(etv, board, true),
                 evalKing(etv, board, G1, false));
 
-        assertEquals(KING_PST[G1.value()] + evalKingSafety(etv, board, false),
+        assertEquals(etv.terms[KING_PST_IND + G1.value()] + evalKingSafety(etv, board, false),
                 evalKing(etv, board, G8, false));
     }
 
@@ -35,7 +35,7 @@ public class EvalKingTest {
 
         board.setPos("8/p3k3/8/8/8/8/4K3/8 w - - 0 1");
 
-        assertEquals(KING_ENDGAME_PST[E2.value()], evalKing(etv, board, E2, true));
+        assertEquals(etv.terms[KING_ENDGAME_PST_IND + E2.value()], evalKing(etv, board, E2, true));
 
         // test the symmetry
         assertEquals(evalKing(etv, board, E2, true), evalKing(etv, board, E7, true));
