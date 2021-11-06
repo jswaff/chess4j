@@ -9,6 +9,8 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.eval.EvalRook.*;
 import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.*;
 
+import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+
 public class EvalRookTest {
 
     private final EvalTermsVector etv = new EvalTermsVector();
@@ -19,7 +21,7 @@ public class EvalRookTest {
 
         board.resetBoard();
 
-        assertEquals(ROOK_PST[A1.value()], evalRook(etv, board, A1));
+        assertEquals(etv.terms[ROOK_PST_IND + A1.value()], evalRook(etv, board, A1));
 
         // test the symmetry
         assertEquals(evalRook(etv, board, A1), evalRook(etv, board, A8));
@@ -30,7 +32,7 @@ public class EvalRookTest {
 
         board.setPos("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
 
-        assertEquals(ROOK_PST[F7.value()] + MAJOR_ON_7TH + ROOK_OPEN_FILE,
+        assertEquals(etv.terms[ROOK_PST_IND + F7.value()] + MAJOR_ON_7TH + etv.terms[ROOK_OPEN_FILE_IND],
                 evalRook(etv, board, F7));
     }
 
@@ -39,7 +41,7 @@ public class EvalRookTest {
 
         board.setPos("3r3k/8/8/8/8/8/8/7K b - - 0 1");
 
-        assertEquals(ROOK_PST[D1.value()] + ROOK_OPEN_FILE,
+        assertEquals(etv.terms[ROOK_PST_IND + D1.value()] + etv.terms[ROOK_OPEN_FILE_IND],
                 evalRook(etv, board, D8));
     }
 
@@ -49,12 +51,12 @@ public class EvalRookTest {
         // friendly pawn but no enemy -- not half open (or open)
         board.setPos("8/2P5/8/2R5/K7/8/7k/8 w - - 0 1");
 
-        assertEquals(ROOK_PST[C5.value()], evalRook(etv, board, C5));
+        assertEquals(etv.terms[ROOK_PST_IND + C5.value()], evalRook(etv, board, C5));
 
         // enemy pawn on C makes it half open
         board.setPos("8/2p5/8/2R5/K7/8/7k/8 w - - 0 1");
 
-        assertEquals(ROOK_PST[C5.value()] + ROOK_HALF_OPEN_FILE,
+        assertEquals(etv.terms[ROOK_PST_IND + C5.value()] + etv.terms[ROOK_HALF_OPEN_FILE_IND],
                 evalRook(etv, board, C5));
     }
 }

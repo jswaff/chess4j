@@ -9,6 +9,8 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.eval.EvalQueen.*;
 import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.*;
 
+import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+
 public class EvalQueenTest {
 
     private final Board board = new Board();

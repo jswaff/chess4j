@@ -8,6 +8,8 @@ import static org.junit.Assert.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.eval.EvalPawn.*;
 
+import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+
 public class EvalPawnTest {
 
     private final Board board = new Board();

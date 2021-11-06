@@ -5,6 +5,8 @@ import com.jamesswafford.chess4j.board.squares.Square;
 
 import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.evalMajorOn7th;
 
+import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+
 public class EvalQueen {
 
     public static final int[] QUEEN_PST = {

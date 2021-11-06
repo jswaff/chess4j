@@ -8,6 +8,8 @@ import static org.junit.Assert.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.eval.EvalKnight.*;
 
+import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+
 public class EvalKnightTest {
 
     private final Board board = new Board();
@@ -17,7 +19,7 @@ public class EvalKnightTest {
     public void testEvalKnight() {
         board.resetBoard();
 
-        assertEquals(KNIGHT_PST[B1.value()] + KNIGHT_TROPISM * B1.distance(E8),
+        assertEquals(etv.terms[KNIGHT_PST_IND + B1.value()] + etv.terms[KNIGHT_TROPISM_IND] * B1.distance(E8),
                 evalKnight(etv, board, B1));
 
         // test the symmetry

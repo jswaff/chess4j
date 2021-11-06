@@ -3,6 +3,8 @@ package com.jamesswafford.chess4j.eval;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.Square;
 
+import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+
 public class EvalPawn {
 
     public static final int[] PAWN_PST = {
