@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.book.OpeningBook;
+import com.jamesswafford.chess4j.tuner.TunerDatasource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +11,10 @@ import java.util.Optional;
 
 public class Globals {
 
-    private static Board board = new Board();
-    private static List<Undo> gameUndos = new ArrayList<>();
+    private static final Board board = new Board();
+    private static final List<Undo> gameUndos = new ArrayList<>();
     private static OpeningBook openingBook;
+    private static TunerDatasource tunerDatasource;
 
     public static Board getBoard() {
         return board;
@@ -28,5 +30,13 @@ public class Globals {
 
     public static void setOpeningBook(OpeningBook openingBook) {
         Globals.openingBook = openingBook;
+    }
+
+    public static Optional<TunerDatasource> getTunerDatasource() {
+        return Optional.ofNullable(tunerDatasource);
+    }
+
+    public static void setTunerDatasource(TunerDatasource tunerDatasource) {
+        Globals.tunerDatasource = tunerDatasource;
     }
 }

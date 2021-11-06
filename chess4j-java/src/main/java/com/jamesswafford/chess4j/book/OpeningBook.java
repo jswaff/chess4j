@@ -3,7 +3,8 @@ package com.jamesswafford.chess4j.book;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.Move;
-import com.jamesswafford.chess4j.exceptions.PgnToBookException;
+import com.jamesswafford.chess4j.exceptions.PgnProcessingException;
+import com.jamesswafford.chess4j.io.MoveWithNAG;
 import com.jamesswafford.chess4j.io.PGNGame;
 import com.jamesswafford.chess4j.io.PGNIterator;
 import com.jamesswafford.chess4j.utils.GameResult;
@@ -36,10 +37,10 @@ public interface OpeningBook {
 
         Board board = new Board();
 
-        List<Move> gameMoves = game.getMoves();
+        List<MoveWithNAG> gameMoves = game.getMoves();
         int i=0;
         while (i<15 && i<gameMoves.size()) {
-            Move gameMove = gameMoves.get(i);
+            Move gameMove = gameMoves.get(i).getMove();
             addToBook(board, gameMove);
             board.applyMove(gameMove);
             i++;
@@ -51,19 +52,19 @@ public interface OpeningBook {
             processPGNFile(pgnFile,true);
             return processPGNFile(pgnFile,false);
         } catch (IOException e) {
-            throw new PgnToBookException("Error adding " + pgnFile.getName() + " to opening book", e);
+            throw new PgnProcessingException("Error adding " + pgnFile.getName() + " to opening book", e);
         }
     }
 
     private int processPGNFile(File pgnFile, boolean dryRun) throws IOException {
         int n = 0;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(pgnFile))) {
+        try {
             if (!dryRun) {
                 dropIndexes();
             }
 
-            PGNIterator it = new PGNIterator(br);
+            PGNIterator it = new PGNIterator(pgnFile);
             PGNGame pgnGame;
             while ((pgnGame = it.next()) != null) {
                 if (!dryRun) {

@@ -7,7 +7,7 @@
 [Result "1-0"]
 [ECO "A02"]
 
-1.f4 e5 2.fxe5 d6 3.exd6 Bxd6 4.Nf3 g5 5.g3 g4 6.Nh4 Ne7 7.d4 Ng6 8.Nxg6 
+1.f4 e5 2.fxe5 d6 3.exd6 Bxd6 4.Nf3 g5 5.g3 g4 6.Nh4 Ne7 7.d4 {-2.65/14 0.12s} Ng6 8.Nxg6
 hxg6 9.Qd3 Nc6 10.c3 Bf5 11.e4 Qe7 12.Bg2 O-O-O 13.Be3 Rde8 14.Nd2 f6 15.
 O-O-O Bd7 16.Nc4 Kb8 17.e5 fxe5 18.dxe5 Nxe5 19.Qd4 b6 20.Nxe5 Qxe5 21.
 Qxe5 Rxe5 22.Bd4 Re2 23.Bxh8 Rxg2 24.Rd2 Rxd2 25.Kxd2 b5 26.Re1 a5 27.Bf6 

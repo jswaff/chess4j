@@ -9,6 +9,7 @@ import com.jamesswafford.chess4j.book.OpeningBook;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
+import com.jamesswafford.chess4j.tuner.TunerDatasource;
 import com.jamesswafford.chess4j.utils.GameResult;
 import com.jamesswafford.chess4j.utils.GameStatus;
 import com.jamesswafford.chess4j.utils.GameStatusChecker;
@@ -35,6 +36,7 @@ public class XBoardHandlerTest {
 
     XBoardHandler xboardHandler;
     OpeningBook openingBook;
+    TunerDatasource tunerDatasource;
     SearchIterator searchIterator;
 
     private static Logger inputParserLogger;
@@ -55,6 +57,8 @@ public class XBoardHandlerTest {
         xboardHandler = new XBoardHandler();
         openingBook = mock(OpeningBook.class);
         xboardHandler.setOpeningBook(openingBook);
+        tunerDatasource = mock(TunerDatasource.class);
+        xboardHandler.setTunerDatasource(tunerDatasource);
         searchIterator = mock(SearchIterator.class);
         xboardHandler.setSearchIterator(searchIterator);
 
@@ -78,9 +82,11 @@ public class XBoardHandlerTest {
 
     @Test
     public void easyCmd() {
+        xboardHandler.parseAndDispatch("hard");
+        assertTrue(xboardHandler.isPonderingEnabled());
         xboardHandler.parseAndDispatch("easy");
+        assertFalse(xboardHandler.isPonderingEnabled());
         assertEquals(0, testAppender.getNonDebugMessages().size());
-        // TODO: ensure pondering was turned off
     }
 
     @Test
@@ -153,9 +159,11 @@ public class XBoardHandlerTest {
 
     @Test
     public void hardCmd() {
+        xboardHandler.parseAndDispatch("easy");
+        assertFalse(xboardHandler.isPonderingEnabled());
         xboardHandler.parseAndDispatch("hard");
+        assertTrue(xboardHandler.isPonderingEnabled());
         assertEquals(0, testAppender.getNonDebugMessages().size());
-        // TODO: ensure pondering turned on
     }
 
     @Test
@@ -191,6 +199,12 @@ public class XBoardHandlerTest {
     public void pgn2bookCmd() {
         xboardHandler.parseAndDispatch("pgn2book foo.pgn");
         verify(openingBook).addToBook(new File("foo.pgn"));
+    }
+
+    @Test
+    public void pgn2tunerCmd() {
+        xboardHandler.parseAndDispatch("pgn2tuner bar.pgn");
+        verify(tunerDatasource).addFile(new File("bar.pgn"));
     }
 
     @Test

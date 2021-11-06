@@ -8,6 +8,7 @@ import com.jamesswafford.chess4j.io.XBoardHandler;
 import com.jamesswafford.chess4j.search.AlphaBetaSearch;
 import com.jamesswafford.chess4j.search.SearchOptions;
 import com.jamesswafford.chess4j.search.SearchParameters;
+import com.jamesswafford.chess4j.tuner.SQLiteTunerDatasource;
 import com.jamesswafford.chess4j.utils.TestSuiteProcessor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,6 +21,7 @@ public final class App {
     private static final  Logger LOGGER = LogManager.getLogger(App.class);
 
     private static String bookPath = null;
+    private static String tunerDSPath = null;
     private static String testSuiteFile = null;
     private static int testSuiteTime = 10; // default to ten seconds
     private static int maxDepth = 0;
@@ -37,6 +39,8 @@ public final class App {
             testSuiteTime = Integer.parseInt(arg.substring(6));
         } else if (arg.startsWith("-book=")) {
             bookPath = arg.substring(6);
+        } else if (arg.startsWith("-tunerds=")) {
+            tunerDSPath = arg.substring(9);
         } else if (arg.startsWith("-hash=")) {
             int szBytes = Integer.parseInt(arg.substring(6)) * 1024 * 1024;
             TTHolder.getInstance().resizeMainTable(szBytes);
@@ -105,6 +109,9 @@ public final class App {
 
         if (bookPath != null) {
             Globals.setOpeningBook(SQLiteBook.openOrInitialize(bookPath));
+        }
+        if (tunerDSPath != null) {
+            Globals.setTunerDatasource(SQLiteTunerDatasource.openOrInitialize(tunerDSPath));
         }
 
         repl();

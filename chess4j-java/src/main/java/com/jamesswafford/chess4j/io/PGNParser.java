@@ -10,42 +10,41 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * http://www6.chessclub.com/help/PGN-spec
- * @author James
- *
- */
 public final class PGNParser {
 
-    private static final String tagPattern = "\\[([A-Za-z0-9_]+)\\s+\\\"(.*?)\\\"\\]";
+    private static final String tagPattern = "\\[([A-Za-z0-9_]+)\\s+\"(.*?)\"]";
 
-    private List<Move> getMoves(String pgn) throws ParseException, IllegalMoveException {
-        List<Move> moves = new ArrayList<Move>();
+    public PGNGame parseGame(String pgn) throws ParseException, IllegalMoveException {
+        List<PGNTag> tags = getPGNTags(pgn);
+        List<MoveWithNAG> moves = getMoves(pgn);
+        PGNResult result = getResult(pgn);
+
+        return new PGNGame(tags,moves,result);
+    }
+
+    private List<MoveWithNAG> getMoves(String pgn) throws ParseException, IllegalMoveException {
+        List<MoveWithNAG> moves = new ArrayList<>();
 
         String moveText = getMoveText(pgn);
 
-        // get rid of comments
-        moveText = moveText.replaceAll("\\{(.*)?\\}", "");
+        List<PGNMoveTextToken> tokens = PGNMoveTextTokenizer.tokenize(moveText);
 
-        // get rid of move indicators
-        moveText = moveText.replaceAll("\\d+\\.", "");
-
-        // get rid of game end indicator
-        moveText = moveText.replaceAll("1-0", "").replaceAll("0-1", "")
-                .replaceAll("1/2-1/2", "").replaceAll("\\*", "");
-
-        // get rid of extra white space
-        moveText = moveText.replaceAll("\\s+", " ").trim();
-
-        String[] mvs = moveText.split(" ");
         MoveParser mp = new MoveParser();
 
         Board board = new Board();
 
-        for (String mv : mvs) {
-            Move m = mp.parseMove(mv, board);
-            moves.add(m);
-            board.applyMove(m);
+        for (int i=0;i<tokens.size();i++) {
+            PGNMoveTextToken token = tokens.get(i);
+            if (PGNMoveTextTokenType.MOVE.equals(token.getTokenType())) {
+                Move m = mp.parseMove(token.getValue(), board);
+                // if the next token is a NAG (annotation), include it
+                String nag = null;
+                if (i < tokens.size()-1 && PGNMoveTextTokenType.NAG.equals(tokens.get(i+1).getTokenType())) {
+                    nag = tokens.get(i+1).getValue();
+                }
+                moves.add(new MoveWithNAG(m, nag));
+                board.applyMove(m);
+            }
         }
 
         return moves;
@@ -53,9 +52,10 @@ public final class PGNParser {
 
     private String getMoveText(String pgn) {
 
-        Pattern p = Pattern.compile("\\[(.*)?\\]");
+        Pattern p = Pattern.compile("\\[(.*)?]");
         Matcher m = p.matcher(pgn);
 
+        // TODO: this breaks "end of line comments"
         return m.replaceAll("").replaceAll("\n", " ").replaceAll("\r", " ").trim();
     }
 
@@ -83,25 +83,17 @@ public final class PGNParser {
         } else if (pgn.trim().endsWith("*")) {
             result = PGNResult.ADJOURNED;
         } else {
-            throw new ParseException("Could not determine game result.");
+            throw new ParseException("Could not determine game result");
         }
 
         return result;
     }
 
-    public synchronized PGNGame parseGame(String pgn) throws ParseException, IllegalMoveException {
-        List<PGNTag> tags = getPGNTags(pgn);
-        List<Move> moves = getMoves(pgn);
-        PGNResult result = getResult(pgn);
-
-        return new PGNGame(tags,moves,result);
-    }
-
     /**
-     * Parse the text to get a PGNTag  , or return null if it doesn't represent a PGN tag.
+     * Parse text to get a PGNTag
      *
-     * @param tagTxt
-     * @return
+     * @param tagTxt - text , possibly with PGN tag
+     * @return - the PGN tag, or null if the text doesn't represent a PGN tag
      */
     private PGNTag parseTag(String tagTxt) {
         Pattern r = Pattern.compile(tagPattern);

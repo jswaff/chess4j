@@ -6,8 +6,11 @@ import com.jamesswafford.chess4j.pieces.Piece;
 
 public class Move {
 
-    private Square from,to;
-    private Piece piece,captured,promotion;
+    private final Square from;
+    private final Square to;
+    private final Piece piece;
+    private Piece captured;
+    private Piece promotion;
     private boolean castle,epCapture;
 
     public Move(Piece piece, Square from, Square to) {
