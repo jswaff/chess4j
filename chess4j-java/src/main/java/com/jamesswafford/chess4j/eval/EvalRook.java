@@ -13,7 +13,7 @@ public class EvalRook {
     public static int evalRook(EvalTermsVector etv, Board board, Square sq) {
         boolean isWhite = board.getPiece(sq).isWhite();
         int score = etv.terms[ROOK_PST_IND + (isWhite?sq.value():sq.flipVertical().value())];
-        score += evalMajorOn7th(board, isWhite, sq);
+        score += evalMajorOn7th(etv, board, isWhite, sq);
         score += evalRookOpenFile(etv, board, isWhite, sq);
         return score;
     }

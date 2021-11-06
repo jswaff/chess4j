@@ -49,19 +49,33 @@ public class EvalTermsVector {
              -5,  0,  0,  0,  0,  0,  0, -5,
               0,  0,  0,  0,  0,  0,  0,  0,
              25,  // ROOK_OPEN_FILE
-             15   // ROOK_HALF_OPEN_FILE
+             15,  // ROOK_HALF_OPEN_FILE
+             -1, -1, -1, -1, -1, -1, -1, -1,     // QUEEN_PST
+             -1,  0,  0,  0,  0,  0,  0, -1,
+             -1,  0,  1,  1,  1,  1,  0, -1,
+             -1,  0,  1,  2,  2,  1,  0, -1,
+             -1,  0,  1,  2,  2,  1,  0, -1,
+             -1,  0,  1,  1,  1,  1,  0, -1,
+             -1,  0,  0,  0,  0,  0,  0, -1,
+             -1, -1, -1, -1, -1, -1, -1, -1,
+             50,  // MAJOR_ON_7TH
+             80   // CONNECTED_MAJORS_ON_7TH
     };
 
-    public static int KING_SAFETY_PAWN_ONE_AWAY_IND = 0;
-    public static int KING_SAFETY_PAWN_TWO_AWAY_IND = 1;
-    public static int KING_SAFETY_PAWN_FAR_AWAY_IND = 2;
-    public static int KING_SAFETY_MIDDLE_OPEN_FILE_IND = 3;
-    public static int KING_PST_IND = 4;
-    public static int KING_ENDGAME_PST_IND = 68;
-    public static int BISHOP_PST_IND = 132;
-    public static int KNIGHT_PST_IND = 196;
-    public static int KNIGHT_TROPISM_IND = 260;
-    public static int ROOK_PST_IND = 261;
-    public static int ROOK_OPEN_FILE_IND = 325;
-    public static int ROOK_HALF_OPEN_FILE_IND = 326;
+    public static final int KING_SAFETY_PAWN_ONE_AWAY_IND = 0;
+    public static final int KING_SAFETY_PAWN_TWO_AWAY_IND = 1;
+    public static final int KING_SAFETY_PAWN_FAR_AWAY_IND = 2;
+    public static final int KING_SAFETY_MIDDLE_OPEN_FILE_IND = 3;
+    public static final int KING_PST_IND = 4;
+    public static final int KING_ENDGAME_PST_IND = 68;
+    public static final int BISHOP_PST_IND = 132;
+    public static final int KNIGHT_PST_IND = 196;
+    public static final int KNIGHT_TROPISM_IND = 260;
+    public static final int ROOK_PST_IND = 261;
+    public static final int ROOK_OPEN_FILE_IND = 325;
+    public static final int ROOK_HALF_OPEN_FILE_IND = 326;
+    public static final int QUEEN_PST_IND = 327;
+    public static final int MAJOR_ON_7TH_IND = 391;
+    public static final int CONNECTED_MAJORS_ON_7TH_IND = 392;
+
 }

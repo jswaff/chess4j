@@ -32,7 +32,8 @@ public class EvalRookTest {
 
         board.setPos("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
 
-        assertEquals(etv.terms[ROOK_PST_IND + F7.value()] + MAJOR_ON_7TH + etv.terms[ROOK_OPEN_FILE_IND],
+        assertEquals(etv.terms[ROOK_PST_IND + F7.value()] + etv.terms[MAJOR_ON_7TH_IND] +
+                        etv.terms[ROOK_OPEN_FILE_IND],
                 evalRook(etv, board, F7));
     }
 

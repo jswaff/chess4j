@@ -9,30 +9,29 @@ import com.jamesswafford.chess4j.movegen.Magic;
 
 import static com.jamesswafford.chess4j.board.squares.Rank.*;
 
+import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+
 public class EvalMajorOn7th {
 
-    public static final int MAJOR_ON_7TH = 50;
-    public static final int CONNECTED_MAJORS_ON_7TH = 80;
-
-    public static int evalMajorOn7th(Board board, boolean isWhite, Square sq) {
+    public static int evalMajorOn7th(EvalTermsVector etv, Board board, boolean isWhite, Square sq) {
         int score = 0;
 
         if (isWhite) {
             if (sq.rank() == RANK_7 && board.getKingSquare(Color.BLACK).rank() == RANK_8) {
-                score += MAJOR_ON_7TH;
-                score += evalConnectedMajorOn7th(board, true, sq);
+                score += etv.terms[MAJOR_ON_7TH_IND];
+                score += evalConnectedMajorOn7th(etv, board, true, sq);
             }
         } else {
             if (sq.rank() == RANK_2 && board.getKingSquare(Color.WHITE).rank() == RANK_1) {
-                score += MAJOR_ON_7TH;
-                score += evalConnectedMajorOn7th(board,false, sq);
+                score += etv.terms[MAJOR_ON_7TH_IND];
+                score += evalConnectedMajorOn7th(etv, board,false, sq);
             }
         }
 
         return score;
     }
 
-    private static int evalConnectedMajorOn7th(Board board, boolean isWhite, Square sq) {
+    private static int evalConnectedMajorOn7th(EvalTermsVector etv, Board board, boolean isWhite, Square sq) {
         int score = 0;
 
         long rookMoves = Magic.getRookMoves(board,sq.value(),
@@ -40,11 +39,11 @@ public class EvalMajorOn7th {
 
         if (isWhite) {
             if ((rookMoves & (board.getWhiteRooks() | board.getWhiteQueens())) != 0) {
-                score += CONNECTED_MAJORS_ON_7TH;
+                score += etv.terms[CONNECTED_MAJORS_ON_7TH_IND];
             }
         } else {
             if ((rookMoves & (board.getBlackRooks() | board.getBlackQueens())) != 0) {
-                score += CONNECTED_MAJORS_ON_7TH;
+                score += etv.terms[CONNECTED_MAJORS_ON_7TH_IND];
             }
         }
 
