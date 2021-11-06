@@ -20,7 +20,7 @@ public class EvalPawnTest {
 
         board.resetBoard();
 
-        assertEquals(PAWN_PST[E2.value()], evalPawn(etv, board, E2));
+        assertEquals(etv.terms[PAWN_PST_IND + E2.value()], evalPawn(etv, board, E2));
 
         // test the symmetry
         assertEquals(evalPawn(etv, board, E2), evalPawn(etv, board, E7));
@@ -42,11 +42,12 @@ public class EvalPawnTest {
         k - - - K - - -
         */
 
-        assertEquals(PAWN_PST[B6.value()] + PASSED_PAWN,
+        assertEquals(etv.terms[PAWN_PST_IND + B6.value()] + etv.terms[PASSED_PAWN_IND],
                 evalPawn(etv, board, B6));
 
         // the black pawn on A2 is passed and isolated
-        assertEquals(PAWN_PST[A7.value()] + PASSED_PAWN + ISOLATED_PAWN,
+        assertEquals(etv.terms[PAWN_PST_IND + A7.value()] + etv.terms[PASSED_PAWN_IND] +
+                        etv.terms[ISOLATED_PAWN_IND],
                 evalPawn(etv, board, A2));
     }
 }

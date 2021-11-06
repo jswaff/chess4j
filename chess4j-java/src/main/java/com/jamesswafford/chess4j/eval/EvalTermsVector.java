@@ -59,7 +59,18 @@ public class EvalTermsVector {
              -1,  0,  0,  0,  0,  0,  0, -1,
              -1, -1, -1, -1, -1, -1, -1, -1,
              50,  // MAJOR_ON_7TH
-             80   // CONNECTED_MAJORS_ON_7TH
+             80,  // CONNECTED_MAJORS_ON_7TH
+              0,  0,  0,  0,  0,  0,  0,  0,     // PAWN_PST
+             30, 30, 30, 30, 30, 30, 30, 30,
+             14, 14, 14, 18, 18, 14, 14, 14,
+              7,  7,  7, 10, 10,  7,  7,  7,
+              5,  5,  5,  7,  7,  5,  5,  5,
+              3,  3,  3,  5,  5,  3,  3,  3,
+              0,  0,  0, -3, -3,  0,  0,  0,
+              0,  0,  0,  0,  0,  0,  0,  0,
+             20,  // PASSED_PAWN
+            -20,  // ISOLATED_PAWN
+            -10   // DOUBLED_PAWN
     };
 
     public static final int KING_SAFETY_PAWN_ONE_AWAY_IND = 0;
@@ -77,5 +88,9 @@ public class EvalTermsVector {
     public static final int QUEEN_PST_IND = 327;
     public static final int MAJOR_ON_7TH_IND = 391;
     public static final int CONNECTED_MAJORS_ON_7TH_IND = 392;
+    public static final int PAWN_PST_IND = 393;
+    public static final int PASSED_PAWN_IND = 457;
+    public static final int ISOLATED_PAWN_IND = 458;
+    public static final int DOUBLED_PAWN_IND = 459;
 
 }
