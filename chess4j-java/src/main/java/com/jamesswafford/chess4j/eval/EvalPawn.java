@@ -26,7 +26,7 @@ public class EvalPawn {
     public static final int DOUBLED_PAWN = -10;
 
 
-    public static int evalPawn(Board board, Square sq) {
+    public static int evalPawn(EvalTermsVector etv, Board board, Square sq) {
         int score=0;
 
         boolean isWhite = board.getPiece(sq).isWhite();

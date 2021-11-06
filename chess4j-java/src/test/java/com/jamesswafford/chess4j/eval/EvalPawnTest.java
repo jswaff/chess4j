@@ -10,17 +10,18 @@ import static com.jamesswafford.chess4j.eval.EvalPawn.*;
 
 public class EvalPawnTest {
 
-    private Board board = new Board();
+    private final Board board = new Board();
+    private final EvalTermsVector etv = new EvalTermsVector();
 
     @Test
     public void testEvalPawn() {
 
         board.resetBoard();
 
-        assertEquals(PAWN_PST[E2.value()], evalPawn(board, E2));
+        assertEquals(PAWN_PST[E2.value()], evalPawn(etv, board, E2));
 
         // test the symmetry
-        assertEquals(evalPawn(board, E2), evalPawn(board, E7));
+        assertEquals(evalPawn(etv, board, E2), evalPawn(etv, board, E7));
     }
 
     @Test
@@ -40,10 +41,10 @@ public class EvalPawnTest {
         */
 
         assertEquals(PAWN_PST[B6.value()] + PASSED_PAWN,
-                evalPawn(board, B6));
+                evalPawn(etv, board, B6));
 
         // the black pawn on A2 is passed and isolated
         assertEquals(PAWN_PST[A7.value()] + PASSED_PAWN + ISOLATED_PAWN,
-                evalPawn(board, A2));
+                evalPawn(etv, board, A2));
     }
 }

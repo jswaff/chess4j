@@ -8,17 +8,21 @@ import static org.junit.Assert.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.eval.EvalBishop.*;
 
+import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+
 public class EvalBishopTest {
+
+    private final EvalTermsVector etv = new EvalTermsVector();
 
     @Test
     public void testEvalBishop() {
 
         Board board = new Board();
 
-        assertEquals(BISHOP_PST[C1.value()], evalBishop(board, C1));
+        assertEquals(etv.terms[BISHOP_PST_IND + C1.value()], evalBishop(etv, board, C1));
 
         // test the symmetry
-        assertEquals(evalBishop(board, C1), evalBishop(board, C8));
+        assertEquals(evalBishop(etv, board, C1), evalBishop(etv, board, C8));
     }
 
 }

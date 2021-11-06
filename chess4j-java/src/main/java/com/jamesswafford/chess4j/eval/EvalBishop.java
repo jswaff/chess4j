@@ -3,23 +3,15 @@ package com.jamesswafford.chess4j.eval;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.Square;
 
+import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+
 public class EvalBishop {
 
-    public static final int[] BISHOP_PST = {
-            0, 0,  0,  0,  0,  0, 0, 0,
-            0, 7,  7,  7,  7,  7, 7, 0,
-            0, 7, 15, 15, 15, 15, 7, 0,
-            0, 7, 15, 20, 20, 15, 7, 0,
-            0, 7, 15, 20, 20, 15, 7, 0,
-            0, 7, 15, 15, 15, 15, 7, 0,
-            0, 7,  7,  7,  7,  7, 7, 0,
-            0, 0,  0,  0,  0,  0, 0, 0 };
-
-    public static int evalBishop(Board board, Square sq) {
+    public static int evalBishop(EvalTermsVector etv, Board board, Square sq) {
         if (board.getPiece(sq).isWhite()) {
-            return BISHOP_PST[sq.value()];
+            return etv.terms[BISHOP_PST_IND + sq.value()];
         } else {
-            return BISHOP_PST[sq.flipVertical().value()];
+            return etv.terms[BISHOP_PST_IND + sq.flipVertical().value()];
         }
     }
 

@@ -17,7 +17,7 @@ public class EvalQueen {
             -1,  0,  0,  0,  0,  0,  0, -1,
             -1, -1, -1, -1, -1, -1, -1, -1 };
 
-    public static int evalQueen(Board board, Square sq) {
+    public static int evalQueen(EvalTermsVector etv, Board board, Square sq) {
         boolean isWhite = board.getPiece(sq).isWhite();
         int score = QUEEN_PST[isWhite?sq.value():sq.flipVertical().value()];
         score += evalMajorOn7th(board, isWhite, sq);

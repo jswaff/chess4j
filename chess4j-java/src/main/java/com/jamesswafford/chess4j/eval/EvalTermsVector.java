@@ -22,6 +22,14 @@ public class EvalTermsVector {
               0, 10, 20, 25, 25, 20, 10,  0,
               0, 10, 20, 20, 20, 20, 10,  0,
               0, 10, 10, 10, 10, 10, 10,  0,
+              0,  0,  0,  0,  0,  0,  0,  0,
+              0,  0,  0,  0,  0,  0,  0,  0,    // BISHOP_PST
+              0,  7,  7,  7,  7,  7,  7,  0,
+              0,  7, 15, 15, 15, 15,  7,  0,
+              0,  7, 15, 20, 20, 15,  7,  0,
+              0,  7, 15, 20, 20, 15,  7,  0,
+              0,  7, 15, 15, 15, 15,  7,  0,
+              0,  7,  7,  7,  7,  7,  7,  0,
               0,  0,  0,  0,  0,  0,  0,  0
     };
 
@@ -31,4 +39,5 @@ public class EvalTermsVector {
     public static int KING_SAFETY_MIDDLE_OPEN_FILE_IND = 3;
     public static int KING_PST_IND = 4;
     public static int KING_ENDGAME_PST_IND = 68;
+    public static int BISHOP_PST_IND = 132;
 }

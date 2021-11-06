@@ -10,17 +10,18 @@ import static com.jamesswafford.chess4j.eval.EvalKnight.*;
 
 public class EvalKnightTest {
 
-    private Board board = new Board();
+    private final Board board = new Board();
+    private final EvalTermsVector etv = new EvalTermsVector();
 
     @Test
     public void testEvalKnight() {
         board.resetBoard();
 
         assertEquals(KNIGHT_PST[B1.value()] + KNIGHT_TROPISM * B1.distance(E8),
-                evalKnight(board, B1));
+                evalKnight(etv, board, B1));
 
         // test the symmetry
-        assertEquals(evalKnight(board, B1), evalKnight(board, B8));
+        assertEquals(evalKnight(etv, board, B1), evalKnight(etv, board, B8));
     }
 
 }

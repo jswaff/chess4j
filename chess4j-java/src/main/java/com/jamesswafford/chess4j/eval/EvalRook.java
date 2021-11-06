@@ -25,7 +25,7 @@ public class EvalRook {
     public static final int ROOK_HALF_OPEN_FILE = 15;
 
 
-    public static int evalRook(Board board, Square sq) {
+    public static int evalRook(EvalTermsVector etv, Board board, Square sq) {
         boolean isWhite = board.getPiece(sq).isWhite();
         int score = ROOK_PST[isWhite?sq.value():sq.flipVertical().value()];
         score += evalMajorOn7th(board, isWhite, sq);

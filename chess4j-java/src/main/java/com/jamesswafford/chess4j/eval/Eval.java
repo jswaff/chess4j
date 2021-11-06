@@ -7,6 +7,7 @@ import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
+import io.vavr.Function3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -76,15 +77,15 @@ public final class Eval implements Evaluator {
         int mgScore = matScore;
         int egScore = matScore;
 
-        mgScore += evalPawns(board);
-        mgScore += evalPieces(board.getWhiteKnights(), board, EvalKnight::evalKnight)
-                - evalPieces(board.getBlackKnights(), board, EvalKnight::evalKnight);
-        mgScore += evalPieces(board.getWhiteBishops(), board, EvalBishop::evalBishop)
-                - evalPieces(board.getBlackBishops(), board, EvalBishop::evalBishop);
-        mgScore += evalPieces(board.getWhiteRooks(), board, EvalRook::evalRook)
-                - evalPieces(board.getBlackRooks(), board, EvalRook::evalRook);
-        mgScore += evalPieces(board.getWhiteQueens(), board, EvalQueen::evalQueen)
-                - evalPieces(board.getBlackQueens(), board, EvalQueen::evalQueen);
+        mgScore += evalPawns(etv, board);
+        mgScore += evalPieces(etv, board.getWhiteKnights(), board, EvalKnight::evalKnight)
+                - evalPieces(etv, board.getBlackKnights(), board, EvalKnight::evalKnight);
+        mgScore += evalPieces(etv, board.getWhiteBishops(), board, EvalBishop::evalBishop)
+                - evalPieces(etv, board.getBlackBishops(), board, EvalBishop::evalBishop);
+        mgScore += evalPieces(etv, board.getWhiteRooks(), board, EvalRook::evalRook)
+                - evalPieces(etv, board.getBlackRooks(), board, EvalRook::evalRook);
+        mgScore += evalPieces(etv, board.getWhiteQueens(), board, EvalQueen::evalQueen)
+                - evalPieces(etv, board.getBlackQueens(), board, EvalQueen::evalQueen);
 
         egScore = mgScore;
         mgScore += evalKing(etv, board, board.getKingSquare(Color.WHITE), false)
@@ -118,38 +119,39 @@ public final class Eval implements Evaluator {
         }
     }
 
-    private static int evalPieces(long pieceMap, Board board, BiFunction<Board, Square, Integer> evalFunc) {
+    private static int evalPieces(EvalTermsVector etv, long pieceMap, Board board,
+                                  Function3<EvalTermsVector, Board, Square, Integer> evalFunc) {
         int score = 0;
 
         while (pieceMap != 0) {
             int sqVal = Bitboard.lsb(pieceMap);
             Square sq = Square.valueOf(sqVal);
-            score += evalFunc.apply(board, sq);
+            score += evalFunc.apply(etv, board, sq);
             pieceMap ^= Bitboard.squares[sqVal];
         }
 
         return score;
     }
 
-    private static int evalPawns(Board board) {
+    private static int evalPawns(EvalTermsVector etv, Board board) {
 
         // try the pawn hash
         PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board.getPawnKey());
         if (pte != null) {
-            assert(pte.getScore() == evalPawnsNoHash(board));
+            assert(pte.getScore() == evalPawnsNoHash(etv, board));
             return pte.getScore();
         }
 
-        int score = evalPawnsNoHash(board);
+        int score = evalPawnsNoHash(etv, board);
 
         TTHolder.getInstance().getPawnHashTable().store(board.getPawnKey(), score);
 
         return score;
     }
 
-    private static int evalPawnsNoHash(Board board) {
-        return evalPieces(board.getWhitePawns(), board, EvalPawn::evalPawn)
-                - evalPieces(board.getBlackPawns(), board, EvalPawn::evalPawn);
+    private static int evalPawnsNoHash(EvalTermsVector etv, Board board) {
+        return evalPieces(etv, board.getWhitePawns(), board, EvalPawn::evalPawn)
+                - evalPieces(etv, board.getBlackPawns(), board, EvalPawn::evalPawn);
     }
 
     public static native int evalNative(Board board, boolean materialOnly);

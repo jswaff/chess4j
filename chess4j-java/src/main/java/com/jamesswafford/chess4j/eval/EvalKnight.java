@@ -18,7 +18,7 @@ public class EvalKnight {
 
     public static final int KNIGHT_TROPISM = -2;
 
-    public static int evalKnight(Board board, Square sq) {
+    public static int evalKnight(EvalTermsVector etv, Board board, Square sq) {
         int score = 0;
 
         if (board.getPiece(sq).isWhite()) {

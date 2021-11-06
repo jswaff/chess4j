@@ -11,17 +11,18 @@ import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.*;
 
 public class EvalQueenTest {
 
-    private Board board = new Board();
+    private final Board board = new Board();
+    private final EvalTermsVector etv = new EvalTermsVector();
 
     @Test
     public void testEvalQueen() {
 
         board.resetBoard();
 
-        assertEquals(QUEEN_PST[D1.value()], evalQueen(board, D1));
+        assertEquals(QUEEN_PST[D1.value()], evalQueen(etv, board, D1));
 
         // test symmetry
-        assertEquals(evalQueen(board, D1), evalQueen(board, D8));
+        assertEquals(evalQueen(etv, board, D1), evalQueen(etv, board, D8));
     }
 
     @Test
@@ -30,6 +31,6 @@ public class EvalQueenTest {
         board.setPos("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
 
         assertEquals(QUEEN_PST[C7.value()] + MAJOR_ON_7TH + CONNECTED_MAJORS_ON_7TH,
-                evalQueen(board, C7));
+                evalQueen(etv, board, C7));
     }
 }
