@@ -11,6 +11,8 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.pieces.Pawn.BLACK_PAWN;
 import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
 
+import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+
 public class EvalKing {
 
     public static final int[] KING_PST = {
@@ -35,13 +37,8 @@ public class EvalKing {
               0,  0,  0,  0,  0,  0,  0,  0 };
 
 
-    public static final int KING_SAFETY_PAWN_ONE_AWAY = -10;
-    public static final int KING_SAFETY_PAWN_TWO_AWAY = -20;
-    public static final int KING_SAFETY_PAWN_FAR_AWAY = -30;
-    public static final int KING_SAFETY_MIDDLE_OPEN_FILE = -50;
-
     // returns a score from the perspective of white
-    public static int evalKing(Board b, Square kingSq, boolean endGame) {
+    public static int evalKing(EvalTermsVector etv, Board b, Square kingSq, boolean endGame) {
 
         assert(kingSq == b.getKingSquare(Color.WHITE) || kingSq == b.getKingSquare(Color.BLACK));
 
@@ -52,14 +49,14 @@ public class EvalKing {
                 score += KING_ENDGAME_PST[kingSq.value()];
             } else {
                 score += KING_PST[kingSq.value()];
-                score += evalKingSafety(b, true);
+                score += evalKingSafety(etv, b, true);
             }
         } else {
             if (endGame) {
                 score += KING_ENDGAME_PST[kingSq.flipVertical().value()];
             } else {
                 score += KING_PST[kingSq.flipVertical().value()];
-                score += evalKingSafety(b, false);
+                score += evalKingSafety(etv, b, false);
             }
         }
 
@@ -67,7 +64,7 @@ public class EvalKing {
     }
 
     // this will return a score from the perspective of the player
-    public static int evalKingSafety(Board board, boolean forWhite) {
+    public static int evalKingSafety(EvalTermsVector etv, Board board, boolean forWhite) {
         int score = 0;
 
         Square kingSq;
@@ -78,64 +75,64 @@ public class EvalKing {
                 // check that pawns on f,g,h are not too far away
                 if (board.getPiece(F2) == WHITE_PAWN);
                 else if (board.getPiece(F3) == WHITE_PAWN) {
-                    score += KING_SAFETY_PAWN_ONE_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(F4) == WHITE_PAWN) {
-                    score += KING_SAFETY_PAWN_TWO_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += KING_SAFETY_PAWN_FAR_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(G2) == WHITE_PAWN);
                 else if (board.getPiece(G3) == WHITE_PAWN) {
-                    score += KING_SAFETY_PAWN_ONE_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(G4) == WHITE_PAWN) {
-                    score += KING_SAFETY_PAWN_TWO_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += KING_SAFETY_PAWN_FAR_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(H2) == WHITE_PAWN);
                 else if (board.getPiece(H3) == WHITE_PAWN) {
-                    score += KING_SAFETY_PAWN_ONE_AWAY /2;
+                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND] /2;
                 } else if (board.getPiece(H4) == WHITE_PAWN) {
-                    score += KING_SAFETY_PAWN_TWO_AWAY /2;
+                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND] /2;
                 } else {
-                    score += KING_SAFETY_PAWN_FAR_AWAY /2;
+                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND] /2;
                 }
 
             } else if (kingSq.file().westOf(FILE_D)) {
                 if (board.getPiece(C2) == WHITE_PAWN);
                 else if (board.getPiece(C3) == WHITE_PAWN) {
-                    score += KING_SAFETY_PAWN_ONE_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(C4) == WHITE_PAWN) {
-                    score += KING_SAFETY_PAWN_TWO_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += KING_SAFETY_PAWN_FAR_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(B2) == WHITE_PAWN);
                 else if (board.getPiece(B3) == WHITE_PAWN) {
-                    score += KING_SAFETY_PAWN_ONE_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(B4) == WHITE_PAWN) {
-                    score += KING_SAFETY_PAWN_TWO_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += KING_SAFETY_PAWN_FAR_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(A2) == WHITE_PAWN);
                 else if (board.getPiece(A3) == WHITE_PAWN) {
-                    score += KING_SAFETY_PAWN_ONE_AWAY /2;
+                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND] /2;
                 } else if (board.getPiece(A4) == WHITE_PAWN) {
-                    score += KING_SAFETY_PAWN_TWO_AWAY /2;
+                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND] /2;
                 } else {
-                    score += KING_SAFETY_PAWN_FAR_AWAY /2;
+                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND] /2;
                 }
             } else {
                 // check if open file
                 if ( ((board.getWhitePawns() | board.getBlackPawns())
                         & Bitboard.files[kingSq.file().getValue()])==0)
                 {
-                    score += KING_SAFETY_MIDDLE_OPEN_FILE;
+                    score += etv.terms[KING_SAFETY_MIDDLE_OPEN_FILE_IND];
                 }
             }
             // scale down with material?
@@ -144,63 +141,63 @@ public class EvalKing {
             if (kingSq.file().eastOf(FILE_E)) {
                 if (board.getPiece(F7) == BLACK_PAWN);
                 else if (board.getPiece(F6) == BLACK_PAWN) {
-                    score += KING_SAFETY_PAWN_ONE_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(F5) == BLACK_PAWN) {
-                    score += KING_SAFETY_PAWN_TWO_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += KING_SAFETY_PAWN_FAR_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(G7) == BLACK_PAWN);
                 else if (board.getPiece(G6) == BLACK_PAWN) {
-                    score += KING_SAFETY_PAWN_ONE_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(G5) == BLACK_PAWN) {
-                    score += KING_SAFETY_PAWN_TWO_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += KING_SAFETY_PAWN_FAR_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(H7) == BLACK_PAWN);
                 else if (board.getPiece(H6) == BLACK_PAWN) {
-                    score += KING_SAFETY_PAWN_ONE_AWAY /2;
+                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND] /2;
                 } else if (board.getPiece(H5) == BLACK_PAWN) {
-                    score += KING_SAFETY_PAWN_TWO_AWAY /2;
+                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND] /2;
                 } else {
-                    score += KING_SAFETY_PAWN_FAR_AWAY /2;
+                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND] /2;
                 }
             } else if (kingSq.file().westOf(FILE_D)) {
                 if (board.getPiece(C7) == BLACK_PAWN);
                 else if (board.getPiece(C6) == BLACK_PAWN) {
-                    score += KING_SAFETY_PAWN_ONE_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(C5) == BLACK_PAWN) {
-                    score += KING_SAFETY_PAWN_TWO_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += KING_SAFETY_PAWN_FAR_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(B7) == BLACK_PAWN);
                 else if (board.getPiece(B6) == BLACK_PAWN) {
-                    score += KING_SAFETY_PAWN_ONE_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(B5) == BLACK_PAWN) {
-                    score += KING_SAFETY_PAWN_TWO_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += KING_SAFETY_PAWN_FAR_AWAY;
+                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(A7) == BLACK_PAWN);
                 else if (board.getPiece(A6) == BLACK_PAWN) {
-                    score += KING_SAFETY_PAWN_ONE_AWAY /2;
+                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND] /2;
                 } else if (board.getPiece(A5) == BLACK_PAWN) {
-                    score += KING_SAFETY_PAWN_TWO_AWAY /2;
+                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND] /2;
                 } else {
-                    score += KING_SAFETY_PAWN_FAR_AWAY /2;
+                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND] /2;
                 }
             } else {
                 // check if open file
                 if ( ((board.getWhitePawns() | board.getBlackPawns())
                         & Bitboard.files[kingSq.file().getValue()])==0)
                 {
-                    score += KING_SAFETY_MIDDLE_OPEN_FILE;
+                    score += etv.terms[KING_SAFETY_MIDDLE_OPEN_FILE_IND];
                 }
             }
         }

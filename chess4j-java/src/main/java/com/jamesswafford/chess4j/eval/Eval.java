@@ -42,10 +42,12 @@ public final class Eval implements Evaluator {
 
     public static int eval(Board board, boolean materialOnly) {
 
-        int evalScore = evalHelper(board, materialOnly);
+        EvalTermsVector etv = new EvalTermsVector();
+
+        int evalScore = evalHelper(etv, board, materialOnly);
 
         // if we are running with assertions enabled, test symmetry
-        assert(ensureEvalSymmetry(evalScore, board, materialOnly));
+        assert(ensureEvalSymmetry(etv, evalScore, board, materialOnly));
 
         // if we are running with assertions enabled and the native library is loaded, verify equality
         assert(evalsAreEqual(evalScore, board, materialOnly));
@@ -53,7 +55,7 @@ public final class Eval implements Evaluator {
         return evalScore;
     }
 
-    private static int evalHelper(Board board, boolean materialOnly) {
+    private static int evalHelper(EvalTermsVector etv, Board board, boolean materialOnly) {
         int matScore = EvalMaterial.evalMaterial(board);
         if (materialOnly) {
             return board.getPlayerToMove() == Color.WHITE ? matScore : -matScore;
@@ -85,10 +87,10 @@ public final class Eval implements Evaluator {
                 - evalPieces(board.getBlackQueens(), board, EvalQueen::evalQueen);
 
         egScore = mgScore;
-        mgScore += evalKing(board, board.getKingSquare(Color.WHITE), false)
-                - evalKing(board, board.getKingSquare(Color.BLACK), false);
-        egScore += evalKing(board, board.getKingSquare(Color.WHITE), true)
-                - evalKing(board, board.getKingSquare(Color.BLACK), true);
+        mgScore += evalKing(etv, board, board.getKingSquare(Color.WHITE), false)
+                - evalKing(etv, board, board.getKingSquare(Color.BLACK), false);
+        egScore += evalKing(etv, board, board.getKingSquare(Color.WHITE), true)
+                - evalKing(etv, board, board.getKingSquare(Color.BLACK), true);
 
         // blend the middle game score and end game score, and divide by the draw factor
         int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
@@ -160,16 +162,17 @@ public final class Eval implements Evaluator {
     /**
      * Helper method to test eval symmetry
      *
+     * @param etv - eval terms vector
      * @param evalScore - the score the board has been evaulated at
      * @param board - the chess board
      * @param materialOnly - whether to evaulate material only
      *
      * @return - true if the eval is symmetric in the given position
      */
-    private static boolean ensureEvalSymmetry(int evalScore, Board board, boolean materialOnly) {
+    private static boolean ensureEvalSymmetry(EvalTermsVector etv, int evalScore, Board board, boolean materialOnly) {
         Board flipBoard = board.deepCopy();
         flipBoard.flipVertical();
-        int flipScore = evalHelper(flipBoard, materialOnly);
+        int flipScore = evalHelper(etv, flipBoard, materialOnly);
         boolean retVal = flipScore == evalScore;
         flipBoard.flipVertical();
         assert(board.equals(flipBoard));
