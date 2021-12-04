@@ -3,9 +3,9 @@ package com.jamesswafford.chess4j.io;
 import com.jamesswafford.chess4j.eval.EvalTermsVector;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 
+import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
 import static org.junit.Assert.*;
 
 public class EvalTermsVectorFileUtilTest {
@@ -37,6 +37,25 @@ public class EvalTermsVectorFileUtilTest {
         assertContains(config, "PASSED_PAWN");
         assertContains(config, "ISOLATED_PAWN");
         assertContains(config, "DOUBLED_PAWN");
+    }
+
+    @Test
+    public void readTest() throws IOException {
+        // test three default values, then read a file in and ensure those values changed
+
+        EvalTermsVector etv = new EvalTermsVector();
+        assertEquals(etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND], -10);
+        assertEquals(etv.terms[ROOK_PST_IND+63], 0);
+        assertEquals(etv.terms[DOUBLED_PAWN_IND], -10);
+
+        File file = new File(getClass().getResource("/eval.config").getFile());
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            EvalTermsVectorFileUtil.read(etv, br);
+        }
+
+        //assertEquals(etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND], -12);
+        //assertEquals(etv.terms[ROOK_PST_IND+63], 9);
+        //assertEquals(etv.terms[DOUBLED_PAWN_IND], -11);
     }
 
     private static void assertContains(String config, String key) {

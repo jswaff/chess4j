@@ -2,9 +2,12 @@ package com.jamesswafford.chess4j.io;
 
 import com.jamesswafford.chess4j.eval.EvalTermsVector;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
 
@@ -30,6 +33,13 @@ public class EvalTermsVectorFileUtil {
         writeLine(writer, "PASSED_PAWN", etv.terms[PASSED_PAWN_IND]);
         writeLine(writer, "ISOLATED_PAWN", etv.terms[ISOLATED_PAWN_IND]);
         writeLine(writer, "DOUBLED_PAWN", etv.terms[DOUBLED_PAWN_IND]);
+    }
+
+    public static void read(EvalTermsVector etv, BufferedReader reader) throws IOException {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            System.out.println(line);
+        }
     }
 
     private static void writeLine(Writer writer, String key, Integer val) throws IOException {
