@@ -2,7 +2,7 @@ package com.jamesswafford.chess4j.eval;
 
 public class EvalTermsVector {
 
-    int[] terms = new int[] {
+    public int[] terms = new int[] {
             -10,  // KING_SAFETY_PAWN_ONE_AWAY
             -20,  // KING_SAFETY_PAWN_TWO_AWAY
             -30,  // KING_SAFETY_PAWN_FAR_AWAY
