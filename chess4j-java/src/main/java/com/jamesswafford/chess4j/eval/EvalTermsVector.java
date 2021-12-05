@@ -1,5 +1,12 @@
 package com.jamesswafford.chess4j.eval;
 
+import io.vavr.Tuple2;
+import lombok.EqualsAndHashCode;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+@EqualsAndHashCode
 public class EvalTermsVector {
 
     public int[] terms = new int[] {
@@ -93,4 +100,52 @@ public class EvalTermsVector {
     public static final int ISOLATED_PAWN_IND = 458;
     public static final int DOUBLED_PAWN_IND = 459;
 
+    private static final Map<String, Tuple2<Integer, Integer>> indexMap = new HashMap<>();
+    static {
+        indexMap.put("KING_SAFETY_PAWN_ONE_AWAY", new Tuple2<>(KING_SAFETY_PAWN_ONE_AWAY_IND, 1));
+        indexMap.put("KING_SAFETY_PAWN_TWO_AWAY", new Tuple2<>(KING_SAFETY_PAWN_TWO_AWAY_IND, 1));
+        indexMap.put("KING_SAFETY_PAWN_FAR_AWAY", new Tuple2<>(KING_SAFETY_PAWN_FAR_AWAY_IND, 1));
+        indexMap.put("KING_SAFETY_MIDDLE_OPEN_FILE", new Tuple2<>(KING_SAFETY_MIDDLE_OPEN_FILE_IND, 1));
+        indexMap.put("KING_PST", new Tuple2<>(KING_PST_IND, 64));
+        indexMap.put("KING_ENDGAME_PST", new Tuple2<>(KING_ENDGAME_PST_IND, 64));
+        indexMap.put("BISHOP_PST", new Tuple2<>(BISHOP_PST_IND, 64));
+        indexMap.put("KNIGHT_PST", new Tuple2<>(KNIGHT_PST_IND, 64));
+        indexMap.put("KNIGHT_TROPISM", new Tuple2<>(KNIGHT_TROPISM_IND, 1));
+        indexMap.put("ROOK_PST", new Tuple2<>(ROOK_PST_IND, 64));
+        indexMap.put("ROOK_OPEN_FILE", new Tuple2<>(ROOK_OPEN_FILE_IND, 1));
+        indexMap.put("ROOK_HALF_OPEN_FILE", new Tuple2<>(ROOK_HALF_OPEN_FILE_IND, 1));
+        indexMap.put("QUEEN_PST", new Tuple2<>(QUEEN_PST_IND, 64));
+        indexMap.put("MAJOR_ON_7TH", new Tuple2<>(MAJOR_ON_7TH_IND, 1));
+        indexMap.put("CONNECTED_MAJORS_ON_7TH", new Tuple2<>(CONNECTED_MAJORS_ON_7TH_IND, 1));
+        indexMap.put("PAWN_PST", new Tuple2<>(PAWN_PST_IND, 64));
+        indexMap.put("PASSED_PAWN", new Tuple2<>(PASSED_PAWN_IND, 1));
+        indexMap.put("ISOLATED_PAWN", new Tuple2<>(ISOLATED_PAWN_IND, 1));
+        indexMap.put("DOUBLED_PAWN", new Tuple2<>(DOUBLED_PAWN_IND, 1));
+    }
+
+    public static Set<String> getKeys() {
+        return indexMap.keySet();
+    }
+
+    public List<Integer> getVals(String key) {
+        if (!indexMap.containsKey(key)) {
+            throw new IllegalArgumentException("invalid key " + key);
+        }
+        Tuple2<Integer, Integer> v = indexMap.get(key);
+        int[] myterms = Arrays.copyOfRange(terms, v._1, v._1 + v._2);
+        return Arrays.stream(myterms)
+                .boxed()
+                .collect(Collectors.toList());
+    }
+
+    public void setVal(String key, List<Integer> vals) {
+        Tuple2<Integer, Integer> indexTuple = indexMap.get(key);
+        if (vals.size() != indexTuple._2) {
+            throw new IllegalArgumentException("length of values is invalid.  expected: "  +
+                    indexTuple._2 + ", received: " + vals.size());
+        }
+        for (int i=0;i<vals.size();i++) {
+            terms[indexTuple._1 + i] = vals.get(i);
+        }
+    }
 }
