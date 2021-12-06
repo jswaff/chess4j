@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.search;
 
+import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.eval.Eval;
@@ -368,7 +369,7 @@ public class AlphaBetaSearch implements Search {
                     move.promotion()==null && !move.equals(killerMovesStore.getKiller1(ply)) &&
                     !move.equals(killerMovesStore.getKiller2(ply)))
             {
-                int material = Eval.eval(board, true);
+                int material = Eval.eval(Globals.getEvalTermsVector(), board, true);
                 int materialGain = move.captured()==null ? 0 : EvalMaterial.evalPiece(move.captured());
                 int futilityMargin = depth==1 ? (EvalMaterial.PAWN_VAL * 2) : EvalMaterial.ROOK_VAL;
                 if (material + materialGain + futilityMargin <= alpha) {

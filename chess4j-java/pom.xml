@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>com.jamesswafford.chess4j</groupId>
 		<artifactId>chess4j-parent</artifactId>
-		<version>4.0</version>
+		<version>4.1</version>
 	</parent>
 	
     <dependencies>
@@ -25,6 +25,11 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr</artifactId>
         </dependency>
 
         <dependency>

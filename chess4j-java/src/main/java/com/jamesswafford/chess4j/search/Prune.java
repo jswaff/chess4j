@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.search;
 
 import com.jamesswafford.chess4j.Constants;
+import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.squares.Rank;
@@ -21,7 +22,7 @@ public class Prune {
                 && !(lastMove.piece()==Pawn.WHITE_PAWN && lastMove.to().rank()==Rank.RANK_7)
                 && !(lastMove.piece()==Pawn.BLACK_PAWN && lastMove.to().rank()==Rank.RANK_2))
         {
-            int evalMat = -Eval.eval(b,true);
+            int evalMat = -Eval.eval(Globals.getEvalTermsVector(), b, true);
 
             return (depth < 2 && (evalMat + EvalMaterial.PAWN_VAL*2 <= alpha))   // futility pruning
                 || (depth < 3 && (evalMat + EvalMaterial.PAWN_VAL*5 <= alpha)) ;  // extended futility pruning

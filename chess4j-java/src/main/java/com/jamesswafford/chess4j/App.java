@@ -4,6 +4,7 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.book.SQLiteBook;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.io.EvalTermsVectorUtil;
 import com.jamesswafford.chess4j.io.XBoardHandler;
 import com.jamesswafford.chess4j.search.AlphaBetaSearch;
 import com.jamesswafford.chess4j.search.SearchOptions;
@@ -13,9 +14,8 @@ import com.jamesswafford.chess4j.utils.TestSuiteProcessor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.Properties;
 
 public final class App {
     private static final  Logger LOGGER = LogManager.getLogger(App.class);
@@ -28,7 +28,7 @@ public final class App {
 
     private App() { }
 
-    private static void processArgument(String arg) {
+    private static void processArgument(String arg) throws IOException {
         if (arg.startsWith("-native")) {
             Initializer.attemptToUseNative = true;
         } else if (arg.startsWith("-suite=")) {
@@ -47,6 +47,13 @@ public final class App {
         } else if (arg.startsWith("-phash=")) {
             int szBytes = Integer.parseInt(arg.substring(7)) * 1024 * 1024;
             TTHolder.getInstance().resizePawnTable(szBytes);
+        } else if (arg.startsWith("-eval=")) {
+            String path = arg.substring(6);
+            try (FileInputStream fis = new FileInputStream(path)) {
+                Properties properties = new Properties();
+                properties.load(fis);
+                Globals.setEvalTermsVector(EvalTermsVectorUtil.toVector(properties));
+            }
         }
     }
 

@@ -8,7 +8,7 @@
     <groupId>com.jamesswafford.chess4j</groupId>
     <artifactId>chess4j-parent</artifactId>
     <packaging>pom</packaging>
-    <version>4.0</version>
+    <version>4.1</version>
 
     <modules>
         <module>chess4j-native</module>
@@ -26,6 +26,11 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>1.18.12</version>
+            </dependency>
+            <dependency>
+                <groupId>io.vavr</groupId>
+                <artifactId>vavr</artifactId>
+                <version>0.10.4</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
