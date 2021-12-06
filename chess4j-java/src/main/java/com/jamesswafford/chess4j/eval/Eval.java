@@ -15,7 +15,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.BiFunction;
 
 import static com.jamesswafford.chess4j.eval.EvalKing.evalKing;
 import static com.jamesswafford.chess4j.eval.MaterialType.*;
@@ -38,11 +37,11 @@ public final class Eval implements Evaluator {
 
     public Eval() { }
 
-    public static int eval(Board board, EvalTermsVector etv) {
-        return eval(board,etv, false);
+    public static int eval(EvalTermsVector etv, Board board) {
+        return eval(etv, board, false);
     }
 
-    public static int eval(Board board, EvalTermsVector etv, boolean materialOnly) {
+    public static int eval(EvalTermsVector etv, Board board, boolean materialOnly) {
 
         int evalScore = evalHelper(etv, board, materialOnly);
 
@@ -157,7 +156,7 @@ public final class Eval implements Evaluator {
 
     @Override
     public int evaluateBoard(Board board) {
-        return eval(board, Globals.getEvalTermsVector());
+        return eval(Globals.getEvalTermsVector(), board);
     }
 
     /**

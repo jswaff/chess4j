@@ -53,7 +53,7 @@ public class XBoardHandler {
         put("computer", XBoardHandler::noOp);
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
         put("easy", (String[] cmd) -> ponderingEnabled = false);
-        put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getBoard(), Globals.getEvalTermsVector())));
+        put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getEvalTermsVector(), Globals.getBoard())));
         put("exit",XBoardHandler.this::exit);
         put("force", XBoardHandler.this::force);
         put("go", XBoardHandler.this::go);

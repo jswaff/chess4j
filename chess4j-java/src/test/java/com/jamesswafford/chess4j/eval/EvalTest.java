@@ -21,7 +21,7 @@ public class EvalTest {
     @Test
     public void testStartPosIs0() {
         board.resetBoard();
-        int eval = eval(board, etv);
+        int eval = eval(etv, board);
         assertEquals(0, eval);
     }
 
@@ -74,7 +74,7 @@ public class EvalTest {
     public void testKK() {
         String fen = "k7/8/8/8/8/8/8/K7 w - -";
         Board board = new Board(fen);
-        assertEquals(0, eval(board, etv));
+        assertEquals(0, eval(etv, board));
         testCaseSymmetry(fen);
     }
 
@@ -82,7 +82,7 @@ public class EvalTest {
     public void testKNK() {
         String fen = "kn6/8/8/8/8/8/8/K7 w - -";
         Board board = new Board(fen);
-        assertEquals(0, eval(board, etv));
+        assertEquals(0, eval(etv, board));
         testCaseSymmetry(fen);
     }
 
@@ -90,7 +90,7 @@ public class EvalTest {
     public void testKNKP() {
         String fen = "kn6/8/8/8/8/8/P7/K7 w - -";
         Board board = new Board(fen);
-        int eval = eval(board, etv);
+        int eval = eval(etv, board);
         assertTrue(eval > -50 && eval < 0);
         testCaseSymmetry(fen);
     }
@@ -99,7 +99,7 @@ public class EvalTest {
     public void testKNKN() {
         String fen = "k7/n7/8/8/8/8/8/KN6 w - -";
         Board board = new Board(fen);
-        assertEquals(0, eval(board, etv));
+        assertEquals(0, eval(etv, board));
         testCaseSymmetry(fen);
     }
 
@@ -107,7 +107,7 @@ public class EvalTest {
     public void testKNNK() {
         String fen = "knn5/8/8/8/8/8/8/K7 w - -";
         Board board = new Board(fen);
-        assertEquals(0, eval(board, etv));
+        assertEquals(0, eval(etv, board));
         testCaseSymmetry(fen);
     }
 
@@ -115,7 +115,7 @@ public class EvalTest {
     public void testKNKB() {
         String fen = "kb6/8/8/8/8/8/8/KN6 w - -";
         Board board = new Board(fen);
-        assertEquals(0, eval(board, etv));
+        assertEquals(0, eval(etv, board));
         testCaseSymmetry(fen);
     }
 
@@ -123,7 +123,7 @@ public class EvalTest {
     public void testKBK() {
         String fen = "kb6/8/8/8/8/8/8/K7 w - -";
         Board board = new Board(fen);
-        assertEquals(0, eval(board, etv));
+        assertEquals(0, eval(etv, board));
         testCaseSymmetry(fen);
     }
 
@@ -131,7 +131,7 @@ public class EvalTest {
     public void testKBKP() {
         String fen = "kb6/8/8/8/8/8/P7/K7 w - -";
         Board board = new Board(fen);
-        int eval = eval(board, etv);
+        int eval = eval(etv, board);
         assertTrue(eval > -50 && eval < 0);
         testCaseSymmetry(fen);
     }
@@ -140,15 +140,15 @@ public class EvalTest {
     public void testKBKB() {
         String fen = "k7/b7/8/8/8/8/8/KB6 w - -";
         Board board = new Board(fen);
-        assertEquals(0, eval(board, etv));
+        assertEquals(0, eval(etv, board));
         testCaseSymmetry(fen);
     }
 
     private void testCaseSymmetry(String fen) {
         board.setPos(fen);
-        int eval = eval(board, etv);
+        int eval = eval(etv, board);
         board.flipVertical();
-        int eval2 = eval(board, etv);
+        int eval2 = eval(etv, board);
         assertEquals(eval, eval2);
     }
 
