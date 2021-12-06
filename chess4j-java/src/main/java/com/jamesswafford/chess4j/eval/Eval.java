@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.eval;
 
+import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
@@ -37,13 +38,11 @@ public final class Eval implements Evaluator {
 
     public Eval() { }
 
-    public static int eval(Board board) {
-        return eval(board,false);
+    public static int eval(Board board, EvalTermsVector etv) {
+        return eval(board,etv, false);
     }
 
-    public static int eval(Board board, boolean materialOnly) {
-
-        EvalTermsVector etv = new EvalTermsVector();
+    public static int eval(Board board, EvalTermsVector etv, boolean materialOnly) {
 
         int evalScore = evalHelper(etv, board, materialOnly);
 
@@ -158,7 +157,7 @@ public final class Eval implements Evaluator {
 
     @Override
     public int evaluateBoard(Board board) {
-        return eval(board);
+        return eval(board, Globals.getEvalTermsVector());
     }
 
     /**
