@@ -1,12 +1,16 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
+import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.io.PGNResult;
+import com.jamesswafford.chess4j.utils.GameResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SQLiteTunerDatasource implements TunerDatasource {
 
@@ -46,7 +50,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         try {
             Statement stmt = conn.createStatement();
             stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer, processed integer, " +
-                    "eval_depth integer, eval_score real)");
+                    "eval_depth integer, eval_score real, error real)");
             stmt.execute("create index idx_tuner_pos_fen on tuner_pos(fen)");
             stmt.close();
         } catch (SQLException e) {
@@ -82,7 +86,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     }
 
     @Override
-    public void update(String fen, int evalDepth, float evalScore) {
+    public void updateGameDepthAndScore(String fen, int evalDepth, float evalScore) {
         int currentDepth = getEvalDepth(fen);
         if (evalDepth >= currentDepth) {
             String qry = "update tuner_pos set eval_depth=?, eval_score=? where fen = ?";
@@ -97,6 +101,21 @@ public class SQLiteTunerDatasource implements TunerDatasource {
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    @Override
+    public void updateError(String fen, float error) {
+        String qry = "update tuner_pos set error=?, processed=1 where fen=?";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(qry);
+            ps.setFloat(1, error);
+            ps.setString(2, fen);
+            ps.executeUpdate();
+            ps.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -177,6 +196,82 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         }
 
         return score;
+    }
+
+    @Override
+    public List<GameRecord> getGameRecords(boolean unprocessedOnly) {
+        List<GameRecord> gameRecords = new ArrayList<>();
+
+        String sql = "select fen, outcome, processed, eval_depth, eval_score from tuner_pos ";
+        if (unprocessedOnly) {
+            sql += "where processed = 0 ";
+        }
+        sql += "limit 1000";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String fen = rs.getString("fen");
+                Board board = new Board(fen);
+                int outcome = rs.getInt("outcome");
+                GameResult gameResult;
+                if (outcome==-1) {
+                    gameResult = board.getPlayerToMove().isBlack() ? GameResult.WIN : GameResult.LOSS;
+                } else if (outcome==0) {
+                    gameResult = GameResult.DRAW;
+                } else if (outcome==1) {
+                    gameResult = board.getPlayerToMove().isWhite() ? GameResult.WIN : GameResult.LOSS;
+                } else {
+                    throw new IllegalStateException("Outcome is invalid: " + outcome + " fen: " + fen);
+                }
+                GameRecord gameRecord = GameRecord.builder()
+                        .fen(fen)
+                        .gameResult(gameResult)
+                        .processed(rs.getInt("processed")==1)
+                        .evalDepth(rs.getInt("eval_depth"))
+                        .evalScore(rs.getFloat("eval_score"))
+                        .build();
+                gameRecords.add(gameRecord);
+            }
+            ps.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return gameRecords;
+    }
+
+    @Override
+    public void markAllRecordsAsUnprocessed() {
+        String qry = "update tuner_pos set processed=0";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(qry);
+            ps.executeUpdate();
+            ps.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public float getAverageError() {
+        float avgError = 0.0F;
+        String sql = "select avg(error) avg_error from tuner_pos where processed=1";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                avgError = rs.getFloat("avg_error");
+            }
+            ps.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return avgError;
     }
 
 }

@@ -7,11 +7,8 @@ import com.jamesswafford.chess4j.search.SearchParameters;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 import static com.jamesswafford.chess4j.utils.GameResult.*;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
