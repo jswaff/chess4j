@@ -1,6 +1,8 @@
 package com.jamesswafford.chess4j.tuner;
 
+import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.eval.EvalTermsVector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,16 +20,49 @@ public class LogisticRegressionTuner {
         this.errorFunction = new ErrorFunction();
     }
 
-    public void tuneEvalVector() {
+    public EvalTermsVector optimize() {
         long start = System.currentTimeMillis();
         LOGGER.info("tuning started");
-        double averageError = calculateAverageError();
-        LOGGER.info("average error: " + averageError);
+        EvalTermsVector optimizedVector = optimize(Globals.getEvalTermsVector());
         long end = System.currentTimeMillis();
         LOGGER.info("tuning complete in {} seconds", (end-start)/1000);
+        return optimizedVector;
     }
 
-    public double calculateAverageError() { // TODO: w.r.t. eval vector
+    public EvalTermsVector optimize(EvalTermsVector evalTermsVector) {
+        int numParams = evalTermsVector.terms.length;
+        double bestE = calculateAverageError(evalTermsVector);
+        EvalTermsVector bestVector = new EvalTermsVector(evalTermsVector);
+        boolean improved = true;
+        while (improved) {
+            improved = false;
+            for (int i=0;i<numParams;i++) {
+                LOGGER.info("optimizing parameter " + i + " / " + numParams);
+                EvalTermsVector searchVector = new EvalTermsVector(bestVector);
+                searchVector.terms[i] = searchVector.terms[i] + 1;
+                double searchE = calculateAverageError(searchVector);
+                if (searchE < bestE) {
+                    bestE = searchE;
+                    bestVector = searchVector;
+                    improved = true;
+                } else {
+                    LOGGER.info("retrying parameter " + i + " / " + numParams);
+                    searchVector.terms[i] = searchVector.terms[i] - 2;
+                    searchE = calculateAverageError(searchVector);
+                    if (searchE < bestE) {
+                        bestE = searchE;
+                        bestVector = searchVector;
+                        improved = true;
+                    }
+                }
+            }
+        }
+
+        return bestVector;
+    }
+
+    public double calculateAverageError(EvalTermsVector evalTermsVector) {
+        // TODO - use evalTermsVector
         tunerDatasource.markAllRecordsAsUnprocessed();
         long numPositions = tunerDatasource.getTotalPositionsCount();
         LOGGER.info("processing " + numPositions + " positions");
@@ -45,7 +80,9 @@ public class LogisticRegressionTuner {
             gameRecords = tunerDatasource.getGameRecords(true);
         }
 
-        return tunerDatasource.getAverageError();
+        double averageError = tunerDatasource.getAverageError();
+        LOGGER.info("average error: " + averageError);
+        return averageError;
     }
 
     private void processGameRecord(GameRecord gameRecord) {

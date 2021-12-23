@@ -24,4 +24,16 @@ public class EvalTermsVectorTest {
         assertEquals(999, etv.terms[EvalTermsVector.MAJOR_ON_7TH_IND]);
         assertEquals(List.of(999), etv.getVals("MAJOR_ON_7TH"));
     }
+
+    @Test
+    public void copyConstructor() {
+        EvalTermsVector etv = new EvalTermsVector();
+        etv.setVal("MAJOR_ON_7TH", List.of(999));
+
+        EvalTermsVector etv2 = new EvalTermsVector(etv);
+        assertEquals(etv, etv2);
+
+        assertEquals(999, etv2.terms[EvalTermsVector.MAJOR_ON_7TH_IND]);
+        assertEquals(List.of(999), etv2.getVals("MAJOR_ON_7TH"));
+    }
 }

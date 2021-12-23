@@ -7,6 +7,7 @@ import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.book.OpeningBook;
 import com.jamesswafford.chess4j.eval.Eval;
+import com.jamesswafford.chess4j.eval.EvalTermsVector;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
@@ -401,7 +402,14 @@ public class XBoardHandler {
     private void tuneEvalVector(String[] cmd) {
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
             LogisticRegressionTuner tuner = new LogisticRegressionTuner(tunerDatasource1);
-            tuner.tuneEvalVector();
+            EvalTermsVector optimizedVector = tuner.optimize();
+            Properties props = EvalTermsVectorUtil.toProperties(optimizedVector);
+            LOGGER.info(props);
+            try (OutputStream output = new FileOutputStream("eval.properties")) {
+                props.store(output, null);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }, () -> LOGGER.info("no tuner datasource"));
     }
 

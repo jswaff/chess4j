@@ -127,6 +127,12 @@ public class EvalTermsVector {
         return indexMap.keySet();
     }
 
+    public EvalTermsVector() { }
+
+    public EvalTermsVector(EvalTermsVector evalTermsVector) {
+        System.arraycopy(evalTermsVector.terms, 0, terms, 0, terms.length);
+    }
+
     public List<Integer> getVals(String key) {
         if (!indexMap.containsKey(key)) {
             throw new IllegalArgumentException("invalid key " + key);

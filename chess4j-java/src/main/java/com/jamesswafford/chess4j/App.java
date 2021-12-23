@@ -49,6 +49,7 @@ public final class App {
             TTHolder.getInstance().resizePawnTable(szBytes);
         } else if (arg.startsWith("-eval=")) {
             String path = arg.substring(6);
+            LOGGER.info("loading eval properties from " + path);
             try (FileInputStream fis = new FileInputStream(path)) {
                 Properties properties = new Properties();
                 properties.load(fis);
