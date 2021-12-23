@@ -37,7 +37,7 @@ public class LogisticRegressionTuner {
         while (improved) {
             improved = false;
             for (int i=0;i<numParams;i++) {
-                LOGGER.info("optimizing parameter " + i + " / " + numParams);
+                LOGGER.info("optimizing parameter " + (i+1) + " / " + numParams);
                 EvalTermsVector searchVector = new EvalTermsVector(bestVector);
                 searchVector.terms[i] = searchVector.terms[i] + 1;
                 double searchE = calculateAverageError(searchVector);
@@ -46,7 +46,7 @@ public class LogisticRegressionTuner {
                     bestVector = searchVector;
                     improved = true;
                 } else {
-                    LOGGER.info("retrying parameter " + i + " / " + numParams);
+                    LOGGER.info("retrying parameter " + (i+1) + " / " + numParams);
                     searchVector.terms[i] = searchVector.terms[i] - 2;
                     searchE = calculateAverageError(searchVector);
                     if (searchE < bestE) {
@@ -62,7 +62,9 @@ public class LogisticRegressionTuner {
     }
 
     public double calculateAverageError(EvalTermsVector evalTermsVector) {
-        // TODO - use evalTermsVector
+        EvalTermsVector originalVector = Globals.getEvalTermsVector();
+        Globals.setEvalTermsVector(evalTermsVector);
+
         tunerDatasource.markAllRecordsAsUnprocessed();
         long numPositions = tunerDatasource.getTotalPositionsCount();
         LOGGER.info("processing " + numPositions + " positions");
@@ -82,6 +84,9 @@ public class LogisticRegressionTuner {
 
         double averageError = tunerDatasource.getAverageError();
         LOGGER.info("average error: " + averageError);
+
+        Globals.setEvalTermsVector(originalVector);
+
         return averageError;
     }
 
