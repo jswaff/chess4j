@@ -21,11 +21,26 @@ public class ErrorFunction {
     }
 
     public double calculateError(Board board, GameResult gameResult) {
-
         SearchParameters parameters = new SearchParameters(0, -Constants.CHECKMATE, Constants.CHECKMATE);
         int score = search.search(board, parameters);
+        double squishedScore = squishify(score);
+        return calculateError(squishedScore, gameResult);
+    }
 
-        return 0.0;
+    public double calculateError(double squishedScore, GameResult gameResult) {
+        double r;
+        if (GameResult.WIN.equals(gameResult)) {
+            r = 1.0;
+        } else if (GameResult.DRAW.equals(gameResult)) {
+            r = 0.5;
+        } else if (GameResult.LOSS.equals(gameResult)) {
+            r = 0.0;
+        } else {
+            throw new IllegalArgumentException("Cannot compute error for game result " + gameResult);
+        }
+
+        double delta = r - squishedScore;
+        return delta * delta;
     }
 
     public double squishify(int score) {
