@@ -12,6 +12,7 @@ import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
+import com.jamesswafford.chess4j.tuner.LogisticRegressionTuner;
 import com.jamesswafford.chess4j.tuner.TunerDatasource;
 import com.jamesswafford.chess4j.utils.*;
 
@@ -80,6 +81,7 @@ public class XBoardHandler {
         put("setboard", XBoardHandler.this::setboard);
         put("st", XBoardHandler.this::st);
         put("time", XBoardHandler.this::time);
+        put("tune", XBoardHandler.this::tuneEvalVector);
         put("undo", XBoardHandler.this::undo);
         put("usermove", XBoardHandler.this::usermove);
         put("xboard", XBoardHandler::noOp);
@@ -394,6 +396,13 @@ public class XBoardHandler {
         } else {
             searchIterator.setMaxTime(TimeUtils.getSearchTime(centis * 10, incrementMs));
         }
+    }
+
+    private void tuneEvalVector(String[] cmd) {
+        Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
+            LogisticRegressionTuner tuner = new LogisticRegressionTuner(tunerDatasource1);
+            tuner.tuneEvalVector();
+        }, () -> LOGGER.info("no tuner datasource"));
     }
 
     /**

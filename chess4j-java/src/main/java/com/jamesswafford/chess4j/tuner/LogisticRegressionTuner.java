@@ -1,10 +1,14 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.board.Board;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
 public class LogisticRegressionTuner {
+
+    private static final Logger LOGGER = LogManager.getLogger(LogisticRegressionTuner.class);
 
     private final TunerDatasource tunerDatasource;
     private final ErrorFunction errorFunction;
@@ -12,6 +16,15 @@ public class LogisticRegressionTuner {
     public LogisticRegressionTuner(TunerDatasource tunerDatasource) {
         this.tunerDatasource = tunerDatasource;
         this.errorFunction = new ErrorFunction();
+    }
+
+    public void tuneEvalVector() {
+        long start = System.currentTimeMillis();
+        LOGGER.info("tuning started");
+        double averageError = calculateAverageError();
+        LOGGER.info("average error: " + averageError);
+        long end = System.currentTimeMillis();
+        LOGGER.info("tuning complete in {} seconds", (end-start)/1000);
     }
 
     public double calculateAverageError() { // TODO: w.r.t. eval vector
