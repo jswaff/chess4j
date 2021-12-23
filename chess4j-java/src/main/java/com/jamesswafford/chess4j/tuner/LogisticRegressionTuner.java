@@ -29,10 +29,19 @@ public class LogisticRegressionTuner {
 
     public double calculateAverageError() { // TODO: w.r.t. eval vector
         tunerDatasource.markAllRecordsAsUnprocessed();
+        long numPositions = tunerDatasource.getTotalPositionsCount();
+        LOGGER.info("processing " + numPositions + " positions");
         List<GameRecord> gameRecords = tunerDatasource.getGameRecords(true);
 
+        int numProcessed = 0;
         while (gameRecords.size() > 0) {
-            gameRecords.forEach(this::processGameRecord);
+            for (GameRecord gameRecord : gameRecords) {
+                processGameRecord(gameRecord);
+                ++numProcessed;
+                if (numProcessed % 1000 == 0) {
+                    LOGGER.info("\tprocessed " + numProcessed + " / " + numPositions);
+                }
+            }
             gameRecords = tunerDatasource.getGameRecords(true);
         }
 
