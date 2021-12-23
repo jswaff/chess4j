@@ -35,5 +35,9 @@ public class EvalTermsVectorTest {
 
         assertEquals(999, etv2.terms[EvalTermsVector.MAJOR_ON_7TH_IND]);
         assertEquals(List.of(999), etv2.getVals("MAJOR_ON_7TH"));
+
+        // should be able to change independently
+        etv2.setVal("ROOK_OPEN_FILE", List.of(75));
+        assertNotEquals(etv, etv2);
     }
 }

@@ -14,10 +14,12 @@ public class LogisticRegressionTuner {
 
     private final TunerDatasource tunerDatasource;
     private final ErrorFunction errorFunction;
+    private final long numPositions;
 
     public LogisticRegressionTuner(TunerDatasource tunerDatasource) {
         this.tunerDatasource = tunerDatasource;
         this.errorFunction = new ErrorFunction();
+        this.numPositions = tunerDatasource.getTotalPositionsCount();
     }
 
     public EvalTermsVector optimize() {
@@ -66,8 +68,6 @@ public class LogisticRegressionTuner {
         Globals.setEvalTermsVector(evalTermsVector);
 
         tunerDatasource.markAllRecordsAsUnprocessed();
-        long numPositions = tunerDatasource.getTotalPositionsCount();
-        LOGGER.info("processing " + numPositions + " positions");
         List<GameRecord> gameRecords = tunerDatasource.getGameRecords(true);
 
         int numProcessed = 0;
