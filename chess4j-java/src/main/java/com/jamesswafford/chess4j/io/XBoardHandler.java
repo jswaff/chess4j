@@ -13,7 +13,7 @@ import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
-import com.jamesswafford.chess4j.tuner.LogisticRegressionTuner;
+import com.jamesswafford.chess4j.tuner.Tuner;
 import com.jamesswafford.chess4j.tuner.TunerDatasource;
 import com.jamesswafford.chess4j.utils.*;
 
@@ -401,7 +401,7 @@ public class XBoardHandler {
 
     private void tuneEvalVector(String[] cmd) {
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
-            LogisticRegressionTuner tuner = new LogisticRegressionTuner(tunerDatasource1);
+            Tuner tuner = new Tuner(tunerDatasource1);
             EvalTermsVector optimizedVector = tuner.optimize();
             Properties props = EvalTermsVectorUtil.toProperties(optimizedVector);
             LOGGER.info(props);

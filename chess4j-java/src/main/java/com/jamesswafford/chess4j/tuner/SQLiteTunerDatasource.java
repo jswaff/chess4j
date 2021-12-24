@@ -204,9 +204,8 @@ public class SQLiteTunerDatasource implements TunerDatasource {
 
         String sql = "select fen, outcome, processed, eval_depth, eval_score from tuner_pos ";
         if (unprocessedOnly) {
-            sql += "where processed = 0 ";
+            sql += "where processed = 0";
         }
-        sql += "limit 1000";
 
         try {
             PreparedStatement ps = conn.prepareStatement(sql);

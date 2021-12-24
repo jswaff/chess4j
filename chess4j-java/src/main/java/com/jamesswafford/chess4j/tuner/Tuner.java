@@ -13,21 +13,21 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Properties;
 
-public class LogisticRegressionTuner {
+public class Tuner {
 
-    private static final Logger LOGGER = LogManager.getLogger(LogisticRegressionTuner.class);
+    private static final Logger LOGGER = LogManager.getLogger(Tuner.class);
 
     private final ErrorFunction errorFunction;
     private final List<GameRecord> gameRecords;
 
-    public LogisticRegressionTuner(TunerDatasource tunerDatasource) {
+    public Tuner(TunerDatasource tunerDatasource) {
         this.errorFunction = new ErrorFunction();
         this.gameRecords = tunerDatasource.getGameRecords(false);
     }
 
     public EvalTermsVector optimize() {
         long start = System.currentTimeMillis();
-        LOGGER.info("tuning started");
+        LOGGER.info("tuning started: num positions={}", gameRecords.size());
         EvalTermsVector optimizedVector = optimize(Globals.getEvalTermsVector());
         long end = System.currentTimeMillis();
         LOGGER.info("tuning complete in {} seconds", (end-start)/1000);

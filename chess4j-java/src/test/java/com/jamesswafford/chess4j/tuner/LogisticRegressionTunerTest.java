@@ -5,17 +5,16 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
 
 public class LogisticRegressionTunerTest {
 
-    LogisticRegressionTuner tuner;
+    Tuner tuner;
 
     TunerDatasource tunerDatasource = Mockito.mock(TunerDatasource.class);
 
     @Before
     public void setUp() {
-        tuner = new LogisticRegressionTuner(tunerDatasource);
+        tuner = new Tuner(tunerDatasource);
     }
 
     @Test

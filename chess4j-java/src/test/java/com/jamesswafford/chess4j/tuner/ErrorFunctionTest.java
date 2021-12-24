@@ -32,6 +32,12 @@ public class ErrorFunctionTest {
     }
 
     @Test
+    public void calculateErrorFromBoardRealSearch() {
+        Board board = new Board();
+        System.out.println(errorFunction.calculateError(board, WIN));
+    }
+
+    @Test
     public void calculateErrorFromSquishedScore() {
         assertDoubleEquals(errorFunction.calculateError(0.5806, WIN), 0.1759);
         assertDoubleEquals(errorFunction.calculateError(1, WIN), 0);
