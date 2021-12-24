@@ -3,10 +3,15 @@ package com.jamesswafford.chess4j.tuner;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.eval.EvalTermsVector;
+import com.jamesswafford.chess4j.io.EvalTermsVectorUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
+import java.util.Properties;
 
 public class LogisticRegressionTuner {
 
@@ -14,12 +19,10 @@ public class LogisticRegressionTuner {
 
     private final TunerDatasource tunerDatasource;
     private final ErrorFunction errorFunction;
-    private final long numPositions;
 
     public LogisticRegressionTuner(TunerDatasource tunerDatasource) {
         this.tunerDatasource = tunerDatasource;
         this.errorFunction = new ErrorFunction();
-        this.numPositions = tunerDatasource.getTotalPositionsCount();
     }
 
     public EvalTermsVector optimize() {
@@ -34,31 +37,46 @@ public class LogisticRegressionTuner {
     public EvalTermsVector optimize(EvalTermsVector evalTermsVector) {
         int numParams = evalTermsVector.terms.length;
         double bestE = calculateAverageError(evalTermsVector);
+        LOGGER.info("initial E: " + bestE);
         EvalTermsVector bestVector = new EvalTermsVector(evalTermsVector);
-        boolean improved = true;
-        while (improved) {
-            improved = false;
+        int numIterations = 0;
+        int numParamsImproved;
+
+        do {
+            ++numIterations;
+            numParamsImproved = 0;
             for (int i=0;i<numParams;i++) {
-                LOGGER.info("optimizing parameter " + (i+1) + " / " + numParams);
+                LOGGER.info("\toptimizing parameter " + (i+1) + " / " + numParams);
                 EvalTermsVector searchVector = new EvalTermsVector(bestVector);
                 searchVector.terms[i] = searchVector.terms[i] + 1;
                 double searchE = calculateAverageError(searchVector);
                 if (searchE < bestE) {
                     bestE = searchE;
                     bestVector = searchVector;
-                    improved = true;
+                    ++numParamsImproved;
                 } else {
-                    LOGGER.info("retrying parameter " + (i+1) + " / " + numParams);
                     searchVector.terms[i] = searchVector.terms[i] - 2;
                     searchE = calculateAverageError(searchVector);
                     if (searchE < bestE) {
                         bestE = searchE;
                         bestVector = searchVector;
-                        improved = true;
+                        ++numParamsImproved;
                     }
                 }
             }
-        }
+            LOGGER.info("iteration " + numIterations + ": bestE=" + bestE + ", numParamsImproved=" + numParamsImproved);
+
+            // write to a temporary properties file
+            Properties props = EvalTermsVectorUtil.toProperties(bestVector);
+            LOGGER.info(props);
+            try (OutputStream output = new FileOutputStream("temp-eval.properties")) {
+                props.store(output, null);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        } while (numParamsImproved == 0);
+
 
         return bestVector;
     }
@@ -70,24 +88,14 @@ public class LogisticRegressionTuner {
         tunerDatasource.markAllRecordsAsUnprocessed();
         List<GameRecord> gameRecords = tunerDatasource.getGameRecords(true);
 
-        int numProcessed = 0;
         while (gameRecords.size() > 0) {
-            for (GameRecord gameRecord : gameRecords) {
-                processGameRecord(gameRecord);
-                ++numProcessed;
-                if (numProcessed % 1000 == 0) {
-                    LOGGER.info("\tprocessed " + numProcessed + " / " + numPositions);
-                }
-            }
+            gameRecords.forEach(this::processGameRecord);
             gameRecords = tunerDatasource.getGameRecords(true);
         }
 
-        double averageError = tunerDatasource.getAverageError();
-        LOGGER.info("average error: " + averageError);
-
         Globals.setEvalTermsVector(originalVector);
 
-        return averageError;
+        return tunerDatasource.getAverageError();
     }
 
     private void processGameRecord(GameRecord gameRecord) {

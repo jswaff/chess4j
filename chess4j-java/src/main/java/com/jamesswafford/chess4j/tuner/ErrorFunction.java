@@ -10,7 +10,7 @@ import com.jamesswafford.chess4j.utils.GameResult;
 public class ErrorFunction {
 
     private Search search;
-    private double k = -1.13; // from Texel
+    private double k = -1.13; // TODO: from Texel.  Compute a k to minimize E
 
     public ErrorFunction() {
         search = new AlphaBetaSearch();
