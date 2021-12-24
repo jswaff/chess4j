@@ -1,7 +1,6 @@
 package com.jamesswafford.chess4j.tuner;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -19,7 +18,6 @@ public class LogisticRegressionTunerTest {
         tuner = new LogisticRegressionTuner(tunerDatasource);
     }
 
-    @Ignore
     @Test
     public void optimizeTest() {
         tuner.optimize();

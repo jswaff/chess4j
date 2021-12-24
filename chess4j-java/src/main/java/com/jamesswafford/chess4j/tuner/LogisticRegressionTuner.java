@@ -17,12 +17,12 @@ public class LogisticRegressionTuner {
 
     private static final Logger LOGGER = LogManager.getLogger(LogisticRegressionTuner.class);
 
-    private final TunerDatasource tunerDatasource;
     private final ErrorFunction errorFunction;
+    private final List<GameRecord> gameRecords;
 
     public LogisticRegressionTuner(TunerDatasource tunerDatasource) {
-        this.tunerDatasource = tunerDatasource;
         this.errorFunction = new ErrorFunction();
+        this.gameRecords = tunerDatasource.getGameRecords(false);
     }
 
     public EvalTermsVector optimize() {
@@ -75,7 +75,7 @@ public class LogisticRegressionTuner {
                 e.printStackTrace();
             }
 
-        } while (numParamsImproved == 0);
+        } while (numParamsImproved > 0);
 
 
         return bestVector;
@@ -85,22 +85,16 @@ public class LogisticRegressionTuner {
         EvalTermsVector originalVector = Globals.getEvalTermsVector();
         Globals.setEvalTermsVector(evalTermsVector);
 
-        tunerDatasource.markAllRecordsAsUnprocessed();
-        List<GameRecord> gameRecords = tunerDatasource.getGameRecords(true);
-
-        while (gameRecords.size() > 0) {
-            gameRecords.forEach(this::processGameRecord);
-            gameRecords = tunerDatasource.getGameRecords(true);
+        double totalError = 0;
+        for (GameRecord gameRecord : gameRecords) {
+            Board board = new Board(gameRecord.getFen());
+            double error = errorFunction.calculateError(board, gameRecord.getGameResult());
+            totalError += error;
         }
 
         Globals.setEvalTermsVector(originalVector);
 
-        return tunerDatasource.getAverageError();
+        return totalError / gameRecords.size();
     }
 
-    private void processGameRecord(GameRecord gameRecord) {
-        Board board = new Board(gameRecord.getFen());
-        double error = errorFunction.calculateError(board, gameRecord.getGameResult());
-        tunerDatasource.updateError(gameRecord.getFen(), (float)error); // sets "processed" flag
-    }
 }
