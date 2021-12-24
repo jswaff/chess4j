@@ -35,6 +35,8 @@ public class LogisticRegressionTuner {
     }
 
     public EvalTermsVector optimize(EvalTermsVector evalTermsVector) {
+        boolean pawnHashEnabled = Globals.isPawnHashEnabled();
+        Globals.setPawnHashEnabled(false);
         int numParams = evalTermsVector.terms.length;
         double bestError = calculateAverageError(evalTermsVector);
         LOGGER.info("initial E: " + bestError);
@@ -68,6 +70,10 @@ public class LogisticRegressionTuner {
             // write to file in case execution is interrupted
             writeVectorToTempProperties(bestVector);
         } while (numParamsImproved > 0);
+
+        // restore the pawn hash setting
+        Globals.setPawnHashEnabled(pawnHashEnabled);
+
         return bestVector;
     }
 

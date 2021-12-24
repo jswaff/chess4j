@@ -134,15 +134,19 @@ public final class Eval implements Evaluator {
     private static int evalPawns(EvalTermsVector etv, Board board) {
 
         // try the pawn hash
-        PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board.getPawnKey());
-        if (pte != null) {
-            assert(pte.getScore() == evalPawnsNoHash(etv, board));
-            return pte.getScore();
+        if (Globals.isPawnHashEnabled()) {
+            PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board.getPawnKey());
+            if (pte != null) {
+                assert (pte.getScore() == evalPawnsNoHash(etv, board));
+                return pte.getScore();
+            }
         }
 
         int score = evalPawnsNoHash(etv, board);
 
-        TTHolder.getInstance().getPawnHashTable().store(board.getPawnKey(), score);
+        if (Globals.isPawnHashEnabled()) {
+            TTHolder.getInstance().getPawnHashTable().store(board.getPawnKey(), score);
+        }
 
         return score;
     }

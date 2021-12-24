@@ -18,6 +18,8 @@ public class Globals {
     private static OpeningBook openingBook;
     private static TunerDatasource tunerDatasource;
 
+    private static boolean pawnHashEnabled = true;
+
     public static Board getBoard() {
         return board;
     }
@@ -49,4 +51,14 @@ public class Globals {
     public static void setTunerDatasource(TunerDatasource tunerDatasource) {
         Globals.tunerDatasource = tunerDatasource;
     }
+
+    public static boolean isPawnHashEnabled() {
+        return pawnHashEnabled;
+    }
+
+    public static void setPawnHashEnabled(boolean pawnHashEnabled) {
+        Globals.pawnHashEnabled = pawnHashEnabled;
+    }
+
+
 }
