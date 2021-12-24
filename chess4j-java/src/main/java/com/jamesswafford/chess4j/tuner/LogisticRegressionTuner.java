@@ -3,15 +3,10 @@ package com.jamesswafford.chess4j.tuner;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.eval.EvalTermsVector;
-import com.jamesswafford.chess4j.io.EvalTermsVectorUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
-import java.util.Properties;
 
 public class LogisticRegressionTuner {
 
@@ -46,7 +41,6 @@ public class LogisticRegressionTuner {
             ++numIterations;
             numParamsImproved = 0;
             for (int i=0;i<numParams;i++) {
-                LOGGER.info("\toptimizing parameter " + (i+1) + " / " + numParams);
                 EvalTermsVector searchVector = new EvalTermsVector(bestVector);
                 searchVector.terms[i] = searchVector.terms[i] + 1;
                 double searchE = calculateAverageError(searchVector);
@@ -65,15 +59,6 @@ public class LogisticRegressionTuner {
                 }
             }
             LOGGER.info("iteration " + numIterations + ": bestE=" + bestE + ", numParamsImproved=" + numParamsImproved);
-
-            // write to a temporary properties file
-            Properties props = EvalTermsVectorUtil.toProperties(bestVector);
-            LOGGER.info(props);
-            try (OutputStream output = new FileOutputStream("temp-eval.properties")) {
-                props.store(output, null);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
         } while (numParamsImproved > 0);
 
