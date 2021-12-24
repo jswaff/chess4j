@@ -43,7 +43,7 @@ public class Tuner {
         EvalTermsVector bestVector = new EvalTermsVector(evalTermsVector);
         int numIterations = 0;
         int numParamsImproved;
-        long startTime, totalTime;
+        long startTime, totalSeconds;
 
         do {
             startTime = System.currentTimeMillis();
@@ -67,8 +67,8 @@ public class Tuner {
                     }
                 }
             }
-            totalTime = System.currentTimeMillis() - startTime;
-            LOGGER.info("iteration " + numIterations + ": time=" + (totalTime/3600) + "m " + (totalTime%3600) + "s, " +
+            totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
+            LOGGER.info("iteration " + numIterations + ": time=" + (totalSeconds/60) + "m " + (totalSeconds%60) + "s, " +
                     "E=" + bestError + ", numParamsImproved=" + numParamsImproved);
 
             // write to file in case execution is interrupted
