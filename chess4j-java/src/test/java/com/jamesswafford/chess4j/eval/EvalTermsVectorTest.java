@@ -11,8 +11,8 @@ public class EvalTermsVectorTest {
     @Test
     public void testGetVal() {
         EvalTermsVector etv = new EvalTermsVector();
-        assertEquals(25, etv.terms[EvalTermsVector.ROOK_OPEN_FILE_IND]);
-        assertEquals(List.of(25), etv.getVals("ROOK_OPEN_FILE"));
+        assertEquals(24, etv.terms[EvalTermsVector.ROOK_OPEN_FILE_IND]);
+        assertEquals(List.of(24), etv.getVals("ROOK_OPEN_FILE"));
 
         assertEquals(64, etv.getVals("ROOK_PST").size());
     }

@@ -10,10 +10,11 @@ import java.util.stream.Collectors;
 public class EvalTermsVector {
 
     public int[] terms = new int[] {
-            -10,  // KING_SAFETY_PAWN_ONE_AWAY
-            -20,  // KING_SAFETY_PAWN_TWO_AWAY
-            -30,  // KING_SAFETY_PAWN_FAR_AWAY
-            -50,  // KING_SAFETY_MIDDLE_OPEN_FILE
+              2,  // KING_SAFETY_PAWN_ONE_AWAY
+            -31,  // KING_SAFETY_PAWN_TWO_AWAY
+            -31,  // KING_SAFETY_PAWN_FAR_AWAY
+            -79,  // KING_SAFETY_MIDDLE_OPEN_FILE
+
             -30,-30,-30,-30,-30,-30,-30,-30,    // KING_PST
             -30,-30,-30,-30,-30,-30,-30,-30,
             -30,-30,-30,-30,-30,-30,-30,-30,
@@ -22,6 +23,7 @@ public class EvalTermsVector {
             -20,-20,-20,-20,-20,-20,-20,-20,
             -10,-10,-10,-10,-10,-10,-10,-10,
               0, 10, 20,-25,  0,-25, 20,  0,
+
               0,  0,  0,  0,  0,  0,  0,  0,    // KING_ENDGAME_PST
               0, 10, 10, 10, 10, 10, 10,  0,
               0, 10, 20, 20, 20, 20, 10,  0,
@@ -30,6 +32,7 @@ public class EvalTermsVector {
               0, 10, 20, 20, 20, 20, 10,  0,
               0, 10, 10, 10, 10, 10, 10,  0,
               0,  0,  0,  0,  0,  0,  0,  0,
+
               0,  0,  0,  0,  0,  0,  0,  0,     // BISHOP_PST
               0,  7,  7,  7,  7,  7,  7,  0,
               0,  7, 15, 15, 15, 15,  7,  0,
@@ -38,6 +41,7 @@ public class EvalTermsVector {
               0,  7, 15, 15, 15, 15,  7,  0,
               0,  7,  7,  7,  7,  7,  7,  0,
               0,  0,  0,  0,  0,  0,  0,  0,
+
              -5, -5, -5, -5, -5, -5, -5, -5,     // KNIGHT_PST
              -5,  0, 10, 10, 10, 10,  0, -5,
              -5,  0, 15, 20, 20, 15,  0, -5,
@@ -46,7 +50,9 @@ public class EvalTermsVector {
              -5,  0,  8,  0,  0,  8,  0, -5,
              -5,  0,  0,  5,  5,  0,  0, -5,
             -10,-10, -5, -5, -5, -5,-10,-10,
-             -2,  // KNIGHT TROPISM
+
+             -3,  // KNIGHT TROPISM
+
               0,  0,  0,  0,  0,  0,  0,  0,      // ROOK_PST
               0,  0,  0,  0,  0,  0,  0,  0,
              -5,  0,  0,  0,  0,  0,  0, -5,
@@ -55,8 +61,10 @@ public class EvalTermsVector {
              -5,  0,  0,  0,  0,  0,  0, -5,
              -5,  0,  0,  0,  0,  0,  0, -5,
               0,  0,  0,  0,  0,  0,  0,  0,
-             25,  // ROOK_OPEN_FILE
-             15,  // ROOK_HALF_OPEN_FILE
+
+             24,  // ROOK_OPEN_FILE
+             13,  // ROOK_HALF_OPEN_FILE
+
              -1, -1, -1, -1, -1, -1, -1, -1,     // QUEEN_PST
              -1,  0,  0,  0,  0,  0,  0, -1,
              -1,  0,  1,  1,  1,  1,  0, -1,
@@ -65,8 +73,10 @@ public class EvalTermsVector {
              -1,  0,  1,  1,  1,  1,  0, -1,
              -1,  0,  0,  0,  0,  0,  0, -1,
              -1, -1, -1, -1, -1, -1, -1, -1,
-             50,  // MAJOR_ON_7TH
-             80,  // CONNECTED_MAJORS_ON_7TH
+
+              6,  // MAJOR_ON_7TH
+             40,  // CONNECTED_MAJORS_ON_7TH
+
               0,  0,  0,  0,  0,  0,  0,  0,     // PAWN_PST
              30, 30, 30, 30, 30, 30, 30, 30,
              14, 14, 14, 18, 18, 14, 14, 14,
@@ -75,9 +85,10 @@ public class EvalTermsVector {
               3,  3,  3,  5,  5,  3,  3,  3,
               0,  0,  0, -3, -3,  0,  0,  0,
               0,  0,  0,  0,  0,  0,  0,  0,
-             20,  // PASSED_PAWN
-            -20,  // ISOLATED_PAWN
-            -10   // DOUBLED_PAWN
+
+             35,  // PASSED_PAWN
+            -13,  // ISOLATED_PAWN
+            - 4   // DOUBLED_PAWN
     };
 
     public static final int KING_SAFETY_PAWN_ONE_AWAY_IND = 0;
