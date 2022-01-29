@@ -76,16 +76,28 @@ public final class Eval implements Evaluator {
         int egScore = matScore;
 
         mgScore += evalPawns(etv, board, false);
+        egScore += evalPawns(etv, board, true);
+
         mgScore += evalPieces(etv, board.getWhiteKnights(), board, false, EvalKnight::evalKnight)
                 - evalPieces(etv, board.getBlackKnights(), board, false, EvalKnight::evalKnight);
+        egScore += evalPieces(etv, board.getWhiteKnights(), board, true, EvalKnight::evalKnight)
+                - evalPieces(etv, board.getBlackKnights(), board, true, EvalKnight::evalKnight);
+
         mgScore += evalPieces(etv, board.getWhiteBishops(), board, false, EvalBishop::evalBishop)
                 - evalPieces(etv, board.getBlackBishops(), board, false, EvalBishop::evalBishop);
+        egScore += evalPieces(etv, board.getWhiteBishops(), board, true, EvalBishop::evalBishop)
+                - evalPieces(etv, board.getBlackBishops(), board, true, EvalBishop::evalBishop);
+
         mgScore += evalPieces(etv, board.getWhiteRooks(), board, false, EvalRook::evalRook)
                 - evalPieces(etv, board.getBlackRooks(), board, false, EvalRook::evalRook);
+        egScore += evalPieces(etv, board.getWhiteRooks(), board, true, EvalRook::evalRook)
+                - evalPieces(etv, board.getBlackRooks(), board, true, EvalRook::evalRook);
+
         mgScore += evalPieces(etv, board.getWhiteQueens(), board, false, EvalQueen::evalQueen)
                 - evalPieces(etv, board.getBlackQueens(), board, false, EvalQueen::evalQueen);
+        egScore += evalPieces(etv, board.getWhiteQueens(), board, true, EvalQueen::evalQueen)
+                - evalPieces(etv, board.getBlackQueens(), board, true, EvalQueen::evalQueen);
 
-        egScore = mgScore;
         mgScore += evalKing(etv, board, board.getKingSquare(Color.WHITE), false)
                 - evalKing(etv, board, board.getKingSquare(Color.BLACK), false);
         egScore += evalKing(etv, board, board.getKingSquare(Color.WHITE), true)
