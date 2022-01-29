@@ -20,10 +20,10 @@ public class EvalKnightTest {
         board.resetBoard();
 
         assertEquals(etv.terms[KNIGHT_PST_IND + B1.value()] + etv.terms[KNIGHT_TROPISM_IND] * B1.distance(E8),
-                evalKnight(etv, board, B1));
+                evalKnight(etv, board, B1, false));
 
         // test the symmetry
-        assertEquals(evalKnight(etv, board, B1), evalKnight(etv, board, B8));
+        assertEquals(evalKnight(etv, board, B1, false), evalKnight(etv, board, B8, false));
     }
 
 }

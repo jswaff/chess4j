@@ -10,7 +10,7 @@ import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
 
 public class EvalRook {
 
-    public static int evalRook(EvalTermsVector etv, Board board, Square sq) {
+    public static int evalRook(EvalTermsVector etv, Board board, Square sq, boolean endgame) {
         boolean isWhite = board.getPiece(sq).isWhite();
         int score = etv.terms[ROOK_PST_IND + (isWhite?sq.value():sq.flipVertical().value())];
         score += evalMajorOn7th(etv, board, isWhite, sq);

@@ -19,10 +19,10 @@ public class EvalBishopTest {
 
         Board board = new Board();
 
-        assertEquals(etv.terms[BISHOP_PST_IND + C1.value()], evalBishop(etv, board, C1));
+        assertEquals(etv.terms[BISHOP_PST_IND + C1.value()], evalBishop(etv, board, C1, false));
 
         // test the symmetry
-        assertEquals(evalBishop(etv, board, C1), evalBishop(etv, board, C8));
+        assertEquals(evalBishop(etv, board, C1, false), evalBishop(etv, board, C8, false));
     }
 
 }

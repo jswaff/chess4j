@@ -8,7 +8,7 @@ import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
 
 public class EvalKnight {
 
-    public static int evalKnight(EvalTermsVector etv, Board board, Square sq) {
+    public static int evalKnight(EvalTermsVector etv, Board board, Square sq, boolean endgame) {
         int score = 0;
 
         if (board.getPiece(sq).isWhite()) {

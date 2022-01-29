@@ -7,7 +7,7 @@ import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
 
 public class EvalPawn {
 
-    public static int evalPawn(EvalTermsVector etv, Board board, Square sq) {
+    public static int evalPawn(EvalTermsVector etv, Board board, Square sq, boolean endgame) {
         int score=0;
 
         boolean isWhite = board.getPiece(sq).isWhite();
