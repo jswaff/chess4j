@@ -37,8 +37,8 @@ public class EvalTermsVectorUtilTest {
             Properties props = new Properties();
             props.load(fis);
             EvalTermsVector etv = EvalTermsVectorUtil.toVector(props);
-            assertEquals(25, etv.terms[EvalTermsVector.MAJOR_ON_7TH_IND]);
-            assertEquals(-2, etv.terms[EvalTermsVector.QUEEN_PST_IND+1]);
+            assertEquals(6, etv.terms[EvalTermsVector.MAJOR_ON_7TH_IND]);
+            assertEquals(49, etv.terms[EvalTermsVector.QUEEN_PST_IND+1]);
         }
     }
 

@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.io;
 
 import com.jamesswafford.chess4j.eval.EvalTermsVector;
 
+import java.io.FileOutputStream;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -33,5 +34,11 @@ public class EvalTermsVectorUtil {
         });
 
         return etv;
+    }
+
+    public static void main(String[] args) throws Exception {
+        Properties props = EvalTermsVectorUtil.toProperties(new EvalTermsVector());
+        System.out.println(props);
+        props.store(new FileOutputStream("test.properties"), null);
     }
 }

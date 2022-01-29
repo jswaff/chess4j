@@ -15,6 +15,8 @@ public class EvalTermsVectorTest {
         assertEquals(List.of(24), etv.getVals("ROOK_OPEN_FILE"));
 
         assertEquals(64, etv.getVals("ROOK_PST").size());
+
+        assertEquals(List.of(-4), etv.getVals("DOUBLED_PAWN"));
     }
 
     @Test
