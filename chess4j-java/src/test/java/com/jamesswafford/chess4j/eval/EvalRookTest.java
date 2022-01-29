@@ -28,6 +28,17 @@ public class EvalRookTest {
     }
 
     @Test
+    public void testEvalRook_endGame() {
+
+        board.resetBoard();
+
+        assertEquals(etv.terms[ROOK_ENDGAME_PST_IND + A1.value()], evalRook(etv, board, A1, true));
+
+        // test the symmetry
+        assertEquals(evalRook(etv, board, A1, true), evalRook(etv, board, A8, true));
+    }
+
+    @Test
     public void testEvalRook_bankRankMate() {
 
         board.setPos("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");

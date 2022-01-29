@@ -12,7 +12,20 @@ public class EvalRook {
 
     public static int evalRook(EvalTermsVector etv, Board board, Square sq, boolean endgame) {
         boolean isWhite = board.getPiece(sq).isWhite();
-        int score = etv.terms[ROOK_PST_IND + (isWhite?sq.value():sq.flipVertical().value())];
+        int score;
+        if (isWhite) {
+            if (endgame) {
+                score = etv.terms[ROOK_ENDGAME_PST_IND + sq.value()];
+            } else {
+                score = etv.terms[ROOK_PST_IND + sq.value()];
+            }
+        } else {
+            if (endgame) {
+                score = etv.terms[ROOK_ENDGAME_PST_IND + sq.flipVertical().value()];
+            } else {
+                score = etv.terms[ROOK_PST_IND + sq.flipVertical().value()];
+            }
+        }
         score += evalMajorOn7th(etv, board, isWhite, sq);
         score += evalRookOpenFile(etv, board, isWhite, sq);
         return score;

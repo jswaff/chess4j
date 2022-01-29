@@ -19,11 +19,22 @@ public class EvalKnightTest {
     public void testEvalKnight() {
         board.resetBoard();
 
-        assertEquals(etv.terms[KNIGHT_PST_IND + B1.value()] + etv.terms[KNIGHT_TROPISM_IND] * B1.distance(E8),
+        assertEquals(etv.terms[KNIGHT_PST_IND + B1.value()] + (long) etv.terms[KNIGHT_TROPISM_IND] * B1.distance(E8),
                 evalKnight(etv, board, B1, false));
 
         // test the symmetry
         assertEquals(evalKnight(etv, board, B1, false), evalKnight(etv, board, B8, false));
+    }
+
+    @Test
+    public void testEvalKnight_endGame() {
+        board.resetBoard();
+
+        assertEquals(etv.terms[KNIGHT_ENDGAME_PST_IND + B1.value()] + (long) etv.terms[KNIGHT_TROPISM_IND] * B1.distance(E8),
+                evalKnight(etv, board, B1, true));
+
+        // test the symmetry
+        assertEquals(evalKnight(etv, board, B1, true), evalKnight(etv, board, B8, true));
     }
 
 }

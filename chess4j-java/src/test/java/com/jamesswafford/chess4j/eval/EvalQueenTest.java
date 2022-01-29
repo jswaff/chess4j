@@ -27,6 +27,17 @@ public class EvalQueenTest {
     }
 
     @Test
+    public void testEvalQueen_endGame() {
+
+        board.resetBoard();
+
+        assertEquals(etv.terms[QUEEN_ENDGAME_PST_IND + D1.value()], evalQueen(etv, board, D1, true));
+
+        // test symmetry
+        assertEquals(evalQueen(etv, board, D1, true), evalQueen(etv, board, D8, true));
+    }
+
+    @Test
     public void testEvalQueen_bankRankMate() {
 
         board.setPos("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");

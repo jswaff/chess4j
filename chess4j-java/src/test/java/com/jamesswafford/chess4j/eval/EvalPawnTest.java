@@ -27,6 +27,17 @@ public class EvalPawnTest {
     }
 
     @Test
+    public void testEvalPawn_endGame() {
+
+        board.resetBoard();
+
+        assertEquals(etv.terms[PAWN_ENDGAME_PST_IND + E2.value()], evalPawn(etv, board, E2, true));
+
+        // test the symmetry
+        assertEquals(evalPawn(etv, board, E2, true), evalPawn(etv, board, E7, true));
+    }
+
+    @Test
     public void testEvalPawn_wiki3() {
 
         board.setPos("8/8/1PP2PbP/3r4/8/1Q5p/p5N1/k3K3 b - - 0 1");
