@@ -8,14 +8,22 @@ import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
 
 public class EvalKnight {
 
-    public static int evalKnight(EvalTermsVector etv, Board board, Square sq) {
-        int score = 0;
+    public static int evalKnight(EvalTermsVector etv, Board board, Square sq, boolean endgame) {
+        int score;
 
         if (board.getPiece(sq).isWhite()) {
-            score = etv.terms[KNIGHT_PST_IND + sq.value()];
+            if (endgame) {
+                score = etv.terms[KNIGHT_ENDGAME_PST_IND + sq.value()];
+            } else {
+                score = etv.terms[KNIGHT_PST_IND + sq.value()];
+            }
             score += etv.terms[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.BLACK));
         } else {
-            score = etv.terms[KNIGHT_PST_IND + sq.flipVertical().value()];
+            if (endgame) {
+                score = etv.terms[KNIGHT_ENDGAME_PST_IND + sq.flipVertical().value()];
+            } else {
+                score = etv.terms[KNIGHT_PST_IND + sq.flipVertical().value()];
+            }
             score += etv.terms[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.WHITE));
         }
 

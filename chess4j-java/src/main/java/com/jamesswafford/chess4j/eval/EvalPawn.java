@@ -7,12 +7,24 @@ import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
 
 public class EvalPawn {
 
-    public static int evalPawn(EvalTermsVector etv, Board board, Square sq) {
-        int score=0;
-
+    public static int evalPawn(EvalTermsVector etv, Board board, Square sq, boolean endgame) {
         boolean isWhite = board.getPiece(sq).isWhite();
 
-        score += etv.terms[PAWN_PST_IND + (isWhite ? sq.value() : sq.flipVertical().value())];
+        int score;
+        if (isWhite) {
+            if (endgame) {
+                score = etv.terms[PAWN_ENDGAME_PST_IND + sq.value()];
+            } else {
+                score = etv.terms[PAWN_PST_IND + sq.value()];
+            }
+        } else {
+            if (endgame) {
+                score = etv.terms[PAWN_ENDGAME_PST_IND + sq.flipVertical().value()];
+            } else {
+                score = etv.terms[PAWN_PST_IND + sq.flipVertical().value()];
+            }
+        }
+
         if (PawnUtils.isPassedPawn(board, sq, isWhite)) {
             score += etv.terms[PASSED_PAWN_IND];
         }

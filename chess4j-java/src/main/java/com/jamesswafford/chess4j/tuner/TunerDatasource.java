@@ -19,15 +19,15 @@ public interface TunerDatasource {
 
     void insert(String fen, PGNResult pgnResult);
 
-    void update(String fen, int evalDepth, float evalScore);
+    void updateGameDepthAndScore(String fen, int evalDepth, float evalScore);
 
     long getTotalPositionsCount();
 
     long getFenCount(String fen);
 
-    int getEvalDepth(String fen);
+    GameRecord getGameRecord(String fen);
 
-    float getEvalScore(String fen);
+    List<GameRecord> getGameRecords();
 
     default void addFile(File pgnFile) {
         try {
@@ -58,7 +58,7 @@ public interface TunerDatasource {
                 if (gameMove.getNag() != null) {
                     CutechessNagParser cutechessNagParser = new CutechessNagParser(gameMove.getNag());
                     if (cutechessNagParser.isValid()) {
-                        update(fen, cutechessNagParser.depth(), cutechessNagParser.score());
+                        updateGameDepthAndScore(fen, cutechessNagParser.depth(), cutechessNagParser.score());
                     }
                 }
             }

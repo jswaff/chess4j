@@ -1,12 +1,17 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
+import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.io.PGNResult;
+import com.jamesswafford.chess4j.utils.GameResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SQLiteTunerDatasource implements TunerDatasource {
 
@@ -45,7 +50,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     public void initializeDatasource() {
         try {
             Statement stmt = conn.createStatement();
-            stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer, processed integer, " +
+            stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer, " +
                     "eval_depth integer, eval_score real)");
             stmt.execute("create index idx_tuner_pos_fen on tuner_pos(fen)");
             stmt.close();
@@ -69,7 +74,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
             }
 
             try {
-                String sql = "insert into tuner_pos(fen, outcome, processed) values (? ,?, 0)";
+                String sql = "insert into tuner_pos(fen, outcome) values (? ,?)";
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ps.setString(1, fen);
                 ps.setInt(2, outcome);
@@ -82,11 +87,11 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     }
 
     @Override
-    public void update(String fen, int evalDepth, float evalScore) {
-        int currentDepth = getEvalDepth(fen);
-        if (evalDepth >= currentDepth) {
-            String qry = "update tuner_pos set eval_depth=?, eval_score=? where fen = ?";
+    public void updateGameDepthAndScore(String fen, int evalDepth, float evalScore) {
+        GameRecord gameRecord = getGameRecord(fen);
+        if (evalDepth >= gameRecord.getEvalDepth()) {
 
+            String qry = "update tuner_pos set eval_depth=?, eval_score=? where fen = ?";
             try {
                 PreparedStatement ps = conn.prepareStatement(qry);
                 ps.setInt(1, evalDepth);
@@ -140,43 +145,67 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     }
 
     @Override
-    public int getEvalDepth(String fen) {
-        String sql = "select eval_depth from tuner_pos where fen = ?";
+    public GameRecord getGameRecord(String fen) {
 
-        int depth = 0;
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+        String sql = "select fen, outcome, eval_depth, eval_score from tuner_pos where fen = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, fen);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                depth = rs.getInt("eval_depth");
+                Board board = new Board(fen);
+                return GameRecord.builder()
+                        .fen(fen)
+                        .gameResult(mapOutcomeToGameResult(rs.getInt("outcome"), board.getPlayerToMove()))
+                        .evalDepth(rs.getInt("eval_depth"))
+                        .evalScore(rs.getFloat("eval_score"))
+                        .build();
+            } else {
+                throw new RuntimeException("Game record not found for fen " + fen);
             }
-            ps.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-        return depth;
     }
 
     @Override
-    public float getEvalScore(String fen) {
-        String sql = "select eval_score from tuner_pos where fen = ?";
+    public List<GameRecord> getGameRecords() {
+        List<GameRecord> gameRecords = new ArrayList<>();
 
-        float score = 0;
+        String sql = "select fen, outcome, eval_depth, eval_score from tuner_pos ";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, fen);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                score = rs.getFloat("eval_score");
+            while (rs.next()) {
+                String fen = rs.getString("fen");
+                Board board = new Board(fen);
+                GameRecord gameRecord = GameRecord.builder()
+                        .fen(fen)
+                        .gameResult(mapOutcomeToGameResult(rs.getInt("outcome"), board.getPlayerToMove()))
+                        .evalDepth(rs.getInt("eval_depth"))
+                        .evalScore(rs.getFloat("eval_score"))
+                        .build();
+                gameRecords.add(gameRecord);
             }
             ps.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
-        return score;
+        return gameRecords;
     }
 
+    private GameResult mapOutcomeToGameResult(int outcome, Color ptm) {
+        GameResult gameResult;
+        if (outcome==-1) {
+            gameResult = ptm.isBlack() ? GameResult.WIN : GameResult.LOSS;
+        } else if (outcome==0) {
+            gameResult = GameResult.DRAW;
+        } else if (outcome==1) {
+            gameResult = ptm.isWhite() ? GameResult.WIN : GameResult.LOSS;
+        } else {
+            throw new IllegalStateException("Outcome is invalid: " + outcome);
+        }
+        return gameResult;
+    }
 }

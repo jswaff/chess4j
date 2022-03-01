@@ -20,10 +20,21 @@ public class EvalQueenTest {
 
         board.resetBoard();
 
-        assertEquals(etv.terms[QUEEN_PST_IND + D1.value()], evalQueen(etv, board, D1));
+        assertEquals(etv.terms[QUEEN_PST_IND + D1.value()], evalQueen(etv, board, D1, false));
 
         // test symmetry
-        assertEquals(evalQueen(etv, board, D1), evalQueen(etv, board, D8));
+        assertEquals(evalQueen(etv, board, D1, false), evalQueen(etv, board, D8, false));
+    }
+
+    @Test
+    public void testEvalQueen_endGame() {
+
+        board.resetBoard();
+
+        assertEquals(etv.terms[QUEEN_ENDGAME_PST_IND + D1.value()], evalQueen(etv, board, D1, true));
+
+        // test symmetry
+        assertEquals(evalQueen(etv, board, D1, true), evalQueen(etv, board, D8, true));
     }
 
     @Test
@@ -33,6 +44,6 @@ public class EvalQueenTest {
 
         assertEquals(etv.terms[QUEEN_PST_IND + C7.value()] + etv.terms[MAJOR_ON_7TH_IND] +
                         etv.terms[CONNECTED_MAJORS_ON_7TH_IND],
-                evalQueen(etv, board, C7));
+                evalQueen(etv, board, C7, false));
     }
 }

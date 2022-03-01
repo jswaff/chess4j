@@ -7,11 +7,13 @@ import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.book.OpeningBook;
 import com.jamesswafford.chess4j.eval.Eval;
+import com.jamesswafford.chess4j.eval.EvalTermsVector;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
+import com.jamesswafford.chess4j.tuner.Tuner;
 import com.jamesswafford.chess4j.tuner.TunerDatasource;
 import com.jamesswafford.chess4j.utils.*;
 
@@ -54,6 +56,7 @@ public class XBoardHandler {
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
         put("easy", (String[] cmd) -> ponderingEnabled = false);
         put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getEvalTermsVector(), Globals.getBoard())));
+        put("eval2props", XBoardHandler.this::writeEvalProperties);
         put("exit",XBoardHandler.this::exit);
         put("force", XBoardHandler.this::force);
         put("go", XBoardHandler.this::go);
@@ -80,6 +83,7 @@ public class XBoardHandler {
         put("setboard", XBoardHandler.this::setboard);
         put("st", XBoardHandler.this::st);
         put("time", XBoardHandler.this::time);
+        put("tune", XBoardHandler.this::tuneEvalVector);
         put("undo", XBoardHandler.this::undo);
         put("usermove", XBoardHandler.this::usermove);
         put("xboard", XBoardHandler::noOp);
@@ -394,6 +398,21 @@ public class XBoardHandler {
         } else {
             searchIterator.setMaxTime(TimeUtils.getSearchTime(centis * 10, incrementMs));
         }
+    }
+
+    private void tuneEvalVector(String[] cmd) {
+        Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
+            Tuner tuner = new Tuner(tunerDatasource1);
+            EvalTermsVector optimizedVector = tuner.optimize();
+            EvalTermsVectorUtil.store(optimizedVector, "eval.properties");
+            Globals.setEvalTermsVector(optimizedVector);
+        }, () -> LOGGER.info("no tuner datasource"));
+    }
+
+    private void writeEvalProperties(String[] cmd) {
+        String propsFile = cmd[1];
+        LOGGER.info("writing eval to properties file {}", propsFile);
+        EvalTermsVectorUtil.store(Globals.getEvalTermsVector(), propsFile);
     }
 
     /**
