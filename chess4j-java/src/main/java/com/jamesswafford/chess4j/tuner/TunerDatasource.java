@@ -21,8 +21,6 @@ public interface TunerDatasource {
 
     void updateGameDepthAndScore(String fen, int evalDepth, float evalScore);
 
-    void updateError(String fen, float error);
-
     long getTotalPositionsCount();
 
     long getFenCount(String fen);
@@ -31,9 +29,7 @@ public interface TunerDatasource {
 
     float getEvalScore(String fen);
 
-    List<GameRecord> getGameRecords(boolean unprocessedOnly);
-
-    void markAllRecordsAsUnprocessed();
+    List<GameRecord> getGameRecords();
 
     default void addFile(File pgnFile) {
         try {

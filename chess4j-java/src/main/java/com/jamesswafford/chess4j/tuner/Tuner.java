@@ -18,7 +18,7 @@ public class Tuner {
 
     public Tuner(TunerDatasource tunerDatasource) {
         this.costFunction = new CostFunction();
-        this.gameRecords = tunerDatasource.getGameRecords(false);
+        this.gameRecords = tunerDatasource.getGameRecords();
     }
 
     public EvalTermsVector optimize() {
@@ -77,7 +77,7 @@ public class Tuner {
         return bestVector;
     }
 
-    public double calculateAverageError(EvalTermsVector evalTermsVector) {
+    private double calculateAverageError(EvalTermsVector evalTermsVector) {
         EvalTermsVector originalVector = Globals.getEvalTermsVector();
         Globals.setEvalTermsVector(evalTermsVector);
 

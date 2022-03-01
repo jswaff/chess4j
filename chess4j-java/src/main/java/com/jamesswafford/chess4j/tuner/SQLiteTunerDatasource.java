@@ -49,7 +49,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     public void initializeDatasource() {
         try {
             Statement stmt = conn.createStatement();
-            stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer, processed integer, " +
+            stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer, " +
                     "eval_depth integer, eval_score real, error real)");
             stmt.execute("create index idx_tuner_pos_fen on tuner_pos(fen)");
             stmt.close();
@@ -73,7 +73,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
             }
 
             try {
-                String sql = "insert into tuner_pos(fen, outcome, processed) values (? ,?, 0)";
+                String sql = "insert into tuner_pos(fen, outcome) values (? ,?)";
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ps.setString(1, fen);
                 ps.setInt(2, outcome);
@@ -101,21 +101,6 @@ public class SQLiteTunerDatasource implements TunerDatasource {
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-        }
-    }
-
-    @Override
-    public void updateError(String fen, float error) {
-        String qry = "update tuner_pos set error=?, processed=1 where fen=?";
-
-        try {
-            PreparedStatement ps = conn.prepareStatement(qry);
-            ps.setFloat(1, error);
-            ps.setString(2, fen);
-            ps.executeUpdate();
-            ps.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -199,13 +184,10 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     }
 
     @Override
-    public List<GameRecord> getGameRecords(boolean unprocessedOnly) {
+    public List<GameRecord> getGameRecords() {
         List<GameRecord> gameRecords = new ArrayList<>();
 
-        String sql = "select fen, outcome, processed, eval_depth, eval_score from tuner_pos ";
-        if (unprocessedOnly) {
-            sql += "where processed = 0";
-        }
+        String sql = "select fen, outcome, eval_depth, eval_score from tuner_pos ";
 
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -227,7 +209,6 @@ public class SQLiteTunerDatasource implements TunerDatasource {
                 GameRecord gameRecord = GameRecord.builder()
                         .fen(fen)
                         .gameResult(gameResult)
-                        .processed(rs.getInt("processed")==1)
                         .evalDepth(rs.getInt("eval_depth"))
                         .evalScore(rs.getFloat("eval_score"))
                         .build();
@@ -239,19 +220,6 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         }
 
         return gameRecords;
-    }
-
-    @Override
-    public void markAllRecordsAsUnprocessed() {
-        String qry = "update tuner_pos set processed=0";
-
-        try {
-            PreparedStatement ps = conn.prepareStatement(qry);
-            ps.executeUpdate();
-            ps.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }

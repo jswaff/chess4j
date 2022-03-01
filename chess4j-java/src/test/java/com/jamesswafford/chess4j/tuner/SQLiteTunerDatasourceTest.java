@@ -60,11 +60,10 @@ public class SQLiteTunerDatasourceTest {
         String fen = FenBuilder.createFen(board, false);
         tunerDatasource.insert(fen, PGNResult.WHITE_WINS);
         assertEquals(1, tunerDatasource.getTotalPositionsCount());
-        List<GameRecord> gameRecords = tunerDatasource.getGameRecords(false);
+        List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
         assertEquals(1, gameRecords.size());
         assertEquals(fen, gameRecords.get(0).getFen());
         assertEquals(GameResult.WIN, gameRecords.get(0).getGameResult());
-        assertFalse(gameRecords.get(0).getProcessed());
         assertEquals(Integer.valueOf(0), gameRecords.get(0).getEvalDepth());
         assertEquals(Float.valueOf(0), gameRecords.get(0).getEvalScore());
 
@@ -72,11 +71,11 @@ public class SQLiteTunerDatasourceTest {
         String fen2 = FenBuilder.createFen(board, false);
         tunerDatasource.insert(fen2, PGNResult.WHITE_WINS);
         assertEquals(2, tunerDatasource.getTotalPositionsCount());
-        GameRecord gr2 = tunerDatasource.getGameRecords(true).stream()
+        GameRecord gr2 = tunerDatasource.getGameRecords().stream()
                         .filter(gr -> fen2.equals(gr.getFen())).findFirst().get();
         assertEquals(GameResult.LOSS, gr2.getGameResult());
 
-        assertEquals(2, tunerDatasource.getGameRecords(true).size());
+        assertEquals(2, tunerDatasource.getGameRecords().size());
     }
 
     @Test
