@@ -181,64 +181,6 @@ public class SQLiteTunerDatasourceTest {
         assertTrue(evalScore > -2.65001);
     }
 
-    @Test
-    public void averageError() {
-        assertEquals(0, tunerDatasource.getTotalPositionsCount());
-
-        Board board = new Board();
-        String fen = FenBuilder.createFen(board, false);
-        tunerDatasource.insert(fen, PGNResult.WHITE_WINS);
-
-        board.applyMove(new Move(Pawn.WHITE_PAWN, Square.E2, Square.E4));
-        String fen2 = FenBuilder.createFen(board, false);
-        tunerDatasource.insert(fen2, PGNResult.WHITE_WINS);
-
-        board.applyMove(new Move(Pawn.BLACK_PAWN, Square.E7, Square.E5));
-        String fen3 = FenBuilder.createFen(board, false);
-        tunerDatasource.insert(fen3, PGNResult.WHITE_WINS);
-
-        assertEquals(3, tunerDatasource.getTotalPositionsCount());
-
-        // all records should be unprocessed
-        assertEquals(3, tunerDatasource.getGameRecords(true).size());
-
-        // set the error for the first position
-        tunerDatasource.updateError(fen, 0.25F);
-        assertDoubleEquals(tunerDatasource.getAverageError(), 0.25F);
-        assertEquals(2, tunerDatasource.getGameRecords(true).size());
-        assertEquals(3, tunerDatasource.getGameRecords(false).size());
-
-        // set the error for the second position
-        tunerDatasource.updateError(fen2, 0.03F);
-        assertDoubleEquals(tunerDatasource.getAverageError(), 0.14F);
-        assertEquals(1, tunerDatasource.getGameRecords(true).size());
-        assertEquals(3, tunerDatasource.getGameRecords(false).size());
-
-        // set the error function for the third position
-        tunerDatasource.updateError(fen3, 0.02F);
-        assertDoubleEquals(tunerDatasource.getAverageError(), 0.10F);
-        assertEquals(0, tunerDatasource.getGameRecords(true).size());
-        assertEquals(3, tunerDatasource.getGameRecords(false).size());
-
-        // update the error function for the third position (again)
-        tunerDatasource.updateError(fen3, 0.05F);
-        assertDoubleEquals(tunerDatasource.getAverageError(), 0.11F);
-        assertEquals(0, tunerDatasource.getGameRecords(true).size());
-        assertEquals(3, tunerDatasource.getGameRecords(false).size());
-
-        // set unprocessed
-        tunerDatasource.markAllRecordsAsUnprocessed();
-        assertEquals(3, tunerDatasource.getGameRecords(true).size());
-        assertEquals(3, tunerDatasource.getGameRecords(false).size());
-    }
-
-
-    private void assertDoubleEquals(double val, double expected) {
-        double epsilon = 0.0001;
-        assertTrue(val >= expected - epsilon);
-        assertTrue(val <= expected + epsilon);
-    }
-
     private void populateTunerDatasource(String pgn) {
         File pgnFile = new File(SQLiteTunerDatasourceTest.class.getResource(pgn).getFile());
         tunerDatasource.addFile(pgnFile);

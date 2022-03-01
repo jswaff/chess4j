@@ -13,11 +13,11 @@ public class Tuner {
 
     private static final Logger LOGGER = LogManager.getLogger(Tuner.class);
 
-    private final ErrorFunction errorFunction;
+    private final CostFunction costFunction;
     private final List<GameRecord> gameRecords;
 
     public Tuner(TunerDatasource tunerDatasource) {
-        this.errorFunction = new ErrorFunction();
+        this.costFunction = new CostFunction();
         this.gameRecords = tunerDatasource.getGameRecords(false);
     }
 
@@ -84,7 +84,7 @@ public class Tuner {
         double totalError = 0;
         for (GameRecord gameRecord : gameRecords) {
             Board board = new Board(gameRecord.getFen());
-            double error = errorFunction.calculateError(board, gameRecord.getGameResult());
+            double error = costFunction.calculateCost(board, gameRecord.getGameResult());
             totalError += error;
         }
 

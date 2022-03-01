@@ -254,23 +254,4 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         }
     }
 
-    @Override
-    public float getAverageError() {
-        float avgError = 0.0F;
-        String sql = "select avg(error) avg_error from tuner_pos where processed=1";
-
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                avgError = rs.getFloat("avg_error");
-            }
-            ps.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        return avgError;
-    }
-
 }

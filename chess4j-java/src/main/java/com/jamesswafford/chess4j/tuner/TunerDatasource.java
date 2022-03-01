@@ -35,8 +35,6 @@ public interface TunerDatasource {
 
     void markAllRecordsAsUnprocessed();
 
-    float getAverageError();
-
     default void addFile(File pgnFile) {
         try {
             processPGNFile(pgnFile,true);
