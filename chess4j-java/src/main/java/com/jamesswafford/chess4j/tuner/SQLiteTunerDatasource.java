@@ -3,6 +3,8 @@ package com.jamesswafford.chess4j.tuner;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
+import com.jamesswafford.chess4j.exceptions.GameRecordNotFoundException;
+import com.jamesswafford.chess4j.exceptions.UncheckedSqlException;
 import com.jamesswafford.chess4j.io.PGNResult;
 import com.jamesswafford.chess4j.utils.GameResult;
 import org.apache.logging.log4j.LogManager;
@@ -55,7 +57,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
             stmt.execute("create index idx_tuner_pos_fen on tuner_pos(fen)");
             stmt.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedSqlException(e);
         }
     }
 
@@ -81,7 +83,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
                 ps.executeUpdate();
                 ps.close();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedSqlException(e);
             }
         }
     }
@@ -100,7 +102,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
                 ps.executeUpdate();
                 ps.close();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedSqlException(e);
             }
         }
     }
@@ -118,7 +120,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
             }
             ps.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedSqlException(e);
         }
 
         return cnt;
@@ -138,7 +140,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
             }
             ps.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedSqlException(e);
         }
 
         return cnt;
@@ -161,10 +163,10 @@ public class SQLiteTunerDatasource implements TunerDatasource {
                         .evalScore(rs.getFloat("eval_score"))
                         .build();
             } else {
-                throw new RuntimeException("Game record not found for fen " + fen);
+                throw new GameRecordNotFoundException("Game record not found for fen " + fen);
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedSqlException(e);
         }
     }
 
@@ -189,7 +191,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
             }
             ps.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedSqlException(e);
         }
 
         return gameRecords;
