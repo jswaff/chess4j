@@ -15,7 +15,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.util.Properties;
 
 public final class App {
     private static final  Logger LOGGER = LogManager.getLogger(App.class);
@@ -50,11 +49,7 @@ public final class App {
         } else if (arg.startsWith("-eval=")) {
             String path = arg.substring(6);
             LOGGER.info("loading eval properties from " + path);
-            try (FileInputStream fis = new FileInputStream(path)) {
-                Properties properties = new Properties();
-                properties.load(fis);
-                Globals.setEvalTermsVector(EvalTermsVectorUtil.toVector(properties));
-            }
+            Globals.setEvalTermsVector(EvalTermsVectorUtil.load(path));
         }
     }
 
