@@ -110,12 +110,12 @@ public class SQLiteTunerDatasourceTest {
         tunerDatasource.insert(fen, PGNResult.WHITE_WINS);
         assertEquals(1, tunerDatasource.getTotalPositionsCount());
 
-        assertEquals(0, tunerDatasource.getEvalDepth(fen));
+        assertEquals(Integer.valueOf(0), tunerDatasource.getGameRecord(fen).getEvalDepth());
 
         tunerDatasource.updateGameDepthAndScore(fen, 12, 9.30F);
 
-        assertEquals(12, tunerDatasource.getEvalDepth(fen));
-        float foundScore = tunerDatasource.getEvalScore(fen);
+        assertEquals(Integer.valueOf(12), tunerDatasource.getGameRecord(fen).getEvalDepth());
+        float foundScore = tunerDatasource.getGameRecord(fen).getEvalScore();
         assertTrue(foundScore > 9.29999);
         assertTrue(foundScore < 9.30001);
     }
@@ -174,8 +174,9 @@ public class SQLiteTunerDatasourceTest {
         board.applyMove(mp.parseMove("d4", board));
         String fen = createFen(board, false);
         assertEquals(1, tunerDatasource.getFenCount(fen));
-        assertEquals(14, tunerDatasource.getEvalDepth(fen));
-        float evalScore = tunerDatasource.getEvalScore(fen);
+        GameRecord gameRecord = tunerDatasource.getGameRecord(fen);
+        assertEquals(Integer.valueOf(14), gameRecord.getEvalDepth());
+        float evalScore = gameRecord.getEvalScore();
         assertTrue(evalScore < -2.64999);
         assertTrue(evalScore > -2.65001);
     }

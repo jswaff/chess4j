@@ -25,9 +25,7 @@ public interface TunerDatasource {
 
     long getFenCount(String fen);
 
-    int getEvalDepth(String fen);
-
-    float getEvalScore(String fen);
+    GameRecord getGameRecord(String fen);
 
     List<GameRecord> getGameRecords();
 

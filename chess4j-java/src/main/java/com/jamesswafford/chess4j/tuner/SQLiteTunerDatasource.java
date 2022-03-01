@@ -87,10 +87,10 @@ public class SQLiteTunerDatasource implements TunerDatasource {
 
     @Override
     public void updateGameDepthAndScore(String fen, int evalDepth, float evalScore) {
-        int currentDepth = getEvalDepth(fen);
-        if (evalDepth >= currentDepth) {
-            String qry = "update tuner_pos set eval_depth=?, eval_score=? where fen = ?";
+        GameRecord gameRecord = getGameRecord(fen);
+        if (evalDepth >= gameRecord.getEvalDepth()) {
 
+            String qry = "update tuner_pos set eval_depth=?, eval_score=? where fen = ?";
             try {
                 PreparedStatement ps = conn.prepareStatement(qry);
                 ps.setInt(1, evalDepth);
@@ -144,43 +144,38 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     }
 
     @Override
-    public int getEvalDepth(String fen) {
-        String sql = "select eval_depth from tuner_pos where fen = ?";
+    public GameRecord getGameRecord(String fen) {
 
-        int depth = 0;
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+        String sql = "select fen, outcome, eval_depth, eval_score from tuner_pos where fen = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, fen);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                depth = rs.getInt("eval_depth");
+                Board board = new Board(fen);
+                int outcome = rs.getInt("outcome");
+                GameResult gameResult;
+                if (outcome == -1) {
+                    gameResult = board.getPlayerToMove().isBlack() ? GameResult.WIN : GameResult.LOSS;
+                } else if (outcome == 0) {
+                    gameResult = GameResult.DRAW;
+                } else if (outcome == 1) {
+                    gameResult = board.getPlayerToMove().isWhite() ? GameResult.WIN : GameResult.LOSS;
+                } else {
+                    throw new IllegalStateException("Outcome is invalid: " + outcome + " fen: " + fen);
+                }
+                return GameRecord.builder()
+                        .fen(fen)
+                        .gameResult(gameResult)
+                        .evalDepth(rs.getInt("eval_depth"))
+                        .evalScore(rs.getFloat("eval_score"))
+                        .build();
+            } else {
+                throw new RuntimeException("Game record not found for fen " + fen);
             }
-            ps.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-        return depth;
-    }
-
-    @Override
-    public float getEvalScore(String fen) {
-        String sql = "select eval_score from tuner_pos where fen = ?";
-
-        float score = 0;
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, fen);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                score = rs.getFloat("eval_score");
-            }
-            ps.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        return score;
     }
 
     @Override
