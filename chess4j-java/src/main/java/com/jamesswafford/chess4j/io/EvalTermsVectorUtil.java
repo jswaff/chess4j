@@ -2,7 +2,10 @@ package com.jamesswafford.chess4j.io;
 
 import com.jamesswafford.chess4j.eval.EvalTermsVector;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -36,9 +39,23 @@ public class EvalTermsVectorUtil {
         return etv;
     }
 
-    public static void main(String[] args) throws Exception {
-        Properties props = EvalTermsVectorUtil.toProperties(new EvalTermsVector());
-        System.out.println(props);
-        props.store(new FileOutputStream("test.properties"), null);
+    public static EvalTermsVector load(String propertiesFileName) {
+        try (FileInputStream fis = new FileInputStream(propertiesFileName)) {
+            Properties properties = new Properties();
+            properties.load(fis);
+            return toVector(properties);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
+
+    public static void store(EvalTermsVector etv, String propertiesFileName) {
+        Properties props = toProperties(etv);
+        try {
+            props.store(new FileOutputStream(propertiesFileName), null);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
 }

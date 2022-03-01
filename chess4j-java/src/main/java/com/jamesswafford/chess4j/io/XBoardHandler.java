@@ -56,6 +56,7 @@ public class XBoardHandler {
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
         put("easy", (String[] cmd) -> ponderingEnabled = false);
         put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getEvalTermsVector(), Globals.getBoard())));
+        put("eval2props", XBoardHandler.this::writeEvalProperties);
         put("exit",XBoardHandler.this::exit);
         put("force", XBoardHandler.this::force);
         put("go", XBoardHandler.this::go);
@@ -403,14 +404,15 @@ public class XBoardHandler {
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
             Tuner tuner = new Tuner(tunerDatasource1);
             EvalTermsVector optimizedVector = tuner.optimize();
-            Properties props = EvalTermsVectorUtil.toProperties(optimizedVector);
-            LOGGER.info(props);
-            try (OutputStream output = new FileOutputStream("eval.properties")) {
-                props.store(output, null);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            EvalTermsVectorUtil.store(optimizedVector, "eval.properties");
+            Globals.setEvalTermsVector(optimizedVector);
         }, () -> LOGGER.info("no tuner datasource"));
+    }
+
+    private void writeEvalProperties(String[] cmd) {
+        String propsFile = cmd[1];
+        LOGGER.info("writing eval to properties file {}", propsFile);
+        EvalTermsVectorUtil.store(Globals.getEvalTermsVector(), propsFile);
     }
 
     /**

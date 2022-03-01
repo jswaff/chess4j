@@ -31,7 +31,7 @@ public class EvalTermsVectorUtilTest {
     }
 
     @Test
-    public void propertiesFromFile() throws IOException {
+    public void toVector() throws IOException {
         File propsFile = new File(getClass().getResource("/eval.properties").getFile());
         try (FileInputStream fis = new FileInputStream(propsFile)) {
             Properties props = new Properties();

@@ -7,11 +7,7 @@ import com.jamesswafford.chess4j.io.EvalTermsVectorUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
-import java.util.Properties;
 
 public class Tuner {
 
@@ -72,7 +68,7 @@ public class Tuner {
                     "E=" + bestError + ", numParamsImproved=" + numParamsImproved);
 
             // write to file in case execution is interrupted
-            writeVectorToTempProperties(bestVector);
+            EvalTermsVectorUtil.store(bestVector, "eval-tuning.properties");
         } while (numParamsImproved > 0);
 
         // restore the pawn hash setting
@@ -97,14 +93,4 @@ public class Tuner {
         return totalError / gameRecords.size();
     }
 
-    private void writeVectorToTempProperties(EvalTermsVector evalTermsVector) {
-        Properties props = EvalTermsVectorUtil.toProperties(evalTermsVector);
-        LOGGER.info(props);
-        try (OutputStream output = new FileOutputStream("eval-tuning.properties")) {
-            props.store(output, null);
-        } catch (IOException e) {
-            LOGGER.error(e);
-            throw new RuntimeException(e);
-        }
-    }
 }
