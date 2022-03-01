@@ -1,4 +1,4 @@
 [submodule "lib/prophet"]
 	path = lib/prophet
 	url = https://github.com/jswaff/prophet
-	branch = master
+	branch = tapered

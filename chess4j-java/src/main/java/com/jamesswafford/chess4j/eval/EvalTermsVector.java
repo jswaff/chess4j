@@ -69,7 +69,7 @@ public class EvalTermsVector {
             -56,-41,-17,-10,-13,-32,-31, -3,
             -72,-27,-56,-45,-45,-41,-28,-98,
 
-            -3,  // KNIGHT TROPISM
+             -3,  // KNIGHT TROPISM
 
               2, 10, 10, 19, 14,  6, -2,  2,     // ROOK_PST
               4,  7, 10, 11,  6, 13, 12, 10,
