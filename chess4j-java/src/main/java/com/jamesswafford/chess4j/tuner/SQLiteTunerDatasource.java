@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.io.PGNResult;
 import com.jamesswafford.chess4j.utils.GameResult;
 import org.apache.logging.log4j.LogManager;
@@ -50,7 +51,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         try {
             Statement stmt = conn.createStatement();
             stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer, " +
-                    "eval_depth integer, eval_score real, error real)");
+                    "eval_depth integer, eval_score real)");
             stmt.execute("create index idx_tuner_pos_fen on tuner_pos(fen)");
             stmt.close();
         } catch (SQLException e) {
@@ -153,20 +154,9 @@ public class SQLiteTunerDatasource implements TunerDatasource {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 Board board = new Board(fen);
-                int outcome = rs.getInt("outcome");
-                GameResult gameResult;
-                if (outcome == -1) {
-                    gameResult = board.getPlayerToMove().isBlack() ? GameResult.WIN : GameResult.LOSS;
-                } else if (outcome == 0) {
-                    gameResult = GameResult.DRAW;
-                } else if (outcome == 1) {
-                    gameResult = board.getPlayerToMove().isWhite() ? GameResult.WIN : GameResult.LOSS;
-                } else {
-                    throw new IllegalStateException("Outcome is invalid: " + outcome + " fen: " + fen);
-                }
                 return GameRecord.builder()
                         .fen(fen)
-                        .gameResult(gameResult)
+                        .gameResult(mapOutcomeToGameResult(rs.getInt("outcome"), board.getPlayerToMove()))
                         .evalDepth(rs.getInt("eval_depth"))
                         .evalScore(rs.getFloat("eval_score"))
                         .build();
@@ -183,27 +173,15 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         List<GameRecord> gameRecords = new ArrayList<>();
 
         String sql = "select fen, outcome, eval_depth, eval_score from tuner_pos ";
-
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 String fen = rs.getString("fen");
                 Board board = new Board(fen);
-                int outcome = rs.getInt("outcome");
-                GameResult gameResult;
-                if (outcome==-1) {
-                    gameResult = board.getPlayerToMove().isBlack() ? GameResult.WIN : GameResult.LOSS;
-                } else if (outcome==0) {
-                    gameResult = GameResult.DRAW;
-                } else if (outcome==1) {
-                    gameResult = board.getPlayerToMove().isWhite() ? GameResult.WIN : GameResult.LOSS;
-                } else {
-                    throw new IllegalStateException("Outcome is invalid: " + outcome + " fen: " + fen);
-                }
                 GameRecord gameRecord = GameRecord.builder()
                         .fen(fen)
-                        .gameResult(gameResult)
+                        .gameResult(mapOutcomeToGameResult(rs.getInt("outcome"), board.getPlayerToMove()))
                         .evalDepth(rs.getInt("eval_depth"))
                         .evalScore(rs.getFloat("eval_score"))
                         .build();
@@ -217,4 +195,17 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         return gameRecords;
     }
 
+    private GameResult mapOutcomeToGameResult(int outcome, Color ptm) {
+        GameResult gameResult;
+        if (outcome==-1) {
+            gameResult = ptm.isBlack() ? GameResult.WIN : GameResult.LOSS;
+        } else if (outcome==0) {
+            gameResult = GameResult.DRAW;
+        } else if (outcome==1) {
+            gameResult = ptm.isWhite() ? GameResult.WIN : GameResult.LOSS;
+        } else {
+            throw new IllegalStateException("Outcome is invalid: " + outcome);
+        }
+        return gameResult;
+    }
 }
