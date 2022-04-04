@@ -1,16 +1,13 @@
 package com.jamesswafford.chess4j.tuner;
 
-import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.search.Search;
-import com.jamesswafford.chess4j.search.SearchParameters;
+import com.jamesswafford.chess4j.eval.EvalTermsVector;
 import org.junit.Before;
 import org.junit.Test;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 import static com.jamesswafford.chess4j.utils.GameResult.*;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
 
 public class CostFunctionTest {
 
@@ -23,18 +20,9 @@ public class CostFunctionTest {
 
     @Test
     public void calculateCostFromBoard() {
+        EvalTermsVector etv = new EvalTermsVector();
         Board board = new Board();
-        SearchParameters parameters = new SearchParameters(0, -Constants.CHECKMATE, Constants.CHECKMATE);
-        Search search = mock(Search.class);
-        costFunction.setSearch(search);
-        when(search.search(board, parameters)).thenReturn(50);
-        assertDoubleEquals(costFunction.calculateCost(board, WIN), 0.1759);
-    }
-
-    @Test
-    public void calculateCostFromBoardRealSearch() {
-        Board board = new Board();
-        System.out.println(costFunction.calculateCost(board, WIN));
+        assertDoubleEquals(costFunction.calculateCost(etv, board, DRAW), 0.00);
     }
 
     @Test
@@ -52,8 +40,10 @@ public class CostFunctionTest {
 
     @Test
     public void squishify() {
-        assertDoubleEquals(costFunction.squishify(50), 0.5806);
         assertDoubleEquals(costFunction.squishify(0), 0.5);
+        assertDoubleEquals(costFunction.squishify(50), 0.5806);
+        assertDoubleEquals(costFunction.squishify(100), 0.6571);
+        assertDoubleEquals(costFunction.squishify(-300), 0.1244);
         assertDoubleEquals(costFunction.squishify(-500), 0.0372);
         assertDoubleEquals(costFunction.squishify(CHECKMATE), 1);
         assertDoubleEquals(costFunction.squishify(-CHECKMATE), 0);

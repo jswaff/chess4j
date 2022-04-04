@@ -1,28 +1,14 @@
 package com.jamesswafford.chess4j.tuner;
 
-import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.search.AlphaBetaSearch;
-import com.jamesswafford.chess4j.search.Search;
-import com.jamesswafford.chess4j.search.SearchParameters;
+import com.jamesswafford.chess4j.eval.Eval;
+import com.jamesswafford.chess4j.eval.EvalTermsVector;
 import com.jamesswafford.chess4j.utils.GameResult;
 
 public class CostFunction {
 
-    private Search search;
-    private double k = -1.13; // TODO: from Texel.  Compute to minimize E
-
-    public CostFunction() {
-        search = new AlphaBetaSearch();
-    }
-
-    public void setSearch(Search search) {
-        this.search = search;
-    }
-
-    public double calculateCost(Board board, GameResult gameResult) {
-        SearchParameters parameters = new SearchParameters(0, -Constants.CHECKMATE, Constants.CHECKMATE);
-        int score = search.search(board, parameters);
+    public double calculateCost(EvalTermsVector etv, Board board, GameResult gameResult) {
+        int score = Eval.eval(etv, board, false);
         double squishedScore = squishify(score);
         return calculateCost(squishedScore, gameResult);
     }
@@ -44,9 +30,13 @@ public class CostFunction {
     }
 
     public double squishify(int score) {
+        // This is the traditional approach: 1 / (1 + e ^ -z)
+        //return 1.0 / (1 + Math.exp(-score));
+
+        // This is the "Texel" approach
+        double k = -1.13;
         double exp = k * score / 400.0;
-        double denom = 1 + Math.pow(10, exp);
-        return 1.0 / denom;
+        return 1.0 / (1 + Math.pow(10, exp));
     }
 
 }

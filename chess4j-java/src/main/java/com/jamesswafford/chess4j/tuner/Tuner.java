@@ -78,17 +78,13 @@ public class Tuner {
     }
 
     private double calculateAverageError(EvalTermsVector evalTermsVector) {
-        EvalTermsVector originalVector = Globals.getEvalTermsVector();
-        Globals.setEvalTermsVector(evalTermsVector);
 
         double totalError = 0;
         for (GameRecord gameRecord : gameRecords) {
             Board board = new Board(gameRecord.getFen());
-            double error = costFunction.calculateCost(board, gameRecord.getGameResult());
+            double error = costFunction.calculateCost(evalTermsVector, board, gameRecord.getGameResult());
             totalError += error;
         }
-
-        Globals.setEvalTermsVector(originalVector);
 
         return totalError / gameRecords.size();
     }
