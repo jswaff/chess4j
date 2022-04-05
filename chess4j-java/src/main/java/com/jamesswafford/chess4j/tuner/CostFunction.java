@@ -1,6 +1,12 @@
 package com.jamesswafford.chess4j.tuner;
 
+import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.eval.EvalTermsVector;
 import com.jamesswafford.chess4j.utils.GameResult;
+
+import java.util.List;
+
+import static com.jamesswafford.chess4j.tuner.Hypothesis.hypothesis;
 
 public class CostFunction {
 
@@ -20,4 +26,16 @@ public class CostFunction {
         return delta * delta;
     }
 
+    public static double cost(List<GameRecord> dataSet, EvalTermsVector theta) {
+        double totalError = 0;
+
+        for (GameRecord gameRecord : dataSet) {
+            Board board = new Board(gameRecord.getFen());
+            double h = hypothesis(board, theta);
+            double cost = cost(h, gameRecord.getGameResult());
+            totalError += cost;
+        }
+
+        return totalError / dataSet.size();
+    }
 }

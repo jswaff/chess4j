@@ -16,12 +16,10 @@ public class LogisticRegressionTuner {
 
     private static final Logger LOGGER = LogManager.getLogger(LogisticRegressionTuner.class);
 
-    private List<GameRecord> trainingSet;
 
     public EvalTermsVector optimize(List<GameRecord> dataSet, int maxIterations) {
 
-        // TODO: - 80/20 split training set vs test set
-        trainingSet = new ArrayList<>(dataSet);
+        List<GameRecord> trainingSet = dataSet; // TODO
 
         // disable pawn hash
         boolean pawnHashEnabled = Globals.isPawnHashEnabled();
@@ -29,9 +27,12 @@ public class LogisticRegressionTuner {
 
         long start = System.currentTimeMillis();
         LOGGER.info("training started: m={}", trainingSet.size());
-        EvalTermsVector theta = trainWithNaiveSearch(Globals.getEvalTermsVector(), maxIterations);
+        EvalTermsVector initialTheta = Globals.getEvalTermsVector();
+        EvalTermsVector theta = trainWithNaiveSearch(trainingSet, initialTheta, maxIterations);
         long end = System.currentTimeMillis();
         LOGGER.info("training complete in {} seconds", (end-start)/1000);
+
+        // TODO - measure error with test set
 
         // restore the pawn hash setting
         Globals.setPawnHashEnabled(pawnHashEnabled);
@@ -39,7 +40,7 @@ public class LogisticRegressionTuner {
         return theta;
     }
 
-    private EvalTermsVector trainWithGradientDescent(EvalTermsVector theta, int maxIterations) {
+    private EvalTermsVector trainWithGradientDescent(List<GameRecord> trainingSet, EvalTermsVector theta, int maxIterations) {
 
         EvalTermsVector bestTheta = new EvalTermsVector(theta);
         for (int it=0; it<maxIterations; it++) {
@@ -64,9 +65,9 @@ public class LogisticRegressionTuner {
         return bestTheta;
     }
 
-    private EvalTermsVector trainWithNaiveSearch(EvalTermsVector theta, int maxIterations) {
+    private EvalTermsVector trainWithNaiveSearch(List<GameRecord> trainingSet, EvalTermsVector theta, int maxIterations) {
         int n = theta.terms.length;
-        double bestError = calculateAverageError(theta);
+        double bestError = cost(trainingSet, theta);
         EvalTermsVector bestTheta = new EvalTermsVector(theta);
 
         for (int it = 0; it<maxIterations; it++) {
@@ -74,14 +75,14 @@ public class LogisticRegressionTuner {
             for (int i=0;i<n;i++) {
                 EvalTermsVector candidateTheta = new EvalTermsVector(bestTheta);
                 candidateTheta.terms[i] = candidateTheta.terms[i] + 1;
-                double error = calculateAverageError(candidateTheta);
+                double error = cost(trainingSet, candidateTheta);
                 if (error < bestError) {
                     bestError = error;
                     bestTheta = candidateTheta;
                     numParamsImproved++;
                 } else {
                     candidateTheta.terms[i] = candidateTheta.terms[i] - 2;
-                    error = calculateAverageError(candidateTheta);
+                    error = cost(trainingSet, candidateTheta);
                     if (error < bestError) {
                         bestError = error;
                         bestTheta = candidateTheta;
@@ -95,19 +96,6 @@ public class LogisticRegressionTuner {
         }
 
         return bestTheta;
-    }
-
-    private double calculateAverageError(EvalTermsVector theta) {
-        double totalError = 0;
-
-        for (GameRecord gameRecord : trainingSet) {
-            Board board = new Board(gameRecord.getFen());
-            double h = hypothesis(board, theta);
-            double cost = cost(h, gameRecord.getGameResult());
-            totalError += cost;
-        }
-
-        return totalError / trainingSet.size();
     }
 
 }
