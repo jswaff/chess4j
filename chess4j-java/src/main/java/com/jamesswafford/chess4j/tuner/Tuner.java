@@ -82,8 +82,9 @@ public class Tuner {
         double totalError = 0;
         for (GameRecord gameRecord : gameRecords) {
             Board board = new Board(gameRecord.getFen());
-            double error = costFunction.calculateCost(evalTermsVector, board, gameRecord.getGameResult());
-            totalError += error;
+            double h = Hypothesis.hypothesis(board, evalTermsVector);
+            double cost = costFunction.cost(h, gameRecord.getGameResult());
+            totalError += cost;
         }
 
         return totalError / gameRecords.size();
