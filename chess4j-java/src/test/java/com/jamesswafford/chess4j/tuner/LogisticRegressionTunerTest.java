@@ -8,17 +8,17 @@ import static org.junit.Assert.assertTrue;
 
 public class LogisticRegressionTunerTest {
 
-    Tuner tuner;
+    LogisticRegressionTuner tuner;
 
     TunerDatasource tunerDatasource = Mockito.mock(TunerDatasource.class);
 
     @Before
     public void setUp() {
-        tuner = new Tuner(tunerDatasource);
+        tuner = new LogisticRegressionTuner(tunerDatasource);
     }
 
     @Test
     public void optimizeTest() {
-        tuner.optimize();
+        tuner.optimize(3);
     }
 }

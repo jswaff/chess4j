@@ -12,28 +12,35 @@ import java.util.List;
 import static com.jamesswafford.chess4j.tuner.CostFunction.cost;
 import static com.jamesswafford.chess4j.tuner.Hypothesis.hypothesis;
 
-public class Tuner {
+public class LogisticRegressionTuner {
 
-    private static final Logger LOGGER = LogManager.getLogger(Tuner.class);
+    private static final Logger LOGGER = LogManager.getLogger(LogisticRegressionTuner.class);
 
     private final List<GameRecord> trainingSet;
 
-    public Tuner(TunerDatasource tunerDatasource) {
+    public LogisticRegressionTuner(TunerDatasource tunerDatasource) {
         this.trainingSet = tunerDatasource.getGameRecords();
     }
 
-    public EvalTermsVector optimize() {
+    public EvalTermsVector optimize(int maxIterations) {
+
+        // disable pawn hash
+        boolean pawnHashEnabled = Globals.isPawnHashEnabled();
+        Globals.setPawnHashEnabled(false);
+
         long start = System.currentTimeMillis();
-        LOGGER.info("tuning started: num positions={}", trainingSet.size());
-        EvalTermsVector optimizedWeights = optimizeWithNaiveSearch(Globals.getEvalTermsVector(), 1000);
+        LOGGER.info("training started: m={}", trainingSet.size());
+        EvalTermsVector optimizedWeights = trainWithNaiveSearch(Globals.getEvalTermsVector(), maxIterations);
         long end = System.currentTimeMillis();
-        LOGGER.info("tuning complete in {} seconds", (end-start)/1000);
+        LOGGER.info("training complete in {} seconds", (end-start)/1000);
+
+        // restore the pawn hash setting
+        Globals.setPawnHashEnabled(pawnHashEnabled);
+
         return optimizedWeights;
     }
 
-    public EvalTermsVector optimizeWithGradientDescent(EvalTermsVector theta, int maxIterations) {
-        boolean pawnHashEnabled = Globals.isPawnHashEnabled();
-        Globals.setPawnHashEnabled(false);
+    private EvalTermsVector trainWithGradientDescent(EvalTermsVector theta, int maxIterations) {
 
         EvalTermsVector bestTheta = new EvalTermsVector(theta);
         for (int it=0; it<maxIterations; it++) {
@@ -55,23 +62,15 @@ public class Tuner {
             // TODO: convergence test
         }
 
-        // restore the pawn hash setting
-        Globals.setPawnHashEnabled(pawnHashEnabled);
-
         return bestTheta;
     }
 
-    public EvalTermsVector optimizeWithNaiveSearch(EvalTermsVector theta, int maxIterations) {
-        boolean pawnHashEnabled = Globals.isPawnHashEnabled();
-        Globals.setPawnHashEnabled(false);
-
+    private EvalTermsVector trainWithNaiveSearch(EvalTermsVector theta, int maxIterations) {
         int n = theta.terms.length;
         double bestError = calculateAverageError(theta);
-
-        LOGGER.info("initial error: " + bestError);
         EvalTermsVector bestTheta = new EvalTermsVector(theta);
 
-        for (int it=0; it<maxIterations; it++) {
+        for (int it = 0; it<maxIterations; it++) {
             int numParamsImproved = 0;
             for (int i=0;i<n;i++) {
                 EvalTermsVector candidateTheta = new EvalTermsVector(bestTheta);
@@ -80,37 +79,31 @@ public class Tuner {
                 if (error < bestError) {
                     bestError = error;
                     bestTheta = candidateTheta;
-                    ++numParamsImproved;
+                    numParamsImproved++;
                 } else {
                     candidateTheta.terms[i] = candidateTheta.terms[i] - 2;
                     error = calculateAverageError(candidateTheta);
                     if (error < bestError) {
                         bestError = error;
                         bestTheta = candidateTheta;
-                        ++numParamsImproved;
+                        numParamsImproved++;
                     }
                 }
             }
-            if (numParamsImproved==0) {
-                // TODO: convergence test
+            if (numParamsImproved > 0) {
                 break;
             }
         }
 
-        // restore the pawn hash setting
-        Globals.setPawnHashEnabled(pawnHashEnabled);
-
-        LOGGER.info("final error: " + bestError);
-
         return bestTheta;
     }
 
-    private double calculateAverageError(EvalTermsVector evalTermsVector) {
-
+    private double calculateAverageError(EvalTermsVector theta) {
         double totalError = 0;
+
         for (GameRecord gameRecord : trainingSet) {
             Board board = new Board(gameRecord.getFen());
-            double h = hypothesis(board, evalTermsVector);
+            double h = hypothesis(board, theta);
             double cost = cost(h, gameRecord.getGameResult());
             totalError += cost;
         }
