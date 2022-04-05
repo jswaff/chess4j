@@ -19,8 +19,6 @@ public interface TunerDatasource {
 
     void insert(String fen, PGNResult pgnResult);
 
-    void updateGameDepthAndScore(String fen, int evalDepth, float evalScore);
-
     long getTotalPositionsCount();
 
     long getFenCount(String fen);
@@ -55,12 +53,11 @@ public interface TunerDatasource {
                 String fen = FenBuilder.createFen(board, false);
                 insert(fen, game.getResult());
                 // if we have the depth/score in the annotation, use it
-                if (gameMove.getNag() != null) {
+                /*if (gameMove.getNag() != null) {
                     CutechessNagParser cutechessNagParser = new CutechessNagParser(gameMove.getNag());
                     if (cutechessNagParser.isValid()) {
-                        updateGameDepthAndScore(fen, cutechessNagParser.depth(), cutechessNagParser.score());
                     }
-                }
+                }*/
             }
             i++;
         }

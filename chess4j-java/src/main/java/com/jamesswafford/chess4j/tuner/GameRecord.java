@@ -10,7 +10,5 @@ public class GameRecord {
 
     private String fen;
     private GameResult gameResult;
-    private Integer evalDepth; // during game
-    private Float evalScore; // during game
 
 }

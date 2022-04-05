@@ -24,7 +24,6 @@ import static org.junit.Assert.*;
 
 public class SQLiteTunerDatasourceTest {
 
-    private final static String smallPGN = "/pgn/small.pgn";
     private final static String tinyPGN = "/pgn/tiny.pgn";
     private final static String testDB = "tunertest.db";
 
@@ -64,8 +63,6 @@ public class SQLiteTunerDatasourceTest {
         assertEquals(1, gameRecords.size());
         assertEquals(fen, gameRecords.get(0).getFen());
         assertEquals(GameResult.WIN, gameRecords.get(0).getGameResult());
-        assertEquals(Integer.valueOf(0), gameRecords.get(0).getEvalDepth());
-        assertEquals(Float.valueOf(0), gameRecords.get(0).getEvalScore());
 
         board.applyMove(new Move(Pawn.WHITE_PAWN, Square.E2, Square.E4));
         String fen2 = FenBuilder.createFen(board, false);
@@ -101,23 +98,6 @@ public class SQLiteTunerDatasourceTest {
         } catch (IllegalStateException e) { /* good */ }
 
         assertEquals(0, tunerDatasource.getTotalPositionsCount());
-    }
-
-    @Test
-    public void updateWithScoreAndDepth() {
-        Board board = new Board();
-        String fen = FenBuilder.createFen(board, false);
-        tunerDatasource.insert(fen, PGNResult.WHITE_WINS);
-        assertEquals(1, tunerDatasource.getTotalPositionsCount());
-
-        assertEquals(Integer.valueOf(0), tunerDatasource.getGameRecord(fen).getEvalDepth());
-
-        tunerDatasource.updateGameDepthAndScore(fen, 12, 9.30F);
-
-        assertEquals(Integer.valueOf(12), tunerDatasource.getGameRecord(fen).getEvalDepth());
-        float foundScore = tunerDatasource.getGameRecord(fen).getEvalScore();
-        assertTrue(foundScore > 9.29999);
-        assertTrue(foundScore < 9.30001);
     }
 
     @Test
@@ -174,11 +154,6 @@ public class SQLiteTunerDatasourceTest {
         board.applyMove(mp.parseMove("d4", board));
         String fen = createFen(board, false);
         assertEquals(1, tunerDatasource.getFenCount(fen));
-        GameRecord gameRecord = tunerDatasource.getGameRecord(fen);
-        assertEquals(Integer.valueOf(14), gameRecord.getEvalDepth());
-        float evalScore = gameRecord.getEvalScore();
-        assertTrue(evalScore < -2.64999);
-        assertTrue(evalScore > -2.65001);
     }
 
     private void populateTunerDatasource(String pgn) {

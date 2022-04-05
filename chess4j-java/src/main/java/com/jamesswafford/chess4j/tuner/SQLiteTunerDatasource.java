@@ -52,8 +52,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     public void initializeDatasource() {
         try {
             Statement stmt = conn.createStatement();
-            stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer, " +
-                    "eval_depth integer, eval_score real)");
+            stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer)");
             stmt.execute("create index idx_tuner_pos_fen on tuner_pos(fen)");
             stmt.close();
         } catch (SQLException e) {
@@ -80,25 +79,6 @@ public class SQLiteTunerDatasource implements TunerDatasource {
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ps.setString(1, fen);
                 ps.setInt(2, outcome);
-                ps.executeUpdate();
-                ps.close();
-            } catch (SQLException e) {
-                throw new UncheckedSqlException(e);
-            }
-        }
-    }
-
-    @Override
-    public void updateGameDepthAndScore(String fen, int evalDepth, float evalScore) {
-        GameRecord gameRecord = getGameRecord(fen);
-        if (evalDepth >= gameRecord.getEvalDepth()) {
-
-            String qry = "update tuner_pos set eval_depth=?, eval_score=? where fen = ?";
-            try {
-                PreparedStatement ps = conn.prepareStatement(qry);
-                ps.setInt(1, evalDepth);
-                ps.setFloat(2, evalScore);
-                ps.setString(3, fen);
                 ps.executeUpdate();
                 ps.close();
             } catch (SQLException e) {
@@ -149,7 +129,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     @Override
     public GameRecord getGameRecord(String fen) {
 
-        String sql = "select fen, outcome, eval_depth, eval_score from tuner_pos where fen = ?";
+        String sql = "select outcome from tuner_pos where fen = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, fen);
@@ -159,8 +139,6 @@ public class SQLiteTunerDatasource implements TunerDatasource {
                 return GameRecord.builder()
                         .fen(fen)
                         .gameResult(mapOutcomeToGameResult(rs.getInt("outcome"), board.getPlayerToMove()))
-                        .evalDepth(rs.getInt("eval_depth"))
-                        .evalScore(rs.getFloat("eval_score"))
                         .build();
             } else {
                 throw new GameRecordNotFoundException("Game record not found for fen " + fen);
@@ -174,7 +152,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     public List<GameRecord> getGameRecords() {
         List<GameRecord> gameRecords = new ArrayList<>();
 
-        String sql = "select fen, outcome, eval_depth, eval_score from tuner_pos ";
+        String sql = "select fen, outcome from tuner_pos ";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
@@ -184,8 +162,6 @@ public class SQLiteTunerDatasource implements TunerDatasource {
                 GameRecord gameRecord = GameRecord.builder()
                         .fen(fen)
                         .gameResult(mapOutcomeToGameResult(rs.getInt("outcome"), board.getPlayerToMove()))
-                        .evalDepth(rs.getInt("eval_depth"))
-                        .evalScore(rs.getFloat("eval_score"))
                         .build();
                 gameRecords.add(gameRecord);
             }
