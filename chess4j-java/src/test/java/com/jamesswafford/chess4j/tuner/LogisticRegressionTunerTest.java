@@ -2,23 +2,20 @@ package com.jamesswafford.chess4j.tuner;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
 
 public class LogisticRegressionTunerTest {
 
     LogisticRegressionTuner tuner;
 
-    TunerDatasource tunerDatasource = Mockito.mock(TunerDatasource.class);
-
     @Before
     public void setUp() {
-        tuner = new LogisticRegressionTuner(tunerDatasource);
+        tuner = new LogisticRegressionTuner();
     }
 
     @Test
     public void optimizeTest() {
-        tuner.optimize(3);
+        tuner.optimize(new ArrayList<>(), 3);
     }
 }
