@@ -87,5 +87,4 @@ public class FenToTunerTest {
         fenToTuner.addFile(epdFile);
     }
 
-
 }

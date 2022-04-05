@@ -415,7 +415,7 @@ public class XBoardHandler {
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
             List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
             LogisticRegressionTuner tuner = new LogisticRegressionTuner();
-            EvalTermsVector optimizedWeights = tuner.optimize(dataSet, maxIterations);
+            EvalTermsVector optimizedWeights = tuner.optimize(Globals.getEvalTermsVector(), dataSet, maxIterations);
             EvalTermsVectorUtil.store(optimizedWeights, "eval.properties");
             Globals.setEvalTermsVector(optimizedWeights);
         }, () -> LOGGER.info("no tuner datasource"));

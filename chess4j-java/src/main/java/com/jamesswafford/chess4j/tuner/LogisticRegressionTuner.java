@@ -17,7 +17,7 @@ public class LogisticRegressionTuner {
     private static final Logger LOGGER = LogManager.getLogger(LogisticRegressionTuner.class);
 
 
-    public EvalTermsVector optimize(List<GameRecord> dataSet, int maxIterations) {
+    public EvalTermsVector optimize(EvalTermsVector initialTheta, List<GameRecord> dataSet, int maxIterations) {
 
         List<GameRecord> trainingSet = dataSet; // TODO
 
@@ -25,14 +25,18 @@ public class LogisticRegressionTuner {
         boolean pawnHashEnabled = Globals.isPawnHashEnabled();
         Globals.setPawnHashEnabled(false);
 
+        double initialError = cost(trainingSet, initialTheta);
+        LOGGER.info("initial error={}", initialError);
+
         long start = System.currentTimeMillis();
         LOGGER.info("training started: m={}", trainingSet.size());
-        EvalTermsVector initialTheta = Globals.getEvalTermsVector();
         EvalTermsVector theta = trainWithNaiveSearch(trainingSet, initialTheta, maxIterations);
         long end = System.currentTimeMillis();
         LOGGER.info("training complete in {} seconds", (end-start)/1000);
 
         // TODO - measure error with test set
+        double finalError = cost(trainingSet, theta);
+        LOGGER.info("final error={}", finalError);
 
         // restore the pawn hash setting
         Globals.setPawnHashEnabled(pawnHashEnabled);
