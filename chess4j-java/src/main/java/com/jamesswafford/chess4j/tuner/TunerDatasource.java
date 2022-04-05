@@ -23,8 +23,6 @@ public interface TunerDatasource {
 
     long getFenCount(String fen);
 
-    GameRecord getGameRecord(String fen);
-
     List<GameRecord> getGameRecords();
 
     default void addFile(File pgnFile) {

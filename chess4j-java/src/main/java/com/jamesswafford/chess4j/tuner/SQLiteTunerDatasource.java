@@ -3,7 +3,6 @@ package com.jamesswafford.chess4j.tuner;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
-import com.jamesswafford.chess4j.exceptions.GameRecordNotFoundException;
 import com.jamesswafford.chess4j.exceptions.UncheckedSqlException;
 import com.jamesswafford.chess4j.io.PGNResult;
 import com.jamesswafford.chess4j.utils.GameResult;
@@ -124,28 +123,6 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         }
 
         return cnt;
-    }
-
-    @Override
-    public GameRecord getGameRecord(String fen) {
-
-        String sql = "select outcome from tuner_pos where fen = ?";
-
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, fen);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                Board board = new Board(fen);
-                return GameRecord.builder()
-                        .fen(fen)
-                        .gameResult(mapOutcomeToGameResult(rs.getInt("outcome"), board.getPlayerToMove()))
-                        .build();
-            } else {
-                throw new GameRecordNotFoundException("Game record not found for fen " + fen);
-            }
-        } catch (SQLException e) {
-            throw new UncheckedSqlException(e);
-        }
     }
 
     @Override
