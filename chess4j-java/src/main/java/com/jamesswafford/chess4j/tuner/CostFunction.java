@@ -4,7 +4,7 @@ import com.jamesswafford.chess4j.utils.GameResult;
 
 public class CostFunction {
 
-    public double cost(double hypothesis, GameResult gameResult) {
+    public static double cost(double hypothesis, GameResult gameResult) {
         double y;
         if (GameResult.WIN.equals(gameResult)) {
             y = 1.0;
