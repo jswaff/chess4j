@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.tuner;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.eval.EvalTermsVector;
+import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,7 +18,7 @@ public class LogisticRegressionTuner {
     private static final Logger LOGGER = LogManager.getLogger(LogisticRegressionTuner.class);
 
 
-    public EvalTermsVector optimize(EvalTermsVector initialTheta, List<GameRecord> dataSet, int maxIterations) {
+    public Tuple2<EvalTermsVector, Double> optimize(EvalTermsVector initialTheta, List<GameRecord> dataSet, int maxIterations) {
 
         List<GameRecord> trainingSet = dataSet; // TODO
 
@@ -41,7 +42,7 @@ public class LogisticRegressionTuner {
         // restore the pawn hash setting
         Globals.setPawnHashEnabled(pawnHashEnabled);
 
-        return theta;
+        return new Tuple2<>(theta, finalError);
     }
 
     private EvalTermsVector trainWithGradientDescent(List<GameRecord> trainingSet, EvalTermsVector theta, int maxIterations) {
