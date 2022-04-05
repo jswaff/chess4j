@@ -13,10 +13,7 @@ import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
-import com.jamesswafford.chess4j.tuner.GameRecord;
-import com.jamesswafford.chess4j.tuner.LogisticRegressionTuner;
-import com.jamesswafford.chess4j.tuner.PGNToTuner;
-import com.jamesswafford.chess4j.tuner.TunerDatasource;
+import com.jamesswafford.chess4j.tuner.*;
 import com.jamesswafford.chess4j.utils.*;
 
 import org.apache.logging.log4j.LogManager;
@@ -60,6 +57,7 @@ public class XBoardHandler {
         put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getEvalTermsVector(), Globals.getBoard())));
         put("eval2props", XBoardHandler.this::writeEvalProperties);
         put("exit",XBoardHandler.this::exit);
+        put("fen2tuner", XBoardHandler.this::fenToTunerDS);
         put("force", XBoardHandler.this::force);
         put("go", XBoardHandler.this::go);
         put("hard", (String[] cmd) -> ponderingEnabled = true);
@@ -151,6 +149,15 @@ public class XBoardHandler {
     private void exit(String[] cmd) {
         analysisMode = false;
         searchIterator.setSkipTimeChecks(false);
+    }
+
+    private void fenToTunerDS(String[] cmd) {
+        if (tunerDatasource != null) {
+            FenToTuner fenToTuner = new FenToTuner(tunerDatasource);
+            fenToTuner.addFile(new File(cmd[1]));
+        } else {
+            LOGGER.warn("There is no tuner datasource.");
+        }
     }
 
     private void force(String[] cmd) {
