@@ -15,6 +15,7 @@ import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
 import com.jamesswafford.chess4j.tuner.GameRecord;
 import com.jamesswafford.chess4j.tuner.LogisticRegressionTuner;
+import com.jamesswafford.chess4j.tuner.PGNToTuner;
 import com.jamesswafford.chess4j.tuner.TunerDatasource;
 import com.jamesswafford.chess4j.utils.*;
 
@@ -239,7 +240,8 @@ public class XBoardHandler {
 
     private void pgnToTunerDS(String[] cmd) {
         if (tunerDatasource != null) {
-            tunerDatasource.addFile(new File(cmd[1]));
+            PGNToTuner pgnToTuner = new PGNToTuner(tunerDatasource);
+            pgnToTuner.addFile(new File(cmd[1]));
         } else {
             LOGGER.warn("There is no tuner datasource.");
         }

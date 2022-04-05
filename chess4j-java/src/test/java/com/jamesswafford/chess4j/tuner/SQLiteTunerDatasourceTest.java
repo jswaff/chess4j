@@ -158,7 +158,8 @@ public class SQLiteTunerDatasourceTest {
 
     private void populateTunerDatasource(String pgn) {
         File pgnFile = new File(SQLiteTunerDatasourceTest.class.getResource(pgn).getFile());
-        tunerDatasource.addFile(pgnFile);
+        PGNToTuner pgnToTuner = new PGNToTuner(tunerDatasource);
+        pgnToTuner.addFile(pgnFile);
     }
 
 }
