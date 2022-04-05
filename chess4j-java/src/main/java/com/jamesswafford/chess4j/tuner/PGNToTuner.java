@@ -30,7 +30,21 @@ public class PGNToTuner {
         }
     }
 
-    public void addGame(PGNGame game) {
+    private void processPGNFile(File pgnFile, boolean dryRun) throws IOException {
+        int n = 0;
+
+        PGNIterator it = new PGNIterator(pgnFile);
+        PGNGame pgnGame;
+        while ((pgnGame = it.next()) != null) {
+            LOGGER.info("processing game " + n + " with " + pgnGame.getMoves().size() + " moves " + (dryRun? " (dry run)":""));
+            if (!dryRun) {
+                addGame(pgnGame);
+            }
+            n++;
+        }
+    }
+
+    private void addGame(PGNGame game) {
 
         // don't process games that don't have an outcome!
         if (!Arrays.asList(PGNResult.WHITE_WINS, PGNResult.BLACK_WINS, PGNResult.DRAW).contains(game.getResult())) {
@@ -56,21 +70,5 @@ public class PGNToTuner {
             i++;
         }
     }
-
-    private void processPGNFile(File pgnFile, boolean dryRun) throws IOException {
-        int n = 0;
-
-        PGNIterator it = new PGNIterator(pgnFile);
-        PGNGame pgnGame;
-        while ((pgnGame = it.next()) != null) {
-            LOGGER.info("processing game " + n + " with " + pgnGame.getMoves().size() + " moves " + (dryRun? " (dry run)":""));
-            if (!dryRun) {
-                addGame(pgnGame);
-            }
-            n++;
-        }
-    }
-
-
 
 }
