@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.tuner;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.eval.EvalTermsVector;
+import com.jamesswafford.chess4j.io.EvalTermsVectorUtil;
 import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -99,6 +100,7 @@ public class LogisticRegressionTuner {
                     }
                 }
             }
+            EvalTermsVectorUtil.store(bestTheta, "eval-tune-" + (it+1) + ".properties", "Error: " + bestError);
             if (numParamsImproved == 0) {
                 break;
             }

@@ -49,10 +49,10 @@ public class EvalTermsVectorUtil {
         }
     }
 
-    public static void store(EvalTermsVector etv, String propertiesFileName) {
+    public static void store(EvalTermsVector etv, String propertiesFileName, String comments) {
         Properties props = toProperties(etv);
         try {
-            props.store(new FileOutputStream(propertiesFileName), null);
+            props.store(new FileOutputStream(propertiesFileName), comments);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

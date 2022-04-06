@@ -16,6 +16,7 @@ import com.jamesswafford.chess4j.search.SearchIteratorImpl;
 import com.jamesswafford.chess4j.tuner.*;
 import com.jamesswafford.chess4j.utils.*;
 
+import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -415,16 +416,16 @@ public class XBoardHandler {
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
             List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
             LogisticRegressionTuner tuner = new LogisticRegressionTuner();
-            EvalTermsVector optimizedWeights = tuner.optimize(Globals.getEvalTermsVector(), dataSet, maxIterations)._1;
-            EvalTermsVectorUtil.store(optimizedWeights, "eval.properties");
-            Globals.setEvalTermsVector(optimizedWeights);
+            Tuple2<EvalTermsVector, Double> optimizedWeights = tuner.optimize(Globals.getEvalTermsVector(), dataSet, maxIterations);
+            EvalTermsVectorUtil.store(optimizedWeights._1, "eval.properties", "Error: " + optimizedWeights._2);
+            Globals.setEvalTermsVector(optimizedWeights._1);
         }, () -> LOGGER.info("no tuner datasource"));
     }
 
     private void writeEvalProperties(String[] cmd) {
         String propsFile = cmd[1];
         LOGGER.info("writing eval to properties file {}", propsFile);
-        EvalTermsVectorUtil.store(Globals.getEvalTermsVector(), propsFile);
+        EvalTermsVectorUtil.store(Globals.getEvalTermsVector(), propsFile, null);
     }
 
     /**
