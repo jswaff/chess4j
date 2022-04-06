@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class LogisticRegressionTunerTest {
 
@@ -41,7 +40,7 @@ public class LogisticRegressionTunerTest {
     }
 
     @Test
-    public void errorShouldDecrease() {
+    public void optimize() {
 
         // get a list of game records
         populateTunerDatasource(testEpd);
@@ -52,14 +51,7 @@ public class LogisticRegressionTunerTest {
         EvalTermsVector theta = new EvalTermsVector();
         Arrays.fill(theta.terms, 0);
 
-        // verify error continues to decrease
-        double lastError = 999999;
-        for (int i=1;i<=5;i++) {
-            Tuple2<EvalTermsVector, Double> retVal = tuner.optimize(theta, gameRecords, i);
-            assertTrue(retVal._2 < lastError);
-            lastError = retVal._2;
-            theta = new EvalTermsVector(retVal._1);
-        }
+        tuner.optimize(theta, gameRecords, 3);
     }
 
     private void populateTunerDatasource(String epd) {

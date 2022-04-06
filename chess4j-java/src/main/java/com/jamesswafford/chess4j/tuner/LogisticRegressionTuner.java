@@ -33,16 +33,15 @@ public class LogisticRegressionTuner {
         LOGGER.info("data set size: {} training: {}, test: {}", dataSet.size(), trainingSet.size(), testSet.size());
 
         double initialError = cost(testSet, initialTheta);
-        LOGGER.info("initial error={}", initialError);
+        LOGGER.info("initial error using test set: {}", initialError);
 
         long start = System.currentTimeMillis();
-        LOGGER.info("training started: m={}", trainingSet.size());
         EvalTermsVector theta = trainWithNaiveSearch(trainingSet, initialTheta, maxIterations);
         long end = System.currentTimeMillis();
         LOGGER.info("training complete in {} seconds", (end-start)/1000);
 
         double finalError = cost(testSet, theta);
-        LOGGER.info("final error={}", finalError);
+        LOGGER.info("final error using test set: {}", finalError);
 
         // restore the pawn hash setting
         Globals.setPawnHashEnabled(pawnHashEnabled);
@@ -103,6 +102,7 @@ public class LogisticRegressionTuner {
             if (numParamsImproved == 0) {
                 break;
             }
+            LOGGER.info("error using training set after iteration {}: {}", (it+1), bestError);
         }
 
         return bestTheta;
