@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.jamesswafford.chess4j.tuner.CostFunction.cost;
@@ -20,13 +21,18 @@ public class LogisticRegressionTuner {
 
     public Tuple2<EvalTermsVector, Double> optimize(EvalTermsVector initialTheta, List<GameRecord> dataSet, int maxIterations) {
 
-        List<GameRecord> trainingSet = dataSet; // TODO
-
         // disable pawn hash
         boolean pawnHashEnabled = Globals.isPawnHashEnabled();
         Globals.setPawnHashEnabled(false);
 
-        double initialError = cost(trainingSet, initialTheta);
+        // divide data set up into training and test sets
+        Collections.shuffle(dataSet);
+        int m = dataSet.size() * 4 / 5;
+        List<GameRecord> trainingSet = new ArrayList<>(dataSet.subList(0, m));
+        List<GameRecord> testSet = dataSet.subList(m, dataSet.size());
+        LOGGER.info("data set size: {} training: {}, test: {}", dataSet.size(), trainingSet.size(), testSet.size());
+
+        double initialError = cost(testSet, initialTheta);
         LOGGER.info("initial error={}", initialError);
 
         long start = System.currentTimeMillis();
@@ -35,8 +41,7 @@ public class LogisticRegressionTuner {
         long end = System.currentTimeMillis();
         LOGGER.info("training complete in {} seconds", (end-start)/1000);
 
-        // TODO - measure error with test set
-        double finalError = cost(trainingSet, theta);
+        double finalError = cost(testSet, theta);
         LOGGER.info("final error={}", finalError);
 
         // restore the pawn hash setting
@@ -95,7 +100,7 @@ public class LogisticRegressionTuner {
                     }
                 }
             }
-            if (numParamsImproved > 0) {
+            if (numParamsImproved == 0) {
                 break;
             }
         }

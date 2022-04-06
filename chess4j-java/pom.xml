@@ -101,7 +101,8 @@
                 <configuration>
                     <excludes>
                         <exclude>**/Perf*</exclude>
-                        <exclude>**/OpeningBookSQL*</exclude>
+                        <exclude>**/SQLiteBook*</exclude>
+                        <exclude>**/LogisticRegressionTuner*</exclude>
                     </excludes>
                     <skipTests>false</skipTests>
                     <argLine>-Djava.library.path=${project.basedir}/../chess4j-native/target</argLine>

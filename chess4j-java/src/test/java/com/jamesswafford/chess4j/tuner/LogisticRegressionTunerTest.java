@@ -20,7 +20,7 @@ public class LogisticRegressionTunerTest {
     LogisticRegressionTuner tuner = new LogisticRegressionTuner();
 
     private final static String testDB = "tunertest.db";
-    private final static String testEpd = "/samplefen.epd";
+    private final static String testEpd = "/samplefen1000.epd";
 
     static SQLiteTunerDatasource tunerDatasource;
     static Connection conn;
@@ -40,13 +40,12 @@ public class LogisticRegressionTunerTest {
         new File(testDB).delete();
     }
 
-
     @Test
     public void errorShouldDecrease() {
 
         // get a list of game records
         populateTunerDatasource(testEpd);
-        assertEquals(100, tunerDatasource.getTotalPositionsCount());
+        assertEquals(1000, tunerDatasource.getTotalPositionsCount());
         List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
 
         // get a sample theta vector
@@ -54,12 +53,12 @@ public class LogisticRegressionTunerTest {
         Arrays.fill(theta.terms, 0);
 
         // verify error continues to decrease
-        double lastError = CostFunction.cost(gameRecords, theta);
+        double lastError = 999999;
         for (int i=1;i<=5;i++) {
             Tuple2<EvalTermsVector, Double> retVal = tuner.optimize(theta, gameRecords, i);
             assertTrue(retVal._2 < lastError);
             lastError = retVal._2;
-            theta = retVal._1;
+            theta = new EvalTermsVector(retVal._1);
         }
     }
 
