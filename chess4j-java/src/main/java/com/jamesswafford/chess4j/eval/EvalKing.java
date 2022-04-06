@@ -11,12 +11,12 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.pieces.Pawn.BLACK_PAWN;
 import static com.jamesswafford.chess4j.pieces.Pawn.WHITE_PAWN;
 
-import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalKing {
 
     // returns a score from the perspective of white
-    public static int evalKing(EvalTermsVector etv, Board b, Square kingSq, boolean endGame) {
+    public static int evalKing(EvalWeightsVector etv, Board b, Square kingSq, boolean endGame) {
 
         assert(kingSq == b.getKingSquare(Color.WHITE) || kingSq == b.getKingSquare(Color.BLACK));
 
@@ -42,7 +42,7 @@ public class EvalKing {
     }
 
     // this will return a score from the perspective of the player
-    public static int evalKingSafety(EvalTermsVector etv, Board board, boolean forWhite) {
+    public static int evalKingSafety(EvalWeightsVector etv, Board board, boolean forWhite) {
         int score = 0;
 
         Square kingSq;

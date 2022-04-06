@@ -37,11 +37,11 @@ public final class Eval implements Evaluator {
 
     public Eval() { }
 
-    public static int eval(EvalTermsVector etv, Board board) {
+    public static int eval(EvalWeightsVector etv, Board board) {
         return eval(etv, board, false);
     }
 
-    public static int eval(EvalTermsVector etv, Board board, boolean materialOnly) {
+    public static int eval(EvalWeightsVector etv, Board board, boolean materialOnly) {
 
         int evalScore = evalHelper(etv, board, materialOnly);
 
@@ -54,7 +54,7 @@ public final class Eval implements Evaluator {
         return evalScore;
     }
 
-    private static int evalHelper(EvalTermsVector etv, Board board, boolean materialOnly) {
+    private static int evalHelper(EvalWeightsVector etv, Board board, boolean materialOnly) {
         int matScore = EvalMaterial.evalMaterial(board);
         if (materialOnly) {
             return board.getPlayerToMove() == Color.WHITE ? matScore : -matScore;
@@ -131,8 +131,8 @@ public final class Eval implements Evaluator {
         }
     }
 
-    private static int evalPieces(EvalTermsVector etv, long pieceMap, Board board, boolean endgame,
-                                  Function4<EvalTermsVector, Board, Square, Boolean, Integer> evalFunc) {
+    private static int evalPieces(EvalWeightsVector etv, long pieceMap, Board board, boolean endgame,
+                                  Function4<EvalWeightsVector, Board, Square, Boolean, Integer> evalFunc) {
         int score = 0;
 
         while (pieceMap != 0) {
@@ -145,7 +145,7 @@ public final class Eval implements Evaluator {
         return score;
     }
 
-    private static int evalPawns(EvalTermsVector etv, Board board, boolean endgame) {
+    private static int evalPawns(EvalWeightsVector etv, Board board, boolean endgame) {
 
         // try the pawn hash
         if (Globals.isPawnHashEnabled()) {
@@ -165,7 +165,7 @@ public final class Eval implements Evaluator {
         return score;
     }
 
-    private static int evalPawnsNoHash(EvalTermsVector etv, Board board, boolean endgame) {
+    private static int evalPawnsNoHash(EvalWeightsVector etv, Board board, boolean endgame) {
         return evalPieces(etv, board.getWhitePawns(), board, endgame, EvalPawn::evalPawn)
                 - evalPieces(etv, board.getBlackPawns(), board, endgame, EvalPawn::evalPawn);
     }
@@ -187,7 +187,7 @@ public final class Eval implements Evaluator {
      *
      * @return - true if the eval is symmetric in the given position
      */
-    private static boolean ensureEvalSymmetry(EvalTermsVector etv, int evalScore, Board board, boolean materialOnly) {
+    private static boolean ensureEvalSymmetry(EvalWeightsVector etv, int evalScore, Board board, boolean materialOnly) {
         Board flipBoard = board.deepCopy();
         flipBoard.flipVertical();
         int flipScore = evalHelper(etv, flipBoard, materialOnly);

@@ -8,12 +8,12 @@ import static org.junit.Assert.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.eval.EvalPawn.*;
 
-import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalPawnTest {
 
     private final Board board = new Board();
-    private final EvalTermsVector etv = new EvalTermsVector();
+    private final EvalWeightsVector etv = new EvalWeightsVector();
 
     @Test
     public void testEvalPawn() {

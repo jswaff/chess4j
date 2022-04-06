@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode
-public class EvalTermsVector {
+public class EvalWeightsVector {
 
     public int[] terms = new int[] {
               2,  // KING_SAFETY_PAWN_ONE_AWAY
@@ -193,10 +193,10 @@ public class EvalTermsVector {
         return indexMap.keySet();
     }
 
-    public EvalTermsVector() { }
+    public EvalWeightsVector() { }
 
-    public EvalTermsVector(EvalTermsVector evalTermsVector) {
-        System.arraycopy(evalTermsVector.terms, 0, terms, 0, terms.length);
+    public EvalWeightsVector(EvalWeightsVector evalWeightsVector) {
+        System.arraycopy(evalWeightsVector.terms, 0, terms, 0, terms.length);
     }
 
     public List<Integer> getVals(String key) {

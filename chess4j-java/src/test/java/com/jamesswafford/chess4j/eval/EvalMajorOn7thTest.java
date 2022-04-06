@@ -8,11 +8,11 @@ import static org.junit.Assert.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.*;
 
-import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalMajorOn7thTest {
 
-    private final EvalTermsVector etv = new EvalTermsVector();
+    private final EvalWeightsVector etv = new EvalWeightsVector();
     private final Board board = new Board();
 
     @Test

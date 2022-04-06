@@ -6,11 +6,11 @@ import com.jamesswafford.chess4j.board.squares.Square;
 
 import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.evalMajorOn7th;
 
-import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalRook {
 
-    public static int evalRook(EvalTermsVector etv, Board board, Square sq, boolean endgame) {
+    public static int evalRook(EvalWeightsVector etv, Board board, Square sq, boolean endgame) {
         boolean isWhite = board.getPiece(sq).isWhite();
         int score;
         if (isWhite) {
@@ -31,7 +31,7 @@ public class EvalRook {
         return score;
     }
 
-    private static int evalRookOpenFile(EvalTermsVector etv, Board board, boolean isWhite, Square sq) {
+    private static int evalRookOpenFile(EvalWeightsVector etv, Board board, boolean isWhite, Square sq) {
         int score = 0;
 
         long friends,enemies;

@@ -3,11 +3,11 @@ package com.jamesswafford.chess4j.eval;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.Square;
 
-import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalPawn {
 
-    public static int evalPawn(EvalTermsVector etv, Board board, Square sq, boolean endgame) {
+    public static int evalPawn(EvalWeightsVector etv, Board board, Square sq, boolean endgame) {
         boolean isWhite = board.getPiece(sq).isWhite();
 
         int score;

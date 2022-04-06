@@ -5,11 +5,11 @@ import com.jamesswafford.chess4j.board.squares.Square;
 
 import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.evalMajorOn7th;
 
-import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalQueen {
 
-    public static int evalQueen(EvalTermsVector etv, Board board, Square sq, boolean endgame) {
+    public static int evalQueen(EvalWeightsVector etv, Board board, Square sq, boolean endgame) {
         boolean isWhite = board.getPiece(sq).isWhite();
         int score;
         if (isWhite) {

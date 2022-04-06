@@ -3,11 +3,11 @@ package com.jamesswafford.chess4j.eval;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.Square;
 
-import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalBishop {
 
-    public static int evalBishop(EvalTermsVector etv, Board board, Square sq, boolean endgame) {
+    public static int evalBishop(EvalWeightsVector etv, Board board, Square sq, boolean endgame) {
         if (board.getPiece(sq).isWhite()) {
             if (endgame) {
                 return etv.terms[BISHOP_ENDGAME_PST_IND + sq.value()];

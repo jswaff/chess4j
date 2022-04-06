@@ -1,7 +1,6 @@
 package com.jamesswafford.chess4j.tuner;
 
-import com.jamesswafford.chess4j.eval.EvalTermsVector;
-import io.vavr.Tuple2;
+import com.jamesswafford.chess4j.eval.EvalWeightsVector;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -48,7 +47,7 @@ public class LogisticRegressionTunerTest {
         List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
 
         // get a sample theta vector
-        EvalTermsVector theta = new EvalTermsVector();
+        EvalWeightsVector theta = new EvalWeightsVector();
         Arrays.fill(theta.terms, 0);
 
         tuner.optimize(theta, gameRecords, 3);

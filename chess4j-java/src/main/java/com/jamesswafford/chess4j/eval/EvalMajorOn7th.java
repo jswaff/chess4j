@@ -9,11 +9,11 @@ import com.jamesswafford.chess4j.movegen.Magic;
 
 import static com.jamesswafford.chess4j.board.squares.Rank.*;
 
-import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalMajorOn7th {
 
-    public static int evalMajorOn7th(EvalTermsVector etv, Board board, boolean isWhite, Square sq) {
+    public static int evalMajorOn7th(EvalWeightsVector etv, Board board, boolean isWhite, Square sq) {
         int score = 0;
 
         if (isWhite) {
@@ -31,7 +31,7 @@ public class EvalMajorOn7th {
         return score;
     }
 
-    private static int evalConnectedMajorOn7th(EvalTermsVector etv, Board board, boolean isWhite, Square sq) {
+    private static int evalConnectedMajorOn7th(EvalWeightsVector etv, Board board, boolean isWhite, Square sq) {
         int score = 0;
 
         long rookMoves = Magic.getRookMoves(board,sq.value(),

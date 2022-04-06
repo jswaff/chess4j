@@ -1,6 +1,6 @@
 package com.jamesswafford.chess4j.io;
 
-import com.jamesswafford.chess4j.eval.EvalTermsVector;
+import com.jamesswafford.chess4j.eval.EvalWeightsVector;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -14,18 +14,18 @@ import java.util.stream.Stream;
 
 public class EvalTermsVectorUtil {
 
-    public static Properties toProperties(EvalTermsVector etv) {
+    public static Properties toProperties(EvalWeightsVector etv) {
         Properties props = new Properties();
-        Set<String> keys = EvalTermsVector.getKeys();
+        Set<String> keys = EvalWeightsVector.getKeys();
         keys.forEach(key -> props.put(
                 key,
                 etv.getVals(key).stream().map(Object::toString).collect(Collectors.joining(","))));
         return props;
     }
 
-    public static EvalTermsVector toVector(Properties props) {
-        EvalTermsVector etv = new EvalTermsVector();
-        Set<String> keys = EvalTermsVector.getKeys();
+    public static EvalWeightsVector toVector(Properties props) {
+        EvalWeightsVector etv = new EvalWeightsVector();
+        Set<String> keys = EvalWeightsVector.getKeys();
 
         keys.forEach(key -> {
             String propVal = props.getProperty(key);
@@ -39,7 +39,7 @@ public class EvalTermsVectorUtil {
         return etv;
     }
 
-    public static EvalTermsVector load(String propertiesFileName) {
+    public static EvalWeightsVector load(String propertiesFileName) {
         try (FileInputStream fis = new FileInputStream(propertiesFileName)) {
             Properties properties = new Properties();
             properties.load(fis);
@@ -49,7 +49,7 @@ public class EvalTermsVectorUtil {
         }
     }
 
-    public static void store(EvalTermsVector etv, String propertiesFileName, String comments) {
+    public static void store(EvalWeightsVector etv, String propertiesFileName, String comments) {
         Properties props = toProperties(etv);
         try {
             props.store(new FileOutputStream(propertiesFileName), comments);

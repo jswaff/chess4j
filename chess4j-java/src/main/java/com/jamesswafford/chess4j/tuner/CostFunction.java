@@ -1,7 +1,7 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.eval.EvalTermsVector;
+import com.jamesswafford.chess4j.eval.EvalWeightsVector;
 import com.jamesswafford.chess4j.utils.GameResult;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class CostFunction {
         return delta * delta;
     }
 
-    public static double cost(List<GameRecord> dataSet, EvalTermsVector theta) {
+    public static double cost(List<GameRecord> dataSet, EvalWeightsVector theta) {
         double totalError = 0;
 
         for (GameRecord gameRecord : dataSet) {

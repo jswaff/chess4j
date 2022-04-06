@@ -4,11 +4,11 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.squares.Square;
 
-import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalKnight {
 
-    public static int evalKnight(EvalTermsVector etv, Board board, Square sq, boolean endgame) {
+    public static int evalKnight(EvalWeightsVector etv, Board board, Square sq, boolean endgame) {
         int score;
 
         if (board.getPiece(sq).isWhite()) {
