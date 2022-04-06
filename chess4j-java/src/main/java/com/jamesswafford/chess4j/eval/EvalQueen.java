@@ -9,23 +9,23 @@ import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalQueen {
 
-    public static int evalQueen(EvalWeightsVector etv, Board board, Square sq, boolean endgame) {
+    public static int evalQueen(EvalFeaturesVector features, EvalWeightsVector weights, Board board, Square sq, boolean endgame) {
         boolean isWhite = board.getPiece(sq).isWhite();
         int score;
         if (isWhite) {
             if (endgame) {
-                score = etv.terms[QUEEN_ENDGAME_PST_IND + sq.value()];
+                score = weights.weights[QUEEN_ENDGAME_PST_IND + sq.value()];
             } else {
-                score = etv.terms[QUEEN_PST_IND + sq.value()];
+                score = weights.weights[QUEEN_PST_IND + sq.value()];
             }
         } else {
             if (endgame) {
-                score = etv.terms[QUEEN_ENDGAME_PST_IND + sq.flipVertical().value()];
+                score = weights.weights[QUEEN_ENDGAME_PST_IND + sq.flipVertical().value()];
             } else {
-                score = etv.terms[QUEEN_PST_IND + sq.flipVertical().value()];
+                score = weights.weights[QUEEN_PST_IND + sq.flipVertical().value()];
             }
         }
-        score += evalMajorOn7th(etv, board, isWhite, sq);
+        score += evalMajorOn7th(weights, board, isWhite, sq);
         return score;
     }
 

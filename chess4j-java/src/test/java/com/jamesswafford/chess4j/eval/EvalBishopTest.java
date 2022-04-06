@@ -12,17 +12,18 @@ import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalBishopTest {
 
-    private final EvalWeightsVector etv = new EvalWeightsVector();
+    private final EvalFeaturesVector features = new EvalFeaturesVector();
+    private final EvalWeightsVector weights = new EvalWeightsVector();
 
     @Test
     public void testEvalBishop() {
 
         Board board = new Board();
 
-        assertEquals(etv.terms[BISHOP_PST_IND + C1.value()], evalBishop(etv, board, C1, false));
+        assertEquals(weights.weights[BISHOP_PST_IND + C1.value()], evalBishop(features, weights, board, C1, false));
 
         // test the symmetry
-        assertEquals(evalBishop(etv, board, C1, false), evalBishop(etv, board, C8, false));
+        assertEquals(evalBishop(features, weights, board, C1, false), evalBishop(features, weights, board, C8, false));
     }
 
     @Test
@@ -30,9 +31,9 @@ public class EvalBishopTest {
 
         Board board = new Board();
 
-        assertEquals(etv.terms[BISHOP_ENDGAME_PST_IND + C1.value()], evalBishop(etv, board, C1, true));
+        assertEquals(weights.weights[BISHOP_ENDGAME_PST_IND + C1.value()], evalBishop(features, weights, board, C1, true));
 
         // test the symmetry
-        assertEquals(evalBishop(etv, board, C1, true), evalBishop(etv, board, C8, true));
+        assertEquals(evalBishop(features, weights, board, C1, true), evalBishop(features, weights, board, C8, true));
     }
 }

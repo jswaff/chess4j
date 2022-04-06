@@ -417,7 +417,7 @@ public class XBoardHandler {
             List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
             LogisticRegressionTuner tuner = new LogisticRegressionTuner();
             Tuple2<EvalWeightsVector, Double> optimizedWeights = tuner.optimize(Globals.getEvalTermsVector(), dataSet, maxIterations);
-            EvalTermsVectorUtil.store(optimizedWeights._1, "eval.properties", "Error: " + optimizedWeights._2);
+            EvalWeightsVectorUtil.store(optimizedWeights._1, "eval.properties", "Error: " + optimizedWeights._2);
             Globals.setEvalTermsVector(optimizedWeights._1);
         }, () -> LOGGER.info("no tuner datasource"));
     }
@@ -425,7 +425,7 @@ public class XBoardHandler {
     private void writeEvalProperties(String[] cmd) {
         String propsFile = cmd[1];
         LOGGER.info("writing eval to properties file {}", propsFile);
-        EvalTermsVectorUtil.store(Globals.getEvalTermsVector(), propsFile, null);
+        EvalWeightsVectorUtil.store(Globals.getEvalTermsVector(), propsFile, null);
     }
 
     /**

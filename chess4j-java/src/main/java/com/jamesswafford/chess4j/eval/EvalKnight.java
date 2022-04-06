@@ -8,23 +8,24 @@ import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalKnight {
 
-    public static int evalKnight(EvalWeightsVector etv, Board board, Square sq, boolean endgame) {
+    public static int evalKnight(EvalFeaturesVector features, EvalWeightsVector weights, Board board, Square sq,
+                                 boolean endgame) {
         int score;
 
         if (board.getPiece(sq).isWhite()) {
             if (endgame) {
-                score = etv.terms[KNIGHT_ENDGAME_PST_IND + sq.value()];
+                score = weights.weights[KNIGHT_ENDGAME_PST_IND + sq.value()];
             } else {
-                score = etv.terms[KNIGHT_PST_IND + sq.value()];
+                score = weights.weights[KNIGHT_PST_IND + sq.value()];
             }
-            score += etv.terms[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.BLACK));
+            score += weights.weights[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.BLACK));
         } else {
             if (endgame) {
-                score = etv.terms[KNIGHT_ENDGAME_PST_IND + sq.flipVertical().value()];
+                score = weights.weights[KNIGHT_ENDGAME_PST_IND + sq.flipVertical().value()];
             } else {
-                score = etv.terms[KNIGHT_PST_IND + sq.flipVertical().value()];
+                score = weights.weights[KNIGHT_PST_IND + sq.flipVertical().value()];
             }
-            score += etv.terms[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.WHITE));
+            score += weights.weights[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.WHITE));
         }
 
         return score;

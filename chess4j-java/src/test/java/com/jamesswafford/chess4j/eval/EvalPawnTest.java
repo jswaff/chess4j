@@ -13,17 +13,18 @@ import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 public class EvalPawnTest {
 
     private final Board board = new Board();
-    private final EvalWeightsVector etv = new EvalWeightsVector();
+    private final EvalFeaturesVector features = new EvalFeaturesVector();
+    private final EvalWeightsVector weights = new EvalWeightsVector();
 
     @Test
     public void testEvalPawn() {
 
         board.resetBoard();
 
-        assertEquals(etv.terms[PAWN_PST_IND + E2.value()], evalPawn(etv, board, E2, false));
+        assertEquals(weights.weights[PAWN_PST_IND + E2.value()], evalPawn(features, weights, board, E2, false));
 
         // test the symmetry
-        assertEquals(evalPawn(etv, board, E2, false), evalPawn(etv, board, E7, false));
+        assertEquals(evalPawn(features, weights, board, E2, false), evalPawn(features, weights, board, E7, false));
     }
 
     @Test
@@ -31,10 +32,10 @@ public class EvalPawnTest {
 
         board.resetBoard();
 
-        assertEquals(etv.terms[PAWN_ENDGAME_PST_IND + E2.value()], evalPawn(etv, board, E2, true));
+        assertEquals(weights.weights[PAWN_ENDGAME_PST_IND + E2.value()], evalPawn(features, weights, board, E2, true));
 
         // test the symmetry
-        assertEquals(evalPawn(etv, board, E2, true), evalPawn(etv, board, E7, true));
+        assertEquals(evalPawn(features, weights, board, E2, true), evalPawn(features, weights, board, E7, true));
     }
 
     @Test
@@ -53,12 +54,12 @@ public class EvalPawnTest {
         k - - - K - - -
         */
 
-        assertEquals(etv.terms[PAWN_PST_IND + B6.value()] + etv.terms[PASSED_PAWN_IND],
-                evalPawn(etv, board, B6, false));
+        assertEquals(weights.weights[PAWN_PST_IND + B6.value()] + weights.weights[PASSED_PAWN_IND],
+                evalPawn(features, weights, board, B6, false));
 
         // the black pawn on A2 is passed and isolated
-        assertEquals(etv.terms[PAWN_PST_IND + A7.value()] + etv.terms[PASSED_PAWN_IND] +
-                        etv.terms[ISOLATED_PAWN_IND],
-                evalPawn(etv, board, A2, false));
+        assertEquals(weights.weights[PAWN_PST_IND + A7.value()] + weights.weights[PASSED_PAWN_IND] +
+                        weights.weights[ISOLATED_PAWN_IND],
+                evalPawn(features, weights, board, A2, false));
     }
 }

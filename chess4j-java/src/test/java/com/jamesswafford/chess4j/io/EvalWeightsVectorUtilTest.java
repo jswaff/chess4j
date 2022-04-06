@@ -18,15 +18,15 @@ public class EvalWeightsVectorUtilTest {
         EvalWeightsVector etv = new EvalWeightsVector();
         // change the fields away from the defaults
         Random r = new Random(System.currentTimeMillis());
-        for (int i=0;i<etv.terms.length;i++) {
-            etv.terms[i] = r.nextInt();
+        for (int i = 0; i<etv.weights.length; i++) {
+            etv.weights[i] = r.nextInt();
         }
 
-        Properties props = EvalTermsVectorUtil.toProperties(etv);
+        Properties props = EvalWeightsVectorUtil.toProperties(etv);
 
         // load a new vector and ensure it is equivalent
-        EvalWeightsVector etv2 = EvalTermsVectorUtil.toVector(props);
-        assertArrayEquals(etv.terms, etv2.terms);
+        EvalWeightsVector etv2 = EvalWeightsVectorUtil.toVector(props);
+        assertArrayEquals(etv.weights, etv2.weights);
         assertEquals(etv, etv2);
     }
 
@@ -36,9 +36,9 @@ public class EvalWeightsVectorUtilTest {
         try (FileInputStream fis = new FileInputStream(propsFile)) {
             Properties props = new Properties();
             props.load(fis);
-            EvalWeightsVector etv = EvalTermsVectorUtil.toVector(props);
-            assertEquals(6, etv.terms[EvalWeightsVector.MAJOR_ON_7TH_IND]);
-            assertEquals(49, etv.terms[EvalWeightsVector.QUEEN_PST_IND+1]);
+            EvalWeightsVector etv = EvalWeightsVectorUtil.toVector(props);
+            assertEquals(6, etv.weights[EvalWeightsVector.MAJOR_ON_7TH_IND]);
+            assertEquals(49, etv.weights[EvalWeightsVector.QUEEN_PST_IND+1]);
         }
     }
 

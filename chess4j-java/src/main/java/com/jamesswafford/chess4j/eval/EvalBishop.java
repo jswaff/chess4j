@@ -7,18 +7,18 @@ import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalBishop {
 
-    public static int evalBishop(EvalWeightsVector etv, Board board, Square sq, boolean endgame) {
+    public static int evalBishop(EvalFeaturesVector features, EvalWeightsVector weights, Board board, Square sq, boolean endgame) {
         if (board.getPiece(sq).isWhite()) {
             if (endgame) {
-                return etv.terms[BISHOP_ENDGAME_PST_IND + sq.value()];
+                return weights.weights[BISHOP_ENDGAME_PST_IND + sq.value()];
             } else {
-                return etv.terms[BISHOP_PST_IND + sq.value()];
+                return weights.weights[BISHOP_PST_IND + sq.value()];
             }
         } else {
             if (endgame) {
-                return etv.terms[BISHOP_ENDGAME_PST_IND + sq.flipVertical().value()];
+                return weights.weights[BISHOP_ENDGAME_PST_IND + sq.flipVertical().value()];
             } else {
-                return etv.terms[BISHOP_PST_IND + sq.flipVertical().value()];
+                return weights.weights[BISHOP_PST_IND + sq.flipVertical().value()];
             }
         }
     }

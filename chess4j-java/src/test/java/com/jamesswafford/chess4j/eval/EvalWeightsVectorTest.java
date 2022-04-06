@@ -11,7 +11,7 @@ public class EvalWeightsVectorTest {
     @Test
     public void testGetVal() {
         EvalWeightsVector etv = new EvalWeightsVector();
-        assertEquals(24, etv.terms[EvalWeightsVector.ROOK_OPEN_FILE_IND]);
+        assertEquals(24, etv.weights[EvalWeightsVector.ROOK_OPEN_FILE_IND]);
         assertEquals(List.of(24), etv.getVals("ROOK_OPEN_FILE"));
 
         assertEquals(64, etv.getVals("ROOK_PST").size());
@@ -23,7 +23,7 @@ public class EvalWeightsVectorTest {
     public void testSetVal() {
         EvalWeightsVector etv = new EvalWeightsVector();
         etv.setVal("MAJOR_ON_7TH", List.of(999));
-        assertEquals(999, etv.terms[EvalWeightsVector.MAJOR_ON_7TH_IND]);
+        assertEquals(999, etv.weights[EvalWeightsVector.MAJOR_ON_7TH_IND]);
         assertEquals(List.of(999), etv.getVals("MAJOR_ON_7TH"));
     }
 
@@ -35,7 +35,7 @@ public class EvalWeightsVectorTest {
         EvalWeightsVector etv2 = new EvalWeightsVector(etv);
         assertEquals(etv, etv2);
 
-        assertEquals(999, etv2.terms[EvalWeightsVector.MAJOR_ON_7TH_IND]);
+        assertEquals(999, etv2.weights[EvalWeightsVector.MAJOR_ON_7TH_IND]);
         assertEquals(List.of(999), etv2.getVals("MAJOR_ON_7TH"));
 
         // should be able to change independently

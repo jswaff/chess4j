@@ -18,12 +18,12 @@ public class EvalMajorOn7th {
 
         if (isWhite) {
             if (sq.rank() == RANK_7 && board.getKingSquare(Color.BLACK).rank() == RANK_8) {
-                score += etv.terms[MAJOR_ON_7TH_IND];
+                score += etv.weights[MAJOR_ON_7TH_IND];
                 score += evalConnectedMajorOn7th(etv, board, true, sq);
             }
         } else {
             if (sq.rank() == RANK_2 && board.getKingSquare(Color.WHITE).rank() == RANK_1) {
-                score += etv.terms[MAJOR_ON_7TH_IND];
+                score += etv.weights[MAJOR_ON_7TH_IND];
                 score += evalConnectedMajorOn7th(etv, board,false, sq);
             }
         }
@@ -39,11 +39,11 @@ public class EvalMajorOn7th {
 
         if (isWhite) {
             if ((rookMoves & (board.getWhiteRooks() | board.getWhiteQueens())) != 0) {
-                score += etv.terms[CONNECTED_MAJORS_ON_7TH_IND];
+                score += etv.weights[CONNECTED_MAJORS_ON_7TH_IND];
             }
         } else {
             if ((rookMoves & (board.getBlackRooks() | board.getBlackQueens())) != 0) {
-                score += etv.terms[CONNECTED_MAJORS_ON_7TH_IND];
+                score += etv.weights[CONNECTED_MAJORS_ON_7TH_IND];
             }
         }
 

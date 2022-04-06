@@ -12,29 +12,30 @@ import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalKnightTest {
 
+    private final EvalFeaturesVector features = new EvalFeaturesVector();
+    private final EvalWeightsVector weights = new EvalWeightsVector();
     private final Board board = new Board();
-    private final EvalWeightsVector etv = new EvalWeightsVector();
 
     @Test
     public void testEvalKnight() {
         board.resetBoard();
 
-        assertEquals(etv.terms[KNIGHT_PST_IND + B1.value()] + (long) etv.terms[KNIGHT_TROPISM_IND] * B1.distance(E8),
-                evalKnight(etv, board, B1, false));
+        assertEquals(weights.weights[KNIGHT_PST_IND + B1.value()] + (long) weights.weights[KNIGHT_TROPISM_IND] * B1.distance(E8),
+                evalKnight(features, weights, board, B1, false));
 
         // test the symmetry
-        assertEquals(evalKnight(etv, board, B1, false), evalKnight(etv, board, B8, false));
+        assertEquals(evalKnight(features, weights, board, B1, false), evalKnight(features, weights, board, B8, false));
     }
 
     @Test
     public void testEvalKnight_endGame() {
         board.resetBoard();
 
-        assertEquals(etv.terms[KNIGHT_ENDGAME_PST_IND + B1.value()] + (long) etv.terms[KNIGHT_TROPISM_IND] * B1.distance(E8),
-                evalKnight(etv, board, B1, true));
+        assertEquals(weights.weights[KNIGHT_ENDGAME_PST_IND + B1.value()] + (long) weights.weights[KNIGHT_TROPISM_IND] * B1.distance(E8),
+                evalKnight(features, weights, board, B1, true));
 
         // test the symmetry
-        assertEquals(evalKnight(etv, board, B1, true), evalKnight(etv, board, B8, true));
+        assertEquals(evalKnight(features, weights, board, B1, true), evalKnight(features, weights, board, B8, true));
     }
 
 }

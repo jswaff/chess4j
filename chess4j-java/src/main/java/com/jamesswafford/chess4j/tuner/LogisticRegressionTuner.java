@@ -3,7 +3,7 @@ package com.jamesswafford.chess4j.tuner;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.eval.EvalWeightsVector;
-import com.jamesswafford.chess4j.io.EvalTermsVectorUtil;
+import com.jamesswafford.chess4j.io.EvalWeightsVectorUtil;
 import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -76,7 +76,7 @@ public class LogisticRegressionTuner {
     }
 
     private EvalWeightsVector trainWithNaiveSearch(List<GameRecord> trainingSet, EvalWeightsVector theta, int maxIterations) {
-        int n = theta.terms.length;
+        int n = theta.weights.length;
         double bestError = cost(trainingSet, theta);
         EvalWeightsVector bestTheta = new EvalWeightsVector(theta);
 
@@ -84,14 +84,14 @@ public class LogisticRegressionTuner {
             int numParamsImproved = 0;
             for (int i=0;i<n;i++) {
                 EvalWeightsVector candidateTheta = new EvalWeightsVector(bestTheta);
-                candidateTheta.terms[i] = candidateTheta.terms[i] + 1;
+                candidateTheta.weights[i] = candidateTheta.weights[i] + 1;
                 double error = cost(trainingSet, candidateTheta);
                 if (error < bestError) {
                     bestError = error;
                     bestTheta = candidateTheta;
                     numParamsImproved++;
                 } else {
-                    candidateTheta.terms[i] = candidateTheta.terms[i] - 2;
+                    candidateTheta.weights[i] = candidateTheta.weights[i] - 2;
                     error = cost(trainingSet, candidateTheta);
                     if (error < bestError) {
                         bestError = error;
@@ -100,7 +100,7 @@ public class LogisticRegressionTuner {
                     }
                 }
             }
-            EvalTermsVectorUtil.store(bestTheta, "eval-tune-" + (it+1) + ".properties", "Error: " + bestError);
+            EvalWeightsVectorUtil.store(bestTheta, "eval-tune-" + (it+1) + ".properties", "Error: " + bestError);
             if (numParamsImproved == 0) {
                 break;
             }

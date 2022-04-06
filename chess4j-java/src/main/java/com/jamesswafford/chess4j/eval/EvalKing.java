@@ -24,16 +24,16 @@ public class EvalKing {
 
         if (kingSq == b.getKingSquare(Color.WHITE)) {
             if (endGame) {
-                score += etv.terms[KING_ENDGAME_PST_IND + kingSq.value()];
+                score += etv.weights[KING_ENDGAME_PST_IND + kingSq.value()];
             } else {
-                score += etv.terms[KING_PST_IND + kingSq.value()];
+                score += etv.weights[KING_PST_IND + kingSq.value()];
                 score += evalKingSafety(etv, b, true);
             }
         } else {
             if (endGame) {
-                score += etv.terms[KING_ENDGAME_PST_IND + kingSq.flipVertical().value()];
+                score += etv.weights[KING_ENDGAME_PST_IND + kingSq.flipVertical().value()];
             } else {
-                score += etv.terms[KING_PST_IND + kingSq.flipVertical().value()];
+                score += etv.weights[KING_PST_IND + kingSq.flipVertical().value()];
                 score += evalKingSafety(etv, b, false);
             }
         }
@@ -53,64 +53,64 @@ public class EvalKing {
                 // check that pawns on f,g,h are not too far away
                 if (board.getPiece(F2) == WHITE_PAWN);
                 else if (board.getPiece(F3) == WHITE_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(F4) == WHITE_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(G2) == WHITE_PAWN);
                 else if (board.getPiece(G3) == WHITE_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(G4) == WHITE_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(H2) == WHITE_PAWN);
                 else if (board.getPiece(H3) == WHITE_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND] /2;
+                    score += etv.weights[KING_SAFETY_PAWN_ONE_AWAY_IND] /2;
                 } else if (board.getPiece(H4) == WHITE_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND] /2;
+                    score += etv.weights[KING_SAFETY_PAWN_TWO_AWAY_IND] /2;
                 } else {
-                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND] /2;
+                    score += etv.weights[KING_SAFETY_PAWN_FAR_AWAY_IND] /2;
                 }
 
             } else if (kingSq.file().westOf(FILE_D)) {
                 if (board.getPiece(C2) == WHITE_PAWN);
                 else if (board.getPiece(C3) == WHITE_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(C4) == WHITE_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(B2) == WHITE_PAWN);
                 else if (board.getPiece(B3) == WHITE_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(B4) == WHITE_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(A2) == WHITE_PAWN);
                 else if (board.getPiece(A3) == WHITE_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND] /2;
+                    score += etv.weights[KING_SAFETY_PAWN_ONE_AWAY_IND] /2;
                 } else if (board.getPiece(A4) == WHITE_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND] /2;
+                    score += etv.weights[KING_SAFETY_PAWN_TWO_AWAY_IND] /2;
                 } else {
-                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND] /2;
+                    score += etv.weights[KING_SAFETY_PAWN_FAR_AWAY_IND] /2;
                 }
             } else {
                 // check if open file
                 if ( ((board.getWhitePawns() | board.getBlackPawns())
                         & Bitboard.files[kingSq.file().getValue()])==0)
                 {
-                    score += etv.terms[KING_SAFETY_MIDDLE_OPEN_FILE_IND];
+                    score += etv.weights[KING_SAFETY_MIDDLE_OPEN_FILE_IND];
                 }
             }
             // scale down with material?
@@ -119,63 +119,63 @@ public class EvalKing {
             if (kingSq.file().eastOf(FILE_E)) {
                 if (board.getPiece(F7) == BLACK_PAWN);
                 else if (board.getPiece(F6) == BLACK_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(F5) == BLACK_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(G7) == BLACK_PAWN);
                 else if (board.getPiece(G6) == BLACK_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(G5) == BLACK_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(H7) == BLACK_PAWN);
                 else if (board.getPiece(H6) == BLACK_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND] /2;
+                    score += etv.weights[KING_SAFETY_PAWN_ONE_AWAY_IND] /2;
                 } else if (board.getPiece(H5) == BLACK_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND] /2;
+                    score += etv.weights[KING_SAFETY_PAWN_TWO_AWAY_IND] /2;
                 } else {
-                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND] /2;
+                    score += etv.weights[KING_SAFETY_PAWN_FAR_AWAY_IND] /2;
                 }
             } else if (kingSq.file().westOf(FILE_D)) {
                 if (board.getPiece(C7) == BLACK_PAWN);
                 else if (board.getPiece(C6) == BLACK_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(C5) == BLACK_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(B7) == BLACK_PAWN);
                 else if (board.getPiece(B6) == BLACK_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(B5) == BLACK_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND];
+                    score += etv.weights[KING_SAFETY_PAWN_FAR_AWAY_IND];
                 }
 
                 if (board.getPiece(A7) == BLACK_PAWN);
                 else if (board.getPiece(A6) == BLACK_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_ONE_AWAY_IND] /2;
+                    score += etv.weights[KING_SAFETY_PAWN_ONE_AWAY_IND] /2;
                 } else if (board.getPiece(A5) == BLACK_PAWN) {
-                    score += etv.terms[KING_SAFETY_PAWN_TWO_AWAY_IND] /2;
+                    score += etv.weights[KING_SAFETY_PAWN_TWO_AWAY_IND] /2;
                 } else {
-                    score += etv.terms[KING_SAFETY_PAWN_FAR_AWAY_IND] /2;
+                    score += etv.weights[KING_SAFETY_PAWN_FAR_AWAY_IND] /2;
                 }
             } else {
                 // check if open file
                 if ( ((board.getWhitePawns() | board.getBlackPawns())
                         & Bitboard.files[kingSq.file().getValue()])==0)
                 {
-                    score += etv.terms[KING_SAFETY_MIDDLE_OPEN_FILE_IND];
+                    score += etv.weights[KING_SAFETY_MIDDLE_OPEN_FILE_IND];
                 }
             }
         }

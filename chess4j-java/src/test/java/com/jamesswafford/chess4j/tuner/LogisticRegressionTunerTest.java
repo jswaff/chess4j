@@ -48,7 +48,7 @@ public class LogisticRegressionTunerTest {
 
         // get a sample theta vector
         EvalWeightsVector theta = new EvalWeightsVector();
-        Arrays.fill(theta.terms, 0);
+        Arrays.fill(theta.weights, 0);
 
         tuner.optimize(theta, gameRecords, 3);
     }
