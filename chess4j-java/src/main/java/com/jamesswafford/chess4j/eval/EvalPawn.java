@@ -38,4 +38,34 @@ public class EvalPawn {
         return score;
     }
 
+    public static java.lang.Void extractPawnFeatures(int[] features, Board board, Square sq, boolean endgame) {
+        boolean isWhite = board.getPiece(sq).isWhite();
+
+        if (isWhite) {
+            if (endgame) {
+                features[PAWN_ENDGAME_PST_IND + sq.value()]++;
+            } else {
+                features[PAWN_PST_IND + sq.value()]++;
+            }
+        } else {
+            if (endgame) {
+                features[PAWN_ENDGAME_PST_IND + sq.flipVertical().value()]--;
+            } else {
+                features[PAWN_PST_IND + sq.flipVertical().value()]--;
+            }
+        }
+
+        int v = isWhite ? 1 : -1;
+        if (PawnUtils.isPassedPawn(board, sq, isWhite)) {
+            features[PASSED_PAWN_IND] += v;
+        }
+        if (PawnUtils.isIsolated(board, sq, isWhite)) {
+            features[ISOLATED_PAWN_IND] += v;
+        }
+        if (PawnUtils.isDoubled(board, sq, isWhite)) {
+            features[DOUBLED_PAWN_IND] += v;
+        }
+
+        return null;
+    }
 }

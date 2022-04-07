@@ -79,14 +79,15 @@ public final class Eval implements Evaluator {
         int[] egFeatures = new int[EvalWeightsVector.NUM_WEIGHTS];
 
         mgScore += evalPawns(weights, board, false);
+        extractFeatures(mgFeatures, board.getWhitePawns() | board.getBlackPawns(), board, false,
+                EvalPawn::extractPawnFeatures);
 //        egScore += evalPawns(etv, board, true);
 
-        int knightMgScore = evalPieces(weights, board.getWhiteKnights(), board, false, EvalKnight::evalKnight)
+         mgScore += evalPieces(weights, board.getWhiteKnights(), board, false, EvalKnight::evalKnight)
                 - evalPieces(weights, board.getBlackKnights(), board, false, EvalKnight::evalKnight);
         extractFeatures(mgFeatures, board.getWhiteKnights() | board.getBlackKnights(), board, false,
                 EvalKnight::extractKnightFeatures);
-        assert(knightMgScore==calculateScore(mgFeatures, weights));
-        mgScore += knightMgScore;
+        assert(mgScore-matScore==calculateScore(mgFeatures, weights));
 //        egScore += evalPieces(etv, board.getWhiteKnights(), board, true, EvalKnight::evalKnight)
 //                - evalPieces(etv, board.getBlackKnights(), board, true, EvalKnight::evalKnight);
 
