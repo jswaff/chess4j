@@ -23,4 +23,21 @@ public class EvalBishop {
         }
     }
 
+    public static java.lang.Void extractBishopFeatures(int[] features, Board board, Square sq, boolean endgame) {
+        if (board.getPiece(sq).isWhite()) {
+            if (endgame) {
+                features[BISHOP_ENDGAME_PST_IND + sq.value()]++;
+            } else {
+                features[BISHOP_PST_IND + sq.value()]++;
+            }
+        } else {
+            if (endgame) {
+                features[BISHOP_ENDGAME_PST_IND + sq.flipVertical().value()]--;
+            } else {
+                features[BISHOP_PST_IND + sq.flipVertical().value()]--;
+            }
+        }
+        return null;
+    }
+
 }

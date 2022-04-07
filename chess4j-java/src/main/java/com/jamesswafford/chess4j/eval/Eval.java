@@ -87,12 +87,14 @@ public final class Eval implements Evaluator {
                 - evalPieces(weights, board.getBlackKnights(), board, false, EvalKnight::evalKnight);
         extractFeatures(mgFeatures, board.getWhiteKnights() | board.getBlackKnights(), board, false,
                 EvalKnight::extractKnightFeatures);
-        assert(mgScore-matScore==calculateScore(mgFeatures, weights));
 //        egScore += evalPieces(etv, board.getWhiteKnights(), board, true, EvalKnight::evalKnight)
 //                - evalPieces(etv, board.getBlackKnights(), board, true, EvalKnight::evalKnight);
 
         mgScore += evalPieces(weights, board.getWhiteBishops(), board, false, EvalBishop::evalBishop)
                 - evalPieces(weights, board.getBlackBishops(), board, false, EvalBishop::evalBishop);
+        extractFeatures(mgFeatures, board.getWhiteBishops() | board.getBlackBishops(), board, false,
+                EvalBishop::extractBishopFeatures);
+        assert(mgScore-matScore==calculateScore(mgFeatures, weights));
 //        egScore += evalPieces(etv, board.getWhiteBishops(), board, true, EvalBishop::evalBishop)
 //                - evalPieces(etv, board.getBlackBishops(), board, true, EvalBishop::evalBishop);
 
