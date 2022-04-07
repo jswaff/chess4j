@@ -31,7 +31,7 @@ public class EvalMajorOn7th {
         return score;
     }
 
-    private static int evalConnectedMajorOn7th(EvalWeightsVector etv, Board board, boolean isWhite, Square sq) {
+    private static int evalConnectedMajorOn7th(EvalWeightsVector weights, Board board, boolean isWhite, Square sq) {
         int score = 0;
 
         long rookMoves = Magic.getRookMoves(board,sq.value(),
@@ -39,15 +39,44 @@ public class EvalMajorOn7th {
 
         if (isWhite) {
             if ((rookMoves & (board.getWhiteRooks() | board.getWhiteQueens())) != 0) {
-                score += etv.weights[CONNECTED_MAJORS_ON_7TH_IND];
+                score += weights.weights[CONNECTED_MAJORS_ON_7TH_IND];
             }
         } else {
             if ((rookMoves & (board.getBlackRooks() | board.getBlackQueens())) != 0) {
-                score += etv.weights[CONNECTED_MAJORS_ON_7TH_IND];
+                score += weights.weights[CONNECTED_MAJORS_ON_7TH_IND];
             }
         }
 
         return score;
+    }
+
+    public static void exractMajorOn7thFeatures(int[] features, Board board, boolean isWhite, Square sq) {
+        if (isWhite) {
+            if (sq.rank() == RANK_7 && board.getKingSquare(Color.BLACK).rank() == RANK_8) {
+                features[MAJOR_ON_7TH_IND]++;
+                extractConnectedMajorOn7thFeatures(features, board, true, sq);
+            }
+        } else {
+            if (sq.rank() == RANK_2 && board.getKingSquare(Color.WHITE).rank() == RANK_1) {
+                features[MAJOR_ON_7TH_IND]--;
+                extractConnectedMajorOn7thFeatures(features, board, false, sq);
+            }
+        }
+    }
+
+    public static void extractConnectedMajorOn7thFeatures(int[] features, Board board, boolean isWhite, Square sq) {
+        long rookMoves = Magic.getRookMoves(board,sq.value(),
+                Bitboard.rays[sq.value()][East.getInstance().value()]);
+
+        if (isWhite) {
+            if ((rookMoves & (board.getWhiteRooks() | board.getWhiteQueens())) != 0) {
+                features[CONNECTED_MAJORS_ON_7TH_IND]++;
+            }
+        } else {
+            if ((rookMoves & (board.getBlackRooks() | board.getBlackQueens())) != 0) {
+                features[CONNECTED_MAJORS_ON_7TH_IND]--;
+            }
+        }
     }
 
 }
