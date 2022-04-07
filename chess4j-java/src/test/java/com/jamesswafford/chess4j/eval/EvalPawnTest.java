@@ -12,36 +12,34 @@ import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalPawnTest {
 
-    private final Board board = new Board();
-    private final EvalFeaturesVector features = new EvalFeaturesVector();
     private final EvalWeightsVector weights = new EvalWeightsVector();
 
     @Test
     public void testEvalPawn() {
 
-        board.resetBoard();
+        Board board = new Board();
 
-        assertEquals(weights.weights[PAWN_PST_IND + E2.value()], evalPawn(features, weights, board, E2, false));
+        assertEquals(weights.weights[PAWN_PST_IND + E2.value()], evalPawn(weights, board, E2, false));
 
         // test the symmetry
-        assertEquals(evalPawn(features, weights, board, E2, false), evalPawn(features, weights, board, E7, false));
+        assertEquals(evalPawn(weights, board, E2, false), evalPawn(weights, board, E7, false));
     }
 
     @Test
     public void testEvalPawn_endGame() {
 
-        board.resetBoard();
+        Board board = new Board();
 
-        assertEquals(weights.weights[PAWN_ENDGAME_PST_IND + E2.value()], evalPawn(features, weights, board, E2, true));
+        assertEquals(weights.weights[PAWN_ENDGAME_PST_IND + E2.value()], evalPawn(weights, board, E2, true));
 
         // test the symmetry
-        assertEquals(evalPawn(features, weights, board, E2, true), evalPawn(features, weights, board, E7, true));
+        assertEquals(evalPawn(weights, board, E2, true), evalPawn(weights, board, E7, true));
     }
 
     @Test
     public void testEvalPawn_wiki3() {
 
-        board.setPos("8/8/1PP2PbP/3r4/8/1Q5p/p5N1/k3K3 b - - 0 1");
+        Board board = new Board("8/8/1PP2PbP/3r4/8/1Q5p/p5N1/k3K3 b - - 0 1");
 
         /*
         - - - - - - - -
@@ -55,11 +53,11 @@ public class EvalPawnTest {
         */
 
         assertEquals(weights.weights[PAWN_PST_IND + B6.value()] + weights.weights[PASSED_PAWN_IND],
-                evalPawn(features, weights, board, B6, false));
+                evalPawn(weights, board, B6, false));
 
         // the black pawn on A2 is passed and isolated
         assertEquals(weights.weights[PAWN_PST_IND + A7.value()] + weights.weights[PASSED_PAWN_IND] +
                         weights.weights[ISOLATED_PAWN_IND],
-                evalPawn(features, weights, board, A2, false));
+                evalPawn(weights, board, A2, false));
     }
 }

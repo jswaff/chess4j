@@ -13,12 +13,11 @@ import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 public class EvalMajorOn7thTest {
 
     private final EvalWeightsVector weights = new EvalWeightsVector();
-    private final Board board = new Board();
 
     @Test
     public void testEvalMajorOn7th() {
 
-        board.setPos("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
+        Board board = new Board("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
         /*
             -------k
             --Q--R--	white to move

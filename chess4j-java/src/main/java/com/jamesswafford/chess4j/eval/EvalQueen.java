@@ -9,7 +9,7 @@ import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalQueen {
 
-    public static int evalQueen(EvalFeaturesVector features, EvalWeightsVector weights, Board board, Square sq, boolean endgame) {
+    public static int evalQueen(EvalWeightsVector weights, Board board, Square sq, boolean endgame) {
         boolean isWhite = board.getPiece(sq).isWhite();
         int score;
         if (isWhite) {

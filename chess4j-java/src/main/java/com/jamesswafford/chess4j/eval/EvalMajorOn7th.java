@@ -13,18 +13,18 @@ import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalMajorOn7th {
 
-    public static int evalMajorOn7th(EvalWeightsVector etv, Board board, boolean isWhite, Square sq) {
+    public static int evalMajorOn7th(EvalWeightsVector weights, Board board, boolean isWhite, Square sq) {
         int score = 0;
 
         if (isWhite) {
             if (sq.rank() == RANK_7 && board.getKingSquare(Color.BLACK).rank() == RANK_8) {
-                score += etv.weights[MAJOR_ON_7TH_IND];
-                score += evalConnectedMajorOn7th(etv, board, true, sq);
+                score += weights.weights[MAJOR_ON_7TH_IND];
+                score += evalConnectedMajorOn7th(weights, board, true, sq);
             }
         } else {
             if (sq.rank() == RANK_2 && board.getKingSquare(Color.WHITE).rank() == RANK_1) {
-                score += etv.weights[MAJOR_ON_7TH_IND];
-                score += evalConnectedMajorOn7th(etv, board,false, sq);
+                score += weights.weights[MAJOR_ON_7TH_IND];
+                score += evalConnectedMajorOn7th(weights, board,false, sq);
             }
         }
 

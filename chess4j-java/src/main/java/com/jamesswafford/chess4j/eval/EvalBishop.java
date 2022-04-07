@@ -7,7 +7,7 @@ import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalBishop {
 
-    public static int evalBishop(EvalFeaturesVector features, EvalWeightsVector weights, Board board, Square sq, boolean endgame) {
+    public static int evalBishop(EvalWeightsVector weights, Board board, Square sq, boolean endgame) {
         if (board.getPiece(sq).isWhite()) {
             if (endgame) {
                 return weights.weights[BISHOP_ENDGAME_PST_IND + sq.value()];

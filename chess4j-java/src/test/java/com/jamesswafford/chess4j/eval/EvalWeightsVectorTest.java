@@ -10,36 +10,36 @@ public class EvalWeightsVectorTest {
 
     @Test
     public void testGetVal() {
-        EvalWeightsVector etv = new EvalWeightsVector();
-        assertEquals(24, etv.weights[EvalWeightsVector.ROOK_OPEN_FILE_IND]);
-        assertEquals(List.of(24), etv.getVals("ROOK_OPEN_FILE"));
+        EvalWeightsVector weights = new EvalWeightsVector();
+        assertEquals(24, weights.weights[EvalWeightsVector.ROOK_OPEN_FILE_IND]);
+        assertEquals(List.of(24), weights.getVals("ROOK_OPEN_FILE"));
 
-        assertEquals(64, etv.getVals("ROOK_PST").size());
+        assertEquals(64, weights.getVals("ROOK_PST").size());
 
-        assertEquals(List.of(-4), etv.getVals("DOUBLED_PAWN"));
+        assertEquals(List.of(-4), weights.getVals("DOUBLED_PAWN"));
     }
 
     @Test
     public void testSetVal() {
-        EvalWeightsVector etv = new EvalWeightsVector();
-        etv.setVal("MAJOR_ON_7TH", List.of(999));
-        assertEquals(999, etv.weights[EvalWeightsVector.MAJOR_ON_7TH_IND]);
-        assertEquals(List.of(999), etv.getVals("MAJOR_ON_7TH"));
+        EvalWeightsVector weights = new EvalWeightsVector();
+        weights.setVal("MAJOR_ON_7TH", List.of(999));
+        assertEquals(999, weights.weights[EvalWeightsVector.MAJOR_ON_7TH_IND]);
+        assertEquals(List.of(999), weights.getVals("MAJOR_ON_7TH"));
     }
 
     @Test
     public void copyConstructor() {
-        EvalWeightsVector etv = new EvalWeightsVector();
-        etv.setVal("MAJOR_ON_7TH", List.of(999));
+        EvalWeightsVector weights = new EvalWeightsVector();
+        weights.setVal("MAJOR_ON_7TH", List.of(999));
 
-        EvalWeightsVector etv2 = new EvalWeightsVector(etv);
-        assertEquals(etv, etv2);
+        EvalWeightsVector weights2 = new EvalWeightsVector(weights);
+        assertEquals(weights, weights2);
 
-        assertEquals(999, etv2.weights[EvalWeightsVector.MAJOR_ON_7TH_IND]);
-        assertEquals(List.of(999), etv2.getVals("MAJOR_ON_7TH"));
+        assertEquals(999, weights2.weights[EvalWeightsVector.MAJOR_ON_7TH_IND]);
+        assertEquals(List.of(999), weights2.getVals("MAJOR_ON_7TH"));
 
         // should be able to change independently
-        etv2.setVal("ROOK_OPEN_FILE", List.of(75));
-        assertNotEquals(etv, etv2);
+        weights2.setVal("ROOK_OPEN_FILE", List.of(75));
+        assertNotEquals(weights, weights2);
     }
 }

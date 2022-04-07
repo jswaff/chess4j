@@ -10,7 +10,7 @@ import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalRook {
 
-    public static int evalRook(EvalFeaturesVector features, EvalWeightsVector weights, Board board, Square sq, boolean endgame) {
+    public static int evalRook(EvalWeightsVector weights, Board board, Square sq, boolean endgame) {
         boolean isWhite = board.getPiece(sq).isWhite();
         int score;
         if (isWhite) {
