@@ -14,17 +14,23 @@ public class EvalKnight {
 
         if (board.getPiece(sq).isWhite()) {
             if (endgame) {
+                features.features[KNIGHT_ENDGAME_PST_IND + sq.value()]++;
                 score = weights.weights[KNIGHT_ENDGAME_PST_IND + sq.value()];
             } else {
+                features.features[KNIGHT_PST_IND + sq.value()]++;
                 score = weights.weights[KNIGHT_PST_IND + sq.value()];
             }
+            features.features[KNIGHT_TROPISM_IND] += sq.distance(board.getKingSquare(Color.BLACK));
             score += weights.weights[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.BLACK));
         } else {
             if (endgame) {
+                features.features[KNIGHT_ENDGAME_PST_IND + sq.flipVertical().value()]--;
                 score = weights.weights[KNIGHT_ENDGAME_PST_IND + sq.flipVertical().value()];
             } else {
+                features.features[KNIGHT_PST_IND + sq.flipVertical().value()]--;
                 score = weights.weights[KNIGHT_PST_IND + sq.flipVertical().value()];
             }
+            features.features[KNIGHT_TROPISM_IND] -= sq.distance(board.getKingSquare(Color.WHITE));
             score += weights.weights[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.WHITE));
         }
 
