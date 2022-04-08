@@ -10,7 +10,7 @@ import static com.jamesswafford.chess4j.tuner.Hypothesis.hypothesis;
 
 public class CostFunction {
 
-    public static double cost(double hypothesis, GameResult gameResult) {
+    public static double y(GameResult gameResult) {
         double y;
         if (GameResult.WIN.equals(gameResult)) {
             y = 1.0;
@@ -21,8 +21,11 @@ public class CostFunction {
         } else {
             throw new IllegalArgumentException("Cannot compute cost for game result " + gameResult);
         }
+        return y;
+    }
 
-        double delta = y - hypothesis;
+    public static double cost(double hypothesis, GameResult gameResult) {
+        double delta = y(gameResult) - hypothesis;
         return delta * delta;
     }
 

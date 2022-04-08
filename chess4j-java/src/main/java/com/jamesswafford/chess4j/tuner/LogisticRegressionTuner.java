@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.jamesswafford.chess4j.tuner.CostFunction.cost;
-import static com.jamesswafford.chess4j.tuner.Hypothesis.hypothesis;
 
 public class LogisticRegressionTuner {
 
@@ -38,7 +37,8 @@ public class LogisticRegressionTuner {
         LOGGER.info("initial error using test set: {}", initialError);
 
         long start = System.currentTimeMillis();
-        EvalWeightsVector theta = trainWithNaiveSearch(trainingSet, initialTheta, maxIterations);
+        //EvalWeightsVector theta = trainWithNaiveSearch(trainingSet, initialTheta, maxIterations);
+        EvalWeightsVector theta = trainWithGradientDescent(trainingSet, initialTheta, maxIterations);
         long end = System.currentTimeMillis();
         LOGGER.info("training complete in {} seconds", (end-start)/1000);
 
@@ -51,35 +51,54 @@ public class LogisticRegressionTuner {
         return new Tuple2<>(theta, finalError);
     }
 
-    private EvalWeightsVector trainWithGradientDescent(List<GameRecord> trainingSet, EvalWeightsVector theta, int maxIterations) {
+    private EvalWeightsVector trainWithGradientDescent(List<GameRecord> trainingSet, EvalWeightsVector weights, int maxIterations) {
 
-        EvalWeightsVector bestTheta = new EvalWeightsVector(theta);
+        EvalWeightsVector bestWeights = new EvalWeightsVector(weights);
+
+        int m = trainingSet.size();
+        int n = weights.weights.length;
+        double alpha = 1.0;
+
         for (int it=0; it<maxIterations; it++) {
 
-            // calculate the hypothesis and cost over the entire training set
-            List<int[]> features = new ArrayList<>();
-            List<Double> hypothesis = new ArrayList<>();
-            List<Double> y = new ArrayList<>();
-            List<Double> cost = new ArrayList<>();
+            double[][] features = new double[m][n];
+            double[] y = new double[m];
 
-            for (GameRecord trainingRecord : trainingSet) {
-                Tuple2<Integer, int[]> eval = Eval.evalWithFeatures(bestTheta, new Board(trainingRecord.getFen()));
-                features.add(eval._2);
-                double h = hypothesis(eval._1);
-                // TODO: get Y
-                double e = cost(h, trainingRecord.getGameResult());
-                hypothesis.add(h);
-                cost.add(e);
+            for (int i=0;i<m;i++) {
+                GameRecord trainingRecord = trainingSet.get(i);
+                Tuple2<Integer, int[]> eval = Eval.evalWithFeatures(bestWeights, new Board(trainingRecord.getFen()));
+                for (int j=0;j<n;j++) {
+                    features[i][j] = eval._2[j];
+                }
+                y[i] = CostFunction.y(trainingRecord.getGameResult());
+
+                // sanity check
+                double s = 0;
+                for (int j=0;j<n;j++) {
+                    s += features[i][j] * bestWeights.weights[j];
+                }
+                System.out.println("s=" + s + ", eval=" + eval._1);
+                assert(s == eval._1);
             }
 
             // adjust the weights using batch gradient descent
-            // DO THEM ALL AT ONE TIME (do not use updated theta)
+            double[] theta = new double[n];
+            for (int j=0;j<n;j++) {
+                theta[j] = bestWeights.weights[j];
+            }
+            double[] gradient = GradientDescent.batchGradientDescent(theta, features, y, alpha);
 
+            // adjust theta
+            for (int j=0;j<n;j++) {
+                bestWeights.weights[j] -= (int)gradient[j];
+            }
 
-            // TODO: convergence test
+            // calculate cost
+            double error = cost(trainingSet, bestWeights);
+            LOGGER.info("error using training set after iteration {}: {}", (it+1), error);
         }
 
-        return bestTheta;
+        return bestWeights;
     }
 
     private EvalWeightsVector trainWithNaiveSearch(List<GameRecord> trainingSet, EvalWeightsVector theta, int maxIterations) {
