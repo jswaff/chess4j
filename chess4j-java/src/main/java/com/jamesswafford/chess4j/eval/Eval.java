@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.jamesswafford.chess4j.eval.EvalKing.evalKing;
+import static com.jamesswafford.chess4j.eval.EvalKing.extractKingFeatures;
 import static com.jamesswafford.chess4j.eval.MaterialType.*;
 
 public final class Eval implements Evaluator {
@@ -108,16 +109,24 @@ public final class Eval implements Evaluator {
                 - evalPieces(weights, board.getBlackQueens(), board, false, EvalQueen::evalQueen);
         extractFeatures(mgFeatures, board.getWhiteQueens() | board.getBlackQueens(), board, false,
                 EvalQueen::extractQueenFeatures);
-        assert(mgScore-matScore==calculateScore(mgFeatures, weights));
 //        egScore += evalPieces(etv, board.getWhiteQueens(), board, true, EvalQueen::evalQueen)
 //                - evalPieces(etv, board.getBlackQueens(), board, true, EvalQueen::evalQueen);
 
         egScore = mgScore;
+        System.arraycopy(mgFeatures, 0, egFeatures, 0, egFeatures.length);
 
         mgScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), false)
                 - evalKing(weights, board, board.getKingSquare(Color.BLACK), false);
+        extractKingFeatures(mgFeatures, board, board.getKingSquare(Color.WHITE), false);
+        extractKingFeatures(mgFeatures, board, board.getKingSquare(Color.BLACK), false);
+
         egScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), true)
                 - evalKing(weights, board, board.getKingSquare(Color.BLACK), true);
+        extractKingFeatures(egFeatures, board, board.getKingSquare(Color.WHITE), true);
+        extractKingFeatures(egFeatures, board, board.getKingSquare(Color.BLACK), true);
+
+        assert(mgScore-matScore==calculateScore(mgFeatures, weights));
+        assert(egScore-matScore==calculateScore(egFeatures, weights));
 
         // blend the middle game score and end game score, and divide by the draw factor
         int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
