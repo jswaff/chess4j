@@ -13,9 +13,9 @@ public class HypothesisTest {
 
     @Test
     public void hypothesisTest() {
-        EvalWeightsVector etv = new EvalWeightsVector();
+        EvalWeightsVector weights = new EvalWeightsVector();
         Board board = new Board();
-        assertDoubleEquals(hypothesis(board, etv), 0.5);
+        assertDoubleEquals(hypothesis(board, weights), 0.5);
     }
 
     @Test

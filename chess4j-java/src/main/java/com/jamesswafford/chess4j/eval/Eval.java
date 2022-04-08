@@ -255,17 +255,17 @@ public final class Eval implements Evaluator {
     /**
      * Helper method to test eval symmetry
      *
-     * @param etv - eval terms vector
+     * @param weights - eval terms vector
      * @param evalScore - the score the board has been evaulated at
      * @param board - the chess board
      * @param materialOnly - whether to evaulate material only
      *
      * @return - true if the eval is symmetric in the given position
      */
-    private static boolean ensureEvalSymmetry(EvalWeightsVector etv, int evalScore, Board board, boolean materialOnly) {
+    private static boolean ensureEvalSymmetry(EvalWeightsVector weights, int evalScore, Board board, boolean materialOnly) {
         Board flipBoard = board.deepCopy();
         flipBoard.flipVertical();
-        int flipScore = evalHelper(etv, flipBoard, materialOnly);
+        int flipScore = evalHelper(weights, flipBoard, materialOnly);
         boolean retVal = flipScore == evalScore;
         flipBoard.flipVertical();
         assert(board.equals(flipBoard));
