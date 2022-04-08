@@ -45,4 +45,46 @@ public class EvalQueenTest {
                         weights.weights[CONNECTED_MAJORS_ON_7TH_IND],
                 evalQueen(weights, board, C7, false));
     }
+
+    @Test
+    public void testExtractQueenFeatures() {
+
+        Board board = new Board();
+
+        int[] features = new int[NUM_WEIGHTS];
+        extractQueenFeatures(features, board, D1, false);
+        assertEquals(1, features[QUEEN_PST_IND + D1.value()]);
+
+        // test the symmetry
+        int[] features2 = new int[NUM_WEIGHTS];
+        extractQueenFeatures(features2, board, D8, false);
+        assertEquals(-1, features2[QUEEN_PST_IND + D1.value()]);
+    }
+
+    @Test
+    public void testExtractQueenFeatures_endGame() {
+
+        Board board = new Board();
+
+        int[] features = new int[NUM_WEIGHTS];
+        extractQueenFeatures(features, board, D1, true);
+        assertEquals(1, features[QUEEN_ENDGAME_PST_IND + D1.value()]);
+
+        // test the symmetry
+        int[] features2 = new int[NUM_WEIGHTS];
+        extractQueenFeatures(features2, board, D8, true);
+        assertEquals(-1, features2[QUEEN_ENDGAME_PST_IND + D1.value()]);
+    }
+
+    @Test
+    public void testExtractQueenFeatures_bankRankMate() {
+
+        Board board = new Board("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
+
+        int[] features = new int[NUM_WEIGHTS];
+        extractQueenFeatures(features, board, C7, false);
+        assertEquals(1, features[MAJOR_ON_7TH_IND]);
+        assertEquals(1, features[CONNECTED_MAJORS_ON_7TH_IND]);
+    }
+
 }

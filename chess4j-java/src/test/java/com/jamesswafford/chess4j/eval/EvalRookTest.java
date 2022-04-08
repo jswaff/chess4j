@@ -100,7 +100,6 @@ public class EvalRookTest {
         int[] features2 = new int[NUM_WEIGHTS];
         extractRookFeatures(features2, board, A8, true);
         assertEquals(-1, features2[ROOK_ENDGAME_PST_IND + A1.value()]);
-
     }
 
     @Test

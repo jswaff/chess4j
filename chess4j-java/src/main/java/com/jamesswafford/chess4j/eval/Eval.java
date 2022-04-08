@@ -101,12 +101,14 @@ public final class Eval implements Evaluator {
                 - evalPieces(weights, board.getBlackRooks(), board, false, EvalRook::evalRook);
         extractFeatures(mgFeatures, board.getWhiteRooks() | board.getBlackRooks(), board, false,
                 EvalRook::extractRookFeatures);
-        assert(mgScore-matScore==calculateScore(mgFeatures, weights));
 //        egScore += evalPieces(etv, board.getWhiteRooks(), board, true, EvalRook::evalRook)
 //                - evalPieces(etv, board.getBlackRooks(), board, true, EvalRook::evalRook);
 
         mgScore += evalPieces(weights, board.getWhiteQueens(), board, false, EvalQueen::evalQueen)
                 - evalPieces(weights, board.getBlackQueens(), board, false, EvalQueen::evalQueen);
+        extractFeatures(mgFeatures, board.getWhiteQueens() | board.getBlackQueens(), board, false,
+                EvalQueen::extractQueenFeatures);
+        assert(mgScore-matScore==calculateScore(mgFeatures, weights));
 //        egScore += evalPieces(etv, board.getWhiteQueens(), board, true, EvalQueen::evalQueen)
 //                - evalPieces(etv, board.getBlackQueens(), board, true, EvalQueen::evalQueen);
 
