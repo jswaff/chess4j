@@ -6,10 +6,17 @@ import java.util.List;
 
 public class GradientDescent {
 
-    public static EvalWeightsVector batchGradientDescent(List<Double> h, List<Double> y, List<Double> x, double alpha) {
-        // TODO
+    // calculate the gradient - the partial derivatives of the cost w.r.t. theta
+    public static double[] batchGradientDescent(double[] theta, int[][] x, double[] y, double lambda) {
 
-        return new EvalWeightsVector();
+        int n = theta.length;
+        int m = y.length;
+
+        // x should be m x n
+
+        double[] grad = new double[n];
+
+        return grad;
     }
 
 }

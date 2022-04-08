@@ -20,13 +20,13 @@ public class HypothesisTest {
 
     @Test
     public void squishifyTest() {
-        assertDoubleEquals(squishify(0), 0.5);
-        assertDoubleEquals(squishify(50), 0.5806);
-        assertDoubleEquals(squishify(100), 0.6571);
-        assertDoubleEquals(squishify(-300), 0.1244);
-        assertDoubleEquals(squishify(-500), 0.0372);
-        assertDoubleEquals(squishify(CHECKMATE), 1);
-        assertDoubleEquals(squishify(-CHECKMATE), 0);
+        assertDoubleEquals(Hypothesis.hypothesis(0), 0.5);
+        assertDoubleEquals(Hypothesis.hypothesis(50), 0.5806);
+        assertDoubleEquals(Hypothesis.hypothesis(100), 0.6571);
+        assertDoubleEquals(Hypothesis.hypothesis(-300), 0.1244);
+        assertDoubleEquals(Hypothesis.hypothesis(-500), 0.0372);
+        assertDoubleEquals(Hypothesis.hypothesis(CHECKMATE), 1);
+        assertDoubleEquals(Hypothesis.hypothesis(-CHECKMATE), 0);
     }
 
     private void assertDoubleEquals(double val, double expected) {

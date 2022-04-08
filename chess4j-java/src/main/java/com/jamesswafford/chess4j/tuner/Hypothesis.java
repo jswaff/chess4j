@@ -8,10 +8,10 @@ public class Hypothesis {
 
     public static double hypothesis(Board board, EvalWeightsVector evalWeightsVector) {
         int score = Eval.eval(evalWeightsVector, board, false);
-        return squishify(score);
+        return hypothesis(score);
     }
 
-    public static double squishify(int score) {
+    public static double hypothesis(int score) {
         // This is the traditional approach: 1 / (1 + e ^ -z)
         //return 1.0 / (1 + Math.exp(-score));
 

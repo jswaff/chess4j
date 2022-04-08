@@ -24,7 +24,7 @@ public class EvalWeightsVectorUtil {
     }
 
     public static EvalWeightsVector toVector(Properties props) {
-        EvalWeightsVector etv = new EvalWeightsVector();
+        EvalWeightsVector weights = new EvalWeightsVector();
         Set<String> keys = EvalWeightsVector.getKeys();
 
         keys.forEach(key -> {
@@ -33,10 +33,10 @@ public class EvalWeightsVectorUtil {
                     .map(String::trim)
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
-            etv.setVal(key, propVals);
+            weights.setVal(key, propVals);
         });
 
-        return etv;
+        return weights;
     }
 
     public static EvalWeightsVector load(String propertiesFileName) {

@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.EvalWeightsVector;
 import com.jamesswafford.chess4j.io.EvalWeightsVectorUtil;
 import io.vavr.Tuple2;
@@ -56,18 +57,24 @@ public class LogisticRegressionTuner {
         for (int it=0; it<maxIterations; it++) {
 
             // calculate the hypothesis and cost over the entire training set
+            List<int[]> features = new ArrayList<>();
             List<Double> hypothesis = new ArrayList<>();
+            List<Double> y = new ArrayList<>();
             List<Double> cost = new ArrayList<>();
 
             for (GameRecord trainingRecord : trainingSet) {
-                double h = hypothesis(new Board(trainingRecord.getFen()), bestTheta);
+                Tuple2<Integer, int[]> eval = Eval.evalWithFeatures(bestTheta, new Board(trainingRecord.getFen()));
+                features.add(eval._2);
+                double h = hypothesis(eval._1);
+                // TODO: get Y
                 double e = cost(h, trainingRecord.getGameResult());
                 hypothesis.add(h);
                 cost.add(e);
             }
 
             // adjust the weights using batch gradient descent
-            // TODO: need feature vector
+            // DO THEM ALL AT ONE TIME (do not use updated theta)
+
 
             // TODO: convergence test
         }
