@@ -15,26 +15,22 @@ import static com.jamesswafford.chess4j.eval.MaterialType.*;
 
 public class EvalMaterialTest {
 
-    private final Board board = new Board();
-
     @Test
     public void testEvalMaterial_initialPos() {
-
-        board.resetBoard();
-        assertEquals(0, evalMaterial(board));
+        assertEquals(0, evalMaterial(new Board()));
     }
 
     @Test
     public void testEvalMaterial_pos1() {
 
-        board.setPos("6k1/8/8/3B4/8/8/8/K7 w - - 0 1");
+        Board board = new Board("6k1/8/8/3B4/8/8/8/K7 w - - 0 1");
         assertEquals(BISHOP_VAL, evalMaterial(board));
     }
 
     @Test
     public void testEvalMaterial_pos2() {
 
-        board.setPos("6k1/8/8/3Br3/8/8/8/K7 w - - 0 1");
+        Board board = new Board("6k1/8/8/3Br3/8/8/8/K7 w - - 0 1");
         assertEquals(BISHOP_VAL-ROOK_VAL-60, // rook adj 12 x 5 pawns
                 evalMaterial(board));
     }
@@ -42,7 +38,7 @@ public class EvalMaterialTest {
     @Test
     public void testEvalNonPawnMaterial() {
 
-        board.setPos("8/k7/prb5/K7/QN6/8/8/8 b - - 0 1");
+        Board board = new Board("8/k7/prb5/K7/QN6/8/8/8 b - - 0 1");
 
         assertEquals(QUEEN_VAL + KNIGHT_VAL - 30, // 30 = knight adj 6 x 5 pawns
                 evalNonPawnMaterial(board, true));
@@ -54,7 +50,7 @@ public class EvalMaterialTest {
     @Test
     public void testEvalPawnMaterial() {
 
-        board.setPos("8/k7/prb5/K7/QN6/8/8/8 b - - 0 1");
+        Board board = new Board("8/k7/prb5/K7/QN6/8/8/8 b - - 0 1");
 
         assertEquals(0, evalPawnMaterial(board, true));
         assertEquals(PAWN_VAL, evalPawnMaterial(board, false));

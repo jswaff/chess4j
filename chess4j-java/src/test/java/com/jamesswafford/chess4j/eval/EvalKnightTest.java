@@ -8,33 +8,67 @@ import static org.junit.Assert.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.eval.EvalKnight.*;
 
-import static com.jamesswafford.chess4j.eval.EvalTermsVector.*;
+import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
 
 public class EvalKnightTest {
 
-    private final Board board = new Board();
-    private final EvalTermsVector etv = new EvalTermsVector();
+    private final EvalWeightsVector weights = new EvalWeightsVector();
 
     @Test
     public void testEvalKnight() {
-        board.resetBoard();
+        Board board = new Board();
 
-        assertEquals(etv.terms[KNIGHT_PST_IND + B1.value()] + (long) etv.terms[KNIGHT_TROPISM_IND] * B1.distance(E8),
-                evalKnight(etv, board, B1, false));
+        assertEquals(weights.weights[KNIGHT_PST_IND + B1.value()] +
+                        (long) weights.weights[KNIGHT_TROPISM_IND] * B1.distance(E8),
+                evalKnight(weights, board, B1, false));
 
         // test the symmetry
-        assertEquals(evalKnight(etv, board, B1, false), evalKnight(etv, board, B8, false));
+        assertEquals(evalKnight(weights, board, B1, false),
+                evalKnight(weights, board, B8, false));
     }
 
     @Test
     public void testEvalKnight_endGame() {
-        board.resetBoard();
+        Board board = new Board();
 
-        assertEquals(etv.terms[KNIGHT_ENDGAME_PST_IND + B1.value()] + (long) etv.terms[KNIGHT_TROPISM_IND] * B1.distance(E8),
-                evalKnight(etv, board, B1, true));
+        assertEquals(weights.weights[KNIGHT_ENDGAME_PST_IND + B1.value()] + (long) weights.weights[KNIGHT_TROPISM_IND] * B1.distance(E8),
+                evalKnight(weights, board, B1, true));
 
         // test the symmetry
-        assertEquals(evalKnight(etv, board, B1, true), evalKnight(etv, board, B8, true));
+        assertEquals(evalKnight(weights, board, B1, true),
+                evalKnight(weights, board, B8, true));
+    }
+
+    @Test
+    public void testExtractKnightFeatures() {
+        Board board = new Board();
+
+        int[] features = new int[NUM_WEIGHTS];
+        extractKnightFeatures(features, board, B1, false);
+        assertEquals(1, features[KNIGHT_PST_IND + B1.value()]);
+        assertEquals(B1.distance(E8), features[KNIGHT_TROPISM_IND]);
+
+        // test the symmetry
+        int[] features2 = new int[NUM_WEIGHTS];
+        extractKnightFeatures(features2, board, B8, false);
+        assertEquals(-1, features2[KNIGHT_PST_IND + B1.value()]);
+        assertEquals(-B8.distance(E1), features2[KNIGHT_TROPISM_IND]);
+    }
+
+    @Test
+    public void testExtractKnightFeatures_endGame() {
+        Board board = new Board();
+
+        int[] features = new int[NUM_WEIGHTS];
+        extractKnightFeatures(features, board, B1, true);
+        assertEquals(1, features[KNIGHT_ENDGAME_PST_IND + B1.value()]);
+        assertEquals(B1.distance(E8), features[KNIGHT_TROPISM_IND]);
+
+        // test the symmetry
+        int[] features2 = new int[NUM_WEIGHTS];
+        extractKnightFeatures(features2, board, B8, true);
+        assertEquals(-1, features2[KNIGHT_ENDGAME_PST_IND + B1.value()]);
+        assertEquals(-B8.distance(E1), features2[KNIGHT_TROPISM_IND]);
     }
 
 }

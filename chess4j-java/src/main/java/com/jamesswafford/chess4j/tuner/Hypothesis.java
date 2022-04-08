@@ -2,16 +2,16 @@ package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.eval.Eval;
-import com.jamesswafford.chess4j.eval.EvalTermsVector;
+import com.jamesswafford.chess4j.eval.EvalWeightsVector;
 
 public class Hypothesis {
 
-    public static double hypothesis(Board board, EvalTermsVector evalTermsVector) {
-        int score = Eval.eval(evalTermsVector, board, false);
-        return squishify(score);
+    public static double hypothesis(Board board, EvalWeightsVector evalWeightsVector) {
+        int score = Eval.eval(evalWeightsVector, board, false);
+        return hypothesis(score);
     }
 
-    public static double squishify(int score) {
+    public static double hypothesis(int score) {
         // This is the traditional approach: 1 / (1 + e ^ -z)
         //return 1.0 / (1 + Math.exp(-score));
 

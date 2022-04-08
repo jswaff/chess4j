@@ -7,7 +7,7 @@ import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.book.OpeningBook;
 import com.jamesswafford.chess4j.eval.Eval;
-import com.jamesswafford.chess4j.eval.EvalTermsVector;
+import com.jamesswafford.chess4j.eval.EvalWeightsVector;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
@@ -416,8 +416,8 @@ public class XBoardHandler {
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
             List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
             LogisticRegressionTuner tuner = new LogisticRegressionTuner();
-            Tuple2<EvalTermsVector, Double> optimizedWeights = tuner.optimize(Globals.getEvalTermsVector(), dataSet, maxIterations);
-            EvalTermsVectorUtil.store(optimizedWeights._1, "eval.properties", "Error: " + optimizedWeights._2);
+            Tuple2<EvalWeightsVector, Double> optimizedWeights = tuner.optimize(Globals.getEvalTermsVector(), dataSet, maxIterations);
+            EvalWeightsVectorUtil.store(optimizedWeights._1, "eval.properties", "Error: " + optimizedWeights._2);
             Globals.setEvalTermsVector(optimizedWeights._1);
         }, () -> LOGGER.info("no tuner datasource"));
     }
@@ -425,7 +425,7 @@ public class XBoardHandler {
     private void writeEvalProperties(String[] cmd) {
         String propsFile = cmd[1];
         LOGGER.info("writing eval to properties file {}", propsFile);
-        EvalTermsVectorUtil.store(Globals.getEvalTermsVector(), propsFile, null);
+        EvalWeightsVectorUtil.store(Globals.getEvalTermsVector(), propsFile, null);
     }
 
     /**

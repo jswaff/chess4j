@@ -7,9 +7,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode
-public class EvalTermsVector {
+public class EvalWeightsVector {
 
-    public int[] terms = new int[] {
+    public int[] weights = new int[] {
               2,  // KING_SAFETY_PAWN_ONE_AWAY
             -31,  // KING_SAFETY_PAWN_TWO_AWAY
             -31,  // KING_SAFETY_PAWN_FAR_AWAY
@@ -160,6 +160,7 @@ public class EvalTermsVector {
     public static final int PASSED_PAWN_IND = 777;
     public static final int ISOLATED_PAWN_IND = 778;
     public static final int DOUBLED_PAWN_IND = 779;
+    public static final int NUM_WEIGHTS = 780;
 
     private static final Map<String, Tuple2<Integer, Integer>> indexMap = new HashMap<>();
     static {
@@ -193,10 +194,10 @@ public class EvalTermsVector {
         return indexMap.keySet();
     }
 
-    public EvalTermsVector() { }
+    public EvalWeightsVector() { }
 
-    public EvalTermsVector(EvalTermsVector evalTermsVector) {
-        System.arraycopy(evalTermsVector.terms, 0, terms, 0, terms.length);
+    public EvalWeightsVector(EvalWeightsVector evalWeightsVector) {
+        System.arraycopy(evalWeightsVector.weights, 0, weights, 0, weights.length);
     }
 
     public List<Integer> getVals(String key) {
@@ -204,7 +205,7 @@ public class EvalTermsVector {
             throw new IllegalArgumentException("invalid key " + key);
         }
         Tuple2<Integer, Integer> v = indexMap.get(key);
-        int[] myterms = Arrays.copyOfRange(terms, v._1, v._1 + v._2);
+        int[] myterms = Arrays.copyOfRange(weights, v._1, v._1 + v._2);
         return Arrays.stream(myterms)
                 .boxed()
                 .collect(Collectors.toList());
@@ -217,7 +218,7 @@ public class EvalTermsVector {
                     indexTuple._2 + ", received: " + vals.size());
         }
         for (int i=0;i<vals.size();i++) {
-            terms[indexTuple._1 + i] = vals.get(i);
+            weights[indexTuple._1 + i] = vals.get(i);
         }
     }
 }
