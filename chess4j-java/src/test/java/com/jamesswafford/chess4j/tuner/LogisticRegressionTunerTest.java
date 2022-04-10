@@ -8,7 +8,6 @@ import org.junit.Test;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -47,10 +46,9 @@ public class LogisticRegressionTunerTest {
         List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
 
         // get a sample theta vector
-        EvalWeightsVector theta = new EvalWeightsVector();
-        Arrays.fill(theta.weights, 0);
+        EvalWeightsVector weights = new EvalWeightsVector();
 
-        tuner.optimize(theta, gameRecords, 3);
+        tuner.optimize(weights, gameRecords, 3);
     }
 
     private void populateTunerDatasource(String epd) {

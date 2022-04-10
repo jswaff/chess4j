@@ -6,8 +6,8 @@ import com.jamesswafford.chess4j.eval.EvalWeightsVector;
 
 public class Hypothesis {
 
-    public static double hypothesis(Board board, EvalWeightsVector evalWeightsVector) {
-        int score = Eval.eval(evalWeightsVector, board, false);
+    public static double hypothesis(Board board, EvalWeightsVector weights) {
+        int score = Eval.eval(weights, board, false);
         return hypothesis(score);
     }
 

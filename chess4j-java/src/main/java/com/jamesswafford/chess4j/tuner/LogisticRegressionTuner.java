@@ -8,6 +8,7 @@ import com.jamesswafford.chess4j.io.EvalWeightsVectorUtil;
 import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ejml.simple.SimpleMatrix;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,43 +60,43 @@ public class LogisticRegressionTuner {
         int n = weights.weights.length;
         double alpha = 1.0;
 
+        SimpleMatrix x = new SimpleMatrix(m, n);
+        SimpleMatrix y = new SimpleMatrix(m, 1);
+        for (int i=0;i<m;i++) {
+            GameRecord trainingRecord = trainingSet.get(i);
+            Board board = new Board(trainingRecord.getFen());
+            int[] features_i = Eval.extractFeatures(board);
+            for (int j=0;j<n;j++) {
+                x.set(i, j, features_i[j]);
+            }
+            y.set(i, 0, CostFunction.y(trainingRecord.getGameResult()));
+        }
+
+        SimpleMatrix xTrans = x.transpose();
+        SimpleMatrix theta = new SimpleMatrix(n, 1);
+        for (int i=0;i<n;i++) {
+            theta.set(i, 0, weights.weights[i]);
+        }
+
         for (int it=0; it<maxIterations; it++) {
 
-            double[][] features = new double[m][n];
-            double[] y = new double[m];
+            // create the hypothesis vector
+            SimpleMatrix h = x.mult(theta); // TODO: use Eval / sigmoid
+            SimpleMatrix loss = h.minus(y);
 
-            for (int i=0;i<m;i++) {
-                GameRecord trainingRecord = trainingSet.get(i);
-                Tuple2<Integer, int[]> eval = Eval.evalWithFeatures(bestWeights, new Board(trainingRecord.getFen()));
-                for (int j=0;j<n;j++) {
-                    features[i][j] = eval._2[j];
-                }
-                y[i] = CostFunction.y(trainingRecord.getGameResult());
+            SimpleMatrix gradient = xTrans.mult(loss).divide(m);
+            theta = theta.minus(gradient); // TODO: alpha
 
-                // sanity check
-                double s = 0;
-                for (int j=0;j<n;j++) {
-                    s += features[i][j] * bestWeights.weights[j];
-                }
-                System.out.println("s=" + s + ", eval=" + eval._1);
-                assert(s == eval._1);
-            }
+//            int[] s = new int[m];
+//            for (int i=0;i<m;i++) {
+//                GameRecord trainingRecord = trainingSet.get(i);
+//                Board board = new Board(trainingRecord.getFen());
+//                s[i] = Eval.eval(weights, board);
+//            }
 
-            // adjust the weights using batch gradient descent
-            double[] theta = new double[n];
-            for (int j=0;j<n;j++) {
-                theta[j] = bestWeights.weights[j];
-            }
-            double[] gradient = GradientDescent.batchGradientDescent(theta, features, y, alpha);
-
-            // adjust theta
-            for (int j=0;j<n;j++) {
-                bestWeights.weights[j] -= (int)gradient[j];
-            }
-
-            // calculate cost
-            double error = cost(trainingSet, bestWeights);
-            LOGGER.info("error using training set after iteration {}: {}", (it+1), error);
+//            // calculate cost
+//            double error = cost(trainingSet, bestWeights);
+//            LOGGER.info("error using training set after iteration {}: {}", (it+1), error);
         }
 
         return bestWeights;
