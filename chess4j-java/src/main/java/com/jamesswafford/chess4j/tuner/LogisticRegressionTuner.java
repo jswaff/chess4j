@@ -54,8 +54,6 @@ public class LogisticRegressionTuner {
 
     private EvalWeightsVector trainWithGradientDescent(List<GameRecord> trainingSet, EvalWeightsVector weights, int maxIterations) {
 
-        EvalWeightsVector bestWeights = new EvalWeightsVector(weights);
-
         int m = trainingSet.size();
         int n = weights.weights.length;
         double alpha = 1.0;
@@ -73,30 +71,37 @@ public class LogisticRegressionTuner {
         }
 
         SimpleMatrix xTrans = x.transpose();
+
+        EvalWeightsVector bestWeights = new EvalWeightsVector(weights);
         SimpleMatrix theta = new SimpleMatrix(n, 1);
         for (int i=0;i<n;i++) {
-            theta.set(i, 0, weights.weights[i]);
+            theta.set(i, 0, bestWeights.weights[i]);
         }
 
         for (int it=0; it<maxIterations; it++) {
 
-            // create the hypothesis vector
-            SimpleMatrix h = x.mult(theta); // TODO: use Eval / sigmoid
-            SimpleMatrix loss = h.minus(y);
-
-            SimpleMatrix gradient = xTrans.mult(loss).divide(m);
-            theta = theta.minus(gradient); // TODO: alpha
-
-//            int[] s = new int[m];
+//            // create the hypothesis vector
+//            //SimpleMatrix h = x.mult(theta);
+//            SimpleMatrix h = new SimpleMatrix(m, 1);
 //            for (int i=0;i<m;i++) {
 //                GameRecord trainingRecord = trainingSet.get(i);
 //                Board board = new Board(trainingRecord.getFen());
-//                s[i] = Eval.eval(weights, board);
+//                h.set(i, 0, Hypothesis.hypothesis(board, bestWeights));
+//            }
+//
+//            SimpleMatrix loss = h.minus(y);
+//
+//            SimpleMatrix gradient = xTrans.mult(loss).divide(m);
+//            System.out.println(gradient);
+//
+//            theta = theta.minus(gradient.divide((1/alpha))); // TODO: alpha
+//            for (int i=0;i<n;i++) {
+//                bestWeights.weights[i] = (int)Math.round(theta.get(i, 0));
 //            }
 
-//            // calculate cost
-//            double error = cost(trainingSet, bestWeights);
-//            LOGGER.info("error using training set after iteration {}: {}", (it+1), error);
+            // calculate cost
+            double error = cost(trainingSet, bestWeights);
+            LOGGER.info("error using training set after iteration {}: {}", (it+1), error);
         }
 
         return bestWeights;
