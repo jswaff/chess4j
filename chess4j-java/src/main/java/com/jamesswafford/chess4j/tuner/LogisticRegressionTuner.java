@@ -38,7 +38,6 @@ public class LogisticRegressionTuner {
         LOGGER.info("initial error using test set: {}", initialError);
 
         long start = System.currentTimeMillis();
-        //EvalWeightsVector theta = trainWithNaiveSearch(trainingSet, initialTheta, maxIterations);
         EvalWeightsVector theta = trainWithGradientDescent(trainingSet, initialTheta, maxIterations);
         long end = System.currentTimeMillis();
         LOGGER.info("training complete in {} seconds", (end-start)/1000);
@@ -80,24 +79,21 @@ public class LogisticRegressionTuner {
 
         for (int it=0; it<maxIterations; it++) {
 
-//            // create the hypothesis vector
-//            //SimpleMatrix h = x.mult(theta);
-//            SimpleMatrix h = new SimpleMatrix(m, 1);
-//            for (int i=0;i<m;i++) {
-//                GameRecord trainingRecord = trainingSet.get(i);
-//                Board board = new Board(trainingRecord.getFen());
-//                h.set(i, 0, Hypothesis.hypothesis(board, bestWeights));
-//            }
-//
-//            SimpleMatrix loss = h.minus(y);
-//
-//            SimpleMatrix gradient = xTrans.mult(loss).divide(m);
-//            System.out.println(gradient);
-//
-//            theta = theta.minus(gradient.divide((1/alpha))); // TODO: alpha
-//            for (int i=0;i<n;i++) {
-//                bestWeights.weights[i] = (int)Math.round(theta.get(i, 0));
-//            }
+            // create the hypothesis vector
+            //SimpleMatrix h = x.mult(theta);
+            SimpleMatrix h = new SimpleMatrix(m, 1);
+            for (int i=0;i<m;i++) {
+                GameRecord trainingRecord = trainingSet.get(i);
+                Board board = new Board(trainingRecord.getFen());
+                h.set(i, 0, Hypothesis.hypothesis(board, bestWeights));
+            }
+
+            SimpleMatrix loss = h.minus(y);
+            SimpleMatrix gradient = xTrans.mult(loss).divide(m);
+            theta = theta.minus(gradient); // TODO: alpha
+            for (int i=0;i<n;i++) {
+                bestWeights.weights[i] = (int)Math.round(theta.get(i, 0));
+            }
 
             // calculate cost
             double error = cost(trainingSet, bestWeights);
