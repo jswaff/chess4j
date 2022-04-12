@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.EvalWeightsVector;
 import com.jamesswafford.chess4j.io.EvalWeightsVectorUtil;
@@ -72,18 +73,20 @@ public class LogisticRegressionTuner {
             SimpleMatrix x = new SimpleMatrix(m, n);
             SimpleMatrix y = new SimpleMatrix(m, 1);
             for (int i=0;i<m;i++) {
-                GameRecord trainingRecord = trainingSet.get(i);
+                GameRecord trainingRecord = trainingSet.get(random.nextInt(trainingSet.size()));
                 Board board = new Board(trainingRecord.getFen());
                 int[] features_i = Eval.extractFeatures(board);
                 for (int j=0;j<n;j++) {
                     x.set(i, j, features_i[j]);
                 }
-                y.set(i, 0, CostFunction.y(trainingRecord.getGameResult()));
+                double y_i = CostFunction.y(trainingRecord.getGameResult());
+                if (board.getPlayerToMove().isBlack()) y_i = 1.0 - y_i; // from white's perspective
+                y.set(i, 0, y_i);
             }
             SimpleMatrix xTrans = x.transpose();
 
             // calculate the gradient
-            SimpleMatrix h = x.mult(theta);
+            SimpleMatrix h = x.mult(theta); // from white's perspective
             SimpleMatrix loss = h.minus(y);
             SimpleMatrix gradient = xTrans.mult(loss).divide(m);
             theta = theta.minus(gradient.divide(1.0/learningRate)); // TODO: verify the learning rate
