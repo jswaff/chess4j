@@ -13,6 +13,7 @@ import org.ejml.simple.SimpleMatrix;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import static com.jamesswafford.chess4j.tuner.CostFunction.cost;
 
@@ -55,29 +56,10 @@ public class LogisticRegressionTuner {
     private EvalWeightsVector trainWithGradientDescent(List<GameRecord> trainingSet, EvalWeightsVector weights,
                                                        double learningRate, int maxIterations) {
 
-        int m = trainingSet.size();
-        int n = weights.weights.length;
-        double alpha = 1.0;
-
-        SimpleMatrix x = new SimpleMatrix(m, n);
-        SimpleMatrix y = new SimpleMatrix(m, 1);
-        for (int i=0;i<m;i++) {
-            GameRecord trainingRecord = trainingSet.get(i);
-            Board board = new Board(trainingRecord.getFen());
-            int[] features_i = Eval.extractFeatures(board);
-            for (int j=0;j<n;j++) {
-                x.set(i, j, features_i[j]);
-            }
-            y.set(i, 0, CostFunction.y(trainingRecord.getGameResult()));
-        }
-
-        SimpleMatrix xTrans = x.transpose();
+        Random random = new Random(System.currentTimeMillis());
 
         EvalWeightsVector bestWeights = new EvalWeightsVector(weights);
-        bestWeights.randomize();
-        for (int i=0;i<bestWeights.weights.length;i++) {
-            System.out.println("i=" + i + " : " + bestWeights.weights[i]);
-        }
+        int n = weights.weights.length;
         SimpleMatrix theta = new SimpleMatrix(n, 1);
         for (int i=0;i<n;i++) {
             theta.set(i, 0, bestWeights.weights[i]);
@@ -85,18 +67,26 @@ public class LogisticRegressionTuner {
 
         for (int it=0; it<maxIterations; it++) {
 
-            // create the hypothesis vector
-            SimpleMatrix h = x.mult(theta);
-//            SimpleMatrix h = new SimpleMatrix(m, 1);
-//            for (int i=0;i<m;i++) {
-//                GameRecord trainingRecord = trainingSet.get(i);
-//                Board board = new Board(trainingRecord.getFen());
-//                h.set(i, 0, Hypothesis.hypothesis(board, bestWeights));
-//            }
+            // randomly pick some records from the training set
+            int m = Math.min(1000, trainingSet.size());
+            SimpleMatrix x = new SimpleMatrix(m, n);
+            SimpleMatrix y = new SimpleMatrix(m, 1);
+            for (int i=0;i<m;i++) {
+                GameRecord trainingRecord = trainingSet.get(i);
+                Board board = new Board(trainingRecord.getFen());
+                int[] features_i = Eval.extractFeatures(board);
+                for (int j=0;j<n;j++) {
+                    x.set(i, j, features_i[j]);
+                }
+                y.set(i, 0, CostFunction.y(trainingRecord.getGameResult()));
+            }
+            SimpleMatrix xTrans = x.transpose();
 
+            // calculate the gradient
+            SimpleMatrix h = x.mult(theta);
             SimpleMatrix loss = h.minus(y);
             SimpleMatrix gradient = xTrans.mult(loss).divide(m);
-            theta = theta.minus(gradient.divide(1.0/learningRate)); // TODO: alpha
+            theta = theta.minus(gradient.divide(1.0/learningRate)); // TODO: verify the learning rate
             for (int i=0;i<n;i++) {
                 bestWeights.weights[i] = (int)Math.round(theta.get(i, 0));
             }
@@ -104,6 +94,10 @@ public class LogisticRegressionTuner {
             // calculate cost
             double error = cost(trainingSet, bestWeights);
             LOGGER.info("error using training set after iteration {}: {}", (it+1), error);
+
+            if (it % 9 == 0) {
+                EvalWeightsVectorUtil.store(bestWeights, "eval-tune-" + (it+1) + ".properties", "Error: " + error);
+            }
         }
 
         return bestWeights;
