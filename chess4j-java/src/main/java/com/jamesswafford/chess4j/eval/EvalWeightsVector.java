@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.eval;
 import io.vavr.Tuple2;
 import lombok.EqualsAndHashCode;
 
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 public class EvalWeightsVector {
 
     public int[] weights = new int[] {
+
               2,  // KING_SAFETY_PAWN_ONE_AWAY
             -31,  // KING_SAFETY_PAWN_TWO_AWAY
             -31,  // KING_SAFETY_PAWN_FAR_AWAY
@@ -219,6 +221,13 @@ public class EvalWeightsVector {
         }
         for (int i=0;i<vals.size();i++) {
             weights[indexTuple._1 + i] = vals.get(i);
+        }
+    }
+
+    public void randomize() {
+        SecureRandom random = new SecureRandom();
+        for (int i=0;i< weights.length;i++) {
+            weights[i] = random.nextInt(100);
         }
     }
 }

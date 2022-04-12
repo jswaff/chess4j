@@ -21,7 +21,8 @@ public class LogisticRegressionTuner {
     private static final Logger LOGGER = LogManager.getLogger(LogisticRegressionTuner.class);
 
 
-    public Tuple2<EvalWeightsVector, Double> optimize(EvalWeightsVector initialTheta, List<GameRecord> dataSet, int maxIterations) {
+    public Tuple2<EvalWeightsVector, Double> optimize(EvalWeightsVector initialTheta, List<GameRecord> dataSet,
+                                                      double learningRate, int maxIterations) {
 
         // disable pawn hash
         boolean pawnHashEnabled = Globals.isPawnHashEnabled();
@@ -38,7 +39,7 @@ public class LogisticRegressionTuner {
         LOGGER.info("initial error using test set: {}", initialError);
 
         long start = System.currentTimeMillis();
-        EvalWeightsVector theta = trainWithGradientDescent(trainingSet, initialTheta, maxIterations);
+        EvalWeightsVector theta = trainWithGradientDescent(trainingSet, initialTheta, learningRate, maxIterations);
         long end = System.currentTimeMillis();
         LOGGER.info("training complete in {} seconds", (end-start)/1000);
 
@@ -51,7 +52,8 @@ public class LogisticRegressionTuner {
         return new Tuple2<>(theta, finalError);
     }
 
-    private EvalWeightsVector trainWithGradientDescent(List<GameRecord> trainingSet, EvalWeightsVector weights, int maxIterations) {
+    private EvalWeightsVector trainWithGradientDescent(List<GameRecord> trainingSet, EvalWeightsVector weights,
+                                                       double learningRate, int maxIterations) {
 
         int m = trainingSet.size();
         int n = weights.weights.length;
@@ -72,6 +74,10 @@ public class LogisticRegressionTuner {
         SimpleMatrix xTrans = x.transpose();
 
         EvalWeightsVector bestWeights = new EvalWeightsVector(weights);
+        bestWeights.randomize();
+        for (int i=0;i<bestWeights.weights.length;i++) {
+            System.out.println("i=" + i + " : " + bestWeights.weights[i]);
+        }
         SimpleMatrix theta = new SimpleMatrix(n, 1);
         for (int i=0;i<n;i++) {
             theta.set(i, 0, bestWeights.weights[i]);
@@ -90,7 +96,7 @@ public class LogisticRegressionTuner {
 
             SimpleMatrix loss = h.minus(y);
             SimpleMatrix gradient = xTrans.mult(loss).divide(m);
-            theta = theta.minus(gradient); // TODO: alpha
+            theta = theta.minus(gradient.divide(1.0/learningRate)); // TODO: alpha
             for (int i=0;i<n;i++) {
                 bestWeights.weights[i] = (int)Math.round(theta.get(i, 0));
             }

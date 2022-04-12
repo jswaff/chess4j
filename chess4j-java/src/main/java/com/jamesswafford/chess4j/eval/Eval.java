@@ -114,14 +114,6 @@ public final class Eval implements Evaluator {
         return board.getPlayerToMove() == Color.WHITE ? taperedScore : -taperedScore;
     }
 
-    private static int calculateScore(int[] features, EvalWeightsVector weights) {
-        int score = 0;
-        for (int i=0;i<features.length;i++) {
-            score += features[i] * weights.weights[i];
-        }
-        return score;
-    }
-
     private static boolean evalsAreEqual(int javaScore, Board board, boolean materialOnly) {
         if (Initializer.nativeCodeInitialized()) {
             try {
@@ -265,5 +257,12 @@ public final class Eval implements Evaluator {
         }
     }
 
+    private static int calculateScore(int[] features, EvalWeightsVector weights) {
+        int score = 0;
+        for (int i=0;i<features.length;i++) {
+            score += features[i] * weights.weights[i];
+        }
+        return score;
+    }
 
 }

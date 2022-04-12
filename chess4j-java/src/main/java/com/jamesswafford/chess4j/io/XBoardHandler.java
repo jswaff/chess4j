@@ -412,11 +412,13 @@ public class XBoardHandler {
     }
 
     private void tuneEvalVector(String[] cmd) {
-        int maxIterations = Integer.parseInt(cmd[1]);
+        double learningRate = Double.parseDouble(cmd[1]);
+        int maxIterations = Integer.parseInt(cmd[2]);
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
             List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
             LogisticRegressionTuner tuner = new LogisticRegressionTuner();
-            Tuple2<EvalWeightsVector, Double> optimizedWeights = tuner.optimize(Globals.getEvalTermsVector(), dataSet, maxIterations);
+            Tuple2<EvalWeightsVector, Double> optimizedWeights = tuner.optimize(Globals.getEvalTermsVector(), dataSet,
+                    learningRate, maxIterations);
             EvalWeightsVectorUtil.store(optimizedWeights._1, "eval.properties", "Error: " + optimizedWeights._2);
             Globals.setEvalTermsVector(optimizedWeights._1);
         }, () -> LOGGER.info("no tuner datasource"));
