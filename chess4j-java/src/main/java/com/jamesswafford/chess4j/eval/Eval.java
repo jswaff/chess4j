@@ -18,6 +18,7 @@ import java.util.Set;
 
 import static com.jamesswafford.chess4j.eval.EvalKing.evalKing;
 import static com.jamesswafford.chess4j.eval.EvalKing.extractKingFeatures;
+import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
 import static com.jamesswafford.chess4j.eval.MaterialType.*;
 
 public final class Eval implements Evaluator {
@@ -49,7 +50,7 @@ public final class Eval implements Evaluator {
         assert(verifyEvalSymmetry(weights, evalScore, board, materialOnly));
         assert(verifyNativeEvalIsEqual(evalScore, board, materialOnly));
         assert(verifyExtractedFeatures(weights, evalScore, board, materialOnly));
-        
+
         return evalScore;
     }
 
@@ -61,14 +62,14 @@ public final class Eval implements Evaluator {
 
         // evaluate for a draw.  positions that are drawn by rule are immediately returned.  others
         // that are "drawish" are further evaluated but later tapered down.
-        MaterialType materialType = EvalMaterial.calculateMaterialType(board);
-        int drawFactor = 1;
-        if (immediateDraws.contains(materialType)) {
-            return 0;
-        }
-        if (factor8Draws.contains(materialType)) {
-            drawFactor = 8;
-        }
+//        MaterialType materialType = EvalMaterial.calculateMaterialType(board);
+//        int drawFactor = 1;
+//        if (immediateDraws.contains(materialType)) {
+//            return 0;
+//        }
+//        if (factor8Draws.contains(materialType)) {
+//            drawFactor = 8;
+//        }
 
         // calculate a middle game score and end game score based on positional features
         int mgScore = matScore;
@@ -92,14 +93,14 @@ public final class Eval implements Evaluator {
         mgScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), false)
                 - evalKing(weights, board, board.getKingSquare(Color.BLACK), false);
 
-        egScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), true)
-                - evalKing(weights, board, board.getKingSquare(Color.BLACK), true);
+//        egScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), true)
+//                - evalKing(weights, board, board.getKingSquare(Color.BLACK), true);
 
         // blend the middle game score and end game score, and divide by the draw factor
-        int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
+//        int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
 
         // return the score from the perspective of the player on move
-        return board.getPlayerToMove() == Color.WHITE ? taperedScore : -taperedScore;
+        return board.getPlayerToMove() == Color.WHITE ? mgScore : -mgScore;
     }
 
     private static int evalPieces(EvalWeightsVector weights, long pieceMap, Board board, boolean endgame,
@@ -151,6 +152,8 @@ public final class Eval implements Evaluator {
     public static int[] extractFeatures(Board board) {
 
         int[] mgFeatures = new int[EvalWeightsVector.NUM_WEIGHTS];
+
+        extractMaterialFeatures(mgFeatures, board);
 
         extractFeatures(mgFeatures, board.getWhitePawns() | board.getBlackPawns(), board, false,
                 EvalPawn::extractPawnFeatures);
@@ -224,15 +227,16 @@ public final class Eval implements Evaluator {
 
     private static boolean verifyExtractedFeatures(EvalWeightsVector weights, int evalScore, Board board, boolean materialOnly) {
 
-        return true;
-    }
-
-    private static int calculateScore(int[] features, EvalWeightsVector weights) {
+        int[] features = extractFeatures(board);
         int score = 0;
-        for (int i=0;i<features.length;i++) {
+        int toInd = materialOnly ? EvalWeightsVector.BISHOP_PAIR_IND+1 : features.length;
+        for (int i=0;i<toInd;i++) {
             score += features[i] * weights.weights[i];
         }
-        return score;
+        score = board.getPlayerToMove().equals(Color.WHITE) ? score : -score;
+        assert(score==evalScore);
+
+        return true;
     }
 
 

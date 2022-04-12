@@ -34,11 +34,11 @@ public class EvalMaterial {
 
             // raise the knight's value 1/16 for each pawn above 5, and lower for each
             // pawn below 5.
-            int knightAdj = (numPawns - 5) * 6;
+            int knightAdj = 0; // FIXME (numPawns - 5) * 6;
 
             // lower the rook's value 1/8 for each pawn above 5, and raise for each
             // pawn above 5.
-            int rookAdj = (numPawns - 5) * -12;
+            int rookAdj = 0; // FIXME (numPawns - 5) * -12;
 
             return board.getNumPieces(WHITE_QUEEN) * weights.weights[EvalWeightsVector.QUEEN_VAL_IND]
                     + board.getNumPieces(WHITE_ROOK) * (weights.weights[EvalWeightsVector.ROOK_VAL_IND] + rookAdj)
@@ -50,11 +50,11 @@ public class EvalMaterial {
 
             // raise the knight's value 1/16 for each pawn above 5, and lower for each
             // pawn below 5.
-            int knightAdj = (numPawns - 5) * 6;
+            int knightAdj = 0; // FIXME (numPawns - 5) * 6;
 
             // lower the rook's value 1/8 for each pawn above 5, and raise for each
             // pawn below 5.
-            int rookAdj = (numPawns - 5) * -12;
+            int rookAdj = 0; // FIXME (numPawns - 5) * -12;
 
             return board.getNumPieces(BLACK_QUEEN) * weights.weights[EvalWeightsVector.QUEEN_VAL_IND]
                     + board.getNumPieces(BLACK_ROOK) * (weights.weights[EvalWeightsVector.ROOK_VAL_IND] + rookAdj)
@@ -64,20 +64,14 @@ public class EvalMaterial {
         }
     }
 
-    public static int evalBishopPair(EvalWeightsVector weights, Board board) {
-        int score = 0;
-        if (Long.bitCount(board.getWhiteBishops()) > 1) score += weights.weights[EvalWeightsVector.BISHOP_PAIR_IND];
-        if (Long.bitCount(board.getBlackBishops()) > 1) score -= weights.weights[EvalWeightsVector.BISHOP_PAIR_IND];
-        return score;
-    }
-
-    public static int evalPawnMaterial(EvalWeightsVector weights, Board board, boolean forWhite) {
-
-        if (forWhite) {
-            return board.getNumPieces(WHITE_PAWN) * weights.weights[EvalWeightsVector.PAWN_VAL_IND];
-        } else {
-            return board.getNumPieces(BLACK_PAWN) * weights.weights[EvalWeightsVector.PAWN_VAL_IND];
-        }
+    public static void extractMaterialFeatures(int[] features, Board board) {
+        features[EvalWeightsVector.PAWN_VAL_IND] = board.getNumPieces(WHITE_PAWN) - board.getNumPieces(BLACK_PAWN);
+        features[EvalWeightsVector.QUEEN_VAL_IND] = board.getNumPieces(WHITE_QUEEN) - board.getNumPieces(BLACK_QUEEN);
+        features[EvalWeightsVector.ROOK_VAL_IND] = board.getNumPieces(WHITE_ROOK) - board.getNumPieces(BLACK_ROOK);
+        features[EvalWeightsVector.KNIGHT_VAL_IND] = board.getNumPieces(WHITE_KNIGHT) - board.getNumPieces(BLACK_KNIGHT);
+        features[EvalWeightsVector.BISHOP_VAL_IND] = board.getNumPieces(WHITE_BISHOP) - board.getNumPieces(BLACK_BISHOP);
+        features[EvalWeightsVector.BISHOP_PAIR_IND] = (board.getNumPieces(WHITE_BISHOP) > 1 ? 1 : 0) -
+                (board.getNumPieces(BLACK_BISHOP) > 1 ? 1 : 0);
     }
 
     public static int evalPiece(Piece piece) {

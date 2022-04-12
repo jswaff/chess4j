@@ -371,7 +371,7 @@ public class AlphaBetaSearch implements Search {
             {
                 int material = Eval.eval(Globals.getEvalWeightsVector(), board, true);
                 int materialGain = move.captured()==null ? 0 : EvalMaterial.evalPiece(move.captured());
-                int futilityMargin = depth==1 ? (SEE.PAWN_VAL * 2) : SEE.ROOK_VAL; // FIXME
+                int futilityMargin = depth==1 ? (SEE.PAWN_VAL * 2) : SEE.ROOK_VAL; // FIXME - sync
                 if (material + materialGain + futilityMargin <= alpha) {
                     continue;
                 }
@@ -503,7 +503,7 @@ public class AlphaBetaSearch implements Search {
 
             // if this is a capture, can it possibly raise alpha? (delta pruning)
             if (move.captured() != null && move.promotion()==null &&
-                    standPat + EvalMaterial.evalPiece(move.captured()) + 100 * 2 < alpha) { // FIXME
+                    standPat + EvalMaterial.evalPiece(move.captured()) + SEE.PAWN_VAL * 2 < alpha) { // FIXME - sync
                 continue;
             }
 
