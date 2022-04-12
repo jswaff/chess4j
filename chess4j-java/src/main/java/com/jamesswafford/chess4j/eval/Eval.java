@@ -56,7 +56,7 @@ public final class Eval implements Evaluator {
     }
 
     private static int evalHelper(EvalWeightsVector weights, Board board, boolean materialOnly) {
-        int matScore = EvalMaterial.evalMaterial(board);
+        int matScore = EvalMaterial.evalMaterial(weights, board);
         if (materialOnly) {
             return board.getPlayerToMove() == Color.WHITE ? matScore : -matScore;
         }
@@ -176,7 +176,7 @@ public final class Eval implements Evaluator {
 
     @Override
     public int evaluateBoard(Board board) {
-        return eval(Globals.getEvalTermsVector(), board);
+        return eval(Globals.getEvalWeightsVector(), board);
     }
 
     /**

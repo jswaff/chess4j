@@ -28,11 +28,11 @@ public class Globals {
         return gameUndos;
     }
 
-    public static EvalWeightsVector getEvalTermsVector() {
+    public static EvalWeightsVector getEvalWeightsVector() {
         return evalWeightsVector;
     }
 
-    public static void setEvalTermsVector(EvalWeightsVector evalWeightsVector) {
+    public static void setEvalWeightsVector(EvalWeightsVector evalWeightsVector) {
         Globals.evalWeightsVector = evalWeightsVector;
     }
 
