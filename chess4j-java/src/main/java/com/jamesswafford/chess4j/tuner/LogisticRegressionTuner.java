@@ -86,13 +86,13 @@ public class LogisticRegressionTuner {
         for (int it=0; it<maxIterations; it++) {
 
             // create the hypothesis vector
-            //SimpleMatrix h = x.mult(theta);
-            SimpleMatrix h = new SimpleMatrix(m, 1);
-            for (int i=0;i<m;i++) {
-                GameRecord trainingRecord = trainingSet.get(i);
-                Board board = new Board(trainingRecord.getFen());
-                h.set(i, 0, Hypothesis.hypothesis(board, bestWeights));
-            }
+            SimpleMatrix h = x.mult(theta);
+//            SimpleMatrix h = new SimpleMatrix(m, 1);
+//            for (int i=0;i<m;i++) {
+//                GameRecord trainingRecord = trainingSet.get(i);
+//                Board board = new Board(trainingRecord.getFen());
+//                h.set(i, 0, Hypothesis.hypothesis(board, bestWeights));
+//            }
 
             SimpleMatrix loss = h.minus(y);
             SimpleMatrix gradient = xTrans.mult(loss).divide(m);
