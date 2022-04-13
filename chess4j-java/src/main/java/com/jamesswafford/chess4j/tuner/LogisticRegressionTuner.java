@@ -2,7 +2,6 @@ package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.EvalWeightsVector;
 import com.jamesswafford.chess4j.io.EvalWeightsVectorUtil;
@@ -109,10 +108,6 @@ public class LogisticRegressionTuner {
             // calculate cost
             double error = cost(trainingSet, bestWeights);
             LOGGER.info("error using training set after iteration {}: {}", (it+1), error);
-
-            if ((it+1) % 10 == 0) {
-                EvalWeightsVectorUtil.store(bestWeights, "eval-tune-" + (it+1) + ".properties", "Error: " + error);
-            }
         }
 
         return bestWeights;
