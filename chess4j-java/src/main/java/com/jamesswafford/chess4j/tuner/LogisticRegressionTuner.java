@@ -29,12 +29,12 @@ public class LogisticRegressionTuner {
         boolean pawnHashEnabled = Globals.isPawnHashEnabled();
         Globals.setPawnHashEnabled(false);
 
-        // divide data set up into training and test sets
+        // if we have enough data, divide data set up into training and test sets in an 80/20 split
         Collections.shuffle(dataSet);
-        int m = dataSet.size() * 4 / 5;
         List<GameRecord> trainingSet;
         List<GameRecord> testSet;
-        if (m > 0) {
+        if (dataSet.size() >= 100) {
+            int m = dataSet.size() * 4 / 5;
             trainingSet = new ArrayList<>(dataSet.subList(0, m));
             testSet = dataSet.subList(m, dataSet.size());
         } else {
@@ -60,13 +60,13 @@ public class LogisticRegressionTuner {
         return new Tuple2<>(weights, finalError);
     }
 
-    private EvalWeights trainWithGradientDescent(List<GameRecord> trainingSet, EvalWeights weights,
+    private EvalWeights trainWithGradientDescent(List<GameRecord> trainingSet, EvalWeights initialWeights,
                                                  double learningRate, int maxIterations) {
 
         Random random = new Random(System.currentTimeMillis());
 
-        EvalWeights bestWeights = new EvalWeights(weights);
-        int n = weights.vals.length;
+        EvalWeights bestWeights = new EvalWeights(initialWeights);
+        int n = initialWeights.vals.length;
         SimpleMatrix theta = new SimpleMatrix(n, 1);
         for (int i=0;i<n;i++) {
             theta.set(i, 0, bestWeights.vals[i]);
@@ -91,15 +91,14 @@ public class LogisticRegressionTuner {
 
             // calculate the gradient
             SimpleMatrix h = x.mult(theta);
-            // TODO: use vector operations
             for (int i=0;i<m;i++) {
                 h.set(i, 0, Hypothesis.hypothesis(h.get(i, 0)));
             }
 
             SimpleMatrix loss = h.minus(y);
             SimpleMatrix gradient = xTrans.mult(loss).divide(m);
-            theta = theta.minus(gradient.divide(1.0/learningRate)); // TODO: verify the learning rate
-            for (int i=0;i<n;i++) {
+            theta = theta.minus(gradient.divide(1.0/learningRate));
+            for (int i=1;i<n;i++) { // start at one to keep pawn val anchored
                 bestWeights.vals[i] = (int)Math.round(theta.get(i, 0));
             }
 
