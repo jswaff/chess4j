@@ -2,11 +2,11 @@ package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.eval.Eval;
-import com.jamesswafford.chess4j.eval.EvalWeightsVector;
+import com.jamesswafford.chess4j.eval.EvalWeights;
 
 public class Hypothesis {
 
-    public static double hypothesis(Board board, EvalWeightsVector weights) {
+    public static double hypothesis(Board board, EvalWeights weights) {
         int score = Eval.eval(weights, board, false);
         return hypothesis(score);
     }

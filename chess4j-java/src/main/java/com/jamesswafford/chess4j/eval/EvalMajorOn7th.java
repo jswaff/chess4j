@@ -9,21 +9,21 @@ import com.jamesswafford.chess4j.movegen.Magic;
 
 import static com.jamesswafford.chess4j.board.squares.Rank.*;
 
-import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
+import static com.jamesswafford.chess4j.eval.EvalWeights.*;
 
 public class EvalMajorOn7th {
 
-    public static int evalMajorOn7th(EvalWeightsVector weights, Board board, boolean isWhite, Square sq) {
+    public static int evalMajorOn7th(EvalWeights weights, Board board, boolean isWhite, Square sq) {
         int score = 0;
 
         if (isWhite) {
             if (sq.rank() == RANK_7 && board.getKingSquare(Color.BLACK).rank() == RANK_8) {
-                score += weights.weights[MAJOR_ON_7TH_IND];
+                score += weights.vals[MAJOR_ON_7TH_IND];
                 score += evalConnectedMajorOn7th(weights, board, true, sq);
             }
         } else {
             if (sq.rank() == RANK_2 && board.getKingSquare(Color.WHITE).rank() == RANK_1) {
-                score += weights.weights[MAJOR_ON_7TH_IND];
+                score += weights.vals[MAJOR_ON_7TH_IND];
                 score += evalConnectedMajorOn7th(weights, board,false, sq);
             }
         }
@@ -31,7 +31,7 @@ public class EvalMajorOn7th {
         return score;
     }
 
-    private static int evalConnectedMajorOn7th(EvalWeightsVector weights, Board board, boolean isWhite, Square sq) {
+    private static int evalConnectedMajorOn7th(EvalWeights weights, Board board, boolean isWhite, Square sq) {
         int score = 0;
 
         long rookMoves = Magic.getRookMoves(board,sq.value(),
@@ -39,11 +39,11 @@ public class EvalMajorOn7th {
 
         if (isWhite) {
             if ((rookMoves & (board.getWhiteRooks() | board.getWhiteQueens())) != 0) {
-                score += weights.weights[CONNECTED_MAJORS_ON_7TH_IND];
+                score += weights.vals[CONNECTED_MAJORS_ON_7TH_IND];
             }
         } else {
             if ((rookMoves & (board.getBlackRooks() | board.getBlackQueens())) != 0) {
-                score += weights.weights[CONNECTED_MAJORS_ON_7TH_IND];
+                score += weights.vals[CONNECTED_MAJORS_ON_7TH_IND];
             }
         }
 

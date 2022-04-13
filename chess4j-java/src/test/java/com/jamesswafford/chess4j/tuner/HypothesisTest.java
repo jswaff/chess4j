@@ -1,7 +1,7 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.eval.EvalWeightsVector;
+import com.jamesswafford.chess4j.eval.EvalWeights;
 import org.junit.Test;
 
 import static com.jamesswafford.chess4j.Constants.CHECKMATE;
@@ -13,7 +13,7 @@ public class HypothesisTest {
 
     @Test
     public void hypothesisTest() {
-        EvalWeightsVector weights = new EvalWeightsVector();
+        EvalWeights weights = new EvalWeights();
         Board board = new Board();
         assertDoubleEquals(hypothesis(board, weights), 0.5);
     }

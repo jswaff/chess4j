@@ -3,22 +3,22 @@ package com.jamesswafford.chess4j.eval;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.Square;
 
-import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
+import static com.jamesswafford.chess4j.eval.EvalWeights.*;
 
 public class EvalBishop {
 
-    public static int evalBishop(EvalWeightsVector weights, Board board, Square sq, boolean endgame) {
+    public static int evalBishop(EvalWeights weights, Board board, Square sq, boolean endgame) {
         if (board.getPiece(sq).isWhite()) {
             if (endgame) {
-                return weights.weights[BISHOP_ENDGAME_PST_IND + sq.value()];
+                return weights.vals[BISHOP_ENDGAME_PST_IND + sq.value()];
             } else {
-                return weights.weights[BISHOP_PST_IND + sq.value()];
+                return weights.vals[BISHOP_PST_IND + sq.value()];
             }
         } else {
             if (endgame) {
-                return weights.weights[BISHOP_ENDGAME_PST_IND + sq.flipVertical().value()];
+                return weights.vals[BISHOP_ENDGAME_PST_IND + sq.flipVertical().value()];
             } else {
-                return weights.weights[BISHOP_PST_IND + sq.flipVertical().value()];
+                return weights.vals[BISHOP_PST_IND + sq.flipVertical().value()];
             }
         }
     }

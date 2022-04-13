@@ -3,14 +3,13 @@ package com.jamesswafford.chess4j.eval;
 import io.vavr.Tuple2;
 import lombok.EqualsAndHashCode;
 
-import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode
-public class EvalWeightsVector {
+public class EvalWeights {
 
-    public int[] weights = new int[] {
+    public int[] vals = new int[] {
 
             100,  // PAWN_VAL
             975,  // QUEEN_VAL
@@ -217,10 +216,10 @@ public class EvalWeightsVector {
         return indexMap.keySet();
     }
 
-    public EvalWeightsVector() { }
+    public EvalWeights() { }
 
-    public EvalWeightsVector(EvalWeightsVector evalWeightsVector) {
-        System.arraycopy(evalWeightsVector.weights, 0, weights, 0, weights.length);
+    public EvalWeights(EvalWeights evalWeights) {
+        System.arraycopy(evalWeights.vals, 0, vals, 0, vals.length);
     }
 
     public List<Integer> getVals(String key) {
@@ -228,7 +227,7 @@ public class EvalWeightsVector {
             throw new IllegalArgumentException("invalid key " + key);
         }
         Tuple2<Integer, Integer> v = indexMap.get(key);
-        int[] myterms = Arrays.copyOfRange(weights, v._1, v._1 + v._2);
+        int[] myterms = Arrays.copyOfRange(vals, v._1, v._1 + v._2);
         return Arrays.stream(myterms)
                 .boxed()
                 .collect(Collectors.toList());
@@ -241,14 +240,7 @@ public class EvalWeightsVector {
                     indexTuple._2 + ", received: " + vals.size());
         }
         for (int i=0;i<vals.size();i++) {
-            weights[indexTuple._1 + i] = vals.get(i);
-        }
-    }
-
-    public void randomize() {
-        SecureRandom random = new SecureRandom();
-        for (int i=0;i< weights.length;i++) {
-            weights[i] = random.nextInt(100);
+            this.vals[indexTuple._1 + i] = vals.get(i);
         }
     }
 }

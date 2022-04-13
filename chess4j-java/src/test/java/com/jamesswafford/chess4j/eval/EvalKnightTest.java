@@ -8,18 +8,18 @@ import static org.junit.Assert.*;
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.eval.EvalKnight.*;
 
-import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
+import static com.jamesswafford.chess4j.eval.EvalWeights.*;
 
 public class EvalKnightTest {
 
-    private final EvalWeightsVector weights = new EvalWeightsVector();
+    private final EvalWeights weights = new EvalWeights();
 
     @Test
     public void testEvalKnight() {
         Board board = new Board();
 
-        assertEquals(weights.weights[KNIGHT_PST_IND + B1.value()] +
-                        (long) weights.weights[KNIGHT_TROPISM_IND] * B1.distance(E8),
+        assertEquals(weights.vals[KNIGHT_PST_IND + B1.value()] +
+                        (long) weights.vals[KNIGHT_TROPISM_IND] * B1.distance(E8),
                 evalKnight(weights, board, B1, false));
 
         // test the symmetry
@@ -31,7 +31,7 @@ public class EvalKnightTest {
     public void testEvalKnight_endGame() {
         Board board = new Board();
 
-        assertEquals(weights.weights[KNIGHT_ENDGAME_PST_IND + B1.value()] + (long) weights.weights[KNIGHT_TROPISM_IND] * B1.distance(E8),
+        assertEquals(weights.vals[KNIGHT_ENDGAME_PST_IND + B1.value()] + (long) weights.vals[KNIGHT_TROPISM_IND] * B1.distance(E8),
                 evalKnight(weights, board, B1, true));
 
         // test the symmetry
