@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.eval.EvalWeightsVector;
+import com.jamesswafford.chess4j.utils.GameResult;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -8,6 +9,7 @@ import org.junit.Test;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -35,6 +37,20 @@ public class LogisticRegressionTunerTest {
     public static void tearDown() throws Exception {
         conn.close();
         new File(testDB).delete();
+    }
+
+    @Test
+    public void kqk() {
+
+        EvalWeightsVector weightsVector = new EvalWeightsVector();
+        Arrays.fill(weightsVector.weights, 0);
+        weightsVector.weights[EvalWeightsVector.QUEEN_VAL_IND] = 100;
+
+        tuner.optimize(
+                weightsVector,
+                List.of(new GameRecord("3k4/3Q4/3K4/8/8/8/8/8 w - -", GameResult.DRAW)),
+                100.0,
+                10);
     }
 
     @Test

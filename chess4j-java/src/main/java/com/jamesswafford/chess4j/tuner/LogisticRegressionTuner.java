@@ -33,8 +33,15 @@ public class LogisticRegressionTuner {
         // divide data set up into training and test sets
         Collections.shuffle(dataSet);
         int m = dataSet.size() * 4 / 5;
-        List<GameRecord> trainingSet = new ArrayList<>(dataSet.subList(0, m));
-        List<GameRecord> testSet = dataSet.subList(m, dataSet.size());
+        List<GameRecord> trainingSet;
+        List<GameRecord> testSet;
+        if (m > 0) {
+            trainingSet = new ArrayList<>(dataSet.subList(0, m));
+            testSet = dataSet.subList(m, dataSet.size());
+        } else {
+            trainingSet = new ArrayList<>(dataSet);
+            testSet = new ArrayList<>(dataSet);
+        }
         LOGGER.info("data set size: {} training: {}, test: {}", dataSet.size(), trainingSet.size(), testSet.size());
 
         double initialError = cost(testSet, initialTheta);
@@ -60,7 +67,7 @@ public class LogisticRegressionTuner {
         Random random = new Random(System.currentTimeMillis());
 
         EvalWeightsVector bestWeights = new EvalWeightsVector(weights);
-        int n = weights.weights.length;
+        int n = 6; //weights.weights.length; FIXME
         SimpleMatrix theta = new SimpleMatrix(n, 1);
         for (int i=0;i<n;i++) {
             theta.set(i, 0, bestWeights.weights[i]);
@@ -87,6 +94,11 @@ public class LogisticRegressionTuner {
 
             // calculate the gradient
             SimpleMatrix h = x.mult(theta); // from white's perspective
+            // TODO: use vector operations
+            for (int i=0;i<m;i++) {
+                h.set(i, 0, Hypothesis.hypothesis(h.get(i, 0)));
+            }
+
             SimpleMatrix loss = h.minus(y);
             SimpleMatrix gradient = xTrans.mult(loss).divide(m);
             theta = theta.minus(gradient.divide(1.0/learningRate)); // TODO: verify the learning rate
@@ -98,7 +110,7 @@ public class LogisticRegressionTuner {
             double error = cost(trainingSet, bestWeights);
             LOGGER.info("error using training set after iteration {}: {}", (it+1), error);
 
-            if (it % 9 == 0) {
+            if ((it+1) % 10 == 0) {
                 EvalWeightsVectorUtil.store(bestWeights, "eval-tune-" + (it+1) + ".properties", "Error: " + error);
             }
         }
