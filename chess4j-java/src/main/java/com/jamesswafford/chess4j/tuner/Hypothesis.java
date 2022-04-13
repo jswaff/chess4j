@@ -8,6 +8,7 @@ public class Hypothesis {
 
     public static double hypothesis(Board board, EvalWeights weights) {
         int score = Eval.eval(weights, board, false);
+        if (board.getPlayerToMove().isBlack()) score = -score;
         return hypothesis(score);
     }
 

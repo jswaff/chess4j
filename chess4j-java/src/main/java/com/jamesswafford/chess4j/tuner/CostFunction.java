@@ -2,7 +2,7 @@ package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.eval.EvalWeights;
-import com.jamesswafford.chess4j.utils.GameResult;
+import com.jamesswafford.chess4j.io.PGNResult;
 
 import java.util.List;
 
@@ -10,22 +10,22 @@ import static com.jamesswafford.chess4j.tuner.Hypothesis.hypothesis;
 
 public class CostFunction {
 
-    public static double y(GameResult gameResult) {
+    public static double y(PGNResult pgnResult) {
         double y;
-        if (GameResult.WIN.equals(gameResult)) {
+        if (PGNResult.WHITE_WINS.equals(pgnResult)) {
             y = 1.0;
-        } else if (GameResult.DRAW.equals(gameResult)) {
+        } else if (PGNResult.DRAW.equals(pgnResult)) {
             y = 0.5;
-        } else if (GameResult.LOSS.equals(gameResult)) {
+        } else if (PGNResult.BLACK_WINS.equals(pgnResult)) {
             y = 0.0;
         } else {
-            throw new IllegalArgumentException("Cannot compute cost for game result " + gameResult);
+            throw new IllegalArgumentException("Cannot compute cost for result " + pgnResult);
         }
         return y;
     }
 
-    public static double cost(double hypothesis, GameResult gameResult) {
-        double delta = y(gameResult) - hypothesis;
+    public static double cost(double hypothesis, PGNResult result) {
+        double delta = hypothesis - y(result);
         return delta * delta;
     }
 
@@ -35,7 +35,7 @@ public class CostFunction {
         for (GameRecord gameRecord : dataSet) {
             Board board = new Board(gameRecord.getFen());
             double h = hypothesis(board, weights);
-            double cost = cost(h, gameRecord.getGameResult());
+            double cost = cost(h, gameRecord.getResult());
             totalError += cost;
         }
 

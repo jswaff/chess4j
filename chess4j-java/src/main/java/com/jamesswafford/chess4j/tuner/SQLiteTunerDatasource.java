@@ -1,11 +1,8 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
-import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.exceptions.UncheckedSqlException;
 import com.jamesswafford.chess4j.io.PGNResult;
-import com.jamesswafford.chess4j.utils.GameResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -134,11 +131,9 @@ public class SQLiteTunerDatasource implements TunerDatasource {
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                String fen = rs.getString("fen");
-                Board board = new Board(fen);
                 GameRecord gameRecord = GameRecord.builder()
-                        .fen(fen)
-                        .gameResult(mapOutcomeToGameResult(rs.getInt("outcome"), board.getPlayerToMove()))
+                        .fen(rs.getString("fen"))
+                        .result(mapOutcomeToResult(rs.getInt("outcome")))
                         .build();
                 gameRecords.add(gameRecord);
             }
@@ -150,17 +145,17 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         return gameRecords;
     }
 
-    private GameResult mapOutcomeToGameResult(int outcome, Color ptm) {
-        GameResult gameResult;
+    private PGNResult mapOutcomeToResult(int outcome) {
+        PGNResult result;
         if (outcome==-1) {
-            gameResult = ptm.isBlack() ? GameResult.WIN : GameResult.LOSS;
+            result = PGNResult.BLACK_WINS;
         } else if (outcome==0) {
-            gameResult = GameResult.DRAW;
+            result = PGNResult.DRAW;
         } else if (outcome==1) {
-            gameResult = ptm.isWhite() ? GameResult.WIN : GameResult.LOSS;
+            result = PGNResult.WHITE_WINS;
         } else {
             throw new IllegalStateException("Outcome is invalid: " + outcome);
         }
-        return gameResult;
+        return result;
     }
 }

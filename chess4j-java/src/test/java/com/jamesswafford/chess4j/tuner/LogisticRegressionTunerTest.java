@@ -1,7 +1,7 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.eval.EvalWeights;
-import com.jamesswafford.chess4j.utils.GameResult;
+import com.jamesswafford.chess4j.io.PGNResult;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -48,7 +48,7 @@ public class LogisticRegressionTunerTest {
 
         tuner.optimize(
                 weightsVector,
-                List.of(new GameRecord("3k4/3Q4/3K4/8/8/8/8/8 w - -", GameResult.DRAW)),
+                List.of(new GameRecord("3k4/3Q4/3K4/8/8/8/8/8 w - -", PGNResult.DRAW)),
                 100.0,
                 10);
     }

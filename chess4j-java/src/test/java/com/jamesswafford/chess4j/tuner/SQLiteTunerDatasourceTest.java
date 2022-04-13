@@ -6,7 +6,6 @@ import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.io.FenBuilder;
 import com.jamesswafford.chess4j.io.PGNResult;
 import com.jamesswafford.chess4j.pieces.Pawn;
-import com.jamesswafford.chess4j.utils.GameResult;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -59,7 +58,7 @@ public class SQLiteTunerDatasourceTest {
         List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
         assertEquals(1, gameRecords.size());
         assertEquals(fen, gameRecords.get(0).getFen());
-        assertEquals(GameResult.WIN, gameRecords.get(0).getGameResult());
+        assertEquals(PGNResult.WHITE_WINS, gameRecords.get(0).getResult());
 
         board.applyMove(new Move(Pawn.WHITE_PAWN, Square.E2, Square.E4));
         String fen2 = FenBuilder.createFen(board, false);
@@ -67,7 +66,7 @@ public class SQLiteTunerDatasourceTest {
         assertEquals(2, tunerDatasource.getTotalPositionsCount());
         GameRecord gr2 = tunerDatasource.getGameRecords().stream()
                         .filter(gr -> fen2.equals(gr.getFen())).findFirst().get();
-        assertEquals(GameResult.LOSS, gr2.getGameResult());
+        assertEquals(PGNResult.WHITE_WINS, gr2.getResult());
 
         assertEquals(2, tunerDatasource.getGameRecords().size());
     }
