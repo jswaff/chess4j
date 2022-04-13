@@ -4,7 +4,7 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.book.SQLiteBook;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
-import com.jamesswafford.chess4j.io.EvalTermsVectorUtil;
+import com.jamesswafford.chess4j.io.EvalWeightsUtil;
 import com.jamesswafford.chess4j.io.XBoardHandler;
 import com.jamesswafford.chess4j.search.AlphaBetaSearch;
 import com.jamesswafford.chess4j.search.SearchOptions;
@@ -49,7 +49,7 @@ public final class App {
         } else if (arg.startsWith("-eval=")) {
             String path = arg.substring(6);
             LOGGER.info("loading eval properties from " + path);
-            Globals.setEvalTermsVector(EvalTermsVectorUtil.load(path));
+            Globals.setEvalWeights(EvalWeightsUtil.load(path));
         }
     }
 

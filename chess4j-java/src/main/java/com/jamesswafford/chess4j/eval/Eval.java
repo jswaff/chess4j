@@ -16,7 +16,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.jamesswafford.chess4j.eval.EvalKing.evalKing;
+import static com.jamesswafford.chess4j.eval.EvalKing.*;
+import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
 import static com.jamesswafford.chess4j.eval.MaterialType.*;
 
 public final class Eval implements Evaluator {
@@ -37,80 +38,174 @@ public final class Eval implements Evaluator {
 
     public Eval() { }
 
-    public static int eval(EvalTermsVector etv, Board board) {
-        return eval(etv, board, false);
+    public static int eval(EvalWeights weights, Board board) {
+        return eval(weights, board, false);
     }
 
-    public static int eval(EvalTermsVector etv, Board board, boolean materialOnly) {
+    public static int eval(EvalWeights weights, Board board, boolean materialOnly) {
 
-        int evalScore = evalHelper(etv, board, materialOnly);
+        int evalScore = evalHelper(weights, board, materialOnly);
 
-        // if we are running with assertions enabled, test symmetry
-        assert(ensureEvalSymmetry(etv, evalScore, board, materialOnly));
-
-        // if we are running with assertions enabled and the native library is loaded, verify equality
-        assert(evalsAreEqual(evalScore, board, materialOnly));
+        assert(verifyEvalSymmetry(weights, evalScore, board, materialOnly));
+        assert(verifyNativeEvalIsEqual(evalScore, board, materialOnly));
+        assert(verifyExtractedFeatures(weights, evalScore, board, materialOnly));
 
         return evalScore;
     }
 
-    private static int evalHelper(EvalTermsVector etv, Board board, boolean materialOnly) {
-        int matScore = EvalMaterial.evalMaterial(board);
+    private static int evalHelper(EvalWeights weights, Board board, boolean materialOnly) {
+        int matScore = EvalMaterial.evalMaterial(weights, board);
         if (materialOnly) {
             return board.getPlayerToMove() == Color.WHITE ? matScore : -matScore;
         }
 
         // evaluate for a draw.  positions that are drawn by rule are immediately returned.  others
         // that are "drawish" are further evaluated but later tapered down.
-        MaterialType materialType = EvalMaterial.calculateMaterialType(board);
-        int drawFactor = 1;
-        if (immediateDraws.contains(materialType)) {
-            return 0;
-        }
-        if (factor8Draws.contains(materialType)) {
-            drawFactor = 8;
-        }
+//        MaterialType materialType = EvalMaterial.calculateMaterialType(board);
+//        int drawFactor = 1;
+//        if (immediateDraws.contains(materialType)) {
+//            return 0;
+//        }
+//        if (factor8Draws.contains(materialType)) {
+//            drawFactor = 8;
+//        }
 
         // calculate a middle game score and end game score based on positional features
         int mgScore = matScore;
-        int egScore = matScore;
 
-        mgScore += evalPawns(etv, board, false);
-        egScore += evalPawns(etv, board, true);
+        mgScore += evalPawns(weights, board, false);
 
-        mgScore += evalPieces(etv, board.getWhiteKnights(), board, false, EvalKnight::evalKnight)
-                - evalPieces(etv, board.getBlackKnights(), board, false, EvalKnight::evalKnight);
-        egScore += evalPieces(etv, board.getWhiteKnights(), board, true, EvalKnight::evalKnight)
-                - evalPieces(etv, board.getBlackKnights(), board, true, EvalKnight::evalKnight);
+        mgScore += evalPieces(weights, board.getWhiteKnights(), board, false, EvalKnight::evalKnight)
+                - evalPieces(weights, board.getBlackKnights(), board, false, EvalKnight::evalKnight);
 
-        mgScore += evalPieces(etv, board.getWhiteBishops(), board, false, EvalBishop::evalBishop)
-                - evalPieces(etv, board.getBlackBishops(), board, false, EvalBishop::evalBishop);
-        egScore += evalPieces(etv, board.getWhiteBishops(), board, true, EvalBishop::evalBishop)
-                - evalPieces(etv, board.getBlackBishops(), board, true, EvalBishop::evalBishop);
+        mgScore += evalPieces(weights, board.getWhiteBishops(), board, false, EvalBishop::evalBishop)
+                - evalPieces(weights, board.getBlackBishops(), board, false, EvalBishop::evalBishop);
 
-        mgScore += evalPieces(etv, board.getWhiteRooks(), board, false, EvalRook::evalRook)
-                - evalPieces(etv, board.getBlackRooks(), board, false, EvalRook::evalRook);
-        egScore += evalPieces(etv, board.getWhiteRooks(), board, true, EvalRook::evalRook)
-                - evalPieces(etv, board.getBlackRooks(), board, true, EvalRook::evalRook);
+        mgScore += evalPieces(weights, board.getWhiteRooks(), board, false, EvalRook::evalRook)
+                - evalPieces(weights, board.getBlackRooks(), board, false, EvalRook::evalRook);
 
-        mgScore += evalPieces(etv, board.getWhiteQueens(), board, false, EvalQueen::evalQueen)
-                - evalPieces(etv, board.getBlackQueens(), board, false, EvalQueen::evalQueen);
-        egScore += evalPieces(etv, board.getWhiteQueens(), board, true, EvalQueen::evalQueen)
-                - evalPieces(etv, board.getBlackQueens(), board, true, EvalQueen::evalQueen);
+        mgScore += evalPieces(weights, board.getWhiteQueens(), board, false, EvalQueen::evalQueen)
+                - evalPieces(weights, board.getBlackQueens(), board, false, EvalQueen::evalQueen);
 
-        mgScore += evalKing(etv, board, board.getKingSquare(Color.WHITE), false)
-                - evalKing(etv, board, board.getKingSquare(Color.BLACK), false);
-        egScore += evalKing(etv, board, board.getKingSquare(Color.WHITE), true)
-                - evalKing(etv, board, board.getKingSquare(Color.BLACK), true);
+//        int egScore = mgScore;
 
-        // blend the middle game score and end game score, and divide by the draw factor
-        int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
+        mgScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), false)
+                - evalKing(weights, board, board.getKingSquare(Color.BLACK), false);
+
+////        egScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), true)
+////                - evalKing(weights, board, board.getKingSquare(Color.BLACK), true);
+//
+//        // blend the middle game score and end game score, and divide by the draw factor
+////        int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
 
         // return the score from the perspective of the player on move
-        return board.getPlayerToMove() == Color.WHITE ? taperedScore : -taperedScore;
+        return board.getPlayerToMove() == Color.WHITE ? mgScore : -mgScore;
     }
 
-    private static boolean evalsAreEqual(int javaScore, Board board, boolean materialOnly) {
+    private static int evalPieces(EvalWeights weights, long pieceMap, Board board, boolean endgame,
+                                  Function4<EvalWeights, Board, Square, Boolean, Integer> evalFunc) {
+        int score = 0;
+
+        while (pieceMap != 0) {
+            int sqVal = Bitboard.lsb(pieceMap);
+            Square sq = Square.valueOf(sqVal);
+            score += evalFunc.apply(weights, board, sq, endgame);
+            pieceMap ^= Bitboard.squares[sqVal];
+        }
+
+        return score;
+    }
+
+    private static int evalPawns(EvalWeights weights, Board board, boolean endgame) {
+
+        // try the pawn hash
+        if (Globals.isPawnHashEnabled()) {
+            PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board.getPawnKey());
+            if (pte != null) {
+                assert (pte.getScore() == evalPawnsNoHash(weights, board, endgame));
+                return pte.getScore();
+            }
+        }
+
+        int score = evalPawnsNoHash(weights, board, endgame);
+
+        if (Globals.isPawnHashEnabled()) {
+            TTHolder.getInstance().getPawnHashTable().store(board.getPawnKey(), score);
+        }
+
+        return score;
+    }
+
+    private static int evalPawnsNoHash(EvalWeights weights, Board board, boolean endgame) {
+        return evalPieces(weights, board.getWhitePawns(), board, endgame, EvalPawn::evalPawn)
+                - evalPieces(weights, board.getBlackPawns(), board, endgame, EvalPawn::evalPawn);
+    }
+
+    public static native int evalNative(Board board, boolean materialOnly);
+
+    @Override
+    public int evaluateBoard(Board board) {
+        return eval(Globals.getEvalWeights(), board);
+    }
+
+    public static int[] extractFeatures(Board board) {
+
+        int[] mgFeatures = new int[EvalWeights.NUM_WEIGHTS];
+
+        extractMaterialFeatures(mgFeatures, board);
+
+        extractFeatures(mgFeatures, board.getWhitePawns() | board.getBlackPawns(), board, false,
+                EvalPawn::extractPawnFeatures);
+
+        extractFeatures(mgFeatures, board.getWhiteKnights() | board.getBlackKnights(), board, false,
+                EvalKnight::extractKnightFeatures);
+
+        extractFeatures(mgFeatures, board.getWhiteBishops() | board.getBlackBishops(), board, false,
+                EvalBishop::extractBishopFeatures);
+
+        extractFeatures(mgFeatures, board.getWhiteRooks() | board.getBlackRooks(), board, false,
+                EvalRook::extractRookFeatures);
+
+        extractFeatures(mgFeatures, board.getWhiteQueens() | board.getBlackQueens(), board, false,
+                EvalQueen::extractQueenFeatures);
+
+        extractKingFeatures(mgFeatures, board, board.getKingSquare(Color.WHITE), false);
+        extractKingFeatures(mgFeatures, board, board.getKingSquare(Color.BLACK), false);
+
+        return mgFeatures;
+    }
+
+    private static void extractFeatures(int[] features, long pieceMap, Board board, boolean endgame,
+                                        Function4<int[], Board, Square, Boolean, Void> extractFunc) {
+        while (pieceMap != 0) {
+            int sqVal = Bitboard.lsb(pieceMap);
+            Square sq = Square.valueOf(sqVal);
+            extractFunc.apply(features, board, sq, endgame);
+            pieceMap ^= Bitboard.squares[sqVal];
+        }
+    }
+
+    /**
+     * Helper method to test eval symmetry
+     *
+     * @param weights - eval terms vector
+     * @param evalScore - the score the board has been evaulated at
+     * @param board - the chess board
+     * @param materialOnly - whether to evaulate material only
+     *
+     * @return - true if the eval is symmetric in the given position
+     */
+    private static boolean verifyEvalSymmetry(EvalWeights weights, int evalScore, Board board, boolean materialOnly) {
+        Board flipBoard = board.deepCopy();
+        flipBoard.flipVertical();
+        int flipScore = evalHelper(weights, flipBoard, materialOnly);
+        boolean retVal = flipScore == evalScore;
+        flipBoard.flipVertical();
+        assert(board.equals(flipBoard));
+        return retVal;
+    }
+
+    private static boolean verifyNativeEvalIsEqual(int javaScore, Board board, boolean materialOnly) {
         if (Initializer.nativeCodeInitialized()) {
             try {
                 int nativeSccore = evalNative(board, materialOnly);
@@ -129,70 +224,19 @@ public final class Eval implements Evaluator {
         }
     }
 
-    private static int evalPieces(EvalTermsVector etv, long pieceMap, Board board, boolean endgame,
-                                  Function4<EvalTermsVector, Board, Square, Boolean, Integer> evalFunc) {
+    private static boolean verifyExtractedFeatures(EvalWeights weights, int evalScore, Board board, boolean materialOnly) {
+
+        int[] features = extractFeatures(board);
         int score = 0;
-
-        while (pieceMap != 0) {
-            int sqVal = Bitboard.lsb(pieceMap);
-            Square sq = Square.valueOf(sqVal);
-            score += evalFunc.apply(etv, board, sq, endgame);
-            pieceMap ^= Bitboard.squares[sqVal];
+        int toInd = materialOnly ? EvalWeights.BISHOP_PAIR_IND+1 : features.length;
+        for (int i=0;i<toInd;i++) {
+            score += features[i] * weights.vals[i];
         }
+        score = board.getPlayerToMove().equals(Color.WHITE) ? score : -score;
+        assert(score==evalScore);
 
-        return score;
+        return true;
     }
 
-    private static int evalPawns(EvalTermsVector etv, Board board, boolean endgame) {
-
-        // try the pawn hash
-        if (Globals.isPawnHashEnabled()) {
-            PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board.getPawnKey());
-            if (pte != null) {
-                assert (pte.getScore() == evalPawnsNoHash(etv, board, endgame));
-                return pte.getScore();
-            }
-        }
-
-        int score = evalPawnsNoHash(etv, board, endgame);
-
-        if (Globals.isPawnHashEnabled()) {
-            TTHolder.getInstance().getPawnHashTable().store(board.getPawnKey(), score);
-        }
-
-        return score;
-    }
-
-    private static int evalPawnsNoHash(EvalTermsVector etv, Board board, boolean endgame) {
-        return evalPieces(etv, board.getWhitePawns(), board, endgame, EvalPawn::evalPawn)
-                - evalPieces(etv, board.getBlackPawns(), board, endgame, EvalPawn::evalPawn);
-    }
-
-    public static native int evalNative(Board board, boolean materialOnly);
-
-    @Override
-    public int evaluateBoard(Board board) {
-        return eval(Globals.getEvalTermsVector(), board);
-    }
-
-    /**
-     * Helper method to test eval symmetry
-     *
-     * @param etv - eval terms vector
-     * @param evalScore - the score the board has been evaulated at
-     * @param board - the chess board
-     * @param materialOnly - whether to evaulate material only
-     *
-     * @return - true if the eval is symmetric in the given position
-     */
-    private static boolean ensureEvalSymmetry(EvalTermsVector etv, int evalScore, Board board, boolean materialOnly) {
-        Board flipBoard = board.deepCopy();
-        flipBoard.flipVertical();
-        int flipScore = evalHelper(etv, flipBoard, materialOnly);
-        boolean retVal = flipScore == evalScore;
-        flipBoard.flipVertical();
-        assert(board.equals(flipBoard));
-        return retVal;
-    }
 
 }

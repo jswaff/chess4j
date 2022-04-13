@@ -202,12 +202,6 @@ public class XBoardHandlerTest {
     }
 
     @Test
-    public void pgn2tunerCmd() {
-        xboardHandler.parseAndDispatch("pgn2tuner bar.pgn");
-        verify(tunerDatasource).addFile(new File("bar.pgn"));
-    }
-
-    @Test
     public void pingCmd() {
         xboardHandler.parseAndDispatch("ping 1337");
 

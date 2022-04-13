@@ -3,7 +3,7 @@ package com.jamesswafford.chess4j;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.book.OpeningBook;
-import com.jamesswafford.chess4j.eval.EvalTermsVector;
+import com.jamesswafford.chess4j.eval.EvalWeights;
 import com.jamesswafford.chess4j.tuner.TunerDatasource;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ public class Globals {
 
     private static final Board board = new Board();
     private static final List<Undo> gameUndos = new ArrayList<>();
-    private static EvalTermsVector evalTermsVector = new EvalTermsVector();
+    private static EvalWeights evalWeights = new EvalWeights();
     private static OpeningBook openingBook;
     private static TunerDatasource tunerDatasource;
 
@@ -28,12 +28,12 @@ public class Globals {
         return gameUndos;
     }
 
-    public static EvalTermsVector getEvalTermsVector() {
-        return evalTermsVector;
+    public static EvalWeights getEvalWeights() {
+        return evalWeights;
     }
 
-    public static void setEvalTermsVector(EvalTermsVector evalTermsVector) {
-        Globals.evalTermsVector = evalTermsVector;
+    public static void setEvalWeights(EvalWeights evalWeights) {
+        Globals.evalWeights = evalWeights;
     }
 
     public static Optional<OpeningBook> getOpeningBook() {

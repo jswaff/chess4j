@@ -39,6 +39,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.ejml</groupId>
+            <artifactId>ejml-all</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.1</version>
@@ -101,7 +106,8 @@
                 <configuration>
                     <excludes>
                         <exclude>**/Perf*</exclude>
-                        <exclude>**/OpeningBookSQL*</exclude>
+                        <exclude>**/SQLiteBook*</exclude>
+                        <exclude>**/LogisticRegressionTuner*</exclude>
                     </excludes>
                     <skipTests>false</skipTests>
                     <argLine>-Djava.library.path=${project.basedir}/../chess4j-native/target</argLine>

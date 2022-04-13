@@ -1,6 +1,6 @@
 package com.jamesswafford.chess4j.io;
 
-import com.jamesswafford.chess4j.eval.EvalTermsVector;
+import com.jamesswafford.chess4j.eval.EvalWeights;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -12,20 +12,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class EvalTermsVectorUtil {
+public class EvalWeightsUtil {
 
-    public static Properties toProperties(EvalTermsVector etv) {
+    public static Properties toProperties(EvalWeights weights) {
         Properties props = new Properties();
-        Set<String> keys = EvalTermsVector.getKeys();
+        Set<String> keys = EvalWeights.getKeys();
         keys.forEach(key -> props.put(
                 key,
-                etv.getVals(key).stream().map(Object::toString).collect(Collectors.joining(","))));
+                weights.getVals(key).stream().map(Object::toString).collect(Collectors.joining(","))));
         return props;
     }
 
-    public static EvalTermsVector toVector(Properties props) {
-        EvalTermsVector etv = new EvalTermsVector();
-        Set<String> keys = EvalTermsVector.getKeys();
+    public static EvalWeights toWeights(Properties props) {
+        EvalWeights weights = new EvalWeights();
+        Set<String> keys = EvalWeights.getKeys();
 
         keys.forEach(key -> {
             String propVal = props.getProperty(key);
@@ -33,26 +33,26 @@ public class EvalTermsVectorUtil {
                     .map(String::trim)
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
-            etv.setVal(key, propVals);
+            weights.setVal(key, propVals);
         });
 
-        return etv;
+        return weights;
     }
 
-    public static EvalTermsVector load(String propertiesFileName) {
+    public static EvalWeights load(String propertiesFileName) {
         try (FileInputStream fis = new FileInputStream(propertiesFileName)) {
             Properties properties = new Properties();
             properties.load(fis);
-            return toVector(properties);
+            return toWeights(properties);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    public static void store(EvalTermsVector etv, String propertiesFileName) {
-        Properties props = toProperties(etv);
+    public static void store(EvalWeights weights, String propertiesFileName, String comments) {
+        Properties props = toProperties(weights);
         try {
-            props.store(new FileOutputStream(propertiesFileName), null);
+            props.store(new FileOutputStream(propertiesFileName), comments);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -6,8 +6,8 @@ import java.util.List;
 
 public class EPDOperation {
 
-    private String epdOpcode;
-    private List<String> epdOperands = new ArrayList<>();
+    private final String epdOpcode;
+    private final List<String> epdOperands = new ArrayList<>();
 
     public EPDOperation(String epdOpCode) {
         this.epdOpcode=epdOpCode;

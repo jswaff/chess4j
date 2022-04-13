@@ -7,16 +7,16 @@ import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.book.OpeningBook;
 import com.jamesswafford.chess4j.eval.Eval;
-import com.jamesswafford.chess4j.eval.EvalTermsVector;
+import com.jamesswafford.chess4j.eval.EvalWeights;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
-import com.jamesswafford.chess4j.tuner.Tuner;
-import com.jamesswafford.chess4j.tuner.TunerDatasource;
+import com.jamesswafford.chess4j.tuner.*;
 import com.jamesswafford.chess4j.utils.*;
 
+import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -55,9 +55,10 @@ public class XBoardHandler {
         put("computer", XBoardHandler::noOp);
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
         put("easy", (String[] cmd) -> ponderingEnabled = false);
-        put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getEvalTermsVector(), Globals.getBoard())));
+        put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getEvalWeights(), Globals.getBoard())));
         put("eval2props", XBoardHandler.this::writeEvalProperties);
         put("exit",XBoardHandler.this::exit);
+        put("fen2tuner", XBoardHandler.this::fenToTunerDS);
         put("force", XBoardHandler.this::force);
         put("go", XBoardHandler.this::go);
         put("hard", (String[] cmd) -> ponderingEnabled = true);
@@ -83,7 +84,7 @@ public class XBoardHandler {
         put("setboard", XBoardHandler.this::setboard);
         put("st", XBoardHandler.this::st);
         put("time", XBoardHandler.this::time);
-        put("tune", XBoardHandler.this::tuneEvalVector);
+        put("tune", XBoardHandler.this::tuneEvalWeights);
         put("undo", XBoardHandler.this::undo);
         put("usermove", XBoardHandler.this::usermove);
         put("xboard", XBoardHandler::noOp);
@@ -149,6 +150,15 @@ public class XBoardHandler {
     private void exit(String[] cmd) {
         analysisMode = false;
         searchIterator.setSkipTimeChecks(false);
+    }
+
+    private void fenToTunerDS(String[] cmd) {
+        if (tunerDatasource != null) {
+            FenToTuner fenToTuner = new FenToTuner(tunerDatasource);
+            fenToTuner.addFile(new File(cmd[1]));
+        } else {
+            LOGGER.warn("There is no tuner datasource.");
+        }
     }
 
     private void force(String[] cmd) {
@@ -238,7 +248,8 @@ public class XBoardHandler {
 
     private void pgnToTunerDS(String[] cmd) {
         if (tunerDatasource != null) {
-            tunerDatasource.addFile(new File(cmd[1]));
+            PGNToTuner pgnToTuner = new PGNToTuner(tunerDatasource);
+            pgnToTuner.addFile(new File(cmd[1]));
         } else {
             LOGGER.warn("There is no tuner datasource.");
         }
@@ -400,19 +411,23 @@ public class XBoardHandler {
         }
     }
 
-    private void tuneEvalVector(String[] cmd) {
+    private void tuneEvalWeights(String[] cmd) {
+        double learningRate = Double.parseDouble(cmd[1]);
+        int maxIterations = Integer.parseInt(cmd[2]);
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
-            Tuner tuner = new Tuner(tunerDatasource1);
-            EvalTermsVector optimizedVector = tuner.optimize();
-            EvalTermsVectorUtil.store(optimizedVector, "eval.properties");
-            Globals.setEvalTermsVector(optimizedVector);
+            List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
+            LogisticRegressionTuner tuner = new LogisticRegressionTuner();
+            Tuple2<EvalWeights, Double> optimizedWeights = tuner.optimize(Globals.getEvalWeights(), dataSet,
+                    learningRate, maxIterations);
+            EvalWeightsUtil.store(optimizedWeights._1, "eval.properties", "Error: " + optimizedWeights._2);
+            Globals.setEvalWeights(optimizedWeights._1);
         }, () -> LOGGER.info("no tuner datasource"));
     }
 
     private void writeEvalProperties(String[] cmd) {
         String propsFile = cmd[1];
         LOGGER.info("writing eval to properties file {}", propsFile);
-        EvalTermsVectorUtil.store(Globals.getEvalTermsVector(), propsFile);
+        EvalWeightsUtil.store(Globals.getEvalWeights(), propsFile, null);
     }
 
     /**

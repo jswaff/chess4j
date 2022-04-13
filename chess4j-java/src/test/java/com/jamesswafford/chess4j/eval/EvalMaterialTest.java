@@ -6,80 +6,58 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
-import static com.jamesswafford.chess4j.pieces.Pawn.*;
-import static com.jamesswafford.chess4j.pieces.Knight.*;
-import static com.jamesswafford.chess4j.pieces.Bishop.*;
-import static com.jamesswafford.chess4j.pieces.Rook.*;
-import static com.jamesswafford.chess4j.pieces.Queen.*;
+import static com.jamesswafford.chess4j.eval.EvalWeights.*;
 import static com.jamesswafford.chess4j.eval.MaterialType.*;
 
 public class EvalMaterialTest {
 
-    private final Board board = new Board();
-
     @Test
     public void testEvalMaterial_initialPos() {
-
-        board.resetBoard();
-        assertEquals(0, evalMaterial(board));
+        assertEquals(0, evalMaterial(new EvalWeights(), new Board()));
     }
 
     @Test
     public void testEvalMaterial_pos1() {
+        EvalWeights weights = new EvalWeights();
+        Board board = new Board("6k1/8/8/3B4/8/8/8/K7 w - - 0 1");
 
-        board.setPos("6k1/8/8/3B4/8/8/8/K7 w - - 0 1");
-        assertEquals(BISHOP_VAL, evalMaterial(board));
+        assertEquals(weights.vals[BISHOP_VAL_IND], evalMaterial(weights, board));
     }
 
     @Test
     public void testEvalMaterial_pos2() {
+        EvalWeights weights = new EvalWeights();
+        Board board = new Board("6k1/8/8/3Br3/8/8/8/K7 w - - 0 1");
 
-        board.setPos("6k1/8/8/3Br3/8/8/8/K7 w - - 0 1");
-        assertEquals(BISHOP_VAL-ROOK_VAL-60, // rook adj 12 x 5 pawns
-                evalMaterial(board));
+        int expectedRookAdj = 0; // 12 x 5 pawns
+        assertEquals(weights.vals[BISHOP_VAL_IND] - weights.vals[ROOK_VAL_IND] - expectedRookAdj,
+                evalMaterial(weights, board));
     }
 
     @Test
-    public void testEvalNonPawnMaterial() {
+    public void testEvalNonPawnMaterial_adjustments() {
+        EvalWeights weights = new EvalWeights();
+        Board board = new Board("8/k7/prb5/K7/QN6/8/8/8 b - - 0 1");
 
-        board.setPos("8/k7/prb5/K7/QN6/8/8/8 b - - 0 1");
+        int expectedKnightAdj = 0; // 6 x 5 pawns
+        assertEquals(weights.vals[QUEEN_VAL_IND] + weights.vals[KNIGHT_VAL_IND] - expectedKnightAdj,
+                evalNonPawnMaterial(weights, board, true));
 
-        assertEquals(QUEEN_VAL + KNIGHT_VAL - 30, // 30 = knight adj 6 x 5 pawns
-                evalNonPawnMaterial(board, true));
-
-        assertEquals(ROOK_VAL + 48 + BISHOP_VAL,  // 48 = rook adj 12 x 4 pawns
-                evalNonPawnMaterial(board, false));
+        int expectedRookAdj = 0; // 12 x 4 pawns
+        assertEquals(weights.vals[ROOK_VAL_IND] + expectedRookAdj + weights.vals[BISHOP_VAL_IND],
+                evalNonPawnMaterial(weights, board, false));
     }
 
     @Test
-    public void testEvalPawnMaterial() {
+    public void testEvalNonPawnMaterial_bishopPair() {
+        EvalWeights weights = new EvalWeights();
+        Board board = new Board("8/kbb5/8/8/8/8/KBN5/8 b - - 0 1");
 
-        board.setPos("8/k7/prb5/K7/QN6/8/8/8 b - - 0 1");
+        assertEquals(weights.vals[BISHOP_VAL_IND] + weights.vals[KNIGHT_VAL_IND],
+                evalNonPawnMaterial(weights, board, true));
 
-        assertEquals(0, evalPawnMaterial(board, true));
-        assertEquals(PAWN_VAL, evalPawnMaterial(board, false));
-    }
-
-    @Test
-    public void testBishopPair() {
-
-        Board board = new Board();
-
-        assertEquals(0, evalBishopPair(board));
-
-        board.setPos("1rb1r1k1/2q2pb1/pp1p4/2n1pPPQ/Pn1BP3/1NN4R/1PP4P/R5K1 b - -");
-
-        assertEquals(-BISHOP_PAIR, evalBishopPair(board));
-    }
-
-    @Test
-    public void testEvalPiece() {
-
-        assertEquals(QUEEN_VAL, evalPiece(BLACK_QUEEN));
-        assertEquals(ROOK_VAL, evalPiece(WHITE_ROOK));
-        assertEquals(BISHOP_VAL, evalPiece(BLACK_BISHOP));
-        assertEquals(KNIGHT_VAL, evalPiece(WHITE_KNIGHT));
-        assertEquals(PAWN_VAL, evalPiece(WHITE_PAWN));
+        assertEquals(weights.vals[BISHOP_VAL_IND]* 2L + weights.vals[BISHOP_PAIR_IND],
+                evalNonPawnMaterial(weights, board, false));
     }
 
     @Test

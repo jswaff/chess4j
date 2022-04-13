@@ -1,6 +1,6 @@
 package com.jamesswafford.chess4j.tuner;
 
-import com.jamesswafford.chess4j.utils.GameResult;
+import com.jamesswafford.chess4j.io.PGNResult;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,8 +9,6 @@ import lombok.Data;
 public class GameRecord {
 
     private String fen;
-    private GameResult gameResult;
-    private Integer evalDepth; // during game
-    private Float evalScore; // during game
+    private PGNResult result;
 
 }

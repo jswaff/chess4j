@@ -1,52 +1,44 @@
 package com.jamesswafford.chess4j.tuner;
 
-import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.search.AlphaBetaSearch;
-import com.jamesswafford.chess4j.search.Search;
-import com.jamesswafford.chess4j.search.SearchParameters;
-import com.jamesswafford.chess4j.utils.GameResult;
+import com.jamesswafford.chess4j.eval.EvalWeights;
+import com.jamesswafford.chess4j.io.PGNResult;
+
+import java.util.List;
+
+import static com.jamesswafford.chess4j.tuner.Hypothesis.hypothesis;
 
 public class CostFunction {
 
-    private Search search;
-    private double k = -1.13; // TODO: from Texel.  Compute to minimize E
-
-    public CostFunction() {
-        search = new AlphaBetaSearch();
-    }
-
-    public void setSearch(Search search) {
-        this.search = search;
-    }
-
-    public double calculateCost(Board board, GameResult gameResult) {
-        SearchParameters parameters = new SearchParameters(0, -Constants.CHECKMATE, Constants.CHECKMATE);
-        int score = search.search(board, parameters);
-        double squishedScore = squishify(score);
-        return calculateCost(squishedScore, gameResult);
-    }
-
-    public double calculateCost(double squishedScore, GameResult gameResult) {
-        double r;
-        if (GameResult.WIN.equals(gameResult)) {
-            r = 1.0;
-        } else if (GameResult.DRAW.equals(gameResult)) {
-            r = 0.5;
-        } else if (GameResult.LOSS.equals(gameResult)) {
-            r = 0.0;
+    public static double y(PGNResult pgnResult) {
+        double y;
+        if (PGNResult.WHITE_WINS.equals(pgnResult)) {
+            y = 1.0;
+        } else if (PGNResult.DRAW.equals(pgnResult)) {
+            y = 0.5;
+        } else if (PGNResult.BLACK_WINS.equals(pgnResult)) {
+            y = 0.0;
         } else {
-            throw new IllegalArgumentException("Cannot compute cost for game result " + gameResult);
+            throw new IllegalArgumentException("Cannot compute cost for result " + pgnResult);
         }
+        return y;
+    }
 
-        double delta = r - squishedScore;
+    public static double cost(double hypothesis, PGNResult result) {
+        double delta = hypothesis - y(result);
         return delta * delta;
     }
 
-    public double squishify(int score) {
-        double exp = k * score / 400.0;
-        double denom = 1 + Math.pow(10, exp);
-        return 1.0 / denom;
-    }
+    public static double cost(List<GameRecord> dataSet, EvalWeights weights) {
+        double totalError = 0;
 
+        for (GameRecord gameRecord : dataSet) {
+            Board board = new Board(gameRecord.getFen());
+            double h = hypothesis(board, weights);
+            double cost = cost(h, gameRecord.getResult());
+            totalError += cost;
+        }
+
+        return totalError / dataSet.size();
+    }
 }

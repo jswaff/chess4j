@@ -1,6 +1,6 @@
 package com.jamesswafford.chess4j.io;
 
-import com.jamesswafford.chess4j.eval.EvalTermsVector;
+import com.jamesswafford.chess4j.eval.EvalWeights;
 import org.junit.Test;
 
 import java.io.File;
@@ -11,23 +11,23 @@ import java.util.Random;
 
 import static org.junit.Assert.*;
 
-public class EvalTermsVectorUtilTest {
+public class EvalWeightsUtilTest {
 
     @Test
     public void toPropertiesAndToVector() {
-        EvalTermsVector etv = new EvalTermsVector();
+        EvalWeights weights = new EvalWeights();
         // change the fields away from the defaults
         Random r = new Random(System.currentTimeMillis());
-        for (int i=0;i<etv.terms.length;i++) {
-            etv.terms[i] = r.nextInt();
+        for (int i = 0; i<weights.vals.length; i++) {
+            weights.vals[i] = r.nextInt();
         }
 
-        Properties props = EvalTermsVectorUtil.toProperties(etv);
+        Properties props = EvalWeightsUtil.toProperties(weights);
 
         // load a new vector and ensure it is equivalent
-        EvalTermsVector etv2 = EvalTermsVectorUtil.toVector(props);
-        assertArrayEquals(etv.terms, etv2.terms);
-        assertEquals(etv, etv2);
+        EvalWeights weights2 = EvalWeightsUtil.toWeights(props);
+        assertArrayEquals(weights.vals, weights2.vals);
+        assertEquals(weights, weights2);
     }
 
     @Test
@@ -36,9 +36,9 @@ public class EvalTermsVectorUtilTest {
         try (FileInputStream fis = new FileInputStream(propsFile)) {
             Properties props = new Properties();
             props.load(fis);
-            EvalTermsVector etv = EvalTermsVectorUtil.toVector(props);
-            assertEquals(6, etv.terms[EvalTermsVector.MAJOR_ON_7TH_IND]);
-            assertEquals(49, etv.terms[EvalTermsVector.QUEEN_PST_IND+1]);
+            EvalWeights weights = EvalWeightsUtil.toWeights(props);
+            assertEquals(6, weights.vals[EvalWeights.MAJOR_ON_7TH_IND]);
+            assertEquals(49, weights.vals[EvalWeights.QUEEN_PST_IND+1]);
         }
     }
 

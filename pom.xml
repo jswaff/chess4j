@@ -32,6 +32,11 @@
                 <artifactId>vavr</artifactId>
                 <version>0.10.4</version>
             </dependency>
+            <dependency>
+                <groupId>org.ejml</groupId>
+                <artifactId>ejml-all</artifactId>
+                <version>0.41</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
