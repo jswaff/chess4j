@@ -1,9 +1,6 @@
 package com.jamesswafford.chess4j.eval;
 
-import com.jamesswafford.chess4j.Constants;
-import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.pieces.*;
 
 import static com.jamesswafford.chess4j.pieces.Bishop.BLACK_BISHOP;
 import static com.jamesswafford.chess4j.pieces.Bishop.WHITE_BISHOP;
