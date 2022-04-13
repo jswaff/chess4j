@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.jamesswafford.chess4j.eval.EvalKing.*;
 import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
 import static com.jamesswafford.chess4j.eval.MaterialType.*;
 
@@ -72,25 +73,25 @@ public final class Eval implements Evaluator {
         // calculate a middle game score and end game score based on positional features
         int mgScore = matScore;
 
-//        mgScore += evalPawns(weights, board, false);
-//
-//        mgScore += evalPieces(weights, board.getWhiteKnights(), board, false, EvalKnight::evalKnight)
-//                - evalPieces(weights, board.getBlackKnights(), board, false, EvalKnight::evalKnight);
-//
-//        mgScore += evalPieces(weights, board.getWhiteBishops(), board, false, EvalBishop::evalBishop)
-//                - evalPieces(weights, board.getBlackBishops(), board, false, EvalBishop::evalBishop);
-//
-//        mgScore += evalPieces(weights, board.getWhiteRooks(), board, false, EvalRook::evalRook)
-//                - evalPieces(weights, board.getBlackRooks(), board, false, EvalRook::evalRook);
-//
-//        mgScore += evalPieces(weights, board.getWhiteQueens(), board, false, EvalQueen::evalQueen)
-//                - evalPieces(weights, board.getBlackQueens(), board, false, EvalQueen::evalQueen);
-//
+        mgScore += evalPawns(weights, board, false);
+
+        mgScore += evalPieces(weights, board.getWhiteKnights(), board, false, EvalKnight::evalKnight)
+                - evalPieces(weights, board.getBlackKnights(), board, false, EvalKnight::evalKnight);
+
+        mgScore += evalPieces(weights, board.getWhiteBishops(), board, false, EvalBishop::evalBishop)
+                - evalPieces(weights, board.getBlackBishops(), board, false, EvalBishop::evalBishop);
+
+        mgScore += evalPieces(weights, board.getWhiteRooks(), board, false, EvalRook::evalRook)
+                - evalPieces(weights, board.getBlackRooks(), board, false, EvalRook::evalRook);
+
+        mgScore += evalPieces(weights, board.getWhiteQueens(), board, false, EvalQueen::evalQueen)
+                - evalPieces(weights, board.getBlackQueens(), board, false, EvalQueen::evalQueen);
+
 //        int egScore = mgScore;
-//
-//        mgScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), false)
-//                - evalKing(weights, board, board.getKingSquare(Color.BLACK), false);
-//
+
+        mgScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), false)
+                - evalKing(weights, board, board.getKingSquare(Color.BLACK), false);
+
 ////        egScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), true)
 ////                - evalKing(weights, board, board.getKingSquare(Color.BLACK), true);
 //
@@ -153,23 +154,23 @@ public final class Eval implements Evaluator {
 
         extractMaterialFeatures(mgFeatures, board);
 
-//        extractFeatures(mgFeatures, board.getWhitePawns() | board.getBlackPawns(), board, false,
-//                EvalPawn::extractPawnFeatures);
-//
-//        extractFeatures(mgFeatures, board.getWhiteKnights() | board.getBlackKnights(), board, false,
-//                EvalKnight::extractKnightFeatures);
-//
-//        extractFeatures(mgFeatures, board.getWhiteBishops() | board.getBlackBishops(), board, false,
-//                EvalBishop::extractBishopFeatures);
-//
-//        extractFeatures(mgFeatures, board.getWhiteRooks() | board.getBlackRooks(), board, false,
-//                EvalRook::extractRookFeatures);
-//
-//        extractFeatures(mgFeatures, board.getWhiteQueens() | board.getBlackQueens(), board, false,
-//                EvalQueen::extractQueenFeatures);
-//
-//        extractKingFeatures(mgFeatures, board, board.getKingSquare(Color.WHITE), false);
-//        extractKingFeatures(mgFeatures, board, board.getKingSquare(Color.BLACK), false);
+        extractFeatures(mgFeatures, board.getWhitePawns() | board.getBlackPawns(), board, false,
+                EvalPawn::extractPawnFeatures);
+
+        extractFeatures(mgFeatures, board.getWhiteKnights() | board.getBlackKnights(), board, false,
+                EvalKnight::extractKnightFeatures);
+
+        extractFeatures(mgFeatures, board.getWhiteBishops() | board.getBlackBishops(), board, false,
+                EvalBishop::extractBishopFeatures);
+
+        extractFeatures(mgFeatures, board.getWhiteRooks() | board.getBlackRooks(), board, false,
+                EvalRook::extractRookFeatures);
+
+        extractFeatures(mgFeatures, board.getWhiteQueens() | board.getBlackQueens(), board, false,
+                EvalQueen::extractQueenFeatures);
+
+        extractKingFeatures(mgFeatures, board, board.getKingSquare(Color.WHITE), false);
+        extractKingFeatures(mgFeatures, board, board.getKingSquare(Color.BLACK), false);
 
         return mgFeatures;
     }

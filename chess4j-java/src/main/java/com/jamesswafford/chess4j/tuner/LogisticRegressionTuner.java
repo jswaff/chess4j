@@ -105,7 +105,11 @@ public class LogisticRegressionTuner {
 
             // calculate cost
             double error = cost(trainingSet, bestWeights);
-            LOGGER.info("error using training set after iteration {}: {}", (it+1), error);
+            LOGGER.info(error);
+
+            if ((it+1)%10 == 0) {
+                EvalWeightsUtil.store(bestWeights, "eval-tune-" + (it+1) + ".properties", "Error: " + error);
+            }
         }
 
         return bestWeights;
