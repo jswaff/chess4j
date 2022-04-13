@@ -1,16 +1,12 @@
 package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.Constants;
+import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.pieces.Piece;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.jamesswafford.chess4j.pieces.*;
 
 import static com.jamesswafford.chess4j.pieces.Bishop.BLACK_BISHOP;
 import static com.jamesswafford.chess4j.pieces.Bishop.WHITE_BISHOP;
-import static com.jamesswafford.chess4j.pieces.King.BLACK_KING;
-import static com.jamesswafford.chess4j.pieces.King.WHITE_KING;
 import static com.jamesswafford.chess4j.pieces.Knight.BLACK_KNIGHT;
 import static com.jamesswafford.chess4j.pieces.Knight.WHITE_KNIGHT;
 import static com.jamesswafford.chess4j.pieces.Pawn.BLACK_PAWN;
@@ -23,95 +19,70 @@ import static com.jamesswafford.chess4j.eval.MaterialType.*;
 
 public class EvalMaterial {
 
-    public static final int QUEEN_VAL  = 975;
-    public static final int ROOK_VAL   = 500;
-    public static final int KNIGHT_VAL = 325;
-    public static final int BISHOP_VAL = 325;
-    public static final int PAWN_VAL   = 100;
-    public static final int BISHOP_PAIR = 50;
-
-    private static final Map<Piece, Integer> pieceValMap;
-
-    static {
-        pieceValMap = new HashMap<>();
-        pieceValMap.put(WHITE_KING, Constants.INFINITY);
-        pieceValMap.put(WHITE_QUEEN, QUEEN_VAL);
-        pieceValMap.put(WHITE_ROOK, ROOK_VAL);
-        pieceValMap.put(WHITE_BISHOP, BISHOP_VAL);
-        pieceValMap.put(WHITE_KNIGHT, KNIGHT_VAL);
-        pieceValMap.put(WHITE_PAWN, PAWN_VAL);
-
-        pieceValMap.put(BLACK_KING, Constants.INFINITY);
-        pieceValMap.put(BLACK_QUEEN, QUEEN_VAL);
-        pieceValMap.put(BLACK_ROOK, ROOK_VAL);
-        pieceValMap.put(BLACK_BISHOP, BISHOP_VAL);
-        pieceValMap.put(BLACK_KNIGHT, KNIGHT_VAL);
-        pieceValMap.put(BLACK_PAWN, PAWN_VAL);
-    }
-
-    public static int evalMaterial(Board board) {
+    public static int evalMaterial(EvalWeightsVector weights, Board board) {
         int pawnMaterial =
-                (board.getNumPieces(WHITE_PAWN) - board.getNumPieces(BLACK_PAWN))  * PAWN_VAL;
+                (board.getNumPieces(WHITE_PAWN) - board.getNumPieces(BLACK_PAWN))  * weights.weights[EvalWeightsVector.PAWN_VAL_IND];
         return pawnMaterial
-                + evalNonPawnMaterial(board, true)
-                - evalNonPawnMaterial(board, false);
+                + evalNonPawnMaterial(weights, board, true)
+                - evalNonPawnMaterial(weights, board, false);
     }
 
-    public static int evalNonPawnMaterial(Board board, boolean forWhite) {
+    public static int evalNonPawnMaterial(EvalWeightsVector weights, Board board, boolean forWhite) {
 
         if (forWhite) {
             int numPawns = board.getNumPieces(WHITE_PAWN);
 
             // raise the knight's value 1/16 for each pawn above 5, and lower for each
             // pawn below 5.
-            int knightAdj = (numPawns - 5) * 6;
+            int knightAdj = 0; // FIXME (numPawns - 5) * 6;
 
             // lower the rook's value 1/8 for each pawn above 5, and raise for each
             // pawn above 5.
-            int rookAdj = (numPawns - 5) * -12;
+            int rookAdj = 0; // FIXME (numPawns - 5) * -12;
 
-            return board.getNumPieces(WHITE_QUEEN) * QUEEN_VAL
-                    + board.getNumPieces(WHITE_ROOK) * (ROOK_VAL + rookAdj)
-                    + board.getNumPieces(WHITE_KNIGHT) * (KNIGHT_VAL + knightAdj)
-                    + board.getNumPieces(WHITE_BISHOP) * BISHOP_VAL
-                    + (board.getNumPieces(WHITE_BISHOP) > 1 ? BISHOP_PAIR : 0);
+            return board.getNumPieces(WHITE_QUEEN) * weights.weights[EvalWeightsVector.QUEEN_VAL_IND]
+                    + board.getNumPieces(WHITE_ROOK) * (weights.weights[EvalWeightsVector.ROOK_VAL_IND] + rookAdj)
+                    + board.getNumPieces(WHITE_KNIGHT) * (weights.weights[EvalWeightsVector.KNIGHT_VAL_IND] + knightAdj)
+                    + board.getNumPieces(WHITE_BISHOP) * weights.weights[EvalWeightsVector.BISHOP_VAL_IND]
+                    + (board.getNumPieces(WHITE_BISHOP) > 1 ? weights.weights[EvalWeightsVector.BISHOP_PAIR_IND]: 0);
         } else {
             int numPawns = board.getNumPieces(BLACK_PAWN);
 
             // raise the knight's value 1/16 for each pawn above 5, and lower for each
             // pawn below 5.
-            int knightAdj = (numPawns - 5) * 6;
+            int knightAdj = 0; // FIXME (numPawns - 5) * 6;
 
             // lower the rook's value 1/8 for each pawn above 5, and raise for each
             // pawn below 5.
-            int rookAdj = (numPawns - 5) * -12;
+            int rookAdj = 0; // FIXME (numPawns - 5) * -12;
 
-            return board.getNumPieces(BLACK_QUEEN) * QUEEN_VAL
-                    + board.getNumPieces(BLACK_ROOK) * (ROOK_VAL + rookAdj)
-                    + board.getNumPieces(BLACK_KNIGHT) * (KNIGHT_VAL + knightAdj)
-                    + board.getNumPieces(BLACK_BISHOP) * BISHOP_VAL
-                    + (board.getNumPieces(BLACK_BISHOP) > 1 ? BISHOP_PAIR: 0);
+            return board.getNumPieces(BLACK_QUEEN) * weights.weights[EvalWeightsVector.QUEEN_VAL_IND]
+                    + board.getNumPieces(BLACK_ROOK) * (weights.weights[EvalWeightsVector.ROOK_VAL_IND] + rookAdj)
+                    + board.getNumPieces(BLACK_KNIGHT) * (weights.weights[EvalWeightsVector.KNIGHT_VAL_IND] + knightAdj)
+                    + board.getNumPieces(BLACK_BISHOP) * weights.weights[EvalWeightsVector.BISHOP_VAL_IND]
+                    + (board.getNumPieces(BLACK_BISHOP) > 1 ? weights.weights[EvalWeightsVector.BISHOP_PAIR_IND]: 0);
         }
     }
 
-    public static int evalBishopPair(Board board) {
-        int score = 0;
-        if (Long.bitCount(board.getWhiteBishops()) > 1) score += BISHOP_PAIR;
-        if (Long.bitCount(board.getBlackBishops()) > 1) score -= BISHOP_PAIR;
-        return score;
-    }
-
-    public static int evalPawnMaterial(Board board, boolean forWhite) {
-
-        if (forWhite) {
-            return board.getNumPieces(WHITE_PAWN) * PAWN_VAL;
-        } else {
-            return board.getNumPieces(BLACK_PAWN) * PAWN_VAL;
-        }
+    public static void extractMaterialFeatures(int[] features, Board board) {
+        features[EvalWeightsVector.PAWN_VAL_IND] = board.getNumPieces(WHITE_PAWN) - board.getNumPieces(BLACK_PAWN);
+        features[EvalWeightsVector.QUEEN_VAL_IND] = board.getNumPieces(WHITE_QUEEN) - board.getNumPieces(BLACK_QUEEN);
+        features[EvalWeightsVector.ROOK_VAL_IND] = board.getNumPieces(WHITE_ROOK) - board.getNumPieces(BLACK_ROOK);
+        features[EvalWeightsVector.KNIGHT_VAL_IND] = board.getNumPieces(WHITE_KNIGHT) - board.getNumPieces(BLACK_KNIGHT);
+        features[EvalWeightsVector.BISHOP_VAL_IND] = board.getNumPieces(WHITE_BISHOP) - board.getNumPieces(BLACK_BISHOP);
+        features[EvalWeightsVector.BISHOP_PAIR_IND] = (board.getNumPieces(WHITE_BISHOP) > 1 ? 1 : 0) -
+                (board.getNumPieces(BLACK_BISHOP) > 1 ? 1 : 0);
     }
 
     public static int evalPiece(Piece piece) {
-        return pieceValMap.get(piece);
+        EvalWeightsVector weights = Globals.getEvalWeightsVector();
+        if (piece instanceof Pawn) return weights.weights[EvalWeightsVector.PAWN_VAL_IND];
+        if (piece instanceof Knight) return weights.weights[EvalWeightsVector.KNIGHT_VAL_IND];
+        if (piece instanceof Bishop) return weights.weights[EvalWeightsVector.BISHOP_VAL_IND];
+        if (piece instanceof Rook) return weights.weights[EvalWeightsVector.ROOK_VAL_IND];
+        if (piece instanceof Queen) return weights.weights[EvalWeightsVector.QUEEN_VAL_IND];
+        if (piece instanceof King) return Constants.INFINITY;
+        throw new IllegalArgumentException("Illegal argument for piece: " + piece);
     }
 
     public static MaterialType calculateMaterialType(Board board) {

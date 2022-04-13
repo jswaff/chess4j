@@ -49,7 +49,7 @@ public final class App {
         } else if (arg.startsWith("-eval=")) {
             String path = arg.substring(6);
             LOGGER.info("loading eval properties from " + path);
-            Globals.setEvalTermsVector(EvalWeightsVectorUtil.load(path));
+            Globals.setEvalWeightsVector(EvalWeightsVectorUtil.load(path));
         }
     }
 

@@ -129,7 +129,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     public List<GameRecord> getGameRecords() {
         List<GameRecord> gameRecords = new ArrayList<>();
 
-        String sql = "select fen, outcome from tuner_pos limit 100000";
+        String sql = "select fen, outcome from tuner_pos";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
