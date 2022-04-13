@@ -6,12 +6,12 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class EvalWeightsVectorTest {
+public class EvalWeightsTest {
 
     @Test
     public void testGetVal() {
-        EvalWeightsVector weights = new EvalWeightsVector();
-        assertEquals(24, weights.weights[EvalWeightsVector.ROOK_OPEN_FILE_IND]);
+        EvalWeights weights = new EvalWeights();
+        assertEquals(24, weights.vals[EvalWeights.ROOK_OPEN_FILE_IND]);
         assertEquals(List.of(24), weights.getVals("ROOK_OPEN_FILE"));
 
         assertEquals(64, weights.getVals("ROOK_PST").size());
@@ -21,21 +21,21 @@ public class EvalWeightsVectorTest {
 
     @Test
     public void testSetVal() {
-        EvalWeightsVector weights = new EvalWeightsVector();
+        EvalWeights weights = new EvalWeights();
         weights.setVal("MAJOR_ON_7TH", List.of(999));
-        assertEquals(999, weights.weights[EvalWeightsVector.MAJOR_ON_7TH_IND]);
+        assertEquals(999, weights.vals[EvalWeights.MAJOR_ON_7TH_IND]);
         assertEquals(List.of(999), weights.getVals("MAJOR_ON_7TH"));
     }
 
     @Test
     public void copyConstructor() {
-        EvalWeightsVector weights = new EvalWeightsVector();
+        EvalWeights weights = new EvalWeights();
         weights.setVal("MAJOR_ON_7TH", List.of(999));
 
-        EvalWeightsVector weights2 = new EvalWeightsVector(weights);
+        EvalWeights weights2 = new EvalWeights(weights);
         assertEquals(weights, weights2);
 
-        assertEquals(999, weights2.weights[EvalWeightsVector.MAJOR_ON_7TH_IND]);
+        assertEquals(999, weights2.vals[EvalWeights.MAJOR_ON_7TH_IND]);
         assertEquals(List.of(999), weights2.getVals("MAJOR_ON_7TH"));
 
         // should be able to change independently

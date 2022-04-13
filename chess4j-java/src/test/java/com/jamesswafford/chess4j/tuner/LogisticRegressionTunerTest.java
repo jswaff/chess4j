@@ -1,6 +1,6 @@
 package com.jamesswafford.chess4j.tuner;
 
-import com.jamesswafford.chess4j.eval.EvalWeightsVector;
+import com.jamesswafford.chess4j.eval.EvalWeights;
 import com.jamesswafford.chess4j.utils.GameResult;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -42,9 +42,9 @@ public class LogisticRegressionTunerTest {
     @Test
     public void kqk() {
 
-        EvalWeightsVector weightsVector = new EvalWeightsVector();
-        Arrays.fill(weightsVector.weights, 0);
-        weightsVector.weights[EvalWeightsVector.QUEEN_VAL_IND] = 100;
+        EvalWeights weightsVector = new EvalWeights();
+        Arrays.fill(weightsVector.vals, 0);
+        weightsVector.vals[EvalWeights.QUEEN_VAL_IND] = 100;
 
         tuner.optimize(
                 weightsVector,
@@ -62,7 +62,7 @@ public class LogisticRegressionTunerTest {
         List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
 
         // get a sample theta vector
-        EvalWeightsVector weights = new EvalWeightsVector();
+        EvalWeights weights = new EvalWeights();
 
         tuner.optimize(weights, gameRecords, 1.0, 3);
     }

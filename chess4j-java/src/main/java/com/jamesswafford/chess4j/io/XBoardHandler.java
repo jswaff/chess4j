@@ -7,7 +7,7 @@ import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.book.OpeningBook;
 import com.jamesswafford.chess4j.eval.Eval;
-import com.jamesswafford.chess4j.eval.EvalWeightsVector;
+import com.jamesswafford.chess4j.eval.EvalWeights;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
@@ -55,7 +55,7 @@ public class XBoardHandler {
         put("computer", XBoardHandler::noOp);
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
         put("easy", (String[] cmd) -> ponderingEnabled = false);
-        put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getEvalWeightsVector(), Globals.getBoard())));
+        put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getEvalWeights(), Globals.getBoard())));
         put("eval2props", XBoardHandler.this::writeEvalProperties);
         put("exit",XBoardHandler.this::exit);
         put("fen2tuner", XBoardHandler.this::fenToTunerDS);
@@ -417,17 +417,17 @@ public class XBoardHandler {
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
             List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
             LogisticRegressionTuner tuner = new LogisticRegressionTuner();
-            Tuple2<EvalWeightsVector, Double> optimizedWeights = tuner.optimize(Globals.getEvalWeightsVector(), dataSet,
+            Tuple2<EvalWeights, Double> optimizedWeights = tuner.optimize(Globals.getEvalWeights(), dataSet,
                     learningRate, maxIterations);
-            EvalWeightsVectorUtil.store(optimizedWeights._1, "eval.properties", "Error: " + optimizedWeights._2);
-            Globals.setEvalWeightsVector(optimizedWeights._1);
+            EvalWeightsUtil.store(optimizedWeights._1, "eval.properties", "Error: " + optimizedWeights._2);
+            Globals.setEvalWeights(optimizedWeights._1);
         }, () -> LOGGER.info("no tuner datasource"));
     }
 
     private void writeEvalProperties(String[] cmd) {
         String propsFile = cmd[1];
         LOGGER.info("writing eval to properties file {}", propsFile);
-        EvalWeightsVectorUtil.store(Globals.getEvalWeightsVector(), propsFile, null);
+        EvalWeightsUtil.store(Globals.getEvalWeights(), propsFile, null);
     }
 
     /**

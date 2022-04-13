@@ -1,7 +1,7 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.eval.EvalWeightsVector;
+import com.jamesswafford.chess4j.eval.EvalWeights;
 import com.jamesswafford.chess4j.utils.GameResult;
 
 import java.util.List;
@@ -29,12 +29,12 @@ public class CostFunction {
         return delta * delta;
     }
 
-    public static double cost(List<GameRecord> dataSet, EvalWeightsVector theta) {
+    public static double cost(List<GameRecord> dataSet, EvalWeights weights) {
         double totalError = 0;
 
         for (GameRecord gameRecord : dataSet) {
             Board board = new Board(gameRecord.getFen());
-            double h = hypothesis(board, theta);
+            double h = hypothesis(board, weights);
             double cost = cost(h, gameRecord.getGameResult());
             totalError += cost;
         }

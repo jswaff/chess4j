@@ -6,30 +6,25 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
-import static com.jamesswafford.chess4j.pieces.Pawn.*;
-import static com.jamesswafford.chess4j.pieces.Knight.*;
-import static com.jamesswafford.chess4j.pieces.Bishop.*;
-import static com.jamesswafford.chess4j.pieces.Rook.*;
-import static com.jamesswafford.chess4j.pieces.Queen.*;
 import static com.jamesswafford.chess4j.eval.MaterialType.*;
 
 public class EvalMaterialTest {
 
     @Test
     public void testEvalMaterial_initialPos() {
-        assertEquals(0, evalMaterial(new EvalWeightsVector(), new Board()));
+        assertEquals(0, evalMaterial(new EvalWeights(), new Board()));
     }
 
     @Test
     public void testEvalMaterial_pos1() {
-        EvalWeightsVector weights = new EvalWeightsVector();
+        EvalWeights weights = new EvalWeights();
         Board board = new Board("6k1/8/8/3B4/8/8/8/K7 w - - 0 1");
-        assertEquals(weights.weights[EvalWeightsVector.BISHOP_VAL_IND], evalMaterial(weights, board));
+        assertEquals(weights.vals[EvalWeights.BISHOP_VAL_IND], evalMaterial(weights, board));
     }
 
     @Test
     public void testEvalMaterial_pos2() {
-        EvalWeightsVector weights = new EvalWeightsVector();
+        EvalWeights weights = new EvalWeights();
         Board board = new Board("6k1/8/8/3Br3/8/8/8/K7 w - - 0 1");
 //        assertEquals(BISHOP_VAL-ROOK_VAL-60, // rook adj 12 x 5 pawns
 //                evalMaterial(board));
@@ -37,7 +32,7 @@ public class EvalMaterialTest {
 
     @Test
     public void testEvalNonPawnMaterial() {
-        EvalWeightsVector weights = new EvalWeightsVector();
+        EvalWeights weights = new EvalWeights();
 
         Board board = new Board("8/k7/prb5/K7/QN6/8/8/8 b - - 0 1");
 

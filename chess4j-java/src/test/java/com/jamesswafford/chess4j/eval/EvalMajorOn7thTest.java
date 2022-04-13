@@ -5,17 +5,16 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static com.jamesswafford.chess4j.eval.EvalKnight.extractKnightFeatures;
 import static org.junit.Assert.*;
 
 import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.*;
 
-import static com.jamesswafford.chess4j.eval.EvalWeightsVector.*;
+import static com.jamesswafford.chess4j.eval.EvalWeights.*;
 
 public class EvalMajorOn7thTest {
 
-    private final EvalWeightsVector weights = new EvalWeightsVector();
+    private final EvalWeights weights = new EvalWeights();
 
     @Test
     public void testEvalMajorOn7th() {
@@ -32,12 +31,12 @@ public class EvalMajorOn7thTest {
             -------K
          */
 
-        assertEquals(weights.weights[MAJOR_ON_7TH_IND] + weights.weights[CONNECTED_MAJORS_ON_7TH_IND],
+        assertEquals(weights.vals[MAJOR_ON_7TH_IND] + weights.vals[CONNECTED_MAJORS_ON_7TH_IND],
                 evalMajorOn7th(weights, board, true, C7));
 
-        assertEquals(weights.weights[MAJOR_ON_7TH_IND], evalMajorOn7th(weights, board, true, F7));
+        assertEquals(weights.vals[MAJOR_ON_7TH_IND], evalMajorOn7th(weights, board, true, F7));
 
-        assertEquals(weights.weights[MAJOR_ON_7TH_IND], evalMajorOn7th(weights, board, false, A2));
+        assertEquals(weights.vals[MAJOR_ON_7TH_IND], evalMajorOn7th(weights, board, false, A2));
 
         // move the black king out from the back rank
         board.setPos("8/2Q2R2/7k/8/8/8/r7/7K w - - 0 1");

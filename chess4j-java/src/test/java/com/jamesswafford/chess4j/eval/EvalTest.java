@@ -16,7 +16,7 @@ import static com.jamesswafford.chess4j.eval.Eval.*;
  */
 public class EvalTest {
 
-    EvalWeightsVector weights = new EvalWeightsVector();
+    EvalWeights weights = new EvalWeights();
 
     @Test
     public void testStartPosIs0() {

@@ -369,7 +369,7 @@ public class AlphaBetaSearch implements Search {
                     move.promotion()==null && !move.equals(killerMovesStore.getKiller1(ply)) &&
                     !move.equals(killerMovesStore.getKiller2(ply)))
             {
-                int material = Eval.eval(Globals.getEvalWeightsVector(), board, true);
+                int material = Eval.eval(Globals.getEvalWeights(), board, true);
                 int materialGain = move.captured()==null ? 0 : EvalMaterial.evalPiece(move.captured());
                 int futilityMargin = depth==1 ? (SEE.PAWN_VAL * 2) : SEE.ROOK_VAL; // FIXME - sync
                 if (material + materialGain + futilityMargin <= alpha) {

@@ -19,15 +19,15 @@ import static com.jamesswafford.chess4j.eval.MaterialType.*;
 
 public class EvalMaterial {
 
-    public static int evalMaterial(EvalWeightsVector weights, Board board) {
+    public static int evalMaterial(EvalWeights weights, Board board) {
         int pawnMaterial =
-                (board.getNumPieces(WHITE_PAWN) - board.getNumPieces(BLACK_PAWN))  * weights.weights[EvalWeightsVector.PAWN_VAL_IND];
+                (board.getNumPieces(WHITE_PAWN) - board.getNumPieces(BLACK_PAWN))  * weights.vals[EvalWeights.PAWN_VAL_IND];
         return pawnMaterial
                 + evalNonPawnMaterial(weights, board, true)
                 - evalNonPawnMaterial(weights, board, false);
     }
 
-    public static int evalNonPawnMaterial(EvalWeightsVector weights, Board board, boolean forWhite) {
+    public static int evalNonPawnMaterial(EvalWeights weights, Board board, boolean forWhite) {
 
         if (forWhite) {
             int numPawns = board.getNumPieces(WHITE_PAWN);
@@ -40,11 +40,11 @@ public class EvalMaterial {
             // pawn above 5.
             int rookAdj = 0; // FIXME (numPawns - 5) * -12;
 
-            return board.getNumPieces(WHITE_QUEEN) * weights.weights[EvalWeightsVector.QUEEN_VAL_IND]
-                    + board.getNumPieces(WHITE_ROOK) * (weights.weights[EvalWeightsVector.ROOK_VAL_IND] + rookAdj)
-                    + board.getNumPieces(WHITE_KNIGHT) * (weights.weights[EvalWeightsVector.KNIGHT_VAL_IND] + knightAdj)
-                    + board.getNumPieces(WHITE_BISHOP) * weights.weights[EvalWeightsVector.BISHOP_VAL_IND]
-                    + (board.getNumPieces(WHITE_BISHOP) > 1 ? weights.weights[EvalWeightsVector.BISHOP_PAIR_IND]: 0);
+            return board.getNumPieces(WHITE_QUEEN) * weights.vals[EvalWeights.QUEEN_VAL_IND]
+                    + board.getNumPieces(WHITE_ROOK) * (weights.vals[EvalWeights.ROOK_VAL_IND] + rookAdj)
+                    + board.getNumPieces(WHITE_KNIGHT) * (weights.vals[EvalWeights.KNIGHT_VAL_IND] + knightAdj)
+                    + board.getNumPieces(WHITE_BISHOP) * weights.vals[EvalWeights.BISHOP_VAL_IND]
+                    + (board.getNumPieces(WHITE_BISHOP) > 1 ? weights.vals[EvalWeights.BISHOP_PAIR_IND]: 0);
         } else {
             int numPawns = board.getNumPieces(BLACK_PAWN);
 
@@ -56,31 +56,31 @@ public class EvalMaterial {
             // pawn below 5.
             int rookAdj = 0; // FIXME (numPawns - 5) * -12;
 
-            return board.getNumPieces(BLACK_QUEEN) * weights.weights[EvalWeightsVector.QUEEN_VAL_IND]
-                    + board.getNumPieces(BLACK_ROOK) * (weights.weights[EvalWeightsVector.ROOK_VAL_IND] + rookAdj)
-                    + board.getNumPieces(BLACK_KNIGHT) * (weights.weights[EvalWeightsVector.KNIGHT_VAL_IND] + knightAdj)
-                    + board.getNumPieces(BLACK_BISHOP) * weights.weights[EvalWeightsVector.BISHOP_VAL_IND]
-                    + (board.getNumPieces(BLACK_BISHOP) > 1 ? weights.weights[EvalWeightsVector.BISHOP_PAIR_IND]: 0);
+            return board.getNumPieces(BLACK_QUEEN) * weights.vals[EvalWeights.QUEEN_VAL_IND]
+                    + board.getNumPieces(BLACK_ROOK) * (weights.vals[EvalWeights.ROOK_VAL_IND] + rookAdj)
+                    + board.getNumPieces(BLACK_KNIGHT) * (weights.vals[EvalWeights.KNIGHT_VAL_IND] + knightAdj)
+                    + board.getNumPieces(BLACK_BISHOP) * weights.vals[EvalWeights.BISHOP_VAL_IND]
+                    + (board.getNumPieces(BLACK_BISHOP) > 1 ? weights.vals[EvalWeights.BISHOP_PAIR_IND]: 0);
         }
     }
 
     public static void extractMaterialFeatures(int[] features, Board board) {
-        features[EvalWeightsVector.PAWN_VAL_IND] = board.getNumPieces(WHITE_PAWN) - board.getNumPieces(BLACK_PAWN);
-        features[EvalWeightsVector.QUEEN_VAL_IND] = board.getNumPieces(WHITE_QUEEN) - board.getNumPieces(BLACK_QUEEN);
-        features[EvalWeightsVector.ROOK_VAL_IND] = board.getNumPieces(WHITE_ROOK) - board.getNumPieces(BLACK_ROOK);
-        features[EvalWeightsVector.KNIGHT_VAL_IND] = board.getNumPieces(WHITE_KNIGHT) - board.getNumPieces(BLACK_KNIGHT);
-        features[EvalWeightsVector.BISHOP_VAL_IND] = board.getNumPieces(WHITE_BISHOP) - board.getNumPieces(BLACK_BISHOP);
-        features[EvalWeightsVector.BISHOP_PAIR_IND] = (board.getNumPieces(WHITE_BISHOP) > 1 ? 1 : 0) -
+        features[EvalWeights.PAWN_VAL_IND] = board.getNumPieces(WHITE_PAWN) - board.getNumPieces(BLACK_PAWN);
+        features[EvalWeights.QUEEN_VAL_IND] = board.getNumPieces(WHITE_QUEEN) - board.getNumPieces(BLACK_QUEEN);
+        features[EvalWeights.ROOK_VAL_IND] = board.getNumPieces(WHITE_ROOK) - board.getNumPieces(BLACK_ROOK);
+        features[EvalWeights.KNIGHT_VAL_IND] = board.getNumPieces(WHITE_KNIGHT) - board.getNumPieces(BLACK_KNIGHT);
+        features[EvalWeights.BISHOP_VAL_IND] = board.getNumPieces(WHITE_BISHOP) - board.getNumPieces(BLACK_BISHOP);
+        features[EvalWeights.BISHOP_PAIR_IND] = (board.getNumPieces(WHITE_BISHOP) > 1 ? 1 : 0) -
                 (board.getNumPieces(BLACK_BISHOP) > 1 ? 1 : 0);
     }
 
     public static int evalPiece(Piece piece) {
-        EvalWeightsVector weights = Globals.getEvalWeightsVector();
-        if (piece instanceof Pawn) return weights.weights[EvalWeightsVector.PAWN_VAL_IND];
-        if (piece instanceof Knight) return weights.weights[EvalWeightsVector.KNIGHT_VAL_IND];
-        if (piece instanceof Bishop) return weights.weights[EvalWeightsVector.BISHOP_VAL_IND];
-        if (piece instanceof Rook) return weights.weights[EvalWeightsVector.ROOK_VAL_IND];
-        if (piece instanceof Queen) return weights.weights[EvalWeightsVector.QUEEN_VAL_IND];
+        EvalWeights weights = Globals.getEvalWeights();
+        if (piece instanceof Pawn) return weights.vals[EvalWeights.PAWN_VAL_IND];
+        if (piece instanceof Knight) return weights.vals[EvalWeights.KNIGHT_VAL_IND];
+        if (piece instanceof Bishop) return weights.vals[EvalWeights.BISHOP_VAL_IND];
+        if (piece instanceof Rook) return weights.vals[EvalWeights.ROOK_VAL_IND];
+        if (piece instanceof Queen) return weights.vals[EvalWeights.QUEEN_VAL_IND];
         if (piece instanceof King) return Constants.INFINITY;
         throw new IllegalArgumentException("Illegal argument for piece: " + piece);
     }

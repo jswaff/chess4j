@@ -16,8 +16,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.jamesswafford.chess4j.eval.EvalKing.evalKing;
-import static com.jamesswafford.chess4j.eval.EvalKing.extractKingFeatures;
 import static com.jamesswafford.chess4j.eval.EvalMaterial.*;
 import static com.jamesswafford.chess4j.eval.MaterialType.*;
 
@@ -39,11 +37,11 @@ public final class Eval implements Evaluator {
 
     public Eval() { }
 
-    public static int eval(EvalWeightsVector weights, Board board) {
+    public static int eval(EvalWeights weights, Board board) {
         return eval(weights, board, false);
     }
 
-    public static int eval(EvalWeightsVector weights, Board board, boolean materialOnly) {
+    public static int eval(EvalWeights weights, Board board, boolean materialOnly) {
 
         int evalScore = evalHelper(weights, board, materialOnly);
 
@@ -54,7 +52,7 @@ public final class Eval implements Evaluator {
         return evalScore;
     }
 
-    private static int evalHelper(EvalWeightsVector weights, Board board, boolean materialOnly) {
+    private static int evalHelper(EvalWeights weights, Board board, boolean materialOnly) {
         int matScore = EvalMaterial.evalMaterial(weights, board);
         if (materialOnly) {
             return board.getPlayerToMove() == Color.WHITE ? matScore : -matScore;
@@ -103,8 +101,8 @@ public final class Eval implements Evaluator {
         return board.getPlayerToMove() == Color.WHITE ? mgScore : -mgScore;
     }
 
-    private static int evalPieces(EvalWeightsVector weights, long pieceMap, Board board, boolean endgame,
-                                  Function4<EvalWeightsVector, Board, Square, Boolean, Integer> evalFunc) {
+    private static int evalPieces(EvalWeights weights, long pieceMap, Board board, boolean endgame,
+                                  Function4<EvalWeights, Board, Square, Boolean, Integer> evalFunc) {
         int score = 0;
 
         while (pieceMap != 0) {
@@ -117,7 +115,7 @@ public final class Eval implements Evaluator {
         return score;
     }
 
-    private static int evalPawns(EvalWeightsVector weights, Board board, boolean endgame) {
+    private static int evalPawns(EvalWeights weights, Board board, boolean endgame) {
 
         // try the pawn hash
         if (Globals.isPawnHashEnabled()) {
@@ -137,7 +135,7 @@ public final class Eval implements Evaluator {
         return score;
     }
 
-    private static int evalPawnsNoHash(EvalWeightsVector weights, Board board, boolean endgame) {
+    private static int evalPawnsNoHash(EvalWeights weights, Board board, boolean endgame) {
         return evalPieces(weights, board.getWhitePawns(), board, endgame, EvalPawn::evalPawn)
                 - evalPieces(weights, board.getBlackPawns(), board, endgame, EvalPawn::evalPawn);
     }
@@ -146,12 +144,12 @@ public final class Eval implements Evaluator {
 
     @Override
     public int evaluateBoard(Board board) {
-        return eval(Globals.getEvalWeightsVector(), board);
+        return eval(Globals.getEvalWeights(), board);
     }
 
     public static int[] extractFeatures(Board board) {
 
-        int[] mgFeatures = new int[EvalWeightsVector.NUM_WEIGHTS];
+        int[] mgFeatures = new int[EvalWeights.NUM_WEIGHTS];
 
         extractMaterialFeatures(mgFeatures, board);
 
@@ -196,7 +194,7 @@ public final class Eval implements Evaluator {
      *
      * @return - true if the eval is symmetric in the given position
      */
-    private static boolean verifyEvalSymmetry(EvalWeightsVector weights, int evalScore, Board board, boolean materialOnly) {
+    private static boolean verifyEvalSymmetry(EvalWeights weights, int evalScore, Board board, boolean materialOnly) {
         Board flipBoard = board.deepCopy();
         flipBoard.flipVertical();
         int flipScore = evalHelper(weights, flipBoard, materialOnly);
@@ -225,13 +223,13 @@ public final class Eval implements Evaluator {
         }
     }
 
-    private static boolean verifyExtractedFeatures(EvalWeightsVector weights, int evalScore, Board board, boolean materialOnly) {
+    private static boolean verifyExtractedFeatures(EvalWeights weights, int evalScore, Board board, boolean materialOnly) {
 
         int[] features = extractFeatures(board);
         int score = 0;
-        int toInd = materialOnly ? EvalWeightsVector.BISHOP_PAIR_IND+1 : features.length;
+        int toInd = materialOnly ? EvalWeights.BISHOP_PAIR_IND+1 : features.length;
         for (int i=0;i<toInd;i++) {
-            score += features[i] * weights.weights[i];
+            score += features[i] * weights.vals[i];
         }
         score = board.getPlayerToMove().equals(Color.WHITE) ? score : -score;
         assert(score==evalScore);
