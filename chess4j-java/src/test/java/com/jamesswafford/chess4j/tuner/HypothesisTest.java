@@ -31,14 +31,14 @@ public class HypothesisTest {
     }
 
     @Test
-    public void squishifyTest() {
-        assertDoubleEquals(Hypothesis.hypothesis(0), 0.5);
-        assertDoubleEquals(Hypothesis.hypothesis(50), 0.5806);
-        assertDoubleEquals(Hypothesis.hypothesis(100), 0.6571);
-        assertDoubleEquals(Hypothesis.hypothesis(-300), 0.1244);
-        assertDoubleEquals(Hypothesis.hypothesis(-500), 0.0372);
-        assertDoubleEquals(Hypothesis.hypothesis(CHECKMATE), 1);
-        assertDoubleEquals(Hypothesis.hypothesis(-CHECKMATE), 0);
+    public void sigmoidTest() {
+        assertDoubleEquals(Hypothesis.sigmoid(0), 0.5);
+        assertDoubleEquals(Hypothesis.sigmoid(50), 0.5806);
+        assertDoubleEquals(Hypothesis.sigmoid(100), 0.6571);
+        assertDoubleEquals(Hypothesis.sigmoid(-300), 0.1244);
+        assertDoubleEquals(Hypothesis.sigmoid(-500), 0.0372);
+        assertDoubleEquals(Hypothesis.sigmoid(CHECKMATE), 1);
+        assertDoubleEquals(Hypothesis.sigmoid(-CHECKMATE), 0);
     }
 
     private void assertDoubleEquals(double val, double expected) {

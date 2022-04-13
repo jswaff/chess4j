@@ -9,10 +9,10 @@ public class Hypothesis {
     public static double hypothesis(Board board, EvalWeights weights) {
         int score = Eval.eval(weights, board, false);
         if (board.getPlayerToMove().isBlack()) score = -score;
-        return hypothesis(score);
+        return sigmoid(score);
     }
 
-    public static double hypothesis(double score) {
+    public static double sigmoid(double score) {
         // This is the traditional approach: 1 / (1 + e ^ -z)
         //return 1.0 / (1 + Math.exp(-score));
 

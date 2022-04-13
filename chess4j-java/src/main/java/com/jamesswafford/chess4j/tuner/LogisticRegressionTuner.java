@@ -1,8 +1,6 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
-import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.EvalWeights;
 import com.jamesswafford.chess4j.io.EvalWeightsUtil;
 import io.vavr.Tuple2;
@@ -13,7 +11,6 @@ import org.ejml.simple.SimpleMatrix;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import static com.jamesswafford.chess4j.tuner.CostFunction.cost;
 
@@ -63,50 +60,28 @@ public class LogisticRegressionTuner {
     private EvalWeights trainWithGradientDescent(List<GameRecord> trainingSet, EvalWeights initialWeights,
                                                  double learningRate, int maxIterations) {
 
-        Random random = new Random(System.currentTimeMillis());
-
         EvalWeights bestWeights = new EvalWeights(initialWeights);
-        int n = initialWeights.vals.length;
-        SimpleMatrix theta = new SimpleMatrix(n, 1);
-        for (int i=0;i<n;i++) {
-            theta.set(i, 0, bestWeights.vals[i]);
-        }
+        int n = bestWeights.vals.length;
+        SimpleMatrix theta = MatrixUtils.weightsToMatrix(bestWeights);
 
         for (int it=0; it<maxIterations; it++) {
 
-            // randomly pick some records from the training set
-            int m = Math.min(1000, trainingSet.size());
-            SimpleMatrix x = new SimpleMatrix(m, n);
-            SimpleMatrix y = new SimpleMatrix(m, 1);
-            for (int i=0;i<m;i++) {
-                GameRecord trainingRecord = trainingSet.get(random.nextInt(trainingSet.size()));
-                Board board = new Board(trainingRecord.getFen());
-                int[] features_i = Eval.extractFeatures(board);
-                for (int j=0;j<n;j++) {
-                    x.set(i, j, features_i[j]);
-                }
-                y.set(i, 0, CostFunction.y(trainingRecord.getResult()));
-            }
-            SimpleMatrix xTrans = x.transpose();
+            // load a batch and set up the X (features) matrix and Y (outcome) vector
+            Tuple2<SimpleMatrix, SimpleMatrix> xy = MatrixUtils.loadXY(trainingSet, 1000, n);
+            SimpleMatrix x = xy._1;
+            SimpleMatrix y = xy._2;
 
-            // calculate the gradient
-            SimpleMatrix h = x.mult(theta);
-            for (int i=0;i<m;i++) {
-                h.set(i, 0, Hypothesis.hypothesis(h.get(i, 0)));
-            }
-
-            SimpleMatrix loss = h.minus(y);
-            SimpleMatrix gradient = xTrans.mult(loss).divide(m);
+            // calculate the gradient and adjust accordingly
+            SimpleMatrix gradient = Gradient.gradient(x, y, theta);
             theta = theta.minus(gradient.divide(1.0/learningRate));
             for (int i=1;i<n;i++) { // start at one to keep pawn val anchored
                 bestWeights.vals[i] = (int)Math.round(theta.get(i, 0));
             }
 
-            // calculate cost
-            double error = cost(trainingSet, bestWeights);
-            LOGGER.info(error);
-
+            // display the error and store the weights every 10 iterations
             if ((it+1)%10 == 0) {
+                double error = cost(trainingSet, bestWeights);
+                LOGGER.info(error);
                 EvalWeightsUtil.store(bestWeights, "eval-tune-" + (it+1) + ".properties", "Error: " + error);
             }
         }
