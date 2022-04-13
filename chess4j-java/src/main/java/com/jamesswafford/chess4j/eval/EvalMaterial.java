@@ -74,17 +74,6 @@ public class EvalMaterial {
                 (board.getNumPieces(BLACK_BISHOP) > 1 ? 1 : 0);
     }
 
-    public static int evalPiece(Piece piece) {
-        EvalWeights weights = Globals.getEvalWeights();
-        if (piece instanceof Pawn) return weights.vals[EvalWeights.PAWN_VAL_IND];
-        if (piece instanceof Knight) return weights.vals[EvalWeights.KNIGHT_VAL_IND];
-        if (piece instanceof Bishop) return weights.vals[EvalWeights.BISHOP_VAL_IND];
-        if (piece instanceof Rook) return weights.vals[EvalWeights.ROOK_VAL_IND];
-        if (piece instanceof Queen) return weights.vals[EvalWeights.QUEEN_VAL_IND];
-        if (piece instanceof King) return Constants.INFINITY;
-        throw new IllegalArgumentException("Illegal argument for piece: " + piece);
-    }
-
     public static MaterialType calculateMaterialType(Board board) {
 
         int numWhitePawns = board.getNumPieces(WHITE_PAWN);

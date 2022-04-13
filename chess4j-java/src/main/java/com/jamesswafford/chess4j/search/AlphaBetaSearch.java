@@ -4,7 +4,6 @@ import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.eval.Eval;
-import com.jamesswafford.chess4j.eval.EvalMaterial;
 import com.jamesswafford.chess4j.eval.Evaluator;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.hash.TranspositionTableEntry;
@@ -370,7 +369,7 @@ public class AlphaBetaSearch implements Search {
                     !move.equals(killerMovesStore.getKiller2(ply)))
             {
                 int material = Eval.eval(Globals.getEvalWeights(), board, true);
-                int materialGain = move.captured()==null ? 0 : EvalMaterial.evalPiece(move.captured());
+                int materialGain = move.captured()==null ? 0 : SEE.seePieceVal(move.captured()); // FIXME - sync
                 int futilityMargin = depth==1 ? (SEE.PAWN_VAL * 2) : SEE.ROOK_VAL; // FIXME - sync
                 if (material + materialGain + futilityMargin <= alpha) {
                     continue;
@@ -503,7 +502,7 @@ public class AlphaBetaSearch implements Search {
 
             // if this is a capture, can it possibly raise alpha? (delta pruning)
             if (move.captured() != null && move.promotion()==null &&
-                    standPat + EvalMaterial.evalPiece(move.captured()) + SEE.PAWN_VAL * 2 < alpha) { // FIXME - sync
+                    standPat + SEE.seePieceVal(move.captured()) + SEE.PAWN_VAL * 2 < alpha) { // FIXME - sync
                 continue;
             }
 
