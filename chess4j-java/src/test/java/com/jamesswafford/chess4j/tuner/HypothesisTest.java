@@ -16,6 +16,18 @@ public class HypothesisTest {
         EvalWeights weights = new EvalWeights();
         Board board = new Board();
         assertDoubleEquals(hypothesis(board, weights), 0.5);
+
+        // one queen on the board should heavily favor white
+        board = new Board("3k4/3Q4/3K4/8/8/8/8/8 w - -");
+        double h = hypothesis(board, weights);
+        assertTrue(h > 0.99);
+
+        // even on blacks turn the hypothesis should be from white's perspective
+        board = new Board("3k4/3Q4/3K4/8/8/8/8/8 b - -");
+        double h2 = hypothesis(board, weights);
+        assertTrue(h2 > 0.99);
+
+        assertDoubleEquals(h, h2);
     }
 
     @Test

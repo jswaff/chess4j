@@ -1,6 +1,6 @@
 package com.jamesswafford.chess4j.tuner;
 
-import com.jamesswafford.chess4j.utils.GameResult;
+import com.jamesswafford.chess4j.io.PGNResult;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -60,25 +60,25 @@ public class FenToTunerTest {
                 .filter(gameRecord -> "r5k1/1N3pp1/1ppb3p/3p4/1p1P4/P2P2PP/4QP2/R5K1 b - -".equals(gameRecord.getFen()))
                 .findFirst()
                 .get();
-        assertEquals(GameResult.LOSS, g1.getGameResult());
+        assertEquals(PGNResult.WHITE_WINS, g1.getResult());
 
         GameRecord g2 = gameRecords.stream()
                 .filter(gameRecord -> "8/8/8/3p4/1P1P2k1/2NP4/7p/2b4K b - -".equals(gameRecord.getFen()))
                 .findFirst()
                 .get();
-        assertEquals(GameResult.DRAW, g2.getGameResult());
+        assertEquals(PGNResult.DRAW, g2.getResult());
 
         GameRecord g3 = gameRecords.stream()
                 .filter(gameRecord -> "2r3k1/2b2pp1/1pp4p/3p4/1P1P4/2NQ2PP/5PK1/1R6 b - -".equals(gameRecord.getFen()))
                 .findFirst()
                 .get();
-        assertEquals(GameResult.LOSS, g3.getGameResult());
+        assertEquals(PGNResult.WHITE_WINS, g3.getResult());
 
         GameRecord g4 = gameRecords.stream()
                 .filter(gameRecord -> "4r1k1/1rpb1pp1/1p5p/3P4/p1PBn1P1/3n3P/R1N2P1K/1R6 w - -".equals(gameRecord.getFen()))
                 .findFirst()
                 .get();
-        assertEquals(GameResult.LOSS, g4.getGameResult());
+        assertEquals(PGNResult.BLACK_WINS, g4.getResult());
     }
 
     private void populateTunerDatasource(String epd) {

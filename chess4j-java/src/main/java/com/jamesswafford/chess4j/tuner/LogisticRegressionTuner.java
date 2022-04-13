@@ -85,14 +85,12 @@ public class LogisticRegressionTuner {
                 for (int j=0;j<n;j++) {
                     x.set(i, j, features_i[j]);
                 }
-                double y_i = CostFunction.y(trainingRecord.getGameResult());
-                if (board.getPlayerToMove().isBlack()) y_i = 1.0 - y_i; // from white's perspective
-                y.set(i, 0, y_i);
+                y.set(i, 0, CostFunction.y(trainingRecord.getResult()));
             }
             SimpleMatrix xTrans = x.transpose();
 
             // calculate the gradient
-            SimpleMatrix h = x.mult(theta); // from white's perspective
+            SimpleMatrix h = x.mult(theta);
             // TODO: use vector operations
             for (int i=0;i<m;i++) {
                 h.set(i, 0, Hypothesis.hypothesis(h.get(i, 0)));
