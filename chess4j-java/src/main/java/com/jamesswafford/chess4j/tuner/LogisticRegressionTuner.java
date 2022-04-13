@@ -66,7 +66,7 @@ public class LogisticRegressionTuner {
         Random random = new Random(System.currentTimeMillis());
 
         EvalWeights bestWeights = new EvalWeights(weights);
-        int n = 6; //weights.weights.length; FIXME
+        int n = weights.vals.length;
         SimpleMatrix theta = new SimpleMatrix(n, 1);
         for (int i=0;i<n;i++) {
             theta.set(i, 0, bestWeights.vals[i]);
