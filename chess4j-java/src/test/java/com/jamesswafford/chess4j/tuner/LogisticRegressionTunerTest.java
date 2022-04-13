@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.eval.EvalWeights;
 import com.jamesswafford.chess4j.io.PGNResult;
+import io.vavr.Tuple2;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class LogisticRegressionTunerTest {
 
@@ -42,15 +44,17 @@ public class LogisticRegressionTunerTest {
     @Test
     public void kqk() {
 
-        EvalWeights weightsVector = new EvalWeights();
-        Arrays.fill(weightsVector.vals, 0);
-        weightsVector.vals[EvalWeights.QUEEN_VAL_IND] = 100;
+        EvalWeights weights = new EvalWeights();
+        Arrays.fill(weights.vals, 0);
+        weights.vals[EvalWeights.QUEEN_VAL_IND] = 100;
 
-        tuner.optimize(
-                weightsVector,
-                List.of(new GameRecord("3k4/3Q4/3K4/8/8/8/8/8 w - -", PGNResult.DRAW)),
+        Tuple2<EvalWeights, Double> tunedWeights = tuner.optimize(
+                weights,
+                List.of(new GameRecord("3k4/3Q4/3K4/8/8/8/8/8 w - -", PGNResult.WHITE_WINS)),
                 100.0,
                 10);
+
+        assertTrue(tunedWeights._1.vals[EvalWeights.QUEEN_VAL_IND] > 100);
     }
 
     @Test
@@ -61,10 +65,9 @@ public class LogisticRegressionTunerTest {
         assertEquals(1000, tunerDatasource.getTotalPositionsCount());
         List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
 
-        // get a sample theta vector
         EvalWeights weights = new EvalWeights();
 
-        tuner.optimize(weights, gameRecords, 1.0, 3);
+        tuner.optimize(weights, gameRecords, 100.0, 3);
     }
 
     private void populateTunerDatasource(String epd) {
