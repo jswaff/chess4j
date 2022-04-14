@@ -1,82 +1,55 @@
 package com.jamesswafford.chess4j.tuner;
 
-import com.jamesswafford.chess4j.eval.EvalWeights;
-import io.vavr.Tuple2;
 import org.ejml.simple.SimpleMatrix;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class GradientTest {
 
-    private final static String testDB = "tunertest.db";
-    private final static String testEpd = "/samplefen1000.epd";
-
-    static SQLiteTunerDatasource tunerDatasource;
-    static Connection conn;
-
-    @BeforeClass
-    public static void setUp() throws Exception {
-        Class.forName("org.sqlite.JDBC");
-        conn = DriverManager.getConnection("jdbc:sqlite:" + testDB);
-
-        tunerDatasource = new SQLiteTunerDatasource(conn);
-        tunerDatasource.initializeDatasource();
-    }
-
-    @AfterClass
-    public static void tearDown() throws Exception {
-        conn.close();
-        new File(testDB).delete();
-    }
-
     @Test
-    public void gradientTest() {
-        populateTunerDatasource(testEpd);
+    public void simpleGradientTest() {
+        double[] theta = new double[] { -2, -1, 1, 2 };
 
-        assertEquals(1000, tunerDatasource.getTotalPositionsCount());
-        List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
+        double[][] X = new double[][] {
+                { 1.0, 0.1, 0.6, 1.1 },
+                { 1.0, 0.2, 0.7, 1.2 },
+                { 1.0, 0.3, 0.8, 1.3 },
+                { 1.0, 0.4, 0.9, 1.4 },
+                { 1.0, 0.5, 1.0, 1.5 }
+        };
 
-        EvalWeights weights = new EvalWeights();
-        int n = weights.vals.length;
-        SimpleMatrix theta = MatrixUtils.weightsToMatrix(weights);
+        double[] y = new double[] { 1, 0, 1, 0, 1 };
 
-        Tuple2<SimpleMatrix, SimpleMatrix> xy = MatrixUtils.loadXY(gameRecords, 1000, n);
-        SimpleMatrix x = xy._1;
-        SimpleMatrix y = xy._2;
+        SimpleMatrix thetaMatrix = new SimpleMatrix(theta.length, 1);
+        for (int i=0;i<theta.length;i++) {
+            thetaMatrix.set(i, 0, theta[i]);
+        }
 
-        SimpleMatrix g = Gradient.gradient(x, y, theta);
+        SimpleMatrix xMatrix = new SimpleMatrix(X);
 
-        // This is too crude
-        /*int epsilon = 2;
-        for (int i=0;i<n;i++) {
-            EvalWeights wPlus = new EvalWeights(weights);
-            wPlus.vals[i] += epsilon;
+        SimpleMatrix yMatrix = new SimpleMatrix(y.length, 1);
+        for (int i=0;i<y.length;i++) {
+            yMatrix.set(i, 0, y[i]);
+        }
 
-            EvalWeights wMinus = new EvalWeights(weights);
-            wMinus.vals[i] -= epsilon;
+        SimpleMatrix gradient = Gradient.gradient(xMatrix, yMatrix, thetaMatrix, Hypothesis::classicSigmoid);
 
-            double gradApprox = (CostFunction.cost(gameRecords, wPlus) - CostFunction.cost(gameRecords, wMinus)) /
-                    (2 * epsilon);
+        assertDoubleEquals(gradient.get(0, 0), 0.146561);
+        assertDoubleEquals(gradient.get(1, 0), 0.051442);
+        assertDoubleEquals(gradient.get(2, 0), 0.124722);
+        assertDoubleEquals(gradient.get(3, 0), 0.198003);
 
-            System.out.println("n=" + i + ", g: " + g.get(i, 0) + ", gApprox: " + gradApprox);
-        }*/
-
-
+        /*
+                with regularization
+            fprintf(' 0.146561\n -0.548558\n 0.724722\n 1.398003\n');
+         */
     }
 
-
-    private void populateTunerDatasource(String epd) {
-        File epdFile = new File(SQLiteTunerDatasourceTest.class.getResource(epd).getFile());
-        FenToTuner fenToTuner = new FenToTuner(tunerDatasource);
-        fenToTuner.addFile(epdFile);
+    private void assertDoubleEquals(double val, double expected) {
+        double epsilon = 0.0001;
+        assertTrue(val >= expected - epsilon);
+        assertTrue(val <= expected + epsilon);
     }
 
 }

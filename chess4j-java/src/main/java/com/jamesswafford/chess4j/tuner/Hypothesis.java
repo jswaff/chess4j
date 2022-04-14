@@ -9,17 +9,19 @@ public class Hypothesis {
     public static double hypothesis(Board board, EvalWeights weights) {
         int score = Eval.eval(weights, board, false);
         if (board.getPlayerToMove().isBlack()) score = -score;
-        return sigmoid(score);
+        return texelSigmoid(score);
     }
 
-    public static double sigmoid(double score) {
-        // This is the traditional approach: 1 / (1 + e ^ -z)
-        //return 1.0 / (1 + Math.exp(-score));
+    public static double texelSigmoid(double z) {
 
         // This is the "Texel" approach
         double k = -1.13;
-        double exp = k * score / 400.0;
+        double exp = k * z / 400.0;
         return 1.0 / (1 + Math.pow(10, exp));
     }
 
+    public static double classicSigmoid(double z) {
+        //  1 / (1 + e ^ -z)
+        return 1.0 / (1 + Math.exp(-z));
+    }
 }

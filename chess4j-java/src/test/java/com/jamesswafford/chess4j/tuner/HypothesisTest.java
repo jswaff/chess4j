@@ -32,13 +32,13 @@ public class HypothesisTest {
 
     @Test
     public void sigmoidTest() {
-        assertDoubleEquals(Hypothesis.sigmoid(0), 0.5);
-        assertDoubleEquals(Hypothesis.sigmoid(50), 0.5806);
-        assertDoubleEquals(Hypothesis.sigmoid(100), 0.6571);
-        assertDoubleEquals(Hypothesis.sigmoid(-300), 0.1244);
-        assertDoubleEquals(Hypothesis.sigmoid(-500), 0.0372);
-        assertDoubleEquals(Hypothesis.sigmoid(CHECKMATE), 1);
-        assertDoubleEquals(Hypothesis.sigmoid(-CHECKMATE), 0);
+        assertDoubleEquals(Hypothesis.texelSigmoid(0), 0.5);
+        assertDoubleEquals(Hypothesis.texelSigmoid(50), 0.5806);
+        assertDoubleEquals(Hypothesis.texelSigmoid(100), 0.6571);
+        assertDoubleEquals(Hypothesis.texelSigmoid(-300), 0.1244);
+        assertDoubleEquals(Hypothesis.texelSigmoid(-500), 0.0372);
+        assertDoubleEquals(Hypothesis.texelSigmoid(CHECKMATE), 1);
+        assertDoubleEquals(Hypothesis.texelSigmoid(-CHECKMATE), 0);
     }
 
     private void assertDoubleEquals(double val, double expected) {
