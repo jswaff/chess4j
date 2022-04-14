@@ -33,17 +33,18 @@ public class GradientTest {
             yMatrix.set(i, 0, y[i]);
         }
 
-        SimpleMatrix gradient = Gradient.gradient(xMatrix, yMatrix, thetaMatrix, Hypothesis::classicSigmoid);
+        SimpleMatrix gradient = Gradient.gradient(xMatrix, yMatrix, thetaMatrix, 0, Hypothesis::classicSigmoid);
 
         assertDoubleEquals(gradient.get(0, 0), 0.146561);
         assertDoubleEquals(gradient.get(1, 0), 0.051442);
         assertDoubleEquals(gradient.get(2, 0), 0.124722);
         assertDoubleEquals(gradient.get(3, 0), 0.198003);
 
-        /*
-                with regularization
-            fprintf(' 0.146561\n -0.548558\n 0.724722\n 1.398003\n');
-         */
+        SimpleMatrix gradientR = Gradient.gradient(xMatrix, yMatrix, thetaMatrix, 3.0, Hypothesis::classicSigmoid);
+        assertDoubleEquals(gradientR.get(0, 0), 0.146561);
+        assertDoubleEquals(gradientR.get(1, 0), -0.548558);
+        assertDoubleEquals(gradientR.get(2, 0), 0.724722);
+        assertDoubleEquals(gradientR.get(3, 0), 1.398003);
     }
 
     private void assertDoubleEquals(double val, double expected) {
