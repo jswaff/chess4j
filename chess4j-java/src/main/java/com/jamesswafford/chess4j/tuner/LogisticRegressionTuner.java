@@ -20,7 +20,10 @@ public class LogisticRegressionTuner {
 
 
     public Tuple2<EvalWeights, Double> optimize(EvalWeights initialWeights, List<GameRecord> dataSet,
-                                                double learningRate, int maxIterations) {
+                                                double learningRate, double lambda, int batchSize, int maxIterations) {
+
+        LOGGER.info("optimizing weights.  alpha: {}, lambda: {}, batchSize: {}, maxIteration: {}",
+                learningRate, lambda, batchSize, maxIterations);
 
         // disable pawn hash
         boolean pawnHashEnabled = Globals.isPawnHashEnabled();
@@ -44,7 +47,8 @@ public class LogisticRegressionTuner {
         LOGGER.info("initial error using test set: {}", initialError);
 
         long start = System.currentTimeMillis();
-        EvalWeights weights = trainWithGradientDescent(trainingSet, initialWeights, learningRate, maxIterations);
+        EvalWeights weights = trainWithGradientDescent(trainingSet, testSet, initialWeights, learningRate, lambda,
+                batchSize, maxIterations);
         long end = System.currentTimeMillis();
         LOGGER.info("training complete in {} seconds", (end-start)/1000);
 
@@ -57,8 +61,9 @@ public class LogisticRegressionTuner {
         return new Tuple2<>(weights, finalError);
     }
 
-    private EvalWeights trainWithGradientDescent(List<GameRecord> trainingSet, EvalWeights initialWeights,
-                                                 double learningRate, int maxIterations) {
+    private EvalWeights trainWithGradientDescent(List<GameRecord> trainingSet, List<GameRecord> testSet,
+                                                 EvalWeights initialWeights,
+                                                 double learningRate, double lambda, int batchSize, int maxIterations) {
 
         EvalWeights bestWeights = new EvalWeights(initialWeights);
         int n = bestWeights.vals.length;
@@ -67,22 +72,22 @@ public class LogisticRegressionTuner {
         for (int it=0; it<maxIterations; it++) {
 
             // load a batch and set up the X (features) matrix and Y (outcome) vector
-            Tuple2<SimpleMatrix, SimpleMatrix> xy = MatrixUtils.loadXY(trainingSet, 1000, n);
+            Tuple2<SimpleMatrix, SimpleMatrix> xy = MatrixUtils.loadXY(trainingSet, batchSize, n);
             SimpleMatrix x = xy._1;
             SimpleMatrix y = xy._2;
 
             // calculate the gradient and adjust accordingly
-            SimpleMatrix gradient = Gradient.gradient(x, y, theta, 0);
+            SimpleMatrix gradient = Gradient.gradient(x, y, theta, lambda);
             theta = theta.minus(gradient.divide(1.0/learningRate));
             for (int i=1;i<n;i++) { // start at one to keep pawn val anchored
                 bestWeights.vals[i] = (int)Math.round(theta.get(i, 0));
             }
 
-            // display the error and store the weights every 10 iterations
-            if ((it+1)%10 == 0) {
-                double error = cost(trainingSet, bestWeights);
-                LOGGER.info(error);
-                EvalWeightsUtil.store(bestWeights, "eval-tune-" + (it+1) + ".properties", "Error: " + error);
+            // display the error and store the weights every 100 iterations
+            if ((it+1)%100 == 0) {
+                double trainingError = cost(trainingSet, bestWeights);
+                double testError = cost(testSet, bestWeights);
+                LOGGER.info(trainingError + "," + testError);
             }
         }
 

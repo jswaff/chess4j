@@ -41,4 +41,5 @@ public class CostFunction {
 
         return totalError / dataSet.size();
     }
+
 }
