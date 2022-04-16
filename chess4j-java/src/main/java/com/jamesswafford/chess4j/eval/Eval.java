@@ -148,36 +148,36 @@ public final class Eval implements Evaluator {
         return eval(Globals.getEvalWeights(), board);
     }
 
-    public static int[] extractFeatures(Board board) {
+    public static double[] extractFeatures(Board board) {
 
         EvalWeights evalWeights = new EvalWeights();
-        int[] mgFeatures = new int[evalWeights.vals.length];
+        double[] features = new double[evalWeights.vals.length];
 
-        extractMaterialFeatures(mgFeatures, board);
+        extractMaterialFeatures(features, board);
 
-        extractFeatures(mgFeatures, board.getWhitePawns() | board.getBlackPawns(), board, false,
+        extractFeatures(features, board.getWhitePawns() | board.getBlackPawns(), board, false,
                 EvalPawn::extractPawnFeatures);
 
-        extractFeatures(mgFeatures, board.getWhiteKnights() | board.getBlackKnights(), board, false,
+        extractFeatures(features, board.getWhiteKnights() | board.getBlackKnights(), board, false,
                 EvalKnight::extractKnightFeatures);
 
-        extractFeatures(mgFeatures, board.getWhiteBishops() | board.getBlackBishops(), board, false,
+        extractFeatures(features, board.getWhiteBishops() | board.getBlackBishops(), board, false,
                 EvalBishop::extractBishopFeatures);
 
-        extractFeatures(mgFeatures, board.getWhiteRooks() | board.getBlackRooks(), board, false,
+        extractFeatures(features, board.getWhiteRooks() | board.getBlackRooks(), board, false,
                 EvalRook::extractRookFeatures);
 
-        extractFeatures(mgFeatures, board.getWhiteQueens() | board.getBlackQueens(), board, false,
+        extractFeatures(features, board.getWhiteQueens() | board.getBlackQueens(), board, false,
                 EvalQueen::extractQueenFeatures);
 
-        extractKingFeatures(mgFeatures, board, board.getKingSquare(Color.WHITE), false);
-        extractKingFeatures(mgFeatures, board, board.getKingSquare(Color.BLACK), false);
+        extractKingFeatures(features, board, board.getKingSquare(Color.WHITE), false);
+        extractKingFeatures(features, board, board.getKingSquare(Color.BLACK), false);
 
-        return mgFeatures;
+        return features;
     }
 
-    private static void extractFeatures(int[] features, long pieceMap, Board board, boolean endgame,
-                                        Function4<int[], Board, Square, Boolean, Void> extractFunc) {
+    private static void extractFeatures(double[] features, long pieceMap, Board board, boolean endgame,
+                                        Function4<double[], Board, Square, Boolean, Void> extractFunc) {
         while (pieceMap != 0) {
             int sqVal = Bitboard.lsb(pieceMap);
             Square sq = Square.valueOf(sqVal);
@@ -227,7 +227,7 @@ public final class Eval implements Evaluator {
 
     private static boolean verifyExtractedFeatures(EvalWeights weights, int evalScore, Board board, boolean materialOnly) {
 
-        int[] features = extractFeatures(board);
+        double[] features = extractFeatures(board);
         int score = 0;
         int toInd = materialOnly ? EvalWeights.BISHOP_PAIR_IND+1 : features.length;
         for (int i=0;i<toInd;i++) {

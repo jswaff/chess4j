@@ -38,7 +38,7 @@ public class EvalPawn {
         return score;
     }
 
-    public static java.lang.Void extractPawnFeatures(int[] features, Board board, Square sq, boolean endgame) {
+    public static java.lang.Void extractPawnFeatures(double[] features, Board board, Square sq, boolean endgame) {
         boolean isWhite = board.getPiece(sq).isWhite();
 
         if (isWhite) {

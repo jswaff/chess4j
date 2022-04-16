@@ -181,7 +181,7 @@ public class EvalKing {
         return score;
     }
 
-    public static void extractKingFeatures(int[] features, Board board, Square kingSq, boolean endgame) {
+    public static void extractKingFeatures(double[] features, Board board, Square kingSq, boolean endgame) {
         if (kingSq == board.getKingSquare(Color.WHITE)) {
             if (endgame) {
                 features[KING_ENDGAME_PST_IND + kingSq.value()]++;
@@ -199,7 +199,7 @@ public class EvalKing {
         }
     }
 
-    public static void extractKingSafetyFeatures(int[] features, Board board, boolean forWhite) {
+    public static void extractKingSafetyFeatures(double[] features, Board board, boolean forWhite) {
         Square kingSq;
         if (forWhite) {
             kingSq = board.getKingSquare(Color.WHITE);
