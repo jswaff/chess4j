@@ -121,7 +121,7 @@ public class EvalKingTest {
 
         Board board = new Board("rnbq1rk1/pppppppp/bn6/8/BN6/5P2/PPPPP1PP/RNBQ1RK1 w - - 0 1");
 
-        int[] features = new int[NUM_WEIGHTS];
+        int[] features = new int[weights.vals.length];
         extractKingFeatures(features, board, G1, false);
         assertEquals(1, features[KING_PST_IND + G1.value()]);
     }
@@ -131,13 +131,13 @@ public class EvalKingTest {
 
         Board board = new Board("8/p3k3/8/8/8/8/4K3/8 w - - 0 1");
 
-        int[] features = new int[NUM_WEIGHTS];
+        int[] features = new int[weights.vals.length];
         extractKingFeatures(features, board, E2, true);
         assertEquals(1, features[KING_ENDGAME_PST_IND + E2.value()]);
 
 
         // test the symmetry
-        int[] features2 = new int[NUM_WEIGHTS];
+        int[] features2 = new int[weights.vals.length];
         extractKingFeatures(features2, board, E7, true);
         assertEquals(-1, features2[KING_ENDGAME_PST_IND + E2.value()]);
     }
@@ -148,7 +148,7 @@ public class EvalKingTest {
         // initial position then e3... no penalty
         Board board = new Board("rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
 
-        int[] features = new int[NUM_WEIGHTS];
+        int[] features = new int[weights.vals.length];
         extractKingSafetyFeatures(features, board, true);
         for (int feature : features) assertEquals(0, feature);
 
@@ -183,7 +183,7 @@ public class EvalKingTest {
 
         Board board = new Board("rnbq1rk1/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1RK1 w - - 0 1");
 
-        int[] features = new int[NUM_WEIGHTS];
+        int[] features = new int[weights.vals.length];
         extractKingSafetyFeatures(features, board, true);
         for (int feature : features) assertEquals(0, feature);
 
@@ -218,7 +218,7 @@ public class EvalKingTest {
         // pawn on C3
         Board board = new Board("1krq1bnr/pppppppp/8/8/8/2P5/PP1PPPPP/1KRQ1BNR w - - 0 1");
 
-        int[] features = new int[NUM_WEIGHTS];
+        int[] features = new int[weights.vals.length];
         extractKingSafetyFeatures(features, board, true);
         assertEquals(1, features[KING_SAFETY_PAWN_ONE_AWAY_IND]);
 

@@ -68,12 +68,12 @@ public class EvalPawnTest {
 
         Board board = new Board();
 
-        int[] features = new int[NUM_WEIGHTS];
+        int[] features = new int[weights.vals.length];
         extractPawnFeatures(features, board, E2, false);
         assertEquals(1, features[PAWN_PST_IND + E2.value()]);
 
         // test the symmetry
-        int[] features2 = new int[NUM_WEIGHTS];
+        int[] features2 = new int[weights.vals.length];
         extractPawnFeatures(features2, board, E7, false);
         assertEquals(-1, features2[PAWN_PST_IND + E2.value()]);
     }
@@ -83,12 +83,12 @@ public class EvalPawnTest {
 
         Board board = new Board();
 
-        int[] features = new int[NUM_WEIGHTS];
+        int[] features = new int[weights.vals.length];
         extractPawnFeatures(features, board, E2, true);
         assertEquals(1, features[PAWN_ENDGAME_PST_IND + E2.value()]);
 
         // test the symmetry
-        int[] features2 = new int[NUM_WEIGHTS];
+        int[] features2 = new int[weights.vals.length];
         extractPawnFeatures(features2, board, E7, true);
         assertEquals(-1, features2[PAWN_ENDGAME_PST_IND + E2.value()]);
     }
@@ -109,7 +109,7 @@ public class EvalPawnTest {
         k - - - K - - -
         */
 
-        int[] features = new int[NUM_WEIGHTS];
+        int[] features = new int[weights.vals.length];
         extractPawnFeatures(features, board, B6, false);
         assertEquals(1, features[PASSED_PAWN_IND]);
 

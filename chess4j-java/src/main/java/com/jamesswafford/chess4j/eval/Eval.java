@@ -150,7 +150,8 @@ public final class Eval implements Evaluator {
 
     public static int[] extractFeatures(Board board) {
 
-        int[] mgFeatures = new int[EvalWeights.NUM_WEIGHTS];
+        EvalWeights evalWeights = new EvalWeights();
+        int[] mgFeatures = new int[evalWeights.vals.length];
 
         extractMaterialFeatures(mgFeatures, board);
 

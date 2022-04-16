@@ -77,12 +77,12 @@ public class EvalRookTest {
 
         Board board = new Board();
 
-        int[] features = new int[NUM_WEIGHTS];
+        int[] features = new int[weights.vals.length];
         extractRookFeatures(features, board, A1, false);
         assertEquals(1, features[ROOK_PST_IND + A1.value()]);
 
         // test the symmetry
-        int[] features2 = new int[NUM_WEIGHTS];
+        int[] features2 = new int[weights.vals.length];
         extractRookFeatures(features2, board, A8, false);
         assertEquals(-1, features2[ROOK_PST_IND + A1.value()]);
     }
@@ -92,12 +92,12 @@ public class EvalRookTest {
 
         Board board = new Board();
 
-        int[] features = new int[NUM_WEIGHTS];
+        int[] features = new int[weights.vals.length];
         extractRookFeatures(features, board, A1, true);
         assertEquals(1, features[ROOK_ENDGAME_PST_IND + A1.value()]);
 
         // test the symmetry
-        int[] features2 = new int[NUM_WEIGHTS];
+        int[] features2 = new int[weights.vals.length];
         extractRookFeatures(features2, board, A8, true);
         assertEquals(-1, features2[ROOK_ENDGAME_PST_IND + A1.value()]);
     }
@@ -107,7 +107,7 @@ public class EvalRookTest {
 
         Board board = new Board("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
 
-        int[] features = new int[NUM_WEIGHTS];
+        int[] features = new int[weights.vals.length];
         extractRookFeatures(features, board, F7, false);
         assertEquals(1, features[MAJOR_ON_7TH_IND]);
         assertEquals(1, features[ROOK_OPEN_FILE_IND]);
@@ -118,7 +118,7 @@ public class EvalRookTest {
 
         Board board = new Board("3r3k/8/8/8/8/8/8/7K b - - 0 1");
 
-        int[] features = new int[NUM_WEIGHTS];
+        int[] features = new int[weights.vals.length];
         extractRookFeatures(features, board, D8, false);
         assertEquals(-1, features[ROOK_OPEN_FILE_IND]);
     }
@@ -129,7 +129,7 @@ public class EvalRookTest {
         // friendly pawn but no enemy -- not half open (or open)
         Board board = new Board("8/2P5/8/2R5/K7/8/7k/8 w - - 0 1");
 
-        int[] features = new int[NUM_WEIGHTS];
+        int[] features = new int[weights.vals.length];
         extractRookFeatures(features, board, C5, false);
         assertEquals(0, features[ROOK_OPEN_FILE_IND]);
         assertEquals(0, features[ROOK_HALF_OPEN_FILE_IND]);

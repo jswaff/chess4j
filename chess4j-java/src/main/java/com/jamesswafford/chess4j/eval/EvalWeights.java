@@ -175,7 +175,6 @@ public class EvalWeights {
     public static final int PASSED_PAWN_IND = 783;
     public static final int ISOLATED_PAWN_IND = 784;
     public static final int DOUBLED_PAWN_IND = 785;
-    public static final int NUM_WEIGHTS = 786;
 
     private static final Map<String, Tuple2<Integer, Integer>> indexMap = new HashMap<>();
     static {

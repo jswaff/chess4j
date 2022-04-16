@@ -73,7 +73,7 @@ public class EvalMajorOn7thTest {
             -------K
          */
 
-        int[] features = new int[NUM_WEIGHTS];
+        int[] features = new int[weights.vals.length];
         exractMajorOn7thFeatures(features, board, true, C7);
         assertEquals(1, features[MAJOR_ON_7TH_IND]);
         assertEquals(1, features[CONNECTED_MAJORS_ON_7TH_IND]);
