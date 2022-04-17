@@ -44,7 +44,7 @@ public class LogisticRegressionTuner {
         LOGGER.info("initial error using test set: {}", initialError);
 
         long start = System.currentTimeMillis();
-        EvalWeights weights = trainWithGradientDescent(trainingSet, initialWeights, learningRate, maxIterations);
+        EvalWeights weights = trainWithGradientDescent(trainingSet, testSet, initialWeights, learningRate, maxIterations);
         long end = System.currentTimeMillis();
         LOGGER.info("training complete in {} seconds", (end-start)/1000);
 
@@ -57,8 +57,8 @@ public class LogisticRegressionTuner {
         return new Tuple2<>(weights, finalError);
     }
 
-    private EvalWeights trainWithGradientDescent(List<GameRecord> trainingSet, EvalWeights initialWeights,
-                                                 double learningRate, int maxIterations) {
+    private EvalWeights trainWithGradientDescent(List<GameRecord> trainingSet, List<GameRecord> testSet,
+                                                 EvalWeights initialWeights,  double learningRate, int maxIterations) {
 
         EvalWeights bestWeights = new EvalWeights(initialWeights);
         int n = bestWeights.vals.length;
@@ -67,7 +67,7 @@ public class LogisticRegressionTuner {
         for (int it=0; it<maxIterations; it++) {
 
             // load a batch and set up the X (features) matrix and Y (outcome) vector
-            Tuple2<SimpleMatrix, SimpleMatrix> xy = MatrixUtils.loadXY(trainingSet, 1000, n);
+            Tuple2<SimpleMatrix, SimpleMatrix> xy = MatrixUtils.loadXY(trainingSet, 500, n);
             SimpleMatrix x = xy._1;
             SimpleMatrix y = xy._2;
 
@@ -80,9 +80,10 @@ public class LogisticRegressionTuner {
 
             // display the error and store the weights every 10 iterations
             if ((it+1)%10 == 0) {
-                double error = cost(trainingSet, bestWeights);
-                LOGGER.info(error);
-                EvalWeightsUtil.store(bestWeights, "eval-tune-" + (it+1) + ".properties", "Error: " + error);
+                double trainingError = cost(trainingSet, bestWeights);
+                double testError = cost(testSet, bestWeights);
+                LOGGER.info(trainingError + "," + testError);
+                EvalWeightsUtil.store(bestWeights, "eval-tune-" + (it+1) + ".properties", "Error: " + trainingError);
             }
         }
 
