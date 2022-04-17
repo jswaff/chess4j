@@ -30,7 +30,7 @@ public class EvalKnight {
         return score;
     }
 
-    public static java.lang.Void extractKnightFeatures(int[] features, Board board, Square sq, boolean endgame) {
+    public static java.lang.Void extractKnightFeatures(double[] features, Board board, Square sq, boolean endgame) {
         if (board.getPiece(sq).isWhite()) {
             if (endgame) {
                 features[KNIGHT_ENDGAME_PST_IND + sq.value()]++;

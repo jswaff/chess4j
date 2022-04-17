@@ -30,7 +30,7 @@ public class EvalQueen {
         return score;
     }
 
-    public static java.lang.Void extractQueenFeatures(int[] features, Board board, Square sq, boolean endgame) {
+    public static java.lang.Void extractQueenFeatures(double[] features, Board board, Square sq, boolean endgame) {
         boolean isWhite = board.getPiece(sq).isWhite();
         if (isWhite) {
             if (endgame) {
