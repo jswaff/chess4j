@@ -181,21 +181,15 @@ public class EvalKing {
         return score;
     }
 
-    public static void extractKingFeatures(double[] features, Board board, Square kingSq, boolean endgame) {
+    public static void extractKingFeatures(double[] features, Board board, Square kingSq, double phase) {
         if (kingSq == board.getKingSquare(Color.WHITE)) {
-            if (endgame) {
-                features[KING_ENDGAME_PST_IND + kingSq.value()]++;
-            } else {
-                features[KING_PST_IND + kingSq.value()]++;
-                extractKingSafetyFeatures(features, board, true);
-            }
+            features[KING_ENDGAME_PST_IND + kingSq.value()] += (1-phase);
+            features[KING_PST_IND + kingSq.value()] += phase;
+            extractKingSafetyFeatures(features, board, true);
         } else {
-            if (endgame) {
-                features[KING_ENDGAME_PST_IND + kingSq.flipVertical().value()]--;
-            } else {
-                features[KING_PST_IND + kingSq.flipVertical().value()]--;
-                extractKingSafetyFeatures(features, board, false);
-            }
+            features[KING_ENDGAME_PST_IND + kingSq.flipVertical().value()] -= (1-phase);
+            features[KING_PST_IND + kingSq.flipVertical().value()] -= phase;
+            extractKingSafetyFeatures(features, board, false);
         }
     }
 

@@ -153,35 +153,38 @@ public final class Eval implements Evaluator {
         EvalWeights evalWeights = new EvalWeights();
         double[] features = new double[evalWeights.vals.length];
 
+        //double phase = EvalTaper.phaseD(board);
+        double phase = 1.0;
+
         extractMaterialFeatures(features, board);
 
-        extractFeatures(features, board.getWhitePawns() | board.getBlackPawns(), board, false,
+        extractFeatures(features, board.getWhitePawns() | board.getBlackPawns(), board, phase,
                 EvalPawn::extractPawnFeatures);
 
-        extractFeatures(features, board.getWhiteKnights() | board.getBlackKnights(), board, false,
+        extractFeatures(features, board.getWhiteKnights() | board.getBlackKnights(), board, phase,
                 EvalKnight::extractKnightFeatures);
 
-        extractFeatures(features, board.getWhiteBishops() | board.getBlackBishops(), board, false,
+        extractFeatures(features, board.getWhiteBishops() | board.getBlackBishops(), board, phase,
                 EvalBishop::extractBishopFeatures);
 
-        extractFeatures(features, board.getWhiteRooks() | board.getBlackRooks(), board, false,
+        extractFeatures(features, board.getWhiteRooks() | board.getBlackRooks(), board, phase,
                 EvalRook::extractRookFeatures);
 
-        extractFeatures(features, board.getWhiteQueens() | board.getBlackQueens(), board, false,
+        extractFeatures(features, board.getWhiteQueens() | board.getBlackQueens(), board, phase,
                 EvalQueen::extractQueenFeatures);
 
-        extractKingFeatures(features, board, board.getKingSquare(Color.WHITE), false);
-        extractKingFeatures(features, board, board.getKingSquare(Color.BLACK), false);
+        extractKingFeatures(features, board, board.getKingSquare(Color.WHITE), phase);
+        extractKingFeatures(features, board, board.getKingSquare(Color.BLACK), phase);
 
         return features;
     }
 
-    private static void extractFeatures(double[] features, long pieceMap, Board board, boolean endgame,
-                                        Function4<double[], Board, Square, Boolean, Void> extractFunc) {
+    private static void extractFeatures(double[] features, long pieceMap, Board board, double phase,
+                                        Function4<double[], Board, Square, Double, Void> extractFunc) {
         while (pieceMap != 0) {
             int sqVal = Bitboard.lsb(pieceMap);
             Square sq = Square.valueOf(sqVal);
-            extractFunc.apply(features, board, sq, endgame);
+            extractFunc.apply(features, board, sq, phase);
             pieceMap ^= Bitboard.squares[sqVal];
         }
     }

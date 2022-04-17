@@ -46,4 +46,8 @@ public class EvalTaper {
         return Math.min(phase, 24);
     }
 
+    public static double phaseD(Board board) {
+        return phase(board) / 24.0;
+    }
+
 }

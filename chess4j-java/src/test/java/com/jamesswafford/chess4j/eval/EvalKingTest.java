@@ -125,7 +125,7 @@ public class EvalKingTest {
         Board board = new Board("rnbq1rk1/pppppppp/bn6/8/BN6/5P2/PPPPP1PP/RNBQ1RK1 w - - 0 1");
 
         double[] features = new double[weights.vals.length];
-        extractKingFeatures(features, board, G1, false);
+        extractKingFeatures(features, board, G1, 1.0);
         assertEquals(1, features[KING_PST_IND + G1.value()], testEpsilon);
     }
 
@@ -135,13 +135,12 @@ public class EvalKingTest {
         Board board = new Board("8/p3k3/8/8/8/8/4K3/8 w - - 0 1");
 
         double[] features = new double[weights.vals.length];
-        extractKingFeatures(features, board, E2, true);
+        extractKingFeatures(features, board, E2, 0.0);
         assertEquals(1, features[KING_ENDGAME_PST_IND + E2.value()], testEpsilon);
-
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
-        extractKingFeatures(features2, board, E7, true);
+        extractKingFeatures(features2, board, E7, 0.0);
         assertEquals(-1, features2[KING_ENDGAME_PST_IND + E2.value()], testEpsilon);
     }
 
