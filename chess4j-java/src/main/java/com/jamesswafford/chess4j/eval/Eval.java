@@ -62,7 +62,7 @@ public final class Eval implements Evaluator {
         // evaluate for a draw.  positions that are drawn by rule are immediately returned.  others
         // that are "drawish" are further evaluated but later tapered down.
 //        MaterialType materialType = EvalMaterial.calculateMaterialType(board);
-//        int drawFactor = 1;
+        int drawFactor = 1;
 //        if (immediateDraws.contains(materialType)) {
 //            return 0;
 //        }
@@ -87,16 +87,16 @@ public final class Eval implements Evaluator {
         mgScore += evalPieces(weights, board.getWhiteQueens(), board, false, EvalQueen::evalQueen)
                 - evalPieces(weights, board.getBlackQueens(), board, false, EvalQueen::evalQueen);
 
-//        int egScore = mgScore;
+        int egScore = mgScore;
 
         mgScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), false)
                 - evalKing(weights, board, board.getKingSquare(Color.BLACK), false);
 
-////        egScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), true)
-////                - evalKing(weights, board, board.getKingSquare(Color.BLACK), true);
-//
-//        // blend the middle game score and end game score, and divide by the draw factor
-////        int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
+        egScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), true)
+                - evalKing(weights, board, board.getKingSquare(Color.BLACK), true);
+
+        // blend the middle game score and end game score, and divide by the draw factor
+        //int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
 
         // return the score from the perspective of the player on move
         return board.getPlayerToMove() == Color.WHITE ? mgScore : -mgScore;
@@ -153,28 +153,27 @@ public final class Eval implements Evaluator {
         EvalWeights evalWeights = new EvalWeights();
         double[] features = new double[evalWeights.vals.length];
 
-        //double phase = EvalTaper.phaseD(board);
-        double phase = 1.0;
+        double phase = EvalTaper.phaseD(board);
 
         extractMaterialFeatures(features, board);
 
-        extractFeatures(features, board.getWhitePawns() | board.getBlackPawns(), board, phase,
+        extractFeatures(features, board.getWhitePawns() | board.getBlackPawns(), board, 1.0,
                 EvalPawn::extractPawnFeatures);
 
-        extractFeatures(features, board.getWhiteKnights() | board.getBlackKnights(), board, phase,
+        extractFeatures(features, board.getWhiteKnights() | board.getBlackKnights(), board, 1.0,
                 EvalKnight::extractKnightFeatures);
 
-        extractFeatures(features, board.getWhiteBishops() | board.getBlackBishops(), board, phase,
+        extractFeatures(features, board.getWhiteBishops() | board.getBlackBishops(), board, 1.0,
                 EvalBishop::extractBishopFeatures);
 
-        extractFeatures(features, board.getWhiteRooks() | board.getBlackRooks(), board, phase,
+        extractFeatures(features, board.getWhiteRooks() | board.getBlackRooks(), board, 1.0,
                 EvalRook::extractRookFeatures);
 
-        extractFeatures(features, board.getWhiteQueens() | board.getBlackQueens(), board, phase,
+        extractFeatures(features, board.getWhiteQueens() | board.getBlackQueens(), board, 1.0,
                 EvalQueen::extractQueenFeatures);
 
-        extractKingFeatures(features, board, board.getKingSquare(Color.WHITE), phase);
-        extractKingFeatures(features, board, board.getKingSquare(Color.BLACK), phase);
+        extractKingFeatures(features, board, board.getKingSquare(Color.WHITE), 1.0);
+        extractKingFeatures(features, board, board.getKingSquare(Color.BLACK), 1.0);
 
         return features;
     }
@@ -234,10 +233,14 @@ public final class Eval implements Evaluator {
         int score = 0;
         int toInd = materialOnly ? EvalWeights.BISHOP_PAIR_IND+1 : features.length;
         for (int i=0;i<toInd;i++) {
-            score += features[i] * weights.vals[i];
+            score += Math.round(features[i] * weights.vals[i]);
         }
         score = board.getPlayerToMove().equals(Color.WHITE) ? score : -score;
-        assert(score==evalScore);
+
+        if (Math.abs(score - evalScore) >= 0.000001) {
+            System.out.println("score: " + score + ", evalScore: " + evalScore);
+        }
+        assert(Math.abs(score - evalScore) < 0.000001);
 
         return true;
     }
