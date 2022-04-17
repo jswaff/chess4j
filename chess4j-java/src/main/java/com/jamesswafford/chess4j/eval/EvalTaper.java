@@ -19,10 +19,7 @@ public class EvalTaper {
     public static int taper(Board board, int mgScore, int egScore) {
         int mgPhase = phase(board);
         int egPhase = 24 - mgPhase;
-//        double phase = phaseD(board);
-
         return (mgScore * mgPhase + egScore * egPhase) / 24;
-//        return (int) (Math.round(mgScore * phase) + Math.round(egPhase * (1-phase)));
     }
 
 

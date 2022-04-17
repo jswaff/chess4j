@@ -96,10 +96,10 @@ public final class Eval implements Evaluator {
                 - evalKing(weights, board, board.getKingSquare(Color.BLACK), true);
 
         // blend the middle game score and end game score, and divide by the draw factor
-        //int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
+        int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
 
         // return the score from the perspective of the player on move
-        return board.getPlayerToMove() == Color.WHITE ? mgScore : -mgScore;
+        return board.getPlayerToMove() == Color.WHITE ? taperedScore : -taperedScore;
     }
 
     private static int evalPieces(EvalWeights weights, long pieceMap, Board board, boolean endgame,
@@ -172,8 +172,8 @@ public final class Eval implements Evaluator {
         extractFeatures(features, board.getWhiteQueens() | board.getBlackQueens(), board, 1.0,
                 EvalQueen::extractQueenFeatures);
 
-        extractKingFeatures(features, board, board.getKingSquare(Color.WHITE), 1.0);
-        extractKingFeatures(features, board, board.getKingSquare(Color.BLACK), 1.0);
+        extractKingFeatures(features, board, board.getKingSquare(Color.WHITE), phase);
+        extractKingFeatures(features, board, board.getKingSquare(Color.BLACK), phase);
 
         return features;
     }
@@ -230,17 +230,14 @@ public final class Eval implements Evaluator {
     private static boolean verifyExtractedFeatures(EvalWeights weights, int evalScore, Board board, boolean materialOnly) {
 
         double[] features = extractFeatures(board);
-        int score = 0;
+        double score = 0;
         int toInd = materialOnly ? EvalWeights.BISHOP_PAIR_IND+1 : features.length;
         for (int i=0;i<toInd;i++) {
-            score += Math.round(features[i] * weights.vals[i]);
+            score += features[i] * weights.vals[i];
         }
         score = board.getPlayerToMove().equals(Color.WHITE) ? score : -score;
 
-        if (Math.abs(score - evalScore) >= 0.000001) {
-            System.out.println("score: " + score + ", evalScore: " + evalScore);
-        }
-        assert(Math.abs(score - evalScore) < 0.000001);
+        assert(Math.abs(score - evalScore) < 1.0);
 
         return true;
     }
