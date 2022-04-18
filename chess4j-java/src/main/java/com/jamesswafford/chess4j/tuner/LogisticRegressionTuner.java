@@ -63,6 +63,8 @@ public class LogisticRegressionTuner {
         int n = bestWeights.vals.length;
         SimpleMatrix theta = MatrixUtils.weightsToMatrix(bestWeights);
 
+        LOGGER.info("initial learning rate: {}", learningRate);
+
         // reduce the learning rate to 10% over the run
         double lrDelta = (learningRate / maxIterations) * 0.9;
 
@@ -76,7 +78,7 @@ public class LogisticRegressionTuner {
             // calculate the gradient and adjust accordingly
             SimpleMatrix gradient = Gradient.gradient(x, y, theta, 0);
             theta = theta.minus(gradient.divide(1.0/learningRate));
-            for (int i = EvalWeights.BISHOP_PAIR_IND +1; i<n; i++) { // do not adjust material
+            for (int i = 1; i<n; i++) { // anchor pawn value
                 bestWeights.vals[i] = (int)Math.round(theta.get(i, 0));
             }
 
@@ -89,6 +91,8 @@ public class LogisticRegressionTuner {
 
             learningRate -= lrDelta;
         }
+
+        LOGGER.info("final learning rate: {}", learningRate);
 
         return bestWeights;
     }
