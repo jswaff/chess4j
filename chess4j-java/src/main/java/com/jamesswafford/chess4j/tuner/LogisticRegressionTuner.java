@@ -63,8 +63,6 @@ public class LogisticRegressionTuner {
         int n = bestWeights.vals.length;
         SimpleMatrix theta = MatrixUtils.weightsToMatrix(bestWeights);
 
-        LOGGER.info("initial learning rate: {}", learningRate);
-
         // reduce the learning rate to 10% over the run
         double lrDelta = (learningRate / maxIterations) * 0.9;
 
@@ -91,8 +89,6 @@ public class LogisticRegressionTuner {
 
             learningRate -= lrDelta;
         }
-
-        LOGGER.info("final learning rate: {}", learningRate);
 
         return bestWeights;
     }
