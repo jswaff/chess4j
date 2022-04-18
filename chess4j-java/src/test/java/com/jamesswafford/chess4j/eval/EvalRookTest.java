@@ -80,12 +80,12 @@ public class EvalRookTest {
         Board board = new Board();
 
         double[] features = new double[weights.vals.length];
-        extractRookFeatures(features, board, A1, false);
+        extractRookFeatures(features, board, A1, 1.0);
         assertEquals(1, features[ROOK_PST_IND + A1.value()], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
-        extractRookFeatures(features2, board, A8, false);
+        extractRookFeatures(features2, board, A8, 1.0);
         assertEquals(-1, features2[ROOK_PST_IND + A1.value()], testEpsilon);
     }
 
@@ -95,12 +95,12 @@ public class EvalRookTest {
         Board board = new Board();
 
         double[] features = new double[weights.vals.length];
-        extractRookFeatures(features, board, A1, true);
+        extractRookFeatures(features, board, A1, 0.0);
         assertEquals(1, features[ROOK_ENDGAME_PST_IND + A1.value()], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
-        extractRookFeatures(features2, board, A8, true);
+        extractRookFeatures(features2, board, A8, 0.0);
         assertEquals(-1, features2[ROOK_ENDGAME_PST_IND + A1.value()], testEpsilon);
     }
 
@@ -110,7 +110,7 @@ public class EvalRookTest {
         Board board = new Board("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
 
         double[] features = new double[weights.vals.length];
-        extractRookFeatures(features, board, F7, false);
+        extractRookFeatures(features, board, F7, 1.0);
         assertEquals(1, features[MAJOR_ON_7TH_IND], testEpsilon);
         assertEquals(1, features[ROOK_OPEN_FILE_IND], testEpsilon);
     }
@@ -121,7 +121,7 @@ public class EvalRookTest {
         Board board = new Board("3r3k/8/8/8/8/8/8/7K b - - 0 1");
 
         double[] features = new double[weights.vals.length];
-        extractRookFeatures(features, board, D8, false);
+        extractRookFeatures(features, board, D8, 1.0);
         assertEquals(-1, features[ROOK_OPEN_FILE_IND], testEpsilon);
     }
 
@@ -132,7 +132,7 @@ public class EvalRookTest {
         Board board = new Board("8/2P5/8/2R5/K7/8/7k/8 w - - 0 1");
 
         double[] features = new double[weights.vals.length];
-        extractRookFeatures(features, board, C5, false);
+        extractRookFeatures(features, board, C5, 1.0);
         assertEquals(0, features[ROOK_OPEN_FILE_IND], testEpsilon);
         assertEquals(0, features[ROOK_HALF_OPEN_FILE_IND], testEpsilon);
 
@@ -140,7 +140,7 @@ public class EvalRookTest {
         board.setPos("8/2p5/8/2R5/K7/8/7k/8 w - - 0 1");
 
         Arrays.fill(features, 0);
-        extractRookFeatures(features, board, C5, false);
+        extractRookFeatures(features, board, C5, 1.0);
         assertEquals(0, features[ROOK_OPEN_FILE_IND], testEpsilon);
         assertEquals(1, features[ROOK_HALF_OPEN_FILE_IND], testEpsilon);
     }

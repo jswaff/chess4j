@@ -54,12 +54,12 @@ public class EvalQueenTest {
         Board board = new Board();
 
         double[] features = new double[weights.vals.length];
-        extractQueenFeatures(features, board, D1, false);
+        extractQueenFeatures(features, board, D1, 1.0);
         assertEquals(1, features[QUEEN_PST_IND + D1.value()], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
-        extractQueenFeatures(features2, board, D8, false);
+        extractQueenFeatures(features2, board, D8, 1.0);
         assertEquals(-1, features2[QUEEN_PST_IND + D1.value()], testEpsilon);
     }
 
@@ -69,12 +69,12 @@ public class EvalQueenTest {
         Board board = new Board();
 
         double[] features = new double[weights.vals.length];
-        extractQueenFeatures(features, board, D1, true);
+        extractQueenFeatures(features, board, D1, 0.0);
         assertEquals(1, features[QUEEN_ENDGAME_PST_IND + D1.value()], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
-        extractQueenFeatures(features2, board, D8, true);
+        extractQueenFeatures(features2, board, D8, 0.0);
         assertEquals(-1, features2[QUEEN_ENDGAME_PST_IND + D1.value()], testEpsilon);
     }
 
@@ -84,7 +84,7 @@ public class EvalQueenTest {
         Board board = new Board("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
 
         double[] features = new double[weights.vals.length];
-        extractQueenFeatures(features, board, C7, false);
+        extractQueenFeatures(features, board, C7, 1.0);
         assertEquals(1, features[MAJOR_ON_7TH_IND], testEpsilon);
         assertEquals(1, features[CONNECTED_MAJORS_ON_7TH_IND], testEpsilon);
     }

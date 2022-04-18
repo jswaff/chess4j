@@ -55,20 +55,14 @@ public class EvalRook {
         return score;
     }
 
-    public static java.lang.Void extractRookFeatures(double[] features, Board board, Square sq, boolean endgame) {
+    public static java.lang.Void extractRookFeatures(double[] features, Board board, Square sq, double phase) {
         boolean isWhite = board.getPiece(sq).isWhite();
         if (isWhite) {
-            if (endgame) {
-                features[ROOK_ENDGAME_PST_IND + sq.value()]++;
-            } else {
-                features[ROOK_PST_IND + sq.value()]++;
-            }
+            features[ROOK_ENDGAME_PST_IND + sq.value()] += (1-phase);
+            features[ROOK_PST_IND + sq.value()] += phase;
         } else {
-            if (endgame) {
-                features[ROOK_ENDGAME_PST_IND + sq.flipVertical().value()]--;
-            } else {
-                features[ROOK_PST_IND + sq.flipVertical().value()]--;
-            }
+            features[ROOK_ENDGAME_PST_IND + sq.flipVertical().value()] -= (1-phase);
+            features[ROOK_PST_IND + sq.flipVertical().value()] -= phase;
         }
 
         exractMajorOn7thFeatures(features, board, isWhite, sq);

@@ -44,12 +44,12 @@ public class EvalBishopTest {
         Board board = new Board();
 
         double[] features = new double[weights.vals.length];
-        extractBishopFeatures(features, board, C1, false);
+        extractBishopFeatures(features, board, C1, 1.0);
         assertEquals(1, features[BISHOP_PST_IND + C1.value()], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
-        extractBishopFeatures(features2, board, C8, false);
+        extractBishopFeatures(features2, board, C8, 1.0);
         assertEquals(-1, features2[BISHOP_PST_IND + C1.value()], testEpsilon);
     }
 
@@ -59,12 +59,12 @@ public class EvalBishopTest {
         Board board = new Board();
 
         double[] features = new double[weights.vals.length];
-        extractBishopFeatures(features, board, C1, true);
+        extractBishopFeatures(features, board, C1, 0.0);
         assertEquals(1, features[BISHOP_ENDGAME_PST_IND + C1.value()], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
-        extractBishopFeatures(features2, board, C8, true);
+        extractBishopFeatures(features2, board, C8, 0.0);
         assertEquals(-1, features2[BISHOP_ENDGAME_PST_IND + C1.value()], testEpsilon);
     }
 

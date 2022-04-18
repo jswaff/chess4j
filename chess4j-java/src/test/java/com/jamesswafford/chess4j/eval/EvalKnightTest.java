@@ -46,13 +46,13 @@ public class EvalKnightTest {
         Board board = new Board();
 
         double[] features = new double[weights.vals.length];
-        extractKnightFeatures(features, board, B1, false);
+        extractKnightFeatures(features, board, B1, 1.0);
         assertEquals(1, features[KNIGHT_PST_IND + B1.value()], testEpsilon);
         assertEquals(B1.distance(E8), features[KNIGHT_TROPISM_IND], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
-        extractKnightFeatures(features2, board, B8, false);
+        extractKnightFeatures(features2, board, B8, 1.0);
         assertEquals(-1, features2[KNIGHT_PST_IND + B1.value()], testEpsilon);
         assertEquals(-B8.distance(E1), features2[KNIGHT_TROPISM_IND], testEpsilon);
     }
@@ -62,13 +62,13 @@ public class EvalKnightTest {
         Board board = new Board();
 
         double[] features = new double[weights.vals.length];
-        extractKnightFeatures(features, board, B1, true);
+        extractKnightFeatures(features, board, B1, 0.0);
         assertEquals(1, features[KNIGHT_ENDGAME_PST_IND + B1.value()], testEpsilon);
         assertEquals(B1.distance(E8), features[KNIGHT_TROPISM_IND], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
-        extractKnightFeatures(features2, board, B8, true);
+        extractKnightFeatures(features2, board, B8, 0.0);
         assertEquals(-1, features2[KNIGHT_ENDGAME_PST_IND + B1.value()], testEpsilon);
         assertEquals(-B8.distance(E1), features2[KNIGHT_TROPISM_IND], testEpsilon);
     }

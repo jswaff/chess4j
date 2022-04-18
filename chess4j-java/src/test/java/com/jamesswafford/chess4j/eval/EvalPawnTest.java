@@ -71,12 +71,12 @@ public class EvalPawnTest {
         Board board = new Board();
 
         double[] features = new double[weights.vals.length];
-        extractPawnFeatures(features, board, E2, false);
+        extractPawnFeatures(features, board, E2, 1.0);
         assertEquals(1, features[PAWN_PST_IND + E2.value()], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
-        extractPawnFeatures(features2, board, E7, false);
+        extractPawnFeatures(features2, board, E7, 1.0);
         assertEquals(-1, features2[PAWN_PST_IND + E2.value()], testEpsilon);
     }
 
@@ -86,12 +86,12 @@ public class EvalPawnTest {
         Board board = new Board();
 
         double[] features = new double[weights.vals.length];
-        extractPawnFeatures(features, board, E2, true);
+        extractPawnFeatures(features, board, E2, 0.0);
         assertEquals(1, features[PAWN_ENDGAME_PST_IND + E2.value()], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
-        extractPawnFeatures(features2, board, E7, true);
+        extractPawnFeatures(features2, board, E7, 0.0);
         assertEquals(-1, features2[PAWN_ENDGAME_PST_IND + E2.value()], testEpsilon);
     }
 
@@ -112,12 +112,12 @@ public class EvalPawnTest {
         */
 
         double[] features = new double[weights.vals.length];
-        extractPawnFeatures(features, board, B6, false);
+        extractPawnFeatures(features, board, B6, 1.0);
         assertEquals(1, features[PASSED_PAWN_IND], testEpsilon);
 
         // the black pawn on A2 is passed and isolated
         Arrays.fill(features, 0);
-        extractPawnFeatures(features, board, A2, false);
+        extractPawnFeatures(features, board, A2, 1.0);
         assertEquals(-1, features[PASSED_PAWN_IND], testEpsilon);
         assertEquals(-1, features[ISOLATED_PAWN_IND], testEpsilon);
     }
