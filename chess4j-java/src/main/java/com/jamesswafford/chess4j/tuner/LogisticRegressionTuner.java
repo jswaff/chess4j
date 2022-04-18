@@ -83,7 +83,6 @@ public class LogisticRegressionTuner {
                 double trainingError = cost(trainingSet, bestWeights);
                 double testError = cost(testSet, bestWeights);
                 LOGGER.info(trainingError + "," + testError);
-                EvalWeightsUtil.store(bestWeights, "eval-tune-" + (it+1) + ".properties", "Error: " + trainingError);
             }
         }
 
