@@ -2,7 +2,6 @@ package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.eval.EvalWeights;
-import com.jamesswafford.chess4j.io.EvalWeightsUtil;
 import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,10 +63,13 @@ public class LogisticRegressionTuner {
         int n = bestWeights.vals.length;
         SimpleMatrix theta = MatrixUtils.weightsToMatrix(bestWeights);
 
+        // reduce the learning rate to 10% over the run
+        double lrDelta = (learningRate / maxIterations) * 0.9;
+
         for (int it=0; it<maxIterations; it++) {
 
             // load a batch and set up the X (features) matrix and Y (outcome) vector
-            Tuple2<SimpleMatrix, SimpleMatrix> xy = MatrixUtils.loadXY(trainingSet, 500, n);
+            Tuple2<SimpleMatrix, SimpleMatrix> xy = MatrixUtils.loadXY(trainingSet, 1000, n);
             SimpleMatrix x = xy._1;
             SimpleMatrix y = xy._2;
 
@@ -84,41 +86,8 @@ public class LogisticRegressionTuner {
                 double testError = cost(testSet, bestWeights);
                 LOGGER.info(trainingError + "," + testError);
             }
-        }
 
-        return bestWeights;
-    }
-
-    private EvalWeights trainWithNaiveSearch(List<GameRecord> trainingSet, EvalWeights initialWeights, int maxIterations) {
-        int n = initialWeights.vals.length;
-        double bestError = cost(trainingSet, initialWeights);
-        EvalWeights bestWeights = new EvalWeights(initialWeights);
-
-        for (int it = 0; it<maxIterations; it++) {
-            int numParamsImproved = 0;
-            for (int i=0;i<n;i++) {
-                EvalWeights candidateWeights = new EvalWeights(bestWeights);
-                candidateWeights.vals[i] = candidateWeights.vals[i] + 1;
-                double error = cost(trainingSet, candidateWeights);
-                if (error < bestError) {
-                    bestError = error;
-                    bestWeights = candidateWeights;
-                    numParamsImproved++;
-                } else {
-                    candidateWeights.vals[i] = candidateWeights.vals[i] - 2;
-                    error = cost(trainingSet, candidateWeights);
-                    if (error < bestError) {
-                        bestError = error;
-                        bestWeights = candidateWeights;
-                        numParamsImproved++;
-                    }
-                }
-            }
-            EvalWeightsUtil.store(bestWeights, "eval-tune-" + (it+1) + ".properties", "Error: " + bestError);
-            if (numParamsImproved == 0) {
-                break;
-            }
-            LOGGER.info("error using training set after iteration {}: {}", (it+1), bestError);
+            learningRate -= lrDelta;
         }
 
         return bestWeights;
