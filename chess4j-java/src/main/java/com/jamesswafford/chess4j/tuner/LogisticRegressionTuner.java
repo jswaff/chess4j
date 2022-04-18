@@ -74,7 +74,7 @@ public class LogisticRegressionTuner {
             // calculate the gradient and adjust accordingly
             SimpleMatrix gradient = Gradient.gradient(x, y, theta, 0);
             theta = theta.minus(gradient.divide(1.0/learningRate));
-            for (int i=1;i<n;i++) { // start at one to keep pawn val anchored
+            for (int i = EvalWeights.BISHOP_PAIR_IND +1; i<n; i++) { // do not adjust material
                 bestWeights.vals[i] = (int)Math.round(theta.get(i, 0));
             }
 
