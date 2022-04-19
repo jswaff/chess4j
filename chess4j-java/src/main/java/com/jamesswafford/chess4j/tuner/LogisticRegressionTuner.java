@@ -69,7 +69,7 @@ public class LogisticRegressionTuner {
         for (int it=0; it<maxIterations; it++) {
 
             // load a batch and set up the X (features) matrix and Y (outcome) vector
-            Tuple2<SimpleMatrix, SimpleMatrix> xy = MatrixUtils.loadXY(trainingSet, 1000, n);
+            Tuple2<SimpleMatrix, SimpleMatrix> xy = MatrixUtils.loadXY(trainingSet, 500, n);
             SimpleMatrix x = xy._1;
             SimpleMatrix y = xy._2;
 
@@ -81,7 +81,7 @@ public class LogisticRegressionTuner {
             }
 
             // display the error and store the weights every 10 iterations
-            if ((it+1)%10 == 0) {
+            if ((it+1) % 10 == 0) {
                 double trainingError = cost(trainingSet, bestWeights);
                 double testError = cost(testSet, bestWeights);
                 LOGGER.info(trainingError + "," + testError);
