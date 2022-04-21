@@ -62,7 +62,7 @@ public final class Eval implements Evaluator {
         // evaluate for a draw.  positions that are drawn by rule are immediately returned.  others
         // that are "drawish" are further evaluated but later tapered down.
 //        MaterialType materialType = EvalMaterial.calculateMaterialType(board);
-//        int drawFactor = 1;
+        int drawFactor = 1;
 //        if (immediateDraws.contains(materialType)) {
 //            return 0;
 //        }
@@ -72,8 +72,6 @@ public final class Eval implements Evaluator {
 
         // calculate a middle game score and end game score based on positional features
         int mgScore = matScore;
-
-        mgScore += evalPawns(weights, board, false);
 
         mgScore += evalPieces(weights, board.getWhiteKnights(), board, false, EvalKnight::evalKnight)
                 - evalPieces(weights, board.getBlackKnights(), board, false, EvalKnight::evalKnight);
@@ -87,19 +85,22 @@ public final class Eval implements Evaluator {
         mgScore += evalPieces(weights, board.getWhiteQueens(), board, false, EvalQueen::evalQueen)
                 - evalPieces(weights, board.getBlackQueens(), board, false, EvalQueen::evalQueen);
 
-//        int egScore = mgScore;
+        int egScore = mgScore;
+
+        mgScore += evalPawns(weights, board, false);
+        egScore += evalPawns(weights, board, true);
 
         mgScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), false)
                 - evalKing(weights, board, board.getKingSquare(Color.BLACK), false);
 
-////        egScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), true)
-////                - evalKing(weights, board, board.getKingSquare(Color.BLACK), true);
-//
-//        // blend the middle game score and end game score, and divide by the draw factor
-////        int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
+        egScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), true)
+                - evalKing(weights, board, board.getKingSquare(Color.BLACK), true);
+
+        // blend the middle game score and end game score, and divide by the draw factor
+        int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
 
         // return the score from the perspective of the player on move
-        return board.getPlayerToMove() == Color.WHITE ? mgScore : -mgScore;
+        return board.getPlayerToMove() == Color.WHITE ? taperedScore : -taperedScore;
     }
 
     private static int evalPieces(EvalWeights weights, long pieceMap, Board board, boolean endgame,
@@ -119,13 +120,14 @@ public final class Eval implements Evaluator {
     private static int evalPawns(EvalWeights weights, Board board, boolean endgame) {
 
         // try the pawn hash
-        if (Globals.isPawnHashEnabled()) {
+        // FIXME - work with tapered eval
+        /*if (Globals.isPawnHashEnabled()) {
             PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board.getPawnKey());
             if (pte != null) {
                 assert (pte.getScore() == evalPawnsNoHash(weights, board, endgame));
                 return pte.getScore();
             }
-        }
+        }*/
 
         int score = evalPawnsNoHash(weights, board, endgame);
 
@@ -148,39 +150,42 @@ public final class Eval implements Evaluator {
         return eval(Globals.getEvalWeights(), board);
     }
 
-    public static int[] extractFeatures(Board board) {
+    public static double[] extractFeatures(Board board) {
 
-        int[] mgFeatures = new int[EvalWeights.NUM_WEIGHTS];
+        EvalWeights evalWeights = new EvalWeights();
+        double[] features = new double[evalWeights.vals.length];
 
-        extractMaterialFeatures(mgFeatures, board);
+        double phase = EvalTaper.phaseD(board);
 
-        extractFeatures(mgFeatures, board.getWhitePawns() | board.getBlackPawns(), board, false,
+        extractMaterialFeatures(features, board);
+
+        extractFeatures(features, board.getWhitePawns() | board.getBlackPawns(), board, phase,
                 EvalPawn::extractPawnFeatures);
 
-        extractFeatures(mgFeatures, board.getWhiteKnights() | board.getBlackKnights(), board, false,
+        extractFeatures(features, board.getWhiteKnights() | board.getBlackKnights(), board, 1.0,
                 EvalKnight::extractKnightFeatures);
 
-        extractFeatures(mgFeatures, board.getWhiteBishops() | board.getBlackBishops(), board, false,
+        extractFeatures(features, board.getWhiteBishops() | board.getBlackBishops(), board, 1.0,
                 EvalBishop::extractBishopFeatures);
 
-        extractFeatures(mgFeatures, board.getWhiteRooks() | board.getBlackRooks(), board, false,
+        extractFeatures(features, board.getWhiteRooks() | board.getBlackRooks(), board, 1.0,
                 EvalRook::extractRookFeatures);
 
-        extractFeatures(mgFeatures, board.getWhiteQueens() | board.getBlackQueens(), board, false,
+        extractFeatures(features, board.getWhiteQueens() | board.getBlackQueens(), board, 1.0,
                 EvalQueen::extractQueenFeatures);
 
-        extractKingFeatures(mgFeatures, board, board.getKingSquare(Color.WHITE), false);
-        extractKingFeatures(mgFeatures, board, board.getKingSquare(Color.BLACK), false);
+        extractKingFeatures(features, board, board.getKingSquare(Color.WHITE), phase);
+        extractKingFeatures(features, board, board.getKingSquare(Color.BLACK), phase);
 
-        return mgFeatures;
+        return features;
     }
 
-    private static void extractFeatures(int[] features, long pieceMap, Board board, boolean endgame,
-                                        Function4<int[], Board, Square, Boolean, Void> extractFunc) {
+    private static void extractFeatures(double[] features, long pieceMap, Board board, double phase,
+                                        Function4<double[], Board, Square, Double, Void> extractFunc) {
         while (pieceMap != 0) {
             int sqVal = Bitboard.lsb(pieceMap);
             Square sq = Square.valueOf(sqVal);
-            extractFunc.apply(features, board, sq, endgame);
+            extractFunc.apply(features, board, sq, phase);
             pieceMap ^= Bitboard.squares[sqVal];
         }
     }
@@ -226,14 +231,15 @@ public final class Eval implements Evaluator {
 
     private static boolean verifyExtractedFeatures(EvalWeights weights, int evalScore, Board board, boolean materialOnly) {
 
-        int[] features = extractFeatures(board);
-        int score = 0;
+        double[] features = extractFeatures(board);
+        double score = 0;
         int toInd = materialOnly ? EvalWeights.BISHOP_PAIR_IND+1 : features.length;
         for (int i=0;i<toInd;i++) {
             score += features[i] * weights.vals[i];
         }
         score = board.getPlayerToMove().equals(Color.WHITE) ? score : -score;
-        assert(score==evalScore);
+
+        assert(Math.abs(score - evalScore) < 1.0);
 
         return true;
     }

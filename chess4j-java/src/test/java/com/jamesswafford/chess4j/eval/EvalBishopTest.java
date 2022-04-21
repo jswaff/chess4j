@@ -14,6 +14,8 @@ public class EvalBishopTest {
 
     private final EvalWeights weights = new EvalWeights();
 
+    private final double testEpsilon = 0.000001;
+
     @Test
     public void testEvalBishop() {
 
@@ -41,14 +43,14 @@ public class EvalBishopTest {
 
         Board board = new Board();
 
-        int[] features = new int[NUM_WEIGHTS];
-        extractBishopFeatures(features, board, C1, false);
-        assertEquals(1, features[BISHOP_PST_IND + C1.value()]);
+        double[] features = new double[weights.vals.length];
+        extractBishopFeatures(features, board, C1, 1.0);
+        assertEquals(1, features[BISHOP_PST_IND + C1.value()], testEpsilon);
 
         // test the symmetry
-        int[] features2 = new int[NUM_WEIGHTS];
-        extractBishopFeatures(features2, board, C8, false);
-        assertEquals(-1, features2[BISHOP_PST_IND + C1.value()]);
+        double[] features2 = new double[weights.vals.length];
+        extractBishopFeatures(features2, board, C8, 1.0);
+        assertEquals(-1, features2[BISHOP_PST_IND + C1.value()], testEpsilon);
     }
 
     @Test
@@ -56,14 +58,14 @@ public class EvalBishopTest {
 
         Board board = new Board();
 
-        int[] features = new int[NUM_WEIGHTS];
-        extractBishopFeatures(features, board, C1, true);
-        assertEquals(1, features[BISHOP_ENDGAME_PST_IND + C1.value()]);
+        double[] features = new double[weights.vals.length];
+        extractBishopFeatures(features, board, C1, 0.0);
+        assertEquals(1, features[BISHOP_ENDGAME_PST_IND + C1.value()], testEpsilon);
 
         // test the symmetry
-        int[] features2 = new int[NUM_WEIGHTS];
-        extractBishopFeatures(features2, board, C8, true);
-        assertEquals(-1, features2[BISHOP_ENDGAME_PST_IND + C1.value()]);
+        double[] features2 = new double[weights.vals.length];
+        extractBishopFeatures(features2, board, C8, 0.0);
+        assertEquals(-1, features2[BISHOP_ENDGAME_PST_IND + C1.value()], testEpsilon);
     }
 
 }

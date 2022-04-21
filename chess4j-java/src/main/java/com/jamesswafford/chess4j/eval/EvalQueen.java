@@ -30,20 +30,14 @@ public class EvalQueen {
         return score;
     }
 
-    public static java.lang.Void extractQueenFeatures(int[] features, Board board, Square sq, boolean endgame) {
+    public static java.lang.Void extractQueenFeatures(double[] features, Board board, Square sq, double phase) {
         boolean isWhite = board.getPiece(sq).isWhite();
         if (isWhite) {
-            if (endgame) {
-                features[QUEEN_ENDGAME_PST_IND + sq.value()]++;
-            } else {
-                features[QUEEN_PST_IND + sq.value()]++;
-            }
+            features[QUEEN_ENDGAME_PST_IND + sq.value()] += (1-phase);
+            features[QUEEN_PST_IND + sq.value()] += phase;
         } else {
-            if (endgame) {
-                features[QUEEN_ENDGAME_PST_IND + sq.flipVertical().value()]--;
-            } else {
-                features[QUEEN_PST_IND + sq.flipVertical().value()]--;
-            }
+            features[QUEEN_ENDGAME_PST_IND + sq.flipVertical().value()] -= (1-phase);
+            features[QUEEN_PST_IND + sq.flipVertical().value()] -= phase;
         }
         exractMajorOn7thFeatures(features, board, isWhite, sq);
         return null;

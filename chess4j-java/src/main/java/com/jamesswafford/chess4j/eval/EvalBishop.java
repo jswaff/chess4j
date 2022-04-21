@@ -23,19 +23,13 @@ public class EvalBishop {
         }
     }
 
-    public static java.lang.Void extractBishopFeatures(int[] features, Board board, Square sq, boolean endgame) {
+    public static java.lang.Void extractBishopFeatures(double[] features, Board board, Square sq, double phase) {
         if (board.getPiece(sq).isWhite()) {
-            if (endgame) {
-                features[BISHOP_ENDGAME_PST_IND + sq.value()]++;
-            } else {
-                features[BISHOP_PST_IND + sq.value()]++;
-            }
+            features[BISHOP_ENDGAME_PST_IND + sq.value()] += (1-phase);
+            features[BISHOP_PST_IND + sq.value()] += phase;
         } else {
-            if (endgame) {
-                features[BISHOP_ENDGAME_PST_IND + sq.flipVertical().value()]--;
-            } else {
-                features[BISHOP_PST_IND + sq.flipVertical().value()]--;
-            }
+            features[BISHOP_ENDGAME_PST_IND + sq.flipVertical().value()] -= (1-phase);
+            features[BISHOP_PST_IND + sq.flipVertical().value()] -= phase;
         }
         return null;
     }

@@ -38,21 +38,15 @@ public class EvalPawn {
         return score;
     }
 
-    public static java.lang.Void extractPawnFeatures(int[] features, Board board, Square sq, boolean endgame) {
+    public static java.lang.Void extractPawnFeatures(double[] features, Board board, Square sq, double phase) {
         boolean isWhite = board.getPiece(sq).isWhite();
 
         if (isWhite) {
-            if (endgame) {
-                features[PAWN_ENDGAME_PST_IND + sq.value()]++;
-            } else {
-                features[PAWN_PST_IND + sq.value()]++;
-            }
+            features[PAWN_ENDGAME_PST_IND + sq.value()] += (1-phase);
+            features[PAWN_PST_IND + sq.value()] += phase;
         } else {
-            if (endgame) {
-                features[PAWN_ENDGAME_PST_IND + sq.flipVertical().value()]--;
-            } else {
-                features[PAWN_PST_IND + sq.flipVertical().value()]--;
-            }
+            features[PAWN_ENDGAME_PST_IND + sq.flipVertical().value()] -= (1-phase);
+            features[PAWN_PST_IND + sq.flipVertical().value()] -= phase;
         }
 
         int v = isWhite ? 1 : -1;

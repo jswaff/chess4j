@@ -61,7 +61,7 @@ public class EvalMaterial {
         }
     }
 
-    public static void extractMaterialFeatures(int[] features, Board board) {
+    public static void extractMaterialFeatures(double[] features, Board board) {
         features[EvalWeights.PAWN_VAL_IND] = board.getNumPieces(WHITE_PAWN) - board.getNumPieces(BLACK_PAWN);
         features[EvalWeights.QUEEN_VAL_IND] = board.getNumPieces(WHITE_QUEEN) - board.getNumPieces(BLACK_QUEEN);
         features[EvalWeights.ROOK_VAL_IND] = board.getNumPieces(WHITE_ROOK) - board.getNumPieces(BLACK_ROOK);

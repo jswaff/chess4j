@@ -22,7 +22,7 @@ public class MatrixUtils {
         for (int i=0;i<m;i++) {
             GameRecord trainingRecord = gameRecords.get(random.nextInt(gameRecords.size()));
             Board board = new Board(trainingRecord.getFen());
-            int[] features_i = Eval.extractFeatures(board);
+            double[] features_i = Eval.extractFeatures(board);
             for (int j=0;j<numFeatures;j++) {
                 x.set(i, j, features_i[j]);
             }
