@@ -69,7 +69,7 @@ public class LogisticRegressionTuner {
         for (int it=0; it<maxIterations; it++) {
 
             // load a batch and set up the X (features) matrix and Y (outcome) vector
-            Tuple2<SimpleMatrix, SimpleMatrix> xy = MatrixUtils.loadXY(trainingSet, 500, n);
+            Tuple2<SimpleMatrix, SimpleMatrix> xy = MatrixUtils.loadXY(trainingSet, 1000, n);
             SimpleMatrix x = xy._1;
             SimpleMatrix y = xy._2;
 

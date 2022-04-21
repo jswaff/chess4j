@@ -13,7 +13,7 @@ public class Hypothesis {
     }
 
     public static double texelSigmoid(double z) {
-        double k = -1.4; // computed to minimize error
+        double k = -1.13; // computed to minimize error
         double exp = k * z / 400.0;
         return 1.0 / (1 + Math.pow(10, exp));
     }
