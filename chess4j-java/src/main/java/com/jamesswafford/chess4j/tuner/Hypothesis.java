@@ -9,13 +9,11 @@ public class Hypothesis {
     public static double hypothesis(Board board, EvalWeights weights) {
         int score = Eval.eval(weights, board, false);
         if (board.getPlayerToMove().isBlack()) score = -score;
-        return texelSigmoid(score);
+       return texelSigmoid(score);
     }
 
     public static double texelSigmoid(double z) {
-
-        // This is the "Texel" approach
-        double k = -1.13;
+        double k = -1.4; // computed to minimize error
         double exp = k * z / 400.0;
         return 1.0 / (1 + Math.pow(10, exp));
     }

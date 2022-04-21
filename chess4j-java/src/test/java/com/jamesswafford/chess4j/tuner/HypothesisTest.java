@@ -33,10 +33,15 @@ public class HypothesisTest {
     @Test
     public void sigmoidTest() {
         assertDoubleEquals(Hypothesis.texelSigmoid(0), 0.5);
-        assertDoubleEquals(Hypothesis.texelSigmoid(50), 0.5806);
-        assertDoubleEquals(Hypothesis.texelSigmoid(100), 0.6571);
-        assertDoubleEquals(Hypothesis.texelSigmoid(-300), 0.1244);
-        assertDoubleEquals(Hypothesis.texelSigmoid(-500), 0.0372);
+
+        double e50 = Hypothesis.texelSigmoid(50);
+        assertTrue(e50 > 0.5);
+        assertTrue(Hypothesis.texelSigmoid(100) > e50);
+
+        double eNeg300 = Hypothesis.texelSigmoid(-300);
+        assertTrue(eNeg300 < 0.5);
+        assertTrue(Hypothesis.texelSigmoid(-500) < eNeg300);
+
         assertDoubleEquals(Hypothesis.texelSigmoid(CHECKMATE), 1);
         assertDoubleEquals(Hypothesis.texelSigmoid(-CHECKMATE), 0);
     }

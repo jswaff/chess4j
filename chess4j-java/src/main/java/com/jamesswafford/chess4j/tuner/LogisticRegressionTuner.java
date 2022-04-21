@@ -81,7 +81,7 @@ public class LogisticRegressionTuner {
             }
 
             // display the error and store the weights every 10 iterations
-            if ((it+1) % 10 == 0) {
+            if ((it+1) % 100 == 0) {
                 double trainingError = cost(trainingSet, bestWeights);
                 double testError = cost(testSet, bestWeights);
                 LOGGER.info(trainingError + "," + testError);
