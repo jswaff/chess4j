@@ -73,8 +73,6 @@ public final class Eval implements Evaluator {
         // calculate a middle game score and end game score based on positional features
         int mgScore = matScore;
 
-        mgScore += evalPawns(weights, board, false);
-
         mgScore += evalPieces(weights, board.getWhiteKnights(), board, false, EvalKnight::evalKnight)
                 - evalPieces(weights, board.getBlackKnights(), board, false, EvalKnight::evalKnight);
 
@@ -88,6 +86,9 @@ public final class Eval implements Evaluator {
                 - evalPieces(weights, board.getBlackQueens(), board, false, EvalQueen::evalQueen);
 
         int egScore = mgScore;
+
+        mgScore += evalPawns(weights, board, false);
+        egScore += evalPawns(weights, board, true);
 
         mgScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), false)
                 - evalKing(weights, board, board.getKingSquare(Color.BLACK), false);
@@ -119,13 +120,14 @@ public final class Eval implements Evaluator {
     private static int evalPawns(EvalWeights weights, Board board, boolean endgame) {
 
         // try the pawn hash
-        if (Globals.isPawnHashEnabled()) {
+        // FIXME - work with tapered eval
+        /*if (Globals.isPawnHashEnabled()) {
             PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board.getPawnKey());
             if (pte != null) {
                 assert (pte.getScore() == evalPawnsNoHash(weights, board, endgame));
                 return pte.getScore();
             }
-        }
+        }*/
 
         int score = evalPawnsNoHash(weights, board, endgame);
 
@@ -157,7 +159,7 @@ public final class Eval implements Evaluator {
 
         extractMaterialFeatures(features, board);
 
-        extractFeatures(features, board.getWhitePawns() | board.getBlackPawns(), board, 1.0,
+        extractFeatures(features, board.getWhitePawns() | board.getBlackPawns(), board, phase,
                 EvalPawn::extractPawnFeatures);
 
         extractFeatures(features, board.getWhiteKnights() | board.getBlackKnights(), board, 1.0,
