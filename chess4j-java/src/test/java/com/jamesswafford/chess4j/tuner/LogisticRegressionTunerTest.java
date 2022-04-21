@@ -52,9 +52,7 @@ public class LogisticRegressionTunerTest {
                 weights,
                 List.of(new GameRecord("3k4/3Q4/3K4/8/8/8/8/8 w - -", PGNResult.WHITE_WINS)),
                 100.0,
-                0,
-                1,
-                10);
+                1);
 
         assertTrue(tunedWeights._1.vals[EvalWeights.QUEEN_VAL_IND] > 100);
     }
@@ -69,7 +67,7 @@ public class LogisticRegressionTunerTest {
 
         EvalWeights weights = new EvalWeights();
 
-        tuner.optimize(weights, gameRecords, 100.0, 0, 1000, 3);
+        tuner.optimize(weights, gameRecords, 100.0, 3);
     }
 
     private void populateTunerDatasource(String epd) {
