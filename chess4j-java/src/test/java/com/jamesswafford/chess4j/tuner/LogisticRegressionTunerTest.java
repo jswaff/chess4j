@@ -73,7 +73,7 @@ public class LogisticRegressionTunerTest {
     private void populateTunerDatasource(String epd) {
         File epdFile = new File(SQLiteTunerDatasourceTest.class.getResource(epd).getFile());
         FenToTuner fenToTuner = new FenToTuner(tunerDatasource);
-        fenToTuner.addFile(epdFile);
+        fenToTuner.addFile(epdFile, true);
     }
 
 }

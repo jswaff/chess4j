@@ -1,9 +1,7 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.io.PGNResult;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.File;
 import java.sql.Connection;
@@ -15,13 +13,14 @@ import static org.junit.Assert.assertEquals;
 public class FenToTunerTest {
 
     private final static String testDB = "tunertest.db";
-    private final static String testEpd = "/samplefen.epd";
+    private final static String zuriEpd = "/samplefen.epd";
+    private final static String etherealEpd = "/sample_ethereal_fen.epd";
 
     static SQLiteTunerDatasource tunerDatasource;
     static Connection conn;
 
-    @BeforeClass
-    public static void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         Class.forName("org.sqlite.JDBC");
         conn = DriverManager.getConnection("jdbc:sqlite:" + testDB);
 
@@ -29,15 +28,15 @@ public class FenToTunerTest {
         tunerDatasource.initializeDatasource();
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         conn.close();
         new File(testDB).delete();
     }
 
     @Test
-    public void addEpdFile() {
-        populateTunerDatasource(testEpd);
+    public void addZuriEpdFile() {
+        populateTunerDatasource(zuriEpd, true);
         assertEquals(100, tunerDatasource.getTotalPositionsCount());
 
         // verify a few samples
@@ -81,10 +80,48 @@ public class FenToTunerTest {
         assertEquals(PGNResult.BLACK_WINS, g4.getResult());
     }
 
-    private void populateTunerDatasource(String epd) {
+    @Test
+    public void addEtherealEdpFile() {
+        populateTunerDatasource(etherealEpd, false);
+        assertEquals(100, tunerDatasource.getTotalPositionsCount());
+
+        /*
+        8/5p2/3BpP2/2K1Pk2/7p/3N1n1P/8/8 b - - 6 70 [1.0] 308
+        2k2r2/p7/1pp1Rn1p/5Pp1/P7/1P6/2K4P/5R2 b - - 4 34 [0.5] -217
+        3r1rk1/4qp1p/1p1pp1p1/p1pPb3/2P1b3/PPB1P2P/3QBPP1/2RR2K1 w - - 0 23 [0.0] -36
+         */
+
+        assertEquals(1, tunerDatasource.getFenCount("8/5p2/3BpP2/2K1Pk2/7p/3N1n1P/8/8 b - -"));
+        assertEquals(1, tunerDatasource.getFenCount("2k2r2/p7/1pp1Rn1p/5Pp1/P7/1P6/2K4P/5R2 b - -"));
+        assertEquals(1, tunerDatasource.getFenCount("3r1rk1/4qp1p/1p1pp1p1/p1pPb3/2P1b3/PPB1P2P/3QBPP1/2RR2K1 w - -"));
+
+        List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
+        assertEquals(100, gameRecords.size());
+
+        GameRecord g1 = gameRecords.stream()
+                .filter(gameRecord -> "8/5p2/3BpP2/2K1Pk2/7p/3N1n1P/8/8 b - -".equals(gameRecord.getFen()))
+                .findFirst()
+                .get();
+        assertEquals(PGNResult.WHITE_WINS, g1.getResult());
+
+        GameRecord g2 = gameRecords.stream()
+                .filter(gameRecord -> "2k2r2/p7/1pp1Rn1p/5Pp1/P7/1P6/2K4P/5R2 b - -".equals(gameRecord.getFen()))
+                .findFirst()
+                .get();
+        assertEquals(PGNResult.DRAW, g2.getResult());
+
+        GameRecord g3 = gameRecords.stream()
+                .filter(gameRecord -> "3r1rk1/4qp1p/1p1pp1p1/p1pPb3/2P1b3/PPB1P2P/3QBPP1/2RR2K1 w - -".equals(gameRecord.getFen()))
+                .findFirst()
+                .get();
+        assertEquals(PGNResult.BLACK_WINS, g3.getResult());
+
+    }
+    
+    private void populateTunerDatasource(String epd, boolean zuriFormat) {
         File epdFile = new File(SQLiteTunerDatasourceTest.class.getResource(epd).getFile());
         FenToTuner fenToTuner = new FenToTuner(tunerDatasource);
-        fenToTuner.addFile(epdFile);
+        fenToTuner.addFile(epdFile, zuriFormat);
     }
 
 }

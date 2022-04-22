@@ -155,7 +155,7 @@ public class XBoardHandler {
     private void fenToTunerDS(String[] cmd) {
         if (tunerDatasource != null) {
             FenToTuner fenToTuner = new FenToTuner(tunerDatasource);
-            fenToTuner.addFile(new File(cmd[1]));
+            fenToTuner.addFile(new File(cmd[1]), false);
         } else {
             LOGGER.warn("There is no tuner datasource.");
         }
