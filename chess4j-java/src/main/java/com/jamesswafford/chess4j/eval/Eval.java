@@ -70,26 +70,42 @@ public final class Eval implements Evaluator {
 //            drawFactor = 8;
 //        }
 
-        // calculate a middle game score and end game score based on positional features
         int mgScore = matScore;
-
-        mgScore += evalPieces(weights, board.getWhiteKnights(), board, false, EvalKnight::evalKnight)
-                - evalPieces(weights, board.getBlackKnights(), board, false, EvalKnight::evalKnight);
-
-        mgScore += evalPieces(weights, board.getWhiteBishops(), board, false, EvalBishop::evalBishop)
-                - evalPieces(weights, board.getBlackBishops(), board, false, EvalBishop::evalBishop);
-
-        mgScore += evalPieces(weights, board.getWhiteRooks(), board, false, EvalRook::evalRook)
-                - evalPieces(weights, board.getBlackRooks(), board, false, EvalRook::evalRook);
-
-        mgScore += evalPieces(weights, board.getWhiteQueens(), board, false, EvalQueen::evalQueen)
-                - evalPieces(weights, board.getBlackQueens(), board, false, EvalQueen::evalQueen);
-
         int egScore = mgScore;
 
+        // eval pawns
         mgScore += evalPawns(weights, board, false);
         egScore += evalPawns(weights, board, true);
 
+        // eval knights
+        mgScore += evalPieces(weights, board.getWhiteKnights(), board, false, EvalKnight::evalKnight)
+                - evalPieces(weights, board.getBlackKnights(), board, false, EvalKnight::evalKnight);
+
+        egScore += evalPieces(weights, board.getWhiteKnights(), board, true, EvalKnight::evalKnight)
+                - evalPieces(weights, board.getBlackKnights(), board, true, EvalKnight::evalKnight);
+
+        // eval bishops
+        mgScore += evalPieces(weights, board.getWhiteBishops(), board, false, EvalBishop::evalBishop)
+                - evalPieces(weights, board.getBlackBishops(), board, false, EvalBishop::evalBishop);
+
+        egScore += evalPieces(weights, board.getWhiteBishops(), board, true, EvalBishop::evalBishop)
+                - evalPieces(weights, board.getBlackBishops(), board, true, EvalBishop::evalBishop);
+
+        // eval rooks
+        mgScore += evalPieces(weights, board.getWhiteRooks(), board, false, EvalRook::evalRook)
+                - evalPieces(weights, board.getBlackRooks(), board, false, EvalRook::evalRook);
+
+        egScore += evalPieces(weights, board.getWhiteRooks(), board, true, EvalRook::evalRook)
+                - evalPieces(weights, board.getBlackRooks(), board, true, EvalRook::evalRook);
+
+        // eval queens
+        mgScore += evalPieces(weights, board.getWhiteQueens(), board, false, EvalQueen::evalQueen)
+                - evalPieces(weights, board.getBlackQueens(), board, false, EvalQueen::evalQueen);
+
+        egScore += evalPieces(weights, board.getWhiteQueens(), board, true, EvalQueen::evalQueen)
+                - evalPieces(weights, board.getBlackQueens(), board, true, EvalQueen::evalQueen);
+
+        // eval kings
         mgScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), false)
                 - evalKing(weights, board, board.getKingSquare(Color.BLACK), false);
 
@@ -162,16 +178,16 @@ public final class Eval implements Evaluator {
         extractFeatures(features, board.getWhitePawns() | board.getBlackPawns(), board, phase,
                 EvalPawn::extractPawnFeatures);
 
-        extractFeatures(features, board.getWhiteKnights() | board.getBlackKnights(), board, 1.0,
+        extractFeatures(features, board.getWhiteKnights() | board.getBlackKnights(), board, phase,
                 EvalKnight::extractKnightFeatures);
 
-        extractFeatures(features, board.getWhiteBishops() | board.getBlackBishops(), board, 1.0,
+        extractFeatures(features, board.getWhiteBishops() | board.getBlackBishops(), board, phase,
                 EvalBishop::extractBishopFeatures);
 
-        extractFeatures(features, board.getWhiteRooks() | board.getBlackRooks(), board, 1.0,
+        extractFeatures(features, board.getWhiteRooks() | board.getBlackRooks(), board, phase,
                 EvalRook::extractRookFeatures);
 
-        extractFeatures(features, board.getWhiteQueens() | board.getBlackQueens(), board, 1.0,
+        extractFeatures(features, board.getWhiteQueens() | board.getBlackQueens(), board, phase,
                 EvalQueen::extractQueenFeatures);
 
         extractKingFeatures(features, board, board.getKingSquare(Color.WHITE), phase);
