@@ -71,11 +71,11 @@ public class EvalKing {
 
                 if (board.getPiece(H2) == WHITE_PAWN) ;
                 else if (board.getPiece(H3) == WHITE_PAWN) {
-                    score += weights.vals[KING_SAFETY_PAWN_ONE_AWAY_IND];
+                    score += weights.vals[KING_SAFETY_WING_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(H4) == WHITE_PAWN) {
-                    score += weights.vals[KING_SAFETY_PAWN_TWO_AWAY_IND];
+                    score += weights.vals[KING_SAFETY_WING_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += weights.vals[KING_SAFETY_PAWN_FAR_AWAY_IND];
+                    score += weights.vals[KING_SAFETY_WING_PAWN_FAR_AWAY_IND];
                 }
 
             } else if (kingSq.file().westOf(FILE_D)) {
@@ -99,11 +99,11 @@ public class EvalKing {
 
                 if (board.getPiece(A2) == WHITE_PAWN) ;
                 else if (board.getPiece(A3) == WHITE_PAWN) {
-                    score += weights.vals[KING_SAFETY_PAWN_ONE_AWAY_IND];
+                    score += weights.vals[KING_SAFETY_WING_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(A4) == WHITE_PAWN) {
-                    score += weights.vals[KING_SAFETY_PAWN_TWO_AWAY_IND];
+                    score += weights.vals[KING_SAFETY_WING_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += weights.vals[KING_SAFETY_PAWN_FAR_AWAY_IND];
+                    score += weights.vals[KING_SAFETY_WING_PAWN_FAR_AWAY_IND];
                 }
             } else {
                 // check if open file
@@ -136,11 +136,11 @@ public class EvalKing {
 
                 if (board.getPiece(H7) == BLACK_PAWN) ;
                 else if (board.getPiece(H6) == BLACK_PAWN) {
-                    score += weights.vals[KING_SAFETY_PAWN_ONE_AWAY_IND];
+                    score += weights.vals[KING_SAFETY_WING_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(H5) == BLACK_PAWN) {
-                    score += weights.vals[KING_SAFETY_PAWN_TWO_AWAY_IND];
+                    score += weights.vals[KING_SAFETY_WING_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += weights.vals[KING_SAFETY_PAWN_FAR_AWAY_IND];
+                    score += weights.vals[KING_SAFETY_WING_PAWN_FAR_AWAY_IND];
                 }
             } else if (kingSq.file().westOf(FILE_D)) {
                 if (board.getPiece(C7) == BLACK_PAWN) ;
@@ -163,11 +163,11 @@ public class EvalKing {
 
                 if (board.getPiece(A7) == BLACK_PAWN) ;
                 else if (board.getPiece(A6) == BLACK_PAWN) {
-                    score += weights.vals[KING_SAFETY_PAWN_ONE_AWAY_IND];
+                    score += weights.vals[KING_SAFETY_WING_PAWN_ONE_AWAY_IND];
                 } else if (board.getPiece(A5) == BLACK_PAWN) {
-                    score += weights.vals[KING_SAFETY_PAWN_TWO_AWAY_IND];
+                    score += weights.vals[KING_SAFETY_WING_PAWN_TWO_AWAY_IND];
                 } else {
-                    score += weights.vals[KING_SAFETY_PAWN_FAR_AWAY_IND];
+                    score += weights.vals[KING_SAFETY_WING_PAWN_FAR_AWAY_IND];
                 }
             } else {
                 // check if open file
@@ -220,11 +220,11 @@ public class EvalKing {
 
                 if (board.getPiece(H2) == WHITE_PAWN) ;
                 else if (board.getPiece(H3) == WHITE_PAWN) {
-                    features[KING_SAFETY_PAWN_ONE_AWAY_IND] += phase;
+                    features[KING_SAFETY_WING_PAWN_ONE_AWAY_IND] += phase;
                 } else if (board.getPiece(H4) == WHITE_PAWN) {
-                    features[KING_SAFETY_PAWN_TWO_AWAY_IND] += phase;
+                    features[KING_SAFETY_WING_PAWN_TWO_AWAY_IND] += phase;
                 } else {
-                    features[KING_SAFETY_PAWN_FAR_AWAY_IND] += phase;
+                    features[KING_SAFETY_WING_PAWN_FAR_AWAY_IND] += phase;
                 }
 
             } else if (kingSq.file().westOf(FILE_D)) {
@@ -248,11 +248,11 @@ public class EvalKing {
 
                 if (board.getPiece(A2) == WHITE_PAWN) ;
                 else if (board.getPiece(A3) == WHITE_PAWN) {
-                    features[KING_SAFETY_PAWN_ONE_AWAY_IND] += phase;
+                    features[KING_SAFETY_WING_PAWN_ONE_AWAY_IND] += phase;
                 } else if (board.getPiece(A4) == WHITE_PAWN) {
-                    features[KING_SAFETY_PAWN_TWO_AWAY_IND] += phase;
+                    features[KING_SAFETY_WING_PAWN_TWO_AWAY_IND] += phase;
                 } else {
-                    features[KING_SAFETY_PAWN_FAR_AWAY_IND] += phase;
+                    features[KING_SAFETY_WING_PAWN_FAR_AWAY_IND] += phase;
                 }
             } else {
                 // check if open file
@@ -285,11 +285,11 @@ public class EvalKing {
 
                 if (board.getPiece(H7) == BLACK_PAWN) ;
                 else if (board.getPiece(H6) == BLACK_PAWN) {
-                    features[KING_SAFETY_PAWN_ONE_AWAY_IND] -= phase;
+                    features[KING_SAFETY_WING_PAWN_ONE_AWAY_IND] -= phase;
                 } else if (board.getPiece(H5) == BLACK_PAWN) {
-                    features[KING_SAFETY_PAWN_TWO_AWAY_IND] -= phase;
+                    features[KING_SAFETY_WING_PAWN_TWO_AWAY_IND] -= phase;
                 } else {
-                    features[KING_SAFETY_PAWN_FAR_AWAY_IND] -= phase;
+                    features[KING_SAFETY_WING_PAWN_FAR_AWAY_IND] -= phase;
                 }
             } else if (kingSq.file().westOf(FILE_D)) {
                 if (board.getPiece(C7) == BLACK_PAWN) ;
@@ -312,11 +312,11 @@ public class EvalKing {
 
                 if (board.getPiece(A7) == BLACK_PAWN) ;
                 else if (board.getPiece(A6) == BLACK_PAWN) {
-                    features[KING_SAFETY_PAWN_ONE_AWAY_IND] -= phase;
+                    features[KING_SAFETY_WING_PAWN_ONE_AWAY_IND] -= phase;
                 } else if (board.getPiece(A5) == BLACK_PAWN) {
-                    features[KING_SAFETY_PAWN_TWO_AWAY_IND] -= phase;
+                    features[KING_SAFETY_WING_PAWN_TWO_AWAY_IND] -= phase;
                 } else {
-                    features[KING_SAFETY_PAWN_FAR_AWAY_IND] -= phase;
+                    features[KING_SAFETY_WING_PAWN_FAR_AWAY_IND] -= phase;
                 }
             } else {
                 // check if open file

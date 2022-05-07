@@ -115,7 +115,7 @@ public class EvalKingTest {
         board.setPos("1krq1bnr/1ppppppp/8/8/p7/8/PPPPPPPP/1KRQ1BNR b - - 0 1");
 
         assertEquals(0, evalKingSafety(weights, board, true));
-        assertEquals(weights.vals[KING_SAFETY_PAWN_FAR_AWAY_IND],
+        assertEquals(weights.vals[KING_SAFETY_WING_PAWN_FAR_AWAY_IND],
                 evalKingSafety(weights, board, false));
     }
 
@@ -247,7 +247,7 @@ public class EvalKingTest {
         for (double feature : features) assertEquals(0, feature, testEpsilon);
 
         extractKingSafetyFeatures(features, board, false, 1.0);
-        assertEquals(-1, features[KING_SAFETY_PAWN_FAR_AWAY_IND], testEpsilon);
+        assertEquals(-1, features[KING_SAFETY_WING_PAWN_FAR_AWAY_IND], testEpsilon);
     }
 
 }
