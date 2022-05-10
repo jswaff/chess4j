@@ -29,8 +29,9 @@ public class EvalMaterialTest {
         EvalWeights weights = new EvalWeights();
         Board board = new Board("6k1/8/8/3Br3/8/8/8/K7 w - - 0 1");
 
-        int expectedRookAdj = 0; // 12 x 5 pawns
-        assertEquals(weights.vals[BISHOP_VAL_IND] - weights.vals[ROOK_VAL_IND] - expectedRookAdj,
+        // there are no pawns, so rook comes to life
+        int expectedRookAdj = weights.vals[ROOK_KAUFMAN_ADJ] * 5; // 12 x 5 pawns
+        assertEquals(weights.vals[BISHOP_VAL_IND] - weights.vals[ROOK_VAL_IND] + expectedRookAdj,
                 evalMaterial(weights, board));
     }
 
@@ -39,11 +40,11 @@ public class EvalMaterialTest {
         EvalWeights weights = new EvalWeights();
         Board board = new Board("8/k7/prb5/K7/QN6/8/8/8 b - - 0 1");
 
-        int expectedKnightAdj = 0; // 6 x 5 pawns
-        assertEquals(weights.vals[QUEEN_VAL_IND] + weights.vals[KNIGHT_VAL_IND] - expectedKnightAdj,
+        int expectedKnightAdj = weights.vals[KNIGHT_KAUFMAN_ADJ] * -5;
+        assertEquals(weights.vals[QUEEN_VAL_IND] + weights.vals[KNIGHT_VAL_IND] + expectedKnightAdj,
                 evalNonPawnMaterial(weights, board, true));
 
-        int expectedRookAdj = 0; // 12 x 4 pawns
+        int expectedRookAdj = weights.vals[ROOK_KAUFMAN_ADJ] * -4; // 12 x 4 pawns
         assertEquals(weights.vals[ROOK_VAL_IND] + expectedRookAdj + weights.vals[BISHOP_VAL_IND],
                 evalNonPawnMaterial(weights, board, false));
     }
@@ -53,7 +54,9 @@ public class EvalMaterialTest {
         EvalWeights weights = new EvalWeights();
         Board board = new Board("8/kbb5/8/8/8/8/KBN5/8 b - - 0 1");
 
-        assertEquals(weights.vals[BISHOP_VAL_IND] + weights.vals[KNIGHT_VAL_IND],
+        // without pawns, the knight is a little less valuable
+        int expectedKnightAdj = weights.vals[KNIGHT_KAUFMAN_ADJ] * -5;
+        assertEquals(weights.vals[BISHOP_VAL_IND] + weights.vals[KNIGHT_VAL_IND] + expectedKnightAdj,
                 evalNonPawnMaterial(weights, board, true));
 
         assertEquals(weights.vals[BISHOP_VAL_IND]* 2L + weights.vals[BISHOP_PAIR_IND],
