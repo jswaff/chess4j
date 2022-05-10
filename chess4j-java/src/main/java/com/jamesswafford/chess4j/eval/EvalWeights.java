@@ -19,8 +19,11 @@ public class EvalWeights {
              50,  // BISHOP_PAIR
 
               2,  // KING_SAFETY_PAWN_ONE_AWAY
+              1,  // KING_SAFETY_WING_PAWN_ONE_AWAY
             -31,  // KING_SAFETY_PAWN_TWO_AWAY
+            -16,  // KING_SAFETY_WING_PAWN_TWO_AWAY
             -31,  // KING_SAFETY_PAWN_FAR_AWAY
+            -16,  // KING_SAFETY_WING_PAWN_FAR_AWAY
             -79,  // KING_SAFETY_MIDDLE_OPEN_FILE
 
               7, 41, 14, 47, 36, 30, 19, 58,     // KING_PST
@@ -152,29 +155,32 @@ public class EvalWeights {
     public static final int BISHOP_PAIR_IND = 5;
 
     public static final int KING_SAFETY_PAWN_ONE_AWAY_IND = 6;
-    public static final int KING_SAFETY_PAWN_TWO_AWAY_IND = 7;
-    public static final int KING_SAFETY_PAWN_FAR_AWAY_IND = 8;
-    public static final int KING_SAFETY_MIDDLE_OPEN_FILE_IND = 9;
-    public static final int KING_PST_IND = 10;
-    public static final int KING_ENDGAME_PST_IND = 74;
-    public static final int BISHOP_PST_IND = 138;
-    public static final int BISHOP_ENDGAME_PST_IND = 202;
-    public static final int KNIGHT_PST_IND = 266;
-    public static final int KNIGHT_ENDGAME_PST_IND = 330;
-    public static final int KNIGHT_TROPISM_IND = 394;
-    public static final int ROOK_PST_IND = 395;
-    public static final int ROOK_ENDGAME_PST_IND = 459;
-    public static final int ROOK_OPEN_FILE_IND = 523;
-    public static final int ROOK_HALF_OPEN_FILE_IND = 524;
-    public static final int QUEEN_PST_IND = 525;
-    public static final int QUEEN_ENDGAME_PST_IND = 589;
-    public static final int MAJOR_ON_7TH_IND = 653;
-    public static final int CONNECTED_MAJORS_ON_7TH_IND = 654;
-    public static final int PAWN_PST_IND = 655;
-    public static final int PAWN_ENDGAME_PST_IND = 719;
-    public static final int PASSED_PAWN_IND = 783;
-    public static final int ISOLATED_PAWN_IND = 784;
-    public static final int DOUBLED_PAWN_IND = 785;
+    public static final int KING_SAFETY_WING_PAWN_ONE_AWAY_IND = 7;
+    public static final int KING_SAFETY_PAWN_TWO_AWAY_IND = 8;
+    public static final int KING_SAFETY_WING_PAWN_TWO_AWAY_IND = 9;
+    public static final int KING_SAFETY_PAWN_FAR_AWAY_IND = 10;
+    public static final int KING_SAFETY_WING_PAWN_FAR_AWAY_IND = 11;
+    public static final int KING_SAFETY_MIDDLE_OPEN_FILE_IND = 12;
+    public static final int KING_PST_IND = 13;
+    public static final int KING_ENDGAME_PST_IND = 77;
+    public static final int BISHOP_PST_IND = 141;
+    public static final int BISHOP_ENDGAME_PST_IND = 205;
+    public static final int KNIGHT_PST_IND = 269;
+    public static final int KNIGHT_ENDGAME_PST_IND = 333;
+    public static final int KNIGHT_TROPISM_IND = 397;
+    public static final int ROOK_PST_IND = 398;
+    public static final int ROOK_ENDGAME_PST_IND = 462;
+    public static final int ROOK_OPEN_FILE_IND = 526;
+    public static final int ROOK_HALF_OPEN_FILE_IND = 527;
+    public static final int QUEEN_PST_IND = 528;
+    public static final int QUEEN_ENDGAME_PST_IND = 592;
+    public static final int MAJOR_ON_7TH_IND = 656;
+    public static final int CONNECTED_MAJORS_ON_7TH_IND = 657;
+    public static final int PAWN_PST_IND = 658;
+    public static final int PAWN_ENDGAME_PST_IND = 722;
+    public static final int PASSED_PAWN_IND = 786;
+    public static final int ISOLATED_PAWN_IND = 787;
+    public static final int DOUBLED_PAWN_IND = 788;
 
     private static final Map<String, Tuple2<Integer, Integer>> indexMap = new HashMap<>();
     static {
@@ -186,8 +192,11 @@ public class EvalWeights {
         indexMap.put("BISHOP_PAIR", new Tuple2<>(BISHOP_PAIR_IND, 1));
 
         indexMap.put("KING_SAFETY_PAWN_ONE_AWAY", new Tuple2<>(KING_SAFETY_PAWN_ONE_AWAY_IND, 1));
+        indexMap.put("KING_SAFETY_WING_PAWN_ONE_AWAY", new Tuple2<>(KING_SAFETY_WING_PAWN_ONE_AWAY_IND, 1));
         indexMap.put("KING_SAFETY_PAWN_TWO_AWAY", new Tuple2<>(KING_SAFETY_PAWN_TWO_AWAY_IND, 1));
+        indexMap.put("KING_SAFETY_WING_PAWN_TWO_AWAY", new Tuple2<>(KING_SAFETY_WING_PAWN_TWO_AWAY_IND, 1));
         indexMap.put("KING_SAFETY_PAWN_FAR_AWAY", new Tuple2<>(KING_SAFETY_PAWN_FAR_AWAY_IND, 1));
+        indexMap.put("KING_SAFETY_WING_PAWN_FAR_AWAY", new Tuple2<>(KING_SAFETY_WING_PAWN_FAR_AWAY_IND, 1));
         indexMap.put("KING_SAFETY_MIDDLE_OPEN_FILE", new Tuple2<>(KING_SAFETY_MIDDLE_OPEN_FILE_IND, 1));
         indexMap.put("KING_PST", new Tuple2<>(KING_PST_IND, 64));
         indexMap.put("KING_ENDGAME_PST", new Tuple2<>(KING_ENDGAME_PST_IND, 64));
