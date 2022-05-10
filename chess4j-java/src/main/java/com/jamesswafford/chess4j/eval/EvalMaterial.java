@@ -58,13 +58,22 @@ public class EvalMaterial {
     }
 
     public static void extractMaterialFeatures(double[] features, Board board) {
-        features[EvalWeights.PAWN_VAL_IND] = board.getNumPieces(WHITE_PAWN) - board.getNumPieces(BLACK_PAWN);
+        int numWhitePawns = board.getNumPieces(WHITE_PAWN);
+        int numBlackPawns = board.getNumPieces(BLACK_PAWN);
+        int numWhiteKnights = board.getNumPieces(WHITE_KNIGHT);
+        int numBlackKnights = board.getNumPieces(BLACK_KNIGHT);
+        int numWhiteRooks = board.getNumPieces(WHITE_ROOK);
+        int numBlackRooks = board.getNumPieces(BLACK_ROOK);
+        features[EvalWeights.PAWN_VAL_IND] = numWhitePawns - numBlackPawns;
         features[EvalWeights.QUEEN_VAL_IND] = board.getNumPieces(WHITE_QUEEN) - board.getNumPieces(BLACK_QUEEN);
-        features[EvalWeights.ROOK_VAL_IND] = board.getNumPieces(WHITE_ROOK) - board.getNumPieces(BLACK_ROOK);
-        features[EvalWeights.KNIGHT_VAL_IND] = board.getNumPieces(WHITE_KNIGHT) - board.getNumPieces(BLACK_KNIGHT);
+        features[EvalWeights.ROOK_VAL_IND] = numWhiteRooks - numBlackRooks;
+        features[EvalWeights.KNIGHT_VAL_IND] = numWhiteKnights - numBlackKnights;
         features[EvalWeights.BISHOP_VAL_IND] = board.getNumPieces(WHITE_BISHOP) - board.getNumPieces(BLACK_BISHOP);
         features[EvalWeights.BISHOP_PAIR_IND] = (board.getNumPieces(WHITE_BISHOP) > 1 ? 1 : 0) -
                 (board.getNumPieces(BLACK_BISHOP) > 1 ? 1 : 0);
+
+        features[EvalWeights.KNIGHT_KAUFMAN_ADJ] = ((numWhitePawns - 5) * numWhiteKnights - (numBlackPawns - 5) * numBlackKnights);
+        features[EvalWeights.ROOK_KAUFMAN_ADJ] = ((numWhitePawns - 5) * numWhiteRooks - (numBlackPawns - 5) * numBlackRooks);
     }
 
     public static MaterialType calculateMaterialType(Board board) {
