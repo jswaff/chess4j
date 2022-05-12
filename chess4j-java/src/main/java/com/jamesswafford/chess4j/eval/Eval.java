@@ -249,7 +249,7 @@ public final class Eval implements Evaluator {
 
         double[] features = extractFeatures(board);
         double score = 0;
-        int toInd = materialOnly ? EvalWeights.BISHOP_PAIR_IND+1 : features.length;
+        int toInd = materialOnly ? EvalWeights.ROOK_KAUFMAN_ADJ+1 : features.length;
         for (int i=0;i<toInd;i++) {
             score += features[i] * weights.vals[i];
         }
