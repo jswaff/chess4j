@@ -8,7 +8,6 @@ import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
-import com.jamesswafford.chess4j.io.DrawBoard;
 import io.vavr.Function4;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -260,12 +259,6 @@ public final class Eval implements Evaluator {
         // a drawish ending has scaled the value down
         if (Math.abs(score - evalScore) >= 1.0) {
             MaterialType materialType = EvalMaterial.calculateMaterialType(board);
-            /*if (!(immediateDraws.contains(materialType) || factor8Draws.contains(materialType))) {
-                System.out.println("score: " + score + ", evalScore: " + evalScore + ", materialOnly?: " + materialOnly);
-                System.out.println("kaufman knight adj feature: " + features[EvalWeights.KNIGHT_KAUFMAN_ADJ]);
-                System.out.println("kaufman rook adj feature: " + features[EvalWeights.ROOK_KAUFMAN_ADJ]);
-                DrawBoard.drawBoard(board);
-            }*/
             assert (immediateDraws.contains(materialType) || factor8Draws.contains(materialType));
         }
 
