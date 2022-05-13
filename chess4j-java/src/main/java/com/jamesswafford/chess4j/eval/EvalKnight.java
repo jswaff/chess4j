@@ -3,31 +3,26 @@ package com.jamesswafford.chess4j.eval;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.squares.Square;
+import io.vavr.Tuple2;
 
 import static com.jamesswafford.chess4j.eval.EvalWeights.*;
 
 public class EvalKnight {
 
-    public static int evalKnight(EvalWeights weights, Board board, Square sq, boolean endgame) {
-        int score;
+    public static Tuple2<Integer,Integer> evalKnight(EvalWeights weights, Board board, Square sq) {
+        int mg, eg;
 
         if (board.getPiece(sq).isWhite()) {
-            if (endgame) {
-                score = weights.vals[KNIGHT_ENDGAME_PST_IND + sq.value()];
-            } else {
-                score = weights.vals[KNIGHT_PST_IND + sq.value()];
-            }
-            score += weights.vals[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.BLACK));
+            int tropismScore = weights.vals[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.BLACK));
+            mg = weights.vals[KNIGHT_PST_IND + sq.value()] + tropismScore;
+            eg = weights.vals[KNIGHT_ENDGAME_PST_IND + sq.value()] + tropismScore;
         } else {
-            if (endgame) {
-                score = weights.vals[KNIGHT_ENDGAME_PST_IND + sq.flipVertical().value()];
-            } else {
-                score = weights.vals[KNIGHT_PST_IND + sq.flipVertical().value()];
-            }
-            score += weights.vals[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.WHITE));
+            int tropismScore = weights.vals[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.WHITE));
+            mg = -(weights.vals[KNIGHT_PST_IND + sq.flipVertical().value()] + tropismScore);
+            eg = -(weights.vals[KNIGHT_ENDGAME_PST_IND + sq.flipVertical().value()] + tropismScore);
         }
 
-        return score;
+        return new Tuple2<>(mg, eg);
     }
 
     public static java.lang.Void extractKnightFeatures(double[] features, Board board, Square sq, double phase) {
