@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.board.Board;
+import io.vavr.Tuple2;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -19,33 +20,29 @@ public class EvalQueenTest {
     @Test
     public void testEvalQueen() {
 
-//        Board board = new Board();
-//
-//        assertEquals(weights.vals[QUEEN_PST_IND + D1.value()], evalQueen(weights, board, D1, false));
-//
-//        // test symmetry
-//        assertEquals(evalQueen(weights, board, D1, false), evalQueen(weights, board, D8, false));
-    }
+        Board board = new Board();
 
-    @Test
-    public void testEvalQueen_endGame() {
-//
-//        Board board = new Board();
-//
-//        assertEquals(weights.vals[QUEEN_ENDGAME_PST_IND + D1.value()], evalQueen(weights, board, D1, true));
-//
-//        // test symmetry
-//        assertEquals(evalQueen(weights, board, D1, true), evalQueen(weights, board, D8, true));
+        Tuple2<Integer, Integer> score = evalQueen(weights, board, D1);
+
+        assertEquals(weights.vals[QUEEN_PST_IND + D1.value()], (int)score._1);
+        assertEquals(weights.vals[QUEEN_ENDGAME_PST_IND + D1.value()], (int)score._2);
+
+        // test symmetry
+        Tuple2<Integer, Integer> score2 = evalQueen(weights, board, D8);
+        assertEquals((int)score._1, -(int)score2._1);
+        assertEquals((int)score._2, -(int)score2._2);
     }
 
     @Test
     public void testEvalQueen_bankRankMate() {
-//
-//        Board board = new Board("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
-//
-//        assertEquals(weights.vals[QUEEN_PST_IND + C7.value()] + weights.vals[MAJOR_ON_7TH_IND] +
-//                        weights.vals[CONNECTED_MAJORS_ON_7TH_IND],
-//                evalQueen(weights, board, C7, false));
+
+        Board board = new Board("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
+
+        Tuple2<Integer, Integer> score = evalQueen(weights, board, C7);
+
+        assertEquals(weights.vals[QUEEN_PST_IND + C7.value()] + weights.vals[MAJOR_ON_7TH_IND] +
+                        weights.vals[CONNECTED_MAJORS_ON_7TH_IND],
+                (int)score._1);
     }
 
     @Test

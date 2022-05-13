@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.board.Board;
+import io.vavr.Tuple2;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -20,25 +21,16 @@ public class EvalKnightTest {
     public void testEvalKnight() {
         Board board = new Board();
 
-//        assertEquals(weights.vals[KNIGHT_PST_IND + B1.value()] +
-//                        (long) weights.vals[KNIGHT_TROPISM_IND] * B1.distance(E8),
-//                evalKnight(weights, board, B1, false));
-//
-//        // test the symmetry
-//        assertEquals(evalKnight(weights, board, B1, false),
-//                evalKnight(weights, board, B8, false));
-    }
+        Tuple2<Integer, Integer> score = evalKnight(weights, board, B1);
 
-    @Test
-    public void testEvalKnight_endGame() {
-//        Board board = new Board();
-//
-//        assertEquals(weights.vals[KNIGHT_ENDGAME_PST_IND + B1.value()] + (long) weights.vals[KNIGHT_TROPISM_IND] * B1.distance(E8),
-//                evalKnight(weights, board, B1, true));
-//
-//        // test the symmetry
-//        assertEquals(evalKnight(weights, board, B1, true),
-//                evalKnight(weights, board, B8, true));
+        int tropism = weights.vals[KNIGHT_TROPISM_IND] * B1.distance(E8);
+        assertEquals(weights.vals[KNIGHT_PST_IND + B1.value()] + tropism,(int)score._1);
+        assertEquals(weights.vals[KNIGHT_ENDGAME_PST_IND + B1.value()] + tropism, (int)score._2);
+
+        // test the symmetry
+        Tuple2<Integer, Integer> score2 = evalKnight(weights, board, B8);
+        assertEquals((int)score._1, -(int)score2._1);
+        assertEquals((int)score._2, -(int)score2._2);
     }
 
     @Test

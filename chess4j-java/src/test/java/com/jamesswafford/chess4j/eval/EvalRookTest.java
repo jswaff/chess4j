@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.board.Board;
+import io.vavr.Tuple2;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -20,58 +21,60 @@ public class EvalRookTest {
 
     @Test
     public void testEvalRook() {
-//
-//        Board board = new Board();
-//
-//        assertEquals(weights.vals[ROOK_PST_IND + A1.value()], evalRook(weights, board, A1, false));
-//
-//        // test the symmetry
-//        assertEquals(evalRook(weights, board, A1, false), evalRook(weights, board, A8, false));
-    }
 
-    @Test
-    public void testEvalRook_endGame() {
-//
-//        Board board = new Board();
-//
-//        assertEquals(weights.vals[ROOK_ENDGAME_PST_IND + A1.value()], evalRook(weights, board, A1, true));
-//
-//        // test the symmetry
-//        assertEquals(evalRook(weights, board, A1, true), evalRook(weights, board, A8, true));
+        Board board = new Board();
+
+        Tuple2<Integer, Integer> score = evalRook(weights, board, A1);
+
+        assertEquals(weights.vals[ROOK_PST_IND + A1.value()], (int)score._1);
+        assertEquals(weights.vals[ROOK_ENDGAME_PST_IND + A1.value()], (int)score._2);
+
+        // test the symmetry
+        Tuple2<Integer, Integer> score2 = evalRook(weights, board, A8);
+        assertEquals((int)score._1, -(int)score2._1);
+        assertEquals((int)score._2, -(int)score2._2);
     }
 
     @Test
     public void testEvalRook_bankRankMate() {
-//
-//        Board board = new Board("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
-//
-//        assertEquals(weights.vals[ROOK_PST_IND + F7.value()] + weights.vals[MAJOR_ON_7TH_IND] +
-//                        weights.vals[ROOK_OPEN_FILE_IND],
-//                evalRook(weights, board, F7, false));
+
+        Board board = new Board("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
+
+        Tuple2<Integer, Integer> score = evalRook(weights, board, F7);
+
+        assertEquals(weights.vals[ROOK_PST_IND + F7.value()] + weights.vals[MAJOR_ON_7TH_IND] +
+                        weights.vals[ROOK_OPEN_FILE_IND],
+                (int)score._1);
     }
 
     @Test
     public void testEvalRook_rookOpenFile() {
-//
-//        Board board = new Board("3r3k/8/8/8/8/8/8/7K b - - 0 1");
-//
-//        assertEquals(weights.vals[ROOK_PST_IND + D1.value()] + weights.vals[ROOK_OPEN_FILE_IND],
-//                evalRook(weights, board, D8, false));
+
+        Board board = new Board("3r3k/8/8/8/8/8/8/7K b - - 0 1");
+
+        Tuple2<Integer, Integer> score = evalRook(weights, board, D8);
+
+        assertEquals(-(weights.vals[ROOK_PST_IND + D1.value()] + weights.vals[ROOK_OPEN_FILE_IND]),
+                (int)score._1);
     }
 
     @Test
     public void testEvalRook_rookOpenHalfOpenFile() {
-//
-//        // friendly pawn but no enemy -- not half open (or open)
-//        Board board = new Board("8/2P5/8/2R5/K7/8/7k/8 w - - 0 1");
-//
-//        assertEquals(weights.vals[ROOK_PST_IND + C5.value()], evalRook(weights, board, C5, false));
-//
-//        // enemy pawn on C makes it half open
-//        board.setPos("8/2p5/8/2R5/K7/8/7k/8 w - - 0 1");
-//
-//        assertEquals(weights.vals[ROOK_PST_IND + C5.value()] + weights.vals[ROOK_HALF_OPEN_FILE_IND],
-//                evalRook(weights, board, C5, false));
+
+        // friendly pawn but no enemy -- not half open (or open)
+        Board board = new Board("8/2P5/8/2R5/K7/8/7k/8 w - - 0 1");
+
+        Tuple2<Integer, Integer> score = evalRook(weights, board, C5);
+
+        assertEquals(weights.vals[ROOK_PST_IND + C5.value()], (int)score._1);
+
+        // enemy pawn on C makes it half open
+        board.setPos("8/2p5/8/2R5/K7/8/7k/8 w - - 0 1");
+
+        Tuple2<Integer, Integer> score2 = evalRook(weights, board, C5);
+
+        assertEquals(weights.vals[ROOK_PST_IND + C5.value()] + weights.vals[ROOK_HALF_OPEN_FILE_IND],
+                (int)score2._1);
     }
 
     @Test

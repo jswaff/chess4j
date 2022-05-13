@@ -25,24 +25,13 @@ public class EvalBishopTest {
         Tuple2<Integer, Integer> score = evalBishop(weights, board, C1);
 
         assertEquals(weights.vals[BISHOP_PST_IND + C1.value()], (int)score._1);
+        assertEquals(weights.vals[BISHOP_ENDGAME_PST_IND + C1.value()], (int)score._2);
 
         // test the symmetry
-//        Tuple2<Integer, Integer> score2 = evalBishop(weights, board, C8);
-//        assertEquals(weights.vals[BISHOP_PST_IND + C1.value()], (int)score._1);
-//
-//        assertEquals(evalBishop(weights, board, C1, false), evalBishop(weights, board, C8, false));
+        Tuple2<Integer, Integer> score2 = evalBishop(weights, board, C8);
+        assertEquals((int)score._1, -(int)score2._1);
+        assertEquals((int)score._2, -(int)score2._2);
     }
-
-//    @Test
-//    public void testEvalBishop_endGame() {
-//
-//        Board board = new Board();
-//
-//        assertEquals(weights.vals[BISHOP_ENDGAME_PST_IND + C1.value()], evalBishop(weights, board, C1, true));
-//
-//        // test the symmetry
-//        assertEquals(evalBishop(weights, board, C1, true), evalBishop(weights, board, C8, true));
-//    }
 
     @Test
     public void testExtractBishopFeatures() {
