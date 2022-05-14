@@ -19,7 +19,6 @@ public class EvalTaper {
     public static int taper(Board board, int mgScore, int egScore) {
         int mgPhase = phase(board);
         int egPhase = 24 - mgPhase;
-
         return (mgScore * mgPhase + egScore * egPhase) / 24;
     }
 
@@ -44,6 +43,10 @@ public class EvalTaper {
                 board.getNumPieces(Knight.BLACK_KNIGHT);
 
         return Math.min(phase, 24);
+    }
+
+    public static double phaseD(Board board) {
+        return phase(board) / 24.0;
     }
 
 }

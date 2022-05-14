@@ -16,6 +16,8 @@ public class EvalMajorOn7thTest {
 
     private final EvalWeights weights = new EvalWeights();
 
+    private final double testEpsilon = 0.000001;
+
     @Test
     public void testEvalMajorOn7th() {
 
@@ -73,20 +75,20 @@ public class EvalMajorOn7thTest {
             -------K
          */
 
-        int[] features = new int[NUM_WEIGHTS];
+        double[] features = new double[weights.vals.length];
         exractMajorOn7thFeatures(features, board, true, C7);
-        assertEquals(1, features[MAJOR_ON_7TH_IND]);
-        assertEquals(1, features[CONNECTED_MAJORS_ON_7TH_IND]);
+        assertEquals(1, features[MAJOR_ON_7TH_IND], testEpsilon);
+        assertEquals(1, features[CONNECTED_MAJORS_ON_7TH_IND], testEpsilon);
 
         Arrays.fill(features, 0);
         exractMajorOn7thFeatures(features, board, true, F7);
-        assertEquals(1, features[MAJOR_ON_7TH_IND]);
-        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_IND]);
+        assertEquals(1, features[MAJOR_ON_7TH_IND], testEpsilon);
+        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_IND], testEpsilon);
 
         Arrays.fill(features, 0);
         exractMajorOn7thFeatures(features, board, false, A2);
-        assertEquals(-1, features[MAJOR_ON_7TH_IND]);
-        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_IND]);
+        assertEquals(-1, features[MAJOR_ON_7TH_IND], testEpsilon);
+        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_IND], testEpsilon);
 
         // move the black king out from the back rank
         board.setPos("8/2Q2R2/7k/8/8/8/r7/7K w - - 0 1");
@@ -104,13 +106,13 @@ public class EvalMajorOn7thTest {
 
         Arrays.fill(features, 0);
         exractMajorOn7thFeatures(features, board, true, C7);
-        assertEquals(0, features[MAJOR_ON_7TH_IND]);
-        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_IND]);
+        assertEquals(0, features[MAJOR_ON_7TH_IND], testEpsilon);
+        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_IND], testEpsilon);
 
         Arrays.fill(features, 0);
         exractMajorOn7thFeatures(features, board, true, F7);
-        assertEquals(0, features[MAJOR_ON_7TH_IND]);
-        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_IND]);
+        assertEquals(0, features[MAJOR_ON_7TH_IND], testEpsilon);
+        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_IND], testEpsilon);
     }
 
 }

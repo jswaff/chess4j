@@ -52,7 +52,7 @@ public class LogisticRegressionTunerTest {
                 weights,
                 List.of(new GameRecord("3k4/3Q4/3K4/8/8/8/8/8 w - -", PGNResult.WHITE_WINS)),
                 100.0,
-                10);
+                1);
 
         assertTrue(tunedWeights._1.vals[EvalWeights.QUEEN_VAL_IND] > 100);
     }
@@ -73,7 +73,7 @@ public class LogisticRegressionTunerTest {
     private void populateTunerDatasource(String epd) {
         File epdFile = new File(SQLiteTunerDatasourceTest.class.getResource(epd).getFile());
         FenToTuner fenToTuner = new FenToTuner(tunerDatasource);
-        fenToTuner.addFile(epdFile);
+        fenToTuner.addFile(epdFile, true);
     }
 
 }

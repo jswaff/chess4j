@@ -50,7 +50,7 @@ public class EvalMajorOn7th {
         return score;
     }
 
-    public static void exractMajorOn7thFeatures(int[] features, Board board, boolean isWhite, Square sq) {
+    public static void exractMajorOn7thFeatures(double[] features, Board board, boolean isWhite, Square sq) {
         if (isWhite) {
             if (sq.rank() == RANK_7 && board.getKingSquare(Color.BLACK).rank() == RANK_8) {
                 features[MAJOR_ON_7TH_IND]++;
@@ -64,7 +64,7 @@ public class EvalMajorOn7th {
         }
     }
 
-    public static void extractConnectedMajorOn7thFeatures(int[] features, Board board, boolean isWhite, Square sq) {
+    public static void extractConnectedMajorOn7thFeatures(double[] features, Board board, boolean isWhite, Square sq) {
         long rookMoves = Magic.getRookMoves(board,sq.value(),
                 Bitboard.rays[sq.value()][East.getInstance().value()]);
 

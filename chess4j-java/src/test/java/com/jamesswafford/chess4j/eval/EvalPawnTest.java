@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.board.Board;
+import io.vavr.Tuple2;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -16,26 +17,22 @@ public class EvalPawnTest {
 
     private final EvalWeights weights = new EvalWeights();
 
+    private final double testEpsilon = 0.000001;
+
     @Test
     public void testEvalPawn() {
 
         Board board = new Board();
 
-        assertEquals(weights.vals[PAWN_PST_IND + E2.value()], evalPawn(weights, board, E2, false));
+        Tuple2<Integer, Integer> score = evalPawn(weights, board, E2);
+
+        assertEquals(weights.vals[PAWN_PST_IND + E2.value()], (int)score._1);
+        assertEquals(weights.vals[PAWN_ENDGAME_PST_IND + E2.value()], (int)score._2);
 
         // test the symmetry
-        assertEquals(evalPawn(weights, board, E2, false), evalPawn(weights, board, E7, false));
-    }
-
-    @Test
-    public void testEvalPawn_endGame() {
-
-        Board board = new Board();
-
-        assertEquals(weights.vals[PAWN_ENDGAME_PST_IND + E2.value()], evalPawn(weights, board, E2, true));
-
-        // test the symmetry
-        assertEquals(evalPawn(weights, board, E2, true), evalPawn(weights, board, E7, true));
+        Tuple2<Integer, Integer> score2 = evalPawn(weights, board, E7);
+        assertEquals((int)score._1, -(int)score2._1);
+        assertEquals((int)score._2, -(int)score2._2);
     }
 
     @Test
@@ -54,13 +51,17 @@ public class EvalPawnTest {
         k - - - K - - -
         */
 
+        Tuple2<Integer, Integer> score = evalPawn(weights, board, B6);
+
         assertEquals(weights.vals[PAWN_PST_IND + B6.value()] + weights.vals[PASSED_PAWN_IND],
-                evalPawn(weights, board, B6, false));
+                (int)score._1);
 
         // the black pawn on A2 is passed and isolated
+        Tuple2<Integer, Integer> score2 = evalPawn(weights, board, A2);
+
         assertEquals(weights.vals[PAWN_PST_IND + A7.value()] + weights.vals[PASSED_PAWN_IND] +
                         weights.vals[ISOLATED_PAWN_IND],
-                evalPawn(weights, board, A2, false));
+                -(int)score2._1);
     }
 
     @Test
@@ -68,14 +69,14 @@ public class EvalPawnTest {
 
         Board board = new Board();
 
-        int[] features = new int[NUM_WEIGHTS];
-        extractPawnFeatures(features, board, E2, false);
-        assertEquals(1, features[PAWN_PST_IND + E2.value()]);
+        double[] features = new double[weights.vals.length];
+        extractPawnFeatures(features, board, E2, 1.0);
+        assertEquals(1, features[PAWN_PST_IND + E2.value()], testEpsilon);
 
         // test the symmetry
-        int[] features2 = new int[NUM_WEIGHTS];
-        extractPawnFeatures(features2, board, E7, false);
-        assertEquals(-1, features2[PAWN_PST_IND + E2.value()]);
+        double[] features2 = new double[weights.vals.length];
+        extractPawnFeatures(features2, board, E7, 1.0);
+        assertEquals(-1, features2[PAWN_PST_IND + E2.value()], testEpsilon);
     }
 
     @Test
@@ -83,14 +84,14 @@ public class EvalPawnTest {
 
         Board board = new Board();
 
-        int[] features = new int[NUM_WEIGHTS];
-        extractPawnFeatures(features, board, E2, true);
-        assertEquals(1, features[PAWN_ENDGAME_PST_IND + E2.value()]);
+        double[] features = new double[weights.vals.length];
+        extractPawnFeatures(features, board, E2, 0.0);
+        assertEquals(1, features[PAWN_ENDGAME_PST_IND + E2.value()], testEpsilon);
 
         // test the symmetry
-        int[] features2 = new int[NUM_WEIGHTS];
-        extractPawnFeatures(features2, board, E7, true);
-        assertEquals(-1, features2[PAWN_ENDGAME_PST_IND + E2.value()]);
+        double[] features2 = new double[weights.vals.length];
+        extractPawnFeatures(features2, board, E7, 0.0);
+        assertEquals(-1, features2[PAWN_ENDGAME_PST_IND + E2.value()], testEpsilon);
     }
 
     @Test
@@ -109,15 +110,15 @@ public class EvalPawnTest {
         k - - - K - - -
         */
 
-        int[] features = new int[NUM_WEIGHTS];
-        extractPawnFeatures(features, board, B6, false);
-        assertEquals(1, features[PASSED_PAWN_IND]);
+        double[] features = new double[weights.vals.length];
+        extractPawnFeatures(features, board, B6, 1.0);
+        assertEquals(1, features[PASSED_PAWN_IND], testEpsilon);
 
         // the black pawn on A2 is passed and isolated
         Arrays.fill(features, 0);
-        extractPawnFeatures(features, board, A2, false);
-        assertEquals(-1, features[PASSED_PAWN_IND]);
-        assertEquals(-1, features[ISOLATED_PAWN_IND]);
+        extractPawnFeatures(features, board, A2, 1.0);
+        assertEquals(-1, features[PASSED_PAWN_IND], testEpsilon);
+        assertEquals(-1, features[ISOLATED_PAWN_IND], testEpsilon);
     }
 
 }

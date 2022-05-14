@@ -155,7 +155,7 @@ public class XBoardHandler {
     private void fenToTunerDS(String[] cmd) {
         if (tunerDatasource != null) {
             FenToTuner fenToTuner = new FenToTuner(tunerDatasource);
-            fenToTuner.addFile(new File(cmd[1]));
+            fenToTuner.addFile(new File(cmd[1]), false);
         } else {
             LOGGER.warn("There is no tuner datasource.");
         }
@@ -419,7 +419,7 @@ public class XBoardHandler {
             LogisticRegressionTuner tuner = new LogisticRegressionTuner();
             Tuple2<EvalWeights, Double> optimizedWeights = tuner.optimize(Globals.getEvalWeights(), dataSet,
                     learningRate, maxIterations);
-            EvalWeightsUtil.store(optimizedWeights._1, "eval.properties", "Error: " + optimizedWeights._2);
+            EvalWeightsUtil.store(optimizedWeights._1, "eval-tuned.properties", "Error: " + optimizedWeights._2);
             Globals.setEvalWeights(optimizedWeights._1);
         }, () -> LOGGER.info("no tuner datasource"));
     }

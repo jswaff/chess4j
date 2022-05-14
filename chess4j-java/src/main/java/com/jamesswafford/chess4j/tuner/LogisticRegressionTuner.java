@@ -1,10 +1,7 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
-import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.EvalWeights;
-import com.jamesswafford.chess4j.io.EvalWeightsUtil;
 import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +10,6 @@ import org.ejml.simple.SimpleMatrix;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import static com.jamesswafford.chess4j.tuner.CostFunction.cost;
 
@@ -47,7 +43,7 @@ public class LogisticRegressionTuner {
         LOGGER.info("initial error using test set: {}", initialError);
 
         long start = System.currentTimeMillis();
-        EvalWeights weights = trainWithGradientDescent(trainingSet, initialWeights, learningRate, maxIterations);
+        EvalWeights weights = trainWithGradientDescent(trainingSet, testSet, initialWeights, learningRate, maxIterations);
         long end = System.currentTimeMillis();
         LOGGER.info("training complete in {} seconds", (end-start)/1000);
 
@@ -60,90 +56,38 @@ public class LogisticRegressionTuner {
         return new Tuple2<>(weights, finalError);
     }
 
-    private EvalWeights trainWithGradientDescent(List<GameRecord> trainingSet, EvalWeights initialWeights,
-                                                 double learningRate, int maxIterations) {
-
-        Random random = new Random(System.currentTimeMillis());
+    private EvalWeights trainWithGradientDescent(List<GameRecord> trainingSet, List<GameRecord> testSet,
+                                                 EvalWeights initialWeights,  double learningRate, int maxIterations) {
 
         EvalWeights bestWeights = new EvalWeights(initialWeights);
-        int n = initialWeights.vals.length;
-        SimpleMatrix theta = new SimpleMatrix(n, 1);
-        for (int i=0;i<n;i++) {
-            theta.set(i, 0, bestWeights.vals[i]);
-        }
+        int n = bestWeights.vals.length;
+        SimpleMatrix theta = MatrixUtils.weightsToMatrix(bestWeights);
+
+        // reduce the learning rate to 10% over the run
+        double lrDelta = (learningRate / maxIterations) * 0.9;
 
         for (int it=0; it<maxIterations; it++) {
 
-            // randomly pick some records from the training set
-            int m = Math.min(1000, trainingSet.size());
-            SimpleMatrix x = new SimpleMatrix(m, n);
-            SimpleMatrix y = new SimpleMatrix(m, 1);
-            for (int i=0;i<m;i++) {
-                GameRecord trainingRecord = trainingSet.get(random.nextInt(trainingSet.size()));
-                Board board = new Board(trainingRecord.getFen());
-                int[] features_i = Eval.extractFeatures(board);
-                for (int j=0;j<n;j++) {
-                    x.set(i, j, features_i[j]);
-                }
-                y.set(i, 0, CostFunction.y(trainingRecord.getResult()));
-            }
-            SimpleMatrix xTrans = x.transpose();
+            // load a batch and set up the X (features) matrix and Y (outcome) vector
+            Tuple2<SimpleMatrix, SimpleMatrix> xy = MatrixUtils.loadXY(trainingSet, 10000, n);
+            SimpleMatrix x = xy._1;
+            SimpleMatrix y = xy._2;
 
-            // calculate the gradient
-            SimpleMatrix h = x.mult(theta);
-            for (int i=0;i<m;i++) {
-                h.set(i, 0, Hypothesis.hypothesis(h.get(i, 0)));
-            }
-
-            SimpleMatrix loss = h.minus(y);
-            SimpleMatrix gradient = xTrans.mult(loss).divide(m);
+            // calculate the gradient and adjust accordingly
+            SimpleMatrix gradient = Gradient.gradient(x, y, theta, 0);
             theta = theta.minus(gradient.divide(1.0/learningRate));
-            for (int i=1;i<n;i++) { // start at one to keep pawn val anchored
+            for (int i = 1; i<n; i++) { // anchor pawn value
                 bestWeights.vals[i] = (int)Math.round(theta.get(i, 0));
             }
 
-            // calculate cost
-            double error = cost(trainingSet, bestWeights);
-            LOGGER.info(error);
-
-            if ((it+1)%10 == 0) {
-                EvalWeightsUtil.store(bestWeights, "eval-tune-" + (it+1) + ".properties", "Error: " + error);
+            // display the error and store the weights every 10 iterations
+            if ((it+1) % 100 == 0) {
+                double trainingError = cost(trainingSet, bestWeights);
+                double testError = cost(testSet, bestWeights);
+                LOGGER.info(trainingError + "," + testError);
             }
-        }
 
-        return bestWeights;
-    }
-
-    private EvalWeights trainWithNaiveSearch(List<GameRecord> trainingSet, EvalWeights initialWeights, int maxIterations) {
-        int n = initialWeights.vals.length;
-        double bestError = cost(trainingSet, initialWeights);
-        EvalWeights bestWeights = new EvalWeights(initialWeights);
-
-        for (int it = 0; it<maxIterations; it++) {
-            int numParamsImproved = 0;
-            for (int i=0;i<n;i++) {
-                EvalWeights candidateWeights = new EvalWeights(bestWeights);
-                candidateWeights.vals[i] = candidateWeights.vals[i] + 1;
-                double error = cost(trainingSet, candidateWeights);
-                if (error < bestError) {
-                    bestError = error;
-                    bestWeights = candidateWeights;
-                    numParamsImproved++;
-                } else {
-                    candidateWeights.vals[i] = candidateWeights.vals[i] - 2;
-                    error = cost(trainingSet, candidateWeights);
-                    if (error < bestError) {
-                        bestError = error;
-                        bestWeights = candidateWeights;
-                        numParamsImproved++;
-                    }
-                }
-            }
-            EvalWeightsUtil.store(bestWeights, "eval-tune-" + (it+1) + ".properties", "Error: " + bestError);
-            if (numParamsImproved == 0) {
-                break;
-            }
-            LOGGER.info("error using training set after iteration {}: {}", (it+1), bestError);
+            learningRate -= lrDelta;
         }
 
         return bestWeights;
