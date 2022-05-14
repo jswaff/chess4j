@@ -98,15 +98,14 @@ public final class Eval implements Evaluator {
                 board.getWhiteQueens() | board.getBlackQueens(), board,
                 EvalQueen::evalQueen);
 
-        mgScore += pawnsScore._1 + knightsSore._1 + bishopsScore._1 + rooksScore._1 + queensScore._1;
-        egScore += pawnsScore._2 + knightsSore._2 + bishopsScore._2 + rooksScore._2 + queensScore._2;
-
         // eval kings
-        mgScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), false)
-                - evalKing(weights, board, board.getKingSquare(Color.BLACK), false);
+        Tuple2<Integer, Integer> wKingScore = evalKing(weights, board, board.getKingSquare(Color.WHITE));
+        Tuple2<Integer, Integer> bKingScore = evalKing(weights, board, board.getKingSquare(Color.BLACK));
 
-        egScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), true)
-                - evalKing(weights, board, board.getKingSquare(Color.BLACK), true);
+        mgScore += pawnsScore._1 + knightsSore._1 + bishopsScore._1 + rooksScore._1 + queensScore._1 +
+                wKingScore._1 + bKingScore._1;
+        egScore += pawnsScore._2 + knightsSore._2 + bishopsScore._2 + rooksScore._2 + queensScore._2 +
+                wKingScore._2 + bKingScore._2;
 
         // blend the middle game score and end game score, and divide by the draw factor
         int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
