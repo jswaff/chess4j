@@ -8,7 +8,9 @@ import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
+import io.vavr.Function3;
 import io.vavr.Function4;
+import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -74,43 +76,36 @@ public final class Eval implements Evaluator {
         int egScore = mgScore;
 
         // eval pawns
-        mgScore += evalPawns(weights, board, false);
-        egScore += evalPawns(weights, board, true);
+        Tuple2<Integer, Integer> pawnsScore = evalPawns(weights, board);
 
         // eval knights
-        mgScore += evalPieces(weights, board.getWhiteKnights(), board, false, EvalKnight::evalKnight)
-                - evalPieces(weights, board.getBlackKnights(), board, false, EvalKnight::evalKnight);
-
-        egScore += evalPieces(weights, board.getWhiteKnights(), board, true, EvalKnight::evalKnight)
-                - evalPieces(weights, board.getBlackKnights(), board, true, EvalKnight::evalKnight);
+        Tuple2<Integer, Integer> knightsSore = evalPieces(weights,
+                board.getWhiteKnights() | board.getBlackKnights(),
+                board, EvalKnight::evalKnight);
 
         // eval bishops
-        mgScore += evalPieces(weights, board.getWhiteBishops(), board, false, EvalBishop::evalBishop)
-                - evalPieces(weights, board.getBlackBishops(), board, false, EvalBishop::evalBishop);
-
-        egScore += evalPieces(weights, board.getWhiteBishops(), board, true, EvalBishop::evalBishop)
-                - evalPieces(weights, board.getBlackBishops(), board, true, EvalBishop::evalBishop);
+        Tuple2<Integer, Integer> bishopsScore = evalPieces(weights,
+                board.getWhiteBishops() | board.getBlackBishops(),
+                board, EvalBishop::evalBishop);
 
         // eval rooks
-        mgScore += evalPieces(weights, board.getWhiteRooks(), board, false, EvalRook::evalRook)
-                - evalPieces(weights, board.getBlackRooks(), board, false, EvalRook::evalRook);
-
-        egScore += evalPieces(weights, board.getWhiteRooks(), board, true, EvalRook::evalRook)
-                - evalPieces(weights, board.getBlackRooks(), board, true, EvalRook::evalRook);
+        Tuple2<Integer, Integer> rooksScore = evalPieces(weights,
+                board.getWhiteRooks() | board.getBlackRooks(),
+                board, EvalRook::evalRook);
 
         // eval queens
-        mgScore += evalPieces(weights, board.getWhiteQueens(), board, false, EvalQueen::evalQueen)
-                - evalPieces(weights, board.getBlackQueens(), board, false, EvalQueen::evalQueen);
-
-        egScore += evalPieces(weights, board.getWhiteQueens(), board, true, EvalQueen::evalQueen)
-                - evalPieces(weights, board.getBlackQueens(), board, true, EvalQueen::evalQueen);
+        Tuple2<Integer, Integer> queensScore = evalPieces(weights,
+                board.getWhiteQueens() | board.getBlackQueens(), board,
+                EvalQueen::evalQueen);
 
         // eval kings
-        mgScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), false)
-                - evalKing(weights, board, board.getKingSquare(Color.BLACK), false);
+        Tuple2<Integer, Integer> wKingScore = evalKing(weights, board, board.getKingSquare(Color.WHITE));
+        Tuple2<Integer, Integer> bKingScore = evalKing(weights, board, board.getKingSquare(Color.BLACK));
 
-        egScore += evalKing(weights, board, board.getKingSquare(Color.WHITE), true)
-                - evalKing(weights, board, board.getKingSquare(Color.BLACK), true);
+        mgScore += pawnsScore._1 + knightsSore._1 + bishopsScore._1 + rooksScore._1 + queensScore._1 +
+                wKingScore._1 + bKingScore._1;
+        egScore += pawnsScore._2 + knightsSore._2 + bishopsScore._2 + rooksScore._2 + queensScore._2 +
+                wKingScore._2 + bKingScore._2;
 
         // blend the middle game score and end game score, and divide by the draw factor
         int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
@@ -119,44 +114,44 @@ public final class Eval implements Evaluator {
         return board.getPlayerToMove() == Color.WHITE ? taperedScore : -taperedScore;
     }
 
-    private static int evalPieces(EvalWeights weights, long pieceMap, Board board, boolean endgame,
-                                  Function4<EvalWeights, Board, Square, Boolean, Integer> evalFunc) {
-        int score = 0;
+    private static Tuple2<Integer, Integer> evalPieces(EvalWeights weights, long pieceMap, Board board,
+                                  Function3<EvalWeights, Board, Square, Tuple2<Integer, Integer>> evalFunc) {
+
+        int mg=0, eg=0;
 
         while (pieceMap != 0) {
             int sqVal = Bitboard.lsb(pieceMap);
             Square sq = Square.valueOf(sqVal);
-            score += evalFunc.apply(weights, board, sq, endgame);
+            Tuple2<Integer, Integer> score = evalFunc.apply(weights, board, sq);
+            mg += score._1; eg += score._2;
             pieceMap ^= Bitboard.squares[sqVal];
         }
 
-        return score;
+        return new Tuple2<>(mg, eg);
     }
 
-    private static int evalPawns(EvalWeights weights, Board board, boolean endgame) {
+    private static Tuple2<Integer, Integer> evalPawns(EvalWeights weights, Board board) {
 
         // try the pawn hash
-        // FIXME
-        /*if (Globals.isPawnHashEnabled()) {
+        if (Globals.isPawnHashEnabled()) {
             PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board.getPawnKey());
             if (pte != null) {
-                assert (pte.getScore() == evalPawnsNoHash(weights, board, endgame));
+                assert (pte.getScore().equals(evalPieces(weights,
+                        board.getWhitePawns() | board.getBlackPawns(), board,
+                        EvalPawn::evalPawn)));
                 return pte.getScore();
             }
-        }*/
-
-        int score = evalPawnsNoHash(weights, board, endgame);
-
-        if (Globals.isPawnHashEnabled()) {
-            TTHolder.getInstance().getPawnHashTable().store(board.getPawnKey(), score);
         }
 
-        return score;
-    }
+        Tuple2<Integer, Integer> pawnsScore = evalPieces(weights,
+                board.getWhitePawns() | board.getBlackPawns(), board,
+                EvalPawn::evalPawn);
 
-    private static int evalPawnsNoHash(EvalWeights weights, Board board, boolean endgame) {
-        return evalPieces(weights, board.getWhitePawns(), board, endgame, EvalPawn::evalPawn)
-                - evalPieces(weights, board.getBlackPawns(), board, endgame, EvalPawn::evalPawn);
+        if (Globals.isPawnHashEnabled()) {
+            TTHolder.getInstance().getPawnHashTable().store(board.getPawnKey(), pawnsScore._1, pawnsScore._2);
+        }
+
+        return pawnsScore;
     }
 
     public static native int evalNative(Board board, boolean materialOnly);

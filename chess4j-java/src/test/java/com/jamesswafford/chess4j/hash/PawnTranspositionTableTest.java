@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.hash;
 import java.util.List;
 
 import com.jamesswafford.chess4j.board.Undo;
+import io.vavr.Tuple2;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,11 +38,11 @@ public class PawnTranspositionTableTest {
         assertNull(tte);
 
         // now store and reload
-        ptable.store(key,100);
+        ptable.store(key,100, 110);
         tte = ptable.probe(key);
         assertNotNull(tte);
 
-        PawnTranspositionTableEntry lbe = new PawnTranspositionTableEntry(key,100);
+        PawnTranspositionTableEntry lbe = new PawnTranspositionTableEntry(key,100, 110);
         assertEquals(lbe, tte);
 
         // now make move and reprobe
@@ -70,10 +71,10 @@ public class PawnTranspositionTableTest {
         Move b2b4 = mp.parseMove("b2b4", board);
         assertTrue(moves.contains(b2b4));
 
-        ptable.store(key, 77);
+        ptable.store(key, 77, 80);
         PawnTranspositionTableEntry pte = ptable.probe(key);
         assertNotNull(pte);
-        assertEquals(77, pte.getScore());
+        assertEquals(new Tuple2<>(77, 80), pte.getScore());
         assertEquals(key, pte.getZobristKey());
 
         ptable.clear();
@@ -90,29 +91,29 @@ public class PawnTranspositionTableTest {
         MoveParser mp = new MoveParser();
         Move e5e4 = mp.parseMove("e4", board);
         assertTrue(moves.contains(e5e4));
-        ptable.store(key, 71);
+        ptable.store(key, 71, -17);
         PawnTranspositionTableEntry tte = ptable.probe(key);
-        PawnTranspositionTableEntry lbe = new PawnTranspositionTableEntry(key,71);
+        PawnTranspositionTableEntry lbe = new PawnTranspositionTableEntry(key,71, -17);
         assertEquals(lbe, tte);
 
         // overwrite
-        ptable.store(key, 59);
+        ptable.store(key, 59, -2);
         tte = ptable.probe(key);
         assertNotEquals(lbe, tte);
-        lbe = new PawnTranspositionTableEntry(key,59);
+        lbe = new PawnTranspositionTableEntry(key,59, -2);
         assertEquals(lbe, tte);
 
         // use different key to store new entry
         long key2 = ~key;
         tte = ptable.probe(key2);
         assertNull(tte);
-        ptable.store(key2, 45);
+        ptable.store(key2, 45, 3);
 
         // now make sure we didn't overwrite lbe
         tte = ptable.probe(key);
         assertEquals(lbe, tte);
 
-        PawnTranspositionTableEntry lbe2 = new PawnTranspositionTableEntry(key2,45);
+        PawnTranspositionTableEntry lbe2 = new PawnTranspositionTableEntry(key2,45, 3);
         tte = ptable.probe(key2);
         assertEquals(lbe2, tte);
     }
@@ -121,12 +122,12 @@ public class PawnTranspositionTableTest {
     public void resize() {
 
         PawnTranspositionTable ptt = new PawnTranspositionTable(1024);
-        assertEquals(1024 / 12, ptt.tableCapacity());
+        assertEquals(1024 / 16, ptt.tableCapacity());
 
         int fourMb = 4 * 1024 * 1024;
         ptt.resizeTable(fourMb);
 
-        assertEquals(fourMb / 12, ptt.tableCapacity());
+        assertEquals(fourMb / 16, ptt.tableCapacity());
     }
 
 }

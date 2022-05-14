@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.eval;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.Square;
+import io.vavr.Tuple2;
 
 import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.*;
 
@@ -10,25 +11,23 @@ import static com.jamesswafford.chess4j.eval.EvalWeights.*;
 
 public class EvalRook {
 
-    public static int evalRook(EvalWeights weights, Board board, Square sq, boolean endgame) {
+    public static Tuple2<Integer, Integer> evalRook(EvalWeights weights, Board board, Square sq) {
         boolean isWhite = board.getPiece(sq).isWhite();
-        int score;
+
+        int mg, eg;
+
+        int major7th = evalMajorOn7th(weights, board, isWhite, sq);
+        int rookOpen = evalRookOpenFile(weights, board, isWhite, sq);
+
         if (isWhite) {
-            if (endgame) {
-                score = weights.vals[ROOK_ENDGAME_PST_IND + sq.value()];
-            } else {
-                score = weights.vals[ROOK_PST_IND + sq.value()];
-            }
+            mg = weights.vals[ROOK_PST_IND + sq.value()] + major7th + rookOpen;
+            eg = weights.vals[ROOK_ENDGAME_PST_IND + sq.value()] + major7th + rookOpen;
         } else {
-            if (endgame) {
-                score = weights.vals[ROOK_ENDGAME_PST_IND + sq.flipVertical().value()];
-            } else {
-                score = weights.vals[ROOK_PST_IND + sq.flipVertical().value()];
-            }
+            mg = -(weights.vals[ROOK_PST_IND + sq.flipVertical().value()] + major7th + rookOpen);
+            eg = -(weights.vals[ROOK_ENDGAME_PST_IND + sq.flipVertical().value()] + major7th + rookOpen);
         }
-        score += evalMajorOn7th(weights, board, isWhite, sq);
-        score += evalRookOpenFile(weights, board, isWhite, sq);
-        return score;
+
+        return new Tuple2<>(mg, eg);
     }
 
     private static int evalRookOpenFile(EvalWeights weights, Board board, boolean isWhite, Square sq) {
@@ -92,7 +91,5 @@ public class EvalRook {
                 features[ROOK_OPEN_FILE_IND] += inc;
             }
         }
-
     }
-
 }

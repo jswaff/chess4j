@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.Square;
+import io.vavr.Tuple2;
 
 import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.evalMajorOn7th;
 
@@ -10,24 +11,22 @@ import static com.jamesswafford.chess4j.eval.EvalWeights.*;
 
 public class EvalQueen {
 
-    public static int evalQueen(EvalWeights weights, Board board, Square sq, boolean endgame) {
+    public static Tuple2<Integer,Integer> evalQueen(EvalWeights weights, Board board, Square sq) {
         boolean isWhite = board.getPiece(sq).isWhite();
-        int score;
+
+        int mg, eg;
+
+        int major7th = evalMajorOn7th(weights, board, isWhite, sq);
+
         if (isWhite) {
-            if (endgame) {
-                score = weights.vals[QUEEN_ENDGAME_PST_IND + sq.value()];
-            } else {
-                score = weights.vals[QUEEN_PST_IND + sq.value()];
-            }
+            mg = weights.vals[QUEEN_PST_IND + sq.value()] + major7th;
+            eg = weights.vals[QUEEN_ENDGAME_PST_IND + sq.value()] + major7th;
         } else {
-            if (endgame) {
-                score = weights.vals[QUEEN_ENDGAME_PST_IND + sq.flipVertical().value()];
-            } else {
-                score = weights.vals[QUEEN_PST_IND + sq.flipVertical().value()];
-            }
+            mg = -(weights.vals[QUEEN_PST_IND + sq.flipVertical().value()] + major7th);
+            eg = -(weights.vals[QUEEN_ENDGAME_PST_IND + sq.flipVertical().value()] + major7th);
         }
-        score += evalMajorOn7th(weights, board, isWhite, sq);
-        return score;
+
+        return new Tuple2<>(mg, eg);
     }
 
     public static java.lang.Void extractQueenFeatures(double[] features, Board board, Square sq, double phase) {

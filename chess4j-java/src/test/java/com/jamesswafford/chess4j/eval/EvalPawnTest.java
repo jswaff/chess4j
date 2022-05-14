@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.board.Board;
+import io.vavr.Tuple2;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -23,21 +24,15 @@ public class EvalPawnTest {
 
         Board board = new Board();
 
-        assertEquals(weights.vals[PAWN_PST_IND + E2.value()], evalPawn(weights, board, E2, false));
+        Tuple2<Integer, Integer> score = evalPawn(weights, board, E2);
+
+        assertEquals(weights.vals[PAWN_PST_IND + E2.value()], (int)score._1);
+        assertEquals(weights.vals[PAWN_ENDGAME_PST_IND + E2.value()], (int)score._2);
 
         // test the symmetry
-        assertEquals(evalPawn(weights, board, E2, false), evalPawn(weights, board, E7, false));
-    }
-
-    @Test
-    public void testEvalPawn_endGame() {
-
-        Board board = new Board();
-
-        assertEquals(weights.vals[PAWN_ENDGAME_PST_IND + E2.value()], evalPawn(weights, board, E2, true));
-
-        // test the symmetry
-        assertEquals(evalPawn(weights, board, E2, true), evalPawn(weights, board, E7, true));
+        Tuple2<Integer, Integer> score2 = evalPawn(weights, board, E7);
+        assertEquals((int)score._1, -(int)score2._1);
+        assertEquals((int)score._2, -(int)score2._2);
     }
 
     @Test
@@ -56,13 +51,17 @@ public class EvalPawnTest {
         k - - - K - - -
         */
 
+        Tuple2<Integer, Integer> score = evalPawn(weights, board, B6);
+
         assertEquals(weights.vals[PAWN_PST_IND + B6.value()] + weights.vals[PASSED_PAWN_IND],
-                evalPawn(weights, board, B6, false));
+                (int)score._1);
 
         // the black pawn on A2 is passed and isolated
+        Tuple2<Integer, Integer> score2 = evalPawn(weights, board, A2);
+
         assertEquals(weights.vals[PAWN_PST_IND + A7.value()] + weights.vals[PASSED_PAWN_IND] +
                         weights.vals[ISOLATED_PAWN_IND],
-                evalPawn(weights, board, A2, false));
+                -(int)score2._1);
     }
 
     @Test

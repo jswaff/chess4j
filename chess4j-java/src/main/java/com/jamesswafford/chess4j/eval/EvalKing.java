@@ -4,6 +4,7 @@ import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.squares.Square;
+import io.vavr.Tuple2;
 
 import static com.jamesswafford.chess4j.board.squares.File.FILE_D;
 import static com.jamesswafford.chess4j.board.squares.File.FILE_E;
@@ -16,29 +17,21 @@ import static com.jamesswafford.chess4j.eval.EvalWeights.*;
 public class EvalKing {
 
     // returns a score from the perspective of white
-    public static int evalKing(EvalWeights weights, Board board, Square kingSq, boolean endgame) {
+    public static Tuple2<Integer, Integer> evalKing(EvalWeights weights, Board board, Square kingSq) {
 
         assert (kingSq == board.getKingSquare(Color.WHITE) || kingSq == board.getKingSquare(Color.BLACK));
 
-        int score = 0;
+        int mg, eg;
 
         if (kingSq == board.getKingSquare(Color.WHITE)) {
-            if (endgame) {
-                score += weights.vals[KING_ENDGAME_PST_IND + kingSq.value()];
-            } else {
-                score += weights.vals[KING_PST_IND + kingSq.value()];
-                score += evalKingSafety(weights, board, true);
-            }
+            mg = weights.vals[KING_PST_IND + kingSq.value()] + evalKingSafety(weights, board, true);
+            eg = weights.vals[KING_ENDGAME_PST_IND + kingSq.value()];
         } else {
-            if (endgame) {
-                score += weights.vals[KING_ENDGAME_PST_IND + kingSq.flipVertical().value()];
-            } else {
-                score += weights.vals[KING_PST_IND + kingSq.flipVertical().value()];
-                score += evalKingSafety(weights, board, false);
-            }
+            mg = -(weights.vals[KING_PST_IND + kingSq.flipVertical().value()] + evalKingSafety(weights, board, false));
+            eg = -weights.vals[KING_ENDGAME_PST_IND + kingSq.flipVertical().value()];
         }
 
-        return score;
+        return new Tuple2<>(mg, eg);
     }
 
     // this will return a score from the perspective of the player

@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.board.Board;
+import io.vavr.Tuple2;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -26,22 +27,10 @@ public class EvalKingTest {
         // therefore, there should be no scaling of king safety.
         Board board = new Board("rnbq1rk1/pppppppp/bn6/8/BN6/5P2/PPPPP1PP/RNBQ1RK1 w - - 0 1");
 
+        Tuple2<Integer, Integer> score = evalKing(weights, board, G1);
         assertEquals(weights.vals[KING_PST_IND + G1.value()] + evalKingSafety(weights, board, true),
-                evalKing(weights, board, G1, false));
-
-        assertEquals(weights.vals[KING_PST_IND + G1.value()] + evalKingSafety(weights, board, false),
-                evalKing(weights, board, G8, false));
-    }
-
-    @Test
-    public void testEvalKing_endGame() {
-
-        Board board = new Board("8/p3k3/8/8/8/8/4K3/8 w - - 0 1");
-
-        assertEquals(weights.vals[KING_ENDGAME_PST_IND + E2.value()], evalKing(weights, board, E2, true));
-
-        // test the symmetry
-        assertEquals(evalKing(weights, board, E2, true), evalKing(weights, board, E7, true));
+                (int)score._1);
+        assertEquals(weights.vals[KING_ENDGAME_PST_IND + G1.value()], (int)score._2);
     }
 
     @Test

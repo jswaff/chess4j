@@ -2,40 +2,36 @@ package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.Square;
+import io.vavr.Tuple2;
 
 import static com.jamesswafford.chess4j.eval.EvalWeights.*;
 
 public class EvalPawn {
 
-    public static int evalPawn(EvalWeights weights, Board board, Square sq, boolean endgame) {
+    public static Tuple2<Integer, Integer> evalPawn(EvalWeights weights, Board board, Square sq) {
         boolean isWhite = board.getPiece(sq).isWhite();
 
-        int score;
-        if (isWhite) {
-            if (endgame) {
-                score = weights.vals[PAWN_ENDGAME_PST_IND + sq.value()];
-            } else {
-                score = weights.vals[PAWN_PST_IND + sq.value()];
-            }
-        } else {
-            if (endgame) {
-                score = weights.vals[PAWN_ENDGAME_PST_IND + sq.flipVertical().value()];
-            } else {
-                score = weights.vals[PAWN_PST_IND + sq.flipVertical().value()];
-            }
-        }
+        int mg, eg, s=0;
 
         if (PawnUtils.isPassedPawn(board, sq, isWhite)) {
-            score += weights.vals[PASSED_PAWN_IND];
+            s += weights.vals[PASSED_PAWN_IND];
         }
         if (PawnUtils.isIsolated(board, sq, isWhite)) {
-            score += weights.vals[ISOLATED_PAWN_IND];
+            s += weights.vals[ISOLATED_PAWN_IND];
         }
         if (PawnUtils.isDoubled(board, sq, isWhite)) {
-            score += weights.vals[DOUBLED_PAWN_IND];
+            s += weights.vals[DOUBLED_PAWN_IND];
         }
 
-        return score;
+        if (isWhite) {
+            mg = weights.vals[PAWN_PST_IND + sq.value()] + s;
+            eg = weights.vals[PAWN_ENDGAME_PST_IND + sq.value()] + s;
+        } else {
+            mg = -(weights.vals[PAWN_PST_IND + sq.flipVertical().value()] + s);
+            eg = -(weights.vals[PAWN_ENDGAME_PST_IND + sq.flipVertical().value()] + s);
+        }
+
+        return new Tuple2<>(mg, eg);
     }
 
     public static java.lang.Void extractPawnFeatures(double[] features, Board board, Square sq, double phase) {
