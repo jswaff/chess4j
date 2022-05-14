@@ -133,21 +133,22 @@ public final class Eval implements Evaluator {
     private static Tuple2<Integer, Integer> evalPawns(EvalWeights weights, Board board) {
 
         // try the pawn hash
-        // FIXME
-        /*if (Globals.isPawnHashEnabled()) {
+        if (Globals.isPawnHashEnabled()) {
             PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board.getPawnKey());
             if (pte != null) {
-                assert (pte.getScore() == evalPawnsNoHash(weights, board, endgame));
+                assert (pte.getScore().equals(evalPieces(weights,
+                        board.getWhitePawns() | board.getBlackPawns(), board,
+                        EvalPawn::evalPawn)));
                 return pte.getScore();
             }
-        }*/
+        }
 
         Tuple2<Integer, Integer> pawnsScore = evalPieces(weights,
                 board.getWhitePawns() | board.getBlackPawns(), board,
                 EvalPawn::evalPawn);
 
         if (Globals.isPawnHashEnabled()) {
-            TTHolder.getInstance().getPawnHashTable().store(board.getPawnKey(), pawnsScore._1);
+            TTHolder.getInstance().getPawnHashTable().store(board.getPawnKey(), pawnsScore._1, pawnsScore._2);
         }
 
         return pawnsScore;

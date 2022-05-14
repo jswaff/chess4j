@@ -23,11 +23,11 @@ public class TTHolderTest {
 
         // size to 1 mb
         TTHolder.getInstance().resizePawnTable(1024 * 1024);
-        assertEquals(87381, TTHolder.getInstance().getPawnHashTable().tableCapacity());
+        assertEquals(65536, TTHolder.getInstance().getPawnHashTable().tableCapacity());
 
         // size to 2 mb
         TTHolder.getInstance().resizePawnTable(2 * 1024 * 1024);
-        assertEquals(174762, TTHolder.getInstance().getPawnHashTable().tableCapacity());
+        assertEquals(131072, TTHolder.getInstance().getPawnHashTable().tableCapacity());
     }
 
     @Test
@@ -37,12 +37,12 @@ public class TTHolderTest {
         TTHolder.getInstance().resizeAllTables(4 * 1024 * 1024);
 
         assertEquals(131072, TTHolder.getInstance().getHashTable().tableCapacity());
-        assertEquals(174762, TTHolder.getInstance().getPawnHashTable().tableCapacity());
+        assertEquals(131072, TTHolder.getInstance().getPawnHashTable().tableCapacity());
 
         // with 6 mb, each table gets 3 mb
         TTHolder.getInstance().resizeAllTables(6 * 1024 * 1024);
         assertEquals(196608, TTHolder.getInstance().getHashTable().tableCapacity());
-        assertEquals(262144, TTHolder.getInstance().getPawnHashTable().tableCapacity());
+        assertEquals(196608, TTHolder.getInstance().getPawnHashTable().tableCapacity());
     }
 
 }

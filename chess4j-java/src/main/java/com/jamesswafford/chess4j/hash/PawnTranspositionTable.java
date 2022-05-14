@@ -52,8 +52,8 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         return te;
     }
 
-    public void store(long zobristKey, int score) {
-        PawnTranspositionTableEntry te = new PawnTranspositionTableEntry(zobristKey, score);
+    public void store(long zobristKey, int mgscore, int egscore) {
+        PawnTranspositionTableEntry te = new PawnTranspositionTableEntry(zobristKey, mgscore, egscore);
         table[getTableIndex(zobristKey)] = te;
     }
 
