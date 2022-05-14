@@ -13,19 +13,19 @@ import java.util.function.Function;
 
 public class Magic {
 
-    private static long[] rookMasks = new long[64];
-    private static long[][] rookOcc = new long[64][4096];
-    private static long[][] rookAttacks = new long[64][4096];
-    private static long[] magicNumbersRooks = new long[64];
-    private static long[] magicNumbersShiftRooks = new long[64];
-    private static long[][] magicRookMoves = new long[64][4096]; // 4096 = 2^12.  12=max bits for mask
+    private static final long[] rookMasks = new long[64];
+    private static final long[][] rookOcc = new long[64][4096];
+    private static final long[][] rookAttacks = new long[64][4096];
+    private static final long[] magicNumbersRooks = new long[64];
+    private static final long[] magicNumbersShiftRooks = new long[64];
+    private static final long[][] magicRookMoves = new long[64][4096]; // 4096 = 2^12.  12=max bits for mask
 
-    private static long[] bishopMasks = new long[64];
-    private static long[][] bishopOcc = new long[64][1024];
-    private static long[][] bishopAttacks = new long[64][1024];
-    private static long[] magicNumbersBishops = new long[64];
-    private static long[] magicNumbersShiftBishops = new long[64];
-    private static long[][] magicBishopMoves = new long[64][1024];
+    private static final long[] bishopMasks = new long[64];
+    private static final long[][] bishopOcc = new long[64][1024];
+    private static final long[][] bishopAttacks = new long[64][1024];
+    private static final long[] magicNumbersBishops = new long[64];
+    private static final long[] magicNumbersShiftBishops = new long[64];
+    private static final long[][] magicBishopMoves = new long[64][1024];
 
     // initialize rook and bishop masks
     static {
@@ -194,8 +194,8 @@ public class Magic {
             long magicShift = 64 - numMaskBits;
 
             boolean fail;
-            boolean isUsed[] = new boolean[4096];
-            long usedBy[] = new long[4096];
+            boolean[] isUsed = new boolean[4096];
+            long[] usedBy = new long[4096];
 
             Random r = new Random();
             do {
@@ -241,8 +241,8 @@ public class Magic {
             long magicShift = 64 - numMaskBits;
 
             boolean fail;
-            boolean isUsed[] = new boolean[1024];
-            long usedBy[] = new long[1024];
+            boolean[] isUsed = new boolean[1024];
+            long[] usedBy = new long[1024];
 
             Random r = new Random();
             do {
