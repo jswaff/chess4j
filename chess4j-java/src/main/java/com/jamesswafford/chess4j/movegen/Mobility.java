@@ -13,4 +13,11 @@ public final class Mobility {
         return Long.bitCount(bishopMoves);
     }
 
+    public static int queenMobility(Board board, Square fromSq) {
+
+        long emptySquares = ~(board.getWhitePieces() | board.getBlackPieces());
+        long queenMoves = Magic.getQueenMoves(board, fromSq.value(), emptySquares);
+
+        return Long.bitCount(queenMoves);
+    }
 }
