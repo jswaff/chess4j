@@ -64,6 +64,9 @@ public class EvalWeights {
             -4,-22,-24,-22,-11, -5,-13, -9,
             -57,-15,-48,-22,-25,-38,-21,-56,
 
+            2,                                   // BISHOP_MOBILITY
+            3,                                   // BISHOP_ENDGAME_MOBILITY
+
             -82,-16,  8, -3, -7, -7,-17,-75,     // KNIGHT_PST
             -25, -6, 16, 15, -3,-15,  7,-70,
              -9,  3, 25, 18, 30, 33, 21,-15,
@@ -169,22 +172,24 @@ public class EvalWeights {
     public static final int KING_ENDGAME_PST_IND = 79;
     public static final int BISHOP_PST_IND = 143;
     public static final int BISHOP_ENDGAME_PST_IND = 207;
-    public static final int KNIGHT_PST_IND = 271;
-    public static final int KNIGHT_ENDGAME_PST_IND = 335;
-    public static final int KNIGHT_TROPISM_IND = 399;
-    public static final int ROOK_PST_IND = 400;
-    public static final int ROOK_ENDGAME_PST_IND = 464;
-    public static final int ROOK_OPEN_FILE_IND = 528;
-    public static final int ROOK_HALF_OPEN_FILE_IND = 529;
-    public static final int QUEEN_PST_IND = 530;
-    public static final int QUEEN_ENDGAME_PST_IND = 594;
-    public static final int MAJOR_ON_7TH_IND = 658;
-    public static final int CONNECTED_MAJORS_ON_7TH_IND = 659;
-    public static final int PAWN_PST_IND = 660;
-    public static final int PAWN_ENDGAME_PST_IND = 724;
-    public static final int PASSED_PAWN_IND = 788;
-    public static final int ISOLATED_PAWN_IND = 789;
-    public static final int DOUBLED_PAWN_IND = 790;
+    public static final int BISHOP_MOBILITY_IND = 271;
+    public static final int BISHOP_ENDGAME_MOBILITY_IND = 272;
+    public static final int KNIGHT_PST_IND = 273;
+    public static final int KNIGHT_ENDGAME_PST_IND = 337;
+    public static final int KNIGHT_TROPISM_IND = 401;
+    public static final int ROOK_PST_IND = 402;
+    public static final int ROOK_ENDGAME_PST_IND = 466;
+    public static final int ROOK_OPEN_FILE_IND = 530;
+    public static final int ROOK_HALF_OPEN_FILE_IND = 531;
+    public static final int QUEEN_PST_IND = 532;
+    public static final int QUEEN_ENDGAME_PST_IND = 596;
+    public static final int MAJOR_ON_7TH_IND = 660;
+    public static final int CONNECTED_MAJORS_ON_7TH_IND = 661;
+    public static final int PAWN_PST_IND = 662;
+    public static final int PAWN_ENDGAME_PST_IND = 726;
+    public static final int PASSED_PAWN_IND = 790;
+    public static final int ISOLATED_PAWN_IND = 791;
+    public static final int DOUBLED_PAWN_IND = 792;
 
     private static final Map<String, Tuple2<Integer, Integer>> indexMap = new HashMap<>();
     static {
@@ -208,6 +213,8 @@ public class EvalWeights {
         indexMap.put("KING_ENDGAME_PST", new Tuple2<>(KING_ENDGAME_PST_IND, 64));
         indexMap.put("BISHOP_PST", new Tuple2<>(BISHOP_PST_IND, 64));
         indexMap.put("BISHOP_ENDGAME_PST", new Tuple2<>(BISHOP_ENDGAME_PST_IND, 64));
+        indexMap.put("BISHOP_MOBILITY", new Tuple2<>(BISHOP_MOBILITY_IND, 1));
+        indexMap.put("BISHOP_ENDGAME_MOBILITY", new Tuple2<>(BISHOP_ENDGAME_MOBILITY_IND, 1));
         indexMap.put("KNIGHT_PST", new Tuple2<>(KNIGHT_PST_IND, 64));
         indexMap.put("KNIGHT_ENDGAME_PST", new Tuple2<>(KNIGHT_ENDGAME_PST_IND, 64));
         indexMap.put("KNIGHT_TROPISM", new Tuple2<>(KNIGHT_TROPISM_IND, 1));
