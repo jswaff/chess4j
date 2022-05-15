@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.io.DrawBoard;
 import io.vavr.Tuple2;
 import org.junit.Test;
 
@@ -41,8 +42,12 @@ public class EvalQueenTest {
         Tuple2<Integer, Integer> score = evalQueen(weights, board, C7);
 
         assertEquals(weights.vals[QUEEN_PST_IND + C7.value()] + weights.vals[MAJOR_ON_7TH_IND] +
-                        weights.vals[CONNECTED_MAJORS_ON_7TH_IND],
-                (int)score._1);
+                        weights.vals[CONNECTED_MAJORS_ON_7TH_IND] +
+                        weights.vals[QUEEN_MOBILITY_IND] * 20L, (int)score._1);
+
+        assertEquals(weights.vals[QUEEN_ENDGAME_PST_IND + C7.value()] + weights.vals[MAJOR_ON_7TH_IND] +
+                weights.vals[CONNECTED_MAJORS_ON_7TH_IND] +
+                weights.vals[QUEEN_ENDGAME_MOBILITY_IND] * 20L, (int)score._2);
     }
 
     @Test
@@ -53,6 +58,7 @@ public class EvalQueenTest {
         double[] features = new double[weights.vals.length];
         extractQueenFeatures(features, board, D1, 1.0);
         assertEquals(1, features[QUEEN_PST_IND + D1.value()], testEpsilon);
+        assertEquals(0, features[QUEEN_MOBILITY_IND], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
@@ -68,6 +74,7 @@ public class EvalQueenTest {
         double[] features = new double[weights.vals.length];
         extractQueenFeatures(features, board, D1, 0.0);
         assertEquals(1, features[QUEEN_ENDGAME_PST_IND + D1.value()], testEpsilon);
+        assertEquals(0, features[QUEEN_ENDGAME_MOBILITY_IND], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
@@ -80,10 +87,14 @@ public class EvalQueenTest {
 
         Board board = new Board("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
 
+        DrawBoard.drawBoard(board);
+
         double[] features = new double[weights.vals.length];
-        extractQueenFeatures(features, board, C7, 1.0);
+        extractQueenFeatures(features, board, C7, 0.4);
         assertEquals(1, features[MAJOR_ON_7TH_IND], testEpsilon);
         assertEquals(1, features[CONNECTED_MAJORS_ON_7TH_IND], testEpsilon);
+        assertEquals(20 * 0.4, features[QUEEN_MOBILITY_IND], testEpsilon);
+        assertEquals(20 * 0.6, features[QUEEN_ENDGAME_MOBILITY_IND], testEpsilon);
     }
 
 }

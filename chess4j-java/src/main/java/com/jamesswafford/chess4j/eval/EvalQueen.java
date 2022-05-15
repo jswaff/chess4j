@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.Square;
+import com.jamesswafford.chess4j.movegen.Mobility;
 import io.vavr.Tuple2;
 
 import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.evalMajorOn7th;
@@ -18,12 +19,16 @@ public class EvalQueen {
 
         int major7th = evalMajorOn7th(weights, board, isWhite, sq);
 
+        int mobility = Mobility.queenMobility(board, sq);
+        int mobilityMg = mobility * weights.vals[QUEEN_MOBILITY_IND];
+        int mobilityEg = mobility * weights.vals[QUEEN_ENDGAME_MOBILITY_IND];
+
         if (isWhite) {
-            mg = weights.vals[QUEEN_PST_IND + sq.value()] + major7th;
-            eg = weights.vals[QUEEN_ENDGAME_PST_IND + sq.value()] + major7th;
+            mg = weights.vals[QUEEN_PST_IND + sq.value()] + major7th + mobilityMg;
+            eg = weights.vals[QUEEN_ENDGAME_PST_IND + sq.value()] + major7th + mobilityEg;
         } else {
-            mg = -(weights.vals[QUEEN_PST_IND + sq.flipVertical().value()] + major7th);
-            eg = -(weights.vals[QUEEN_ENDGAME_PST_IND + sq.flipVertical().value()] + major7th);
+            mg = -(weights.vals[QUEEN_PST_IND + sq.flipVertical().value()] + major7th + mobilityMg);
+            eg = -(weights.vals[QUEEN_ENDGAME_PST_IND + sq.flipVertical().value()] + major7th + mobilityEg);
         }
 
         return new Tuple2<>(mg, eg);
@@ -31,12 +36,19 @@ public class EvalQueen {
 
     public static java.lang.Void extractQueenFeatures(double[] features, Board board, Square sq, double phase) {
         boolean isWhite = board.getPiece(sq).isWhite();
+
+        int mobility = Mobility.queenMobility(board, sq);
+
         if (isWhite) {
             features[QUEEN_ENDGAME_PST_IND + sq.value()] += (1-phase);
             features[QUEEN_PST_IND + sq.value()] += phase;
+            features[QUEEN_MOBILITY_IND] += mobility * phase;
+            features[QUEEN_ENDGAME_MOBILITY_IND] += mobility * (1-phase);
         } else {
             features[QUEEN_ENDGAME_PST_IND + sq.flipVertical().value()] -= (1-phase);
             features[QUEEN_PST_IND + sq.flipVertical().value()] -= phase;
+            features[QUEEN_MOBILITY_IND] -= mobility * phase;
+            features[QUEEN_ENDGAME_MOBILITY_IND] -= mobility * (1- phase);
         }
         exractMajorOn7thFeatures(features, board, isWhite, sq);
         return null;
