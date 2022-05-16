@@ -126,8 +126,11 @@ public class EvalWeights {
             -17, -3,  3,  1,  6, 13, 15, 19,
             -18,-10, -9, -6, -9,-12,-26, 28,
 
-              6,  // MAJOR_ON_7TH
-             40,  // CONNECTED_MAJORS_ON_7TH
+             1,                                  // QUEEN_MOBILITY
+             2,                                  // QUEEN_ENDGAME_MOBILITY
+
+             6,                                  // MAJOR_ON_7TH
+            40,                                  // CONNECTED_MAJORS_ON_7TH
 
               0,  0,  0,  0,  0,  0,  0,  0,     // PAWN_PST
             127,108,112,120, 76, 89,106, 83,
@@ -183,13 +186,15 @@ public class EvalWeights {
     public static final int ROOK_HALF_OPEN_FILE_IND = 531;
     public static final int QUEEN_PST_IND = 532;
     public static final int QUEEN_ENDGAME_PST_IND = 596;
-    public static final int MAJOR_ON_7TH_IND = 660;
-    public static final int CONNECTED_MAJORS_ON_7TH_IND = 661;
-    public static final int PAWN_PST_IND = 662;
-    public static final int PAWN_ENDGAME_PST_IND = 726;
-    public static final int PASSED_PAWN_IND = 790;
-    public static final int ISOLATED_PAWN_IND = 791;
-    public static final int DOUBLED_PAWN_IND = 792;
+    public static final int QUEEN_MOBILITY_IND = 660;
+    public static final int QUEEN_ENDGAME_MOBILITY_IND = 661;
+    public static final int MAJOR_ON_7TH_IND = 662;
+    public static final int CONNECTED_MAJORS_ON_7TH_IND = 663;
+    public static final int PAWN_PST_IND = 664;
+    public static final int PAWN_ENDGAME_PST_IND = 728;
+    public static final int PASSED_PAWN_IND = 792;
+    public static final int ISOLATED_PAWN_IND = 793;
+    public static final int DOUBLED_PAWN_IND = 794;
 
     private static final Map<String, Tuple2<Integer, Integer>> indexMap = new HashMap<>();
     static {
@@ -224,6 +229,8 @@ public class EvalWeights {
         indexMap.put("ROOK_HALF_OPEN_FILE", new Tuple2<>(ROOK_HALF_OPEN_FILE_IND, 1));
         indexMap.put("QUEEN_PST", new Tuple2<>(QUEEN_PST_IND, 64));
         indexMap.put("QUEEN_ENDGAME_PST", new Tuple2<>(QUEEN_ENDGAME_PST_IND, 64));
+        indexMap.put("QUEEN_MOBILITY", new Tuple2<>(QUEEN_MOBILITY_IND, 1));
+        indexMap.put("QUEEN_ENDGAME_MOBILITY", new Tuple2<>(QUEEN_ENDGAME_MOBILITY_IND, 1));
         indexMap.put("MAJOR_ON_7TH", new Tuple2<>(MAJOR_ON_7TH_IND, 1));
         indexMap.put("CONNECTED_MAJORS_ON_7TH", new Tuple2<>(CONNECTED_MAJORS_ON_7TH_IND, 1));
         indexMap.put("PAWN_PST", new Tuple2<>(PAWN_PST_IND, 64));
