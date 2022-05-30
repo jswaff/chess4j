@@ -13,7 +13,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     private static final Logger LOGGER = LogManager.getLogger(TranspositionTable.class);
 
-    private static final int DEFAULT_SIZE_BYTES = 128 * 1024 * 1024;
+    private static final int DEFAULT_SIZE_BYTES = 512 * 1024 * 1024;
 
     static {
         Initializer.init();

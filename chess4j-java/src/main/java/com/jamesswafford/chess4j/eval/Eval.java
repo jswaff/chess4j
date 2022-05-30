@@ -134,7 +134,7 @@ public final class Eval implements Evaluator {
 
         // try the pawn hash
         if (Globals.isPawnHashEnabled()) {
-            PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board.getPawnKey());
+            PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board);
             if (pte != null) {
                 assert (pte.getScore().equals(evalPieces(weights,
                         board.getWhitePawns() | board.getBlackPawns(), board,

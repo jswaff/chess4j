@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.hash;
 
+import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.init.Initializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,11 +13,15 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     private static final int DEFAULT_SIZE_BYTES = 128 * 1024 * 1024;
 
+    static {
+        Initializer.init();
+    }
+
     private PawnTranspositionTableEntry[] table;
 
     public static int getDefaultSizeBytes() {
         if (Initializer.nativeCodeInitialized()) {
-            return DEFAULT_SIZE_BYTES; // TODO - when pawn hash is implemented in P4 make this 0
+            return 0;
         }
         return DEFAULT_SIZE_BYTES;
     }
@@ -33,15 +38,45 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     public void clear() {
         clearStats();
         Arrays.fill(table, null);
+        if (Initializer.nativeCodeInitialized()) {
+            clearNative();
+        }
     }
 
-    public PawnTranspositionTableEntry probe(long zobristKey) {
+    private native void clearNative();
+
+    @Override
+    public long getNumCollisions() {
+        if (Initializer.nativeCodeInitialized()) {
+            return getNumCollisionsNative();
+        }
+        return numCollisions;
+    }
+
+    @Override
+    public long getNumHits() {
+        if (Initializer.nativeCodeInitialized()) {
+            return getNumHitsNative();
+        }
+        return numHits;
+    }
+
+    @Override
+    public long getNumProbes() {
+        if (Initializer.nativeCodeInitialized()) {
+            return getNumProbesNative();
+        }
+        return numProbes;
+    }
+
+    public PawnTranspositionTableEntry probe(long pawnKey) {
+
         numProbes++;
-        PawnTranspositionTableEntry te = table[getTableIndex(zobristKey)];
+        PawnTranspositionTableEntry te = table[getTableIndex(pawnKey)];
 
         if (te != null) {
             // compare full signature to avoid collisions
-            if (te.getZobristKey() != zobristKey) {
+            if (te.getZobristKey() != pawnKey) {
                 numCollisions++;
                 return null;
             } else {
@@ -51,6 +86,17 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
         return te;
     }
+
+    public PawnTranspositionTableEntry probe(Board board) {
+        if (Initializer.nativeCodeInitialized()) {
+            long nativeVal = probeNative(board);
+            return new PawnTranspositionTableEntry(board.getZobristKey(), nativeVal);
+        } else {
+            return probe(board.getPawnKey());
+        }
+    }
+
+    private native long probeNative(Board board);
 
     public void store(long zobristKey, int mgscore, int egscore) {
         PawnTranspositionTableEntry te = new PawnTranspositionTableEntry(zobristKey, mgscore, egscore);
@@ -66,7 +112,11 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     @Override
     protected void resizeTable(int sizeBytes) {
-        createTable(sizeBytes);
+        if (Initializer.nativeCodeInitialized()) {
+            resizeNative(sizeBytes);
+        } else {
+            createTable(sizeBytes);
+        }
     }
 
     @Override
@@ -78,5 +128,13 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     public int sizeOfEntry() {
         return PawnTranspositionTableEntry.sizeOf();
     }
+
+    private native long getNumCollisionsNative();
+
+    private native long getNumHitsNative();
+
+    private native long getNumProbesNative();
+
+    private native void resizeNative(int sizeBytes);
 
 }

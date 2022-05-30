@@ -290,16 +290,9 @@ public class SearchIteratorImpl implements SearchIterator {
         long hashCollisions = htbl.getNumCollisions();
         double hashHitPct = hashHits / (hashProbes/100.0);
         double hashCollisionPct = hashCollisions / (hashProbes/100.0);
-
-        // native code is not measuring collisions
-        if (Initializer.nativeCodeInitialized()) {
-            LOGGER.info("# hash probes: " + df2.format(hashProbes)
-                    + ", hits: " + df2.format(hashHits) + " (" + df.format(hashHitPct) + "%)");
-        } else {
-            LOGGER.info("# hash probes: " + df2.format(hashProbes)
-                    + ", hits: " + df2.format(hashHits) + " (" + df.format(hashHitPct) + "%)"
-                    + ", collisions: " + df2.format(hashCollisions) + " (" + df.format(hashCollisionPct) + "%)");
-        }
+        LOGGER.info("# hash probes: " + df2.format(hashProbes)
+                + ", hits: " + df2.format(hashHits) + " (" + df.format(hashHitPct) + "%)"
+                + ", collisions: " + df2.format(hashCollisions) + " (" + df.format(hashCollisionPct) + "%)");
 
         double hashFailHighPct = stats.hashFailHighs / (hashProbes/100.0);
         double hashFailLowPct = stats.hashFailLows / (hashProbes/100.0);
@@ -317,7 +310,6 @@ public class SearchIteratorImpl implements SearchIterator {
         long pawnHashCollisions = pawnTbl.getNumCollisions();
         double pawnHashHitPct = pawnHashHits / (pawnHashProbes/100.0);
         double pawnHashCollisionPct = pawnHashCollisions / (pawnHashProbes/100.0);
-
         LOGGER.info("# pawn hash probes: " + df2.format(pawnHashProbes)
                 + ", hits: " + df2.format(pawnHashHits) + " (" + df.format(pawnHashHitPct) + "%)"
                 + ", collisions: " + df2.format(pawnHashCollisions) + " (" + df.format(pawnHashCollisionPct) + "%)");

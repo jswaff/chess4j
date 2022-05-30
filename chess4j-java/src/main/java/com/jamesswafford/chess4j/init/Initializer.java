@@ -61,15 +61,15 @@ public final class Initializer {
             System.out.println("# Detected OS: " + os);
 
             if ("Linux".equals(os)) {
-                System.out.println("# Loading Prophet4 native library.");
+                System.out.println("# Loading Prophet native library.");
                 File libFile = copyLibraryToFile();
                 System.load(libFile.getPath());
-                System.out.println("# Prophet4 loaded, initializing...");
+                System.out.println("# Prophet loaded, initializing...");
                 if (!p4Init()) {
                     attemptToUseNative = false;
                     throw new IllegalStateException("Could not initialize p4!");
                 }
-                System.out.println("# Prophet4 initialized.");
+                System.out.println("# Prophet initialized.");
             }
 
             nativeCodeInitialized = true;

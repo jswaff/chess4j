@@ -8,10 +8,16 @@ public class PawnTranspositionTableEntry {
     private final int mgscore;
     private final int egscore;
 
-    public PawnTranspositionTableEntry(long zobristKey,int mgscore, int egscore) {
+    public PawnTranspositionTableEntry(long zobristKey, int mgscore, int egscore) {
         this.zobristKey = zobristKey;
         this.mgscore = mgscore;
         this.egscore = egscore;
+    }
+
+    public PawnTranspositionTableEntry(long zobristKey, long val) {
+        this.zobristKey = zobristKey;
+        this.mgscore = 0; // FIXME
+        this.egscore = 0; // FIXME
     }
 
     public long getZobristKey() {
