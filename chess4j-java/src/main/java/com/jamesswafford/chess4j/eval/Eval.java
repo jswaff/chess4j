@@ -233,6 +233,8 @@ public final class Eval implements Evaluator {
         return retVal;
     }
 
+    // this method isn't going to work unless the pawn hash is disabled in the native code
+    // alternatively, clear the pawn hash, but disable the search equality check
     private static boolean verifyNativeEvalIsEqual(int javaScore, Board board, boolean materialOnly) {
         if (Initializer.nativeCodeInitialized()) {
             try {
