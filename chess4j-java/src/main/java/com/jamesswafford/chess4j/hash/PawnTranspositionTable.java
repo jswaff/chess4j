@@ -90,7 +90,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     public PawnTranspositionTableEntry probe(Board board) {
         if (Initializer.nativeCodeInitialized()) {
             long nativeVal = probeNative(board);
-            return new PawnTranspositionTableEntry(board.getZobristKey(), nativeVal);
+            return nativeVal==0 ? null : new PawnTranspositionTableEntry(board.getPawnKey(), nativeVal);
         } else {
             return probe(board.getPawnKey());
         }
@@ -98,10 +98,26 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     private native long probeNative(Board board);
 
-    public void store(long zobristKey, int mgscore, int egscore) {
-        PawnTranspositionTableEntry te = new PawnTranspositionTableEntry(zobristKey, mgscore, egscore);
-        table[getTableIndex(zobristKey)] = te;
+    public void store(long pawnKey, int mgscore, int egscore) {
+        PawnTranspositionTableEntry te = new PawnTranspositionTableEntry(pawnKey, mgscore, egscore);
+        table[getTableIndex(pawnKey)] = te;
     }
+
+    /*
+     * This is a convenience method, wrapping the previous "store".  It also serves as a hook into the native
+     * code.  The only time this method would be used when native code is enabled is when assertions are on,
+     * to verify search equality.
+     */
+    public void store(Board board, int mgscore, int egscore) {
+        if (Initializer.nativeCodeInitialized()) {
+            PawnTranspositionTableEntry entry = new PawnTranspositionTableEntry(board.getPawnKey(), mgscore, egscore);
+            storeNative(board, entry.getVal());
+        } else {
+            store(board.getPawnKey(), mgscore, egscore);
+        }
+    }
+
+    private native void storeNative(Board board, long val);
 
     @Override
     protected void createTable(int sizeBytes) {

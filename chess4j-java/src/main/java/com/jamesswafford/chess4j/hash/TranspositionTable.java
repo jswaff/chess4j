@@ -108,7 +108,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
         if (Initializer.nativeCodeInitialized()) {
             long nativeVal = probeNative(board);
-            return new TranspositionTableEntry(board.getZobristKey(), nativeVal);
+            return nativeVal==0 ? null : new TranspositionTableEntry(board.getZobristKey(), nativeVal);
         } else {
             return probe(board.getZobristKey());
         }

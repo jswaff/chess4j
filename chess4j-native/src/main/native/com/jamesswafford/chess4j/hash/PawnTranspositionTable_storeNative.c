@@ -7,15 +7,15 @@
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
 
-extern hash_table_t htbl;
+extern hash_table_t phtbl;
 
 /*
- * Class:     com_jamesswafford_chess4j_hash_TranspositionTable
+ * Class:     com_jamesswafford_chess4j_hash_PawnTranspositionTable
  * Method:    storeNative
  * Signature: (Lcom/jamesswafford/chess4j/board/Board;J)V
  */
-JNIEXPORT void JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_storeNative
-  (JNIEnv *env, jobject UNUSED(htable), jobject board_obj, jlong val)
+JNIEXPORT void JNICALL Java_com_jamesswafford_chess4j_hash_PawnTranspositionTable_storeNative
+  (JNIEnv *env, jobject UNUSED(phtable), jobject board_obj, jlong val)
 {
     /* ensure the static library is initialized */
     if (!p4_initialized) 
@@ -34,6 +34,6 @@ JNIEXPORT void JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_st
     }
 
     /* store the value in the hash table */
-    store_hash_entry(&htbl, c4j_pos.hash_key, (uint64_t)val);
+    store_hash_entry(&phtbl, c4j_pos.pawn_key, (uint64_t)val);
 
 }
