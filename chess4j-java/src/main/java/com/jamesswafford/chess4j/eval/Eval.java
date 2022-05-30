@@ -48,9 +48,7 @@ public final class Eval implements Evaluator {
 
         int evalScore = evalHelper(weights, board, materialOnly);
 
-        assert(verifyEvalSymmetry(weights, evalScore, board, materialOnly));
-        //assert(verifyNativeEvalIsEqual(evalScore, board, materialOnly)); FIXME - not sure if this can be done with pawn hashes enabled
-        assert(verifyExtractedFeatures(weights, evalScore, board, materialOnly));
+        assert(verify(weights, evalScore, board, materialOnly));
 
         return evalScore;
     }
@@ -198,6 +196,21 @@ public final class Eval implements Evaluator {
             extractFunc.apply(features, board, sq, phase);
             pieceMap ^= Bitboard.squares[sqVal];
         }
+    }
+
+    private static boolean verify(EvalWeights weights, int evalScore, Board board, boolean materialOnly) {
+
+        // disable the hash to keep the stats from being inflated, which will cause equality checks to fail
+        boolean pawnHashEnabled = Globals.isPawnHashEnabled();
+        Globals.setPawnHashEnabled(false);
+
+        boolean retVal = verifyEvalSymmetry(weights, evalScore, board, materialOnly) &&
+                //verifyNativeEvalIsEqual(evalScore, board, materialOnly) &&
+                verifyExtractedFeatures(weights, evalScore, board, materialOnly);
+
+        Globals.setPawnHashEnabled(pawnHashEnabled);
+
+        return retVal;
     }
 
     /**
