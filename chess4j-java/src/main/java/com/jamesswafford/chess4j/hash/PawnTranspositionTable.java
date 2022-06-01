@@ -11,7 +11,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     private static final Logger LOGGER = LogManager.getLogger(PawnTranspositionTable.class);
 
-    private static final int DEFAULT_SIZE_BYTES = 128 * 1024 * 1024;
+    private static final long DEFAULT_SIZE_BYTES = 128 * 1024 * 1024;
 
     static {
         Initializer.init();
@@ -19,7 +19,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     private PawnTranspositionTableEntry[] table;
 
-    public static int getDefaultSizeBytes() {
+    public static long getDefaultSizeBytes() {
         if (Initializer.nativeCodeInitialized()) {
             return 0;
         }
@@ -30,7 +30,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         this(getDefaultSizeBytes());
     }
 
-    public PawnTranspositionTable(int sizeBytes) {
+    public PawnTranspositionTable(long sizeBytes) {
         super(sizeBytes);
     }
 
@@ -120,14 +120,14 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     private native void storeNative(Board board, long val);
 
     @Override
-    protected void createTable(int sizeBytes) {
-        int numEntries = sizeBytes / sizeOfEntry();
+    protected void createTable(long sizeBytes) {
+        int numEntries = (int)(sizeBytes / sizeOfEntry());
         LOGGER.debug("# c4j pawn hash size: " + sizeBytes + " bytes ==> " + numEntries + " elements.");
         table = new PawnTranspositionTableEntry[numEntries];
     }
 
     @Override
-    protected void resizeTable(int sizeBytes) {
+    protected void resizeTable(long sizeBytes) {
         if (Initializer.nativeCodeInitialized()) {
             resizeNative(sizeBytes);
         } else {
@@ -151,6 +151,6 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     private native long getNumProbesNative();
 
-    private native void resizeNative(int sizeBytes);
+    private native void resizeNative(long sizeBytes);
 
 }

@@ -13,7 +13,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     private static final Logger LOGGER = LogManager.getLogger(TranspositionTable.class);
 
-    private static final int DEFAULT_SIZE_BYTES = 512 * 1024 * 1024;
+    private static final long DEFAULT_SIZE_BYTES = 512 * 1024 * 1024;
 
     static {
         Initializer.init();
@@ -21,7 +21,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     private TranspositionTableEntry[] table;
 
-    public static int getDefaultSizeBytes() {
+    public static long getDefaultSizeBytes() {
         if (Initializer.nativeCodeInitialized()) {
             return 0;
         }
@@ -32,7 +32,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
         this(getDefaultSizeBytes());
     }
 
-    public TranspositionTable(int sizeBytes) {
+    public TranspositionTable(long sizeBytes) {
         super(sizeBytes);
     }
 
@@ -167,14 +167,14 @@ public class TranspositionTable extends AbstractTranspositionTable {
     private native void storeNative(Board board, long val);
 
     @Override
-    protected void createTable(int sizeBytes) {
-        int numEntries = sizeBytes / sizeOfEntry();
+    protected void createTable(long sizeBytes) {
+        int numEntries = (int)(sizeBytes / sizeOfEntry());
         LOGGER.debug("# c4j hash size: " + sizeBytes + " bytes ==> " + numEntries + " elements.");
         table = new TranspositionTableEntry[numEntries];
     }
 
     @Override
-    protected void resizeTable(int sizeBytes) {
+    protected void resizeTable(long sizeBytes) {
         if (Initializer.nativeCodeInitialized()) {
             resizeNative(sizeBytes);
         } else {
@@ -198,5 +198,5 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     private native long getNumProbesNative();
 
-    private native void resizeNative(int sizeBytes);
+    private native void resizeNative(long sizeBytes);
 }
