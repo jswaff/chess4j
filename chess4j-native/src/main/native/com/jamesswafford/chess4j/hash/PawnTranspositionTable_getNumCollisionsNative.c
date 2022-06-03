@@ -6,16 +6,16 @@
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
 
-extern hash_table_t htbl;
+extern hash_table_t phtbl;
 
 
 /*
- * Class:     com_jamesswafford_chess4j_hash_TranspositionTable
+ * Class:     com_jamesswafford_chess4j_hash_PawnTranspositionTable
  * Method:    getNumCollisionsNative
  * Signature: ()J
  */
-JNIEXPORT jlong JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_getNumCollisionsNative
-  (JNIEnv *env, jobject UNUSED(htable))
+JNIEXPORT jlong JNICALL Java_com_jamesswafford_chess4j_hash_PawnTranspositionTable_getNumCollisionsNative
+  (JNIEnv *env, jobject UNUSED(phtable))
 {
     /* ensure the static library is initialized */
     if (!p4_initialized) 
@@ -24,5 +24,5 @@ JNIEXPORT jlong JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_g
         return 0;
     }
 
-    return htbl.collisions;
+    return phtbl.collisions;
 }

@@ -7,21 +7,24 @@
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
 
-extern hash_table_t htbl;
+
+extern hash_table_t phtbl;
 
 /*
- * Class:     com_jamesswafford_chess4j_hash_TranspositionTable
- * Method:    storeNative
- * Signature: (Lcom/jamesswafford/chess4j/board/Board;J)V
+ * Class:     com_jamesswafford_chess4j_hash_PawnTranspositionTable
+ * Method:    probeNative
+ * Signature: (Lcom/jamesswafford/chess4j/board/Board;)J
  */
-JNIEXPORT void JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_storeNative
-  (JNIEnv *env, jobject UNUSED(htable), jobject board_obj, jlong val)
+JNIEXPORT jlong JNICALL Java_com_jamesswafford_chess4j_hash_PawnTranspositionTable_probeNative
+  (JNIEnv *env, jobject UNUSED(phtable), jobject board_obj)
 {
+    jlong retval = 0;
+
     /* ensure the static library is initialized */
     if (!p4_initialized) 
     {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
-        return;
+        return 0;
     }
     
     /* set the position */
@@ -30,10 +33,14 @@ JNIEXPORT void JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_st
     {
         (*env)->ThrowNew(env, IllegalStateException, 
             "An error was encountered while converting a position.");
-        return;
+        return 0;
     }
+    
 
-    /* store the value in the hash table */
-    store_hash_entry(&htbl, c4j_pos.hash_key, (uint64_t)val);
+    /* probe the table */
+    uint64_t val = probe_hash(&phtbl, c4j_pos.pawn_key);
+    retval = (jlong) val;
 
+
+    return retval;
 }

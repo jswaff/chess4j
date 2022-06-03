@@ -21,7 +21,7 @@ JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_eval_Eval_evalNative
 
     if (!p4_initialized) 
     {
-        (*env)->ThrowNew(env, IllegalStateException, "Prophet4 not initialized!");
+        (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return 0;
     }
 

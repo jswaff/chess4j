@@ -27,7 +27,7 @@ public final class App {
 
     private App() { }
 
-    private static void processArgument(String arg) throws IOException {
+    private static void processArgument(String arg) {
         if (arg.startsWith("-native")) {
             Initializer.attemptToUseNative = true;
         } else if (arg.startsWith("-suite=")) {

@@ -48,9 +48,7 @@ public final class Eval implements Evaluator {
 
         int evalScore = evalHelper(weights, board, materialOnly);
 
-        assert(verifyEvalSymmetry(weights, evalScore, board, materialOnly));
-        assert(verifyNativeEvalIsEqual(evalScore, board, materialOnly));
-        assert(verifyExtractedFeatures(weights, evalScore, board, materialOnly));
+        assert(verify(weights, evalScore, board, materialOnly));
 
         return evalScore;
     }
@@ -134,11 +132,10 @@ public final class Eval implements Evaluator {
 
         // try the pawn hash
         if (Globals.isPawnHashEnabled()) {
-            PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board.getPawnKey());
+            PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board);
             if (pte != null) {
-                assert (pte.getScore().equals(evalPieces(weights,
-                        board.getWhitePawns() | board.getBlackPawns(), board,
-                        EvalPawn::evalPawn)));
+                assert (pte.getScore().equals(
+                        evalPieces(weights, board.getWhitePawns() | board.getBlackPawns(), board, EvalPawn::evalPawn)));
                 return pte.getScore();
             }
         }
@@ -148,7 +145,7 @@ public final class Eval implements Evaluator {
                 EvalPawn::evalPawn);
 
         if (Globals.isPawnHashEnabled()) {
-            TTHolder.getInstance().getPawnHashTable().store(board.getPawnKey(), pawnsScore._1, pawnsScore._2);
+            TTHolder.getInstance().getPawnHashTable().store(board, pawnsScore._1, pawnsScore._2);
         }
 
         return pawnsScore;
@@ -201,6 +198,21 @@ public final class Eval implements Evaluator {
         }
     }
 
+    private static boolean verify(EvalWeights weights, int evalScore, Board board, boolean materialOnly) {
+
+        // disable the hash to keep the stats from being inflated, which will cause equality checks to fail
+        boolean pawnHashEnabled = Globals.isPawnHashEnabled();
+        Globals.setPawnHashEnabled(false);
+
+        boolean retVal = verifyEvalSymmetry(weights, evalScore, board, materialOnly) &&
+                //verifyNativeEvalIsEqual(evalScore, board, materialOnly) &&
+                verifyExtractedFeatures(weights, evalScore, board, materialOnly);
+
+        Globals.setPawnHashEnabled(pawnHashEnabled);
+
+        return retVal;
+    }
+
     /**
      * Helper method to test eval symmetry
      *
@@ -221,6 +233,8 @@ public final class Eval implements Evaluator {
         return retVal;
     }
 
+    // this method isn't going to work unless the pawn hash is disabled in the native code
+    // alternatively, clear the pawn hash, but disable the search equality check
     private static boolean verifyNativeEvalIsEqual(int javaScore, Board board, boolean materialOnly) {
         if (Initializer.nativeCodeInitialized()) {
             try {

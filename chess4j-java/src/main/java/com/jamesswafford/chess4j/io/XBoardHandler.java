@@ -208,7 +208,7 @@ public class XBoardHandler {
     private void memory(String[] cmd) {
         int maxMemoryMB = Integer.parseInt(cmd[1]);
         LOGGER.debug("# received memory command, N=" + maxMemoryMB);
-        TTHolder.getInstance().resizeAllTables(maxMemoryMB * 1024 * 1024);
+        TTHolder.getInstance().resizeAllTables((long)maxMemoryMB * 1024 * 1024);
     }
 
     /**

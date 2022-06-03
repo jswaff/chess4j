@@ -5,29 +5,44 @@ import io.vavr.Tuple2;
 public class PawnTranspositionTableEntry {
 
     private final long zobristKey;
-    private final int mgscore;
-    private final int egscore;
+    private long val;
 
-    public PawnTranspositionTableEntry(long zobristKey,int mgscore, int egscore) {
+    public PawnTranspositionTableEntry(long zobristKey, int mgscore, int egscore) {
         this.zobristKey = zobristKey;
-        this.mgscore = mgscore;
-        this.egscore = egscore;
+        buildStoredValue(mgscore, egscore);
+    }
+
+    public PawnTranspositionTableEntry(long zobristKey, long val) {
+        this.zobristKey = zobristKey;
+        this.val = val;
+    }
+
+    private void buildStoredValue(int mgscore, int egscore) {
+        assert(mgscore >= -32767);
+        assert(mgscore <= 32767);
+        val = ((long)mgscore + 32767) << 32;
+
+        assert(egscore >= -32767);
+        assert(egscore <= 32767);
+        val |= (long)egscore + 32767;
     }
 
     public long getZobristKey() {
         return zobristKey;
     }
 
+    public long getVal() { return val; }
+
     public Tuple2<Integer, Integer> getScore() {
-        return new Tuple2<>(mgscore, egscore);
+        return new Tuple2<>(getMgscore(), getEgscore());
     }
 
     public int getMgscore() {
-        return mgscore;
+        return (int)((val >> 32) & 0xFFFF) - 32767;
     }
 
     public int getEgscore() {
-        return egscore;
+        return (int)(val & 0xFFFF) - 32767;
     }
 
     @Override
@@ -36,27 +51,20 @@ public class PawnTranspositionTableEntry {
             return false;
         }
         PawnTranspositionTableEntry that = (PawnTranspositionTableEntry)obj;
-        if (this.getZobristKey() != that.getZobristKey())
-            return false;
-        if (this.getMgscore() != that.getMgscore())
-            return false;
-        if (this.getEgscore() != that.getEgscore())
-            return false;
 
-        return true;
+        return (this.zobristKey == that.zobristKey) && (this.val == that.val);
     }
 
     @Override
     public int hashCode() {
-        int hc = (int)this.getZobristKey();
-        hc = hc * 31 + this.getMgscore();
-        hc = hc * 37 + this.getEgscore();
+        int hc = (int)this.zobristKey;
+        hc = hc * (int)this.val;
 
         return hc;
     }
 
     public static int sizeOf() {
-        return (Long.SIZE + Integer.SIZE + Integer.SIZE) / Byte.SIZE;
+        return Long.SIZE * 2 / Byte.SIZE;
     }
 
 }

@@ -32,7 +32,7 @@ JNICALL Java_com_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
     /* ensure the static library is initialized */
     if (!p4_initialized) 
     {
-        (*env)->ThrowNew(env, IllegalStateException, "Prophet4 not initialized!");
+        (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return;
     }
 

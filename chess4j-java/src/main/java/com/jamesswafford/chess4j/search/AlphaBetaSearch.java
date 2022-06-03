@@ -192,6 +192,9 @@ public class AlphaBetaSearch implements Search {
             long nativeProbes = TTHolder.getInstance().getHashTable().getNumProbes();
             long nativeHits = TTHolder.getInstance().getHashTable().getNumHits();
 
+            long nativePawnProbes = TTHolder.getInstance().getPawnHashTable().getNumProbes();
+            long nativePawnHits = TTHolder.getInstance().getPawnHashTable().getNumHits();
+
             assert(clearTableWrapper());
             int javaScore = searchWithJavaCode(board, undos, searchParameters, opts);
 
@@ -210,6 +213,17 @@ public class AlphaBetaSearch implements Search {
                 LOGGER.error("hash stats not equal! "
                         + "java probes: " + javaProbes + ", native probes: " + nativeProbes
                         + ", java hits: " + javaHits + ", native hits: " + nativeHits
+                        + ", params: " + searchParameters);
+                return false;
+            }
+
+            // compare the pawn hash table stats
+            long javaPawnProbes = TTHolder.getInstance().getPawnHashTable().getNumProbes();
+            long javaPawnHits = TTHolder.getInstance().getPawnHashTable().getNumHits();
+            if (javaPawnProbes != nativePawnProbes || javaPawnHits != nativePawnHits) {
+                LOGGER.error("pawn hash stats not equal! "
+                        + "java pawn probes: " + javaPawnProbes + ", native pawn probes: " + nativePawnProbes
+                        + ", java pawn hits: " + javaPawnHits + ", native pawn hits: " + nativePawnHits
                         + ", params: " + searchParameters);
                 return false;
             }
