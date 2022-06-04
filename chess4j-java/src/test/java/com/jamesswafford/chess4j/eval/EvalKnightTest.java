@@ -23,9 +23,11 @@ public class EvalKnightTest {
 
         Tuple2<Integer, Integer> score = evalKnight(weights, board, B1);
 
-        int tropism = weights.vals[KNIGHT_TROPISM_IND] * B1.distance(E8);
-        assertEquals(weights.vals[KNIGHT_PST_IND + B1.value()] + tropism,(int)score._1);
-        assertEquals(weights.vals[KNIGHT_ENDGAME_PST_IND + B1.value()] + tropism, (int)score._2);
+        int tropismMg = weights.vals[KNIGHT_TROPISM_IND] * B1.distance(E8);
+        assertEquals(weights.vals[KNIGHT_PST_IND + B1.value()] + tropismMg,(int)score._1);
+
+        int tropismEg = weights.vals[KNIGHT_TROPISM_ENDGAME_IND] * B1.distance(E8);
+        assertEquals(weights.vals[KNIGHT_ENDGAME_PST_IND + B1.value()] + tropismEg, (int)score._2);
 
         // test the symmetry
         Tuple2<Integer, Integer> score2 = evalKnight(weights, board, B8);
@@ -56,13 +58,13 @@ public class EvalKnightTest {
         double[] features = new double[weights.vals.length];
         extractKnightFeatures(features, board, B1, 0.0);
         assertEquals(1, features[KNIGHT_ENDGAME_PST_IND + B1.value()], testEpsilon);
-        assertEquals(B1.distance(E8), features[KNIGHT_TROPISM_IND], testEpsilon);
+        assertEquals(B1.distance(E8), features[KNIGHT_TROPISM_ENDGAME_IND], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
         extractKnightFeatures(features2, board, B8, 0.0);
         assertEquals(-1, features2[KNIGHT_ENDGAME_PST_IND + B1.value()], testEpsilon);
-        assertEquals(-B8.distance(E1), features2[KNIGHT_TROPISM_IND], testEpsilon);
+        assertEquals(-B8.distance(E1), features2[KNIGHT_TROPISM_ENDGAME_IND], testEpsilon);
     }
 
 }

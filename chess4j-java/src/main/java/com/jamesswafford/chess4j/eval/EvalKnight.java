@@ -13,13 +13,17 @@ public class EvalKnight {
         int mg, eg;
 
         if (board.getPiece(sq).isWhite()) {
-            int tropismScore = weights.vals[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.BLACK));
-            mg = weights.vals[KNIGHT_PST_IND + sq.value()] + tropismScore;
-            eg = weights.vals[KNIGHT_ENDGAME_PST_IND + sq.value()] + tropismScore;
+            int tropismScoreMg = weights.vals[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.BLACK));
+            mg = weights.vals[KNIGHT_PST_IND + sq.value()] + tropismScoreMg;
+
+            int tropismScoreEg = weights.vals[KNIGHT_TROPISM_ENDGAME_IND] * sq.distance(board.getKingSquare(Color.BLACK));
+            eg = weights.vals[KNIGHT_ENDGAME_PST_IND + sq.value()] + tropismScoreEg;
         } else {
-            int tropismScore = weights.vals[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.WHITE));
-            mg = -(weights.vals[KNIGHT_PST_IND + sq.flipVertical().value()] + tropismScore);
-            eg = -(weights.vals[KNIGHT_ENDGAME_PST_IND + sq.flipVertical().value()] + tropismScore);
+            int tropismScoreMg = weights.vals[KNIGHT_TROPISM_IND] * sq.distance(board.getKingSquare(Color.WHITE));
+            mg = -(weights.vals[KNIGHT_PST_IND + sq.flipVertical().value()] + tropismScoreMg);
+
+            int tropismScoreEg = weights.vals[KNIGHT_TROPISM_ENDGAME_IND] * sq.distance(board.getKingSquare(Color.WHITE));
+            eg = -(weights.vals[KNIGHT_ENDGAME_PST_IND + sq.flipVertical().value()] + tropismScoreEg);
         }
 
         return new Tuple2<>(mg, eg);
@@ -27,13 +31,17 @@ public class EvalKnight {
 
     public static java.lang.Void extractKnightFeatures(double[] features, Board board, Square sq, double phase) {
         if (board.getPiece(sq).isWhite()) {
-            features[KNIGHT_ENDGAME_PST_IND + sq.value()] += (1-phase);
             features[KNIGHT_PST_IND + sq.value()] += phase;
-            features[KNIGHT_TROPISM_IND] += sq.distance(board.getKingSquare(Color.BLACK));
+            features[KNIGHT_ENDGAME_PST_IND + sq.value()] += (1-phase);
+
+            features[KNIGHT_TROPISM_IND] += sq.distance(board.getKingSquare(Color.BLACK)) * phase;
+            features[KNIGHT_TROPISM_ENDGAME_IND] += sq.distance(board.getKingSquare(Color.BLACK)) * (1-phase);
         } else {
-            features[KNIGHT_ENDGAME_PST_IND + sq.flipVertical().value()] -= (1-phase);
             features[KNIGHT_PST_IND + sq.flipVertical().value()] -= phase;
-            features[KNIGHT_TROPISM_IND] -= sq.distance(board.getKingSquare(Color.WHITE));
+            features[KNIGHT_ENDGAME_PST_IND + sq.flipVertical().value()] -= (1-phase);
+
+            features[KNIGHT_TROPISM_IND] -= sq.distance(board.getKingSquare(Color.WHITE)) * phase;
+            features[KNIGHT_TROPISM_ENDGAME_IND] -= sq.distance(board.getKingSquare(Color.WHITE)) * (1-phase);
         }
         return null;
     }

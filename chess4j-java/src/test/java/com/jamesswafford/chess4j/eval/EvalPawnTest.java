@@ -53,8 +53,8 @@ public class EvalPawnTest {
 
         Tuple2<Integer, Integer> score = evalPawn(weights, board, B6);
 
-        assertEquals(weights.vals[PAWN_PST_IND + B6.value()] + weights.vals[PASSED_PAWN_IND],
-                (int)score._1);
+        assertEquals(weights.vals[PAWN_PST_IND + B6.value()] + weights.vals[PASSED_PAWN_IND], (int)score._1);
+        assertEquals(weights.vals[PAWN_ENDGAME_PST_IND + B6.value()] + weights.vals[PASSED_PAWN_ENDGAME_IND], (int)score._2);
 
         // the black pawn on A2 is passed and isolated
         Tuple2<Integer, Integer> score2 = evalPawn(weights, board, A2);
@@ -62,6 +62,10 @@ public class EvalPawnTest {
         assertEquals(weights.vals[PAWN_PST_IND + A7.value()] + weights.vals[PASSED_PAWN_IND] +
                         weights.vals[ISOLATED_PAWN_IND],
                 -(int)score2._1);
+
+        assertEquals(weights.vals[PAWN_ENDGAME_PST_IND + A7.value()] + weights.vals[PASSED_PAWN_ENDGAME_IND] +
+                        weights.vals[ISOLATED_PAWN_ENDGAME_IND],
+                -(int)score2._2);
     }
 
     @Test
@@ -111,14 +115,17 @@ public class EvalPawnTest {
         */
 
         double[] features = new double[weights.vals.length];
-        extractPawnFeatures(features, board, B6, 1.0);
-        assertEquals(1, features[PASSED_PAWN_IND], testEpsilon);
+        extractPawnFeatures(features, board, B6, 0.8);
+        assertEquals(0.8, features[PASSED_PAWN_IND], testEpsilon);
+        assertEquals(0.2, features[PASSED_PAWN_ENDGAME_IND], testEpsilon);
 
         // the black pawn on A2 is passed and isolated
         Arrays.fill(features, 0);
-        extractPawnFeatures(features, board, A2, 1.0);
-        assertEquals(-1, features[PASSED_PAWN_IND], testEpsilon);
-        assertEquals(-1, features[ISOLATED_PAWN_IND], testEpsilon);
+        extractPawnFeatures(features, board, A2, 0.7);
+        assertEquals(-0.7, features[PASSED_PAWN_IND], testEpsilon);
+        assertEquals(-0.3, features[PASSED_PAWN_ENDGAME_IND], testEpsilon);
+        assertEquals(-0.7, features[ISOLATED_PAWN_IND], testEpsilon);
+        assertEquals(-0.3, features[ISOLATED_PAWN_ENDGAME_IND], testEpsilon);
     }
 
 }
