@@ -17,6 +17,7 @@ public class EvalWeightsTest {
         assertEquals(64, weights.getVals("ROOK_PST").size());
 
         assertEquals(List.of(-4), weights.getVals("DOUBLED_PAWN"));
+        assertEquals(List.of(-5), weights.getVals("DOUBLED_PAWN_ENDGAME"));
 
         assertEquals(List.of(1), weights.getVals("QUEEN_MOBILITY"));
     }

@@ -85,7 +85,8 @@ public class EvalWeights {
             -56,-41,-17,-10,-13,-32,-31, -3,
             -72,-27,-56,-45,-45,-41,-28,-98,
 
-             -3,  // KNIGHT TROPISM
+             -2,  // KNIGHT TROPISM
+             -3,  // KNIGHT_TROPISM_ENDGAME
 
               2, 10, 10, 19, 14,  6, -2,  2,     // ROOK_PST
               4,  7, 10, 11,  6, 13, 12, 10,
@@ -106,7 +107,9 @@ public class EvalWeights {
             -35,-31,-28,-23,-22,-25,-41,-43,
 
              24,  // ROOK_OPEN_FILE
+             23,  // ROOK_OPEN_FILE_ENDGAME
              13,  // ROOK_HALF_OPEN_FILE
+             14,  // ROOK_HALF_OPEN_FILE_ENDGAME
 
              19, 49, 63, 55, 53, 99, 87, 65,     // QUEEN_PST
              -6, 12, 32, 58, 75, 79, 53, 58,
@@ -130,7 +133,9 @@ public class EvalWeights {
              2,                                  // QUEEN_ENDGAME_MOBILITY
 
              6,                                  // MAJOR_ON_7TH
+             7,                                  // MAJOR_ON_7TH_ENDGAME
             40,                                  // CONNECTED_MAJORS_ON_7TH
+            41,                                  // CONNECTED_MAJORS_ON_7TH_ENDGAME
 
               0,  0,  0,  0,  0,  0,  0,  0,     // PAWN_PST
             127,108,112,120, 76, 89,106, 83,
@@ -151,8 +156,11 @@ public class EvalWeights {
               0,  0,  0,  0,  0,  0,  0,  0,
 
              35,  // PASSED_PAWN
+             36,  // PASSED_PAWN_ENDGAME
             -13,  // ISOLATED_PAWN
-             -4   // DOUBLED_PAWN
+            -12,  // ISOLATED_PAWN_ENDGAME
+             -4,  // DOUBLED_PAWN
+             -5   // DOUBLED_PAWN_ENDGAME
     };
 
     public static final int PAWN_VAL_IND   = 0;
@@ -180,21 +188,29 @@ public class EvalWeights {
     public static final int KNIGHT_PST_IND = 273;
     public static final int KNIGHT_ENDGAME_PST_IND = 337;
     public static final int KNIGHT_TROPISM_IND = 401;
-    public static final int ROOK_PST_IND = 402;
-    public static final int ROOK_ENDGAME_PST_IND = 466;
-    public static final int ROOK_OPEN_FILE_IND = 530;
-    public static final int ROOK_HALF_OPEN_FILE_IND = 531;
-    public static final int QUEEN_PST_IND = 532;
-    public static final int QUEEN_ENDGAME_PST_IND = 596;
-    public static final int QUEEN_MOBILITY_IND = 660;
-    public static final int QUEEN_ENDGAME_MOBILITY_IND = 661;
-    public static final int MAJOR_ON_7TH_IND = 662;
-    public static final int CONNECTED_MAJORS_ON_7TH_IND = 663;
-    public static final int PAWN_PST_IND = 664;
-    public static final int PAWN_ENDGAME_PST_IND = 728;
-    public static final int PASSED_PAWN_IND = 792;
-    public static final int ISOLATED_PAWN_IND = 793;
-    public static final int DOUBLED_PAWN_IND = 794;
+    public static final int KNIGHT_TROPISM_ENDGAME_IND = 402;
+    public static final int ROOK_PST_IND = 403;
+    public static final int ROOK_ENDGAME_PST_IND = 467;
+    public static final int ROOK_OPEN_FILE_IND = 531;
+    public static final int ROOK_OPEN_FILE_ENDGAME_IND = 532;
+    public static final int ROOK_HALF_OPEN_FILE_IND = 533;
+    public static final int ROOK_HALF_OPEN_FILE_ENDGAME_IND = 534;
+    public static final int QUEEN_PST_IND = 535;
+    public static final int QUEEN_ENDGAME_PST_IND = 599;
+    public static final int QUEEN_MOBILITY_IND = 663;
+    public static final int QUEEN_ENDGAME_MOBILITY_IND = 664;
+    public static final int MAJOR_ON_7TH_IND = 665;
+    public static final int MAJOR_ON_7TH_ENDGAME_IND = 666;
+    public static final int CONNECTED_MAJORS_ON_7TH_IND = 667;
+    public static final int CONNECTED_MAJORS_ON_7TH_ENDGAME_IND = 668;
+    public static final int PAWN_PST_IND = 669;
+    public static final int PAWN_ENDGAME_PST_IND = 733;
+    public static final int PASSED_PAWN_IND = 797;
+    public static final int PASSED_PAWN_ENDGAME_IND = 798;
+    public static final int ISOLATED_PAWN_IND = 799;
+    public static final int ISOLATED_PAWN_ENDGAME_IND = 800;
+    public static final int DOUBLED_PAWN_IND = 801;
+    public static final int DOUBLED_PAWN_ENDGAME_IND = 802;
 
     private static final Map<String, Tuple2<Integer, Integer>> indexMap = new HashMap<>();
     static {
@@ -223,21 +239,29 @@ public class EvalWeights {
         indexMap.put("KNIGHT_PST", new Tuple2<>(KNIGHT_PST_IND, 64));
         indexMap.put("KNIGHT_ENDGAME_PST", new Tuple2<>(KNIGHT_ENDGAME_PST_IND, 64));
         indexMap.put("KNIGHT_TROPISM", new Tuple2<>(KNIGHT_TROPISM_IND, 1));
+        indexMap.put("KNIGHT_TROPISM_ENDGAME", new Tuple2<>(KNIGHT_TROPISM_ENDGAME_IND, 1));
         indexMap.put("ROOK_PST", new Tuple2<>(ROOK_PST_IND, 64));
         indexMap.put("ROOK_ENDGAME_PST", new Tuple2<>(ROOK_ENDGAME_PST_IND, 64));
         indexMap.put("ROOK_OPEN_FILE", new Tuple2<>(ROOK_OPEN_FILE_IND, 1));
+        indexMap.put("ROOK_OPEN_FILE_ENDGAME", new Tuple2<>(ROOK_OPEN_FILE_ENDGAME_IND, 1));
         indexMap.put("ROOK_HALF_OPEN_FILE", new Tuple2<>(ROOK_HALF_OPEN_FILE_IND, 1));
+        indexMap.put("ROOK_HALF_OPEN_FILE_ENDGAME", new Tuple2<>(ROOK_HALF_OPEN_FILE_ENDGAME_IND, 1));
         indexMap.put("QUEEN_PST", new Tuple2<>(QUEEN_PST_IND, 64));
         indexMap.put("QUEEN_ENDGAME_PST", new Tuple2<>(QUEEN_ENDGAME_PST_IND, 64));
         indexMap.put("QUEEN_MOBILITY", new Tuple2<>(QUEEN_MOBILITY_IND, 1));
         indexMap.put("QUEEN_ENDGAME_MOBILITY", new Tuple2<>(QUEEN_ENDGAME_MOBILITY_IND, 1));
         indexMap.put("MAJOR_ON_7TH", new Tuple2<>(MAJOR_ON_7TH_IND, 1));
+        indexMap.put("MAJOR_ON_7TH_ENDGAME", new Tuple2<>(MAJOR_ON_7TH_ENDGAME_IND, 1));
         indexMap.put("CONNECTED_MAJORS_ON_7TH", new Tuple2<>(CONNECTED_MAJORS_ON_7TH_IND, 1));
+        indexMap.put("CONNECTED_MAJORS_ON_7TH_ENDGAME", new Tuple2<>(CONNECTED_MAJORS_ON_7TH_ENDGAME_IND, 1));
         indexMap.put("PAWN_PST", new Tuple2<>(PAWN_PST_IND, 64));
         indexMap.put("PAWN_ENDGAME_PST", new Tuple2<>(PAWN_ENDGAME_PST_IND, 64));
         indexMap.put("PASSED_PAWN", new Tuple2<>(PASSED_PAWN_IND, 1));
+        indexMap.put("PASSED_PAWN_ENDGAME", new Tuple2<>(PASSED_PAWN_ENDGAME_IND, 1));
         indexMap.put("ISOLATED_PAWN", new Tuple2<>(ISOLATED_PAWN_IND, 1));
+        indexMap.put("ISOLATED_PAWN_ENDGAME", new Tuple2<>(ISOLATED_PAWN_ENDGAME_IND, 1));
         indexMap.put("DOUBLED_PAWN", new Tuple2<>(DOUBLED_PAWN_IND, 1));
+        indexMap.put("DOUBLED_PAWN_ENDGAME", new Tuple2<>(DOUBLED_PAWN_ENDGAME_IND, 1));
     }
 
     public static Set<String> getKeys() {

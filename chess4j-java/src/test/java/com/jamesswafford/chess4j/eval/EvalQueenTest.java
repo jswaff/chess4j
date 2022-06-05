@@ -45,8 +45,8 @@ public class EvalQueenTest {
                         weights.vals[CONNECTED_MAJORS_ON_7TH_IND] +
                         weights.vals[QUEEN_MOBILITY_IND] * 20L, (int)score._1);
 
-        assertEquals(weights.vals[QUEEN_ENDGAME_PST_IND + C7.value()] + weights.vals[MAJOR_ON_7TH_IND] +
-                weights.vals[CONNECTED_MAJORS_ON_7TH_IND] +
+        assertEquals(weights.vals[QUEEN_ENDGAME_PST_IND + C7.value()] + weights.vals[MAJOR_ON_7TH_ENDGAME_IND] +
+                weights.vals[CONNECTED_MAJORS_ON_7TH_ENDGAME_IND] +
                 weights.vals[QUEEN_ENDGAME_MOBILITY_IND] * 20L, (int)score._2);
     }
 
@@ -91,8 +91,10 @@ public class EvalQueenTest {
 
         double[] features = new double[weights.vals.length];
         extractQueenFeatures(features, board, C7, 0.4);
-        assertEquals(1, features[MAJOR_ON_7TH_IND], testEpsilon);
-        assertEquals(1, features[CONNECTED_MAJORS_ON_7TH_IND], testEpsilon);
+        assertEquals(0.4, features[MAJOR_ON_7TH_IND], testEpsilon);
+        assertEquals(0.6, features[MAJOR_ON_7TH_ENDGAME_IND], testEpsilon);
+        assertEquals(0.4, features[CONNECTED_MAJORS_ON_7TH_IND], testEpsilon);
+        assertEquals(0.6, features[CONNECTED_MAJORS_ON_7TH_ENDGAME_IND], testEpsilon);
         assertEquals(20 * 0.4, features[QUEEN_MOBILITY_IND], testEpsilon);
         assertEquals(20 * 0.6, features[QUEEN_ENDGAME_MOBILITY_IND], testEpsilon);
     }
