@@ -35,18 +35,18 @@ public class EvalMajorOn7thTest {
          */
 
         Tuple2<Integer, Integer> score = evalMajorOn7th(weights, board, true, C7);
-        assertEquals(weights.vals[MAJOR_ON_7TH_IND] + weights.vals[CONNECTED_MAJORS_ON_7TH_IND],
+        assertEquals(weights.vals[MAJOR_ON_7TH_MG_IND] + weights.vals[CONNECTED_MAJORS_ON_7TH_MG_IND],
                 score._1, testEpsilon);
-        assertEquals(weights.vals[MAJOR_ON_7TH_ENDGAME_IND] + weights.vals[CONNECTED_MAJORS_ON_7TH_ENDGAME_IND],
+        assertEquals(weights.vals[MAJOR_ON_7TH_EG_IND] + weights.vals[CONNECTED_MAJORS_ON_7TH_EG_IND],
                 score._2, testEpsilon);
 
         score = evalMajorOn7th(weights, board, true, F7);
-        assertEquals(weights.vals[MAJOR_ON_7TH_IND], score._1, testEpsilon);
-        assertEquals(weights.vals[MAJOR_ON_7TH_ENDGAME_IND], score._2, testEpsilon);
+        assertEquals(weights.vals[MAJOR_ON_7TH_MG_IND], score._1, testEpsilon);
+        assertEquals(weights.vals[MAJOR_ON_7TH_EG_IND], score._2, testEpsilon);
 
         score = evalMajorOn7th(weights, board, false, A2);
-        assertEquals(weights.vals[MAJOR_ON_7TH_IND], score._1, testEpsilon);
-        assertEquals(weights.vals[MAJOR_ON_7TH_ENDGAME_IND], score._2, testEpsilon);
+        assertEquals(weights.vals[MAJOR_ON_7TH_MG_IND], score._1, testEpsilon);
+        assertEquals(weights.vals[MAJOR_ON_7TH_EG_IND], score._2, testEpsilon);
 
         // move the black king out from the back rank
         board.setPos("8/2Q2R2/7k/8/8/8/r7/7K w - - 0 1");
@@ -88,24 +88,24 @@ public class EvalMajorOn7thTest {
 
         double[] features = new double[weights.vals.length];
         exractMajorOn7thFeatures(features, board, true, C7, 0.8);
-        assertEquals(0.8, features[MAJOR_ON_7TH_IND], testEpsilon);
-        assertEquals(0.2, features[MAJOR_ON_7TH_ENDGAME_IND], testEpsilon);
-        assertEquals(0.8, features[CONNECTED_MAJORS_ON_7TH_IND], testEpsilon);
-        assertEquals(0.2, features[CONNECTED_MAJORS_ON_7TH_ENDGAME_IND], testEpsilon);
+        assertEquals(0.8, features[MAJOR_ON_7TH_MG_IND], testEpsilon);
+        assertEquals(0.2, features[MAJOR_ON_7TH_EG_IND], testEpsilon);
+        assertEquals(0.8, features[CONNECTED_MAJORS_ON_7TH_MG_IND], testEpsilon);
+        assertEquals(0.2, features[CONNECTED_MAJORS_ON_7TH_EG_IND], testEpsilon);
 
         Arrays.fill(features, 0);
         exractMajorOn7thFeatures(features, board, true, F7, 0.8);
-        assertEquals(0.8, features[MAJOR_ON_7TH_IND], testEpsilon);
-        assertEquals(0.2, features[MAJOR_ON_7TH_ENDGAME_IND], testEpsilon);
-        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_IND], testEpsilon);
-        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_ENDGAME_IND], testEpsilon);
+        assertEquals(0.8, features[MAJOR_ON_7TH_MG_IND], testEpsilon);
+        assertEquals(0.2, features[MAJOR_ON_7TH_EG_IND], testEpsilon);
+        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_MG_IND], testEpsilon);
+        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_EG_IND], testEpsilon);
 
         Arrays.fill(features, 0);
         exractMajorOn7thFeatures(features, board, false, A2, 0.8);
-        assertEquals(-0.8, features[MAJOR_ON_7TH_IND], testEpsilon);
-        assertEquals(-0.2, features[MAJOR_ON_7TH_ENDGAME_IND], testEpsilon);
-        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_IND], testEpsilon);
-        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_ENDGAME_IND], testEpsilon);
+        assertEquals(-0.8, features[MAJOR_ON_7TH_MG_IND], testEpsilon);
+        assertEquals(-0.2, features[MAJOR_ON_7TH_EG_IND], testEpsilon);
+        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_MG_IND], testEpsilon);
+        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_EG_IND], testEpsilon);
 
         // move the black king out from the back rank
         board.setPos("8/2Q2R2/7k/8/8/8/r7/7K w - - 0 1");
@@ -123,17 +123,17 @@ public class EvalMajorOn7thTest {
 
         Arrays.fill(features, 0);
         exractMajorOn7thFeatures(features, board, true, C7, 0.8);
-        assertEquals(0, features[MAJOR_ON_7TH_IND], testEpsilon);
-        assertEquals(0, features[MAJOR_ON_7TH_ENDGAME_IND], testEpsilon);
-        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_IND], testEpsilon);
-        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_ENDGAME_IND], testEpsilon);
+        assertEquals(0, features[MAJOR_ON_7TH_MG_IND], testEpsilon);
+        assertEquals(0, features[MAJOR_ON_7TH_EG_IND], testEpsilon);
+        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_MG_IND], testEpsilon);
+        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_EG_IND], testEpsilon);
 
         Arrays.fill(features, 0);
         exractMajorOn7thFeatures(features, board, true, F7, 0.8);
-        assertEquals(0, features[MAJOR_ON_7TH_IND], testEpsilon);
-        assertEquals(0, features[MAJOR_ON_7TH_ENDGAME_IND], testEpsilon);
-        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_IND], testEpsilon);
-        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_ENDGAME_IND], testEpsilon);
+        assertEquals(0, features[MAJOR_ON_7TH_MG_IND], testEpsilon);
+        assertEquals(0, features[MAJOR_ON_7TH_EG_IND], testEpsilon);
+        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_MG_IND], testEpsilon);
+        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_EG_IND], testEpsilon);
     }
 
 }

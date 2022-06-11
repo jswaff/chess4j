@@ -28,9 +28,9 @@ public class EvalKingTest {
         Board board = new Board("rnbq1rk1/pppppppp/bn6/8/BN6/5P2/PPPPP1PP/RNBQ1RK1 w - - 0 1");
 
         Tuple2<Integer, Integer> score = evalKing(weights, board, G1);
-        assertEquals(weights.vals[KING_PST_IND + G1.value()] + evalKingSafety(weights, board, true),
+        assertEquals(weights.vals[KING_PST_MG_IND + G1.value()] + evalKingSafety(weights, board, true),
                 (int)score._1);
-        assertEquals(weights.vals[KING_ENDGAME_PST_IND + G1.value()], (int)score._2);
+        assertEquals(weights.vals[KING_PST_EG_IND + G1.value()], (int)score._2);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class EvalKingTest {
 
         double[] features = new double[weights.vals.length];
         extractKingFeatures(features, board, G1, 1.0);
-        assertEquals(1, features[KING_PST_IND + G1.value()], testEpsilon);
+        assertEquals(1, features[KING_PST_MG_IND + G1.value()], testEpsilon);
     }
 
     @Test
@@ -125,12 +125,12 @@ public class EvalKingTest {
 
         double[] features = new double[weights.vals.length];
         extractKingFeatures(features, board, E2, 0.0);
-        assertEquals(1, features[KING_ENDGAME_PST_IND + E2.value()], testEpsilon);
+        assertEquals(1, features[KING_PST_EG_IND + E2.value()], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
         extractKingFeatures(features2, board, E7, 0.0);
-        assertEquals(-1, features2[KING_ENDGAME_PST_IND + E2.value()], testEpsilon);
+        assertEquals(-1, features2[KING_PST_EG_IND + E2.value()], testEpsilon);
     }
 
     @Test

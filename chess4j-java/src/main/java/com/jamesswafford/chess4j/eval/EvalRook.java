@@ -20,11 +20,11 @@ public class EvalRook {
         Tuple2<Integer, Integer> rookOpen = evalRookOpenFile(weights, board, isWhite, sq);
 
         if (isWhite) {
-            mg = weights.vals[ROOK_PST_IND + sq.value()] + major7th._1 + rookOpen._1;
-            eg = weights.vals[ROOK_ENDGAME_PST_IND + sq.value()] + major7th._2 + rookOpen._2;
+            mg = weights.vals[ROOK_PST_MG_IND + sq.value()] + major7th._1 + rookOpen._1;
+            eg = weights.vals[ROOK_PST_EG_IND + sq.value()] + major7th._2 + rookOpen._2;
         } else {
-            mg = -(weights.vals[ROOK_PST_IND + sq.flipVertical().value()] + major7th._1 + rookOpen._1);
-            eg = -(weights.vals[ROOK_ENDGAME_PST_IND + sq.flipVertical().value()] + major7th._2 + rookOpen._2);
+            mg = -(weights.vals[ROOK_PST_MG_IND + sq.flipVertical().value()] + major7th._1 + rookOpen._1);
+            eg = -(weights.vals[ROOK_PST_EG_IND + sq.flipVertical().value()] + major7th._2 + rookOpen._2);
         }
 
         return new Tuple2<>(mg, eg);
@@ -45,11 +45,11 @@ public class EvalRook {
         long fileMask = Bitboard.files[sq.file().getValue()] ^ Bitboard.squares[sq.value()];
         if ((fileMask & friends)==0) {
             if ((fileMask & enemies)!=0) {
-                mg += weights.vals[ROOK_HALF_OPEN_FILE_IND];
-                eg += weights.vals[ROOK_HALF_OPEN_FILE_ENDGAME_IND];
+                mg += weights.vals[ROOK_HALF_OPEN_FILE_MG_IND];
+                eg += weights.vals[ROOK_HALF_OPEN_FILE_EG_IND];
             } else {
-                mg += weights.vals[ROOK_OPEN_FILE_IND];
-                eg += weights.vals[ROOK_OPEN_FILE_ENDGAME_IND];
+                mg += weights.vals[ROOK_OPEN_FILE_MG_IND];
+                eg += weights.vals[ROOK_OPEN_FILE_EG_IND];
             }
         }
 
@@ -59,11 +59,11 @@ public class EvalRook {
     public static java.lang.Void extractRookFeatures(double[] features, Board board, Square sq, double phase) {
         boolean isWhite = board.getPiece(sq).isWhite();
         if (isWhite) {
-            features[ROOK_ENDGAME_PST_IND + sq.value()] += (1-phase);
-            features[ROOK_PST_IND + sq.value()] += phase;
+            features[ROOK_PST_EG_IND + sq.value()] += (1-phase);
+            features[ROOK_PST_MG_IND + sq.value()] += phase;
         } else {
-            features[ROOK_ENDGAME_PST_IND + sq.flipVertical().value()] -= (1-phase);
-            features[ROOK_PST_IND + sq.flipVertical().value()] -= phase;
+            features[ROOK_PST_EG_IND + sq.flipVertical().value()] -= (1-phase);
+            features[ROOK_PST_MG_IND + sq.flipVertical().value()] -= phase;
         }
 
         exractMajorOn7thFeatures(features, board, isWhite, sq, phase);
@@ -86,19 +86,19 @@ public class EvalRook {
         if ((fileMask & friends)==0) {
             if ((fileMask & enemies)!=0) {
                 if (isWhite) {
-                    features[ROOK_HALF_OPEN_FILE_IND] += phase;
-                    features[ROOK_HALF_OPEN_FILE_ENDGAME_IND] += (1-phase);
+                    features[ROOK_HALF_OPEN_FILE_MG_IND] += phase;
+                    features[ROOK_HALF_OPEN_FILE_EG_IND] += (1-phase);
                 } else {
-                    features[ROOK_HALF_OPEN_FILE_IND] -= phase;
-                    features[ROOK_HALF_OPEN_FILE_ENDGAME_IND] -= (1-phase);
+                    features[ROOK_HALF_OPEN_FILE_MG_IND] -= phase;
+                    features[ROOK_HALF_OPEN_FILE_EG_IND] -= (1-phase);
                 }
             } else {
                 if (isWhite) {
-                    features[ROOK_OPEN_FILE_IND] += phase;
-                    features[ROOK_OPEN_FILE_ENDGAME_IND] += (1-phase);
+                    features[ROOK_OPEN_FILE_MG_IND] += phase;
+                    features[ROOK_OPEN_FILE_EG_IND] += (1-phase);
                 } else {
-                    features[ROOK_OPEN_FILE_IND] -= phase;
-                    features[ROOK_OPEN_FILE_ENDGAME_IND] -= (1-phase);
+                    features[ROOK_OPEN_FILE_MG_IND] -= phase;
+                    features[ROOK_OPEN_FILE_EG_IND] -= (1-phase);
                 }
             }
         }

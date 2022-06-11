@@ -13,15 +13,15 @@ public class EvalBishop {
         int mg, eg;
 
         int mobility = Mobility.bishopMobility(board, sq);
-        int mobilityMg = mobility * weights.vals[BISHOP_MOBILITY_IND];
-        int mobilityEg = mobility * weights.vals[BISHOP_ENDGAME_MOBILITY_IND];
+        int mobilityMg = mobility * weights.vals[BISHOP_MOBILITY_MG_IND];
+        int mobilityEg = mobility * weights.vals[BISHOP_MOBILITY_EG_IND];
 
         if (board.getPiece(sq).isWhite()) {
-            mg = weights.vals[BISHOP_PST_IND + sq.value()] + mobilityMg;
-            eg = weights.vals[BISHOP_ENDGAME_PST_IND + sq.value()] + mobilityEg;
+            mg = weights.vals[BISHOP_PST_MG_IND + sq.value()] + mobilityMg;
+            eg = weights.vals[BISHOP_PST_EG_IND + sq.value()] + mobilityEg;
         } else {
-            mg = -(weights.vals[BISHOP_PST_IND + sq.flipVertical().value()] + mobilityMg);
-            eg = -(weights.vals[BISHOP_ENDGAME_PST_IND + sq.flipVertical().value()]  + mobilityEg);
+            mg = -(weights.vals[BISHOP_PST_MG_IND + sq.flipVertical().value()] + mobilityMg);
+            eg = -(weights.vals[BISHOP_PST_EG_IND + sq.flipVertical().value()]  + mobilityEg);
         }
 
         return new Tuple2<>(mg, eg);
@@ -32,16 +32,16 @@ public class EvalBishop {
         int mobility = Mobility.bishopMobility(board, sq);
 
         if (board.getPiece(sq).isWhite()) {
-            features[BISHOP_PST_IND + sq.value()] += phase;
-            features[BISHOP_ENDGAME_PST_IND + sq.value()] += (1-phase);
-            features[BISHOP_MOBILITY_IND] += mobility * phase;
-            features[BISHOP_ENDGAME_MOBILITY_IND] += mobility * (1-phase);
+            features[BISHOP_PST_MG_IND + sq.value()] += phase;
+            features[BISHOP_PST_EG_IND + sq.value()] += (1-phase);
+            features[BISHOP_MOBILITY_MG_IND] += mobility * phase;
+            features[BISHOP_MOBILITY_EG_IND] += mobility * (1-phase);
 
         } else {
-            features[BISHOP_PST_IND + sq.flipVertical().value()] -= phase;
-            features[BISHOP_ENDGAME_PST_IND + sq.flipVertical().value()] -= (1-phase);
-            features[BISHOP_MOBILITY_IND] -= mobility * phase;
-            features[BISHOP_ENDGAME_MOBILITY_IND] -= mobility * (1- phase);
+            features[BISHOP_PST_MG_IND + sq.flipVertical().value()] -= phase;
+            features[BISHOP_PST_EG_IND + sq.flipVertical().value()] -= (1-phase);
+            features[BISHOP_MOBILITY_MG_IND] -= mobility * phase;
+            features[BISHOP_MOBILITY_EG_IND] -= mobility * (1- phase);
         }
         return null;
     }

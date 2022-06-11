@@ -20,16 +20,16 @@ public class EvalMajorOn7th {
 
         if (isWhite) {
             if (sq.rank() == RANK_7 && board.getKingSquare(Color.BLACK).rank() == RANK_8) {
-                mg += weights.vals[MAJOR_ON_7TH_IND];
-                eg += weights.vals[MAJOR_ON_7TH_ENDGAME_IND];
+                mg += weights.vals[MAJOR_ON_7TH_MG_IND];
+                eg += weights.vals[MAJOR_ON_7TH_EG_IND];
                 Tuple2<Integer, Integer> m7 = evalConnectedMajorOn7th(weights, board, true, sq);
                 mg += m7._1;
                 eg += m7._2;
             }
         } else {
             if (sq.rank() == RANK_2 && board.getKingSquare(Color.WHITE).rank() == RANK_1) {
-                mg += weights.vals[MAJOR_ON_7TH_IND];
-                eg += weights.vals[MAJOR_ON_7TH_ENDGAME_IND];
+                mg += weights.vals[MAJOR_ON_7TH_MG_IND];
+                eg += weights.vals[MAJOR_ON_7TH_EG_IND];
                 Tuple2<Integer, Integer> m7 = evalConnectedMajorOn7th(weights, board,false, sq);
                 mg += m7._1;
                 eg += m7._2;
@@ -47,13 +47,13 @@ public class EvalMajorOn7th {
 
         if (isWhite) {
             if ((rookMoves & (board.getWhiteRooks() | board.getWhiteQueens())) != 0) {
-                mg += weights.vals[CONNECTED_MAJORS_ON_7TH_IND];
-                eg += weights.vals[CONNECTED_MAJORS_ON_7TH_ENDGAME_IND];
+                mg += weights.vals[CONNECTED_MAJORS_ON_7TH_MG_IND];
+                eg += weights.vals[CONNECTED_MAJORS_ON_7TH_EG_IND];
             }
         } else {
             if ((rookMoves & (board.getBlackRooks() | board.getBlackQueens())) != 0) {
-                mg += weights.vals[CONNECTED_MAJORS_ON_7TH_IND];
-                eg += weights.vals[CONNECTED_MAJORS_ON_7TH_ENDGAME_IND];
+                mg += weights.vals[CONNECTED_MAJORS_ON_7TH_MG_IND];
+                eg += weights.vals[CONNECTED_MAJORS_ON_7TH_EG_IND];
             }
         }
 
@@ -63,14 +63,14 @@ public class EvalMajorOn7th {
     public static void exractMajorOn7thFeatures(double[] features, Board board, boolean isWhite, Square sq, double phase) {
         if (isWhite) {
             if (sq.rank() == RANK_7 && board.getKingSquare(Color.BLACK).rank() == RANK_8) {
-                features[MAJOR_ON_7TH_IND] += phase;
-                features[MAJOR_ON_7TH_ENDGAME_IND] += (1-phase);
+                features[MAJOR_ON_7TH_MG_IND] += phase;
+                features[MAJOR_ON_7TH_EG_IND] += (1-phase);
                 extractConnectedMajorOn7thFeatures(features, board, true, sq, phase);
             }
         } else {
             if (sq.rank() == RANK_2 && board.getKingSquare(Color.WHITE).rank() == RANK_1) {
-                features[MAJOR_ON_7TH_IND] -= phase;
-                features[MAJOR_ON_7TH_ENDGAME_IND] -= (1-phase);
+                features[MAJOR_ON_7TH_MG_IND] -= phase;
+                features[MAJOR_ON_7TH_EG_IND] -= (1-phase);
                 extractConnectedMajorOn7thFeatures(features, board, false, sq, phase);
             }
         }
@@ -82,13 +82,13 @@ public class EvalMajorOn7th {
 
         if (isWhite) {
             if ((rookMoves & (board.getWhiteRooks() | board.getWhiteQueens())) != 0) {
-                features[CONNECTED_MAJORS_ON_7TH_IND] += phase;
-                features[CONNECTED_MAJORS_ON_7TH_ENDGAME_IND] += (1-phase);
+                features[CONNECTED_MAJORS_ON_7TH_MG_IND] += phase;
+                features[CONNECTED_MAJORS_ON_7TH_EG_IND] += (1-phase);
             }
         } else {
             if ((rookMoves & (board.getBlackRooks() | board.getBlackQueens())) != 0) {
-                features[CONNECTED_MAJORS_ON_7TH_IND] -= phase;
-                features[CONNECTED_MAJORS_ON_7TH_ENDGAME_IND] -= (1-phase);
+                features[CONNECTED_MAJORS_ON_7TH_MG_IND] -= phase;
+                features[CONNECTED_MAJORS_ON_7TH_EG_IND] -= (1-phase);
             }
         }
     }
