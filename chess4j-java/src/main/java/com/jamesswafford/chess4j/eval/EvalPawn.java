@@ -11,49 +11,73 @@ public class EvalPawn {
     public static Tuple2<Integer, Integer> evalPawn(EvalWeights weights, Board board, Square sq) {
         boolean isWhite = board.getPiece(sq).isWhite();
 
-        int mg, eg, s=0;
+        int mg=0, eg=0;
 
         if (PawnUtils.isPassedPawn(board, sq, isWhite)) {
-            s += weights.vals[PASSED_PAWN_IND];
+            mg += weights.vals[PASSED_PAWN_MG_IND];
+            eg += weights.vals[PASSED_PAWN_EG_IND];
         }
         if (PawnUtils.isIsolated(board, sq, isWhite)) {
-            s += weights.vals[ISOLATED_PAWN_IND];
+            mg += weights.vals[ISOLATED_PAWN_MG_IND];
+            eg += weights.vals[ISOLATED_PAWN_EG_IND];
         }
         if (PawnUtils.isDoubled(board, sq, isWhite)) {
-            s += weights.vals[DOUBLED_PAWN_IND];
+            mg += weights.vals[DOUBLED_PAWN_MG_IND];
+            eg += weights.vals[DOUBLED_PAWN_EG_IND];
         }
 
+        int mg2, eg2;
         if (isWhite) {
-            mg = weights.vals[PAWN_PST_IND + sq.value()] + s;
-            eg = weights.vals[PAWN_ENDGAME_PST_IND + sq.value()] + s;
+            mg2 = weights.vals[PAWN_PST_MG_IND + sq.value()] + mg;
+            eg2 = weights.vals[PAWN_PST_EG_IND + sq.value()] + eg;
         } else {
-            mg = -(weights.vals[PAWN_PST_IND + sq.flipVertical().value()] + s);
-            eg = -(weights.vals[PAWN_ENDGAME_PST_IND + sq.flipVertical().value()] + s);
+            mg2 = -(weights.vals[PAWN_PST_MG_IND + sq.flipVertical().value()] + mg);
+            eg2 = -(weights.vals[PAWN_PST_EG_IND + sq.flipVertical().value()] + eg);
         }
 
-        return new Tuple2<>(mg, eg);
+        return new Tuple2<>(mg2, eg2);
     }
 
     public static java.lang.Void extractPawnFeatures(double[] features, Board board, Square sq, double phase) {
+
         boolean isWhite = board.getPiece(sq).isWhite();
 
-        if (isWhite) {
-            features[PAWN_ENDGAME_PST_IND + sq.value()] += (1-phase);
-            features[PAWN_PST_IND + sq.value()] += phase;
-        } else {
-            features[PAWN_ENDGAME_PST_IND + sq.flipVertical().value()] -= (1-phase);
-            features[PAWN_PST_IND + sq.flipVertical().value()] -= phase;
-        }
+        boolean passed = PawnUtils.isPassedPawn(board, sq, isWhite);
+        boolean isolated = PawnUtils.isIsolated(board, sq, isWhite);
+        boolean doubled = PawnUtils.isDoubled(board, sq, isWhite);
 
-        int v = isWhite ? 1 : -1;
-        if (PawnUtils.isPassedPawn(board, sq, isWhite)) {
-            features[PASSED_PAWN_IND] += v;
-        }
-        if (PawnUtils.isIsolated(board, sq, isWhite)) {
-            features[ISOLATED_PAWN_IND] += v;
-        }
-        if (PawnUtils.isDoubled(board, sq, isWhite)) {
-            features[DOUBLED_PAWN_IND] += v;
+        if (isWhite) {
+            features[PAWN_PST_MG_IND + sq.value()] += phase;
+            features[PAWN_PST_EG_IND + sq.value()] += (1-phase);
+
+            if (passed) {
+                features[PASSED_PAWN_MG_IND] += phase;
+                features[PASSED_PAWN_EG_IND] += (1-phase);
+            }
+            if (isolated) {
+                features[ISOLATED_PAWN_MG_IND] += phase;
+                features[ISOLATED_PAWN_EG_IND] += (1-phase);
+            }
+            if (doubled) {
+                features[DOUBLED_PAWN_MG_IND] += phase;
+                features[DOUBLED_PAWN_EG_IND] += (1-phase);
+            }
+        } else {
+            features[PAWN_PST_MG_IND + sq.flipVertical().value()] -= phase;
+            features[PAWN_PST_EG_IND + sq.flipVertical().value()] -= (1-phase);
+
+            if (passed) {
+                features[PASSED_PAWN_MG_IND] -= phase;
+                features[PASSED_PAWN_EG_IND] -= (1-phase);
+            }
+            if (isolated) {
+                features[ISOLATED_PAWN_MG_IND] -= phase;
+                features[ISOLATED_PAWN_EG_IND] -= (1-phase);
+            }
+            if (doubled) {
+                features[DOUBLED_PAWN_MG_IND] -= phase;
+                features[DOUBLED_PAWN_EG_IND] -= (1-phase);
+            }
         }
 
         return null;

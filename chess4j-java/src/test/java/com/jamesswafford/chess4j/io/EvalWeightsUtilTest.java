@@ -37,8 +37,8 @@ public class EvalWeightsUtilTest {
             Properties props = new Properties();
             props.load(fis);
             EvalWeights weights = EvalWeightsUtil.toWeights(props);
-            assertEquals(6, weights.vals[EvalWeights.MAJOR_ON_7TH_IND]);
-            assertEquals(49, weights.vals[EvalWeights.QUEEN_PST_IND+1]);
+            assertEquals(6, weights.vals[EvalWeights.MAJOR_ON_7TH_MG_IND]);
+            assertEquals(49, weights.vals[EvalWeights.QUEEN_PST_MG_IND +1]);
         }
     }
 

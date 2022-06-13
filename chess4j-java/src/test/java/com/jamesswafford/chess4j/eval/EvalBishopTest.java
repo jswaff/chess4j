@@ -24,8 +24,8 @@ public class EvalBishopTest {
 
         Tuple2<Integer, Integer> score = evalBishop(weights, board, C1);
 
-        assertEquals(weights.vals[BISHOP_PST_IND + C1.value()], (int)score._1);
-        assertEquals(weights.vals[BISHOP_ENDGAME_PST_IND + C1.value()], (int)score._2);
+        assertEquals(weights.vals[BISHOP_PST_MG_IND + C1.value()], (int)score._1);
+        assertEquals(weights.vals[BISHOP_PST_EG_IND + C1.value()], (int)score._2);
 
         // test the symmetry
         Tuple2<Integer, Integer> score2 = evalBishop(weights, board, C8);
@@ -40,19 +40,19 @@ public class EvalBishopTest {
 
         Tuple2<Integer, Integer> score = evalBishop(weights, board, G5);
 
-        assertEquals(weights.vals[BISHOP_PST_IND + G5.value()] +
-                weights.vals[BISHOP_MOBILITY_IND] * 6L, (int)score._1);
-        assertEquals(weights.vals[BISHOP_ENDGAME_PST_IND + G5.value()] +
-                weights.vals[BISHOP_ENDGAME_MOBILITY_IND] * 6L, (int)score._2);
+        assertEquals(weights.vals[BISHOP_PST_MG_IND + G5.value()] +
+                weights.vals[BISHOP_MOBILITY_MG_IND] * 6L, (int)score._1);
+        assertEquals(weights.vals[BISHOP_PST_EG_IND + G5.value()] +
+                weights.vals[BISHOP_MOBILITY_EG_IND] * 6L, (int)score._2);
 
 
         // test one of the black bishops
         Tuple2<Integer, Integer> score2 = evalBishop(weights, board, D7);
 
-        assertEquals(-(weights.vals[BISHOP_PST_IND + D2.value()] +
-                weights.vals[BISHOP_MOBILITY_IND]), (int)score2._1);
-        assertEquals(-(weights.vals[BISHOP_ENDGAME_PST_IND + D2.value()] +
-                weights.vals[BISHOP_ENDGAME_MOBILITY_IND]), (int)score2._2);
+        assertEquals(-(weights.vals[BISHOP_PST_MG_IND + D2.value()] +
+                weights.vals[BISHOP_MOBILITY_MG_IND]), (int)score2._1);
+        assertEquals(-(weights.vals[BISHOP_PST_EG_IND + D2.value()] +
+                weights.vals[BISHOP_MOBILITY_EG_IND]), (int)score2._2);
     }
 
     @Test
@@ -62,14 +62,14 @@ public class EvalBishopTest {
 
         double[] features = new double[weights.vals.length];
         extractBishopFeatures(features, board, C1, 1.0);
-        assertEquals(1, features[BISHOP_PST_IND + C1.value()], testEpsilon);
-        assertEquals(0, features[BISHOP_MOBILITY_IND], testEpsilon);
+        assertEquals(1, features[BISHOP_PST_MG_IND + C1.value()], testEpsilon);
+        assertEquals(0, features[BISHOP_MOBILITY_MG_IND], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
         extractBishopFeatures(features2, board, C8, 1.0);
-        assertEquals(-1, features2[BISHOP_PST_IND + C1.value()], testEpsilon);
-        assertEquals(0, features2[BISHOP_MOBILITY_IND], testEpsilon);
+        assertEquals(-1, features2[BISHOP_PST_MG_IND + C1.value()], testEpsilon);
+        assertEquals(0, features2[BISHOP_MOBILITY_MG_IND], testEpsilon);
     }
 
     @Test
@@ -79,14 +79,14 @@ public class EvalBishopTest {
 
         double[] features = new double[weights.vals.length];
         extractBishopFeatures(features, board, C1, 0.0);
-        assertEquals(1, features[BISHOP_ENDGAME_PST_IND + C1.value()], testEpsilon);
-        assertEquals(0, features[BISHOP_ENDGAME_MOBILITY_IND], testEpsilon);
+        assertEquals(1, features[BISHOP_PST_EG_IND + C1.value()], testEpsilon);
+        assertEquals(0, features[BISHOP_MOBILITY_EG_IND], testEpsilon);
 
         // test the symmetry
         double[] features2 = new double[weights.vals.length];
         extractBishopFeatures(features2, board, C8, 0.0);
-        assertEquals(-1, features2[BISHOP_ENDGAME_PST_IND + C1.value()], testEpsilon);
-        assertEquals(0, features2[BISHOP_ENDGAME_MOBILITY_IND], testEpsilon);
+        assertEquals(-1, features2[BISHOP_PST_EG_IND + C1.value()], testEpsilon);
+        assertEquals(0, features2[BISHOP_MOBILITY_EG_IND], testEpsilon);
     }
 
     @Test
@@ -96,17 +96,17 @@ public class EvalBishopTest {
 
         double[] features = new double[weights.vals.length];
         extractBishopFeatures(features, board, G5, 0.4);
-        assertEquals(0.4, features[BISHOP_PST_IND + G5.value()], testEpsilon);
-        assertEquals(0.6, features[BISHOP_ENDGAME_PST_IND + G5.value()], testEpsilon);
-        assertEquals(0.4 * 6, features[BISHOP_MOBILITY_IND], testEpsilon);
-        assertEquals(0.6 * 6, features[BISHOP_ENDGAME_MOBILITY_IND], testEpsilon);
+        assertEquals(0.4, features[BISHOP_PST_MG_IND + G5.value()], testEpsilon);
+        assertEquals(0.6, features[BISHOP_PST_EG_IND + G5.value()], testEpsilon);
+        assertEquals(0.4 * 6, features[BISHOP_MOBILITY_MG_IND], testEpsilon);
+        assertEquals(0.6 * 6, features[BISHOP_MOBILITY_EG_IND], testEpsilon);
 
         double[] features2 = new double[weights.vals.length];
         extractBishopFeatures(features2, board, D7, 0.4);
-        assertEquals(-0.4, features2[BISHOP_PST_IND + D2.value()], testEpsilon);
-        assertEquals(-0.6, features2[BISHOP_ENDGAME_PST_IND + D2.value()], testEpsilon);
-        assertEquals(-0.4, features2[BISHOP_MOBILITY_IND], testEpsilon);
-        assertEquals(-0.6, features2[BISHOP_ENDGAME_MOBILITY_IND], testEpsilon);
+        assertEquals(-0.4, features2[BISHOP_PST_MG_IND + D2.value()], testEpsilon);
+        assertEquals(-0.6, features2[BISHOP_PST_EG_IND + D2.value()], testEpsilon);
+        assertEquals(-0.4, features2[BISHOP_MOBILITY_MG_IND], testEpsilon);
+        assertEquals(-0.6, features2[BISHOP_MOBILITY_EG_IND], testEpsilon);
     }
 
 }
