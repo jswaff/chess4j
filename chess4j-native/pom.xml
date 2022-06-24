@@ -11,15 +11,15 @@
     <parent>
         <groupId>com.jamesswafford.chess4j</groupId>
         <artifactId>chess4j-parent</artifactId>
-        <version>4.1</version>
+        <version>5.0</version>
     </parent>
 
     <properties>
-        <P4_DIR>${project.basedir}/../lib/prophet</P4_DIR>
-        <P4_INCLUDE_PATH>${P4_DIR}/include</P4_INCLUDE_PATH>
-        <P4_CFLAGS>-I ${P4_INCLUDE_PATH}</P4_CFLAGS>
-        <P4_RELEASE_LIB_DIR>${P4_DIR}</P4_RELEASE_LIB_DIR>
-        <P4_RELEASE_LINK>-L ${P4_RELEASE_LIB_DIR} -lprophet4lib</P4_RELEASE_LINK>
+        <PROPHET_DIR>${project.basedir}/../lib/prophet</PROPHET_DIR>
+        <PROPHET_INCLUDE_PATH>${PROPHET_DIR}/include</PROPHET_INCLUDE_PATH>
+        <PROPHET_CFLAGS>-I ${PROPHET_INCLUDE_PATH}</PROPHET_CFLAGS>
+        <PROPHET_RELEASE_LIB_DIR>${PROPHET_DIR}</PROPHET_RELEASE_LIB_DIR>
+        <PROPHET_RELEASE_LINK>-L ${PROPHET_RELEASE_LIB_DIR} -lprophet4lib</PROPHET_RELEASE_LINK>
 
         <CHESS4J_CFLAGS>-I ${project.build.directory}/jni-headers</CHESS4J_CFLAGS>
 
@@ -118,7 +118,7 @@
                     <compilerExecutable>gcc</compilerExecutable>
                     <compilerStartOptions>
                         <compilerStartOption>
-                            ${P4_CFLAGS} ${CHESS4J_CFLAGS} ${JAVAH_INCLUDE_CFLAGS}
+                            ${PROPHET_CFLAGS} ${CHESS4J_CFLAGS} ${JAVAH_INCLUDE_CFLAGS}
                             -fPIC -Wall -Werror -Wextra -O2
                         </compilerStartOption>
                     </compilerStartOptions>
@@ -138,7 +138,7 @@
                     </linkerStartOptions>
                     <linkerEndOptions>
                         <linkerEndOption>
-                            ${P4_RELEASE_LINK}
+                            ${PROPHET_RELEASE_LINK}
                         </linkerEndOption>
                     </linkerEndOptions>
                     <linkerFinalName>libchess4j-native</linkerFinalName>
