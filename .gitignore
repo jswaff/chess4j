@@ -8,3 +8,5 @@ logs
 *.iml
 *.ipr
 
+### VSCode
+.vscode
