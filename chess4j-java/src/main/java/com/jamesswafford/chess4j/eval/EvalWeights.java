@@ -83,8 +83,12 @@ public class EvalWeights {
             // PAWN_PST_EG
             0,0,0,0,0,0,0,0,124,103,89,77,62,52,57,68,84,73,62,47,41,46,49,51,26,16,8,-12,-12,-5,3,2,2,-2,-18,-19,-17,-16,-15,-16,-9,-11,-16,-13,-8,-10,-20,-23,2,-6,-3,-15,-1,2,-17,-25,0,0,0,0,0,0,0,0,
 
-             -1,  // PASSED_PAWN_MG
-             48,  // PASSED_PAWN_EG
+            // PASSED_PAWN_MG
+            0,50,40,30,20,10,0,0,
+            
+            // PASSED_PAWN_EG 
+            0,100,70,60,40,20,0,0,
+            
             -13,  // ISOLATED_PAWN_MG
             -14,  // ISOLATED_PAWN_EG
              -5,  // DOUBLED_PAWN_MG
@@ -134,11 +138,11 @@ public class EvalWeights {
     public static final int PAWN_PST_MG_IND = 669;
     public static final int PAWN_PST_EG_IND = 733;
     public static final int PASSED_PAWN_MG_IND = 797;
-    public static final int PASSED_PAWN_EG_IND = 798;
-    public static final int ISOLATED_PAWN_MG_IND = 799;
-    public static final int ISOLATED_PAWN_EG_IND = 800;
-    public static final int DOUBLED_PAWN_MG_IND = 801;
-    public static final int DOUBLED_PAWN_EG_IND = 802;
+    public static final int PASSED_PAWN_EG_IND = 805;
+    public static final int ISOLATED_PAWN_MG_IND = 813;
+    public static final int ISOLATED_PAWN_EG_IND = 814;
+    public static final int DOUBLED_PAWN_MG_IND = 815;
+    public static final int DOUBLED_PAWN_EG_IND = 816;
 
     private static final Map<String, Tuple2<Integer, Integer>> indexMap = new HashMap<>();
     static {
@@ -184,8 +188,8 @@ public class EvalWeights {
         indexMap.put("CONNECTED_MAJORS_ON_7TH_EG", new Tuple2<>(CONNECTED_MAJORS_ON_7TH_EG_IND, 1));
         indexMap.put("PAWN_PST_MG", new Tuple2<>(PAWN_PST_MG_IND, 64));
         indexMap.put("PAWN_PST_EG", new Tuple2<>(PAWN_PST_EG_IND, 64));
-        indexMap.put("PASSED_PAWN_MG", new Tuple2<>(PASSED_PAWN_MG_IND, 1));
-        indexMap.put("PASSED_PAWN_EG", new Tuple2<>(PASSED_PAWN_EG_IND, 1));
+        indexMap.put("PASSED_PAWN_MG", new Tuple2<>(PASSED_PAWN_MG_IND, 8));
+        indexMap.put("PASSED_PAWN_EG", new Tuple2<>(PASSED_PAWN_EG_IND, 8));
         indexMap.put("ISOLATED_PAWN_MG", new Tuple2<>(ISOLATED_PAWN_MG_IND, 1));
         indexMap.put("ISOLATED_PAWN_EG", new Tuple2<>(ISOLATED_PAWN_EG_IND, 1));
         indexMap.put("DOUBLED_PAWN_MG", new Tuple2<>(DOUBLED_PAWN_MG_IND, 1));
