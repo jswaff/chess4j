@@ -9,14 +9,11 @@ import static com.jamesswafford.chess4j.eval.EvalWeights.*;
 public class EvalPawn {
 
     public static Tuple2<Integer, Integer> evalPawn(EvalWeights weights, Board board, Square sq) {
+        
         boolean isWhite = board.getPiece(sq).isWhite();
 
         int mg=0, eg=0;
 
-        if (PawnUtils.isPassedPawn(board, sq, isWhite)) {
-            mg += weights.vals[PASSED_PAWN_MG_IND];
-            eg += weights.vals[PASSED_PAWN_EG_IND];
-        }
         if (PawnUtils.isIsolated(board, sq, isWhite)) {
             mg += weights.vals[ISOLATED_PAWN_MG_IND];
             eg += weights.vals[ISOLATED_PAWN_EG_IND];
@@ -30,9 +27,17 @@ public class EvalPawn {
         if (isWhite) {
             mg2 = weights.vals[PAWN_PST_MG_IND + sq.value()] + mg;
             eg2 = weights.vals[PAWN_PST_EG_IND + sq.value()] + eg;
+            if (PawnUtils.isPassedPawn(board, sq, true)) {
+                mg2 += weights.vals[PASSED_PAWN_MG_IND+sq.rank().getValue()];
+                eg2 += weights.vals[PASSED_PAWN_EG_IND+sq.rank().getValue()];
+            }
         } else {
             mg2 = -(weights.vals[PAWN_PST_MG_IND + sq.flipVertical().value()] + mg);
             eg2 = -(weights.vals[PAWN_PST_EG_IND + sq.flipVertical().value()] + eg);
+            if (PawnUtils.isPassedPawn(board, sq, false)) {
+                mg2 -= weights.vals[PASSED_PAWN_MG_IND+sq.rank().flip().getValue()];
+                eg2 -= weights.vals[PASSED_PAWN_EG_IND+sq.rank().flip().getValue()];
+            }
         }
 
         return new Tuple2<>(mg2, eg2);
@@ -51,8 +56,8 @@ public class EvalPawn {
             features[PAWN_PST_EG_IND + sq.value()] += (1-phase);
 
             if (passed) {
-                features[PASSED_PAWN_MG_IND] += phase;
-                features[PASSED_PAWN_EG_IND] += (1-phase);
+                features[PASSED_PAWN_MG_IND + sq.rank().getValue()] += phase;
+                features[PASSED_PAWN_EG_IND + sq.rank().getValue()] += (1-phase);
             }
             if (isolated) {
                 features[ISOLATED_PAWN_MG_IND] += phase;
@@ -67,8 +72,8 @@ public class EvalPawn {
             features[PAWN_PST_EG_IND + sq.flipVertical().value()] -= (1-phase);
 
             if (passed) {
-                features[PASSED_PAWN_MG_IND] -= phase;
-                features[PASSED_PAWN_EG_IND] -= (1-phase);
+                features[PASSED_PAWN_MG_IND + sq.flipVertical().rank().getValue()] -= phase;
+                features[PASSED_PAWN_EG_IND + sq.flipVertical().rank().getValue()] -= (1-phase);
             }
             if (isolated) {
                 features[ISOLATED_PAWN_MG_IND] -= phase;
