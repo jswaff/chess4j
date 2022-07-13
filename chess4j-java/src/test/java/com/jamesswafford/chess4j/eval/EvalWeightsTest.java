@@ -19,7 +19,8 @@ public class EvalWeightsTest {
         assertEquals(List.of(-5), weights.getVals("DOUBLED_PAWN_MG"));
         assertEquals(List.of(-8), weights.getVals("DOUBLED_PAWN_EG"));
 
-        assertEquals(List.of(0), weights.getVals("QUEEN_MOBILITY_MG"));
+        assertEquals(List.of(-10,-6,-5,-4,-2,-2,-1,0,1,2,2,3,3,4,4,5,6,6,6,7,7,8,8,9,9,10,10,10), 
+            weights.getVals("QUEEN_MOBILITY_MG"));
     }
 
     @Test

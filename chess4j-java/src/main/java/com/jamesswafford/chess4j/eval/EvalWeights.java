@@ -72,8 +72,11 @@ public class EvalWeights {
             // QUEEN_PST_EG
             -1,8,11,13,18,12,8,11,-25,-33,-5,2,16,22,6,10,-15,-6,1,12,25,40,37,40,-15,-3,-1,12,27,32,34,34,-14,-3,-1,11,10,19,16,17,-14,-6,-1,-6,-6,2,6,-1,-17,-12,-16,-15,-15,-16,-14,-5,-11,-20,-25,-20,-25,-27,-10,-6,
 
-             0,  // QUEEN_MOBILITY_MG
-             8,  // QUEEN_MOBILITY_EG
+            // QUEEN_MOBILITY_MG
+            -10,-6,-5,-4,-2,-2,-1,0,1,2,2,3,3,4,4,5,6,6,6,7,7,8,8,9,9,10,10,10,  
+
+             // QUEEN_MOBILITY_EG
+            -50,-30,-22,-16,-10,-6,-2,2,6,10,13,16,19,22,24,27,30,32,34,37,39,41,43,45,47,50,51,53,
 
              6,  // MAJOR_ON_7TH_MG
             29,  // MAJOR_ON_7TH_EG
@@ -133,19 +136,19 @@ public class EvalWeights {
     public static final int QUEEN_PST_MG_IND = 561;
     public static final int QUEEN_PST_EG_IND = 625;
     public static final int QUEEN_MOBILITY_MG_IND = 689;
-    public static final int QUEEN_MOBILITY_EG_IND = 690;
-    public static final int MAJOR_ON_7TH_MG_IND = 691;
-    public static final int MAJOR_ON_7TH_EG_IND = 692;
-    public static final int CONNECTED_MAJORS_ON_7TH_MG_IND = 693;
-    public static final int CONNECTED_MAJORS_ON_7TH_EG_IND = 694;
-    public static final int PAWN_PST_MG_IND = 695;
-    public static final int PAWN_PST_EG_IND = 759;
-    public static final int PASSED_PAWN_MG_IND = 823;
-    public static final int PASSED_PAWN_EG_IND = 831;
-    public static final int ISOLATED_PAWN_MG_IND = 839;
-    public static final int ISOLATED_PAWN_EG_IND = 840;
-    public static final int DOUBLED_PAWN_MG_IND = 841;
-    public static final int DOUBLED_PAWN_EG_IND = 842;
+    public static final int QUEEN_MOBILITY_EG_IND = 717;
+    public static final int MAJOR_ON_7TH_MG_IND = 745;
+    public static final int MAJOR_ON_7TH_EG_IND = 746;
+    public static final int CONNECTED_MAJORS_ON_7TH_MG_IND = 747;
+    public static final int CONNECTED_MAJORS_ON_7TH_EG_IND = 748;
+    public static final int PAWN_PST_MG_IND = 749;
+    public static final int PAWN_PST_EG_IND = 813;
+    public static final int PASSED_PAWN_MG_IND = 877;
+    public static final int PASSED_PAWN_EG_IND = 885;
+    public static final int ISOLATED_PAWN_MG_IND = 893;
+    public static final int ISOLATED_PAWN_EG_IND = 894;
+    public static final int DOUBLED_PAWN_MG_IND = 895;
+    public static final int DOUBLED_PAWN_EG_IND = 896;
 
     private static final Map<String, Tuple2<Integer, Integer>> indexMap = new HashMap<>();
     static {
@@ -183,8 +186,8 @@ public class EvalWeights {
         indexMap.put("ROOK_HALF_OPEN_FILE_EG", new Tuple2<>(ROOK_HALF_OPEN_FILE_EG_IND, 1));
         indexMap.put("QUEEN_PST_MG", new Tuple2<>(QUEEN_PST_MG_IND, 64));
         indexMap.put("QUEEN_PST_EG", new Tuple2<>(QUEEN_PST_EG_IND, 64));
-        indexMap.put("QUEEN_MOBILITY_MG", new Tuple2<>(QUEEN_MOBILITY_MG_IND, 1));
-        indexMap.put("QUEEN_MOBILITY_EG", new Tuple2<>(QUEEN_MOBILITY_EG_IND, 1));
+        indexMap.put("QUEEN_MOBILITY_MG", new Tuple2<>(QUEEN_MOBILITY_MG_IND, 28));
+        indexMap.put("QUEEN_MOBILITY_EG", new Tuple2<>(QUEEN_MOBILITY_EG_IND, 28));
         indexMap.put("MAJOR_ON_7TH_MG", new Tuple2<>(MAJOR_ON_7TH_MG_IND, 1));
         indexMap.put("MAJOR_ON_7TH_EG", new Tuple2<>(MAJOR_ON_7TH_EG_IND, 1));
         indexMap.put("CONNECTED_MAJORS_ON_7TH_MG", new Tuple2<>(CONNECTED_MAJORS_ON_7TH_MG_IND, 1));
