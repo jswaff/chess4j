@@ -212,6 +212,17 @@ public class EvalWeights {
         System.arraycopy(evalWeights.vals, 0, vals, 0, vals.length);
     }
 
+    public void reset() {
+        for (int i=0;i<vals.length;i++) {
+            vals[i] = 0;
+        }
+        vals[0] = 100;
+        vals[1] = 900;
+        vals[2] = 500;
+        vals[3] = 300;
+        vals[4] = 300;
+    }
+
     public List<Integer> getVals(String key) {
         if (!indexMap.containsKey(key)) {
             throw new IllegalArgumentException("invalid key " + key);
