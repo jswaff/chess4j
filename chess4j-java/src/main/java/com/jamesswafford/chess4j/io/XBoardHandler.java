@@ -412,6 +412,7 @@ public class XBoardHandler {
     }
 
     private void tuneEvalWeights(String[] cmd) {
+        Globals.getEvalWeights().reset();
         double learningRate = Double.parseDouble(cmd[1]);
         int maxIterations = Integer.parseInt(cmd[2]);
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {

@@ -13,8 +13,8 @@ public class EvalBishop {
         int mg, eg;
 
         int mobility = Mobility.bishopMobility(board, sq);
-        int mobilityMg = mobility * weights.vals[BISHOP_MOBILITY_MG_IND];
-        int mobilityEg = mobility * weights.vals[BISHOP_MOBILITY_EG_IND];
+        int mobilityMg = weights.vals[BISHOP_MOBILITY_MG_IND + mobility];
+        int mobilityEg = weights.vals[BISHOP_MOBILITY_EG_IND + mobility];
 
         if (board.getPiece(sq).isWhite()) {
             mg = weights.vals[BISHOP_PST_MG_IND + sq.value()] + mobilityMg;
@@ -34,14 +34,14 @@ public class EvalBishop {
         if (board.getPiece(sq).isWhite()) {
             features[BISHOP_PST_MG_IND + sq.value()] += phase;
             features[BISHOP_PST_EG_IND + sq.value()] += (1-phase);
-            features[BISHOP_MOBILITY_MG_IND] += mobility * phase;
-            features[BISHOP_MOBILITY_EG_IND] += mobility * (1-phase);
+            features[BISHOP_MOBILITY_MG_IND + mobility] += phase;
+            features[BISHOP_MOBILITY_EG_IND + mobility] += (1-phase);
 
         } else {
             features[BISHOP_PST_MG_IND + sq.flipVertical().value()] -= phase;
             features[BISHOP_PST_EG_IND + sq.flipVertical().value()] -= (1-phase);
-            features[BISHOP_MOBILITY_MG_IND] -= mobility * phase;
-            features[BISHOP_MOBILITY_EG_IND] -= mobility * (1- phase);
+            features[BISHOP_MOBILITY_MG_IND + mobility] -= phase;
+            features[BISHOP_MOBILITY_EG_IND + mobility] -= (1- phase);
         }
         return null;
     }
