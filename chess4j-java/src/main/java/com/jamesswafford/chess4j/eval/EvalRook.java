@@ -3,6 +3,8 @@ package com.jamesswafford.chess4j.eval;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.Square;
+import com.jamesswafford.chess4j.movegen.Mobility;
+
 import io.vavr.Tuple2;
 
 import static com.jamesswafford.chess4j.eval.EvalMajorOn7th.*;
@@ -16,15 +18,19 @@ public class EvalRook {
 
         int mg, eg;
 
+        int mobility = Mobility.rookMobility(board, sq);
+        int mobilityMg = weights.vals[ROOK_MOBILITY_MG_IND + mobility];
+        int mobilityEg = weights.vals[ROOK_MOBILITY_EG_IND + mobility];
+
         Tuple2<Integer, Integer> major7th = evalMajorOn7th(weights, board, isWhite, sq);
         Tuple2<Integer, Integer> rookOpen = evalRookOpenFile(weights, board, isWhite, sq);
 
         if (isWhite) {
-            mg = weights.vals[ROOK_PST_MG_IND + sq.value()] + major7th._1 + rookOpen._1;
-            eg = weights.vals[ROOK_PST_EG_IND + sq.value()] + major7th._2 + rookOpen._2;
+            mg = weights.vals[ROOK_PST_MG_IND + sq.value()] + major7th._1 + rookOpen._1 + mobilityMg;
+            eg = weights.vals[ROOK_PST_EG_IND + sq.value()] + major7th._2 + rookOpen._2 + mobilityEg;
         } else {
-            mg = -(weights.vals[ROOK_PST_MG_IND + sq.flipVertical().value()] + major7th._1 + rookOpen._1);
-            eg = -(weights.vals[ROOK_PST_EG_IND + sq.flipVertical().value()] + major7th._2 + rookOpen._2);
+            mg = -(weights.vals[ROOK_PST_MG_IND + sq.flipVertical().value()] + major7th._1 + rookOpen._1 + mobilityMg);
+            eg = -(weights.vals[ROOK_PST_EG_IND + sq.flipVertical().value()] + major7th._2 + rookOpen._2 + mobilityEg);
         }
 
         return new Tuple2<>(mg, eg);
@@ -58,12 +64,19 @@ public class EvalRook {
 
     public static java.lang.Void extractRookFeatures(double[] features, Board board, Square sq, double phase) {
         boolean isWhite = board.getPiece(sq).isWhite();
+
+        int mobility = Mobility.rookMobility(board, sq);
+
         if (isWhite) {
             features[ROOK_PST_EG_IND + sq.value()] += (1-phase);
             features[ROOK_PST_MG_IND + sq.value()] += phase;
+            features[ROOK_MOBILITY_MG_IND + mobility] += phase;
+            features[ROOK_MOBILITY_EG_IND + mobility] += (1-phase);
         } else {
             features[ROOK_PST_EG_IND + sq.flipVertical().value()] -= (1-phase);
             features[ROOK_PST_MG_IND + sq.flipVertical().value()] -= phase;
+            features[ROOK_MOBILITY_MG_IND + mobility] -= phase;
+            features[ROOK_MOBILITY_EG_IND + mobility] -= (1- phase);
         }
 
         exractMajorOn7thFeatures(features, board, isWhite, sq, phase);

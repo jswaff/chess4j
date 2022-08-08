@@ -13,6 +13,14 @@ public final class Mobility {
         return Long.bitCount(bishopMoves);
     }
 
+    public static int rookMobility(Board board, Square fromSq) {
+
+        long emptySquares = ~(board.getWhitePieces() | board.getBlackPieces());
+        long rookMoves = Magic.getRookMoves(board, fromSq.value(), emptySquares);
+
+        return Long.bitCount(rookMoves);
+    }
+
     public static int queenMobility(Board board, Square fromSq) {
 
         long emptySquares = ~(board.getWhitePieces() | board.getBlackPieces());

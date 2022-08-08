@@ -4,6 +4,8 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Queen;
+import com.jamesswafford.chess4j.pieces.Rook;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -35,6 +37,26 @@ public class MobilityTest {
         board.applyMove(new Move(Pawn.BLACK_PAWN, B7, B5));
         assertEquals(3, bishopMobility(board, F1));
         assertEquals(6, bishopMobility(board, C8));
+    }
+
+    @Test
+    public void rookMobility1() {
+
+        Board board = new Board();
+        assertEquals(0, rookMobility(board, A1));
+        assertEquals(0, rookMobility(board, A8));
+
+        board.applyMove(new Move(Pawn.WHITE_PAWN, A2, A4));
+        assertEquals(2, rookMobility(board, A1));
+        assertEquals(0, rookMobility(board, A8));
+
+        board.applyMove(new Move(Pawn.BLACK_PAWN, A7, A6));
+        assertEquals(2, rookMobility(board, A1));
+        assertEquals(1, rookMobility(board, A8));
+
+        board.applyMove(new Move(Rook.WHITE_ROOK, A1, A3));
+        assertEquals(9, rookMobility(board, A3));
+        assertEquals(1, rookMobility(board, A8));
     }
 
     @Test
