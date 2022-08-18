@@ -5,6 +5,7 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.North;
+import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.South;
 import com.jamesswafford.chess4j.board.squares.Square;
 
@@ -12,6 +13,7 @@ public class PawnUtils {
 
     private static final long[] isolated = new long[64];
     private static final long[][] passed = new long[64][2];
+    private static final long[][] attacked = new long[64][2];
 
     static {
         for (int i=0;i<64;i++) {
@@ -34,6 +36,26 @@ public class PawnUtils {
             if (sq.file().getValue() < File.FILE_H.getValue()) {
                 passed[i][Color.WHITE.ordinal()] |= Bitboard.rays[i+1][North.getInstance().value()];
                 passed[i][Color.BLACK.ordinal()] |= Bitboard.rays[i+1][South.getInstance().value()];
+            }
+
+            attacked[i][Color.WHITE.ordinal()] = 0;
+            attacked[i][Color.BLACK.ordinal()] = 0;
+
+            if (sq.file().getValue() > File.FILE_A.getValue()) {
+                if (sq.rank() != Rank.RANK_1) {
+                    attacked[i][Color.BLACK.ordinal()] |= Bitboard.toBitboard(Square.valueOf(i+7));
+                }
+                if (sq.rank() != Rank.RANK_8) {
+                    attacked[i][Color.WHITE.ordinal()] |= Bitboard.toBitboard(Square.valueOf(i-9));
+                }
+            }
+            if (sq.file().getValue() < File.FILE_H.getValue()) {
+                if (sq.rank() != Rank.RANK_1) {
+                    attacked[i][Color.BLACK.ordinal()] |= Bitboard.toBitboard(Square.valueOf(i+9));
+                }
+                if (sq.rank() != Rank.RANK_8) {
+                    attacked[i][Color.WHITE.ordinal()] |= Bitboard.toBitboard(Square.valueOf(i-7));
+                }
             }
         }
     }
@@ -66,4 +88,19 @@ public class PawnUtils {
         long friends = isWhite ? board.getWhitePawns() : board.getBlackPawns();
         return (isolated[pawnSq.value()] & friends)==0;
     }
+
+    /**
+     * A supported square is one that is defended by a friendly pawn.  
+     * 
+     * @param board
+     * @param sq
+     * @param isWhite
+     * @return
+     */
+    public static boolean isSupported(Board board, Square sq, boolean isWhite) {
+        long friends = isWhite ? board.getWhitePawns() : board.getBlackPawns();
+        // being supported by a friendly pawn is equivalent to asking if the enemy would be attacked
+        return (attacked[sq.value()][isWhite?Color.BLACK.ordinal():Color.WHITE.ordinal()] & friends) != 0;
+    }
+
 }

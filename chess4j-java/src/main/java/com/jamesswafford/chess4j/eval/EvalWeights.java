@@ -52,6 +52,12 @@ public class EvalWeights {
             // KNIGHT_PST_EG
             -40,-30,-30,-30,-30,-30,-30,-32,-39,-35,-25,-15,-21,-31,-37,-37,-35,-16,2,1,-6,-6,-22,-34,-28,-7,3,12,8,8,-7,-24,-30,-20,0,2,1,-3,-12,-30,-49,-27,-22,-8,-9,-23,-23,-47,-32,-32,-35,-25,-25,-29,-34,-34,-12,-51,-17,-36,-32,-35,-39,-9,
 
+            // KNIGHT_OUTPOST
+            1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,
+
+            // KNIGHT_SUPPORTED_OUTPOST
+            2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,
+
              -8,  // KNIGHT TROPISM_MG
              -9,  // KNIGHT_TROPISM_EG
 
@@ -131,32 +137,34 @@ public class EvalWeights {
     public static final int BISHOP_MOBILITY_EG_IND = 285;
     public static final int KNIGHT_PST_MG_IND = 299;
     public static final int KNIGHT_PST_EG_IND = 363;
-    public static final int KNIGHT_TROPISM_MG_IND = 427;
-    public static final int KNIGHT_TROPISM_EG_IND = 428;
-    public static final int ROOK_PST_MG_IND = 429;
-    public static final int ROOK_PST_EG_IND = 493;
-    public static final int ROOK_MOBILITY_MG_IND = 557;
-    public static final int ROOK_MOBILITY_EG_IND = 572;
-    public static final int ROOK_OPEN_FILE_MG_IND = 587;
-    public static final int ROOK_OPEN_FILE_EG_IND = 588;
-    public static final int ROOK_HALF_OPEN_FILE_MG_IND = 589;
-    public static final int ROOK_HALF_OPEN_FILE_EG_IND = 590;
-    public static final int QUEEN_PST_MG_IND = 591;
-    public static final int QUEEN_PST_EG_IND = 655;
-    public static final int QUEEN_MOBILITY_MG_IND = 719;
-    public static final int QUEEN_MOBILITY_EG_IND = 747;
-    public static final int MAJOR_ON_7TH_MG_IND = 775;
-    public static final int MAJOR_ON_7TH_EG_IND = 776;
-    public static final int CONNECTED_MAJORS_ON_7TH_MG_IND = 777;
-    public static final int CONNECTED_MAJORS_ON_7TH_EG_IND = 778;
-    public static final int PAWN_PST_MG_IND = 779;
-    public static final int PAWN_PST_EG_IND = 843;
-    public static final int PASSED_PAWN_MG_IND = 907;
-    public static final int PASSED_PAWN_EG_IND = 915;
-    public static final int ISOLATED_PAWN_MG_IND = 923;
-    public static final int ISOLATED_PAWN_EG_IND = 924;
-    public static final int DOUBLED_PAWN_MG_IND = 925;
-    public static final int DOUBLED_PAWN_EG_IND = 926;
+    public static final int KNIGHT_OUTPOST_IND = 427;
+    public static final int KNIGHT_SUPPORTED_OUTPOST_IND = 491;
+    public static final int KNIGHT_TROPISM_MG_IND = 555;
+    public static final int KNIGHT_TROPISM_EG_IND = 556;
+    public static final int ROOK_PST_MG_IND = 557;
+    public static final int ROOK_PST_EG_IND = 621;
+    public static final int ROOK_MOBILITY_MG_IND = 685;
+    public static final int ROOK_MOBILITY_EG_IND = 700;
+    public static final int ROOK_OPEN_FILE_MG_IND = 715;
+    public static final int ROOK_OPEN_FILE_EG_IND = 716;
+    public static final int ROOK_HALF_OPEN_FILE_MG_IND = 717;
+    public static final int ROOK_HALF_OPEN_FILE_EG_IND = 718;
+    public static final int QUEEN_PST_MG_IND = 719;
+    public static final int QUEEN_PST_EG_IND = 783;
+    public static final int QUEEN_MOBILITY_MG_IND = 847;
+    public static final int QUEEN_MOBILITY_EG_IND = 875;
+    public static final int MAJOR_ON_7TH_MG_IND = 903;
+    public static final int MAJOR_ON_7TH_EG_IND = 904;
+    public static final int CONNECTED_MAJORS_ON_7TH_MG_IND = 905;
+    public static final int CONNECTED_MAJORS_ON_7TH_EG_IND = 906;
+    public static final int PAWN_PST_MG_IND = 907;
+    public static final int PAWN_PST_EG_IND = 971;
+    public static final int PASSED_PAWN_MG_IND = 1035;
+    public static final int PASSED_PAWN_EG_IND = 1043;
+    public static final int ISOLATED_PAWN_MG_IND = 1051;
+    public static final int ISOLATED_PAWN_EG_IND = 1052;
+    public static final int DOUBLED_PAWN_MG_IND = 1053;
+    public static final int DOUBLED_PAWN_EG_IND = 1054;
 
     private static final Map<String, Tuple2<Integer, Integer>> indexMap = new HashMap<>();
     static {
@@ -184,6 +192,8 @@ public class EvalWeights {
         indexMap.put("BISHOP_MOBILITY_EG", new Tuple2<>(BISHOP_MOBILITY_EG_IND, 14));
         indexMap.put("KNIGHT_PST_MG", new Tuple2<>(KNIGHT_PST_MG_IND, 64));
         indexMap.put("KNIGHT_PST_EG", new Tuple2<>(KNIGHT_PST_EG_IND, 64));
+        indexMap.put("KNIGHT_OUTPOST", new Tuple2<Integer,Integer>(KNIGHT_OUTPOST_IND, 64));
+        indexMap.put("KNIGHT_SUPPORTED_OUTPOST", new Tuple2<Integer,Integer>(KNIGHT_SUPPORTED_OUTPOST_IND, 64));
         indexMap.put("KNIGHT_TROPISM_MG", new Tuple2<>(KNIGHT_TROPISM_MG_IND, 1));
         indexMap.put("KNIGHT_TROPISM_EG", new Tuple2<>(KNIGHT_TROPISM_EG_IND, 1));
         indexMap.put("ROOK_PST_MG", new Tuple2<>(ROOK_PST_MG_IND, 64));

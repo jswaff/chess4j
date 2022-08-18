@@ -1,6 +1,7 @@
 package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.board.Board;
+
 import io.vavr.Tuple2;
 import org.junit.Test;
 
@@ -36,6 +37,19 @@ public class EvalKnightTest {
     }
 
     @Test
+    public void testEvalKnightWithOutpost() {
+        Board board = new Board("r1br1k2/pp3pp1/1b4np/4P3/2pNN3/2P3B1/PP1R1PPP/3R2K1 w - - 0 1");
+
+        Tuple2<Integer, Integer> score = evalKnight(weights, board, D4);
+        int tropismMg = weights.vals[KNIGHT_TROPISM_MG_IND] * D4.distance(F8);
+        int outpostScore = weights.vals[KNIGHT_OUTPOST_IND + D4.value()] + weights.vals[KNIGHT_SUPPORTED_OUTPOST_IND + D4.value()];
+        assertEquals(weights.vals[KNIGHT_PST_MG_IND + D4.value()] + tropismMg + outpostScore, (int)score._1);
+
+        int tropismEg = weights.vals[KNIGHT_TROPISM_EG_IND] * D4.distance(F8);
+        assertEquals(weights.vals[KNIGHT_PST_EG_IND + D4.value()] + tropismEg + outpostScore, (int)score._2);
+    }
+
+    @Test
     public void testExtractKnightFeatures() {
         Board board = new Board();
 
@@ -67,4 +81,13 @@ public class EvalKnightTest {
         assertEquals(-B8.distance(E1), features2[KNIGHT_TROPISM_EG_IND], testEpsilon);
     }
 
+    @Test
+    public void testExtractKnightFeatures_outpost() {
+        Board board = new Board("r1br1k2/pp3pp1/1b4np/4P3/2pNN3/2P3B1/PP1R1PPP/3R2K1 w - - 0 1");
+
+        double[] features = new double[weights.vals.length];
+        extractKnightFeatures(features, board, D4, 0.3); // phase doesn't really matter
+        assertEquals(1, features[KNIGHT_OUTPOST_IND + D4.value()], testEpsilon);
+        assertEquals(1, features[KNIGHT_SUPPORTED_OUTPOST_IND + D4.value()], testEpsilon);
+    }
 }
