@@ -19,9 +19,17 @@ public class EvalBishop {
         if (board.getPiece(sq).isWhite()) {
             mg = weights.vals[BISHOP_PST_MG_IND + sq.value()] + mobilityMg;
             eg = weights.vals[BISHOP_PST_EG_IND + sq.value()] + mobilityEg;
+
+            if (BishopUtils.isTrapped(board, sq, true)) {
+
+            }
         } else {
             mg = -(weights.vals[BISHOP_PST_MG_IND + sq.flipVertical().value()] + mobilityMg);
             eg = -(weights.vals[BISHOP_PST_EG_IND + sq.flipVertical().value()]  + mobilityEg);
+
+            if (BishopUtils.isTrapped(board, sq, false)) {
+                
+            }
         }
 
         return new Tuple2<>(mg, eg);
