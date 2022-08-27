@@ -56,6 +56,19 @@ public class EvalBishopTest {
     }
 
     @Test
+    public void testEvalBishop3_Trapped() {
+        Board board = new Board("8/pp2k1p1/4pp2/1P6/7p/P3P1P1/5PKb/2B5 b - - 0 1");
+
+        Tuple2<Integer, Integer> score = evalBishop(weights, board, H2);
+        assertEquals(-weights.vals[BISHOP_PST_MG_IND + H2.flipVertical().value()] -
+                weights.vals[BISHOP_MOBILITY_MG_IND + 1] -
+                weights.vals[BISHOP_TRAPPED_IND], (int)score._1);
+        assertEquals(-weights.vals[BISHOP_PST_EG_IND + H2.flipVertical().value()] -
+                weights.vals[BISHOP_MOBILITY_EG_IND + 1] -
+                weights.vals[BISHOP_TRAPPED_IND], (int)score._2);
+    }
+
+    @Test
     public void testExtractBishopFeatures() {
 
         Board board = new Board();
@@ -109,4 +122,14 @@ public class EvalBishopTest {
         assertEquals(-0.6, features2[BISHOP_MOBILITY_EG_IND + 1], testEpsilon);
     }
 
+    @Test
+    public void testExtractBishopFeatures_trapped() {
+
+        Board board = new Board("8/pp2k1p1/4pp2/1P6/7p/P3P1P1/5PKb/2B5 b - - 0 1");
+
+        double[] features = new double[weights.vals.length];
+        extractBishopFeatures(features, board, H2, 0.4);
+
+        assertEquals(-1.0, features[BISHOP_TRAPPED_IND], 0);
+    }
 }
