@@ -47,7 +47,7 @@ public class EvalWeights {
            -50,-22,-11,-2,6,12,18,24,29,34,38,42,46,50,  
 
            // TRAPPED BISHOP
-           -50,
+           -125,
 
             // KNIGHT_PST_MG
             -43,-30,-31,-30,-30,-31,-30,-32,-39,-36,-22,-19,-23,-28,-36,-36,-35,-14,2,6,-1,-6,-17,-32,-26,-4,6,12,-1,16,-5,-17,-29,-21,-7,-8,-2,-8,-6,-27,-45,-26,-18,-7,0,-11,-16,-39,-33,-33,-31,-16,-21,-21,-33,-30,-9,-43,-20,-36,-29,-27,-40,-9,
@@ -241,11 +241,13 @@ public class EvalWeights {
         for (int i=0;i<vals.length;i++) {
             vals[i] = 0;
         }
-        vals[0] = 100;
-        vals[1] = 900;
-        vals[2] = 500;
-        vals[3] = 300;
-        vals[4] = 300;
+        vals[PAWN_VAL_IND] = 100;
+        vals[QUEEN_VAL_IND] = 900;
+        vals[ROOK_VAL_IND] = 500;
+        vals[BISHOP_VAL_IND] = 300;
+        vals[KNIGHT_VAL_IND] = 300;
+        // trapped bishop is an exception. 
+        vals[BISHOP_TRAPPED_IND] = -125;
     }
 
     public List<Integer> getVals(String key) {
