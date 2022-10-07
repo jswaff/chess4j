@@ -77,9 +77,13 @@ public class EvalWeights {
             11,-3,-1,1,2,3,4,5,6,8,8,9,10,11,12,
 
              36,  // ROOK_OPEN_FILE_MG
+              7,  // ROOK_OPEN_FILE_SUPPORTED_MG
              27,  // ROOK_OPEN_FILE_EG
+             11,  // ROOK_OPEN_FILE_SUPPORTED_EG
              20,  // ROOK_HALF_OPEN_FILE_MG
+             15,  // ROOK_HALF_OPEN_FILE_SUPPORTED_MG
              14,  // ROOK_HALF_OPEN_FILE_EG
+             17,  // ROOK_HALF_OPEN_FILE_SUPPORTED_EG
 
             // QUEEN_PST_MG
             -1,7,8,11,18,10,9,12,-30,-47,-6,0,12,22,6,14,-17,-8,-1,10,24,43,43,43,-17,-5,-2,7,22,31,35,34,-15,-4,-3,1,3,17,15,18,-17,-7,-2,-8,-6,0,8,0,-20,-12,-4,-7,-7,-7,-8,-4,-13,-23,-19,-8,-18,-28,-11,-6,
@@ -150,25 +154,29 @@ public class EvalWeights {
     public static final int ROOK_MOBILITY_MG_IND = 686;
     public static final int ROOK_MOBILITY_EG_IND = 701;
     public static final int ROOK_OPEN_FILE_MG_IND = 716;
-    public static final int ROOK_OPEN_FILE_EG_IND = 717;
-    public static final int ROOK_HALF_OPEN_FILE_MG_IND = 718;
-    public static final int ROOK_HALF_OPEN_FILE_EG_IND = 719;
-    public static final int QUEEN_PST_MG_IND = 720;
-    public static final int QUEEN_PST_EG_IND = 784;
-    public static final int QUEEN_MOBILITY_MG_IND = 848;
-    public static final int QUEEN_MOBILITY_EG_IND = 876;
-    public static final int MAJOR_ON_7TH_MG_IND = 904;
-    public static final int MAJOR_ON_7TH_EG_IND = 905;
-    public static final int CONNECTED_MAJORS_ON_7TH_MG_IND = 906;
-    public static final int CONNECTED_MAJORS_ON_7TH_EG_IND = 907;
-    public static final int PAWN_PST_MG_IND = 908;
-    public static final int PAWN_PST_EG_IND = 972;
-    public static final int PASSED_PAWN_MG_IND = 1036;
-    public static final int PASSED_PAWN_EG_IND = 1044;
-    public static final int ISOLATED_PAWN_MG_IND = 1052;
-    public static final int ISOLATED_PAWN_EG_IND = 1053;
-    public static final int DOUBLED_PAWN_MG_IND = 1054;
-    public static final int DOUBLED_PAWN_EG_IND = 1055;
+    public static final int ROOK_OPEN_FILE_SUPPORTED_MG_IND = 717;
+    public static final int ROOK_OPEN_FILE_EG_IND = 718;
+    public static final int ROOK_OPEN_FILE_SUPPORTED_EG_IND = 719;
+    public static final int ROOK_HALF_OPEN_FILE_MG_IND = 720;
+    public static final int ROOK_HALF_OPEN_FILE_SUPPORTED_MG_IND = 721;
+    public static final int ROOK_HALF_OPEN_FILE_EG_IND = 722;
+    public static final int ROOK_HALF_OPEN_FILE_SUPPORTED_EG_IND = 723;
+    public static final int QUEEN_PST_MG_IND = 724;
+    public static final int QUEEN_PST_EG_IND = 788;
+    public static final int QUEEN_MOBILITY_MG_IND = 852;
+    public static final int QUEEN_MOBILITY_EG_IND = 880;
+    public static final int MAJOR_ON_7TH_MG_IND = 908;
+    public static final int MAJOR_ON_7TH_EG_IND = 909;
+    public static final int CONNECTED_MAJORS_ON_7TH_MG_IND = 910;
+    public static final int CONNECTED_MAJORS_ON_7TH_EG_IND = 911;
+    public static final int PAWN_PST_MG_IND = 912;
+    public static final int PAWN_PST_EG_IND = 976;
+    public static final int PASSED_PAWN_MG_IND = 1040;
+    public static final int PASSED_PAWN_EG_IND = 1048;
+    public static final int ISOLATED_PAWN_MG_IND = 1056;
+    public static final int ISOLATED_PAWN_EG_IND = 1057;
+    public static final int DOUBLED_PAWN_MG_IND = 1058;
+    public static final int DOUBLED_PAWN_EG_IND = 1059;
 
     private static final Map<String, Tuple2<Integer, Integer>> indexMap = new HashMap<>();
     static {
@@ -206,9 +214,13 @@ public class EvalWeights {
         indexMap.put("ROOK_MOBILITY_MG", new Tuple2<>(ROOK_MOBILITY_MG_IND, 15));
         indexMap.put("ROOK_MOBILITY_EG", new Tuple2<>(ROOK_MOBILITY_EG_IND, 15));
         indexMap.put("ROOK_OPEN_FILE_MG", new Tuple2<>(ROOK_OPEN_FILE_MG_IND, 1));
+        indexMap.put("ROOK_OPEN_FILE_SUPPORTED_MG", new Tuple2<>(ROOK_OPEN_FILE_SUPPORTED_MG_IND, 1));
         indexMap.put("ROOK_OPEN_FILE_EG", new Tuple2<>(ROOK_OPEN_FILE_EG_IND, 1));
+        indexMap.put("ROOK_OPEN_FILE_SUPPORTED_EG", new Tuple2<>(ROOK_OPEN_FILE_SUPPORTED_EG_IND, 1));
         indexMap.put("ROOK_HALF_OPEN_FILE_MG", new Tuple2<>(ROOK_HALF_OPEN_FILE_MG_IND, 1));
+        indexMap.put("ROOK_HALF_OPEN_FILE_SUPPORTED_MG", new Tuple2<>(ROOK_HALF_OPEN_FILE_SUPPORTED_MG_IND, 1));
         indexMap.put("ROOK_HALF_OPEN_FILE_EG", new Tuple2<>(ROOK_HALF_OPEN_FILE_EG_IND, 1));
+        indexMap.put("ROOK_HALF_OPEN_FILE_SUPPORTED_EG", new Tuple2<>(ROOK_HALF_OPEN_FILE_SUPPORTED_EG_IND, 1));
         indexMap.put("QUEEN_PST_MG", new Tuple2<>(QUEEN_PST_MG_IND, 64));
         indexMap.put("QUEEN_PST_EG", new Tuple2<>(QUEEN_PST_EG_IND, 64));
         indexMap.put("QUEEN_MOBILITY_MG", new Tuple2<>(QUEEN_MOBILITY_MG_IND, 28));

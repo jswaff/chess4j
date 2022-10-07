@@ -41,8 +41,10 @@ public class EvalMajorOn7thTest {
                 score._2, testEpsilon);
 
         score = evalMajorOn7th(weights, board, true, F7);
-        assertEquals(weights.vals[MAJOR_ON_7TH_MG_IND], score._1, testEpsilon);
-        assertEquals(weights.vals[MAJOR_ON_7TH_EG_IND], score._2, testEpsilon);
+        assertEquals(weights.vals[MAJOR_ON_7TH_MG_IND] + weights.vals[CONNECTED_MAJORS_ON_7TH_MG_IND], 
+                score._1, testEpsilon);
+        assertEquals(weights.vals[MAJOR_ON_7TH_EG_IND] + weights.vals[CONNECTED_MAJORS_ON_7TH_EG_IND], 
+                score._2, testEpsilon);
 
         score = evalMajorOn7th(weights, board, false, A2);
         assertEquals(weights.vals[MAJOR_ON_7TH_MG_IND], score._1, testEpsilon);
@@ -97,8 +99,8 @@ public class EvalMajorOn7thTest {
         exractMajorOn7thFeatures(features, board, true, F7, 0.8);
         assertEquals(0.8, features[MAJOR_ON_7TH_MG_IND], testEpsilon);
         assertEquals(0.2, features[MAJOR_ON_7TH_EG_IND], testEpsilon);
-        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_MG_IND], testEpsilon);
-        assertEquals(0, features[CONNECTED_MAJORS_ON_7TH_EG_IND], testEpsilon);
+        assertEquals(0.8, features[CONNECTED_MAJORS_ON_7TH_MG_IND], testEpsilon);
+        assertEquals(0.2, features[CONNECTED_MAJORS_ON_7TH_EG_IND], testEpsilon);
 
         Arrays.fill(features, 0);
         exractMajorOn7thFeatures(features, board, false, A2, 0.8);
