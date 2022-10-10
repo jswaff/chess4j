@@ -53,10 +53,10 @@ public class EvalRook {
 
         long fileMask = Bitboard.files[sq.file().getValue()] ^ Bitboard.squares[sq.value()];
         if ((fileMask & friendlyPawns) == 0) {
+            long rookFileMoves = Magic.getRookMoves(board,sq.value(), Bitboard.files[sq.file().getValue()]);
             if ((fileMask & enemyPawns) != 0) {
                 mg += weights.vals[ROOK_HALF_OPEN_FILE_MG_IND];
                 eg += weights.vals[ROOK_HALF_OPEN_FILE_EG_IND];
-                long rookFileMoves = Magic.getRookMoves(board,sq.value(), Bitboard.files[sq.file().getValue()]);
                 if ((rookFileMoves & friendlyRooks) != 0) {
                     mg += weights.vals[ROOK_HALF_OPEN_FILE_SUPPORTED_MG_IND];
                     eg += weights.vals[ROOK_HALF_OPEN_FILE_SUPPORTED_EG_IND];
@@ -64,7 +64,6 @@ public class EvalRook {
             } else {
                 mg += weights.vals[ROOK_OPEN_FILE_MG_IND];
                 eg += weights.vals[ROOK_OPEN_FILE_EG_IND];
-                long rookFileMoves = Magic.getRookMoves(board,sq.value(), Bitboard.files[sq.file().getValue()]);
                 if ((rookFileMoves & friendlyRooks) != 0) {
                     mg += weights.vals[ROOK_OPEN_FILE_SUPPORTED_MG_IND];
                     eg += weights.vals[ROOK_OPEN_FILE_SUPPORTED_EG_IND];

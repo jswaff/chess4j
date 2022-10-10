@@ -3,7 +3,6 @@ package com.jamesswafford.chess4j.eval;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
-import com.jamesswafford.chess4j.board.squares.East;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.movegen.Magic;
 import io.vavr.Tuple2;

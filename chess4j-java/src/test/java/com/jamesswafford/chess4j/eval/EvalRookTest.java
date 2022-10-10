@@ -37,7 +37,7 @@ public class EvalRookTest {
     }
 
     @Test
-    public void testEvalRook_bankRankMate() {
+    public void testEvalRook_bankRank() {
 
         Board board = new Board("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
 
@@ -139,7 +139,7 @@ public class EvalRookTest {
     }
 
     @Test
-    public void testExtractRookFeatures_bankRankMate() {
+    public void testExtractRookFeatures_bankRank() {
 
         Board board = new Board("7k/2Q2R2/8/8/8/8/r7/7K w - - 0 1");
 
