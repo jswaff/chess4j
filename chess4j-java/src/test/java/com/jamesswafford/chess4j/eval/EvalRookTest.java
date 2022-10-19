@@ -3,6 +3,8 @@ package com.jamesswafford.chess4j.eval;
 import com.jamesswafford.chess4j.board.Board;
 
 import io.vavr.Tuple2;
+
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -68,6 +70,7 @@ public class EvalRookTest {
                 (int)score._2);
     }
 
+    @Ignore
     @Test
     public void testEvalRook_rookOpenFileSupported() {
         Board board = new Board("7k/8/8/8/8/3R4/8/3R3K w - - 0 1");
@@ -169,6 +172,7 @@ public class EvalRookTest {
         assertEquals(-0.2, features[ROOK_MOBILITY_EG_IND + 13], testEpsilon);
     }
 
+    @Ignore 
     @Test
     public void testExtractRookFeatures_rookOpenFileSupported() {
         Board board = new Board("7k/8/8/8/8/3R4/8/3R3K w - - 0 1");

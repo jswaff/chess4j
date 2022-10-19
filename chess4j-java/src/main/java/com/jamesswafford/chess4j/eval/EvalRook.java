@@ -3,7 +3,6 @@ package com.jamesswafford.chess4j.eval;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.movegen.Magic;
 import com.jamesswafford.chess4j.movegen.Mobility;
 
 import io.vavr.Tuple2;
@@ -40,34 +39,34 @@ public class EvalRook {
     private static Tuple2<Integer, Integer> evalRookOpenFile(EvalWeights weights, Board board, boolean isWhite, Square sq) {
         int mg = 0, eg = 0;
 
-        long friendlyPawns, enemyPawns, friendlyRooks;
+        long friendlyPawns, enemyPawns /*, friendlyRooks */;
         if (isWhite) {
             friendlyPawns = board.getWhitePawns();
             enemyPawns = board.getBlackPawns();
-            friendlyRooks = board.getWhiteRooks();
+            /* friendlyRooks = board.getWhiteRooks(); */
         } else {
             friendlyPawns = board.getBlackPawns();
             enemyPawns = board.getWhitePawns();
-            friendlyRooks = board.getBlackRooks();
+            /* friendlyRooks = board.getBlackRooks(); */
         }
 
         long fileMask = Bitboard.files[sq.file().getValue()] ^ Bitboard.squares[sq.value()];
         if ((fileMask & friendlyPawns) == 0) {
-            long rookFileMoves = Magic.getRookMoves(board,sq.value(), Bitboard.files[sq.file().getValue()]);
+            /*long rookFileMoves = Magic.getRookMoves(board,sq.value(), Bitboard.files[sq.file().getValue()]);*/
             if ((fileMask & enemyPawns) != 0) {
                 mg += weights.vals[ROOK_HALF_OPEN_FILE_MG_IND];
                 eg += weights.vals[ROOK_HALF_OPEN_FILE_EG_IND];
-                if ((rookFileMoves & friendlyRooks) != 0) {
+                /*if ((rookFileMoves & friendlyRooks) != 0) {
                     mg += weights.vals[ROOK_HALF_OPEN_FILE_SUPPORTED_MG_IND];
                     eg += weights.vals[ROOK_HALF_OPEN_FILE_SUPPORTED_EG_IND];
-                }
+                }*/
             } else {
                 mg += weights.vals[ROOK_OPEN_FILE_MG_IND];
                 eg += weights.vals[ROOK_OPEN_FILE_EG_IND];
-                if ((rookFileMoves & friendlyRooks) != 0) {
+                /*if ((rookFileMoves & friendlyRooks) != 0) {
                     mg += weights.vals[ROOK_OPEN_FILE_SUPPORTED_MG_IND];
                     eg += weights.vals[ROOK_OPEN_FILE_SUPPORTED_EG_IND];
-                }
+                }*/
             }
         }
 
@@ -99,52 +98,52 @@ public class EvalRook {
 
     private static void extractRookFeatures_OpenFile(double[] features, Board board, boolean isWhite, Square sq, double phase) {
         
-        long friendlyPawns, enemyPawns, friendlyRooks;
+        long friendlyPawns, enemyPawns /*, friendlyRooks */;
         if (isWhite) {
             friendlyPawns = board.getWhitePawns();
             enemyPawns = board.getBlackPawns();
-            friendlyRooks = board.getWhiteRooks();
+            /* friendlyRooks = board.getWhiteRooks(); */
         } else {
             friendlyPawns = board.getBlackPawns();
             enemyPawns = board.getWhitePawns();
-            friendlyRooks = board.getBlackRooks();
+            /* friendlyRooks = board.getBlackRooks(); */
         }
 
 
         long fileMask = Bitboard.files[sq.file().getValue()] ^ Bitboard.squares[sq.value()];
-        long rookFileMoves = Magic.getRookMoves(board,sq.value(), Bitboard.files[sq.file().getValue()]);
+        /*long rookFileMoves = Magic.getRookMoves(board,sq.value(), Bitboard.files[sq.file().getValue()]);*/
         if ((fileMask & friendlyPawns)==0) {
             if ((fileMask & enemyPawns)!=0) {
                 if (isWhite) {
                     features[ROOK_HALF_OPEN_FILE_MG_IND] += phase;
                     features[ROOK_HALF_OPEN_FILE_EG_IND] += (1-phase);
-                    if ((rookFileMoves & friendlyRooks) != 0) {
+                    /*if ((rookFileMoves & friendlyRooks) != 0) {
                         features[ROOK_HALF_OPEN_FILE_SUPPORTED_MG_IND] += phase;
                         features[ROOK_HALF_OPEN_FILE_SUPPORTED_EG_IND] += (1-phase);
-                    }
+                    }*/
                 } else {
                     features[ROOK_HALF_OPEN_FILE_MG_IND] -= phase;
                     features[ROOK_HALF_OPEN_FILE_EG_IND] -= (1-phase);
-                    if ((rookFileMoves & friendlyRooks) != 0) {
+                    /*if ((rookFileMoves & friendlyRooks) != 0) {
                         features[ROOK_HALF_OPEN_FILE_SUPPORTED_MG_IND] -= phase;
                         features[ROOK_HALF_OPEN_FILE_SUPPORTED_EG_IND] -= (1-phase);
-                    }
+                    }*/
                 }
             } else {
                 if (isWhite) {
                     features[ROOK_OPEN_FILE_MG_IND] += phase;
                     features[ROOK_OPEN_FILE_EG_IND] += (1-phase);
-                    if ((rookFileMoves & friendlyRooks) != 0) {
+                    /*if ((rookFileMoves & friendlyRooks) != 0) {
                         features[ROOK_OPEN_FILE_SUPPORTED_MG_IND] += phase;
                         features[ROOK_OPEN_FILE_SUPPORTED_EG_IND] += (1-phase);
-                    }
+                    }*/
                 } else {
                     features[ROOK_OPEN_FILE_MG_IND] -= phase;
                     features[ROOK_OPEN_FILE_EG_IND] -= (1-phase);
-                    if ((rookFileMoves & friendlyRooks) != 0) {
+                    /*if ((rookFileMoves & friendlyRooks) != 0) {
                         features[ROOK_OPEN_FILE_SUPPORTED_MG_IND] -= phase;
                         features[ROOK_OPEN_FILE_SUPPORTED_EG_IND] -= (1-phase);
-                    }
+                    }*/
                 }
             }
         }
