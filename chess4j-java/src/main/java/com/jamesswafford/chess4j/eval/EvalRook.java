@@ -39,23 +39,34 @@ public class EvalRook {
     private static Tuple2<Integer, Integer> evalRookOpenFile(EvalWeights weights, Board board, boolean isWhite, Square sq) {
         int mg = 0, eg = 0;
 
-        long friends,enemies;
+        long friendlyPawns, enemyPawns /*, friendlyRooks */;
         if (isWhite) {
-            friends = board.getWhitePawns();
-            enemies = board.getBlackPawns();
+            friendlyPawns = board.getWhitePawns();
+            enemyPawns = board.getBlackPawns();
+            /* friendlyRooks = board.getWhiteRooks(); */
         } else {
-            friends = board.getBlackPawns();
-            enemies = board.getWhitePawns();
+            friendlyPawns = board.getBlackPawns();
+            enemyPawns = board.getWhitePawns();
+            /* friendlyRooks = board.getBlackRooks(); */
         }
 
         long fileMask = Bitboard.files[sq.file().getValue()] ^ Bitboard.squares[sq.value()];
-        if ((fileMask & friends)==0) {
-            if ((fileMask & enemies)!=0) {
+        if ((fileMask & friendlyPawns) == 0) {
+            /*long rookFileMoves = Magic.getRookMoves(board,sq.value(), Bitboard.files[sq.file().getValue()]);*/
+            if ((fileMask & enemyPawns) != 0) {
                 mg += weights.vals[ROOK_HALF_OPEN_FILE_MG_IND];
                 eg += weights.vals[ROOK_HALF_OPEN_FILE_EG_IND];
+                /*if ((rookFileMoves & friendlyRooks) != 0) {
+                    mg += weights.vals[ROOK_HALF_OPEN_FILE_SUPPORTED_MG_IND];
+                    eg += weights.vals[ROOK_HALF_OPEN_FILE_SUPPORTED_EG_IND];
+                }*/
             } else {
                 mg += weights.vals[ROOK_OPEN_FILE_MG_IND];
                 eg += weights.vals[ROOK_OPEN_FILE_EG_IND];
+                /*if ((rookFileMoves & friendlyRooks) != 0) {
+                    mg += weights.vals[ROOK_OPEN_FILE_SUPPORTED_MG_IND];
+                    eg += weights.vals[ROOK_OPEN_FILE_SUPPORTED_EG_IND];
+                }*/
             }
         }
 
@@ -86,32 +97,53 @@ public class EvalRook {
     }
 
     private static void extractRookFeatures_OpenFile(double[] features, Board board, boolean isWhite, Square sq, double phase) {
-        long friends,enemies;
+        
+        long friendlyPawns, enemyPawns /*, friendlyRooks */;
         if (isWhite) {
-            friends = board.getWhitePawns();
-            enemies = board.getBlackPawns();
+            friendlyPawns = board.getWhitePawns();
+            enemyPawns = board.getBlackPawns();
+            /* friendlyRooks = board.getWhiteRooks(); */
         } else {
-            friends = board.getBlackPawns();
-            enemies = board.getWhitePawns();
+            friendlyPawns = board.getBlackPawns();
+            enemyPawns = board.getWhitePawns();
+            /* friendlyRooks = board.getBlackRooks(); */
         }
 
+
         long fileMask = Bitboard.files[sq.file().getValue()] ^ Bitboard.squares[sq.value()];
-        if ((fileMask & friends)==0) {
-            if ((fileMask & enemies)!=0) {
+        /*long rookFileMoves = Magic.getRookMoves(board,sq.value(), Bitboard.files[sq.file().getValue()]);*/
+        if ((fileMask & friendlyPawns)==0) {
+            if ((fileMask & enemyPawns)!=0) {
                 if (isWhite) {
                     features[ROOK_HALF_OPEN_FILE_MG_IND] += phase;
                     features[ROOK_HALF_OPEN_FILE_EG_IND] += (1-phase);
+                    /*if ((rookFileMoves & friendlyRooks) != 0) {
+                        features[ROOK_HALF_OPEN_FILE_SUPPORTED_MG_IND] += phase;
+                        features[ROOK_HALF_OPEN_FILE_SUPPORTED_EG_IND] += (1-phase);
+                    }*/
                 } else {
                     features[ROOK_HALF_OPEN_FILE_MG_IND] -= phase;
                     features[ROOK_HALF_OPEN_FILE_EG_IND] -= (1-phase);
+                    /*if ((rookFileMoves & friendlyRooks) != 0) {
+                        features[ROOK_HALF_OPEN_FILE_SUPPORTED_MG_IND] -= phase;
+                        features[ROOK_HALF_OPEN_FILE_SUPPORTED_EG_IND] -= (1-phase);
+                    }*/
                 }
             } else {
                 if (isWhite) {
                     features[ROOK_OPEN_FILE_MG_IND] += phase;
                     features[ROOK_OPEN_FILE_EG_IND] += (1-phase);
+                    /*if ((rookFileMoves & friendlyRooks) != 0) {
+                        features[ROOK_OPEN_FILE_SUPPORTED_MG_IND] += phase;
+                        features[ROOK_OPEN_FILE_SUPPORTED_EG_IND] += (1-phase);
+                    }*/
                 } else {
                     features[ROOK_OPEN_FILE_MG_IND] -= phase;
                     features[ROOK_OPEN_FILE_EG_IND] -= (1-phase);
+                    /*if ((rookFileMoves & friendlyRooks) != 0) {
+                        features[ROOK_OPEN_FILE_SUPPORTED_MG_IND] -= phase;
+                        features[ROOK_OPEN_FILE_SUPPORTED_EG_IND] -= (1-phase);
+                    }*/
                 }
             }
         }

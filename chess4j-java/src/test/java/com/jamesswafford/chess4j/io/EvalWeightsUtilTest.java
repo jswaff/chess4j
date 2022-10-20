@@ -40,6 +40,9 @@ public class EvalWeightsUtilTest {
             assertEquals(6, weights.vals[EvalWeights.MAJOR_ON_7TH_MG_IND]);
             assertEquals(49, weights.vals[EvalWeights.QUEEN_PST_MG_IND +1]);
             assertEquals(-4, weights.vals[EvalWeights.DOUBLED_PAWN_EG_IND]);
+
+            assertEquals(9, weights.vals[EvalWeights.ROOK_OPEN_FILE_SUPPORTED_EG_IND]);
+            assertEquals(19, weights.vals[EvalWeights.ROOK_HALF_OPEN_FILE_SUPPORTED_EG_IND]);
         }
     }
 

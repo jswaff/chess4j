@@ -3,7 +3,6 @@ package com.jamesswafford.chess4j.eval;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
-import com.jamesswafford.chess4j.board.squares.East;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.movegen.Magic;
 import io.vavr.Tuple2;
@@ -42,8 +41,7 @@ public class EvalMajorOn7th {
     private static Tuple2<Integer, Integer> evalConnectedMajorOn7th(EvalWeights weights, Board board, boolean isWhite, Square sq) {
         int mg = 0, eg = 0;
 
-        long rookMoves = Magic.getRookMoves(board,sq.value(),
-                Bitboard.rays[sq.value()][East.getInstance().value()]);
+        long rookMoves = Magic.getRookMoves(board,sq.value(), Bitboard.ranks[sq.rank().getValue()]);
 
         if (isWhite) {
             if ((rookMoves & (board.getWhiteRooks() | board.getWhiteQueens())) != 0) {
@@ -77,8 +75,7 @@ public class EvalMajorOn7th {
     }
 
     public static void extractConnectedMajorOn7thFeatures(double[] features, Board board, boolean isWhite, Square sq, double phase) {
-        long rookMoves = Magic.getRookMoves(board,sq.value(),
-                Bitboard.rays[sq.value()][East.getInstance().value()]);
+        long rookMoves = Magic.getRookMoves(board,sq.value(), Bitboard.ranks[sq.rank().getValue()]);
 
         if (isWhite) {
             if ((rookMoves & (board.getWhiteRooks() | board.getWhiteQueens())) != 0) {
