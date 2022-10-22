@@ -77,7 +77,9 @@ public class LogisticRegressionTuner {
             SimpleMatrix gradient = Gradient.gradient(x, y, theta, 0);
             theta = theta.minus(gradient.divide(1.0/learningRate));
             for (int i = 1; i<n; i++) { // anchor pawn value
-                bestWeights.vals[i] = (int)Math.round(theta.get(i, 0));
+                if (i != EvalWeights.BISHOP_TRAPPED_IND) { // anchor trapped bishop
+                    bestWeights.vals[i] = (int)Math.round(theta.get(i, 0));
+                }
             }
 
             // display the error and store the weights every 10 iterations

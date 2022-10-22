@@ -32,9 +32,9 @@ Clone the repository and go into the chess4j/chess4j-java directory.
  
  ```mvn clean install```  
 
-Once this process is complete you should see the build artifact in the target directory, e.g. chess4j-java-5.0-uber.jar.  Verify everything is working:
+Once this process is complete you should see the build artifact in the target directory, e.g. chess4j-java-5.1-uber.jar.  Verify everything is working:
 
-```java -jar chess4j-java-5.0-uber.jar -suite=../src/test/resources/suites/wac2.epd```
+```java -jar chess4j-java-5.1-uber.jar -suite=../src/test/resources/suites/wac2.epd```
 
 You should see the program search for about 10 seconds and display the result.  
 
@@ -57,7 +57,7 @@ You now have the option to run with or without the native (Prophet) code enabled
 
 Verify everything is working:
 
-```java -jar chess4j-java-5.0-uber.jar -suite=../src/test/resources/suites/wac2.epd -native```
+```java -jar chess4j-java-5.1-uber.jar -suite=../src/test/resources/suites/wac2.epd -native```
 
 (Note the '-native' argument.)  
 
@@ -94,7 +94,7 @@ Winboard / XBoard has an option to specify the maximum memory usage, and chess4j
 You can run EPD formatted test suites with chess4j using the 'suite' command line argument.  The default time per problem is 10 seconds, but that can also be changed with the 'time' argument.
 
 ```
-java -jar chess4j-java-5.0-uber.jar -suite=wac.epd -time=30
+java -jar chess4j-java-5.1-uber.jar -suite=wac.epd -time=30
 ```
 
 The command above would start chess4j to process the Win At Chess (WAC) test suite, giving it 30 seconds per problem.  (A few test suites can be found in the test/resources folder.)
@@ -102,14 +102,21 @@ The command above would start chess4j to process the Win At Chess (WAC) test sui
 
 ## Changelog
 
-v5.0 
+5.1
+* Passed pawn by rank (was a single value)
+* Non-linear mobility (was a single value)
+* Knight outposts
+* Trapped bishop penalty
+
+
+5.0 
 * added logistic regresssion with gradient descent
 * fully implemented tapered eval (previously was just kings)
 * simple mobility terms for bishop and queens
 
 ## Roadmap
 
-At some point I'd like to try my hand at implementing a neural network, but in the short term I want to continue to improve the "Hand Crafted Evaluation". v5.0 was mostly about tuning existing parameters, but there are major gaps in chess4j's understanding of pawns and basic endgames.
+There may be another minor release or two on the 5.x line, but the main focus of development going forward is to implement a neural network.
 
 You can see the combined Prophet / chess4j backlog here: https://trello.com/b/dhcOEaCO/chess4j-board .
 

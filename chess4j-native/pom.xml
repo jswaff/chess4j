@@ -11,7 +11,7 @@
     <parent>
         <groupId>com.jamesswafford.chess4j</groupId>
         <artifactId>chess4j-parent</artifactId>
-        <version>5.0</version>
+        <version>5.1</version>
     </parent>
 
     <properties>

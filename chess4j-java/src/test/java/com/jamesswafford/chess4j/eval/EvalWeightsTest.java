@@ -11,15 +11,16 @@ public class EvalWeightsTest {
     @Test
     public void testGetVal() {
         EvalWeights weights = new EvalWeights();
-        assertEquals(36, weights.vals[EvalWeights.ROOK_OPEN_FILE_MG_IND]);
-        assertEquals(List.of(36), weights.getVals("ROOK_OPEN_FILE_MG"));
+        assertEquals(30, weights.vals[EvalWeights.ROOK_OPEN_FILE_MG_IND]);
+        assertEquals(List.of(30), weights.getVals("ROOK_OPEN_FILE_MG"));
 
         assertEquals(64, weights.getVals("ROOK_PST_MG").size());
 
-        assertEquals(List.of(-5), weights.getVals("DOUBLED_PAWN_MG"));
+        assertEquals(List.of(-7), weights.getVals("DOUBLED_PAWN_MG"));
         assertEquals(List.of(-8), weights.getVals("DOUBLED_PAWN_EG"));
 
-        assertEquals(List.of(0), weights.getVals("QUEEN_MOBILITY_MG"));
+        assertEquals(List.of(-2,-8,-12,-10,-10,-9,-7,-6,-3,0,2,4,6,6,9,11,13,12,16,14,12,11,5,4,2,1,0,0), 
+            weights.getVals("QUEEN_MOBILITY_MG"));
     }
 
     @Test

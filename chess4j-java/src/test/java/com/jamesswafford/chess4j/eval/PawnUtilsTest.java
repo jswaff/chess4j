@@ -3,7 +3,9 @@ package com.jamesswafford.chess4j.eval;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.squares.Square;
+import com.jamesswafford.chess4j.pieces.Knight;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Piece;
 
@@ -180,4 +182,47 @@ public class PawnUtilsTest {
         assertFalse(isDoubled(board, H5,true));
     }
 
+    @Test
+    public void testSupported1() {
+        Board board = new Board("1r3rk1/3q1ppp/3p4/p1pNpP2/PpP1P1P1/1P3Q2/6KP/5R2 w - - 0 1");
+        assertTrue(isSupported(board, D5, true));
+    }
+
+    @Test
+    public void testSupported2() {
+        Board board = new Board("r1br1k2/ppp2pp1/1b4np/4P3/2pNN3/2P3B1/PP1R1PPP/3R2K1 w - - 0 1");
+        assertTrue(isSupported(board, D4, true));
+        assertFalse(isSupported(board, E4, true));
+        assertTrue(isSupported(board, G6, false));
+    }
+
+    @Test
+    public void testSupported3() {
+        Board board = new Board();
+        assertFalse(isSupported(board, A7, false));
+        assertFalse(isSupported(board, B7, false));
+        assertFalse(isSupported(board, G7, false));
+        assertFalse(isSupported(board, H7, false));
+        assertFalse(isSupported(board, A2, true));
+        assertFalse(isSupported(board, B2, true));
+        assertFalse(isSupported(board, G2, true));
+        assertFalse(isSupported(board, H2, true));
+
+        board.applyMove(new Move(Pawn.WHITE_PAWN, A2, A3));
+        assertTrue(isSupported(board, A3, true));
+        assertFalse(isSupported(board, B2, true));
+
+        board.applyMove(new Move(Pawn.BLACK_PAWN, B7, B5));
+        assertFalse(isSupported(board, B5, false));
+
+        board.applyMove(new Move(Pawn.WHITE_PAWN, E2, E4));
+        assertFalse(isSupported(board, E4, true));
+
+        board.applyMove(new Move(Knight.BLACK_KNIGHT, G8, F6));
+        assertTrue(isSupported(board, F6, false));
+
+        board.applyMove(new Move(Pawn.WHITE_PAWN, D2, D3));
+        assertTrue(isSupported(board, E4, true));
+        assertTrue(isSupported(board, D3, true));
+    }
 }

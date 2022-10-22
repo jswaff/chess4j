@@ -20,8 +20,8 @@ public class EvalQueen {
         Tuple2<Integer, Integer> major7th = evalMajorOn7th(weights, board, isWhite, sq);
 
         int mobility = Mobility.queenMobility(board, sq);
-        int mobilityMg = mobility * weights.vals[QUEEN_MOBILITY_MG_IND];
-        int mobilityEg = mobility * weights.vals[QUEEN_MOBILITY_EG_IND];
+        int mobilityMg = weights.vals[QUEEN_MOBILITY_MG_IND + mobility];
+        int mobilityEg = weights.vals[QUEEN_MOBILITY_EG_IND + mobility];
 
         if (isWhite) {
             mg = weights.vals[QUEEN_PST_MG_IND + sq.value()] + major7th._1 + mobilityMg;
@@ -42,13 +42,13 @@ public class EvalQueen {
         if (isWhite) {
             features[QUEEN_PST_EG_IND + sq.value()] += (1-phase);
             features[QUEEN_PST_MG_IND + sq.value()] += phase;
-            features[QUEEN_MOBILITY_MG_IND] += mobility * phase;
-            features[QUEEN_MOBILITY_EG_IND] += mobility * (1-phase);
+            features[QUEEN_MOBILITY_MG_IND + mobility] += phase;
+            features[QUEEN_MOBILITY_EG_IND + mobility] += (1-phase);
         } else {
             features[QUEEN_PST_EG_IND + sq.flipVertical().value()] -= (1-phase);
             features[QUEEN_PST_MG_IND + sq.flipVertical().value()] -= phase;
-            features[QUEEN_MOBILITY_MG_IND] -= mobility * phase;
-            features[QUEEN_MOBILITY_EG_IND] -= mobility * (1- phase);
+            features[QUEEN_MOBILITY_MG_IND + mobility] -= phase;
+            features[QUEEN_MOBILITY_EG_IND + mobility] -= (1- phase);
         }
         exractMajorOn7thFeatures(features, board, isWhite, sq, phase);
         return null;
