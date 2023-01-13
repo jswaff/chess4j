@@ -84,6 +84,7 @@ public class XBoardHandler {
         put("setboard", XBoardHandler.this::setboard);
         put("st", XBoardHandler.this::st);
         put("time", XBoardHandler.this::time);
+        put("train", XBoardHandler.this::trainNeuralNet);
         put("tune", XBoardHandler.this::tuneEvalWeights);
         put("undo", XBoardHandler.this::undo);
         put("usermove", XBoardHandler.this::usermove);
@@ -422,6 +423,16 @@ public class XBoardHandler {
                     learningRate, maxIterations);
             EvalWeightsUtil.store(optimizedWeights._1, "eval-tuned.properties", "Error: " + optimizedWeights._2);
             Globals.setEvalWeights(optimizedWeights._1);
+        }, () -> LOGGER.info("no tuner datasource"));
+    }
+
+    private void trainNeuralNet(String[] cmd) {
+        double learningRate = Double.parseDouble(cmd[1]);
+        int maxIterations = Integer.parseInt(cmd[2]);
+        Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
+            List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
+            NeuralNetworkTrainer trainer = new NeuralNetworkTrainer();
+            trainer.train(dataSet, learningRate, maxIterations);
         }, () -> LOGGER.info("no tuner datasource"));
     }
 
