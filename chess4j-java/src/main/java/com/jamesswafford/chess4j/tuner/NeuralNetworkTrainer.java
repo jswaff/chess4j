@@ -22,6 +22,11 @@ public class NeuralNetworkTrainer {
 
     public void train(List<GameRecord> dataSet, double learningRate, int numEpochs) {
 
+        int MAX_SIZE = 1048576 / 4;
+        if (dataSet.size() > MAX_SIZE) {
+            dataSet = dataSet.subList(0, MAX_SIZE);
+        }
+
         // if we have enough data, divide data set up into training and test sets in an 80/20 split
         Collections.shuffle(dataSet);
         List<GameRecord> trainingSet;
