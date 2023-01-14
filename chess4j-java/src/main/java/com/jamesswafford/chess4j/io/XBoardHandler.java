@@ -11,6 +11,8 @@ import com.jamesswafford.chess4j.eval.EvalWeights;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
+import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
 import com.jamesswafford.chess4j.tuner.*;
@@ -68,6 +70,7 @@ public class XBoardHandler {
         put("memory", XBoardHandler.this::memory);
         put("new", XBoardHandler.this::newGame);
         put("nopost", (String[] cmd) -> searchIterator.setPost(false));
+        put("order", XBoardHandler::order);
         put("otim", XBoardHandler::noOp);
         put("perft", (String[] cmd) -> Perft.executePerft(Globals.getBoard(), Integer.parseInt(cmd[1])));
         put("pgn2book", XBoardHandler.this::pgnToBook);
@@ -240,6 +243,29 @@ public class XBoardHandler {
         LOGGER.debug("# no op: " + cmd[0]);
     }
 
+    private static void order(String[] cmd) {
+        Board board = Globals.getBoard();
+        EvalWeights weights = Globals.getEvalWeights();
+        Network network = Globals.getNetwork();
+        MoveGenerator moveGen = new MagicBitboardMoveGenerator();
+        boolean useNN = cmd.length>1 && "nn".equals(cmd[1]) && network != null;
+        List<Move> moves = moveGen.generateLegalMoves(board);
+        moves.sort((mv1, mv2) -> {
+            Undo u1 = board.applyMove(mv1);
+            double s1 = useNN ? Eval.eval(network, board) : Eval.eval(weights, board);
+            board.undoMove(u1);
+            Undo u2 = board.applyMove(mv2);
+            double s2 = useNN ? Eval.eval(network, board) : Eval.eval(weights, board);
+            board.undoMove(u2);
+            return Double.compare(s1, s2);
+        });
+        moves.forEach(mv -> {
+            Undo undo = board.applyMove(mv);
+            LOGGER.info("\t" + mv + " " + -Eval.eval(weights, board) + " " + (useNN ? -Eval.eval(network, board) : ""));
+            board.undoMove(undo);
+        });
+    }
+
     private void pgnToBook(String[] cmd) {
         if (openingBook != null) {
             openingBook.addToBook(new File(cmd[1]));
@@ -395,7 +421,7 @@ public class XBoardHandler {
         int seconds = Integer.parseInt(cmd[1]);
         LOGGER.debug("# setting search time to {} seconds per move", seconds);
         fixedTimePerMove = true;
-        searchIterator.setMaxTime(seconds * 1000);
+        searchIterator.setMaxTime(seconds * 1000L);
         searchIterator.setEarlyExitOk(false);
     }
 
@@ -414,32 +440,39 @@ public class XBoardHandler {
     }
 
     private void tuneEvalWeights(String[] cmd) {
+        if (cmd.length != 2) {
+            LOGGER.info("usage: tune <learningRate> <numEpochs> <evalFile>");
+            return;
+        }
         Globals.getEvalWeights().reset();
         double learningRate = Double.parseDouble(cmd[1]);
         int numEpochs = Integer.parseInt(cmd[2]);
+        String propsFile = cmd[3];
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
             List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
             LogisticRegressionTuner tuner = new LogisticRegressionTuner();
-            Tuple2<EvalWeights, Double> optimizedWeights = tuner.optimize(Globals.getEvalWeights(), dataSet, learningRate, numEpochs);
-            EvalWeightsUtil.store(optimizedWeights._1, "eval-tuned.properties", "Error: " + optimizedWeights._2);
+            Tuple2<EvalWeights, Double> optimizedWeights =
+                    tuner.optimize(Globals.getEvalWeights(), dataSet, learningRate, numEpochs);
+            EvalWeightsUtil.store(optimizedWeights._1, propsFile, "Error: " + optimizedWeights._2);
             Globals.setEvalWeights(optimizedWeights._1);
         }, () -> LOGGER.info("no tuner datasource"));
     }
 
     private void trainNeuralNet(String[] cmd) {
-        if (cmd.length != 4) {
+        if (cmd.length < 4) {
             LOGGER.info("usage: train <maxSamples> <learningRate> <numEpochs> <configFile>");
             return;
         }
         int maxSamples = Integer.parseInt(cmd[1]);
         double learningRate = Double.parseDouble(cmd[2]);
         int numEpochs = Integer.parseInt(cmd[3]);
-        String configFile = cmd[4];
+        String configFile = cmd.length==5 ? cmd[4] : null;
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
             List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
             NeuralNetworkTrainer trainer = new NeuralNetworkTrainer();
             Network network = trainer.train(maxSamples, dataSet, learningRate, numEpochs);
-            NeuralNetworkUtil.store(network, configFile);
+            if (configFile != null) NeuralNetworkUtil.store(network, configFile);
+            Globals.setNetwork(network);
         }, () -> LOGGER.info("no tuner datasource"));
     }
 

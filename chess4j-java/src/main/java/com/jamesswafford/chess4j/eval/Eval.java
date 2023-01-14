@@ -8,12 +8,14 @@ import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.tuner.BoardToNetwork;
 import com.jamesswafford.ml.nn.Network;
 import io.vavr.Function3;
 import io.vavr.Function4;
 import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ejml.simple.SimpleMatrix;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -42,7 +44,10 @@ public final class Eval implements Evaluator {
     public Eval() { }
 
     public static double eval(Network network, Board board) {
-        return 0.0;
+        SimpleMatrix X = BoardToNetwork.transformToMatrix(board);
+        SimpleMatrix P = network.predict(X);
+        double whiteToWinPct = P.get(0, 0);
+        return board.getPlayerToMove() == Color.WHITE ? whiteToWinPct : -whiteToWinPct;
     }
 
     public static int eval(EvalWeights weights, Board board) {
