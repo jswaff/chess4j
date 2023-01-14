@@ -416,25 +416,29 @@ public class XBoardHandler {
     private void tuneEvalWeights(String[] cmd) {
         Globals.getEvalWeights().reset();
         double learningRate = Double.parseDouble(cmd[1]);
-        int maxIterations = Integer.parseInt(cmd[2]);
+        int numEpochs = Integer.parseInt(cmd[2]);
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
             List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
             LogisticRegressionTuner tuner = new LogisticRegressionTuner();
-            Tuple2<EvalWeights, Double> optimizedWeights = tuner.optimize(Globals.getEvalWeights(), dataSet,
-                    learningRate, maxIterations);
+            Tuple2<EvalWeights, Double> optimizedWeights = tuner.optimize(Globals.getEvalWeights(), dataSet, learningRate, numEpochs);
             EvalWeightsUtil.store(optimizedWeights._1, "eval-tuned.properties", "Error: " + optimizedWeights._2);
             Globals.setEvalWeights(optimizedWeights._1);
         }, () -> LOGGER.info("no tuner datasource"));
     }
 
     private void trainNeuralNet(String[] cmd) {
-        double learningRate = Double.parseDouble(cmd[1]);
-        int numEpochs = Integer.parseInt(cmd[2]);
-        String configFile = cmd[3];
+        if (cmd.length != 4) {
+            LOGGER.info("usage: train <maxSamples> <learningRate> <numEpochs> <configFile>");
+            return;
+        }
+        int maxSamples = Integer.parseInt(cmd[1]);
+        double learningRate = Double.parseDouble(cmd[2]);
+        int numEpochs = Integer.parseInt(cmd[3]);
+        String configFile = cmd[4];
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
             List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
             NeuralNetworkTrainer trainer = new NeuralNetworkTrainer();
-            Network network = trainer.train(dataSet, learningRate, numEpochs);
+            Network network = trainer.train(maxSamples, dataSet, learningRate, numEpochs);
             NeuralNetworkUtil.store(network, configFile);
         }, () -> LOGGER.info("no tuner datasource"));
     }

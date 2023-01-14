@@ -41,7 +41,7 @@ public class NeuralNetworkTrainerTest {
         populateTunerDatasource(testEpd);
         assertEquals(1000, tunerDatasource.getTotalPositionsCount());
         List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
-        trainer.train(gameRecords, 1.0, 100);
+        trainer.train(gameRecords.size(), gameRecords, 1.0, 100);
     }
 
     private void populateTunerDatasource(String epd) {

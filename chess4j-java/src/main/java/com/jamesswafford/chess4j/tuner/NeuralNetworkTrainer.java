@@ -20,7 +20,7 @@ public class NeuralNetworkTrainer {
 
     private static final Logger LOGGER = LogManager.getLogger(NeuralNetworkTrainer.class);
 
-    public Network train(List<GameRecord> dataSet, double learningRate, int numEpochs) {
+    public Network train(int maxSamples, List<GameRecord> dataSet, double learningRate, int numEpochs) {
 
         int MAX_SIZE = 1048576 / 4;
         if (dataSet.size() > MAX_SIZE) {

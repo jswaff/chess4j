@@ -8,6 +8,7 @@ import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.ml.nn.Network;
 import io.vavr.Function3;
 import io.vavr.Function4;
 import io.vavr.Tuple2;
@@ -39,6 +40,10 @@ public final class Eval implements Evaluator {
     }
 
     public Eval() { }
+
+    public static double eval(Network network, Board board) {
+        return 0.0;
+    }
 
     public static int eval(EvalWeights weights, Board board) {
         return eval(weights, board, false);
