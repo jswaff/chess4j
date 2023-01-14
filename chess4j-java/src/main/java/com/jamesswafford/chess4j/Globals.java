@@ -5,6 +5,9 @@ import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.book.OpeningBook;
 import com.jamesswafford.chess4j.eval.EvalWeights;
 import com.jamesswafford.chess4j.tuner.TunerDatasource;
+import com.jamesswafford.ml.nn.Network;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +18,10 @@ public class Globals {
     private static final Board board = new Board();
     private static final List<Undo> gameUndos = new ArrayList<>();
     private static EvalWeights evalWeights = new EvalWeights();
+
+    @Getter
+    @Setter
+    private static Network network;
     private static OpeningBook openingBook;
     private static TunerDatasource tunerDatasource;
 
