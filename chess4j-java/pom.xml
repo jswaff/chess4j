@@ -20,7 +20,6 @@
         <dependency>
             <groupId>com.jamesswafford</groupId>
             <artifactId>ml</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>

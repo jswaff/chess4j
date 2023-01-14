@@ -1,5 +1,8 @@
 package com.jamesswafford.chess4j.tuner;
 
+import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.board.squares.Square;
+import com.jamesswafford.chess4j.pieces.*;
 import com.jamesswafford.ml.nn.Layer;
 import com.jamesswafford.ml.nn.Network;
 import com.jamesswafford.ml.nn.activation.Sigmoid;
@@ -35,10 +38,10 @@ public class NeuralNetworkTrainer {
 
         // create a network
         Network network = Network.builder()
-                .numInputUnits(0) // TODO
+                .numInputUnits(837)
                 .layers(List.of(
                         new Layer(100, Sigmoid.INSTANCE),
-                        new Layer(20, Sigmoid.INSTANCE)
+                        new Layer(1, Sigmoid.INSTANCE)
                 ))
                 .costFunction(MSE.INSTANCE)
                 .build();
@@ -68,7 +71,7 @@ public class NeuralNetworkTrainer {
     private Pair<SimpleMatrix, SimpleMatrix> loadXY(List<GameRecord> gameRecords) {
 
         // number of X rows is number of features
-        SimpleMatrix X = new SimpleMatrix(1, gameRecords.size()); // TODO
+        SimpleMatrix X = new SimpleMatrix(837, gameRecords.size());
 
         // just one output neuron
         SimpleMatrix Y = new SimpleMatrix(1, gameRecords.size());
@@ -77,7 +80,7 @@ public class NeuralNetworkTrainer {
             GameRecord gameRecord = gameRecords.get(c);
 
             // set the input features for this sample
-            double[] data = null; // TODO
+            double[] data = transform(new Board(gameRecord.getFen()));
             for (int r=0;r<X.numRows();r++) {
                 X.set(r, c, data[r]);
             }
@@ -90,4 +93,34 @@ public class NeuralNetworkTrainer {
         return new Pair<>(X, Y);
     }
 
+    private double[] transform(Board board) {
+        double[] data = new double[837];
+
+        for (int i=0;i<64;i++) {
+            Piece p = board.getPiece(i);
+            if (Rook.WHITE_ROOK.equals(p)) data[i] = 1;
+            else if (Rook.BLACK_ROOK.equals(p)) data[64+i] = 1;
+            else if (Knight.WHITE_KNIGHT.equals(p)) data[128+i] = 1;
+            else if (Knight.BLACK_KNIGHT.equals(p)) data[192+i] = 1;
+            else if (Bishop.WHITE_BISHOP.equals(p)) data[256+i] = 1;
+            else if (Bishop.BLACK_BISHOP.equals(p)) data[320+i] = 1;
+            else if (Queen.WHITE_QUEEN.equals(p)) data[384+i] = 1;
+            else if (Queen.BLACK_QUEEN.equals(p)) data[448+i] = 1;
+            else if (King.WHITE_KING.equals(p)) data[512+i] = 1;
+            else if (King.BLACK_KING.equals(p)) data[576+i] = 1;
+            else if (Pawn.WHITE_PAWN.equals(p)) data[640+i] = 1;
+            else if (Pawn.BLACK_PAWN.equals(p)) data[704+i] = 1;
+
+            if (Square.valueOf(i).equals(board.getEPSquare())) data[768+i] = 1;
+        }
+
+        if (board.hasBQCastlingRight()) data[832] = 1;
+        if (board.hasBKCastlingRight()) data[833] = 1;
+        if (board.hasWQCastlingRight()) data[834] = 1;
+        if (board.hasWKCastlingRight()) data[835] = 1;
+
+        if (board.getPlayerToMove().isWhite()) data[836] = 1;
+
+        return data;
+    }
 }
