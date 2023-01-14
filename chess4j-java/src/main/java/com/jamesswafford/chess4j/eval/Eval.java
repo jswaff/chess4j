@@ -168,6 +168,11 @@ public final class Eval implements Evaluator {
         return eval(Globals.getEvalWeights(), board);
     }
 
+    @Override
+    public double evaluateBoardWithNN(Board board) {
+        return eval(Globals.getNetwork(), board);
+    }
+
     public static double[] extractFeatures(Board board) {
 
         EvalWeights evalWeights = new EvalWeights();
