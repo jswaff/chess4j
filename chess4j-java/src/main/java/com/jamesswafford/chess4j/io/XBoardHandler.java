@@ -16,6 +16,7 @@ import com.jamesswafford.chess4j.search.SearchIteratorImpl;
 import com.jamesswafford.chess4j.tuner.*;
 import com.jamesswafford.chess4j.utils.*;
 
+import com.jamesswafford.ml.nn.Network;
 import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -428,11 +429,13 @@ public class XBoardHandler {
 
     private void trainNeuralNet(String[] cmd) {
         double learningRate = Double.parseDouble(cmd[1]);
-        int maxIterations = Integer.parseInt(cmd[2]);
+        int numEpochs = Integer.parseInt(cmd[2]);
+        String configFile = cmd[3];
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
             List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
             NeuralNetworkTrainer trainer = new NeuralNetworkTrainer();
-            trainer.train(dataSet, learningRate, maxIterations);
+            Network network = trainer.train(dataSet, learningRate, numEpochs);
+            NeuralNetworkUtil.store(network, configFile);
         }, () -> LOGGER.info("no tuner datasource"));
     }
 

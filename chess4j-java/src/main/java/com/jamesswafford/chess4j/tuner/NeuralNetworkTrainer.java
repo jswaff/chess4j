@@ -20,7 +20,7 @@ public class NeuralNetworkTrainer {
 
     private static final Logger LOGGER = LogManager.getLogger(NeuralNetworkTrainer.class);
 
-    public void train(List<GameRecord> dataSet, double learningRate, int numEpochs) {
+    public Network train(List<GameRecord> dataSet, double learningRate, int numEpochs) {
 
         int MAX_SIZE = 1048576 / 4;
         if (dataSet.size() > MAX_SIZE) {
@@ -45,7 +45,7 @@ public class NeuralNetworkTrainer {
         Network network = Network.builder()
                 .numInputUnits(837)
                 .layers(List.of(
-                        new Layer(100, Sigmoid.INSTANCE),
+                        new Layer(10, Sigmoid.INSTANCE),
                         new Layer(1, Sigmoid.INSTANCE)
                 ))
                 .costFunction(MSE.INSTANCE)
@@ -71,6 +71,8 @@ public class NeuralNetworkTrainer {
         network.train(X_train, Y_train, numEpochs, 512, learningRate, X_test, Y_test);
         SimpleMatrix P_final = network.predict(X_test);
         System.out.println("final cost: " + network.cost(P_final, Y_test));
+
+        return network;
     }
 
     private Pair<SimpleMatrix, SimpleMatrix> loadXY(List<GameRecord> gameRecords) {
