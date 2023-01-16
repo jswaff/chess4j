@@ -10,6 +10,8 @@ public interface TunerDatasource {
 
     void insert(String fen, PGNResult pgnResult);
 
+    void updateEval(String fen, int eval);
+
     long getTotalPositionsCount();
 
     long getFenCount(String fen);

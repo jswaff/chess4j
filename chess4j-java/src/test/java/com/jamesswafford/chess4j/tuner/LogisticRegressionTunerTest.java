@@ -50,7 +50,7 @@ public class LogisticRegressionTunerTest {
 
         Tuple2<EvalWeights, Double> tunedWeights = tuner.optimize(
                 weights,
-                List.of(new GameRecord("3k4/3Q4/3K4/8/8/8/8/8 w - -", PGNResult.WHITE_WINS)),
+                List.of(new GameRecord("3k4/3Q4/3K4/8/8/8/8/8 w - -", PGNResult.WHITE_WINS, 0)),
                 100.0,
                 1);
 

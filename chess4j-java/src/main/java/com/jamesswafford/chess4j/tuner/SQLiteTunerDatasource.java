@@ -48,7 +48,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     public void initializeDatasource() {
         try {
             Statement stmt = conn.createStatement();
-            stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer)");
+            stmt.execute("create table tuner_pos(fen text UNIQUE, outcome integer, eval integer, eval_processed integer)");
             stmt.execute("create index idx_tuner_pos_fen on tuner_pos(fen)");
             stmt.close();
         } catch (SQLException e) {
@@ -71,15 +71,30 @@ public class SQLiteTunerDatasource implements TunerDatasource {
             }
 
             try {
-                String sql = "insert into tuner_pos(fen, outcome) values (? ,?)";
+                String sql = "insert into tuner_pos(fen, outcome, eval_processed) values (? ,?, ?)";
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ps.setString(1, fen);
                 ps.setInt(2, outcome);
+                ps.setInt(3, 0);
                 ps.executeUpdate();
                 ps.close();
             } catch (SQLException e) {
                 throw new UncheckedSqlException(e);
             }
+        }
+    }
+
+    @Override
+    public void updateEval(String fen, int eval) {
+        try {
+            String sql = "update tuner_pos set eval=?, eval_processed=1 where fen=?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, eval);
+            ps.setString(2, fen);
+            ps.executeUpdate();
+            ps.close();
+        } catch (SQLException e) {
+            throw new UncheckedSqlException(e);
         }
     }
 
@@ -126,7 +141,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     public List<GameRecord> getGameRecords() {
         List<GameRecord> gameRecords = new ArrayList<>();
 
-        String sql = "select fen, outcome from tuner_pos";
+        String sql = "select fen, outcome, eval, eval_processed from tuner_pos";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
@@ -134,6 +149,7 @@ public class SQLiteTunerDatasource implements TunerDatasource {
                 GameRecord gameRecord = GameRecord.builder()
                         .fen(rs.getString("fen"))
                         .result(mapOutcomeToResult(rs.getInt("outcome")))
+                        .eval(rs.getInt("eval_processed")==1 ? rs.getInt("eval") : null)
                         .build();
                 gameRecords.add(gameRecord);
             }
