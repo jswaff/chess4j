@@ -55,7 +55,7 @@ public class SQLiteTunerDatasourceTest {
         String fen = FenBuilder.createFen(board, false);
         tunerDatasource.insert(fen, PGNResult.WHITE_WINS);
         assertEquals(1, tunerDatasource.getTotalPositionsCount());
-        List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
+        List<GameRecord> gameRecords = tunerDatasource.getGameRecords(false);
         assertEquals(1, gameRecords.size());
         assertEquals(fen, gameRecords.get(0).getFen());
         assertEquals(PGNResult.WHITE_WINS, gameRecords.get(0).getResult());
@@ -65,12 +65,12 @@ public class SQLiteTunerDatasourceTest {
         String fen2 = FenBuilder.createFen(board, false);
         tunerDatasource.insert(fen2, PGNResult.WHITE_WINS);
         assertEquals(2, tunerDatasource.getTotalPositionsCount());
-        GameRecord gr2 = tunerDatasource.getGameRecords().stream()
+        GameRecord gr2 = tunerDatasource.getGameRecords(false).stream()
                         .filter(gr -> fen2.equals(gr.getFen())).findFirst().get();
         assertEquals(PGNResult.WHITE_WINS, gr2.getResult());
         assertNull(gr2.getEval());
 
-        assertEquals(2, tunerDatasource.getGameRecords().size());
+        assertEquals(2, tunerDatasource.getGameRecords(false).size());
     }
 
     @Test
@@ -105,7 +105,8 @@ public class SQLiteTunerDatasourceTest {
         Board board = new Board();
         String fen = FenBuilder.createFen(board, false);
         tunerDatasource.insert(fen, PGNResult.WHITE_WINS);
-        List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
+        List<GameRecord> gameRecords = tunerDatasource.getGameRecords(false);
+        assertEquals(1L, tunerDatasource.getGameRecords(true).size());
 
         assertEquals(1, gameRecords.size());
         assertEquals(fen, gameRecords.get(0).getFen());
@@ -113,12 +114,14 @@ public class SQLiteTunerDatasourceTest {
         assertNull(gameRecords.get(0).getEval());
 
         tunerDatasource.updateEval(fen, -325);
-        gameRecords = tunerDatasource.getGameRecords();
-        
+        gameRecords = tunerDatasource.getGameRecords(false);
+
         assertEquals(1, gameRecords.size());
         assertEquals(fen, gameRecords.get(0).getFen());
         assertEquals(PGNResult.WHITE_WINS, gameRecords.get(0).getResult());
         assertEquals(Integer.valueOf(-325), gameRecords.get(0).getEval());
+
+        assertEquals(0L, tunerDatasource.getGameRecords(true).size());
     }
 
 }

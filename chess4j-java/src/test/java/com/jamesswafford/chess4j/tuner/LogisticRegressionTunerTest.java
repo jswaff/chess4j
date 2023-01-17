@@ -63,7 +63,7 @@ public class LogisticRegressionTunerTest {
         // get a list of game records
         populateTunerDatasource(testEpd);
         assertEquals(1000, tunerDatasource.getTotalPositionsCount());
-        List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
+        List<GameRecord> gameRecords = tunerDatasource.getGameRecords(false);
 
         EvalWeights weights = new EvalWeights();
 

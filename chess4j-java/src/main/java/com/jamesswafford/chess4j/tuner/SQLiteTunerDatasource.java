@@ -138,10 +138,13 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     }
 
     @Override
-    public List<GameRecord> getGameRecords() {
+    public List<GameRecord> getGameRecords(boolean justUnprocessed) {
         List<GameRecord> gameRecords = new ArrayList<>();
 
-        String sql = "select fen, outcome, eval, eval_processed from tuner_pos";
+        String sql = "select fen, outcome, eval, eval_processed from tuner_pos ";
+        if (justUnprocessed) {
+            sql += "where eval_processed = 0 or eval_processed is null ";
+        }
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();

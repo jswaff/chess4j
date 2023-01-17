@@ -52,7 +52,7 @@ public class FenToTunerTest {
         assertEquals(1, tunerDatasource.getFenCount("2r3k1/2b2pp1/1pp4p/3p4/1P1P4/2NQ2PP/5PK1/1R6 b - -"));
         assertEquals(1, tunerDatasource.getFenCount("4r1k1/1rpb1pp1/1p5p/3P4/p1PBn1P1/3n3P/R1N2P1K/1R6 w - -"));
 
-        List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
+        List<GameRecord> gameRecords = tunerDatasource.getGameRecords(false);
         assertEquals(100, gameRecords.size());
 
         GameRecord g1 = gameRecords.stream()
@@ -95,7 +95,7 @@ public class FenToTunerTest {
         assertEquals(1, tunerDatasource.getFenCount("2k2r2/p7/1pp1Rn1p/5Pp1/P7/1P6/2K4P/5R2 b - -"));
         assertEquals(1, tunerDatasource.getFenCount("3r1rk1/4qp1p/1p1pp1p1/p1pPb3/2P1b3/PPB1P2P/3QBPP1/2RR2K1 w - -"));
 
-        List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
+        List<GameRecord> gameRecords = tunerDatasource.getGameRecords(false);
         assertEquals(100, gameRecords.size());
 
         GameRecord g1 = gameRecords.stream()

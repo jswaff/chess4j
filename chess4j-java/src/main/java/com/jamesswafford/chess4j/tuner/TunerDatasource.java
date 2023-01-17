@@ -16,6 +16,6 @@ public interface TunerDatasource {
 
     long getFenCount(String fen);
 
-    List<GameRecord> getGameRecords();
+    List<GameRecord> getGameRecords(boolean justUnprocessed);
 
 }

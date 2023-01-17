@@ -59,6 +59,7 @@ public class XBoardHandler {
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
         put("easy", (String[] cmd) -> ponderingEnabled = false);
         put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getEvalWeights(), Globals.getBoard())));
+        put("evaltunerds", XBoardHandler.this::evalTunerDS);
         put("eval2props", XBoardHandler.this::writeEvalProperties);
         put("exit",XBoardHandler.this::exit);
         put("fen2tuner", XBoardHandler.this::fenToTunerDS);
@@ -155,6 +156,16 @@ public class XBoardHandler {
     private void exit(String[] cmd) {
         analysisMode = false;
         searchIterator.setSkipTimeChecks(false);
+    }
+
+    private void evalTunerDS(String[] cmd) {
+        if (tunerDatasource != null) {
+            int depth = Integer.parseInt(cmd[1]);
+            EvalTuner evalTuner = new EvalTuner(tunerDatasource);
+            evalTuner.eval(depth);
+        } else {
+            LOGGER.warn("There is no tuner datasource.");
+        }
     }
 
     private void fenToTunerDS(String[] cmd) {
@@ -449,7 +460,7 @@ public class XBoardHandler {
         int numEpochs = Integer.parseInt(cmd[2]);
         String propsFile = cmd[3];
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
-            List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
+            List<GameRecord> dataSet = tunerDatasource1.getGameRecords(false);
             LogisticRegressionTuner tuner = new LogisticRegressionTuner();
             Tuple2<EvalWeights, Double> optimizedWeights =
                     tuner.optimize(Globals.getEvalWeights(), dataSet, learningRate, numEpochs);
@@ -468,7 +479,7 @@ public class XBoardHandler {
         int numEpochs = Integer.parseInt(cmd[3]);
         String configFile = cmd.length==5 ? cmd[4] : null;
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
-            List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
+            List<GameRecord> dataSet = tunerDatasource1.getGameRecords(false);
             NeuralNetworkTrainer trainer = new NeuralNetworkTrainer();
             Network network = trainer.train(maxSamples, dataSet, learningRate, numEpochs);
             if (configFile != null) NeuralNetworkUtil.store(network, configFile);
