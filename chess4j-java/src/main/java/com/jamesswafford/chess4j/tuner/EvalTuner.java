@@ -8,6 +8,7 @@ import com.jamesswafford.chess4j.search.SearchParameters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Collections;
 import java.util.List;
 
 public class EvalTuner {
@@ -27,14 +28,16 @@ public class EvalTuner {
         LOGGER.info("# evaluating tuner records to depth {}", depth);
 
         List<GameRecord> gameRecords = tunerDatasource.getGameRecords(true);
+        Collections.shuffle(gameRecords);
         SearchParameters parameters = new SearchParameters(depth, -Constants.CHECKMATE, Constants.CHECKMATE);
 
         for (int i=0;i< gameRecords.size();i++) {
-            if (i%1000 == 0) {
-                LOGGER.info("\t" + i + " of " + gameRecords.size());
-            }
             GameRecord gameRecord = gameRecords.get(i);
+            if (i % 1000 == 0) {
+                LOGGER.info("\t {} of {} {}", +i, gameRecords.size(), gameRecord.getFen());
+            }
             Board board = new Board(gameRecord.getFen());
+            search.initialize();
             int score = search.search(board, parameters);
             tunerDatasource.updateEval(gameRecord.getFen(), score);
         }
