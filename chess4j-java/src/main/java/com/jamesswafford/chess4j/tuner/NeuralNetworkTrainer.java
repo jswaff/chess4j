@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.tuner;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.ml.nn.Layer;
 import com.jamesswafford.ml.nn.Network;
+import com.jamesswafford.ml.nn.activation.Identity;
 import com.jamesswafford.ml.nn.activation.Sigmoid;
 import com.jamesswafford.ml.nn.cost.MSE;
 import org.apache.logging.log4j.LogManager;
@@ -42,8 +43,8 @@ public class NeuralNetworkTrainer {
         Network network = Network.builder()
                 .numInputUnits(837)
                 .layers(List.of(
-                        new Layer(10, Sigmoid.INSTANCE),
-                        new Layer(1, Sigmoid.INSTANCE)
+                        new Layer(100, Sigmoid.INSTANCE),
+                        new Layer(1, Identity.INSTANCE)
                 ))
                 .costFunction(MSE.INSTANCE)
                 .build();
