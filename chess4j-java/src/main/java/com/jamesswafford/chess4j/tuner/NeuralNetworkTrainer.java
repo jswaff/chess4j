@@ -44,7 +44,7 @@ public class NeuralNetworkTrainer {
                 .numInputUnits(837)
                 .layers(List.of(
                         new Layer(100, Sigmoid.INSTANCE),
-                        new Layer(50, Sigmoid.INSTANCE),
+                        //new Layer(50, Sigmoid.INSTANCE),
                         new Layer(1, Identity.INSTANCE)
                 ))
                 .costFunction(MSE.INSTANCE)
