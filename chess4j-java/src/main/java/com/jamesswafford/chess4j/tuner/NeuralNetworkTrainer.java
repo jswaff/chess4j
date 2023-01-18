@@ -1,8 +1,6 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.pieces.*;
 import com.jamesswafford.ml.nn.Layer;
 import com.jamesswafford.ml.nn.Network;
 import com.jamesswafford.ml.nn.activation.Sigmoid;
@@ -92,7 +90,7 @@ public class NeuralNetworkTrainer {
             }
 
             // set label
-            double label = CostFunction.y(gameRecord.getResult());
+            double label = gameRecord.getEval();
             Y.set(0, c, label);
         }
 

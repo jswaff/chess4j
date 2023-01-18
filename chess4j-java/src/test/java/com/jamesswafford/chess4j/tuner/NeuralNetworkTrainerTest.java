@@ -46,8 +46,12 @@ public class NeuralNetworkTrainerTest {
 
     private void populateTunerDatasource(String epd) {
         File epdFile = new File(SQLiteTunerDatasourceTest.class.getResource(epd).getFile());
+
         FenToTuner fenToTuner = new FenToTuner(tunerDatasource);
         fenToTuner.addFile(epdFile, true);
+
+        EvalTuner evalTuner = new EvalTuner(tunerDatasource);
+        evalTuner.eval(0);
     }
 
 }

@@ -43,11 +43,10 @@ public final class Eval implements Evaluator {
 
     public Eval() { }
 
-    public static double eval(Network network, Board board) {
+    public static int eval(Network network, Board board) {
         SimpleMatrix X = BoardToNetwork.transformToMatrix(board);
         SimpleMatrix P = network.predict(X);
-        double whiteToWinPct = P.get(0, 0);
-        return board.getPlayerToMove() == Color.WHITE ? whiteToWinPct : -whiteToWinPct;
+        return (int)Math.round(P.get(0, 0));
     }
 
     public static int eval(EvalWeights weights, Board board) {
@@ -169,7 +168,7 @@ public final class Eval implements Evaluator {
     }
 
     @Override
-    public double evaluateBoardWithNN(Board board) {
+    public int evaluateBoardWithNN(Board board) {
         return eval(Globals.getNetwork(), board);
     }
 
