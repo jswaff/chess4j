@@ -46,7 +46,7 @@ public final class Eval implements Evaluator {
     public static int eval(Network network, Board board) {
         SimpleMatrix X = BoardToNetwork.transformToMatrix(board);
         SimpleMatrix P = network.predict(X);
-        return (int)Math.round(P.get(0, 0));
+        return (int)(Math.round(P.get(0, 0)) * 100.0); // convert to centipawns
     }
 
     public static int eval(EvalWeights weights, Board board) {
