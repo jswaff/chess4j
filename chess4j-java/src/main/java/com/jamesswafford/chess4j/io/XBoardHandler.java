@@ -470,18 +470,17 @@ public class XBoardHandler {
     }
 
     private void trainNeuralNet(String[] cmd) {
-        if (cmd.length < 4) {
-            LOGGER.info("usage: train <maxSamples> <learningRate> <numEpochs> <configFile>");
+        if (cmd.length < 3) {
+            LOGGER.info("usage: train <learningRate> <numEpochs> <configFile>");
             return;
         }
-        int maxSamples = Integer.parseInt(cmd[1]);
-        double learningRate = Double.parseDouble(cmd[2]);
-        int numEpochs = Integer.parseInt(cmd[3]);
-        String configFile = cmd.length==5 ? cmd[4] : null;
+        double learningRate = Double.parseDouble(cmd[1]);
+        int numEpochs = Integer.parseInt(cmd[2]);
+        String configFile = cmd.length==5 ? cmd[3] : null;
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
             List<GameRecord> dataSet = tunerDatasource1.getGameRecords(false);
             NeuralNetworkTrainer trainer = new NeuralNetworkTrainer();
-            Network network = trainer.train(maxSamples, dataSet, learningRate, numEpochs);
+            Network network = trainer.train(dataSet, learningRate, numEpochs);
             if (configFile != null) NeuralNetworkUtil.store(network, configFile);
             Globals.setNetwork(network);
         }, () -> LOGGER.info("no tuner datasource"));

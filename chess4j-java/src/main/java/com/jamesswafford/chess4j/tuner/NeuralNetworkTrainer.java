@@ -19,18 +19,23 @@ public class NeuralNetworkTrainer {
 
     private static final Logger LOGGER = LogManager.getLogger(NeuralNetworkTrainer.class);
 
-    public Network train(int maxSamples, List<GameRecord> dataSet, double learningRate, int numEpochs) {
+    private final int MINI_BATCH_SIZE = 512;
 
-        if (dataSet.size() > maxSamples) {
-            dataSet = dataSet.subList(0, maxSamples);
-        }
+    public Network train(List<GameRecord> dataSet, double learningRate, int numEpochs) {
 
         // if we have enough data, divide data set up into training and test sets in an 80/20 split
         Collections.shuffle(dataSet);
         List<GameRecord> trainingSet;
         List<GameRecord> testSet;
         if (dataSet.size() >= 100) {
-            int m = dataSet.size() * 4 / 5;
+            int m;
+            if (dataSet.size() > 1000000L) {
+                m = dataSet.size() * 19 / 20;
+            } else if (dataSet.size() > 100000L) {
+                m = dataSet.size() * 9 / 10;
+            } else {
+                m = dataSet.size() * 4 / 5;
+            }
             trainingSet = new ArrayList<>(dataSet.subList(0, m));
             testSet = dataSet.subList(m, dataSet.size());
         } else {
@@ -61,13 +66,20 @@ public class NeuralNetworkTrainer {
         SimpleMatrix P_init = network.predict(X_test);
         System.out.println("initial cost: " + network.cost(P_init, Y_test));
 
-        // load the training data
-        Pair<SimpleMatrix, SimpleMatrix> X_Y_train = loadXY(trainingSet);
-        SimpleMatrix X_train = X_Y_train.getValue0();
-        SimpleMatrix Y_train = X_Y_train.getValue1();
-
         // train!
-        network.train(X_train, Y_train, numEpochs, 512, learningRate, X_test, Y_test);
+        int numMiniBatches = trainingSet.size() / MINI_BATCH_SIZE;
+        if ((trainingSet.size() % MINI_BATCH_SIZE) != 0) {
+            numMiniBatches++;
+        }
+
+        network.train(numMiniBatches,
+                batchNum -> {
+                    int fromInd = MINI_BATCH_SIZE * batchNum;
+                    int toInd = Math.min(MINI_BATCH_SIZE * (batchNum + 1), trainingSet.size());
+                    return loadXY(trainingSet.subList(fromInd, toInd));
+                },
+                numEpochs, learningRate, X_test, Y_test);
+
         SimpleMatrix P_final = network.predict(X_test);
         System.out.println("final cost: " + network.cost(P_final, Y_test));
 
