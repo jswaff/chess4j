@@ -20,6 +20,7 @@ public class NeuralNetworkTrainer {
     private static final Logger LOGGER = LogManager.getLogger(NeuralNetworkTrainer.class);
 
     private final int MINI_BATCH_SIZE = 512;
+    private final int MAX_TEST_SET_SIZE = 100000;
 
     public Network train(List<GameRecord> dataSet, double learningRate, int numEpochs) {
 
@@ -29,12 +30,13 @@ public class NeuralNetworkTrainer {
         List<GameRecord> testSet;
         if (dataSet.size() >= 100) {
             int m;
-            if (dataSet.size() > 1000000L) {
-                m = dataSet.size() * 19 / 20;
-            } else if (dataSet.size() > 100000L) {
+            if (dataSet.size() > 10000) {
                 m = dataSet.size() * 9 / 10;
             } else {
                 m = dataSet.size() * 4 / 5;
+            }
+            if (dataSet.size() - m > MAX_TEST_SET_SIZE) {
+                m = dataSet.size() - MAX_TEST_SET_SIZE;
             }
             trainingSet = new ArrayList<>(dataSet.subList(0, m));
             testSet = dataSet.subList(m, dataSet.size());
