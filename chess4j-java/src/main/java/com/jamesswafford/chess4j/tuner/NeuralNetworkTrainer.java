@@ -24,7 +24,7 @@ public class NeuralNetworkTrainer {
 
     public Network train(List<GameRecord> dataSet, double learningRate, int numEpochs) {
 
-        // if we have enough data, divide data set up into training and test sets in an 80/20 split
+        // divide the data up into training and test sets
         Collections.shuffle(dataSet);
         List<GameRecord> trainingSet;
         List<GameRecord> testSet;
@@ -50,7 +50,7 @@ public class NeuralNetworkTrainer {
         Network network = Network.builder()
                 .numInputUnits(837)
                 .layers(List.of(
-                        new Layer(800, Sigmoid.INSTANCE),
+                        new Layer(200, Sigmoid.INSTANCE),
                         //new Layer(50, Sigmoid.INSTANCE),
                         new Layer(1, Identity.INSTANCE)
                 ))
