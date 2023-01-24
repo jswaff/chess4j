@@ -476,7 +476,7 @@ public class XBoardHandler {
         }
         double learningRate = Double.parseDouble(cmd[1]);
         int numEpochs = Integer.parseInt(cmd[2]);
-        String configFile = cmd.length==5 ? cmd[3] : null;
+        String configFile = cmd.length==4 ? cmd[3] : null;
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
             List<GameRecord> dataSet = tunerDatasource1.getGameRecords(false);
             NeuralNetworkTrainer trainer = new NeuralNetworkTrainer();
