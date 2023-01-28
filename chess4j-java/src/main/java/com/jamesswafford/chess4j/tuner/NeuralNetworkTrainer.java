@@ -50,7 +50,7 @@ public class NeuralNetworkTrainer {
         Network network = Network.builder()
                 .numInputUnits(837)
                 .layers(List.of(
-                        new Layer(200, Sigmoid.INSTANCE),
+                        new Layer(800, Sigmoid.INSTANCE),
                         //new Layer(50, Sigmoid.INSTANCE),
                         new Layer(1, Identity.INSTANCE)
                 ))
