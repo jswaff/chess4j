@@ -48,10 +48,10 @@ public class NeuralNetworkTrainer {
 
         // create a network
         Network network = Network.builder()
-                .numInputUnits(837)
+                .numInputUnits(BoardToNetwork.NUM_INPUTS)
                 .layers(List.of(
-                        new Layer(800, Sigmoid.INSTANCE),
-                        //new Layer(50, Sigmoid.INSTANCE),
+                        new Layer(100, Sigmoid.INSTANCE),
+                        new Layer(50, Sigmoid.INSTANCE),
                         new Layer(1, Identity.INSTANCE)
                 ))
                 .costFunction(MSE.INSTANCE)
@@ -91,7 +91,7 @@ public class NeuralNetworkTrainer {
     private Pair<SimpleMatrix, SimpleMatrix> loadXY(List<GameRecord> gameRecords) {
 
         // number of X rows is number of features
-        SimpleMatrix X = new SimpleMatrix(837, gameRecords.size());
+        SimpleMatrix X = new SimpleMatrix(BoardToNetwork.NUM_INPUTS, gameRecords.size());
 
         // just one output neuron
         SimpleMatrix Y = new SimpleMatrix(1, gameRecords.size());

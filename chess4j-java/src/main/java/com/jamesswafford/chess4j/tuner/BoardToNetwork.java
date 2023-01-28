@@ -1,42 +1,53 @@
 package com.jamesswafford.chess4j.tuner;
 
+import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
-import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.pieces.*;
+import com.jamesswafford.chess4j.board.Color;
 import org.ejml.simple.SimpleMatrix;
+
+import static com.jamesswafford.chess4j.board.Bitboard.ALL_SQUARES;
 
 public class BoardToNetwork {
 
+    public static final int NUM_INPUTS = 19;
+
     public static double[] transform(Board board) {
-        double[] data = new double[837];
+        double[] data = new double[NUM_INPUTS];
 
-        for (int i=0;i<64;i++) {
-            Piece p = board.getPiece(i);
-            if (Rook.WHITE_ROOK.equals(p)) data[i] = 1;
-            else if (Rook.BLACK_ROOK.equals(p)) data[64+i] = 1;
-            else if (Knight.WHITE_KNIGHT.equals(p)) data[128+i] = 1;
-            else if (Knight.BLACK_KNIGHT.equals(p)) data[192+i] = 1;
-            else if (Bishop.WHITE_BISHOP.equals(p)) data[256+i] = 1;
-            else if (Bishop.BLACK_BISHOP.equals(p)) data[320+i] = 1;
-            else if (Queen.WHITE_QUEEN.equals(p)) data[384+i] = 1;
-            else if (Queen.BLACK_QUEEN.equals(p)) data[448+i] = 1;
-            else if (King.WHITE_KING.equals(p)) data[512+i] = 1;
-            else if (King.BLACK_KING.equals(p)) data[576+i] = 1;
-            else if (Pawn.WHITE_PAWN.equals(p)) data[640+i] = 1;
-            else if (Pawn.BLACK_PAWN.equals(p)) data[704+i] = 1;
+        // six planes to encode the positions of the pieces of the white player
+        data[0] = board.getWhitePawns();
+        data[1] = board.getWhiteRooks();
+        data[2] = board.getWhiteKnights();
+        data[3] = board.getWhiteBishops();
+        data[4] = board.getWhiteQueens();
+        data[5] = Bitboard.toBitboard(board.getKingSquare(Color.WHITE));
 
-            if (Square.valueOf(i).equals(board.getEPSquare())) data[768+i] = 1;
-        }
+        // six planes to encode the positions of the pieces of the black player
+        data[6] = board.getBlackPawns();
+        data[7] = board.getBlackRooks();
+        data[8] = board.getBlackKnights();
+        data[9] = board.getBlackBishops();
+        data[10] = board.getBlackQueens();
+        data[11] = Bitboard.toBitboard(board.getKingSquare(Color.BLACK));
 
-        if (board.hasBQCastlingRight()) data[832] = 1;
-        if (board.hasBKCastlingRight()) data[833] = 1;
-        if (board.hasWQCastlingRight()) data[834] = 1;
-        if (board.hasWKCastlingRight()) data[835] = 1;
+        // one plane to encode the color of the player
+        data[12] = board.getPlayerToMove().isWhite() ? ALL_SQUARES : 0;
 
-        if (board.getPlayerToMove().isWhite()) data[836] = 1;
+        // four planes for castling rights
+        data[13] = board.hasWKCastlingRight() ? ALL_SQUARES : 0;
+        data[14] = board.hasWQCastlingRight() ? ALL_SQUARES : 0;
+        data[15] = board.hasBKCastlingRight() ? ALL_SQUARES : 0;
+        data[16] = board.hasBQCastlingRight() ? ALL_SQUARES : 0;
+
+        // move count as a number
+        data[17] = board.getMoveCounter();
+
+        // fifty move counter as a number
+        data[18] = board.getFiftyCounter();
 
         return data;
     }
+
     public static SimpleMatrix transformToMatrix(Board board) {
         double[] data = transform(board);
         return new SimpleMatrix(data.length, 1, true, data);

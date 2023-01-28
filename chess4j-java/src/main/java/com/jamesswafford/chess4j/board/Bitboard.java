@@ -12,6 +12,8 @@ import java.util.function.Consumer;
 
 public class Bitboard {
 
+    public static long ALL_SQUARES;
+
     public static long[] squares = new long[64];
     public static long[] ranks = new long[8];
     public static long[] files = new long[8];
@@ -23,6 +25,7 @@ public class Bitboard {
     static {
         for (int i=0; i<64; i++) {
             squares[i] = 1L << i;
+            ALL_SQUARES |= squares[i];
         }
         for (int i=0; i<8; i++) {
             files[i] = ranks[i] = 0;
