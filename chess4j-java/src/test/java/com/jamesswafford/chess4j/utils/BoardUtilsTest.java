@@ -29,6 +29,9 @@ public class BoardUtilsTest {
     public void testAllSquares() {
         long v = Bitboard.ALL_SQUARES;
         assertEquals(64, Long.bitCount(v));
+
+        System.out.println(Bitboard.drawBitboard(v));
+        System.out.println(Bitboard.drawBitboard(Bitboard.LOWER16));
     }
 
     @Test
