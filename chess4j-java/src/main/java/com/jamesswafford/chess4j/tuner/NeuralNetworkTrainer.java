@@ -50,8 +50,8 @@ public class NeuralNetworkTrainer {
         Network network = Network.builder()
                 .numInputUnits(BoardToNetwork.NUM_INPUTS)
                 .layers(List.of(
-                        new Layer(100, Sigmoid.INSTANCE),
-                        new Layer(50, Sigmoid.INSTANCE),
+                        new Layer(8, Sigmoid.INSTANCE),
+                        new Layer(8, Sigmoid.INSTANCE),
                         new Layer(1, Identity.INSTANCE)
                 ))
                 .costFunction(MSE.INSTANCE)
@@ -100,13 +100,16 @@ public class NeuralNetworkTrainer {
             GameRecord gameRecord = gameRecords.get(c);
 
             // set the input features for this sample
-            double[] data = BoardToNetwork.transform(new Board(gameRecord.getFen()));
+            Board board = new Board(gameRecord.getFen());
+            double[] data = BoardToNetwork.transform(board);
             for (int r=0;r<X.numRows();r++) {
                 X.set(r, c, data[r]);
             }
 
             // set label
-            double label = gameRecord.getEval() / 100.0; // convert to pawns
+            // the score is recorded as player to move, convert to white
+            double label = ((double)gameRecord.getEval()) / 100.0; // convert to pawns
+            if (board.getPlayerToMove().isBlack()) label = -label;
             Y.set(0, c, label);
         }
 
