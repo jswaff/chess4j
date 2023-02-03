@@ -46,7 +46,7 @@ public final class Eval implements Evaluator {
     public static int eval(Network network, Board board) {
         SimpleMatrix X = BoardToNetwork.transformToMatrix(board);
         SimpleMatrix P = network.predict(X);
-        int score = (int)(Math.round(P.get(0, 0)) * 100.0); // convert to centi-pawns
+        int score = (int)(Math.round(P.get(0, 0) * 100.0)); // convert to centi-pawns
         return board.getPlayerToMove().isWhite() ? score : -score;
     }
 
