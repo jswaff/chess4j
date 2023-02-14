@@ -74,16 +74,17 @@ public class NeuralNetworkTrainer {
             numMiniBatches++;
         }
 
-        network.train(numMiniBatches,
+        Network.NetworkState trainedState = network.train(numMiniBatches,
                 batchNum -> {
                     int fromInd = MINI_BATCH_SIZE * batchNum;
                     int toInd = Math.min(MINI_BATCH_SIZE * (batchNum + 1), trainingSet.size());
                     return loadXY(trainingSet.subList(fromInd, toInd));
                 },
                 numEpochs, learningRate, X_test, Y_test);
+        Network trained = Network.fromState(trainedState);
 
-        SimpleMatrix P_final = network.predict(X_test);
-        System.out.println("final cost: " + network.cost(P_final, Y_test));
+        SimpleMatrix P_final = trained.predict(X_test);
+        System.out.println("final cost: " + trained.cost(P_final, Y_test));
 
         return network;
     }
