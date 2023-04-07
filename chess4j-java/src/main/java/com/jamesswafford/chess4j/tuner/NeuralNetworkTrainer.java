@@ -28,7 +28,7 @@ public class NeuralNetworkTrainer {
         // divide the data up into training and test sets
         Collections.shuffle(dataSet);
         if (dataSet.size() > MAX_DATA_SET_SIZE) {
-            dataSet.subList(MAX_DATA_SET_SIZE, dataSet.size()-1).clear();
+            dataSet.subList(MAX_DATA_SET_SIZE, dataSet.size()).clear();
         }
         List<GameRecord> trainingSet;
         List<GameRecord> testSet;
