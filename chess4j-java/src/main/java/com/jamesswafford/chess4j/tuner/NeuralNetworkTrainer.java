@@ -19,7 +19,7 @@ public class NeuralNetworkTrainer {
 
     private static final Logger LOGGER = LogManager.getLogger(NeuralNetworkTrainer.class);
 
-    private final int MINI_BATCH_SIZE = 512;
+    private final int MINI_BATCH_SIZE = 1024;
     private final int MAX_DATA_SET_SIZE = 20 * 1000 * 1000;
     private final int MAX_TEST_SET_SIZE = 100000;
 
@@ -54,9 +54,8 @@ public class NeuralNetworkTrainer {
         Network network = Network.builder()
                 .numInputUnits(BoardToNetwork.NUM_INPUTS)
                 .layers(List.of(
-                        //new Layer(64, Sigmoid.INSTANCE),
-                        //new Layer(32, Sigmoid.INSTANCE),
-                        new Layer(1072, Sigmoid.INSTANCE),
+                        new Layer(64, Sigmoid.INSTANCE),
+                        new Layer(32, Sigmoid.INSTANCE),
                         new Layer(1, Identity.INSTANCE)
                 ))
                 .costFunction(MSE.INSTANCE)
