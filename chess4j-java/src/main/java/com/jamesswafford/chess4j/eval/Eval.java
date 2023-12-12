@@ -15,7 +15,6 @@ import io.vavr.Function4;
 import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ejml.simple.SimpleMatrix;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -44,9 +43,9 @@ public final class Eval implements Evaluator {
     public Eval() { }
 
     public static int eval(Network network, Board board) {
-        SimpleMatrix X = BoardToNetwork.transformToMatrix(board);
-        SimpleMatrix P = network.predict(X);
-        int score = (int)(Math.round(P.get(0, 0) * 100.0)); // convert to centi-pawns
+        double[] X = BoardToNetwork.transform(board); // TODO: convert to 2d
+        double[][] P = null; // network.predict(X) FIXME
+        int score = (int)(Math.round(P[0][0] * 100.0)); // convert to centi-pawns
         return board.getPlayerToMove().isWhite() ? score : -score;
     }
 
@@ -170,7 +169,8 @@ public final class Eval implements Evaluator {
 
     @Override
     public int evaluateBoardWithNN(Board board) {
-        return eval(Globals.getNetwork(), board);
+        Network network = Globals.getNetwork().orElseThrow(() -> new IllegalStateException("there is no network"));
+        return eval(network, board);
     }
 
     public static double[] extractFeatures(Board board) {

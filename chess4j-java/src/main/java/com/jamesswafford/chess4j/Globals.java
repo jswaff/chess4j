@@ -15,57 +15,39 @@ import java.util.Optional;
 
 public class Globals {
 
+    @Getter
     private static final Board board = new Board();
+
+    @Getter
     private static final List<Undo> gameUndos = new ArrayList<>();
-    private static EvalWeights evalWeights = new EvalWeights();
 
     @Getter
     @Setter
+    private static EvalWeights evalWeights = new EvalWeights();
+
+    @Setter
     private static Network network;
+
+    @Setter
     private static OpeningBook openingBook;
+
+    @Setter
     private static TunerDatasource tunerDatasource;
 
+    @Getter
+    @Setter
     private static boolean pawnHashEnabled = true;
 
-    public static Board getBoard() {
-        return board;
-    }
-
-    public static List<Undo> getGameUndos() {
-        return gameUndos;
-    }
-
-    public static EvalWeights getEvalWeights() {
-        return evalWeights;
-    }
-
-    public static void setEvalWeights(EvalWeights evalWeights) {
-        Globals.evalWeights = evalWeights;
+    public static Optional<Network> getNetwork() {
+        return Optional.ofNullable(network);
     }
 
     public static Optional<OpeningBook> getOpeningBook() {
         return Optional.ofNullable(openingBook);
     }
 
-    public static void setOpeningBook(OpeningBook openingBook) {
-        Globals.openingBook = openingBook;
-    }
-
     public static Optional<TunerDatasource> getTunerDatasource() {
         return Optional.ofNullable(tunerDatasource);
     }
-
-    public static void setTunerDatasource(TunerDatasource tunerDatasource) {
-        Globals.tunerDatasource = tunerDatasource;
-    }
-
-    public static boolean isPawnHashEnabled() {
-        return pawnHashEnabled;
-    }
-
-    public static void setPawnHashEnabled(boolean pawnHashEnabled) {
-        Globals.pawnHashEnabled = pawnHashEnabled;
-    }
-
 
 }

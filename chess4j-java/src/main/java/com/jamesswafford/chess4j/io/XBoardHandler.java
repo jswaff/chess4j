@@ -257,24 +257,25 @@ public class XBoardHandler {
     private static void order(String[] cmd) {
         Board board = Globals.getBoard();
         EvalWeights weights = Globals.getEvalWeights();
-        Network network = Globals.getNetwork();
-        MoveGenerator moveGen = new MagicBitboardMoveGenerator();
-        boolean useNN = cmd.length>1 && "nn".equals(cmd[1]) && network != null;
-        List<Move> moves = moveGen.generateLegalMoves(board);
-        moves.sort((mv1, mv2) -> {
-            Undo u1 = board.applyMove(mv1);
-            double s1 = useNN ? Eval.eval(network, board) : Eval.eval(weights, board);
-            board.undoMove(u1);
-            Undo u2 = board.applyMove(mv2);
-            double s2 = useNN ? Eval.eval(network, board) : Eval.eval(weights, board);
-            board.undoMove(u2);
-            return Double.compare(s1, s2);
-        });
-        moves.forEach(mv -> {
-            Undo undo = board.applyMove(mv);
-            LOGGER.info("\t" + mv + " " + -Eval.eval(weights, board) + " " + (useNN ? -Eval.eval(network, board) : ""));
-            board.undoMove(undo);
-        });
+        Globals.getNetwork().ifPresentOrElse(network -> {
+            MoveGenerator moveGen = new MagicBitboardMoveGenerator();
+            boolean useNN = cmd.length > 1 && "nn".equals(cmd[1]);
+            List<Move> moves = moveGen.generateLegalMoves(board);
+            moves.sort((mv1, mv2) -> {
+                Undo u1 = board.applyMove(mv1);
+                double s1 = useNN ? Eval.eval(network, board) : Eval.eval(weights, board);
+                board.undoMove(u1);
+                Undo u2 = board.applyMove(mv2);
+                double s2 = useNN ? Eval.eval(network, board) : Eval.eval(weights, board);
+                board.undoMove(u2);
+                return Double.compare(s1, s2);
+            });
+            moves.forEach(mv -> {
+                Undo undo = board.applyMove(mv);
+                LOGGER.info("\t" + mv + " " + -Eval.eval(weights, board) + " " + (useNN ? -Eval.eval(network, board) : ""));
+                board.undoMove(undo);
+            });
+        }, () -> LOGGER.info("There is no network"));
     }
 
     private void pgnToBook(String[] cmd) {
@@ -383,7 +384,7 @@ public class XBoardHandler {
             sb.append(undo.getMove().toString()).append(" ");
         }
 
-        LOGGER.info("# game moves: " + sb.toString());
+        LOGGER.info("# game moves: " + sb);
 
         // don't call book learning unless we started from the initial position
         if (openingBook != null && !setBoard) {

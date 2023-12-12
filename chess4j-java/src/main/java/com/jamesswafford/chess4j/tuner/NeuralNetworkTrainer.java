@@ -8,7 +8,6 @@ import com.jamesswafford.ml.nn.activation.Sigmoid;
 import com.jamesswafford.ml.nn.cost.MSE;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ejml.simple.SimpleMatrix;
 import org.javatuples.Pair;
 
 import java.util.ArrayList;
@@ -19,9 +18,9 @@ public class NeuralNetworkTrainer {
 
     private static final Logger LOGGER = LogManager.getLogger(NeuralNetworkTrainer.class);
 
-    private final int MINI_BATCH_SIZE = 1024 * 8;
-    private final int MAX_DATA_SET_SIZE = 20 * 1000 * 1000;
-    private final int MAX_TEST_SET_SIZE = 100000;
+    private static final int MINI_BATCH_SIZE = 1024 * 8;
+    private static final int MAX_DATA_SET_SIZE = 20 * 1000 * 1000;
+    private static final int MAX_TEST_SET_SIZE = 100000;
 
     public Network train(List<GameRecord> dataSet, double learningRate, int numEpochs) {
 
@@ -48,7 +47,8 @@ public class NeuralNetworkTrainer {
             trainingSet = new ArrayList<>(dataSet);
             testSet = new ArrayList<>(dataSet);
         }
-        LOGGER.info("data set size: {} training: {}, test: {}", dataSet.size(), trainingSet.size(), testSet.size());
+        LOGGER.info("data set size {} training {} test {} learningRate {} numEpochs {}",
+                dataSet.size(), trainingSet.size(), testSet.size(), learningRate, numEpochs);
 
         // create a network
         Network network = Network.builder()
@@ -64,13 +64,15 @@ public class NeuralNetworkTrainer {
         network.initialize();
 
         // load the test data
-        Pair<SimpleMatrix, SimpleMatrix> X_Y_test = loadXY(testSet);
-        SimpleMatrix X_test = X_Y_test.getValue0();
-        SimpleMatrix Y_test = X_Y_test.getValue1();
+        Pair<double[][], double[][]> X_Y_test = loadXY(testSet);
+        double[][] X_test = X_Y_test.getValue0();
+        double[][] Y_test = X_Y_test.getValue1();
+        LOGGER.info("X_test shape: " + X_test.length + "x" + X_test[0].length);
+        LOGGER.info("Y_test shape: " + Y_test.length + "x" + Y_test[0].length);
 
         // get the initial cost
-        SimpleMatrix P_init = network.predict(X_test);
-        System.out.println("initial cost: " + network.cost(P_init, Y_test));
+        double[][] P_init = network.predict(X_test);
+        LOGGER.info("initial cost {}", network.cost(P_init, Y_test));
 
         // train!
         int numMiniBatches = trainingSet.size() / MINI_BATCH_SIZE;
@@ -78,28 +80,30 @@ public class NeuralNetworkTrainer {
             numMiniBatches++;
         }
 
-        Network.NetworkState trainedState = network.train(numMiniBatches,
+        long startTime = System.currentTimeMillis();
+        network.train(numMiniBatches,
                 batchNum -> {
                     int fromInd = MINI_BATCH_SIZE * batchNum;
                     int toInd = Math.min(MINI_BATCH_SIZE * (batchNum + 1), trainingSet.size());
                     return loadXY(trainingSet.subList(fromInd, toInd));
                 },
                 numEpochs, learningRate, X_test, Y_test);
-        Network trained = Network.fromState(trainedState);
+        long elapsed = (System.currentTimeMillis() - startTime) / 1000;
+        LOGGER.info("elapsed time (sec) {}", elapsed);
 
-        SimpleMatrix P_final = trained.predict(X_test);
-        System.out.println("final cost: " + trained.cost(P_final, Y_test));
+        double[][] P_final = network.predict(X_test);
+        LOGGER.info("final cost {}", network.cost(P_final, Y_test));
 
         return network;
     }
 
-    private Pair<SimpleMatrix, SimpleMatrix> loadXY(List<GameRecord> gameRecords) {
+    private Pair<double[][], double[][]> loadXY(List<GameRecord> gameRecords) {
 
         // number of X rows is number of features
-        SimpleMatrix X = new SimpleMatrix(BoardToNetwork.NUM_INPUTS, gameRecords.size());
+        double[][] X = new double[BoardToNetwork.NUM_INPUTS][gameRecords.size()];
 
         // just one output neuron
-        SimpleMatrix Y = new SimpleMatrix(1, gameRecords.size());
+        double[][] Y = new double[1][gameRecords.size()];
 
         for (int c=0;c<gameRecords.size();c++) {
             GameRecord gameRecord = gameRecords.get(c);
@@ -107,15 +111,15 @@ public class NeuralNetworkTrainer {
             // set the input features for this sample
             Board board = new Board(gameRecord.getFen());
             double[] data = BoardToNetwork.transform(board);
-            for (int r=0;r<X.numRows();r++) {
-                X.set(r, c, data[r]);
+            for (int r=0;r<X.length;r++) {
+                X[r][c] = data[r];
             }
 
             // set label
             // the score is recorded as player to move, convert to white
             double label = ((double)gameRecord.getEval()) / 100.0; // convert to pawns
             if (board.getPlayerToMove().isBlack()) label = -label;
-            Y.set(0, c, label);
+            Y[0][c] = label;
         }
 
         return new Pair<>(X, Y);
