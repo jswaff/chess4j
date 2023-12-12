@@ -43,8 +43,8 @@ public final class Eval implements Evaluator {
     public Eval() { }
 
     public static int eval(Network network, Board board) {
-        double[] X = BoardToNetwork.transform(board); // TODO: convert to 2d
-        double[][] P = null; // network.predict(X) FIXME
+        double[][] X = BoardToNetwork.transform(board);
+        double[][] P = network.predict(X);
         int score = (int)(Math.round(P[0][0] * 100.0)); // convert to centi-pawns
         return board.getPlayerToMove().isWhite() ? score : -score;
     }

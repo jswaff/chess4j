@@ -110,9 +110,9 @@ public class NeuralNetworkTrainer {
 
             // set the input features for this sample
             Board board = new Board(gameRecord.getFen());
-            double[] data = BoardToNetwork.transform(board);
+            double[][] data = BoardToNetwork.transform(board);
             for (int r=0;r<X.length;r++) {
-                X[r][c] = data[r];
+                X[r][c] = data[r][0];
             }
 
             // set label
