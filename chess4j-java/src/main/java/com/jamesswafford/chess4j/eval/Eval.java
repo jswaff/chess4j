@@ -8,6 +8,8 @@ import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
+import com.jamesswafford.chess4j.tuner.BoardToNetwork;
+import com.jamesswafford.ml.nn.Network;
 import io.vavr.Function3;
 import io.vavr.Function4;
 import io.vavr.Tuple2;
@@ -39,6 +41,13 @@ public final class Eval implements Evaluator {
     }
 
     public Eval() { }
+
+    public static int eval(Network network, Board board) {
+        double[][] X = BoardToNetwork.transform(board);
+        double[][] P = network.predict(X);
+        int score = (int)(Math.round(P[0][0] * 100.0)); // convert to centi-pawns
+        return board.getPlayerToMove().isWhite() ? score : -score;
+    }
 
     public static int eval(EvalWeights weights, Board board) {
         return eval(weights, board, false);
@@ -156,6 +165,12 @@ public final class Eval implements Evaluator {
     @Override
     public int evaluateBoard(Board board) {
         return eval(Globals.getEvalWeights(), board);
+    }
+
+    @Override
+    public int evaluateBoardWithNN(Board board) {
+        Network network = Globals.getNetwork().orElseThrow(() -> new IllegalStateException("there is no network"));
+        return eval(network, board);
     }
 
     public static double[] extractFeatures(Board board) {

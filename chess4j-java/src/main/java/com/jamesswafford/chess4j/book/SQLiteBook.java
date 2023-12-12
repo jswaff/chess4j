@@ -7,6 +7,7 @@ import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.hash.Zobrist;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.utils.GameResult;
+import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,7 +36,6 @@ public class SQLiteBook implements OpeningBook {
             stmt.execute("create index idx_book_moves_key on book_moves(key)");
             stmt.close();
         } catch (SQLException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -51,7 +51,6 @@ public class SQLiteBook implements OpeningBook {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -63,7 +62,6 @@ public class SQLiteBook implements OpeningBook {
             stmt.execute("drop index idx_book_moves_key");
             stmt.close();
         } catch (SQLException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -246,7 +244,8 @@ public class SQLiteBook implements OpeningBook {
         ps.close();
     }
 
-    public static SQLiteBook openOrInitialize(String bookPath) throws Exception {
+    @SneakyThrows
+    public static SQLiteBook openOrInitialize(String bookPath) {
         LOGGER.debug("# initializing book: " + bookPath);
 
         File bookFile = new File(bookPath);

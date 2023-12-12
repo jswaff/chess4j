@@ -5,6 +5,7 @@ import com.jamesswafford.chess4j.book.SQLiteBook;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.EvalWeightsUtil;
+import com.jamesswafford.chess4j.io.NeuralNetworkUtil;
 import com.jamesswafford.chess4j.io.XBoardHandler;
 import com.jamesswafford.chess4j.search.AlphaBetaSearch;
 import com.jamesswafford.chess4j.search.SearchOptions;
@@ -19,8 +20,6 @@ import java.io.*;
 public final class App {
     private static final  Logger LOGGER = LogManager.getLogger(App.class);
 
-    private static String bookPath = null;
-    private static String tunerDSPath = null;
     private static String testSuiteFile = null;
     private static int testSuiteTime = 10; // default to ten seconds
     private static int maxDepth = 0;
@@ -37,9 +36,13 @@ public final class App {
         } else if (arg.startsWith("-time=")) {
             testSuiteTime = Integer.parseInt(arg.substring(6));
         } else if (arg.startsWith("-book=")) {
-            bookPath = arg.substring(6);
+            String path = arg.substring(6);
+            LOGGER.info("# loading opening book from " + path);
+            Globals.setOpeningBook(SQLiteBook.openOrInitialize(path));
         } else if (arg.startsWith("-tunerds=")) {
-            tunerDSPath = arg.substring(9);
+            String path = arg.substring(9);
+            LOGGER.info("# loading tuner datasource from " + path);
+            Globals.setTunerDatasource(SQLiteTunerDatasource.openOrInitialize(path));
         } else if (arg.startsWith("-hash=")) {
             int szBytes = Integer.parseInt(arg.substring(6)) * 1024 * 1024;
             TTHolder.getInstance().resizeMainTable(szBytes);
@@ -48,8 +51,12 @@ public final class App {
             TTHolder.getInstance().resizePawnTable(szBytes);
         } else if (arg.startsWith("-eval=")) {
             String path = arg.substring(6);
-            LOGGER.info("loading eval properties from " + path);
+            LOGGER.info("# loading eval properties from " + path);
             Globals.setEvalWeights(EvalWeightsUtil.load(path));
+        } else if (arg.startsWith("-nn=")) {
+            String path = arg.substring(4);
+            LOGGER.info("# loading network config from " + path);
+            Globals.setNetwork(NeuralNetworkUtil.load(path));
         }
     }
 
@@ -94,7 +101,7 @@ public final class App {
         // send "done=0" to prevent XBoard timing out during the initialization sequence.
         LOGGER.info("done=0");
 
-        LOGGER.info("# Welcome to chess4j version 5.1!\n\n");
+        LOGGER.info("# Welcome to chess4j version 6.0!\n\n");
 
         assert(showDebugMode());
 
@@ -108,13 +115,6 @@ public final class App {
             TestSuiteProcessor tp = new TestSuiteProcessor();
             tp.processTestSuite(testSuiteFile, maxDepth, testSuiteTime);
             System.exit(0);
-        }
-
-        if (bookPath != null) {
-            Globals.setOpeningBook(SQLiteBook.openOrInitialize(bookPath));
-        }
-        if (tunerDSPath != null) {
-            Globals.setTunerDatasource(SQLiteTunerDatasource.openOrInitialize(tunerDSPath));
         }
 
         repl();

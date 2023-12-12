@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.utils;
 import java.util.Arrays;
 import java.util.List;
 
+import com.jamesswafford.chess4j.board.Bitboard;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Color;
@@ -23,6 +24,15 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 import static com.jamesswafford.chess4j.utils.BoardUtils.*;
 
 public class BoardUtilsTest {
+
+    @Test
+    public void testAllSquares() {
+        long v = Bitboard.ALL_SQUARES;
+        assertEquals(64, Long.bitCount(v));
+
+        System.out.println(Bitboard.drawBitboard(v));
+        System.out.println(Bitboard.drawBitboard(Bitboard.LOWER16));
+    }
 
     @Test
     public void testCountPawns_initialPos() {
