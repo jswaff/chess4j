@@ -189,7 +189,6 @@ public class SQLiteTunerDatasource implements TunerDatasource {
                 }
                 sample.append(",").append(gameRecord.getEval()).append("\n");
                 out.write(sample.toString());
-                System.out.println(sample);
             }
         } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
