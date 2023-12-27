@@ -185,9 +185,9 @@ public class SQLiteTunerDatasource implements TunerDatasource {
                 double[][] features = BoardToNetwork.transform(board);
                 StringBuilder sample = new StringBuilder();
                 for (double[] feature : features) {
-                    sample.append((int)feature[0]);
+                    sample.append((int)feature[0]).append(",");
                 }
-                sample.append(",").append(gameRecord.getEval()).append("\n");
+                sample.append(gameRecord.getEval()).append("\n");
                 out.write(sample.toString());
             }
         } catch (IOException e) {
