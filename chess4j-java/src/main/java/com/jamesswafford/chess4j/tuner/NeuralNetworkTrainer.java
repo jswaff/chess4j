@@ -19,7 +19,7 @@ public class NeuralNetworkTrainer {
     private static final Logger LOGGER = LogManager.getLogger(NeuralNetworkTrainer.class);
 
     private static final int MINI_BATCH_SIZE = 256;
-    private static final int MAX_DATA_SET_SIZE = 20 * 1000 * 1000;
+    private static final int MAX_DATA_SET_SIZE = 1000 * 1000;
     private static final int MAX_TEST_SET_SIZE = 100000;
 
     public Network train(List<GameRecord> dataSet, double learningRate, int numEpochs) {
