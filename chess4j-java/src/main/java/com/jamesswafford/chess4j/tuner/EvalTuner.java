@@ -31,7 +31,7 @@ public class EvalTuner {
 
         List<GameRecord> gameRecords = tunerDatasource.getGameRecords(true);
         Collections.shuffle(gameRecords);
-        SearchParameters parameters = new SearchParameters(depth, -Constants.CHECKMATE, Constants.CHECKMATE);
+        //SearchParameters parameters = new SearchParameters(depth, -Constants.CHECKMATE, Constants.CHECKMATE);
 
         for (int i=0;i< gameRecords.size();i++) {
             GameRecord gameRecord = gameRecords.get(i);
@@ -39,9 +39,9 @@ public class EvalTuner {
                 LOGGER.info("\t {} of {} {}", +i, gameRecords.size(), gameRecord.getFen());
             }
             Board board = new Board(gameRecord.getFen());
-            search.initialize();
+            //search.initialize();
             //int score = search.search(board, parameters);
-            int score = Eval.eval(Globals.getEvalWeights(), board);
+            int score = Eval.eval(Globals.getEvalWeights(), board, true);
             tunerDatasource.updateEval(gameRecord.getFen(), score);
         }
     }

@@ -32,7 +32,7 @@ public class EvalMaterial {
             // raise the knight's value 1/16 for each pawn above 5, and lower for each pawn below 5.
             int knightAdj = (numPawns - 5) * weights.vals[EvalWeights.KNIGHT_KAUFMAN_ADJ];
 
-            // lower the rook's value 1/8 for each pawn above 5, and raise for each pawn above 5.
+            // lower the rook's value 1/8 for each pawn above 5, and raise for each pawn below 5.
             int rookAdj = (numPawns - 5) * weights.vals[EvalWeights.ROOK_KAUFMAN_ADJ];
 
             return board.getNumPieces(WHITE_QUEEN) * weights.vals[EvalWeights.QUEEN_VAL_IND]

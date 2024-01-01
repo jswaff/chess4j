@@ -62,6 +62,7 @@ public class XBoardHandler {
         put("evaltunerds", XBoardHandler.this::evalTunerDS);
         put("eval2props", XBoardHandler.this::writeEvalProperties);
         put("exit",XBoardHandler.this::exit);
+        put("export", XBoardHandler.this::exportTrainingData);
         put("fen2tuner", XBoardHandler.this::fenToTunerDS);
         put("force", XBoardHandler.this::force);
         put("go", XBoardHandler.this::go);
@@ -484,6 +485,14 @@ public class XBoardHandler {
             Network network = trainer.train(dataSet, learningRate, numEpochs);
             if (configFile != null) NeuralNetworkUtil.store(network, configFile);
             Globals.setNetwork(network);
+        }, () -> LOGGER.info("no tuner datasource"));
+    }
+
+    private void exportTrainingData(String[] cmd) {
+        String toFile = "training_data.csv";
+        Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
+            tunerDatasource1.exportToCSV(toFile);
+            LOGGER.info("export complete.");
         }, () -> LOGGER.info("no tuner datasource"));
     }
 
