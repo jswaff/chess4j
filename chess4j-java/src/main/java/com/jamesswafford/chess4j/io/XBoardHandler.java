@@ -264,10 +264,10 @@ public class XBoardHandler {
             List<Move> moves = moveGen.generateLegalMoves(board);
             moves.sort((mv1, mv2) -> {
                 Undo u1 = board.applyMove(mv1);
-                double s1 = useNN ? Eval.eval(network, board) : Eval.eval(weights, board);
+                double s1 = useNN ? Eval.eval(network, board) : Eval.eval(weights, board, true, true);
                 board.undoMove(u1);
                 Undo u2 = board.applyMove(mv2);
-                double s2 = useNN ? Eval.eval(network, board) : Eval.eval(weights, board);
+                double s2 = useNN ? Eval.eval(network, board) : Eval.eval(weights, board, true, true);
                 board.undoMove(u2);
                 return Double.compare(s1, s2);
             });

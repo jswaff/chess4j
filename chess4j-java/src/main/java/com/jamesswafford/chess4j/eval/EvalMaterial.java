@@ -16,44 +16,50 @@ import static com.jamesswafford.chess4j.eval.MaterialType.*;
 
 public class EvalMaterial {
 
-    public static int evalMaterial(EvalWeights weights, Board board) {
+    public static int evalMaterial(EvalWeights weights, Board board, boolean strict) {
         int pawnMaterial =
                 (board.getNumPieces(WHITE_PAWN) - board.getNumPieces(BLACK_PAWN))  * weights.vals[EvalWeights.PAWN_VAL_IND];
         return pawnMaterial
-                + evalNonPawnMaterial(weights, board, true)
-                - evalNonPawnMaterial(weights, board, false);
+                + evalNonPawnMaterial(weights, board, true, strict)
+                - evalNonPawnMaterial(weights, board, false, strict);
     }
 
-    public static int evalNonPawnMaterial(EvalWeights weights, Board board, boolean forWhite) {
+    public static int evalNonPawnMaterial(EvalWeights weights, Board board, boolean forWhite, boolean strict) {
 
         if (forWhite) {
             int numPawns = board.getNumPieces(WHITE_PAWN);
 
             // raise the knight's value 1/16 for each pawn above 5, and lower for each pawn below 5.
-            int knightAdj = (numPawns - 5) * weights.vals[EvalWeights.KNIGHT_KAUFMAN_ADJ];
+            int knightAdj = strict ? 0 : (numPawns - 5) * weights.vals[EvalWeights.KNIGHT_KAUFMAN_ADJ];
 
             // lower the rook's value 1/8 for each pawn above 5, and raise for each pawn below 5.
-            int rookAdj = (numPawns - 5) * weights.vals[EvalWeights.ROOK_KAUFMAN_ADJ];
+            int rookAdj = strict ? 0 : (numPawns - 5) * weights.vals[EvalWeights.ROOK_KAUFMAN_ADJ];
 
-            return board.getNumPieces(WHITE_QUEEN) * weights.vals[EvalWeights.QUEEN_VAL_IND]
+            int npm = board.getNumPieces(WHITE_QUEEN) * weights.vals[EvalWeights.QUEEN_VAL_IND]
                     + board.getNumPieces(WHITE_ROOK) * (weights.vals[EvalWeights.ROOK_VAL_IND] + rookAdj)
                     + board.getNumPieces(WHITE_KNIGHT) * (weights.vals[EvalWeights.KNIGHT_VAL_IND] + knightAdj)
-                    + board.getNumPieces(WHITE_BISHOP) * weights.vals[EvalWeights.BISHOP_VAL_IND]
-                    + (board.getNumPieces(WHITE_BISHOP) > 1 ? weights.vals[EvalWeights.BISHOP_PAIR_IND]: 0);
+                    + board.getNumPieces(WHITE_BISHOP) * weights.vals[EvalWeights.BISHOP_VAL_IND];
+            if (!strict && board.getNumPieces(WHITE_BISHOP) > 1) {
+                npm += weights.vals[EvalWeights.BISHOP_PAIR_IND];
+            }
+            return npm;
         } else {
             int numPawns = board.getNumPieces(BLACK_PAWN);
 
             // raise the knight's value 1/16 for each pawn above 5, and lower for each pawn below 5.
-            int knightAdj = (numPawns - 5) * weights.vals[EvalWeights.KNIGHT_KAUFMAN_ADJ];
+            int knightAdj = strict ? 0 : (numPawns - 5) * weights.vals[EvalWeights.KNIGHT_KAUFMAN_ADJ];
 
             // lower the rook's value 1/8 for each pawn above 5, and raise for each pawn below 5.
-            int rookAdj = (numPawns - 5) * weights.vals[EvalWeights.ROOK_KAUFMAN_ADJ];
+            int rookAdj = strict ? 0 : (numPawns - 5) * weights.vals[EvalWeights.ROOK_KAUFMAN_ADJ];
 
-            return board.getNumPieces(BLACK_QUEEN) * weights.vals[EvalWeights.QUEEN_VAL_IND]
+            int npm = board.getNumPieces(BLACK_QUEEN) * weights.vals[EvalWeights.QUEEN_VAL_IND]
                     + board.getNumPieces(BLACK_ROOK) * (weights.vals[EvalWeights.ROOK_VAL_IND] + rookAdj)
                     + board.getNumPieces(BLACK_KNIGHT) * (weights.vals[EvalWeights.KNIGHT_VAL_IND] + knightAdj)
-                    + board.getNumPieces(BLACK_BISHOP) * weights.vals[EvalWeights.BISHOP_VAL_IND]
-                    + (board.getNumPieces(BLACK_BISHOP) > 1 ? weights.vals[EvalWeights.BISHOP_PAIR_IND]: 0);
+                    + board.getNumPieces(BLACK_BISHOP) * weights.vals[EvalWeights.BISHOP_VAL_IND];
+            if (!strict && board.getNumPieces(BLACK_BISHOP) > 1) {
+                npm += weights.vals[EvalWeights.BISHOP_PAIR_IND];
+            }
+            return npm;
         }
     }
 
