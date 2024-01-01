@@ -41,7 +41,7 @@ public class EvalTuner {
             Board board = new Board(gameRecord.getFen());
             //search.initialize();
             //int score = search.search(board, parameters);
-            int score = Eval.eval(Globals.getEvalWeights(), board, true);
+            int score = Eval.eval(Globals.getEvalWeights(), board, true, false);
             tunerDatasource.updateEval(gameRecord.getFen(), score);
         }
     }
