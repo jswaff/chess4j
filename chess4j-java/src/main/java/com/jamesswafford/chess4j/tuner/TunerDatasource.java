@@ -18,4 +18,5 @@ public interface TunerDatasource {
 
     List<GameRecord> getGameRecords(boolean justUnprocessed);
 
+    void exportToCSV(String file);
 }

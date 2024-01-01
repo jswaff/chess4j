@@ -18,44 +18,28 @@ public class NeuralNetworkTrainer {
 
     private static final Logger LOGGER = LogManager.getLogger(NeuralNetworkTrainer.class);
 
-    private static final int MINI_BATCH_SIZE = 1024 * 8;
-    private static final int MAX_DATA_SET_SIZE = 20 * 1000 * 1000;
-    private static final int MAX_TEST_SET_SIZE = 100000;
+    private static final int MINI_BATCH_SIZE = 256;
+    private static final int MAX_DATA_SET_SIZE = 1000 * 1000;
 
     public Network train(List<GameRecord> dataSet, double learningRate, int numEpochs) {
+
+        LOGGER.info("data set size {} learningRate {} numEpochs {}", dataSet.size(), learningRate, numEpochs);
 
         // divide the data up into training and test sets
         Collections.shuffle(dataSet);
         if (dataSet.size() > MAX_DATA_SET_SIZE) {
             dataSet.subList(MAX_DATA_SET_SIZE, dataSet.size()).clear();
         }
-        List<GameRecord> trainingSet;
-        List<GameRecord> testSet;
-        if (dataSet.size() >= 100) {
-            int m;
-            if (dataSet.size() > 10000) {
-                m = dataSet.size() * 9 / 10;
-            } else {
-                m = dataSet.size() * 4 / 5;
-            }
-            if (dataSet.size() - m > MAX_TEST_SET_SIZE) {
-                m = dataSet.size() - MAX_TEST_SET_SIZE;
-            }
-            trainingSet = new ArrayList<>(dataSet.subList(0, m));
-            testSet = dataSet.subList(m, dataSet.size());
-        } else {
-            trainingSet = new ArrayList<>(dataSet);
-            testSet = new ArrayList<>(dataSet);
-        }
-        LOGGER.info("data set size {} training {} test {} learningRate {} numEpochs {}",
-                dataSet.size(), trainingSet.size(), testSet.size(), learningRate, numEpochs);
+        int m = dataSet.size() * 95 / 100;
+        List<GameRecord> trainingSet = new ArrayList<>(dataSet.subList(0, m));
+        List<GameRecord> testSet = dataSet.subList(m, dataSet.size());
+        LOGGER.info("training set size {} test set size {}", trainingSet.size(), testSet.size());
 
         // create a network
         Network network = Network.builder()
                 .numInputUnits(BoardToNetwork.NUM_INPUTS)
                 .layers(List.of(
-                        new Layer(64, Sigmoid.INSTANCE),
-                        new Layer(32, Sigmoid.INSTANCE),
+                        new Layer(512, Sigmoid.INSTANCE),
                         new Layer(1, Identity.INSTANCE)
                 ))
                 .costFunction(MSE.INSTANCE)
@@ -116,9 +100,8 @@ public class NeuralNetworkTrainer {
             }
 
             // set label
-            // the score is recorded as player to move, convert to white
             double label = ((double)gameRecord.getEval()) / 100.0; // convert to pawns
-            if (board.getPlayerToMove().isBlack()) label = -label;
+            if (board.getPlayerToMove().isBlack()) label = -label; // convert to white POV
             Y[0][c] = label;
         }
 

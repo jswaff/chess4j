@@ -50,20 +50,20 @@ public final class Eval implements Evaluator {
     }
 
     public static int eval(EvalWeights weights, Board board) {
-        return eval(weights, board, false);
+        return eval(weights, board, false, false);
     }
 
-    public static int eval(EvalWeights weights, Board board, boolean materialOnly) {
+    public static int eval(EvalWeights weights, Board board, boolean materialOnly, boolean strict) {
 
-        int evalScore = evalHelper(weights, board, materialOnly);
+        int evalScore = evalHelper(weights, board, materialOnly, strict);
 
-        assert(verify(weights, evalScore, board, materialOnly));
+        assert(verify(weights, evalScore, board, materialOnly, strict));
 
         return evalScore;
     }
 
-    private static int evalHelper(EvalWeights weights, Board board, boolean materialOnly) {
-        int matScore = EvalMaterial.evalMaterial(weights, board);
+    private static int evalHelper(EvalWeights weights, Board board, boolean materialOnly, boolean strict) {
+        int matScore = EvalMaterial.evalMaterial(weights, board, strict);
         if (materialOnly) {
             return board.getPlayerToMove() == Color.WHITE ? matScore : -matScore;
         }
@@ -213,13 +213,13 @@ public final class Eval implements Evaluator {
         }
     }
 
-    private static boolean verify(EvalWeights weights, int evalScore, Board board, boolean materialOnly) {
+    private static boolean verify(EvalWeights weights, int evalScore, Board board, boolean materialOnly, boolean strict) {
 
         // disable the hash to keep the stats from being inflated, which will cause equality checks to fail
         boolean pawnHashEnabled = Globals.isPawnHashEnabled();
         Globals.setPawnHashEnabled(false);
 
-        boolean retVal = verifyEvalSymmetry(weights, evalScore, board, materialOnly) &&
+        boolean retVal = verifyEvalSymmetry(weights, evalScore, board, materialOnly, strict) &&
                 //verifyNativeEvalIsEqual(evalScore, board, materialOnly) &&
                 verifyExtractedFeatures(weights, evalScore, board, materialOnly);
 
@@ -235,13 +235,14 @@ public final class Eval implements Evaluator {
      * @param evalScore - the score the board has been evaulated at
      * @param board - the chess board
      * @param materialOnly - whether to evaulate material only
+     * @param strict - if material only, strict mode doesn't allow knight/rook adjustments or a bishop pair bonus
      *
      * @return - true if the eval is symmetric in the given position
      */
-    private static boolean verifyEvalSymmetry(EvalWeights weights, int evalScore, Board board, boolean materialOnly) {
+    private static boolean verifyEvalSymmetry(EvalWeights weights, int evalScore, Board board, boolean materialOnly, boolean strict) {
         Board flipBoard = board.deepCopy();
         flipBoard.flipVertical();
-        int flipScore = evalHelper(weights, flipBoard, materialOnly);
+        int flipScore = evalHelper(weights, flipBoard, materialOnly, strict);
         boolean retVal = flipScore == evalScore;
         flipBoard.flipVertical();
         assert(board.equals(flipBoard));

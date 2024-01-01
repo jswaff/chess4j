@@ -13,7 +13,7 @@ public class EvalMaterialTest {
 
     @Test
     public void testEvalMaterial_initialPos() {
-        assertEquals(0, evalMaterial(new EvalWeights(), new Board()));
+        assertEquals(0, evalMaterial(new EvalWeights(), new Board(), false));
     }
 
     @Test
@@ -21,7 +21,7 @@ public class EvalMaterialTest {
         EvalWeights weights = new EvalWeights();
         Board board = new Board("6k1/8/8/3B4/8/8/8/K7 w - - 0 1");
 
-        assertEquals(weights.vals[BISHOP_VAL_IND], evalMaterial(weights, board));
+        assertEquals(weights.vals[BISHOP_VAL_IND], evalMaterial(weights, board, false));
     }
 
     @Test
@@ -32,7 +32,10 @@ public class EvalMaterialTest {
         // there are no pawns, so rook comes to life
         int expectedRookAdj = weights.vals[ROOK_KAUFMAN_ADJ] * 5; // 12 x 5 pawns
         assertEquals(weights.vals[BISHOP_VAL_IND] - weights.vals[ROOK_VAL_IND] + expectedRookAdj,
-                evalMaterial(weights, board));
+                evalMaterial(weights, board, false));
+
+        assertEquals(weights.vals[BISHOP_VAL_IND] - weights.vals[ROOK_VAL_IND],
+                evalMaterial(weights, board, true));
     }
 
     @Test
@@ -42,11 +45,15 @@ public class EvalMaterialTest {
 
         int expectedKnightAdj = weights.vals[KNIGHT_KAUFMAN_ADJ] * -5;
         assertEquals(weights.vals[QUEEN_VAL_IND] + weights.vals[KNIGHT_VAL_IND] + expectedKnightAdj,
-                evalNonPawnMaterial(weights, board, true));
+                evalNonPawnMaterial(weights, board, true, false));
+        assertEquals(weights.vals[QUEEN_VAL_IND] + weights.vals[KNIGHT_VAL_IND],
+                evalNonPawnMaterial(weights, board, true, true));
 
         int expectedRookAdj = weights.vals[ROOK_KAUFMAN_ADJ] * -4; // 12 x 4 pawns
         assertEquals(weights.vals[ROOK_VAL_IND] + expectedRookAdj + weights.vals[BISHOP_VAL_IND],
-                evalNonPawnMaterial(weights, board, false));
+                evalNonPawnMaterial(weights, board, false, false));
+        assertEquals(weights.vals[ROOK_VAL_IND] + weights.vals[BISHOP_VAL_IND],
+                evalNonPawnMaterial(weights, board, false, true));
     }
 
     @Test
@@ -57,10 +64,14 @@ public class EvalMaterialTest {
         // without pawns, the knight is a little less valuable
         int expectedKnightAdj = weights.vals[KNIGHT_KAUFMAN_ADJ] * -5;
         assertEquals(weights.vals[BISHOP_VAL_IND] + weights.vals[KNIGHT_VAL_IND] + expectedKnightAdj,
-                evalNonPawnMaterial(weights, board, true));
+                evalNonPawnMaterial(weights, board, true, false));
+        assertEquals(weights.vals[BISHOP_VAL_IND] + weights.vals[KNIGHT_VAL_IND],
+                evalNonPawnMaterial(weights, board, true, true));
 
         assertEquals(weights.vals[BISHOP_VAL_IND]* 2L + weights.vals[BISHOP_PAIR_IND],
-                evalNonPawnMaterial(weights, board, false));
+                evalNonPawnMaterial(weights, board, false, false));
+        assertEquals(weights.vals[BISHOP_VAL_IND]* 2L,
+                evalNonPawnMaterial(weights, board, false, true));
     }
 
     @Test

@@ -1,13 +1,17 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
+import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.exceptions.UncheckedSqlException;
 import com.jamesswafford.chess4j.io.PGNResult;
 import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -164,6 +168,37 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         }
 
         return gameRecords;
+    }
+
+    @Override
+    public void exportToCSV(String file) {
+
+        BufferedWriter out = null;
+        List<GameRecord> gameRecords = getGameRecords(false);
+
+        try {
+            FileWriter fstream = new FileWriter(file);
+            out = new BufferedWriter(fstream);
+
+            for (GameRecord gameRecord : gameRecords) {
+                Board board = new Board(gameRecord.getFen());
+                double[][] features = BoardToNetwork.transform(board);
+                StringBuilder sample = new StringBuilder();
+                for (double[] feature : features) {
+                    sample.append((int)feature[0]).append(",");
+                }
+                sample.append(gameRecord.getEval()).append("\n");
+                out.write(sample.toString());
+            }
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) { /* ignore */  }
+            }
+        }
     }
 
     private PGNResult mapOutcomeToResult(int outcome) {
