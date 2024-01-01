@@ -20,35 +20,20 @@ public class NeuralNetworkTrainer {
 
     private static final int MINI_BATCH_SIZE = 256;
     private static final int MAX_DATA_SET_SIZE = 1000 * 1000;
-    private static final int MAX_TEST_SET_SIZE = 100000;
 
     public Network train(List<GameRecord> dataSet, double learningRate, int numEpochs) {
+
+        LOGGER.info("data set size {} learningRate {} numEpochs {}", dataSet.size(), learningRate, numEpochs);
 
         // divide the data up into training and test sets
         Collections.shuffle(dataSet);
         if (dataSet.size() > MAX_DATA_SET_SIZE) {
             dataSet.subList(MAX_DATA_SET_SIZE, dataSet.size()).clear();
         }
-        List<GameRecord> trainingSet;
-        List<GameRecord> testSet;
-        if (dataSet.size() >= 100) {
-            int m;
-            if (dataSet.size() > 10000) {
-                m = dataSet.size() * 9 / 10;
-            } else {
-                m = dataSet.size() * 4 / 5;
-            }
-            if (dataSet.size() - m > MAX_TEST_SET_SIZE) {
-                m = dataSet.size() - MAX_TEST_SET_SIZE;
-            }
-            trainingSet = new ArrayList<>(dataSet.subList(0, m));
-            testSet = dataSet.subList(m, dataSet.size());
-        } else {
-            trainingSet = new ArrayList<>(dataSet);
-            testSet = new ArrayList<>(dataSet);
-        }
-        LOGGER.info("data set size {} training {} test {} learningRate {} numEpochs {}",
-                dataSet.size(), trainingSet.size(), testSet.size(), learningRate, numEpochs);
+        int m = dataSet.size() * 95 / 100;
+        List<GameRecord> trainingSet = new ArrayList<>(dataSet.subList(0, m));
+        List<GameRecord> testSet = dataSet.subList(m, dataSet.size());
+        LOGGER.info("training set size {} test set size {}", trainingSet.size(), testSet.size());
 
         // create a network
         Network network = Network.builder()
@@ -69,17 +54,9 @@ public class NeuralNetworkTrainer {
         LOGGER.info("X_test shape: " + X_test.length + "x" + X_test[0].length);
         LOGGER.info("Y_test shape: " + Y_test.length + "x" + Y_test[0].length);
 
-//        Pair<SimpleMatrix, SimpleMatrix> X_Y_test = loadXY(testSet);
-//        SimpleMatrix X_test = X_Y_test.getValue0();
-//        SimpleMatrix Y_test = X_Y_test.getValue1();
-//        LOGGER.info("X_test shape: " + X_test.numRows() + "x" + X_test.numCols());
-//        LOGGER.info("Y_test shape: " + Y_test.numRows() + "x" + Y_test.numCols());
-
         // get the initial cost
         double[][] P_init = network.predict(X_test);
         LOGGER.info("initial cost {}", network.cost(P_init, Y_test));
-//        SimpleMatrix P_init = network.predict(X_test);
-//        System.out.println("initial cost: " + network.cost(P_init, Y_test));
 
         // train!
         int numMiniBatches = trainingSet.size() / MINI_BATCH_SIZE;
@@ -100,8 +77,6 @@ public class NeuralNetworkTrainer {
 
         double[][] P_final = network.predict(X_test);
         LOGGER.info("final cost {}", network.cost(P_final, Y_test));
-//        SimpleMatrix P_final = network.predict(X_test);
-//        System.out.println("final cost: " + network.cost(P_final, Y_test));
 
         return network;
     }
@@ -110,11 +85,9 @@ public class NeuralNetworkTrainer {
 
         // number of X rows is number of features
         double[][] X = new double[BoardToNetwork.NUM_INPUTS][gameRecords.size()];
-        //SimpleMatrix X = new SimpleMatrix(BoardToNetwork.NUM_INPUTS, gameRecords.size());
 
         // just one output neuron
         double[][] Y = new double[1][gameRecords.size()];
-        //SimpleMatrix Y = new SimpleMatrix(1, gameRecords.size());
 
         for (int c=0;c<gameRecords.size();c++) {
             GameRecord gameRecord = gameRecords.get(c);
@@ -125,16 +98,11 @@ public class NeuralNetworkTrainer {
             for (int r=0;r<X.length;r++) {
                 X[r][c] = data[r][0];
             }
-//            for (int r=0;r<X.numRows();r++) {
-//                X.set(r, c, data[r]);
-//            }
 
             // set label
-            // the score is recorded as player to move, convert to white
             double label = ((double)gameRecord.getEval()) / 100.0; // convert to pawns
-            if (board.getPlayerToMove().isBlack()) label = -label;
+            if (board.getPlayerToMove().isBlack()) label = -label; // convert to white POV
             Y[0][c] = label;
-            //Y.set(0, c, label);
         }
 
         return new Pair<>(X, Y);
