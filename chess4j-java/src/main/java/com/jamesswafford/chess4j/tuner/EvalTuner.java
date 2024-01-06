@@ -4,6 +4,7 @@ import com.jamesswafford.chess4j.Constants;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.eval.Eval;
+import com.jamesswafford.chess4j.eval.EvalWeights;
 import com.jamesswafford.chess4j.search.AlphaBetaSearch;
 import com.jamesswafford.chess4j.search.Search;
 import com.jamesswafford.chess4j.search.SearchParameters;
@@ -41,9 +42,10 @@ public class EvalTuner {
             Board board = new Board(gameRecord.getFen());
             //search.initialize();
             //int score = search.search(board, parameters);
-            int score = Eval.eval(Globals.getEvalWeights(), board, true, false);
+            EvalWeights trainingWeights = new EvalWeights();
+            trainingWeights.simplifyForNN();
+            int score = Eval.eval(trainingWeights, board, false, false);
             tunerDatasource.updateEval(gameRecord.getFen(), score);
         }
     }
-
 }

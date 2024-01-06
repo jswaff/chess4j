@@ -202,11 +202,11 @@ public class EvalWeights {
         indexMap.put("BISHOP_PST_EG", new Tuple2<>(BISHOP_PST_EG_IND, 64));
         indexMap.put("BISHOP_MOBILITY_MG", new Tuple2<>(BISHOP_MOBILITY_MG_IND, 14));
         indexMap.put("BISHOP_MOBILITY_EG", new Tuple2<>(BISHOP_MOBILITY_EG_IND, 14));
-        indexMap.put("BISHOP_TRAPPED", new Tuple2<Integer,Integer>(BISHOP_TRAPPED_IND, 1));
+        indexMap.put("BISHOP_TRAPPED", new Tuple2<>(BISHOP_TRAPPED_IND, 1));
         indexMap.put("KNIGHT_PST_MG", new Tuple2<>(KNIGHT_PST_MG_IND, 64));
         indexMap.put("KNIGHT_PST_EG", new Tuple2<>(KNIGHT_PST_EG_IND, 64));
-        indexMap.put("KNIGHT_OUTPOST", new Tuple2<Integer,Integer>(KNIGHT_OUTPOST_IND, 64));
-        indexMap.put("KNIGHT_SUPPORTED_OUTPOST", new Tuple2<Integer,Integer>(KNIGHT_SUPPORTED_OUTPOST_IND, 64));
+        indexMap.put("KNIGHT_OUTPOST", new Tuple2<>(KNIGHT_OUTPOST_IND, 64));
+        indexMap.put("KNIGHT_SUPPORTED_OUTPOST", new Tuple2<>(KNIGHT_SUPPORTED_OUTPOST_IND, 64));
         indexMap.put("KNIGHT_TROPISM_MG", new Tuple2<>(KNIGHT_TROPISM_MG_IND, 1));
         indexMap.put("KNIGHT_TROPISM_EG", new Tuple2<>(KNIGHT_TROPISM_EG_IND, 1));
         indexMap.put("ROOK_PST_MG", new Tuple2<>(ROOK_PST_MG_IND, 64));
@@ -250,9 +250,7 @@ public class EvalWeights {
     }
 
     public void reset() {
-        for (int i=0;i<vals.length;i++) {
-            vals[i] = 0;
-        }
+        Arrays.fill(vals, 0);
         vals[PAWN_VAL_IND] = 100;
         vals[QUEEN_VAL_IND] = 900;
         vals[ROOK_VAL_IND] = 500;
@@ -260,6 +258,61 @@ public class EvalWeights {
         vals[KNIGHT_VAL_IND] = 300;
         // trapped bishop is an exception. 
         vals[BISHOP_TRAPPED_IND] = -125;
+    }
+
+    // this is a temporary / experimental routine for NN training purposes
+    public void simplifyForNN() {
+        vals[BISHOP_PAIR_IND] = 0;
+        vals[KNIGHT_KAUFMAN_ADJ] = 0;
+        vals[ROOK_KAUFMAN_ADJ] = 0;
+        vals[KING_SAFETY_PAWN_ONE_AWAY_IND] = 0;
+        vals[KING_SAFETY_WING_PAWN_ONE_AWAY_IND] = 0;
+        vals[KING_SAFETY_PAWN_TWO_AWAY_IND] = 0;
+        vals[KING_SAFETY_WING_PAWN_TWO_AWAY_IND] = 0;
+        vals[KING_SAFETY_PAWN_FAR_AWAY_IND] = 0;
+        vals[KING_SAFETY_WING_PAWN_FAR_AWAY_IND] = 0;
+        vals[KING_SAFETY_MIDDLE_OPEN_FILE_IND] = 0;
+        for (int i=KING_PST_MG_IND;i<KING_PST_MG_IND+64;i++) vals[i] = 0;
+        for (int i=KING_PST_EG_IND;i<KING_PST_EG_IND+64;i++) vals[i] = 0;
+        for (int i=BISHOP_PST_MG_IND;i<BISHOP_PST_MG_IND+64;i++) vals[i] = 0;
+        for (int i=BISHOP_PST_EG_IND;i<BISHOP_PST_EG_IND+64;i++) vals[i] = 0;
+        for (int i=BISHOP_MOBILITY_MG_IND;i<BISHOP_MOBILITY_MG_IND+14;i++) vals[i] = 0;
+        for (int i=BISHOP_MOBILITY_EG_IND;i<BISHOP_MOBILITY_EG_IND+14;i++) vals[i] = 0;
+        vals[BISHOP_TRAPPED_IND] = 0;
+        for (int i=KNIGHT_PST_MG_IND;i<KNIGHT_PST_MG_IND+64;i++) vals[i] = 0;
+        for (int i=KNIGHT_PST_EG_IND;i<KNIGHT_PST_EG_IND+64;i++) vals[i] = 0;
+        for (int i=KNIGHT_OUTPOST_IND;i<KNIGHT_OUTPOST_IND+64;i++) vals[i] = 0;
+        for (int i=KNIGHT_SUPPORTED_OUTPOST_IND;i<KNIGHT_SUPPORTED_OUTPOST_IND+64;i++) vals[i] = 0;
+        vals[KNIGHT_TROPISM_MG_IND] = 0;
+        vals[KNIGHT_TROPISM_EG_IND] = 0;
+        for (int i=ROOK_PST_MG_IND;i<ROOK_PST_MG_IND+64;i++) vals[i] = 0;
+        for (int i=ROOK_PST_EG_IND;i<ROOK_PST_EG_IND+64;i++) vals[i] = 0;
+        for (int i=ROOK_MOBILITY_MG_IND;i<ROOK_MOBILITY_MG_IND+15;i++) vals[i] = 0;
+        for (int i=ROOK_MOBILITY_EG_IND;i<ROOK_MOBILITY_EG_IND+15;i++) vals[i] = 0;
+        vals[ROOK_OPEN_FILE_MG_IND] = 0;
+        vals[ROOK_OPEN_FILE_SUPPORTED_MG_IND] = 0;
+        vals[ROOK_OPEN_FILE_EG_IND] = 0;
+        vals[ROOK_OPEN_FILE_SUPPORTED_EG_IND] = 0;
+        vals[ROOK_HALF_OPEN_FILE_MG_IND] = 0;
+        vals[ROOK_HALF_OPEN_FILE_SUPPORTED_MG_IND] = 0;
+        vals[ROOK_HALF_OPEN_FILE_EG_IND] = 0;
+        vals[ROOK_HALF_OPEN_FILE_SUPPORTED_EG_IND] = 0;
+        for (int i=QUEEN_PST_MG_IND;i<QUEEN_PST_MG_IND+64;i++) vals[i] = 0;
+        for (int i=QUEEN_PST_EG_IND;i<QUEEN_PST_EG_IND+64;i++) vals[i] = 0;
+        for (int i=QUEEN_MOBILITY_MG_IND;i<QUEEN_MOBILITY_MG_IND+28;i++) vals[i] = 0;
+        for (int i=QUEEN_MOBILITY_EG_IND;i<QUEEN_MOBILITY_EG_IND+28;i++) vals[i] = 0;
+        vals[MAJOR_ON_7TH_MG_IND] = 0;
+        vals[MAJOR_ON_7TH_EG_IND] = 0;
+        vals[CONNECTED_MAJORS_ON_7TH_MG_IND] = 0;
+        vals[CONNECTED_MAJORS_ON_7TH_EG_IND] = 0;
+        for (int i=PAWN_PST_MG_IND;i<PAWN_PST_MG_IND+64;i++) vals[i] = 0;
+        for (int i=PAWN_PST_EG_IND;i<PAWN_PST_EG_IND+64;i++) vals[i] = 0;
+        for (int i=PASSED_PAWN_MG_IND;i<PASSED_PAWN_MG_IND+8;i++) vals[i] = 0;
+        for (int i=PASSED_PAWN_EG_IND;i<PASSED_PAWN_EG_IND+8;i++) vals[i] = 0;
+        vals[ISOLATED_PAWN_MG_IND] = 0;
+        vals[ISOLATED_PAWN_EG_IND] = 0;
+        vals[DOUBLED_PAWN_MG_IND] = 0;
+        vals[DOUBLED_PAWN_EG_IND] = 0;
     }
 
     public List<Integer> getVals(String key) {

@@ -39,7 +39,7 @@ public class NeuralNetworkTrainer {
         Network network = Network.builder()
                 .numInputUnits(BoardToNetwork.NUM_INPUTS)
                 .layers(List.of(
-                        new Layer(512, Sigmoid.INSTANCE),
+                        new Layer(32, Sigmoid.INSTANCE),
                         new Layer(1, Identity.INSTANCE)
                 ))
                 .costFunction(MSE.INSTANCE)
