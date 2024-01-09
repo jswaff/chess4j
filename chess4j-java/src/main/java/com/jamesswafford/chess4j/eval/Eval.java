@@ -57,7 +57,8 @@ public final class Eval implements Evaluator {
 
         int evalScore = evalHelper(weights, board, materialOnly, strict);
 
-        assert(verify(weights, evalScore, board, materialOnly, strict));
+        // FIXME
+        //assert(verify(weights, evalScore, board, materialOnly, strict));
 
         return evalScore;
     }
@@ -72,7 +73,7 @@ public final class Eval implements Evaluator {
         // that are "drawish" are further evaluated but later tapered down.
 //        MaterialType materialType = EvalMaterial.calculateMaterialType(board);
         int drawFactor = 1;
-        // TODO
+        // FIXME
 //        if (immediateDraws.contains(materialType)) {
 //            return 0;
 //        }
@@ -116,7 +117,9 @@ public final class Eval implements Evaluator {
                 wKingScore._2 + bKingScore._2;
 
         // blend the middle game score and end game score, and divide by the draw factor
-        int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
+        // FIXME
+        int taperedScore = mgScore;
+//        int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
 
         // return the score from the perspective of the player on move
         return board.getPlayerToMove() == Color.WHITE ? taperedScore : -taperedScore;

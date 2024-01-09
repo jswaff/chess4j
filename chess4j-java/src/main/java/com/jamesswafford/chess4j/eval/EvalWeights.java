@@ -272,7 +272,7 @@ public class EvalWeights {
         vals[KING_SAFETY_PAWN_FAR_AWAY_IND] = 0;
         vals[KING_SAFETY_WING_PAWN_FAR_AWAY_IND] = 0;
         vals[KING_SAFETY_MIDDLE_OPEN_FILE_IND] = 0;
-        for (int i=KING_PST_MG_IND;i<KING_PST_MG_IND+64;i++) vals[i] = 0;
+        //for (int i=KING_PST_MG_IND;i<KING_PST_MG_IND+64;i++) vals[i] = 0;
         for (int i=KING_PST_EG_IND;i<KING_PST_EG_IND+64;i++) vals[i] = 0;
         for (int i=BISHOP_PST_MG_IND;i<BISHOP_PST_MG_IND+64;i++) vals[i] = 0;
         for (int i=BISHOP_PST_EG_IND;i<BISHOP_PST_EG_IND+64;i++) vals[i] = 0;
