@@ -4,7 +4,6 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.ml.nn.Layer;
 import com.jamesswafford.ml.nn.Network;
 import com.jamesswafford.ml.nn.activation.Identity;
-import com.jamesswafford.ml.nn.activation.Sigmoid;
 import com.jamesswafford.ml.nn.cost.MSE;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +18,7 @@ public class NeuralNetworkTrainer {
     private static final Logger LOGGER = LogManager.getLogger(NeuralNetworkTrainer.class);
 
     private static final int MINI_BATCH_SIZE = 256;
-    private static final int MAX_DATA_SET_SIZE = 1000 * 1000;
+    private static final int MAX_DATA_SET_SIZE = 1000 * 1000 * 5;
 
     public Network train(List<GameRecord> dataSet, double learningRate, int numEpochs) {
 

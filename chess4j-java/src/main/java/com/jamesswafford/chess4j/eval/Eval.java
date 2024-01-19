@@ -57,8 +57,7 @@ public final class Eval implements Evaluator {
 
         int evalScore = evalHelper(weights, board, materialOnly, strict);
 
-        // FIXME
-        //assert(verify(weights, evalScore, board, materialOnly, strict));
+        assert(verify(weights, evalScore, board, materialOnly, strict));
 
         return evalScore;
     }
@@ -101,6 +100,7 @@ public final class Eval implements Evaluator {
         Tuple2<Integer, Integer> rooksScore = evalPieces(weights,
                 board.getWhiteRooks() | board.getBlackRooks(),
                 board, EvalRook::evalRook);
+
 
         // eval queens
         Tuple2<Integer, Integer> queensScore = evalPieces(weights,
@@ -288,7 +288,8 @@ public final class Eval implements Evaluator {
         // a drawish ending has scaled the value down
         if (Math.abs(score - evalScore) >= 1.0) {
             MaterialType materialType = EvalMaterial.calculateMaterialType(board);
-            assert (immediateDraws.contains(materialType) || factor8Draws.contains(materialType));
+//            assert (immediateDraws.contains(materialType) || factor8Draws.contains(materialType));
+            assert false;
         }
 
         return true;

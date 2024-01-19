@@ -273,7 +273,7 @@ public class XBoardHandler {
             });
             moves.forEach(mv -> {
                 Undo undo = board.applyMove(mv);
-                LOGGER.info("\t" + mv + " " + -Eval.eval(weights, board, true, true) + " " + (useNN ? -Eval.eval(network, board) : ""));
+                LOGGER.info("\t" + mv + " " + -Eval.eval(weights, board, false, true) + " " + (useNN ? -Eval.eval(network, board) : ""));
                 board.undoMove(undo);
             });
         }, () -> LOGGER.info("There is no network"));
