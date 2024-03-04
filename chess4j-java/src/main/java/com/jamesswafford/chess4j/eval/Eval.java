@@ -54,11 +54,10 @@ public final class Eval implements Evaluator {
     }
 
     public static int eval(EvalWeights weights, Board board, boolean materialOnly, boolean strict) {
-
         int evalScore = evalHelper(weights, board, materialOnly, strict);
-
+        System.out.println("verifying score " + evalScore);
         assert(verify(weights, evalScore, board, materialOnly, strict));
-
+        System.out.println("verification complete");
         return evalScore;
     }
 
