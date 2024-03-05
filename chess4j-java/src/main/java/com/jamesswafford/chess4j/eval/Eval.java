@@ -55,9 +55,7 @@ public final class Eval implements Evaluator {
 
     public static int eval(EvalWeights weights, Board board, boolean materialOnly, boolean strict) {
         int evalScore = evalHelper(weights, board, materialOnly, strict);
-        System.out.println("verifying score " + evalScore);
         assert(verify(weights, evalScore, board, materialOnly, strict));
-        System.out.println("verification complete");
         return evalScore;
     }
 
@@ -146,8 +144,7 @@ public final class Eval implements Evaluator {
         if (Globals.isPawnHashEnabled()) {
             PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board);
             if (pte != null) {
-                assert (pte.getScore().equals(
-                        evalPieces(weights, board.getWhitePawns() | board.getBlackPawns(), board, EvalPawn::evalPawn)));
+                assert(pawnHashScoreIsValid(pte.getScore(), weights, board));
                 return pte.getScore();
             }
         }
@@ -161,6 +158,14 @@ public final class Eval implements Evaluator {
         }
 
         return pawnsScore;
+    }
+
+    private static boolean pawnHashScoreIsValid(Tuple2<Integer, Integer> hashScore, EvalWeights weights, Board board) {
+        Tuple2<Integer, Integer> actualScore = evalPieces(weights, board.getWhitePawns() | board.getBlackPawns(), board, EvalPawn::evalPawn);
+        if (!actualScore.equals(hashScore)) {
+            LOGGER.warn("pawn hash score incorrect.  actual: " + actualScore + " hash: " + hashScore);
+        }
+        return actualScore.equals(hashScore);
     }
 
     public static native int evalNative(Board board, boolean materialOnly);
