@@ -51,8 +51,8 @@ public class EvalKnight {
 
     public static java.lang.Void extractKnightFeatures(double[] features, Board board, Square sq, double phase) {
         if (board.getPiece(sq).isWhite()) {
-            features[KNIGHT_PST_MG_IND + sq.value()] += 1; //phase;
-            features[KNIGHT_PST_EG_IND + sq.value()] += 0; //(1-phase);
+            features[KNIGHT_PST_MG_IND + sq.value()] += phase;
+            features[KNIGHT_PST_EG_IND + sq.value()] += (1-phase);
 
 //            features[KNIGHT_TROPISM_MG_IND] += sq.distance(board.getKingSquare(Color.BLACK)) * phase;
 //            features[KNIGHT_TROPISM_EG_IND] += sq.distance(board.getKingSquare(Color.BLACK)) * (1-phase);
@@ -64,8 +64,8 @@ public class EvalKnight {
 //                }
 //            }
         } else {
-            features[KNIGHT_PST_MG_IND + sq.flipVertical().value()] -= 1; //phase;
-            features[KNIGHT_PST_EG_IND + sq.flipVertical().value()] -= 0; //(1-phase);
+            features[KNIGHT_PST_MG_IND + sq.flipVertical().value()] -= phase;
+            features[KNIGHT_PST_EG_IND + sq.flipVertical().value()] -= (1-phase);
 
 //            features[KNIGHT_TROPISM_MG_IND] -= sq.distance(board.getKingSquare(Color.WHITE)) * phase;
 //            features[KNIGHT_TROPISM_EG_IND] -= sq.distance(board.getKingSquare(Color.WHITE)) * (1-phase);

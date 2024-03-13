@@ -176,12 +176,12 @@ public class EvalKing {
 
     public static void extractKingFeatures(double[] features, Board board, Square kingSq, double phase) {
         if (kingSq == board.getKingSquare(Color.WHITE)) {
-            features[KING_PST_EG_IND + kingSq.value()] += 0; //(1-phase);
-            features[KING_PST_MG_IND + kingSq.value()] += 1; //phase;
+            features[KING_PST_EG_IND + kingSq.value()] += (1-phase);
+            features[KING_PST_MG_IND + kingSq.value()] += phase;
 //            extractKingSafetyFeatures(features, board, true, phase);
         } else {
-            features[KING_PST_EG_IND + kingSq.flipVertical().value()] -= 0; //(1-phase);
-            features[KING_PST_MG_IND + kingSq.flipVertical().value()] -= 1; //phase;
+            features[KING_PST_EG_IND + kingSq.flipVertical().value()] -= (1-phase);
+            features[KING_PST_MG_IND + kingSq.flipVertical().value()] -= phase;
 //            extractKingSafetyFeatures(features, board, false, phase);
         }
     }

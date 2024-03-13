@@ -42,16 +42,16 @@ public class EvalBishop {
         int mobility = Mobility.bishopMobility(board, sq);
 
         if (board.getPiece(sq).isWhite()) {
-            features[BISHOP_PST_MG_IND + sq.value()] += 1; //phase;
-            features[BISHOP_PST_EG_IND + sq.value()] += 0; //(1-phase);
+            features[BISHOP_PST_MG_IND + sq.value()] += phase;
+            features[BISHOP_PST_EG_IND + sq.value()] += (1-phase);
 //            features[BISHOP_MOBILITY_MG_IND + mobility] += phase;
 //            features[BISHOP_MOBILITY_EG_IND + mobility] += (1-phase);
 //            if (BishopUtils.isTrapped(board, sq, true)) {
 //                features[BISHOP_TRAPPED_IND] += 1.0;
 //            }
         } else {
-            features[BISHOP_PST_MG_IND + sq.flipVertical().value()] -= 1; //phase;
-            features[BISHOP_PST_EG_IND + sq.flipVertical().value()] -= 0; //(1-phase);
+            features[BISHOP_PST_MG_IND + sq.flipVertical().value()] -= phase;
+            features[BISHOP_PST_EG_IND + sq.flipVertical().value()] -= (1-phase);
 //            features[BISHOP_MOBILITY_MG_IND + mobility] -= phase;
 //            features[BISHOP_MOBILITY_EG_IND + mobility] -= (1- phase);
 //            if (BishopUtils.isTrapped(board, sq, false)) {

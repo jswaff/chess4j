@@ -114,9 +114,7 @@ public final class Eval implements Evaluator {
                 wKingScore._2 + bKingScore._2;
 
         // blend the middle game score and end game score, and divide by the draw factor
-        // FIXME
-        int taperedScore = mgScore;
-//        int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
+        int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
 
         // return the score from the perspective of the player on move
         return board.getPlayerToMove() == Color.WHITE ? taperedScore : -taperedScore;

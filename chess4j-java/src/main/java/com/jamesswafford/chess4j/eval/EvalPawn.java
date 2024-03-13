@@ -52,8 +52,8 @@ public class EvalPawn {
         boolean doubled = PawnUtils.isDoubled(board, sq, isWhite);
 
         if (isWhite) {
-            features[PAWN_PST_MG_IND + sq.value()] += 1; //phase;
-            features[PAWN_PST_EG_IND + sq.value()] += 0; //(1-phase);
+            features[PAWN_PST_MG_IND + sq.value()] += phase;
+            features[PAWN_PST_EG_IND + sq.value()] += (1-phase);
 
 //            if (passed) {
 //                features[PASSED_PAWN_MG_IND + sq.rank().getValue()] += phase;
@@ -68,8 +68,8 @@ public class EvalPawn {
 //                features[DOUBLED_PAWN_EG_IND] += (1-phase);
 //            }
         } else {
-            features[PAWN_PST_MG_IND + sq.flipVertical().value()] -= 1; //phase;
-            features[PAWN_PST_EG_IND + sq.flipVertical().value()] -= 0; //(1-phase);
+            features[PAWN_PST_MG_IND + sq.flipVertical().value()] -= phase;
+            features[PAWN_PST_EG_IND + sq.flipVertical().value()] -= (1-phase);
 
 //            if (passed) {
 //                features[PASSED_PAWN_MG_IND + sq.flipVertical().rank().getValue()] -= phase;

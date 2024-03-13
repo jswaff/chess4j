@@ -79,13 +79,13 @@ public class EvalRook {
         int mobility = Mobility.rookMobility(board, sq);
 
         if (isWhite) {
-            features[ROOK_PST_EG_IND + sq.value()] += 0; //(1-phase);
-            features[ROOK_PST_MG_IND + sq.value()] += 1; //phase;
+            features[ROOK_PST_EG_IND + sq.value()] += (1-phase);
+            features[ROOK_PST_MG_IND + sq.value()] += phase;
 //            features[ROOK_MOBILITY_MG_IND + mobility] += phase;
 //            features[ROOK_MOBILITY_EG_IND + mobility] += (1-phase);
         } else {
-            features[ROOK_PST_EG_IND + sq.flipVertical().value()] -= 0; //(1-phase);
-            features[ROOK_PST_MG_IND + sq.flipVertical().value()] -= 1; //phase;
+            features[ROOK_PST_EG_IND + sq.flipVertical().value()] -= (1-phase);
+            features[ROOK_PST_MG_IND + sq.flipVertical().value()] -= phase;
 //            features[ROOK_MOBILITY_MG_IND + mobility] -= phase;
 //            features[ROOK_MOBILITY_EG_IND + mobility] -= (1- phase);
         }
