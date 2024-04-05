@@ -56,7 +56,8 @@ public final class App {
         } else if (arg.startsWith("-nn=")) {
             String path = arg.substring(4);
             LOGGER.info("# loading network config from " + path);
-            Globals.setNetwork(NeuralNetworkUtil.load(path));
+            //Globals.setNetwork(NeuralNetworkUtil.load(path));
+            NeuralNetworkUtil.loadModel(path);
         }
     }
 
