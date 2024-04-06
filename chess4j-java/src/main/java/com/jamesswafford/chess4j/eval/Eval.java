@@ -7,6 +7,7 @@ import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.squares.Square;
+import com.jamesswafford.chess4j.exceptions.ModelException;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
@@ -54,10 +55,10 @@ public final class Eval implements Evaluator {
     public static int eval(Predictor<Board, Float> predictor, Board board) {
         try {
             float pred = predictor.predict(board);
-            int score = (int)Math.round(pred);
+            int score = Math.round(pred);
             return board.getPlayerToMove().isWhite() ? score : -score;
         } catch (TranslateException e) {
-            throw new RuntimeException(e);
+            throw new ModelException(e);
         }
     }
     public static int eval(EvalWeights weights, Board board) {

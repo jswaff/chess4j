@@ -7,6 +7,7 @@ import ai.djl.repository.zoo.ModelNotFoundException;
 import ai.djl.repository.zoo.ZooModel;
 import ai.djl.translate.TranslateException;
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.exceptions.ModelException;
 import com.jamesswafford.chess4j.tuner.BoardTranslator;
 import com.jamesswafford.ml.nn.Network;
 
@@ -31,24 +32,15 @@ public class NeuralNetworkUtil {
         Criteria<Board, Float> criteria = Criteria.builder()
                 .setTypes(Board.class, Float.class)
                 .optTranslator(new BoardTranslator())
-                .optModelPath(Paths.get("/home/james/chess-trainer"))
-                .optModelName(modelFileName)
+                .optModelPath(Paths.get(modelFileName))
                 .build();
         try {
             ZooModel<Board, Float> model = criteria.loadModel();
-            System.out.println("model loaded!");
-            // test
             Predictor<Board, Float> predictor = model.newPredictor();
-            try {
-                System.out.println(predictor.predict(new Board("rnb1kbnr/pp1pppp1/7p/2q5/5P2/N1P1P3/P2P2PP/R1BQKBNR w KQkq -")));
-                System.out.println(predictor.predict(new Board("r1q1kb1r/6pp/b1p1pn2/2P1Np2/QP6/4P3/P2N2PP/R1BR2K1 b kq -")));
-                System.out.println(predictor.predict(new Board("8/8/1p1k4/1P6/8/3p3P/1r4P1/5K2 w - -")));
-            } catch (TranslateException e) {
-                throw new RuntimeException(e);
-            }
+            predictor.predict(new Board()); // verify everything is working
             return predictor;
-        } catch (IOException | ModelNotFoundException | MalformedModelException e) {
-            throw new RuntimeException(e); // TODO
+        } catch (IOException | ModelNotFoundException | MalformedModelException | TranslateException e) {
+            throw new ModelException(e);
         }
     }
 
