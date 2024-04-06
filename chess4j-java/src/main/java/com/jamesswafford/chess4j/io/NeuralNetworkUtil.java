@@ -27,7 +27,7 @@ public class NeuralNetworkUtil {
         return Network.fromJson(netConfig);
     }
 
-    public static void loadModel(String modelFileName) {
+    public static Predictor<Board, Float> loadModel(String modelFileName) {
         Criteria<Board, Float> criteria = Criteria.builder()
                 .setTypes(Board.class, Float.class)
                 .optTranslator(new BoardTranslator())
@@ -37,7 +37,6 @@ public class NeuralNetworkUtil {
         try {
             ZooModel<Board, Float> model = criteria.loadModel();
             System.out.println("model loaded!");
-
             // test
             Predictor<Board, Float> predictor = model.newPredictor();
             try {
@@ -47,6 +46,7 @@ public class NeuralNetworkUtil {
             } catch (TranslateException e) {
                 throw new RuntimeException(e);
             }
+            return predictor;
         } catch (IOException | ModelNotFoundException | MalformedModelException e) {
             throw new RuntimeException(e); // TODO
         }

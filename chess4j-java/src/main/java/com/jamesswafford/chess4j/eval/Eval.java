@@ -1,5 +1,7 @@
 package com.jamesswafford.chess4j.eval;
 
+import ai.djl.inference.Predictor;
+import ai.djl.translate.TranslateException;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
@@ -49,6 +51,15 @@ public final class Eval implements Evaluator {
         return board.getPlayerToMove().isWhite() ? score : -score;
     }
 
+    public static int eval(Predictor<Board, Float> predictor, Board board) {
+        try {
+            float pred = predictor.predict(board);
+            int score = (int)Math.round(pred);
+            return board.getPlayerToMove().isWhite() ? score : -score;
+        } catch (TranslateException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public static int eval(EvalWeights weights, Board board) {
         return eval(weights, board, false, false);
     }
