@@ -202,11 +202,11 @@ public class EvalWeights {
         indexMap.put("BISHOP_PST_EG", new Tuple2<>(BISHOP_PST_EG_IND, 64));
         indexMap.put("BISHOP_MOBILITY_MG", new Tuple2<>(BISHOP_MOBILITY_MG_IND, 14));
         indexMap.put("BISHOP_MOBILITY_EG", new Tuple2<>(BISHOP_MOBILITY_EG_IND, 14));
-        indexMap.put("BISHOP_TRAPPED", new Tuple2<Integer,Integer>(BISHOP_TRAPPED_IND, 1));
+        indexMap.put("BISHOP_TRAPPED", new Tuple2<>(BISHOP_TRAPPED_IND, 1));
         indexMap.put("KNIGHT_PST_MG", new Tuple2<>(KNIGHT_PST_MG_IND, 64));
         indexMap.put("KNIGHT_PST_EG", new Tuple2<>(KNIGHT_PST_EG_IND, 64));
-        indexMap.put("KNIGHT_OUTPOST", new Tuple2<Integer,Integer>(KNIGHT_OUTPOST_IND, 64));
-        indexMap.put("KNIGHT_SUPPORTED_OUTPOST", new Tuple2<Integer,Integer>(KNIGHT_SUPPORTED_OUTPOST_IND, 64));
+        indexMap.put("KNIGHT_OUTPOST", new Tuple2<>(KNIGHT_OUTPOST_IND, 64));
+        indexMap.put("KNIGHT_SUPPORTED_OUTPOST", new Tuple2<>(KNIGHT_SUPPORTED_OUTPOST_IND, 64));
         indexMap.put("KNIGHT_TROPISM_MG", new Tuple2<>(KNIGHT_TROPISM_MG_IND, 1));
         indexMap.put("KNIGHT_TROPISM_EG", new Tuple2<>(KNIGHT_TROPISM_EG_IND, 1));
         indexMap.put("ROOK_PST_MG", new Tuple2<>(ROOK_PST_MG_IND, 64));
@@ -250,9 +250,7 @@ public class EvalWeights {
     }
 
     public void reset() {
-        for (int i=0;i<vals.length;i++) {
-            vals[i] = 0;
-        }
+        Arrays.fill(vals, 0);
         vals[PAWN_VAL_IND] = 100;
         vals[QUEEN_VAL_IND] = 900;
         vals[ROOK_VAL_IND] = 500;

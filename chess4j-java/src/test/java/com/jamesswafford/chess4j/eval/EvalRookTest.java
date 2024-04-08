@@ -172,7 +172,7 @@ public class EvalRookTest {
         assertEquals(-0.2, features[ROOK_MOBILITY_EG_IND + 13], testEpsilon);
     }
 
-    @Ignore 
+    @Ignore
     @Test
     public void testExtractRookFeatures_rookOpenFileSupported() {
         Board board = new Board("7k/8/8/8/8/3R4/8/3R3K w - - 0 1");

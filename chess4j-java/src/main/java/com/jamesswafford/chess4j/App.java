@@ -57,6 +57,10 @@ public final class App {
             String path = arg.substring(4);
             LOGGER.info("# loading network config from " + path);
             Globals.setNetwork(NeuralNetworkUtil.load(path));
+        } else if (arg.startsWith("-model=")) {
+            String path = arg.substring(7);
+            LOGGER.info("# loading model from " + path);
+            Globals.setPredictor(NeuralNetworkUtil.loadModel(path));
         }
     }
 

@@ -58,7 +58,7 @@ public class XBoardHandler {
         put("computer", XBoardHandler::noOp);
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
         put("easy", (String[] cmd) -> ponderingEnabled = false);
-        put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getEvalWeights(), Globals.getBoard())));
+        put("eval", XBoardHandler.this::displayEval);
         put("evaltunerds", XBoardHandler.this::evalTunerDS);
         put("eval2props", XBoardHandler.this::writeEvalProperties);
         put("exit",XBoardHandler.this::exit);
@@ -151,6 +151,13 @@ public class XBoardHandler {
         searchIterator.setSkipTimeChecks(true);
         if (!endOfGameCheck()) {
             thinkAndMakeMove(); // the "make move" part is skipped in analysis mode
+        }
+    }
+
+    private void displayEval(String[] cmd) {
+        LOGGER.info("HCE: {}",  Eval.eval(Globals.getEvalWeights(), Globals.getBoard()));
+        if (Globals.getPredictor() != null) {
+            LOGGER.info("Model: {}", Eval.eval(Globals.getPredictor(), Globals.getBoard()));
         }
     }
 
@@ -273,7 +280,7 @@ public class XBoardHandler {
             });
             moves.forEach(mv -> {
                 Undo undo = board.applyMove(mv);
-                LOGGER.info("\t" + mv + " " + -Eval.eval(weights, board, true, true) + " " + (useNN ? -Eval.eval(network, board) : ""));
+                LOGGER.info("\t" + mv + " " + -Eval.eval(weights, board, false, true) + " " + (useNN ? -Eval.eval(network, board) : ""));
                 board.undoMove(undo);
             });
         }, () -> LOGGER.info("There is no network"));

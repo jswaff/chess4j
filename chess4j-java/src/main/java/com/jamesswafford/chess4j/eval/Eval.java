@@ -1,10 +1,13 @@
 package com.jamesswafford.chess4j.eval;
 
+import ai.djl.inference.Predictor;
+import ai.djl.translate.TranslateException;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Bitboard;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
 import com.jamesswafford.chess4j.board.squares.Square;
+import com.jamesswafford.chess4j.exceptions.ModelException;
 import com.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
@@ -49,16 +52,22 @@ public final class Eval implements Evaluator {
         return board.getPlayerToMove().isWhite() ? score : -score;
     }
 
+    public static int eval(Predictor<Board, Float> predictor, Board board) {
+        try {
+            float pred = predictor.predict(board);
+            int score = Math.round(pred);
+            return board.getPlayerToMove().isWhite() ? score : -score;
+        } catch (TranslateException e) {
+            throw new ModelException(e);
+        }
+    }
     public static int eval(EvalWeights weights, Board board) {
         return eval(weights, board, false, false);
     }
 
     public static int eval(EvalWeights weights, Board board, boolean materialOnly, boolean strict) {
-
         int evalScore = evalHelper(weights, board, materialOnly, strict);
-
         assert(verify(weights, evalScore, board, materialOnly, strict));
-
         return evalScore;
     }
 
@@ -143,8 +152,7 @@ public final class Eval implements Evaluator {
         if (Globals.isPawnHashEnabled()) {
             PawnTranspositionTableEntry pte = TTHolder.getInstance().getPawnHashTable().probe(board);
             if (pte != null) {
-                assert (pte.getScore().equals(
-                        evalPieces(weights, board.getWhitePawns() | board.getBlackPawns(), board, EvalPawn::evalPawn)));
+                assert(pawnHashScoreIsValid(pte.getScore(), weights, board));
                 return pte.getScore();
             }
         }
@@ -158,6 +166,14 @@ public final class Eval implements Evaluator {
         }
 
         return pawnsScore;
+    }
+
+    private static boolean pawnHashScoreIsValid(Tuple2<Integer, Integer> hashScore, EvalWeights weights, Board board) {
+        Tuple2<Integer, Integer> actualScore = evalPieces(weights, board.getWhitePawns() | board.getBlackPawns(), board, EvalPawn::evalPawn);
+        if (!actualScore.equals(hashScore)) {
+            LOGGER.warn("pawn hash score incorrect.  actual: " + actualScore + " hash: " + hashScore);
+        }
+        return actualScore.equals(hashScore);
     }
 
     public static native int evalNative(Board board, boolean materialOnly);

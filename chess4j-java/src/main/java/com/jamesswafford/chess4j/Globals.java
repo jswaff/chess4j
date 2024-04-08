@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j;
 
+import ai.djl.inference.Predictor;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.book.OpeningBook;
@@ -27,6 +28,10 @@ public class Globals {
 
     @Setter
     private static Network network;
+
+    @Getter
+    @Setter
+    private static Predictor<Board, Float> predictor;
 
     @Setter
     private static OpeningBook openingBook;

@@ -63,6 +63,14 @@
             <groupId>org.ejml</groupId>
             <artifactId>ejml-all</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ai.djl</groupId>
+            <artifactId>api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-engine</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

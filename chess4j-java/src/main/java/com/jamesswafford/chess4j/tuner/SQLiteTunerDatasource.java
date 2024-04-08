@@ -1,7 +1,6 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
-import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.exceptions.UncheckedSqlException;
 import com.jamesswafford.chess4j.io.PGNResult;
 import lombok.SneakyThrows;
@@ -179,16 +178,8 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         try {
             FileWriter fstream = new FileWriter(file);
             out = new BufferedWriter(fstream);
-
             for (GameRecord gameRecord : gameRecords) {
-                Board board = new Board(gameRecord.getFen());
-                double[][] features = BoardToNetwork.transform(board);
-                StringBuilder sample = new StringBuilder();
-                for (double[] feature : features) {
-                    sample.append((int)feature[0]).append(",");
-                }
-                sample.append(gameRecord.getEval()).append("\n");
-                out.write(sample.toString());
+                out.write(gameRecord.getEval() + "," + gameRecord.getFen() + "\n");
             }
         } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
