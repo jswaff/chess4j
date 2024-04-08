@@ -54,7 +54,7 @@ public final class App {
             LOGGER.info("# loading eval properties from " + path);
             Globals.setEvalWeights(EvalWeightsUtil.load(path));
         } else if (arg.startsWith("-nn=")) {
-            String path = arg.substring(7);
+            String path = arg.substring(4);
             LOGGER.info("# loading model from " + path);
             Globals.setPredictor(NeuralNetworkUtil.loadModel(path));
         }

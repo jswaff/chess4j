@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.io;
 
+import ai.djl.inference.Predictor;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
@@ -19,6 +20,8 @@ import com.jamesswafford.chess4j.tuner.*;
 import com.jamesswafford.chess4j.utils.*;
 
 import io.vavr.Tuple2;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,6 +30,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static com.jamesswafford.chess4j.utils.GameStatusChecker.getGameStatus;
 
@@ -34,14 +38,19 @@ public class XBoardHandler {
 
     private static final  Logger LOGGER = LogManager.getLogger(XBoardHandler.class);
 
+    @Setter
     private OpeningBook openingBook;
+    @Setter
     private TunerDatasource tunerDatasource;
     private int bookMisses;
+    @Setter
     private SearchIterator searchIterator;
     private CompletableFuture<List<Move>> searchFuture;
     private Color engineColor;
     private boolean analysisMode = false;
+    @Getter
     private boolean forceMode = true;
+    @Getter
     private boolean ponderingEnabled = false;
     private boolean ponderMode = false;
     private boolean ponderMiss = false;
@@ -100,28 +109,6 @@ public class XBoardHandler {
         Globals.getOpeningBook().ifPresent(openingBook1 -> this.openingBook = openingBook1);
         Globals.getTunerDatasource().ifPresent(tunerDatasource1 -> this.tunerDatasource = tunerDatasource1);
         searchIterator = new SearchIteratorImpl();
-    }
-
-    public Color getEngineColor() {
-        return engineColor;
-    }
-
-    public boolean isForceMode() {
-        return forceMode;
-    }
-
-    public boolean isPonderingEnabled() { return ponderingEnabled; }
-
-    public void setOpeningBook(OpeningBook openingBook) {
-        this.openingBook = openingBook;
-    }
-
-    public void setTunerDatasource(TunerDatasource tunerDatasource) {
-        this.tunerDatasource = tunerDatasource;
-    }
-
-    public void setSearchIterator(SearchIterator searchIterator) {
-        this.searchIterator = searchIterator;
     }
 
     public void parseAndDispatch(String command) throws IllegalMoveException, ParseException {
@@ -261,27 +248,32 @@ public class XBoardHandler {
     }
 
     private static void order(String[] cmd) {
-        Board board = Globals.getBoard();
+        final Board board = Globals.getBoard();
         EvalWeights weights = Globals.getEvalWeights();
-        Globals.getPredictor().ifPresentOrElse(predictor -> {
-            MoveGenerator moveGen = new MagicBitboardMoveGenerator();
-            boolean useNN = cmd.length > 1 && "nn".equals(cmd[1]);
-            List<Move> moves = moveGen.generateLegalMoves(board);
-            moves.sort((mv1, mv2) -> {
-                Undo u1 = board.applyMove(mv1);
-                double s1 = useNN ? Eval.eval(predictor, board) : Eval.eval(weights, board, false, true);
-                board.undoMove(u1);
-                Undo u2 = board.applyMove(mv2);
-                double s2 = useNN ? Eval.eval(predictor, board) : Eval.eval(weights, board, false, true);
-                board.undoMove(u2);
-                return Double.compare(s1, s2);
-            });
-            moves.forEach(mv -> {
-                Undo undo = board.applyMove(mv);
-                LOGGER.info("\t" + mv + " " + -Eval.eval(weights, board, false, true) + " " + (useNN ? -Eval.eval(predictor, board) : ""));
-                board.undoMove(undo);
-            });
-        }, () -> LOGGER.info("There is no network"));
+        MoveGenerator moveGen = new MagicBitboardMoveGenerator();
+        List<Move> moves = moveGen.generateLegalMoves(board);
+
+        boolean useNN = cmd.length > 1 && "nn".equals(cmd[1]);
+        Function<Board, Integer> hce = board1 -> Eval.eval(weights, board1, false, true);
+        Function<Predictor<Board, Float>, Function<Board, Integer>> nn = predictor -> board1 -> Eval.eval(predictor, board1);
+        Function<Board, Integer> evalFunc = useNN ? Globals.getPredictor()
+                .map(nn)
+                .orElseThrow(() -> new IllegalStateException("No model loaded")) : hce;
+
+        moves.sort((mv1, mv2) -> {
+            Undo u1 = board.applyMove(mv1);
+            double s1 = evalFunc.apply(board);
+            board.undoMove(u1);
+            Undo u2 = board.applyMove(mv2);
+            double s2 = evalFunc.apply(board);
+            board.undoMove(u2);
+            return Double.compare(s1, s2);
+        });
+        moves.forEach(mv -> {
+            Undo undo = board.applyMove(mv);
+            LOGGER.info("\t" + mv + " " + -evalFunc.apply(board));
+            board.undoMove(undo);
+        });
     }
 
     private void pgnToBook(String[] cmd) {
@@ -340,9 +332,9 @@ public class XBoardHandler {
     }
 
     /**
-    * Retract a move.  Undoes the last two moves and continues playing the same color.
-    * Xboard sends this command only when the user is on move.
-    */
+     * Retract a move.  Undoes the last two moves and continues playing the same color.
+     * Xboard sends this command only when the user is on move.
+     */
     private void remove(String[] cmd) {
         synchronized (XBoardHandler.this) {
             if (ponderMode) {
@@ -458,7 +450,7 @@ public class XBoardHandler {
     }
 
     private void tuneEvalWeights(String[] cmd) {
-        if (cmd.length != 2) {
+        if (cmd.length != 4) {
             LOGGER.info("usage: tune <learningRate> <numEpochs> <evalFile>");
             return;
         }
