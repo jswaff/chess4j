@@ -24,10 +24,10 @@ public class EvalKing {
         int mg, eg;
 
         if (kingSq == board.getKingSquare(Color.WHITE)) {
-            mg = weights.vals[KING_PST_MG_IND + kingSq.value()]; // + evalKingSafety(weights, board, true);
+            mg = weights.vals[KING_PST_MG_IND + kingSq.value()] + evalKingSafety(weights, board, true);
             eg = weights.vals[KING_PST_EG_IND + kingSq.value()];
         } else {
-            mg = -(weights.vals[KING_PST_MG_IND + kingSq.flipVertical().value()]); // + evalKingSafety(weights, board, false));
+            mg = -(weights.vals[KING_PST_MG_IND + kingSq.flipVertical().value()] + evalKingSafety(weights, board, false));
             eg = -weights.vals[KING_PST_EG_IND + kingSq.flipVertical().value()];
         }
 
@@ -178,11 +178,11 @@ public class EvalKing {
         if (kingSq == board.getKingSquare(Color.WHITE)) {
             features[KING_PST_EG_IND + kingSq.value()] += (1-phase);
             features[KING_PST_MG_IND + kingSq.value()] += phase;
-//            extractKingSafetyFeatures(features, board, true, phase);
+            extractKingSafetyFeatures(features, board, true, phase);
         } else {
             features[KING_PST_EG_IND + kingSq.flipVertical().value()] -= (1-phase);
             features[KING_PST_MG_IND + kingSq.flipVertical().value()] -= phase;
-//            extractKingSafetyFeatures(features, board, false, phase);
+            extractKingSafetyFeatures(features, board, false, phase);
         }
     }
 

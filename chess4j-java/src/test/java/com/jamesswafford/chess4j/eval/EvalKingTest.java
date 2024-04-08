@@ -2,7 +2,6 @@ package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.board.Board;
 import io.vavr.Tuple2;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -29,7 +28,7 @@ public class EvalKingTest {
         Board board = new Board("rnbq1rk1/pppppppp/bn6/8/BN6/5P2/PPPPP1PP/RNBQ1RK1 w - - 0 1");
 
         Tuple2<Integer, Integer> score = evalKing(weights, board, G1);
-        assertEquals(weights.vals[KING_PST_MG_IND + G1.value()] /*+ evalKingSafety(weights, board, true)*/,
+        assertEquals(weights.vals[KING_PST_MG_IND + G1.value()] + evalKingSafety(weights, board, true),
                 (int)score._1);
         assertEquals(weights.vals[KING_PST_EG_IND + G1.value()], (int)score._2);
     }
@@ -119,7 +118,6 @@ public class EvalKingTest {
         assertEquals(1, features[KING_PST_MG_IND + G1.value()], testEpsilon);
     }
 
-    @Ignore
     @Test
     public void testExtractKingFeatures_endGame() {
 

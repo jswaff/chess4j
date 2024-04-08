@@ -24,11 +24,11 @@ public class EvalQueen {
         int mobilityEg = weights.vals[QUEEN_MOBILITY_EG_IND + mobility];
 
         if (isWhite) {
-            mg = weights.vals[QUEEN_PST_MG_IND + sq.value()]; // + major7th._1 + mobilityMg;
-            eg = weights.vals[QUEEN_PST_EG_IND + sq.value()]; // + major7th._2 + mobilityEg;
+            mg = weights.vals[QUEEN_PST_MG_IND + sq.value()] + major7th._1 + mobilityMg;
+            eg = weights.vals[QUEEN_PST_EG_IND + sq.value()] + major7th._2 + mobilityEg;
         } else {
-            mg = -(weights.vals[QUEEN_PST_MG_IND + sq.flipVertical().value()]); // + major7th._1 + mobilityMg);
-            eg = -(weights.vals[QUEEN_PST_EG_IND + sq.flipVertical().value()]); // + major7th._2 + mobilityEg);
+            mg = -(weights.vals[QUEEN_PST_MG_IND + sq.flipVertical().value()] + major7th._1 + mobilityMg);
+            eg = -(weights.vals[QUEEN_PST_EG_IND + sq.flipVertical().value()] + major7th._2 + mobilityEg);
         }
 
         return new Tuple2<>(mg, eg);
@@ -42,15 +42,15 @@ public class EvalQueen {
         if (isWhite) {
             features[QUEEN_PST_EG_IND + sq.value()] += (1-phase);
             features[QUEEN_PST_MG_IND + sq.value()] += phase;
-//            features[QUEEN_MOBILITY_MG_IND + mobility] += phase;
-//            features[QUEEN_MOBILITY_EG_IND + mobility] += (1-phase);
+            features[QUEEN_MOBILITY_MG_IND + mobility] += phase;
+            features[QUEEN_MOBILITY_EG_IND + mobility] += (1-phase);
         } else {
             features[QUEEN_PST_EG_IND + sq.flipVertical().value()] -= (1-phase);
             features[QUEEN_PST_MG_IND + sq.flipVertical().value()] -= phase;
-//            features[QUEEN_MOBILITY_MG_IND + mobility] -= phase;
-//            features[QUEEN_MOBILITY_EG_IND + mobility] -= (1- phase);
+            features[QUEEN_MOBILITY_MG_IND + mobility] -= phase;
+            features[QUEEN_MOBILITY_EG_IND + mobility] -= (1- phase);
         }
-//        exractMajorOn7thFeatures(features, board, isWhite, sq, phase);
+        exractMajorOn7thFeatures(features, board, isWhite, sq, phase);
         return null;
     }
 

@@ -43,7 +43,6 @@ public class EvalTuner {
             //search.initialize();
             //int score = search.search(board, parameters);
             EvalWeights trainingWeights = new EvalWeights();
-            trainingWeights.simplifyForNN();
             int score = Eval.eval(trainingWeights, board, false, false);
             tunerDatasource.updateEval(gameRecord.getFen(), score);
         }

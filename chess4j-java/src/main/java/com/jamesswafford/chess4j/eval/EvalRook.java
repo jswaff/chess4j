@@ -26,11 +26,11 @@ public class EvalRook {
         Tuple2<Integer, Integer> rookOpen = evalRookOpenFile(weights, board, isWhite, sq);
 
         if (isWhite) {
-            mg = weights.vals[ROOK_PST_MG_IND + sq.value()]; // + major7th._1 + rookOpen._1 + mobilityMg;
-            eg = weights.vals[ROOK_PST_EG_IND + sq.value()]; // + major7th._2 + rookOpen._2 + mobilityEg;
+            mg = weights.vals[ROOK_PST_MG_IND + sq.value()] + major7th._1 + rookOpen._1 + mobilityMg;
+            eg = weights.vals[ROOK_PST_EG_IND + sq.value()] + major7th._2 + rookOpen._2 + mobilityEg;
         } else {
-            mg = -(weights.vals[ROOK_PST_MG_IND + sq.flipVertical().value()]); // + major7th._1 + rookOpen._1 + mobilityMg);
-            eg = -(weights.vals[ROOK_PST_EG_IND + sq.flipVertical().value()]); // + major7th._2 + rookOpen._2 + mobilityEg);
+            mg = -(weights.vals[ROOK_PST_MG_IND + sq.flipVertical().value()] + major7th._1 + rookOpen._1 + mobilityMg);
+            eg = -(weights.vals[ROOK_PST_EG_IND + sq.flipVertical().value()] + major7th._2 + rookOpen._2 + mobilityEg);
         }
 
         return new Tuple2<>(mg, eg);
@@ -81,17 +81,17 @@ public class EvalRook {
         if (isWhite) {
             features[ROOK_PST_EG_IND + sq.value()] += (1-phase);
             features[ROOK_PST_MG_IND + sq.value()] += phase;
-//            features[ROOK_MOBILITY_MG_IND + mobility] += phase;
-//            features[ROOK_MOBILITY_EG_IND + mobility] += (1-phase);
+            features[ROOK_MOBILITY_MG_IND + mobility] += phase;
+            features[ROOK_MOBILITY_EG_IND + mobility] += (1-phase);
         } else {
             features[ROOK_PST_EG_IND + sq.flipVertical().value()] -= (1-phase);
             features[ROOK_PST_MG_IND + sq.flipVertical().value()] -= phase;
-//            features[ROOK_MOBILITY_MG_IND + mobility] -= phase;
-//            features[ROOK_MOBILITY_EG_IND + mobility] -= (1- phase);
+            features[ROOK_MOBILITY_MG_IND + mobility] -= phase;
+            features[ROOK_MOBILITY_EG_IND + mobility] -= (1- phase);
         }
 
-//        exractMajorOn7thFeatures(features, board, isWhite, sq, phase);
-//        extractRookFeatures_OpenFile(features, board, isWhite, sq, phase);
+        exractMajorOn7thFeatures(features, board, isWhite, sq, phase);
+        extractRookFeatures_OpenFile(features, board, isWhite, sq, phase);
 
         return null;
     }

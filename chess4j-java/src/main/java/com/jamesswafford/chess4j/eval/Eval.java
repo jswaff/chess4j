@@ -79,15 +79,14 @@ public final class Eval implements Evaluator {
 
         // evaluate for a draw.  positions that are drawn by rule are immediately returned.  others
         // that are "drawish" are further evaluated but later tapered down.
-//        MaterialType materialType = EvalMaterial.calculateMaterialType(board);
+        MaterialType materialType = EvalMaterial.calculateMaterialType(board);
         int drawFactor = 1;
-        // FIXME
-//        if (immediateDraws.contains(materialType)) {
-//            return 0;
-//        }
-//        if (factor8Draws.contains(materialType)) {
-//            drawFactor = 8;
-//        }
+        if (immediateDraws.contains(materialType)) {
+            return 0;
+        }
+        if (factor8Draws.contains(materialType)) {
+            drawFactor = 8;
+        }
 
         int mgScore = matScore;
         int egScore = mgScore;
@@ -109,7 +108,6 @@ public final class Eval implements Evaluator {
         Tuple2<Integer, Integer> rooksScore = evalPieces(weights,
                 board.getWhiteRooks() | board.getBlackRooks(),
                 board, EvalRook::evalRook);
-
 
         // eval queens
         Tuple2<Integer, Integer> queensScore = evalPieces(weights,
@@ -302,8 +300,7 @@ public final class Eval implements Evaluator {
         // a drawish ending has scaled the value down
         if (Math.abs(score - evalScore) >= 1.0) {
             MaterialType materialType = EvalMaterial.calculateMaterialType(board);
-//            assert (immediateDraws.contains(materialType) || factor8Draws.contains(materialType));
-            assert false;
+            assert (immediateDraws.contains(materialType) || factor8Draws.contains(materialType));
         }
 
         return true;

@@ -30,35 +30,35 @@ public class EvalMaterial {
             int numPawns = board.getNumPieces(WHITE_PAWN);
 
             // raise the knight's value 1/16 for each pawn above 5, and lower for each pawn below 5.
-            int knightAdj = 0; //strict ? 0 : (numPawns - 5) * weights.vals[EvalWeights.KNIGHT_KAUFMAN_ADJ];
+            int knightAdj = strict ? 0 : (numPawns - 5) * weights.vals[EvalWeights.KNIGHT_KAUFMAN_ADJ];
 
             // lower the rook's value 1/8 for each pawn above 5, and raise for each pawn below 5.
-            int rookAdj = 0; //strict ? 0 : (numPawns - 5) * weights.vals[EvalWeights.ROOK_KAUFMAN_ADJ];
+            int rookAdj = strict ? 0 : (numPawns - 5) * weights.vals[EvalWeights.ROOK_KAUFMAN_ADJ];
 
             int npm = board.getNumPieces(WHITE_QUEEN) * weights.vals[EvalWeights.QUEEN_VAL_IND]
                     + board.getNumPieces(WHITE_ROOK) * (weights.vals[EvalWeights.ROOK_VAL_IND] + rookAdj)
                     + board.getNumPieces(WHITE_KNIGHT) * (weights.vals[EvalWeights.KNIGHT_VAL_IND] + knightAdj)
                     + board.getNumPieces(WHITE_BISHOP) * weights.vals[EvalWeights.BISHOP_VAL_IND];
-//            if (!strict && board.getNumPieces(WHITE_BISHOP) > 1) {
-//                npm += weights.vals[EvalWeights.BISHOP_PAIR_IND];
-//            }
+            if (!strict && board.getNumPieces(WHITE_BISHOP) > 1) {
+                npm += weights.vals[EvalWeights.BISHOP_PAIR_IND];
+            }
             return npm;
         } else {
             int numPawns = board.getNumPieces(BLACK_PAWN);
 
             // raise the knight's value 1/16 for each pawn above 5, and lower for each pawn below 5.
-            int knightAdj = 0; //strict ? 0 : (numPawns - 5) * weights.vals[EvalWeights.KNIGHT_KAUFMAN_ADJ];
+            int knightAdj = strict ? 0 : (numPawns - 5) * weights.vals[EvalWeights.KNIGHT_KAUFMAN_ADJ];
 
             // lower the rook's value 1/8 for each pawn above 5, and raise for each pawn below 5.
-            int rookAdj = 0; //strict ? 0 : (numPawns - 5) * weights.vals[EvalWeights.ROOK_KAUFMAN_ADJ];
+            int rookAdj = strict ? 0 : (numPawns - 5) * weights.vals[EvalWeights.ROOK_KAUFMAN_ADJ];
 
             int npm = board.getNumPieces(BLACK_QUEEN) * weights.vals[EvalWeights.QUEEN_VAL_IND]
                     + board.getNumPieces(BLACK_ROOK) * (weights.vals[EvalWeights.ROOK_VAL_IND] + rookAdj)
                     + board.getNumPieces(BLACK_KNIGHT) * (weights.vals[EvalWeights.KNIGHT_VAL_IND] + knightAdj)
                     + board.getNumPieces(BLACK_BISHOP) * weights.vals[EvalWeights.BISHOP_VAL_IND];
-//            if (!strict && board.getNumPieces(BLACK_BISHOP) > 1) {
-//                npm += weights.vals[EvalWeights.BISHOP_PAIR_IND];
-//            }
+            if (!strict && board.getNumPieces(BLACK_BISHOP) > 1) {
+                npm += weights.vals[EvalWeights.BISHOP_PAIR_IND];
+            }
             return npm;
         }
     }
@@ -75,11 +75,11 @@ public class EvalMaterial {
         features[EvalWeights.ROOK_VAL_IND] = numWhiteRooks - numBlackRooks;
         features[EvalWeights.KNIGHT_VAL_IND] = numWhiteKnights - numBlackKnights;
         features[EvalWeights.BISHOP_VAL_IND] = board.getNumPieces(WHITE_BISHOP) - board.getNumPieces(BLACK_BISHOP);
-//        features[EvalWeights.BISHOP_PAIR_IND] = (board.getNumPieces(WHITE_BISHOP) > 1 ? 1 : 0) -
-//                (board.getNumPieces(BLACK_BISHOP) > 1 ? 1 : 0);
+        features[EvalWeights.BISHOP_PAIR_IND] = (board.getNumPieces(WHITE_BISHOP) > 1 ? 1 : 0) -
+                (board.getNumPieces(BLACK_BISHOP) > 1 ? 1 : 0);
 
-//        features[EvalWeights.KNIGHT_KAUFMAN_ADJ] = ((numWhitePawns - 5) * numWhiteKnights - (numBlackPawns - 5) * numBlackKnights);
-//        features[EvalWeights.ROOK_KAUFMAN_ADJ] = ((numWhitePawns - 5) * numWhiteRooks - (numBlackPawns - 5) * numBlackRooks);
+        features[EvalWeights.KNIGHT_KAUFMAN_ADJ] = ((numWhitePawns - 5) * numWhiteKnights - (numBlackPawns - 5) * numBlackKnights);
+        features[EvalWeights.ROOK_KAUFMAN_ADJ] = ((numWhitePawns - 5) * numWhiteRooks - (numBlackPawns - 5) * numBlackRooks);
     }
 
     public static MaterialType calculateMaterialType(Board board) {

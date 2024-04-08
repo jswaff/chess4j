@@ -1,9 +1,7 @@
 package com.jamesswafford.chess4j.eval;
 
 import com.jamesswafford.chess4j.Globals;
-import com.jamesswafford.chess4j.io.DrawBoard;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
@@ -76,7 +74,6 @@ public class EvalTest {
         }
     }
 
-    @Ignore
     @Test
     public void testKK() {
         String fen = "k7/8/8/8/8/8/8/K7 w - -";
@@ -85,7 +82,6 @@ public class EvalTest {
         testCaseSymmetry(fen);
     }
 
-    @Ignore
     @Test
     public void testKNK() {
         String fen = "kn6/8/8/8/8/8/8/K7 w - -";
@@ -94,7 +90,6 @@ public class EvalTest {
         testCaseSymmetry(fen);
     }
 
-    @Ignore
     @Test
     public void testKNKP() {
         String fen = "kn6/8/8/8/8/8/P7/K7 w - -";
@@ -104,7 +99,6 @@ public class EvalTest {
         testCaseSymmetry(fen);
     }
 
-    @Ignore
     @Test
     public void testKNKN() {
         String fen = "k7/n7/8/8/8/8/8/KN6 w - -";
@@ -113,7 +107,6 @@ public class EvalTest {
         testCaseSymmetry(fen);
     }
 
-    @Ignore
     @Test
     public void testKNNK() {
         String fen = "knn5/8/8/8/8/8/8/K7 w - -";
@@ -122,7 +115,6 @@ public class EvalTest {
         testCaseSymmetry(fen);
     }
 
-    @Ignore
     @Test
     public void testKNKB() {
         String fen = "kb6/8/8/8/8/8/8/KN6 w - -";
@@ -131,7 +123,6 @@ public class EvalTest {
         testCaseSymmetry(fen);
     }
 
-    @Ignore
     @Test
     public void testKBK() {
         String fen = "kb6/8/8/8/8/8/8/K7 w - -";
@@ -140,7 +131,6 @@ public class EvalTest {
         testCaseSymmetry(fen);
     }
 
-    @Ignore
     @Test
     public void testKBKP() {
         String fen = "kb6/8/8/8/8/8/P7/K7 w - -";
@@ -150,7 +140,6 @@ public class EvalTest {
         testCaseSymmetry(fen);
     }
 
-    @Ignore
     @Test
     public void testKBKB() {
         String fen = "k7/b7/8/8/8/8/8/KB6 w - -";
