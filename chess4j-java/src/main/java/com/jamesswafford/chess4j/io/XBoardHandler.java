@@ -18,7 +18,6 @@ import com.jamesswafford.chess4j.search.SearchIteratorImpl;
 import com.jamesswafford.chess4j.tuner.*;
 import com.jamesswafford.chess4j.utils.*;
 
-import com.jamesswafford.ml.nn.Network;
 import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -90,7 +89,6 @@ public class XBoardHandler {
         put("setboard", XBoardHandler.this::setboard);
         put("st", XBoardHandler.this::st);
         put("time", XBoardHandler.this::time);
-        put("train", XBoardHandler.this::trainNeuralNet);
         put("tune", XBoardHandler.this::tuneEvalWeights);
         put("undo", XBoardHandler.this::undo);
         put("usermove", XBoardHandler.this::usermove);
@@ -156,9 +154,9 @@ public class XBoardHandler {
 
     private void displayEval(String[] cmd) {
         LOGGER.info("HCE: {}",  Eval.eval(Globals.getEvalWeights(), Globals.getBoard()));
-        if (Globals.getPredictor() != null) {
-            LOGGER.info("Model: {}", Eval.eval(Globals.getPredictor(), Globals.getBoard()));
-        }
+        Globals.getPredictor().ifPresent(predictor -> {
+            LOGGER.info("Model: {}", Eval.eval(predictor, Globals.getBoard()));
+        });
     }
 
     private void exit(String[] cmd) {
@@ -265,22 +263,22 @@ public class XBoardHandler {
     private static void order(String[] cmd) {
         Board board = Globals.getBoard();
         EvalWeights weights = Globals.getEvalWeights();
-        Globals.getNetwork().ifPresentOrElse(network -> {
+        Globals.getPredictor().ifPresentOrElse(predictor -> {
             MoveGenerator moveGen = new MagicBitboardMoveGenerator();
             boolean useNN = cmd.length > 1 && "nn".equals(cmd[1]);
             List<Move> moves = moveGen.generateLegalMoves(board);
             moves.sort((mv1, mv2) -> {
                 Undo u1 = board.applyMove(mv1);
-                double s1 = useNN ? Eval.eval(network, board) : Eval.eval(weights, board, true, true);
+                double s1 = useNN ? Eval.eval(predictor, board) : Eval.eval(weights, board, false, true);
                 board.undoMove(u1);
                 Undo u2 = board.applyMove(mv2);
-                double s2 = useNN ? Eval.eval(network, board) : Eval.eval(weights, board, true, true);
+                double s2 = useNN ? Eval.eval(predictor, board) : Eval.eval(weights, board, false, true);
                 board.undoMove(u2);
                 return Double.compare(s1, s2);
             });
             moves.forEach(mv -> {
                 Undo undo = board.applyMove(mv);
-                LOGGER.info("\t" + mv + " " + -Eval.eval(weights, board, false, true) + " " + (useNN ? -Eval.eval(network, board) : ""));
+                LOGGER.info("\t" + mv + " " + -Eval.eval(weights, board, false, true) + " " + (useNN ? -Eval.eval(predictor, board) : ""));
                 board.undoMove(undo);
             });
         }, () -> LOGGER.info("There is no network"));
@@ -475,23 +473,6 @@ public class XBoardHandler {
                     tuner.optimize(Globals.getEvalWeights(), dataSet, learningRate, numEpochs);
             EvalWeightsUtil.store(optimizedWeights._1, propsFile, "Error: " + optimizedWeights._2);
             Globals.setEvalWeights(optimizedWeights._1);
-        }, () -> LOGGER.info("no tuner datasource"));
-    }
-
-    private void trainNeuralNet(String[] cmd) {
-        if (cmd.length < 3) {
-            LOGGER.info("usage: train <learningRate> <numEpochs> <configFile>");
-            return;
-        }
-        double learningRate = Double.parseDouble(cmd[1]);
-        int numEpochs = Integer.parseInt(cmd[2]);
-        String configFile = cmd.length==4 ? cmd[3] : null;
-        Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
-            List<GameRecord> dataSet = tunerDatasource1.getGameRecords(false);
-            NeuralNetworkTrainer trainer = new NeuralNetworkTrainer();
-            Network network = trainer.train(dataSet, learningRate, numEpochs);
-            if (configFile != null) NeuralNetworkUtil.store(network, configFile);
-            Globals.setNetwork(network);
         }, () -> LOGGER.info("no tuner datasource"));
     }
 
