@@ -1,4 +1,4 @@
-package com.jamesswafford.chess4j.io;
+package com.jamesswafford.chess4j.nn;
 
 import ai.djl.MalformedModelException;
 import ai.djl.inference.Predictor;
@@ -8,14 +8,13 @@ import ai.djl.repository.zoo.ZooModel;
 import ai.djl.translate.TranslateException;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.exceptions.ModelException;
-import com.jamesswafford.chess4j.tuner.BoardTranslator;
 
 import java.io.*;
 import java.nio.file.Paths;
 
-public class NeuralNetworkUtil {
+public class ModelLoader {
 
-    public static Predictor<Board, Float> loadModel(String modelFileName) {
+    public static Predictor<Board, Float> load(String modelFileName) {
         Criteria<Board, Float> criteria = Criteria.builder()
                 .setTypes(Board.class, Float.class)
                 .optTranslator(new BoardTranslator())
@@ -30,5 +29,6 @@ public class NeuralNetworkUtil {
             throw new ModelException(e);
         }
     }
+
 
 }
