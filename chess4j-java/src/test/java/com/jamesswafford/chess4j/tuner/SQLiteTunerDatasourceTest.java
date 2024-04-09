@@ -4,6 +4,7 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.io.FenBuilder;
+import com.jamesswafford.chess4j.io.GameRecord;
 import com.jamesswafford.chess4j.io.PGNResult;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import org.junit.AfterClass;

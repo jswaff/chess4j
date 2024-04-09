@@ -1,13 +1,11 @@
 package com.jamesswafford.chess4j.tuner;
 
-import com.jamesswafford.chess4j.Constants;
-import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.EvalWeights;
+import com.jamesswafford.chess4j.io.GameRecord;
 import com.jamesswafford.chess4j.search.AlphaBetaSearch;
 import com.jamesswafford.chess4j.search.Search;
-import com.jamesswafford.chess4j.search.SearchParameters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

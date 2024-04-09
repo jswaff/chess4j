@@ -1,14 +1,51 @@
 package com.jamesswafford.chess4j.io;
 
 import com.jamesswafford.chess4j.board.Board;
+import com.jamesswafford.chess4j.exceptions.EpdProcessingException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class EPDParser {
 
+    private static final Pattern outcomeBracketPattern = Pattern.compile("^\\[\\d\\.\\d]");
+
     private EPDParser() { }
+
+    public static List<GameRecord> toGameRecords(File epdFile, boolean zuriFormat) throws IOException {
+        List<GameRecord> gameRecords = new ArrayList<>();
+        FileInputStream fis = null;
+        Scanner sc = null;
+
+        try {
+            fis = new FileInputStream(epdFile);
+            sc = new Scanner(fis, StandardCharsets.UTF_8);
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine();
+                gameRecords.add(toGameRecord(line, zuriFormat));
+            }
+            // scanner suppresses exceptions
+            if (sc.ioException() != null) {
+                throw sc.ioException();
+            }
+        } finally {
+            if (fis != null) {
+                fis.close();;
+            }
+            if (sc != null) {
+                sc.close();
+            }
+        }
+        return gameRecords;
+    }
 
     // set the board and return a list of operations
     // Note the EPD grammar can be found here:
@@ -81,4 +118,50 @@ public final class EPDParser {
 
         return operands;
     }
+
+    private static GameRecord toGameRecord(String epdLine, boolean zuriFormat) {
+
+        Board board = new Board();
+        List<EPDOperation> epdOperations = setPos(board, epdLine);
+        String fen = FenBuilder.createFen(board, false);
+        if (!epdLine.startsWith(fen)) {
+            throw new EpdProcessingException("Error processing epdLine " + epdLine + ".  Expected FEN " + fen);
+        }
+
+        String outcome;
+        if (zuriFormat) {
+            // the Zuri dataset uses the "c9" opcode, which is a comment, to denote the outcome
+            EPDOperation c9 = epdOperations.stream().filter(epdOperation -> "c9".equals(epdOperation.getEpdOpcode()))
+                    .findFirst()
+                    .orElseThrow(() -> new EpdProcessingException("couldn't find c9 opcode"));
+
+            if (c9.getEpdOperands().size() != 1) {
+                throw new EpdProcessingException("Expected one operand for c9 opcode");
+            }
+            outcome = c9.getEpdOperands().get(0);
+        } else {
+            // Assume format of Ethereal data.  The outcome is the operand in brackets
+            //8/2N2kp1/5b1p/1P6/3p4/4P1P1/5K1P/8 b - - 0 38 [1.0] -154
+            outcome = epdOperations.get(0).getEpdOperands().stream().filter(opCode -> {
+                Matcher outcomeMatcher = outcomeBracketPattern.matcher(opCode);
+                return outcomeMatcher.matches();
+            }).findFirst().orElseThrow(() -> new EpdProcessingException("couldn't find outcome in epd op codes"));
+            outcome = outcome.replace("[", "");
+            outcome = outcome.replace("]", "");
+        }
+
+        PGNResult pgnResult;
+        if ("1-0".equals(outcome) || "1.0".equals(outcome)) {
+            pgnResult = PGNResult.WHITE_WINS;
+        } else if ("0-1".equals(outcome) || "0.0".equals(outcome)) {
+            pgnResult = PGNResult.BLACK_WINS;
+        } else if ("1/2-1/2".equals(outcome) || "0.5".equals(outcome)) {
+            pgnResult = PGNResult.DRAW;
+        } else {
+            throw new EpdProcessingException("Don't know how to map outcome to result: " + outcome);
+        }
+
+        return GameRecord.builder().fen(fen).result(pgnResult).build();
+    }
+
 }

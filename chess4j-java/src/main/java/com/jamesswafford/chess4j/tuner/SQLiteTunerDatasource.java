@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.exceptions.UncheckedSqlException;
+import com.jamesswafford.chess4j.io.GameRecord;
 import com.jamesswafford.chess4j.io.PGNResult;
 import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;

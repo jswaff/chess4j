@@ -3,6 +3,7 @@ package com.jamesswafford.chess4j.tuner;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.EvalWeights;
+import com.jamesswafford.chess4j.io.GameRecord;
 import io.vavr.Tuple2;
 import org.ejml.simple.SimpleMatrix;
 

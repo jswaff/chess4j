@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.eval.EvalWeights;
+import com.jamesswafford.chess4j.io.GameRecord;
 import com.jamesswafford.chess4j.io.PGNResult;
 
 import java.util.List;

@@ -1,6 +1,5 @@
-package com.jamesswafford.chess4j.tuner;
+package com.jamesswafford.chess4j.io;
 
-import com.jamesswafford.chess4j.io.PGNResult;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,8 +8,9 @@ import lombok.Data;
 public class GameRecord {
 
     private String fen;
-    private PGNResult result;
+    private PGNResult result; // TODO: why PGNResult?
 
+    @Deprecated
     private Integer eval;
 
 }

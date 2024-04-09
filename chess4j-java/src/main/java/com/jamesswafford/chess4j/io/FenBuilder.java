@@ -29,7 +29,7 @@ public final class FenBuilder {
                         sb.append(emptyCnt);
                         emptyCnt = 0;
                     }
-                    sb.append(p.toString());
+                    sb.append(p);
                 } else {
                     emptyCnt++;
                 }
@@ -70,14 +70,14 @@ public final class FenBuilder {
         // ep square
         sb.append(" ");
         if (b.getEPSquare() != null) {
-            sb.append(b.getEPSquare().toString());
+            sb.append(b.getEPSquare());
         } else {
             sb.append("-");
         }
 
         if (includeMoveFields) {
             // half move clock
-            sb.append(" " + b.getFiftyCounter());
+            sb.append(" ").append(b.getFiftyCounter());
 
             // full move counter
             sb.append(" ");

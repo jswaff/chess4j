@@ -1,7 +1,11 @@
 package com.jamesswafford.chess4j.io;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import com.jamesswafford.chess4j.tuner.FenToTuner;
+import com.jamesswafford.chess4j.tuner.SQLiteTunerDatasourceTest;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Color;
@@ -18,10 +22,95 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 public class EPDParserTest {
 
+    private final static String zuriEpd = "/samplefen.epd";
+    private final static String etherealEpd = "/sample_ethereal_fen.epd";
+
     Board board = new Board();
 
     @Test
-    public void epdParserTest1() throws ParseException {
+    public void toGameRecord_EtherealFormat() throws IOException {
+        File epdFile = new File(EPDParserTest.class.getResource(etherealEpd).getFile());
+        List<GameRecord> gameRecords = EPDParser.toGameRecords(epdFile, false);
+
+        // verify a few samples
+        /*
+        8/5p2/3BpP2/2K1Pk2/7p/3N1n1P/8/8 b - - 6 70 [1.0] 308
+        2k2r2/p7/1pp1Rn1p/5Pp1/P7/1P6/2K4P/5R2 b - - 4 34 [0.5] -217
+        3r1rk1/4qp1p/1p1pp1p1/p1pPb3/2P1b3/PPB1P2P/3QBPP1/2RR2K1 w - - 0 23 [0.0] -36
+         */
+
+        assertEquals(1, gameRecords.stream().filter(gr -> "8/5p2/3BpP2/2K1Pk2/7p/3N1n1P/8/8 b - -".equals(gr.getFen())).count());
+        assertEquals(1, gameRecords.stream().filter(gr -> "2k2r2/p7/1pp1Rn1p/5Pp1/P7/1P6/2K4P/5R2 b - -".equals(gr.getFen())).count());
+        assertEquals(1, gameRecords.stream().filter(gr -> "3r1rk1/4qp1p/1p1pp1p1/p1pPb3/2P1b3/PPB1P2P/3QBPP1/2RR2K1 w - -".equals(gr.getFen())).count());
+
+        assertEquals(100, gameRecords.size());
+
+        GameRecord g1 = gameRecords.stream()
+                .filter(gameRecord -> "8/5p2/3BpP2/2K1Pk2/7p/3N1n1P/8/8 b - -".equals(gameRecord.getFen()))
+                .findFirst()
+                .get();
+        assertEquals(PGNResult.WHITE_WINS, g1.getResult());
+
+        GameRecord g2 = gameRecords.stream()
+                .filter(gameRecord -> "2k2r2/p7/1pp1Rn1p/5Pp1/P7/1P6/2K4P/5R2 b - -".equals(gameRecord.getFen()))
+                .findFirst()
+                .get();
+        assertEquals(PGNResult.DRAW, g2.getResult());
+
+        GameRecord g3 = gameRecords.stream()
+                .filter(gameRecord -> "3r1rk1/4qp1p/1p1pp1p1/p1pPb3/2P1b3/PPB1P2P/3QBPP1/2RR2K1 w - -".equals(gameRecord.getFen()))
+                .findFirst()
+                .get();
+        assertEquals(PGNResult.BLACK_WINS, g3.getResult());
+    }
+
+    @Test
+    public void toGameRecords_ZuriFormat() throws IOException {
+        File epdFile = new File(EPDParserTest.class.getResource(zuriEpd).getFile());
+        List<GameRecord> gameRecords = EPDParser.toGameRecords(epdFile, true);
+
+        // verify a few samples
+        /*
+        r5k1/1N3pp1/1ppb3p/3p4/1p1P4/P2P2PP/4QP2/R5K1 b - - c9 "1-0";
+        8/8/8/3p4/1P1P2k1/2NP4/7p/2b4K b - - c9 "1/2-1/2";
+        2r3k1/2b2pp1/1pp4p/3p4/1P1P4/2NQ2PP/5PK1/1R6 b - - c9 "1-0";
+        4r1k1/1rpb1pp1/1p5p/3P4/p1PBn1P1/3n3P/R1N2P1K/1R6 w - - c9 "0-1";
+         */
+
+        assertEquals(1, gameRecords.stream().filter(gr -> "r5k1/1N3pp1/1ppb3p/3p4/1p1P4/P2P2PP/4QP2/R5K1 b - -".equals(gr.getFen())).count());
+        assertEquals(1, gameRecords.stream().filter(gr -> "8/8/8/3p4/1P1P2k1/2NP4/7p/2b4K b - -".equals(gr.getFen())).count());
+        assertEquals(1, gameRecords.stream().filter(gr -> "2r3k1/2b2pp1/1pp4p/3p4/1P1P4/2NQ2PP/5PK1/1R6 b - -".equals(gr.getFen())).count());
+        assertEquals(1, gameRecords.stream().filter(gr -> "4r1k1/1rpb1pp1/1p5p/3P4/p1PBn1P1/3n3P/R1N2P1K/1R6 w - -".equals(gr.getFen())).count());
+
+        assertEquals(100, gameRecords.size());
+
+        GameRecord g1 = gameRecords.stream()
+                .filter(gameRecord -> "r5k1/1N3pp1/1ppb3p/3p4/1p1P4/P2P2PP/4QP2/R5K1 b - -".equals(gameRecord.getFen()))
+                .findFirst()
+                .get();
+        assertEquals(PGNResult.WHITE_WINS, g1.getResult());
+
+        GameRecord g2 = gameRecords.stream()
+                .filter(gameRecord -> "8/8/8/3p4/1P1P2k1/2NP4/7p/2b4K b - -".equals(gameRecord.getFen()))
+                .findFirst()
+                .get();
+        assertEquals(PGNResult.DRAW, g2.getResult());
+
+        GameRecord g3 = gameRecords.stream()
+                .filter(gameRecord -> "2r3k1/2b2pp1/1pp4p/3p4/1P1P4/2NQ2PP/5PK1/1R6 b - -".equals(gameRecord.getFen()))
+                .findFirst()
+                .get();
+        assertEquals(PGNResult.WHITE_WINS, g3.getResult());
+
+        GameRecord g4 = gameRecords.stream()
+                .filter(gameRecord -> "4r1k1/1rpb1pp1/1p5p/3P4/p1PBn1P1/3n3P/R1N2P1K/1R6 w - -".equals(gameRecord.getFen()))
+                .findFirst()
+                .get();
+        assertEquals(PGNResult.BLACK_WINS, g4.getResult());
+    }
+
+    @Test
+    public void setPosTest1() throws ParseException {
         board.resetBoard();
         Board b = board.deepCopy();
 
@@ -50,7 +139,7 @@ public class EPDParserTest {
     }
 
     @Test
-    public void epdParserTest2() throws ParseException {
+    public void setPosTest2() throws ParseException {
         board.resetBoard();
         Board b = board.deepCopy();
 
@@ -67,7 +156,7 @@ public class EPDParserTest {
     }
 
     @Test
-    public void epdParserTest3() throws ParseException {
+    public void setPosTest3() throws ParseException {
         board.resetBoard();
         Board b = board.deepCopy();
 
@@ -85,4 +174,5 @@ public class EPDParserTest {
         assertEquals(1, op2.getEpdOperands().size());
         assertEquals("WAC.022", op2.getEpdOperands().get(0));
     }
+
 }

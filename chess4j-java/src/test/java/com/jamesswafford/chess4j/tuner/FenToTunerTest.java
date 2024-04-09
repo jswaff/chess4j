@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.tuner;
 
+import com.jamesswafford.chess4j.io.GameRecord;
 import com.jamesswafford.chess4j.io.PGNResult;
 import org.junit.*;
 
