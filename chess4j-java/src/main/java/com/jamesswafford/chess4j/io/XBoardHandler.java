@@ -1,6 +1,5 @@
 package com.jamesswafford.chess4j.io;
 
-import ai.djl.inference.Predictor;
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Color;
@@ -14,6 +13,7 @@ import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
+import com.jamesswafford.chess4j.nn.EvalPredictor;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
 import com.jamesswafford.chess4j.tuner.*;
@@ -30,7 +30,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static com.jamesswafford.chess4j.utils.GameStatusChecker.getGameStatus;
 
@@ -78,9 +77,9 @@ public class XBoardHandler {
         put("hint", XBoardHandler::noOp);
         put("level", XBoardHandler.this::level);
         put("memory", XBoardHandler.this::memory);
+        put("moves", XBoardHandler::showMoves);
         put("new", XBoardHandler.this::newGame);
         put("nopost", (String[] cmd) -> searchIterator.setPost(false));
-        put("order", XBoardHandler::order);
         put("otim", XBoardHandler::noOp);
         put("perft", (String[] cmd) -> Perft.executePerft(Globals.getBoard(), Integer.parseInt(cmd[1])));
         put("pgn2book", XBoardHandler.this::pgnToBook);
@@ -142,7 +141,7 @@ public class XBoardHandler {
     private void displayEval(String[] cmd) {
         LOGGER.info("HCE: {}",  Eval.eval(Globals.getEvalWeights(), Globals.getBoard()));
         Globals.getPredictor().ifPresent(predictor -> {
-            LOGGER.info("Model: {}", Eval.eval(predictor, Globals.getBoard()));
+            LOGGER.info("NN: {}", EvalPredictor.predict(predictor, Globals.getBoard()));
         });
     }
 
@@ -245,35 +244,6 @@ public class XBoardHandler {
 
     private static void noOp(String[] cmd) {
         LOGGER.debug("# no op: " + cmd[0]);
-    }
-
-    private static void order(String[] cmd) {
-        final Board board = Globals.getBoard();
-        EvalWeights weights = Globals.getEvalWeights();
-        MoveGenerator moveGen = new MagicBitboardMoveGenerator();
-        List<Move> moves = moveGen.generateLegalMoves(board);
-
-        boolean useNN = cmd.length > 1 && "nn".equals(cmd[1]);
-        Function<Board, Integer> hce = board1 -> Eval.eval(weights, board1, false, true);
-        Function<Predictor<Board, Float>, Function<Board, Integer>> nn = predictor -> board1 -> Eval.eval(predictor, board1);
-        Function<Board, Integer> evalFunc = useNN ? Globals.getPredictor()
-                .map(nn)
-                .orElseThrow(() -> new IllegalStateException("No model loaded")) : hce;
-
-        moves.sort((mv1, mv2) -> {
-            Undo u1 = board.applyMove(mv1);
-            double s1 = evalFunc.apply(board);
-            board.undoMove(u1);
-            Undo u2 = board.applyMove(mv2);
-            double s2 = evalFunc.apply(board);
-            board.undoMove(u2);
-            return Double.compare(s1, s2);
-        });
-        moves.forEach(mv -> {
-            Undo undo = board.applyMove(mv);
-            LOGGER.info("\t" + mv + " " + -evalFunc.apply(board));
-            board.undoMove(undo);
-        });
     }
 
     private void pgnToBook(String[] cmd) {
@@ -421,6 +391,32 @@ public class XBoardHandler {
         } catch (ParseException e) {
             LOGGER.info("tellusererror Illegal position");
         }
+    }
+
+    private static void showMoves(String[] cmd) {
+        final Board board = Globals.getBoard();
+        EvalWeights weights = Globals.getEvalWeights();
+        MoveGenerator moveGen = new MagicBitboardMoveGenerator();
+        List<Move> moves = moveGen.generateLegalMoves(board);
+
+        // sort by HCE
+        moves.sort((mv1, mv2) -> {
+            Undo u1 = board.applyMove(mv1);
+            double s1 = Eval.eval(weights, board);
+            board.undoMove(u1);
+            Undo u2 = board.applyMove(mv2);
+            double s2 = Eval.eval(weights, board);
+            board.undoMove(u2);
+            return Double.compare(s1, s2);
+        });
+        moves.forEach(mv -> {
+            Undo undo = board.applyMove(mv);
+            StringBuilder mvStr = new StringBuilder("\t" + mv + " " + -Eval.eval(weights, board));
+            Globals.getPredictor().ifPresent(predictor -> mvStr.append(" ")
+                    .append(-EvalPredictor.predict(predictor, board)));
+            LOGGER.info(mvStr);
+            board.undoMove(undo);
+        });
     }
 
     /**
