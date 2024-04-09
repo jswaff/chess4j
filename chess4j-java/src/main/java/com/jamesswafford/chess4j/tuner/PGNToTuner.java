@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+@Deprecated
 public class PGNToTuner {
 
     Logger LOGGER = LogManager.getLogger(PGNToTuner.class);

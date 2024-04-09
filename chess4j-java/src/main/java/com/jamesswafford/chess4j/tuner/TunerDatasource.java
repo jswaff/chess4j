@@ -4,6 +4,7 @@ import com.jamesswafford.chess4j.io.*;
 
 import java.util.List;
 
+@Deprecated
 public interface TunerDatasource {
 
     void initializeDatasource();

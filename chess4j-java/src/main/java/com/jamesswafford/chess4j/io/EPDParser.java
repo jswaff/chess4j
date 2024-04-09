@@ -21,10 +21,10 @@ public final class EPDParser {
 
     private EPDParser() { }
 
-    public static List<FENRecord> toGameRecords(String epdFile, boolean zuriFormat) throws IOException {
-        return toGameRecords(new File(epdFile), zuriFormat);
+    public static List<FENRecord> load(String epdFile, boolean zuriFormat) throws IOException {
+        return load(new File(epdFile), zuriFormat);
     }
-    public static List<FENRecord> toGameRecords(File epdFile, boolean zuriFormat) throws IOException {
+    public static List<FENRecord> load(File epdFile, boolean zuriFormat) throws IOException {
         List<FENRecord> fenRecords = new ArrayList<>();
         FileInputStream fis = null;
         Scanner sc = null;
@@ -34,7 +34,7 @@ public final class EPDParser {
             sc = new Scanner(fis, StandardCharsets.UTF_8);
             while (sc.hasNextLine()) {
                 String line = sc.nextLine();
-                fenRecords.add(toGameRecord(line, zuriFormat));
+                fenRecords.add(readLine(line, zuriFormat));
             }
             // scanner suppresses exceptions
             if (sc.ioException() != null) {
@@ -123,7 +123,7 @@ public final class EPDParser {
         return operands;
     }
 
-    private static FENRecord toGameRecord(String epdLine, boolean zuriFormat) {
+    private static FENRecord readLine(String epdLine, boolean zuriFormat) {
 
         Board board = new Board();
         List<EPDOperation> epdOperations = setPos(board, epdLine);

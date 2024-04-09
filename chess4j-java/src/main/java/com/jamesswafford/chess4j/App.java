@@ -131,7 +131,7 @@ public final class App {
             TestSuiteProcessor tp = new TestSuiteProcessor();
             tp.processTestSuite(epdFile, depth, time);
         } else if (labelMode) {
-            List<FENRecord> fenRecords = EPDParser.toGameRecords(epdFile, zuriFormat);
+            List<FENRecord> fenRecords = EPDParser.load(epdFile, zuriFormat);
             FENLabeler fenLabeler = new FENLabeler();
             fenLabeler.label(fenRecords, 0);
             FENCSVWriter.writeToCSV(fenRecords, outFile);
