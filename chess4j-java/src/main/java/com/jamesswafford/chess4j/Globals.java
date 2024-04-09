@@ -6,7 +6,6 @@ import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.book.OpeningBook;
 import com.jamesswafford.chess4j.eval.EvalWeights;
 import com.jamesswafford.chess4j.tuner.TunerDatasource;
-import com.jamesswafford.ml.nn.Network;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,14 +26,10 @@ public class Globals {
     private static EvalWeights evalWeights = new EvalWeights();
 
     @Setter
-    private static Network network;
+    private static OpeningBook openingBook;
 
-    @Getter
     @Setter
     private static Predictor<Board, Float> predictor;
-
-    @Setter
-    private static OpeningBook openingBook;
 
     @Setter
     private static TunerDatasource tunerDatasource;
@@ -43,13 +38,11 @@ public class Globals {
     @Setter
     private static boolean pawnHashEnabled = true;
 
-    public static Optional<Network> getNetwork() {
-        return Optional.ofNullable(network);
-    }
-
     public static Optional<OpeningBook> getOpeningBook() {
         return Optional.ofNullable(openingBook);
     }
+
+    public static Optional<Predictor<Board, Float>> getPredictor() { return Optional.ofNullable(predictor); }
 
     public static Optional<TunerDatasource> getTunerDatasource() {
         return Optional.ofNullable(tunerDatasource);

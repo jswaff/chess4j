@@ -5,7 +5,7 @@ import com.jamesswafford.chess4j.book.SQLiteBook;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.EvalWeightsUtil;
-import com.jamesswafford.chess4j.io.NeuralNetworkUtil;
+import com.jamesswafford.chess4j.nn.ModelLoader;
 import com.jamesswafford.chess4j.io.XBoardHandler;
 import com.jamesswafford.chess4j.search.AlphaBetaSearch;
 import com.jamesswafford.chess4j.search.SearchOptions;
@@ -55,12 +55,8 @@ public final class App {
             Globals.setEvalWeights(EvalWeightsUtil.load(path));
         } else if (arg.startsWith("-nn=")) {
             String path = arg.substring(4);
-            LOGGER.info("# loading network config from " + path);
-            Globals.setNetwork(NeuralNetworkUtil.load(path));
-        } else if (arg.startsWith("-model=")) {
-            String path = arg.substring(7);
             LOGGER.info("# loading model from " + path);
-            Globals.setPredictor(NeuralNetworkUtil.loadModel(path));
+            Globals.setPredictor(ModelLoader.load(path));
         }
     }
 

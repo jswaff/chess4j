@@ -6,6 +6,4 @@ public interface Evaluator {
 
     int evaluateBoard(Board board);
 
-    int evaluateBoardWithNN(Board board);
-
 }
