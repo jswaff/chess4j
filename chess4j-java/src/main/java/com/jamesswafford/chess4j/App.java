@@ -68,9 +68,19 @@ public final class App {
 
         // these options are mutually exclusive
         OptionGroup group = new OptionGroup();
-        group.addOption(createOptionWithArg("label", "epdfile", "Label records in EPD file for training"));
+        group.addOption(Option.builder("label")
+                .numberOfArgs(2)
+                .valueSeparator(' ')
+                .argName("epdfile> <outfile")
+                .desc("Label records in EPD file for training")
+                .build());
         group.addOption(createOptionWithArg("test",   "epdfile", "Process test suite"));
-        group.addOption(createOptionWithArg("tune", "epdfile", "Tune evaluation weights"));
+        group.addOption(Option.builder("tune")
+                .numberOfArgs(2)
+                .valueSeparator(' ')
+                .argName("epdfile> <outfile")
+                .desc("Tune evaluation weights")
+                .build());
         options.addOptionGroup(group);
 
         return options;
@@ -131,20 +141,20 @@ public final class App {
     }
 
     private static void runInLabelMode(CommandLine commandLine) throws IOException {
-        String epdFile = commandLine.getOptionValue("label");
-        List<FENRecord> fenRecords = EPDParser.load(epdFile, true);
+        String[] args = commandLine.getOptionValues("tune");
+        List<FENRecord> fenRecords = EPDParser.load(args[0], true); // TODO
         FENLabeler fenLabeler = new FENLabeler();
-        fenLabeler.label(fenRecords, 0);
-        FENCSVWriter.writeToCSV(fenRecords, "out.csv");
+        fenLabeler.label(fenRecords, 0); // TODO
+        FENCSVWriter.writeToCSV(fenRecords, args[1]);
     }
 
     private static void runInTuningMode(CommandLine commandLine) throws IOException {
-        String epdFile = commandLine.getOptionValue("tune");
-        List<FENRecord> fenRecords = EPDParser.load(epdFile, true);
+        String[] args = commandLine.getOptionValues("tune");
+        List<FENRecord> fenRecords = EPDParser.load(args[0], true);
         LogisticRegressionTuner tuner = new LogisticRegressionTuner();
         Tuple2<EvalWeights, Double> optimizedWeights =
-                tuner.optimize(Globals.getEvalWeights(), fenRecords, 0.3, 300);
-        EvalWeightsUtil.store(optimizedWeights._1, "eval.props", "Error: " + optimizedWeights._2);
+                tuner.optimize(Globals.getEvalWeights(), fenRecords, 0.3, 300); // TODO
+        EvalWeightsUtil.store(optimizedWeights._1, args[1], "Error: " + optimizedWeights._2);
     }
 
     /**
