@@ -12,7 +12,7 @@ import static com.jamesswafford.chess4j.board.squares.Square.*;
 
 import static org.junit.Assert.*;
 
-public class PGNParserTest {
+public class PGNGameParserTest {
 
     @Test
     public void testSimplePGN() {
@@ -41,7 +41,7 @@ public class PGNParserTest {
 
         PGNGame pgnGame = new PGNGame(tags, moves, PGNResult.DRAW);
 
-        assertEquals(pgnGame, new PGNParser().parseGame(pgn));
+        assertEquals(pgnGame, new PGNGameParser().parseGame(pgn));
     }
 
     @Test
@@ -63,7 +63,7 @@ public class PGNParserTest {
             + "35. Ra7 g6 36. Ra6+ Kc5 37. Ke1 Nf4 38. g3 Nxh3 39. Kd2 Kb5 40. Rd6 Kc5 41. Ra6 \n"
             + "Nf2 42. g4 Bd3 43. Re6 1/2-1/2\n";
 
-        PGNGame pgnGame = new PGNParser().parseGame(pgn);
+        PGNGame pgnGame = new PGNGameParser().parseGame(pgn);
         assertEquals(PGNResult.DRAW, pgnGame.getResult());
         assertEquals(85, pgnGame.getMoves().size());
         assertEquals(7, pgnGame.getTags().size());
@@ -95,7 +95,7 @@ public class PGNParserTest {
             + "27. hxg6 Qxg6 28. Bxe3 Bxe3 29. Rxe3 Rxe3 30. Qxe3 Qxc2 31. Qg5+ {Black\n"
             + "	resigns} 1-0\n";
 
-        PGNGame pgnGame = new PGNParser().parseGame(pgn);
+        PGNGame pgnGame = new PGNGameParser().parseGame(pgn);
         assertEquals(PGNResult.WHITE_WINS, pgnGame.getResult());
         assertEquals(61, pgnGame.getMoves().size());
         assertEquals(15, pgnGame.getTags().size());

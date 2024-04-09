@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class PGNParser {
+public final class PGNGameParser {
 
     private static final String tagPattern = "\\[([A-Za-z0-9_]+)\\s+\"(.*?)\"]";
 

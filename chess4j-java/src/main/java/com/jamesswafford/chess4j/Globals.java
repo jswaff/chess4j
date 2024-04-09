@@ -5,7 +5,6 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Undo;
 import com.jamesswafford.chess4j.book.OpeningBook;
 import com.jamesswafford.chess4j.eval.EvalWeights;
-import com.jamesswafford.chess4j.tuner.TunerDatasource;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,9 +30,6 @@ public class Globals {
     @Setter
     private static Predictor<Board, Float> predictor;
 
-    @Setter
-    private static TunerDatasource tunerDatasource;
-
     @Getter
     @Setter
     private static boolean pawnHashEnabled = true;
@@ -43,9 +39,5 @@ public class Globals {
     }
 
     public static Optional<Predictor<Board, Float>> getPredictor() { return Optional.ofNullable(predictor); }
-
-    public static Optional<TunerDatasource> getTunerDatasource() {
-        return Optional.ofNullable(tunerDatasource);
-    }
 
 }

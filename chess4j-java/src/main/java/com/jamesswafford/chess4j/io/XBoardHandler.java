@@ -16,10 +16,8 @@ import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import com.jamesswafford.chess4j.nn.EvalPredictor;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
-import com.jamesswafford.chess4j.tuner.*;
 import com.jamesswafford.chess4j.utils.*;
 
-import io.vavr.Tuple2;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
@@ -39,8 +37,6 @@ public class XBoardHandler {
 
     @Setter
     private OpeningBook openingBook;
-    @Setter
-    private TunerDatasource tunerDatasource;
     private int bookMisses;
     @Setter
     private SearchIterator searchIterator;
@@ -66,9 +62,7 @@ public class XBoardHandler {
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
         put("easy", (String[] cmd) -> ponderingEnabled = false);
         put("eval", XBoardHandler.this::displayEval);
-        put("eval2props", XBoardHandler.this::writeEvalProperties);
         put("exit",XBoardHandler.this::exit);
-        put("fen2tuner", XBoardHandler.this::fenToTunerDS);
         put("force", XBoardHandler.this::force);
         put("go", XBoardHandler.this::go);
         put("hard", (String[] cmd) -> ponderingEnabled = true);
@@ -81,7 +75,6 @@ public class XBoardHandler {
         put("otim", XBoardHandler::noOp);
         put("perft", (String[] cmd) -> Perft.executePerft(Globals.getBoard(), Integer.parseInt(cmd[1])));
         put("pgn2book", XBoardHandler.this::pgnToBook);
-        put("pgn2tuner", XBoardHandler.this::pgnToTunerDS);
         put("ping", XBoardHandler.this::ping);
         put("post", (String[] cmd) -> searchIterator.setPost(true));
         put("protover", XBoardHandler::protover);
@@ -95,7 +88,6 @@ public class XBoardHandler {
         put("setboard", XBoardHandler.this::setboard);
         put("st", XBoardHandler.this::st);
         put("time", XBoardHandler.this::time);
-        put("tune", XBoardHandler.this::tuneEvalWeights);
         put("undo", XBoardHandler.this::undo);
         put("usermove", XBoardHandler.this::usermove);
         put("xboard", XBoardHandler::noOp);
@@ -104,7 +96,6 @@ public class XBoardHandler {
 
     public XBoardHandler() {
         Globals.getOpeningBook().ifPresent(openingBook1 -> this.openingBook = openingBook1);
-        Globals.getTunerDatasource().ifPresent(tunerDatasource1 -> this.tunerDatasource = tunerDatasource1);
         searchIterator = new SearchIteratorImpl();
     }
 
@@ -146,15 +137,6 @@ public class XBoardHandler {
     private void exit(String[] cmd) {
         analysisMode = false;
         searchIterator.setSkipTimeChecks(false);
-    }
-
-    private void fenToTunerDS(String[] cmd) {
-        if (tunerDatasource != null) {
-            FenToTuner fenToTuner = new FenToTuner(tunerDatasource);
-            fenToTuner.addFile(new File(cmd[1]), false);
-        } else {
-            LOGGER.warn("There is no tuner datasource.");
-        }
     }
 
     private void force(String[] cmd) {
@@ -239,15 +221,6 @@ public class XBoardHandler {
             openingBook.addToBook(new File(cmd[1]));
         } else {
             LOGGER.warn("There is no opening book.");
-        }
-    }
-
-    private void pgnToTunerDS(String[] cmd) {
-        if (tunerDatasource != null) {
-            PGNToTuner pgnToTuner = new PGNToTuner(tunerDatasource);
-            pgnToTuner.addFile(new File(cmd[1]));
-        } else {
-            LOGGER.warn("There is no tuner datasource.");
         }
     }
 
@@ -431,31 +404,6 @@ public class XBoardHandler {
         } else {
             searchIterator.setMaxTime(TimeUtils.getSearchTime(centis * 10, incrementMs));
         }
-    }
-
-    private void tuneEvalWeights(String[] cmd) {
-        if (cmd.length != 4) {
-            LOGGER.info("usage: tune <learningRate> <numEpochs> <evalFile>");
-            return;
-        }
-        Globals.getEvalWeights().reset();
-        double learningRate = Double.parseDouble(cmd[1]);
-        int numEpochs = Integer.parseInt(cmd[2]);
-        String propsFile = cmd[3];
-        Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
-            List<FENRecord> dataSet = tunerDatasource1.getGameRecords(false);
-            LogisticRegressionTuner tuner = new LogisticRegressionTuner();
-            Tuple2<EvalWeights, Double> optimizedWeights =
-                    tuner.optimize(Globals.getEvalWeights(), dataSet, learningRate, numEpochs);
-            EvalWeightsUtil.store(optimizedWeights._1, propsFile, "Error: " + optimizedWeights._2);
-            Globals.setEvalWeights(optimizedWeights._1);
-        }, () -> LOGGER.info("no tuner datasource"));
-    }
-
-    private void writeEvalProperties(String[] cmd) {
-        String propsFile = cmd[1];
-        LOGGER.info("writing eval to properties file {}", propsFile);
-        EvalWeightsUtil.store(Globals.getEvalWeights(), propsFile, null);
     }
 
     /**
