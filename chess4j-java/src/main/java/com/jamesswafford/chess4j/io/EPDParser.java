@@ -20,6 +20,9 @@ public final class EPDParser {
 
     private EPDParser() { }
 
+    public static List<FENRecord> toGameRecords(String epdFile, boolean zuriFormat) throws IOException {
+        return toGameRecords(new File(epdFile), zuriFormat);
+    }
     public static List<FENRecord> toGameRecords(File epdFile, boolean zuriFormat) throws IOException {
         List<FENRecord> fenRecords = new ArrayList<>();
         FileInputStream fis = null;
