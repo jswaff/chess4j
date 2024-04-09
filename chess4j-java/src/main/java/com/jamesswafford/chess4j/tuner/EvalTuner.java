@@ -3,7 +3,7 @@ package com.jamesswafford.chess4j.tuner;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.eval.Eval;
 import com.jamesswafford.chess4j.eval.EvalWeights;
-import com.jamesswafford.chess4j.io.GameRecord;
+import com.jamesswafford.chess4j.io.FENRecord;
 import com.jamesswafford.chess4j.search.AlphaBetaSearch;
 import com.jamesswafford.chess4j.search.Search;
 import org.apache.logging.log4j.LogManager;
@@ -28,21 +28,21 @@ public class EvalTuner {
     public void eval(int depth) {
         LOGGER.info("# evaluating tuner records to depth {}", depth);
 
-        List<GameRecord> gameRecords = tunerDatasource.getGameRecords(true);
-        Collections.shuffle(gameRecords);
+        List<FENRecord> fenRecords = tunerDatasource.getGameRecords(true);
+        Collections.shuffle(fenRecords);
         //SearchParameters parameters = new SearchParameters(depth, -Constants.CHECKMATE, Constants.CHECKMATE);
 
-        for (int i=0;i< gameRecords.size();i++) {
-            GameRecord gameRecord = gameRecords.get(i);
+        for (int i = 0; i< fenRecords.size(); i++) {
+            FENRecord fenRecord = fenRecords.get(i);
             if (i % 1000 == 0) {
-                LOGGER.info("\t {} of {} {}", +i, gameRecords.size(), gameRecord.getFen());
+                LOGGER.info("\t {} of {} {}", +i, fenRecords.size(), fenRecord.getFen());
             }
-            Board board = new Board(gameRecord.getFen());
+            Board board = new Board(fenRecord.getFen());
             //search.initialize();
             //int score = search.search(board, parameters);
             EvalWeights trainingWeights = new EvalWeights();
             int score = Eval.eval(trainingWeights, board, false, false);
-            tunerDatasource.updateEval(gameRecord.getFen(), score);
+            tunerDatasource.updateEval(fenRecord.getFen(), score);
         }
     }
 }

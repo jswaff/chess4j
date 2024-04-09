@@ -1,7 +1,7 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.eval.EvalWeights;
-import com.jamesswafford.chess4j.io.GameRecord;
+import com.jamesswafford.chess4j.io.FENRecord;
 import com.jamesswafford.chess4j.io.PGNResult;
 import io.vavr.Tuple2;
 import org.junit.AfterClass;
@@ -51,7 +51,7 @@ public class LogisticRegressionTunerTest {
 
         Tuple2<EvalWeights, Double> tunedWeights = tuner.optimize(
                 weights,
-                List.of(GameRecord.builder().fen("3k4/3Q4/3K4/8/8/8/8/8 w - -").result(PGNResult.WHITE_WINS).build()),
+                List.of(FENRecord.builder().fen("3k4/3Q4/3K4/8/8/8/8/8 w - -").result(PGNResult.WHITE_WINS).build()),
                 100.0,
                 1);
 
@@ -64,11 +64,11 @@ public class LogisticRegressionTunerTest {
         // get a list of game records
         populateTunerDatasource(testEpd);
         assertEquals(1000, tunerDatasource.getTotalPositionsCount());
-        List<GameRecord> gameRecords = tunerDatasource.getGameRecords(false);
+        List<FENRecord> fenRecords = tunerDatasource.getGameRecords(false);
 
         EvalWeights weights = new EvalWeights();
 
-        tuner.optimize(weights, gameRecords, 100.0, 3);
+        tuner.optimize(weights, fenRecords, 100.0, 3);
     }
 
     private void populateTunerDatasource(String epd) {

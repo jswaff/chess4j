@@ -455,7 +455,7 @@ public class XBoardHandler {
         int numEpochs = Integer.parseInt(cmd[2]);
         String propsFile = cmd[3];
         Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
-            List<GameRecord> dataSet = tunerDatasource1.getGameRecords(false);
+            List<FENRecord> dataSet = tunerDatasource1.getGameRecords(false);
             LogisticRegressionTuner tuner = new LogisticRegressionTuner();
             Tuple2<EvalWeights, Double> optimizedWeights =
                     tuner.optimize(Globals.getEvalWeights(), dataSet, learningRate, numEpochs);

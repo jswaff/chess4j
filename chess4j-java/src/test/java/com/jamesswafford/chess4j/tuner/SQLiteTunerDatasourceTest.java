@@ -3,8 +3,8 @@ package com.jamesswafford.chess4j.tuner;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.board.Move;
 import com.jamesswafford.chess4j.board.squares.Square;
-import com.jamesswafford.chess4j.io.FenBuilder;
-import com.jamesswafford.chess4j.io.GameRecord;
+import com.jamesswafford.chess4j.io.FENBuilder;
+import com.jamesswafford.chess4j.io.FENRecord;
 import com.jamesswafford.chess4j.io.PGNResult;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import org.junit.AfterClass;
@@ -53,20 +53,20 @@ public class SQLiteTunerDatasourceTest {
         assertEquals(0, tunerDatasource.getTotalPositionsCount());
 
         Board board = new Board();
-        String fen = FenBuilder.createFen(board, false);
+        String fen = FENBuilder.createFen(board, false);
         tunerDatasource.insert(fen, PGNResult.WHITE_WINS);
         assertEquals(1, tunerDatasource.getTotalPositionsCount());
-        List<GameRecord> gameRecords = tunerDatasource.getGameRecords(false);
-        assertEquals(1, gameRecords.size());
-        assertEquals(fen, gameRecords.get(0).getFen());
-        assertEquals(PGNResult.WHITE_WINS, gameRecords.get(0).getResult());
-        assertNull(gameRecords.get(0).getEval());
+        List<FENRecord> fenRecords = tunerDatasource.getGameRecords(false);
+        assertEquals(1, fenRecords.size());
+        assertEquals(fen, fenRecords.get(0).getFen());
+        assertEquals(PGNResult.WHITE_WINS, fenRecords.get(0).getResult());
+        assertNull(fenRecords.get(0).getEval());
 
         board.applyMove(new Move(Pawn.WHITE_PAWN, Square.E2, Square.E4));
-        String fen2 = FenBuilder.createFen(board, false);
+        String fen2 = FENBuilder.createFen(board, false);
         tunerDatasource.insert(fen2, PGNResult.WHITE_WINS);
         assertEquals(2, tunerDatasource.getTotalPositionsCount());
-        GameRecord gr2 = tunerDatasource.getGameRecords(false).stream()
+        FENRecord gr2 = tunerDatasource.getGameRecords(false).stream()
                         .filter(gr -> fen2.equals(gr.getFen())).findFirst().get();
         assertEquals(PGNResult.WHITE_WINS, gr2.getResult());
         assertNull(gr2.getEval());
@@ -79,10 +79,10 @@ public class SQLiteTunerDatasourceTest {
         assertEquals(0, tunerDatasource.getTotalPositionsCount());
 
         Board board = new Board();
-        tunerDatasource.insert(FenBuilder.createFen(board, false), PGNResult.WHITE_WINS);
+        tunerDatasource.insert(FENBuilder.createFen(board, false), PGNResult.WHITE_WINS);
         assertEquals(1, tunerDatasource.getTotalPositionsCount());
 
-        tunerDatasource.insert(FenBuilder.createFen(board, false), PGNResult.WHITE_WINS);
+        tunerDatasource.insert(FENBuilder.createFen(board, false), PGNResult.WHITE_WINS);
         assertEquals(1, tunerDatasource.getTotalPositionsCount());
     }
 
@@ -92,7 +92,7 @@ public class SQLiteTunerDatasourceTest {
 
         Board board = new Board();
         try {
-            tunerDatasource.insert(FenBuilder.createFen(board, false), PGNResult.ADJOURNED);
+            tunerDatasource.insert(FENBuilder.createFen(board, false), PGNResult.ADJOURNED);
             fail();
         } catch (IllegalStateException e) { /* good */ }
 
@@ -104,23 +104,23 @@ public class SQLiteTunerDatasourceTest {
         assertEquals(0, tunerDatasource.getTotalPositionsCount());
 
         Board board = new Board();
-        String fen = FenBuilder.createFen(board, false);
+        String fen = FENBuilder.createFen(board, false);
         tunerDatasource.insert(fen, PGNResult.WHITE_WINS);
-        List<GameRecord> gameRecords = tunerDatasource.getGameRecords(false);
+        List<FENRecord> fenRecords = tunerDatasource.getGameRecords(false);
         assertEquals(1L, tunerDatasource.getGameRecords(true).size());
 
-        assertEquals(1, gameRecords.size());
-        assertEquals(fen, gameRecords.get(0).getFen());
-        assertEquals(PGNResult.WHITE_WINS, gameRecords.get(0).getResult());
-        assertNull(gameRecords.get(0).getEval());
+        assertEquals(1, fenRecords.size());
+        assertEquals(fen, fenRecords.get(0).getFen());
+        assertEquals(PGNResult.WHITE_WINS, fenRecords.get(0).getResult());
+        assertNull(fenRecords.get(0).getEval());
 
         tunerDatasource.updateEval(fen, -325);
-        gameRecords = tunerDatasource.getGameRecords(false);
+        fenRecords = tunerDatasource.getGameRecords(false);
 
-        assertEquals(1, gameRecords.size());
-        assertEquals(fen, gameRecords.get(0).getFen());
-        assertEquals(PGNResult.WHITE_WINS, gameRecords.get(0).getResult());
-        assertEquals(Integer.valueOf(-325), gameRecords.get(0).getEval());
+        assertEquals(1, fenRecords.size());
+        assertEquals(fen, fenRecords.get(0).getFen());
+        assertEquals(PGNResult.WHITE_WINS, fenRecords.get(0).getResult());
+        assertEquals(Integer.valueOf(-325), fenRecords.get(0).getEval());
 
         assertEquals(0L, tunerDatasource.getGameRecords(true).size());
     }

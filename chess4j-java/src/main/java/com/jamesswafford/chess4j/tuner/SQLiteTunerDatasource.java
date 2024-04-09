@@ -2,7 +2,7 @@ package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.exceptions.UncheckedSqlException;
-import com.jamesswafford.chess4j.io.GameRecord;
+import com.jamesswafford.chess4j.io.FENRecord;
 import com.jamesswafford.chess4j.io.PGNResult;
 import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
@@ -144,8 +144,8 @@ public class SQLiteTunerDatasource implements TunerDatasource {
     }
 
     @Override
-    public List<GameRecord> getGameRecords(boolean justUnprocessed) {
-        List<GameRecord> gameRecords = new ArrayList<>();
+    public List<FENRecord> getGameRecords(boolean justUnprocessed) {
+        List<FENRecord> fenRecords = new ArrayList<>();
 
         String sql = "select fen, outcome, eval, eval_processed from tuner_pos ";
         if (justUnprocessed) {
@@ -155,32 +155,32 @@ public class SQLiteTunerDatasource implements TunerDatasource {
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                GameRecord gameRecord = GameRecord.builder()
+                FENRecord fenRecord = FENRecord.builder()
                         .fen(rs.getString("fen"))
                         .result(mapOutcomeToResult(rs.getInt("outcome")))
                         .eval(rs.getInt("eval_processed")==1 ? rs.getInt("eval") : null)
                         .build();
-                gameRecords.add(gameRecord);
+                fenRecords.add(fenRecord);
             }
             ps.close();
         } catch (SQLException e) {
             throw new UncheckedSqlException(e);
         }
 
-        return gameRecords;
+        return fenRecords;
     }
 
     @Override
     public void exportToCSV(String file) {
 
         BufferedWriter out = null;
-        List<GameRecord> gameRecords = getGameRecords(false);
+        List<FENRecord> fenRecords = getGameRecords(false);
 
         try {
             FileWriter fstream = new FileWriter(file);
             out = new BufferedWriter(fstream);
-            for (GameRecord gameRecord : gameRecords) {
-                out.write(gameRecord.getEval() + "," + gameRecord.getFen() + "\n");
+            for (FENRecord fenRecord : fenRecords) {
+                out.write(fenRecord.getEval() + "," + fenRecord.getFen() + "\n");
             }
         } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());

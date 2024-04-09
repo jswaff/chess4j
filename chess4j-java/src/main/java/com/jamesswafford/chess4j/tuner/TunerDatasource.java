@@ -16,7 +16,7 @@ public interface TunerDatasource {
 
     long getFenCount(String fen);
 
-    List<GameRecord> getGameRecords(boolean justUnprocessed);
+    List<FENRecord> getGameRecords(boolean justUnprocessed);
 
     void exportToCSV(String file);
 }

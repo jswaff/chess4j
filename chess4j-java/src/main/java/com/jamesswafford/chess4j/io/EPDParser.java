@@ -20,8 +20,8 @@ public final class EPDParser {
 
     private EPDParser() { }
 
-    public static List<GameRecord> toGameRecords(File epdFile, boolean zuriFormat) throws IOException {
-        List<GameRecord> gameRecords = new ArrayList<>();
+    public static List<FENRecord> toGameRecords(File epdFile, boolean zuriFormat) throws IOException {
+        List<FENRecord> fenRecords = new ArrayList<>();
         FileInputStream fis = null;
         Scanner sc = null;
 
@@ -30,7 +30,7 @@ public final class EPDParser {
             sc = new Scanner(fis, StandardCharsets.UTF_8);
             while (sc.hasNextLine()) {
                 String line = sc.nextLine();
-                gameRecords.add(toGameRecord(line, zuriFormat));
+                fenRecords.add(toGameRecord(line, zuriFormat));
             }
             // scanner suppresses exceptions
             if (sc.ioException() != null) {
@@ -44,7 +44,7 @@ public final class EPDParser {
                 sc.close();
             }
         }
-        return gameRecords;
+        return fenRecords;
     }
 
     // set the board and return a list of operations
@@ -119,11 +119,11 @@ public final class EPDParser {
         return operands;
     }
 
-    private static GameRecord toGameRecord(String epdLine, boolean zuriFormat) {
+    private static FENRecord toGameRecord(String epdLine, boolean zuriFormat) {
 
         Board board = new Board();
         List<EPDOperation> epdOperations = setPos(board, epdLine);
-        String fen = FenBuilder.createFen(board, false);
+        String fen = FENBuilder.createFen(board, false);
         if (!epdLine.startsWith(fen)) {
             throw new EpdProcessingException("Error processing epdLine " + epdLine + ".  Expected FEN " + fen);
         }
@@ -161,7 +161,7 @@ public final class EPDParser {
             throw new EpdProcessingException("Don't know how to map outcome to result: " + outcome);
         }
 
-        return GameRecord.builder().fen(fen).result(pgnResult).build();
+        return FENRecord.builder().fen(fen).result(pgnResult).build();
     }
 
 }

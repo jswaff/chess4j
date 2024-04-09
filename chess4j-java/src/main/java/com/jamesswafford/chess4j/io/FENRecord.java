@@ -5,12 +5,10 @@ import lombok.Data;
 
 @Builder
 @Data
-public class GameRecord {
+public class FENRecord {
 
     private String fen;
-    private PGNResult result; // TODO: why PGNResult?
-
-    @Deprecated
+    private PGNResult result;
     private Integer eval;
 
 }

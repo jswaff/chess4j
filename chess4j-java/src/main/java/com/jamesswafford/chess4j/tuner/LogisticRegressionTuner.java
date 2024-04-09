@@ -2,7 +2,7 @@ package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.eval.EvalWeights;
-import com.jamesswafford.chess4j.io.GameRecord;
+import com.jamesswafford.chess4j.io.FENRecord;
 import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +19,7 @@ public class LogisticRegressionTuner {
     private static final Logger LOGGER = LogManager.getLogger(LogisticRegressionTuner.class);
 
 
-    public Tuple2<EvalWeights, Double> optimize(EvalWeights initialWeights, List<GameRecord> dataSet,
+    public Tuple2<EvalWeights, Double> optimize(EvalWeights initialWeights, List<FENRecord> dataSet,
                                                 double learningRate, int maxIterations) {
 
         // disable pawn hash
@@ -28,8 +28,8 @@ public class LogisticRegressionTuner {
 
         // if we have enough data, divide data set up into training and test sets in an 80/20 split
         Collections.shuffle(dataSet);
-        List<GameRecord> trainingSet;
-        List<GameRecord> testSet;
+        List<FENRecord> trainingSet;
+        List<FENRecord> testSet;
         if (dataSet.size() >= 100) {
             int m = dataSet.size() * 4 / 5;
             trainingSet = new ArrayList<>(dataSet.subList(0, m));
@@ -57,8 +57,8 @@ public class LogisticRegressionTuner {
         return new Tuple2<>(weights, finalError);
     }
 
-    private EvalWeights trainWithGradientDescent(List<GameRecord> trainingSet, List<GameRecord> testSet,
-                                                 EvalWeights initialWeights,  double learningRate, int maxIterations) {
+    private EvalWeights trainWithGradientDescent(List<FENRecord> trainingSet, List<FENRecord> testSet,
+                                                 EvalWeights initialWeights, double learningRate, int maxIterations) {
 
         EvalWeights bestWeights = new EvalWeights(initialWeights);
         int n = bestWeights.vals.length;

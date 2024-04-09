@@ -2,7 +2,7 @@ package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.eval.EvalWeights;
-import com.jamesswafford.chess4j.io.GameRecord;
+import com.jamesswafford.chess4j.io.FENRecord;
 import com.jamesswafford.chess4j.io.PGNResult;
 
 import java.util.List;
@@ -30,13 +30,13 @@ public class CostFunction {
         return delta * delta;
     }
 
-    public static double cost(List<GameRecord> dataSet, EvalWeights weights) {
+    public static double cost(List<FENRecord> dataSet, EvalWeights weights) {
         double totalError = 0;
 
-        for (GameRecord gameRecord : dataSet) {
-            Board board = new Board(gameRecord.getFen());
+        for (FENRecord fenRecord : dataSet) {
+            Board board = new Board(fenRecord.getFen());
             double h = hypothesis(board, weights);
-            double cost = cost(h, gameRecord.getResult());
+            double cost = cost(h, fenRecord.getResult());
             totalError += cost;
         }
 

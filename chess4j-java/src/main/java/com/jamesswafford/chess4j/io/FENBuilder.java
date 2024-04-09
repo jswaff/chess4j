@@ -8,9 +8,9 @@ import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.pieces.Piece;
 
-public final class FenBuilder {
+public final class FENBuilder {
 
-    private FenBuilder() { }
+    private FENBuilder() { }
 
     public static String createFen(Board b, boolean includeMoveFields) {
 
@@ -43,7 +43,7 @@ public final class FenBuilder {
         }
 
         // player
-        sb.append(" " + (b.getPlayerToMove()==Color.WHITE ? "w":"b"));
+        sb.append(" ").append(b.getPlayerToMove() == Color.WHITE ? "w" : "b");
 
         // castling rights
         sb.append(" ");

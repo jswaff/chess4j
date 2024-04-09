@@ -6,14 +6,14 @@ import com.jamesswafford.chess4j.board.Board;
 
 import static org.junit.Assert.*;
 
-public class FenBuilderTest {
+public class FENBuilderTest {
 
     @Test
     public void testCreateFen_InitialPos() {
 
         Board board = new Board();
 
-        String fen = FenBuilder.createFen(board, true);
+        String fen = FENBuilder.createFen(board, true);
 
         assertEquals("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", fen);
     }
@@ -24,7 +24,7 @@ public class FenBuilderTest {
         String fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
         Board board = new Board(fen);
 
-        assertEquals(fen, FenBuilder.createFen(board, true));
+        assertEquals(fen, FENBuilder.createFen(board, true));
     }
 
     @Test
@@ -34,7 +34,7 @@ public class FenBuilderTest {
 
         Board board = new Board(fen);
 
-        assertEquals(fen, FenBuilder.createFen(board, false));
+        assertEquals(fen, FENBuilder.createFen(board, false));
     }
 
     @Test
@@ -44,7 +44,7 @@ public class FenBuilderTest {
 
         Board board = new Board(fen);
 
-        assertEquals(fen, FenBuilder.createFen(board, true));
+        assertEquals(fen, FENBuilder.createFen(board, true));
     }
 
 }
