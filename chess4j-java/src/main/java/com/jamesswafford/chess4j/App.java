@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j;
 
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.book.SQLiteBook;
+import com.jamesswafford.chess4j.eval.EvalWeights;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.*;
@@ -10,8 +11,10 @@ import com.jamesswafford.chess4j.nn.ModelLoader;
 import com.jamesswafford.chess4j.search.AlphaBetaSearch;
 import com.jamesswafford.chess4j.search.SearchOptions;
 import com.jamesswafford.chess4j.search.SearchParameters;
+import com.jamesswafford.chess4j.tuner.LogisticRegressionTuner;
 import com.jamesswafford.chess4j.tuner.SQLiteTunerDatasource;
 import com.jamesswafford.chess4j.utils.TestSuiteProcessor;
+import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,11 +26,12 @@ public final class App {
 
     private static boolean testMode = false;
     private static boolean labelMode = false;
+    private static boolean tuneMode = false;
     private static String epdFile = null;
     private static int time = 10;
     private static int depth = 0;
     private static boolean zuriFormat = false;
-    private static String outFile = "out.csv";
+    private static String outFile;
 
 
     private App() { }
@@ -71,6 +75,8 @@ public final class App {
             testMode = true;
         } else if (arg.startsWith("-label")) {
             labelMode = true;
+        } else if (arg.startsWith("-tune")) {
+            tuneMode = true;
         } else if (arg.startsWith("-zuri")) {
             zuriFormat = true;
         }
@@ -131,10 +137,24 @@ public final class App {
             TestSuiteProcessor tp = new TestSuiteProcessor();
             tp.processTestSuite(epdFile, depth, time);
         } else if (labelMode) {
+            if (outFile==null) {
+                System.err.println("Specify an output file using -out=<outfile>");
+                System.exit(1);
+            }
             List<FENRecord> fenRecords = EPDParser.load(epdFile, zuriFormat);
             FENLabeler fenLabeler = new FENLabeler();
             fenLabeler.label(fenRecords, 0);
             FENCSVWriter.writeToCSV(fenRecords, outFile);
+        } else if (tuneMode) {
+            if (outFile==null) {
+                System.err.println("Specify an output file using -out=<outfile>");
+                System.exit(1);
+            }
+            List<FENRecord> fenRecords = EPDParser.load(epdFile, zuriFormat);
+            LogisticRegressionTuner tuner = new LogisticRegressionTuner();
+            Tuple2<EvalWeights, Double> optimizedWeights =
+                    tuner.optimize(Globals.getEvalWeights(), fenRecords, 0.3, 10);
+            EvalWeightsUtil.store(optimizedWeights._1, outFile, "Error: " + optimizedWeights._2);
         } else {
             repl();
         }
