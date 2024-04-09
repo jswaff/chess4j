@@ -77,6 +77,73 @@ public final class App {
         }
     }
 
+    public static void main(String[] args) throws Exception {
+
+        // send "done=0" to prevent XBoard timing out during the initialization sequence.
+        LOGGER.info("done=0");
+
+        LOGGER.info("# Welcome to chess4j version 6.0!\n\n");
+
+        assert(showDebugMode());
+
+        for (String arg : args) {
+            processArgument(arg);
+        }
+
+        warmUp();
+
+        if (testMode) {
+            runInTestMode();
+        } else if (labelMode) {
+            runInLabelMode();
+        } else if (tuneMode) {
+            runInTuningMode();
+        } else {
+            repl();
+        }
+    }
+
+    private static boolean showDebugMode() {
+        LOGGER.info("# **** DEBUG MODE ENABLED ****");
+        return true;
+    }
+
+    private static void warmUp() {
+        SearchOptions opts = SearchOptions.builder().avoidNative(true).build();
+        new AlphaBetaSearch().search(new Board(),
+                new SearchParameters(3, -Constants.CHECKMATE, Constants.CHECKMATE), opts);
+        TTHolder.getInstance().clearTables();
+    }
+
+    private static void runInTestMode() throws Exception {
+        LOGGER.info("running in test mode.");
+        TestSuiteProcessor tp = new TestSuiteProcessor();
+        tp.processTestSuite(epdFile, depth, time);
+    }
+
+    private static void runInLabelMode() throws IOException {
+        if (outFile==null) {
+            System.err.println("Specify an output file using -out=<outfile>");
+            System.exit(1);
+        }
+        List<FENRecord> fenRecords = EPDParser.load(epdFile, zuriFormat);
+        FENLabeler fenLabeler = new FENLabeler();
+        fenLabeler.label(fenRecords, 0);
+        FENCSVWriter.writeToCSV(fenRecords, outFile);
+    }
+
+    private static void runInTuningMode() throws IOException {
+        if (outFile==null) {
+            System.err.println("Specify an output file using -out=<outfile>");
+            System.exit(1);
+        }
+        List<FENRecord> fenRecords = EPDParser.load(epdFile, zuriFormat);
+        LogisticRegressionTuner tuner = new LogisticRegressionTuner();
+        Tuple2<EvalWeights, Double> optimizedWeights =
+                tuner.optimize(Globals.getEvalWeights(), fenRecords, 0.3, 10);
+        EvalWeightsUtil.store(optimizedWeights._1, outFile, "Error: " + optimizedWeights._2);
+    }
+
     /**
      * Read-Expression-Print-Loop
      */
@@ -98,60 +165,6 @@ public final class App {
             } catch (Exception e) {
                 LOGGER.warn("# Caught (hopefully recoverable) exception", e);
             }
-        }
-    }
-
-    private static boolean showDebugMode() {
-        LOGGER.info("# **** DEBUG MODE ENABLED ****");
-        return true;
-    }
-
-    private static void warmUp() {
-        SearchOptions opts = SearchOptions.builder().avoidNative(true).build();
-        new AlphaBetaSearch().search(new Board(),
-                new SearchParameters(3, -Constants.CHECKMATE, Constants.CHECKMATE), opts);
-        TTHolder.getInstance().clearTables();
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        // send "done=0" to prevent XBoard timing out during the initialization sequence.
-        LOGGER.info("done=0");
-
-        LOGGER.info("# Welcome to chess4j version 6.0!\n\n");
-
-        assert(showDebugMode());
-
-        for (String arg : args) {
-            processArgument(arg);
-        }
-
-        warmUp();
-
-        if (testMode) {
-            TestSuiteProcessor tp = new TestSuiteProcessor();
-            tp.processTestSuite(epdFile, depth, time);
-        } else if (labelMode) {
-            if (outFile==null) {
-                System.err.println("Specify an output file using -out=<outfile>");
-                System.exit(1);
-            }
-            List<FENRecord> fenRecords = EPDParser.load(epdFile, zuriFormat);
-            FENLabeler fenLabeler = new FENLabeler();
-            fenLabeler.label(fenRecords, 0);
-            FENCSVWriter.writeToCSV(fenRecords, outFile);
-        } else if (tuneMode) {
-            if (outFile==null) {
-                System.err.println("Specify an output file using -out=<outfile>");
-                System.exit(1);
-            }
-            List<FENRecord> fenRecords = EPDParser.load(epdFile, zuriFormat);
-            LogisticRegressionTuner tuner = new LogisticRegressionTuner();
-            Tuple2<EvalWeights, Double> optimizedWeights =
-                    tuner.optimize(Globals.getEvalWeights(), fenRecords, 0.3, 10);
-            EvalWeightsUtil.store(optimizedWeights._1, outFile, "Error: " + optimizedWeights._2);
-        } else {
-            repl();
         }
     }
 
