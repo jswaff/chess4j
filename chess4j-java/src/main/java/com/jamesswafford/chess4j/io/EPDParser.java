@@ -3,6 +3,8 @@ package com.jamesswafford.chess4j.io;
 import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.exceptions.EpdProcessingException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,9 +16,9 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-// TODO: can the parser be made smart enough to detect the format without using the zuriFormat flag?
 public final class EPDParser {
 
+    private static final Logger LOGGER = LogManager.getLogger(EPDParser.class);
     private static final Pattern outcomeBracketPattern = Pattern.compile("^\\[\\d\\.\\d]");
 
     private EPDParser() { }
@@ -25,6 +27,7 @@ public final class EPDParser {
         return load(new File(epdFile), zuriFormat);
     }
     public static List<FENRecord> load(File epdFile, boolean zuriFormat) throws IOException {
+        LOGGER.info("loading records from {}", epdFile);
         List<FENRecord> fenRecords = new ArrayList<>();
         FileInputStream fis = null;
         Scanner sc = null;
@@ -98,7 +101,7 @@ public final class EPDParser {
         List<String> operands = new ArrayList<>();
 
         strOperands = strOperands.trim();
-        if ("".equals(strOperands)) {
+        if (strOperands.isEmpty()) {
             return operands;
         }
 
