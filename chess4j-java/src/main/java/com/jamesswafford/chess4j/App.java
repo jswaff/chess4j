@@ -12,7 +12,6 @@ import com.jamesswafford.chess4j.search.AlphaBetaSearch;
 import com.jamesswafford.chess4j.search.SearchOptions;
 import com.jamesswafford.chess4j.search.SearchParameters;
 import com.jamesswafford.chess4j.tuner.LogisticRegressionTuner;
-import com.jamesswafford.chess4j.tuner.SQLiteTunerDatasource;
 import com.jamesswafford.chess4j.utils.TestSuiteProcessor;
 import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
@@ -47,10 +46,6 @@ public final class App {
             String path = arg.substring(6);
             LOGGER.info("# loading opening book from {}", path);
             Globals.setOpeningBook(SQLiteBook.openOrInitialize(path));
-        } else if (arg.startsWith("-tunerds=")) {
-            String path = arg.substring(9);
-            LOGGER.info("# loading tuner datasource from {}", path);
-            Globals.setTunerDatasource(SQLiteTunerDatasource.openOrInitialize(path));
         } else if (arg.startsWith("-hash=")) {
             int szBytes = Integer.parseInt(arg.substring(6)) * 1024 * 1024;
             TTHolder.getInstance().resizeMainTable(szBytes);

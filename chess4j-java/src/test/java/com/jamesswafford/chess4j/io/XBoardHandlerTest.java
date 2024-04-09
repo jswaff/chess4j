@@ -9,7 +9,6 @@ import com.jamesswafford.chess4j.book.OpeningBook;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
-import com.jamesswafford.chess4j.tuner.TunerDatasource;
 import com.jamesswafford.chess4j.utils.GameResult;
 import com.jamesswafford.chess4j.utils.GameStatus;
 import com.jamesswafford.chess4j.utils.GameStatusChecker;
@@ -36,7 +35,6 @@ public class XBoardHandlerTest {
 
     XBoardHandler xboardHandler;
     OpeningBook openingBook;
-    TunerDatasource tunerDatasource;
     SearchIterator searchIterator;
 
     private static Logger inputParserLogger;
@@ -57,8 +55,6 @@ public class XBoardHandlerTest {
         xboardHandler = new XBoardHandler();
         openingBook = mock(OpeningBook.class);
         xboardHandler.setOpeningBook(openingBook);
-        tunerDatasource = mock(TunerDatasource.class);
-        xboardHandler.setTunerDatasource(tunerDatasource);
         searchIterator = mock(SearchIterator.class);
         xboardHandler.setSearchIterator(searchIterator);
 

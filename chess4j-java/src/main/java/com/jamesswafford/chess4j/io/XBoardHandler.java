@@ -16,7 +16,6 @@ import com.jamesswafford.chess4j.movegen.MoveGenerator;
 import com.jamesswafford.chess4j.nn.EvalPredictor;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
-import com.jamesswafford.chess4j.tuner.*;
 import com.jamesswafford.chess4j.utils.*;
 
 import lombok.Getter;
@@ -38,8 +37,6 @@ public class XBoardHandler {
 
     @Setter
     private OpeningBook openingBook;
-    @Setter
-    private TunerDatasource tunerDatasource;
     private int bookMisses;
     @Setter
     private SearchIterator searchIterator;
@@ -78,7 +75,6 @@ public class XBoardHandler {
         put("otim", XBoardHandler::noOp);
         put("perft", (String[] cmd) -> Perft.executePerft(Globals.getBoard(), Integer.parseInt(cmd[1])));
         put("pgn2book", XBoardHandler.this::pgnToBook);
-        put("pgn2tuner", XBoardHandler.this::pgnToTunerDS);
         put("ping", XBoardHandler.this::ping);
         put("post", (String[] cmd) -> searchIterator.setPost(true));
         put("protover", XBoardHandler::protover);
@@ -100,7 +96,6 @@ public class XBoardHandler {
 
     public XBoardHandler() {
         Globals.getOpeningBook().ifPresent(openingBook1 -> this.openingBook = openingBook1);
-        Globals.getTunerDatasource().ifPresent(tunerDatasource1 -> this.tunerDatasource = tunerDatasource1);
         searchIterator = new SearchIteratorImpl();
     }
 
@@ -226,15 +221,6 @@ public class XBoardHandler {
             openingBook.addToBook(new File(cmd[1]));
         } else {
             LOGGER.warn("There is no opening book.");
-        }
-    }
-
-    private void pgnToTunerDS(String[] cmd) {
-        if (tunerDatasource != null) {
-            PGNToTuner pgnToTuner = new PGNToTuner(tunerDatasource);
-            pgnToTuner.addFile(new File(cmd[1]));
-        } else {
-            LOGGER.warn("There is no tuner datasource.");
         }
     }
 

@@ -18,7 +18,7 @@ public class PGNIterator {
 
     public PGNGame next() throws ParseException, IllegalMoveException {
 
-        PGNParser parser = new PGNParser();
+        PGNGameParser parser = new PGNGameParser();
         String nextGame = getNextPGN();
 
         if (nextGame != null) {
