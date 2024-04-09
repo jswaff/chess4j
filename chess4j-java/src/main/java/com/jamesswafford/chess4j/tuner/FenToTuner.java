@@ -4,7 +4,7 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.exceptions.EpdProcessingException;
 import com.jamesswafford.chess4j.io.EPDOperation;
 import com.jamesswafford.chess4j.io.EPDParser;
-import com.jamesswafford.chess4j.io.FenBuilder;
+import com.jamesswafford.chess4j.io.FENBuilder;
 import com.jamesswafford.chess4j.io.PGNResult;
 
 import java.io.File;
@@ -16,6 +16,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Deprecated
 public class FenToTuner {
 
     private static final Pattern outcomeBracketPattern = Pattern.compile("^\\[\\d\\.\\d]");
@@ -68,7 +69,7 @@ public class FenToTuner {
         Board board = new Board();
         List<EPDOperation> epdOperations = EPDParser.setPos(board, epdLine);
 
-        String fen = FenBuilder.createFen(board, false);
+        String fen = FENBuilder.createFen(board, false);
 
         String outcome;
 

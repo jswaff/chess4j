@@ -49,7 +49,7 @@ public class TestSuiteProcessor {
         int numCorrect = numProblems - wrongProblems.size();
         double pctCorrect = (double) numCorrect / (double) numProblems * 100;
         LOGGER.info("# correct: " + numCorrect + " (" + df.format(pctCorrect) + "%)");
-        if (wrongProblems.size()>0) {
+        if (!wrongProblems.isEmpty()) {
             LOGGER.info("incorrect problems:");
             for (String prob : wrongProblems) {
                 LOGGER.info(prob);
@@ -69,7 +69,7 @@ public class TestSuiteProcessor {
 
         SearchIteratorImpl searchIterator = new SearchIteratorImpl();
         searchIterator.setEarlyExitOk(false);
-        searchIterator.setMaxTime(secondsPerProblem * 1000);
+        searchIterator.setMaxTime(secondsPerProblem * 1000L);
         searchIterator.setMaxDepth(maxDepth);
 
         List<Move> pv = searchIterator.findPvFuture(board, new ArrayList<>()).get();

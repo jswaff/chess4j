@@ -10,7 +10,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-import static com.jamesswafford.chess4j.io.FenBuilder.createFen;
+import static com.jamesswafford.chess4j.io.FENBuilder.createFen;
 import static org.junit.Assert.assertEquals;
 
 public class PGNToTunerTest {

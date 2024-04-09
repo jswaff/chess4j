@@ -1,6 +1,7 @@
 target
 logs
 *.log
+test.csv
 
 ### IntelliJ IDEA ###
 .idea

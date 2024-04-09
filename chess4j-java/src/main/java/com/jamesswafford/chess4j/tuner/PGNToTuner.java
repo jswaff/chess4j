@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+@Deprecated
 public class PGNToTuner {
 
     Logger LOGGER = LogManager.getLogger(PGNToTuner.class);
@@ -58,7 +59,7 @@ public class PGNToTuner {
             MoveWithNAG gameMove = gameMoves.get(i);
             board.applyMove(gameMove.getMove());
             if (i >= 10) { // skip first 5 complete moves
-                String fen = FenBuilder.createFen(board, false);
+                String fen = FENBuilder.createFen(board, false);
                 tunerDatasource.insert(fen, game.getResult());
                 // if we have the depth/score in the annotation, use it
                 /*if (gameMove.getNag() != null) {

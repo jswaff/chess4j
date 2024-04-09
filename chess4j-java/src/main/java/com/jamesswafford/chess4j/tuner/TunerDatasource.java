@@ -4,6 +4,7 @@ import com.jamesswafford.chess4j.io.*;
 
 import java.util.List;
 
+@Deprecated
 public interface TunerDatasource {
 
     void initializeDatasource();
@@ -16,7 +17,6 @@ public interface TunerDatasource {
 
     long getFenCount(String fen);
 
-    List<GameRecord> getGameRecords(boolean justUnprocessed);
+    List<FENRecord> getGameRecords(boolean justUnprocessed);
 
-    void exportToCSV(String file);
 }

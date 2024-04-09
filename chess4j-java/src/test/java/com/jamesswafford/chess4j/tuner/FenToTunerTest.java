@@ -1,5 +1,6 @@
 package com.jamesswafford.chess4j.tuner;
 
+import com.jamesswafford.chess4j.io.FENRecord;
 import com.jamesswafford.chess4j.io.PGNResult;
 import org.junit.*;
 
@@ -52,28 +53,28 @@ public class FenToTunerTest {
         assertEquals(1, tunerDatasource.getFenCount("2r3k1/2b2pp1/1pp4p/3p4/1P1P4/2NQ2PP/5PK1/1R6 b - -"));
         assertEquals(1, tunerDatasource.getFenCount("4r1k1/1rpb1pp1/1p5p/3P4/p1PBn1P1/3n3P/R1N2P1K/1R6 w - -"));
 
-        List<GameRecord> gameRecords = tunerDatasource.getGameRecords(false);
-        assertEquals(100, gameRecords.size());
+        List<FENRecord> fenRecords = tunerDatasource.getGameRecords(false);
+        assertEquals(100, fenRecords.size());
 
-        GameRecord g1 = gameRecords.stream()
+        FENRecord g1 = fenRecords.stream()
                 .filter(gameRecord -> "r5k1/1N3pp1/1ppb3p/3p4/1p1P4/P2P2PP/4QP2/R5K1 b - -".equals(gameRecord.getFen()))
                 .findFirst()
                 .get();
         assertEquals(PGNResult.WHITE_WINS, g1.getResult());
 
-        GameRecord g2 = gameRecords.stream()
+        FENRecord g2 = fenRecords.stream()
                 .filter(gameRecord -> "8/8/8/3p4/1P1P2k1/2NP4/7p/2b4K b - -".equals(gameRecord.getFen()))
                 .findFirst()
                 .get();
         assertEquals(PGNResult.DRAW, g2.getResult());
 
-        GameRecord g3 = gameRecords.stream()
+        FENRecord g3 = fenRecords.stream()
                 .filter(gameRecord -> "2r3k1/2b2pp1/1pp4p/3p4/1P1P4/2NQ2PP/5PK1/1R6 b - -".equals(gameRecord.getFen()))
                 .findFirst()
                 .get();
         assertEquals(PGNResult.WHITE_WINS, g3.getResult());
 
-        GameRecord g4 = gameRecords.stream()
+        FENRecord g4 = fenRecords.stream()
                 .filter(gameRecord -> "4r1k1/1rpb1pp1/1p5p/3P4/p1PBn1P1/3n3P/R1N2P1K/1R6 w - -".equals(gameRecord.getFen()))
                 .findFirst()
                 .get();
@@ -95,22 +96,22 @@ public class FenToTunerTest {
         assertEquals(1, tunerDatasource.getFenCount("2k2r2/p7/1pp1Rn1p/5Pp1/P7/1P6/2K4P/5R2 b - -"));
         assertEquals(1, tunerDatasource.getFenCount("3r1rk1/4qp1p/1p1pp1p1/p1pPb3/2P1b3/PPB1P2P/3QBPP1/2RR2K1 w - -"));
 
-        List<GameRecord> gameRecords = tunerDatasource.getGameRecords(false);
-        assertEquals(100, gameRecords.size());
+        List<FENRecord> fenRecords = tunerDatasource.getGameRecords(false);
+        assertEquals(100, fenRecords.size());
 
-        GameRecord g1 = gameRecords.stream()
+        FENRecord g1 = fenRecords.stream()
                 .filter(gameRecord -> "8/5p2/3BpP2/2K1Pk2/7p/3N1n1P/8/8 b - -".equals(gameRecord.getFen()))
                 .findFirst()
                 .get();
         assertEquals(PGNResult.WHITE_WINS, g1.getResult());
 
-        GameRecord g2 = gameRecords.stream()
+        FENRecord g2 = fenRecords.stream()
                 .filter(gameRecord -> "2k2r2/p7/1pp1Rn1p/5Pp1/P7/1P6/2K4P/5R2 b - -".equals(gameRecord.getFen()))
                 .findFirst()
                 .get();
         assertEquals(PGNResult.DRAW, g2.getResult());
 
-        GameRecord g3 = gameRecords.stream()
+        FENRecord g3 = fenRecords.stream()
                 .filter(gameRecord -> "3r1rk1/4qp1p/1p1pp1p1/p1pPb3/2P1b3/PPB1P2P/3QBPP1/2RR2K1 w - -".equals(gameRecord.getFen()))
                 .findFirst()
                 .get();

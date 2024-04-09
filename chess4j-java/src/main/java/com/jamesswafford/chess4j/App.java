@@ -4,9 +4,9 @@ import com.jamesswafford.chess4j.board.Board;
 import com.jamesswafford.chess4j.book.SQLiteBook;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.init.Initializer;
-import com.jamesswafford.chess4j.io.EvalWeightsUtil;
+import com.jamesswafford.chess4j.io.*;
+import com.jamesswafford.chess4j.nn.FENLabeler;
 import com.jamesswafford.chess4j.nn.ModelLoader;
-import com.jamesswafford.chess4j.io.XBoardHandler;
 import com.jamesswafford.chess4j.search.AlphaBetaSearch;
 import com.jamesswafford.chess4j.search.SearchOptions;
 import com.jamesswafford.chess4j.search.SearchParameters;
@@ -16,32 +16,36 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.util.List;
 
 public final class App {
     private static final  Logger LOGGER = LogManager.getLogger(App.class);
 
-    private static String testSuiteFile = null;
-    private static int testSuiteTime = 10; // default to ten seconds
-    private static int maxDepth = 0;
+    private static boolean testMode = false;
+    private static boolean labelMode = false;
+    private static String epdFile = null;
+    private static int time = 10;
+    private static int depth = 0;
+    private static boolean zuriFormat = false;
+    private static String outFile = "out.csv";
+
 
     private App() { }
 
     private static void processArgument(String arg) {
         if (arg.startsWith("-native")) {
             Initializer.attemptToUseNative = true;
-        } else if (arg.startsWith("-suite=")) {
-            testSuiteFile = arg.substring(7);
         } else if (arg.startsWith("-depth=")) {
-            maxDepth = Integer.parseInt(arg.substring(7));
+            depth = Integer.parseInt(arg.substring(7));
         } else if (arg.startsWith("-time=")) {
-            testSuiteTime = Integer.parseInt(arg.substring(6));
+            time = Integer.parseInt(arg.substring(6));
         } else if (arg.startsWith("-book=")) {
             String path = arg.substring(6);
-            LOGGER.info("# loading opening book from " + path);
+            LOGGER.info("# loading opening book from {}", path);
             Globals.setOpeningBook(SQLiteBook.openOrInitialize(path));
         } else if (arg.startsWith("-tunerds=")) {
             String path = arg.substring(9);
-            LOGGER.info("# loading tuner datasource from " + path);
+            LOGGER.info("# loading tuner datasource from {}", path);
             Globals.setTunerDatasource(SQLiteTunerDatasource.openOrInitialize(path));
         } else if (arg.startsWith("-hash=")) {
             int szBytes = Integer.parseInt(arg.substring(6)) * 1024 * 1024;
@@ -51,12 +55,24 @@ public final class App {
             TTHolder.getInstance().resizePawnTable(szBytes);
         } else if (arg.startsWith("-eval=")) {
             String path = arg.substring(6);
-            LOGGER.info("# loading eval properties from " + path);
+            LOGGER.info("# loading eval properties from {}", path);
             Globals.setEvalWeights(EvalWeightsUtil.load(path));
         } else if (arg.startsWith("-nn=")) {
             String path = arg.substring(4);
             LOGGER.info("# loading model from " + path);
             Globals.setPredictor(ModelLoader.load(path));
+        } else if (arg.startsWith("-epd=")) {
+            epdFile = arg.substring(5);
+            LOGGER.info("# epd {}", epdFile);
+        } else if (arg.startsWith("-out=")) {
+            outFile = arg.substring(5);
+            LOGGER.info("# outFile {}", outFile);
+        } else if (arg.startsWith("-test")) {
+            testMode = true;
+        } else if (arg.startsWith("-label")) {
+            labelMode = true;
+        } else if (arg.startsWith("-zuri")) {
+            zuriFormat = true;
         }
     }
 
@@ -111,13 +127,17 @@ public final class App {
 
         warmUp();
 
-        if (testSuiteFile != null) {
+        if (testMode) {
             TestSuiteProcessor tp = new TestSuiteProcessor();
-            tp.processTestSuite(testSuiteFile, maxDepth, testSuiteTime);
-            System.exit(0);
+            tp.processTestSuite(epdFile, depth, time);
+        } else if (labelMode) {
+            List<FENRecord> fenRecords = EPDParser.load(epdFile, zuriFormat);
+            FENLabeler fenLabeler = new FENLabeler();
+            fenLabeler.label(fenRecords, 0);
+            FENCSVWriter.writeToCSV(fenRecords, outFile);
+        } else {
+            repl();
         }
-
-        repl();
     }
 
 }
