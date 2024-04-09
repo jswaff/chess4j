@@ -8,10 +8,7 @@ import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -168,29 +165,6 @@ public class SQLiteTunerDatasource implements TunerDatasource {
         }
 
         return fenRecords;
-    }
-
-    @Override
-    public void exportToCSV(String file) {
-
-        BufferedWriter out = null;
-        List<FENRecord> fenRecords = getGameRecords(false);
-
-        try {
-            FileWriter fstream = new FileWriter(file);
-            out = new BufferedWriter(fstream);
-            for (FENRecord fenRecord : fenRecords) {
-                out.write(fenRecord.getEval() + "," + fenRecord.getFen() + "\n");
-            }
-        } catch (IOException e) {
-            System.err.println("Error: " + e.getMessage());
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) { /* ignore */  }
-            }
-        }
     }
 
     private PGNResult mapOutcomeToResult(int outcome) {

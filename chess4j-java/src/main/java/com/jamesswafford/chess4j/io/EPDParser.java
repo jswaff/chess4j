@@ -14,6 +14,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+// TODO: can the parser be made smart enough to detect the format without using the zuriFormat flag?
 public final class EPDParser {
 
     private static final Pattern outcomeBracketPattern = Pattern.compile("^\\[\\d\\.\\d]");

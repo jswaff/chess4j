@@ -66,10 +66,8 @@ public class XBoardHandler {
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
         put("easy", (String[] cmd) -> ponderingEnabled = false);
         put("eval", XBoardHandler.this::displayEval);
-        put("evaltunerds", XBoardHandler.this::evalTunerDS);
         put("eval2props", XBoardHandler.this::writeEvalProperties);
         put("exit",XBoardHandler.this::exit);
-        put("export", XBoardHandler.this::exportTrainingData);
         put("fen2tuner", XBoardHandler.this::fenToTunerDS);
         put("force", XBoardHandler.this::force);
         put("go", XBoardHandler.this::go);
@@ -148,16 +146,6 @@ public class XBoardHandler {
     private void exit(String[] cmd) {
         analysisMode = false;
         searchIterator.setSkipTimeChecks(false);
-    }
-
-    private void evalTunerDS(String[] cmd) {
-        if (tunerDatasource != null) {
-            int depth = Integer.parseInt(cmd[1]);
-            EvalTuner evalTuner = new EvalTuner(tunerDatasource);
-            evalTuner.eval(depth);
-        } else {
-            LOGGER.warn("There is no tuner datasource.");
-        }
     }
 
     private void fenToTunerDS(String[] cmd) {
@@ -461,14 +449,6 @@ public class XBoardHandler {
                     tuner.optimize(Globals.getEvalWeights(), dataSet, learningRate, numEpochs);
             EvalWeightsUtil.store(optimizedWeights._1, propsFile, "Error: " + optimizedWeights._2);
             Globals.setEvalWeights(optimizedWeights._1);
-        }, () -> LOGGER.info("no tuner datasource"));
-    }
-
-    private void exportTrainingData(String[] cmd) {
-        String toFile = "training_data.csv";
-        Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
-            tunerDatasource1.exportToCSV(toFile);
-            LOGGER.info("export complete.");
         }, () -> LOGGER.info("no tuner datasource"));
     }
 
