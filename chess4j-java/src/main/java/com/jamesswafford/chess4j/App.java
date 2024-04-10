@@ -56,31 +56,28 @@ public final class App {
     private static Options createCommandLineOptions() {
         Options options = new Options();
         options.addOption(new Option("?", "help", false, "Display help information"));
-        options.addOption(new Option("native", false, "Run native engine"));
-        options.addOption(new Option("zuri", false, "EPD parsing should use Zuri format"));
+        options.addOption(new Option("native",  "Run native engine"));
+        options.addOption(new Option("zuri",  "EPD parsing should use Zuri format"));
 
         options.addOption(createOptionWithArg("book", "bookfile", "Enable opening book"));
         options.addOption(createOptionWithArg("depth", "depth", "Maximum search depth"));
+        options.addOption(createOptionWithArg("epd", "epdfile", "Specify an EPD file"));
         options.addOption(createOptionWithArg("eval", "propsFile", "Use custom eval weights"));
         options.addOption(createOptionWithArg("hash", "mb", "Specify hash size in mb"));
         options.addOption(createOptionWithArg("nn", "modelfile", "Load neural net"));
+        options.addOption(createOptionWithArg("out", "outfile", "Specify an output file"));
         options.addOption(createOptionWithArg("phash", "mb", "Specify pawn hash size in mb"));
         options.addOption(createOptionWithArg("time", "time", "Maximum time per search in seconds"));
 
         // these options are mutually exclusive
         OptionGroup group = new OptionGroup();
-        group.addOption(Option.builder("label")
-                .numberOfArgs(2)
-                .valueSeparator(' ')
-                .argName("epdfile> <outfile")
-                .desc("Label records in EPD file for training")
-                .build());
-        group.addOption(createOptionWithArg("test",   "epdfile", "Process test suite"));
+        group.addOption(new Option("label", "Label records in EPD file for training"));
+        group.addOption(new Option("test", "Process test suite"));
         group.addOption(Option.builder("tune")
-                .numberOfArgs(4)
-                //.optionalArg(true) // it appears to be all or nothing, can't make individual arguments optional
+                .numberOfArgs(2)
+                //.optionalArg(true)
                 .valueSeparator(' ')
-                .argName("epdfile> <outfile> <lr> <iterations")
+                .argName("lr> <iterations")
                 .desc("Tune evaluation weights")
                 .build());
         options.addOptionGroup(group);
@@ -129,7 +126,10 @@ public final class App {
     }
 
     private static void runInTestMode(CommandLine commandLine) throws Exception {
-        String epdFile = commandLine.getOptionValue("test");
+        if (!commandLine.hasOption("epd")) {
+            throw new IllegalArgumentException("label must be used in conjunction with epd");
+        }
+        String epdFile = commandLine.getOptionValue("epd");
 
         int depth = 0;
         if (commandLine.hasOption("depth")) depth = Integer.parseInt(commandLine.getOptionValue("depth"));
@@ -143,25 +143,42 @@ public final class App {
     }
 
     private static void runInLabelMode(CommandLine commandLine) throws IOException {
-        String[] args = commandLine.getOptionValues("label");
+        if (!commandLine.hasOption("epd")) {
+            throw new IllegalArgumentException("label must be used in conjunction with epd");
+        }
+        String epdFile = commandLine.getOptionValue("epd");
+
+        if (!commandLine.hasOption("out")) {
+            throw new IllegalArgumentException("label must be used in conjunction with out");
+        }
+        String outFile = commandLine.getOptionValue("out");
+
+        boolean zuri = commandLine.hasOption("zuri");
 
         int depth = 0;
         if (commandLine.hasOption("depth")) depth = Integer.parseInt(commandLine.getOptionValue("depth"));
 
-        boolean zuri = commandLine.hasOption("zuri");
-
-        List<FENRecord> fenRecords = EPDParser.load(args[0], zuri);
+        List<FENRecord> fenRecords = EPDParser.load(epdFile, zuri);
         FENLabeler fenLabeler = new FENLabeler();
         fenLabeler.label(fenRecords, depth);
-        FENCSVWriter.writeToCSV(fenRecords, args[1]);
+        FENCSVWriter.writeToCSV(fenRecords, outFile);
     }
 
     private static void runInTuningMode(CommandLine commandLine) throws IOException {
         String[] args = commandLine.getOptionValues("tune");
-        String epdFile = args[0];
-        String outFile = args[1];
-        double learningRate = Double.parseDouble(args[2]);
-        int iterations = Integer.parseInt(args[3]);
+        double learningRate = Double.parseDouble(args[0]);
+        int iterations = Integer.parseInt(args[1]);
+
+        if (!commandLine.hasOption("epd")) {
+            throw new IllegalArgumentException("tune must be used in conjunction with epd");
+        }
+        String epdFile = commandLine.getOptionValue("epd");
+
+        if (!commandLine.hasOption("out")) {
+            throw new IllegalArgumentException("tune must be used in conjunction with out");
+        }
+        String outFile = commandLine.getOptionValue("out");
+
         boolean zuri = commandLine.hasOption("zuri");
 
         List<FENRecord> fenRecords = EPDParser.load(epdFile, zuri);
