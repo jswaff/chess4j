@@ -22,6 +22,8 @@ public class LogisticRegressionTuner {
     public Tuple2<EvalWeights, Double> optimize(EvalWeights initialWeights, List<FENRecord> dataSet,
                                                 double learningRate, int maxIterations) {
 
+        LOGGER.info("tuning eval weights.  learningRate: {} maxIterations: {}", learningRate, maxIterations);
+
         // disable pawn hash
         boolean pawnHashEnabled = Globals.isPawnHashEnabled();
         Globals.setPawnHashEnabled(false);
@@ -41,7 +43,7 @@ public class LogisticRegressionTuner {
         LOGGER.info("data set size: {} training: {}, test: {}", dataSet.size(), trainingSet.size(), testSet.size());
 
         double initialError = cost(testSet, initialWeights);
-        LOGGER.info("initial error using test set: {}", initialError);
+        LOGGER.info(String.format("initial error: %.4f", initialError));
 
         long start = System.currentTimeMillis();
         EvalWeights weights = trainWithGradientDescent(trainingSet, testSet, initialWeights, learningRate, maxIterations);
@@ -49,7 +51,7 @@ public class LogisticRegressionTuner {
         LOGGER.info("training complete in {} seconds", (end-start)/1000);
 
         double finalError = cost(testSet, weights);
-        LOGGER.info("final error using test set: {}", finalError);
+        LOGGER.info(String.format("final error: %.4f", finalError));
 
         // restore the pawn hash setting
         Globals.setPawnHashEnabled(pawnHashEnabled);
@@ -66,7 +68,7 @@ public class LogisticRegressionTuner {
 
         // reduce the learning rate to 10% over the run
         //double lrDelta = (learningRate / maxIterations) * 0.9;
-
+        LOGGER.info("Epoch       Train        Test");
         for (int it=0; it<maxIterations; it++) {
 
             // load a batch and set up the X (features) matrix and Y (outcome) vector
@@ -83,11 +85,11 @@ public class LogisticRegressionTuner {
                 }
             }
 
-            // display the error and store the weights every 10 iterations
+            // display the error and store the weights every 100 iterations
             if ((it+1) % 100 == 0) {
                 double trainingError = cost(trainingSet, bestWeights);
                 double testError = cost(testSet, bestWeights);
-                LOGGER.info(trainingError + "," + testError);
+                LOGGER.info(String.format("%5d%12.4f%12.4f", (it+1),trainingError, testError));
             }
 
             //learningRate -= lrDelta;

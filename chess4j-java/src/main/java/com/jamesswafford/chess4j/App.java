@@ -14,6 +14,7 @@ import com.jamesswafford.chess4j.search.SearchParameters;
 import com.jamesswafford.chess4j.tuner.LogisticRegressionTuner;
 import com.jamesswafford.chess4j.utils.TestSuiteProcessor;
 import io.vavr.Tuple2;
+import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,59 +24,7 @@ import java.util.List;
 public final class App {
     private static final  Logger LOGGER = LogManager.getLogger(App.class);
 
-    private static boolean testMode = false;
-    private static boolean labelMode = false;
-    private static boolean tuneMode = false;
-    private static String epdFile = null;
-    private static int time = 10;
-    private static int depth = 0;
-    private static boolean zuriFormat = false;
-    private static String outFile;
-
-
     private App() { }
-
-    private static void processArgument(String arg) {
-        if (arg.startsWith("-native")) {
-            Initializer.attemptToUseNative = true;
-        } else if (arg.startsWith("-depth=")) {
-            depth = Integer.parseInt(arg.substring(7));
-        } else if (arg.startsWith("-time=")) {
-            time = Integer.parseInt(arg.substring(6));
-        } else if (arg.startsWith("-book=")) {
-            String path = arg.substring(6);
-            LOGGER.info("# loading opening book from {}", path);
-            Globals.setOpeningBook(SQLiteBook.openOrInitialize(path));
-        } else if (arg.startsWith("-hash=")) {
-            int szBytes = Integer.parseInt(arg.substring(6)) * 1024 * 1024;
-            TTHolder.getInstance().resizeMainTable(szBytes);
-        } else if (arg.startsWith("-phash=")) {
-            int szBytes = Integer.parseInt(arg.substring(7)) * 1024 * 1024;
-            TTHolder.getInstance().resizePawnTable(szBytes);
-        } else if (arg.startsWith("-eval=")) {
-            String path = arg.substring(6);
-            LOGGER.info("# loading eval properties from {}", path);
-            Globals.setEvalWeights(EvalWeightsUtil.load(path));
-        } else if (arg.startsWith("-nn=")) {
-            String path = arg.substring(4);
-            LOGGER.info("# loading model from " + path);
-            Globals.setPredictor(ModelLoader.load(path));
-        } else if (arg.startsWith("-epd=")) {
-            epdFile = arg.substring(5);
-            LOGGER.info("# epd {}", epdFile);
-        } else if (arg.startsWith("-out=")) {
-            outFile = arg.substring(5);
-            LOGGER.info("# outFile {}", outFile);
-        } else if (arg.startsWith("-test")) {
-            testMode = true;
-        } else if (arg.startsWith("-label")) {
-            labelMode = true;
-        } else if (arg.startsWith("-tune")) {
-            tuneMode = true;
-        } else if (arg.startsWith("-zuri")) {
-            zuriFormat = true;
-        }
-    }
 
     public static void main(String[] args) throws Exception {
 
@@ -86,21 +35,82 @@ public final class App {
 
         assert(showDebugMode());
 
-        for (String arg : args) {
-            processArgument(arg);
-        }
+        Options options = createCommandLineOptions();
+        CommandLineParser commandLineParser = new DefaultParser();
+        CommandLine commandLine = commandLineParser.parse(options, args);
 
+        processCommandLineOptions(options, commandLine);
         warmUp();
 
-        if (testMode) {
-            runInTestMode();
-        } else if (labelMode) {
-            runInLabelMode();
-        } else if (tuneMode) {
-            runInTuningMode();
+        if (commandLine.hasOption("test")) {
+            runInTestMode(commandLine);
+        } else if (commandLine.hasOption("label")) {
+            runInLabelMode(commandLine);
+        } else if (commandLine.hasOption("tune")) {
+            runInTuningMode(commandLine);
         } else {
             repl();
         }
+    }
+
+    private static Options createCommandLineOptions() {
+        Options options = new Options();
+        options.addOption(new Option("?", "help", false, "Display help information"));
+        options.addOption(new Option("native",  "Run native engine"));
+        options.addOption(new Option("zuri",  "EPD parsing should use Zuri format"));
+
+        options.addOption(createOptionWithArg("book", "bookfile", "Enable opening book"));
+        options.addOption(createOptionWithArg("depth", "depth", "Maximum search depth"));
+        options.addOption(createOptionWithArg("epd", "epdfile", "Specify an EPD file"));
+        options.addOption(createOptionWithArg("eval", "propsFile", "Use custom eval weights"));
+        options.addOption(createOptionWithArg("hash", "mb", "Specify hash size in mb"));
+        options.addOption(createOptionWithArg("nn", "modelfile", "Load neural net"));
+        options.addOption(createOptionWithArg("out", "outfile", "Specify an output file"));
+        options.addOption(createOptionWithArg("phash", "mb", "Specify pawn hash size in mb"));
+        options.addOption(createOptionWithArg("time", "time", "Maximum time per search in seconds"));
+
+        // these options are mutually exclusive
+        OptionGroup group = new OptionGroup();
+        group.addOption(new Option("label", "Label records in EPD file for training"));
+        group.addOption(new Option("test", "Process test suite"));
+        group.addOption(Option.builder("tune")
+                .numberOfArgs(2)
+                //.optionalArg(true)
+                .valueSeparator(' ')
+                .argName("lr> <iterations")
+                .desc("Tune evaluation weights")
+                .build());
+        options.addOptionGroup(group);
+
+        return options;
+    }
+
+    private static Option createOptionWithArg(String name, String argName, String description) {
+        return Option.builder(name)
+                .hasArg()
+                .argName(argName)
+                .desc(description)
+                .build();
+    }
+
+    private static void printHelp(Options options) {
+        HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.printHelp("chess4j", options);
+    }
+
+    private static void processCommandLineOptions(Options options, CommandLine commandLine) {
+        if (commandLine.hasOption("?")) printHelp(options);
+        if (commandLine.hasOption("native")) Initializer.attemptToUseNative = true;
+        if (commandLine.hasOption("book"))
+            Globals.setOpeningBook(SQLiteBook.openOrInitialize(commandLine.getOptionValue("book")));
+        if (commandLine.hasOption("eval"))
+            Globals.setEvalWeights(EvalWeightsUtil.load(commandLine.getOptionValue("eval")));
+        if (commandLine.hasOption("hash"))
+            TTHolder.getInstance().resizeMainTable(Long.parseLong(commandLine.getOptionValue("hash")) *1024*1024);
+        if (commandLine.hasOption("nn"))
+            Globals.setPredictor(ModelLoader.load(commandLine.getOptionValue("nn")));
+        if (commandLine.hasOption("phash"))
+            TTHolder.getInstance().resizePawnTable(Long.parseLong(commandLine.getOptionValue("phash")) *1024*1024);
     }
 
     private static boolean showDebugMode() {
@@ -115,32 +125,66 @@ public final class App {
         TTHolder.getInstance().clearTables();
     }
 
-    private static void runInTestMode() throws Exception {
-        LOGGER.info("running in test mode.");
+    private static void runInTestMode(CommandLine commandLine) throws Exception {
+        if (!commandLine.hasOption("epd")) {
+            throw new IllegalArgumentException("label must be used in conjunction with epd");
+        }
+        String epdFile = commandLine.getOptionValue("epd");
+
+        int depth = 0;
+        if (commandLine.hasOption("depth")) depth = Integer.parseInt(commandLine.getOptionValue("depth"));
+
+        int time = 10;
+        if (commandLine.hasOption("time")) time = Integer.parseInt(commandLine.getOptionValue("time"));
+
+        LOGGER.info("running in test mode epd {} depth {} time {}", epdFile, depth, time);
         TestSuiteProcessor tp = new TestSuiteProcessor();
         tp.processTestSuite(epdFile, depth, time);
     }
 
-    private static void runInLabelMode() throws IOException {
-        if (outFile==null) {
-            System.err.println("Specify an output file using -out=<outfile>");
-            System.exit(1);
+    private static void runInLabelMode(CommandLine commandLine) throws IOException {
+        if (!commandLine.hasOption("epd")) {
+            throw new IllegalArgumentException("label must be used in conjunction with epd");
         }
-        List<FENRecord> fenRecords = EPDParser.load(epdFile, zuriFormat);
+        String epdFile = commandLine.getOptionValue("epd");
+
+        if (!commandLine.hasOption("out")) {
+            throw new IllegalArgumentException("label must be used in conjunction with out");
+        }
+        String outFile = commandLine.getOptionValue("out");
+
+        boolean zuri = commandLine.hasOption("zuri");
+
+        int depth = 0;
+        if (commandLine.hasOption("depth")) depth = Integer.parseInt(commandLine.getOptionValue("depth"));
+
+        List<FENRecord> fenRecords = EPDParser.load(epdFile, zuri);
         FENLabeler fenLabeler = new FENLabeler();
-        fenLabeler.label(fenRecords, 0);
+        fenLabeler.label(fenRecords, depth);
         FENCSVWriter.writeToCSV(fenRecords, outFile);
     }
 
-    private static void runInTuningMode() throws IOException {
-        if (outFile==null) {
-            System.err.println("Specify an output file using -out=<outfile>");
-            System.exit(1);
+    private static void runInTuningMode(CommandLine commandLine) throws IOException {
+        String[] args = commandLine.getOptionValues("tune");
+        double learningRate = Double.parseDouble(args[0]);
+        int iterations = Integer.parseInt(args[1]);
+
+        if (!commandLine.hasOption("epd")) {
+            throw new IllegalArgumentException("tune must be used in conjunction with epd");
         }
-        List<FENRecord> fenRecords = EPDParser.load(epdFile, zuriFormat);
+        String epdFile = commandLine.getOptionValue("epd");
+
+        if (!commandLine.hasOption("out")) {
+            throw new IllegalArgumentException("tune must be used in conjunction with out");
+        }
+        String outFile = commandLine.getOptionValue("out");
+
+        boolean zuri = commandLine.hasOption("zuri");
+
+        List<FENRecord> fenRecords = EPDParser.load(epdFile, zuri);
         LogisticRegressionTuner tuner = new LogisticRegressionTuner();
         Tuple2<EvalWeights, Double> optimizedWeights =
-                tuner.optimize(Globals.getEvalWeights(), fenRecords, 0.3, 10);
+                tuner.optimize(Globals.getEvalWeights(), fenRecords, learningRate, iterations);
         EvalWeightsUtil.store(optimizedWeights._1, outFile, "Error: " + optimizedWeights._2);
     }
 
