@@ -57,6 +57,7 @@ public final class App {
         Options options = new Options();
         options.addOption(new Option("?", "help", false, "Display help information"));
         options.addOption(new Option("native", false, "Run native engine"));
+        options.addOption(new Option("zuri", false, "EPD parsing should use Zuri format"));
 
         options.addOption(createOptionWithArg("book", "bookfile", "Enable opening book"));
         options.addOption(createOptionWithArg("depth", "depth", "Maximum search depth"));
@@ -147,7 +148,9 @@ public final class App {
         int depth = 0;
         if (commandLine.hasOption("depth")) depth = Integer.parseInt(commandLine.getOptionValue("depth"));
 
-        List<FENRecord> fenRecords = EPDParser.load(args[0], true); // TODO
+        boolean zuri = commandLine.hasOption("zuri");
+
+        List<FENRecord> fenRecords = EPDParser.load(args[0], zuri);
         FENLabeler fenLabeler = new FENLabeler();
         fenLabeler.label(fenRecords, depth);
         FENCSVWriter.writeToCSV(fenRecords, args[1]);
@@ -159,7 +162,9 @@ public final class App {
         String outFile = args[1];
         double learningRate = Double.parseDouble(args[2]);
         int iterations = Integer.parseInt(args[3]);
-        List<FENRecord> fenRecords = EPDParser.load(epdFile, true);
+        boolean zuri = commandLine.hasOption("zuri");
+
+        List<FENRecord> fenRecords = EPDParser.load(epdFile, zuri);
         LogisticRegressionTuner tuner = new LogisticRegressionTuner();
         Tuple2<EvalWeights, Double> optimizedWeights =
                 tuner.optimize(Globals.getEvalWeights(), fenRecords, learningRate, iterations);
