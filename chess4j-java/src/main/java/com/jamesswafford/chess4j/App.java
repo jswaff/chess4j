@@ -76,9 +76,10 @@ public final class App {
                 .build());
         group.addOption(createOptionWithArg("test",   "epdfile", "Process test suite"));
         group.addOption(Option.builder("tune")
-                .numberOfArgs(2)
+                .numberOfArgs(4)
+                //.optionalArg(true) // it appears to be all or nothing, can't make individual arguments optional
                 .valueSeparator(' ')
-                .argName("epdfile> <outfile")
+                .argName("epdfile> <outfile> <lr> <iterations")
                 .desc("Tune evaluation weights")
                 .build());
         options.addOptionGroup(group);
@@ -141,20 +142,28 @@ public final class App {
     }
 
     private static void runInLabelMode(CommandLine commandLine) throws IOException {
-        String[] args = commandLine.getOptionValues("tune");
+        String[] args = commandLine.getOptionValues("label");
+
+        int depth = 0;
+        if (commandLine.hasOption("depth")) depth = Integer.parseInt(commandLine.getOptionValue("depth"));
+
         List<FENRecord> fenRecords = EPDParser.load(args[0], true); // TODO
         FENLabeler fenLabeler = new FENLabeler();
-        fenLabeler.label(fenRecords, 0); // TODO
+        fenLabeler.label(fenRecords, depth);
         FENCSVWriter.writeToCSV(fenRecords, args[1]);
     }
 
     private static void runInTuningMode(CommandLine commandLine) throws IOException {
         String[] args = commandLine.getOptionValues("tune");
-        List<FENRecord> fenRecords = EPDParser.load(args[0], true);
+        String epdFile = args[0];
+        String outFile = args[1];
+        double learningRate = Double.parseDouble(args[2]);
+        int iterations = Integer.parseInt(args[3]);
+        List<FENRecord> fenRecords = EPDParser.load(epdFile, true);
         LogisticRegressionTuner tuner = new LogisticRegressionTuner();
         Tuple2<EvalWeights, Double> optimizedWeights =
-                tuner.optimize(Globals.getEvalWeights(), fenRecords, 0.3, 300); // TODO
-        EvalWeightsUtil.store(optimizedWeights._1, args[1], "Error: " + optimizedWeights._2);
+                tuner.optimize(Globals.getEvalWeights(), fenRecords, learningRate, iterations);
+        EvalWeightsUtil.store(optimizedWeights._1, outFile, "Error: " + optimizedWeights._2);
     }
 
     /**
