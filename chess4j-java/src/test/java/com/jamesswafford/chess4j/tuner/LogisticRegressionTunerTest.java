@@ -36,9 +36,10 @@ public class LogisticRegressionTunerTest {
         Arrays.fill(weights.vals, 0);
         weights.vals[EvalWeights.QUEEN_VAL_IND] = 100;
 
+        FENRecord kqk = FENRecord.builder().fen("3k4/3Q4/3K4/8/8/8/8/8 w - -").result(PGNResult.WHITE_WINS).build();
         Tuple2<EvalWeights, Double> tunedWeights = tuner.optimize(
                 weights,
-                List.of(FENRecord.builder().fen("3k4/3Q4/3K4/8/8/8/8/8 w - -").result(PGNResult.WHITE_WINS).build()),
+                Arrays.asList(kqk, kqk),
                 100.0,
                 1);
 

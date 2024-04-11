@@ -28,19 +28,13 @@ public class LogisticRegressionTuner {
         boolean pawnHashEnabled = Globals.isPawnHashEnabled();
         Globals.setPawnHashEnabled(false);
 
-        // if we have enough data, divide data set up into training and test sets in an 80/20 split
         Collections.shuffle(dataSet);
-        List<FENRecord> trainingSet;
-        List<FENRecord> testSet;
-        if (dataSet.size() >= 100) {
-            int m = dataSet.size() * 4 / 5;
-            trainingSet = new ArrayList<>(dataSet.subList(0, m));
-            testSet = dataSet.subList(m, dataSet.size());
-        } else {
-            trainingSet = new ArrayList<>(dataSet);
-            testSet = new ArrayList<>(dataSet);
-        }
-        LOGGER.info("data set size: {} training: {}, test: {}", dataSet.size(), trainingSet.size(), testSet.size());
+
+        // divide data set up into training and test sets in an 80/20 split
+        int m = dataSet.size() * 4 / 5;
+        List<FENRecord> trainingSet = new ArrayList<>(dataSet.subList(0, m));
+        List<FENRecord> testSet = dataSet.subList(m, dataSet.size());
+        LOGGER.info("data set size: {} training: {} test: {}", dataSet.size(), trainingSet.size(), testSet.size());
 
         double initialError = cost(testSet, initialWeights);
         LOGGER.info(String.format("initial error: %.4f", initialError));
