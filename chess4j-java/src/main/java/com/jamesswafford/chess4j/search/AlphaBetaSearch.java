@@ -12,8 +12,11 @@ import com.jamesswafford.chess4j.init.Initializer;
 import com.jamesswafford.chess4j.io.DrawBoard;
 import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import com.jamesswafford.chess4j.movegen.MoveGenerator;
+import com.jamesswafford.chess4j.nn.EvalPredictor;
 import com.jamesswafford.chess4j.utils.BoardUtils;
 import com.jamesswafford.chess4j.utils.MoveUtils;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,12 +37,16 @@ public class AlphaBetaSearch implements Search {
 
     private final List<Move> pv;
     private final List<Move> lastPv;
+    @Getter
     private final SearchStats searchStats;
 
     private boolean stop;
     private boolean skipTimeChecks;
+    @Setter
     private Evaluator evaluator;
+    @Setter
     private MoveGenerator moveGenerator;
+    @Setter
     private KillerMovesStore killerMovesStore;
 
     public AlphaBetaSearch() {
@@ -56,9 +63,6 @@ public class AlphaBetaSearch implements Search {
             initializeNativeSearch();
         }
     }
-    public SearchStats getSearchStats() {
-        return searchStats;
-    }
 
     public List<Move> getPv() { return Collections.unmodifiableList(pv); }
 
@@ -69,18 +73,6 @@ public class AlphaBetaSearch implements Search {
         if (Initializer.nativeCodeInitialized()) {
             initializeNativeSearch();
         }
-    }
-
-    public void setEvaluator(Evaluator evaluator) {
-        this.evaluator = evaluator;
-    }
-
-    public void setMoveGenerator(MoveGenerator moveGenerator) {
-        this.moveGenerator = moveGenerator;
-    }
-
-    public void setKillerMovesStore(KillerMovesStore killerMovesStore) {
-        this.killerMovesStore = killerMovesStore;
     }
 
     @Override
@@ -416,7 +408,7 @@ public class AlphaBetaSearch implements Search {
                 // a beta cutoff.  Unless the move looks "interesting" in some way, just search to a reduced depth.
                 // If we're surprised by the score, we'll research it to the normal depth.
 
-                if (numMovesSearched >= 4 && depth >= 3 && !pvNode && !inCheck && !givesCheck && ext==0 &&
+                if (numMovesSearched >= 4 && depth >= 3 && !inCheck && !givesCheck && ext==0 &&
                         move.captured()==null && move.promotion()==null &&
                         !move.equals(killerMovesStore.getKiller1(ply)) && !move.equals(killerMovesStore.getKiller2(ply)))
                 {
@@ -497,7 +489,8 @@ public class AlphaBetaSearch implements Search {
 
         searchStats.qnodes++;
 
-        int standPat = evaluator.evaluateBoard(board);
+        int standPat = Globals.getPredictor().map(predictor -> EvalPredictor.predict(predictor, board))
+                .orElse(evaluator.evaluateBoard(board));
         if (standPat > alpha) {
             if (standPat >= beta) {
                 return standPat;
