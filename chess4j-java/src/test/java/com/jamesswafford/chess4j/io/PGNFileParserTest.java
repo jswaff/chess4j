@@ -7,8 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 public class PGNFileParserTest {
 
@@ -20,7 +19,7 @@ public class PGNFileParserTest {
         // game 1 : 61 half moves ==> 62 FEN records
         // game 2 : 104 half moves ==> 105 FEN records
         // game 3 : 91 half moves ==> 92 FEN records
-        List<FENRecord> fenRecords = PGNFileParser.load(pgnFile);
+        List<FENRecord> fenRecords = PGNFileParser.load(pgnFile, false);
         assertEquals(259, fenRecords.size());
 
         // test final position of each game
@@ -32,6 +31,10 @@ public class PGNFileParserTest {
 
         assertEquals("8/6R1/p4kRp/P4p1P/2rpbP2/B7/3K4/8 b - - 1 46", fenRecords.get(258).getFen());
         assertEquals(PGNResult.WHITE_WINS, fenRecords.get(258).getResult());
+
+        // if we dedupe the records count should be less
+        List<FENRecord> fenRecords2 = PGNFileParser.load(pgnFile, true);
+        assertTrue(fenRecords2.size() < 259);
     }
 
     @Test
