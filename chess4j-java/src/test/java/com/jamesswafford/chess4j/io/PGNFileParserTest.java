@@ -4,15 +4,38 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class PGNToFENConverterTest {
+public class PGNFileParserTest {
 
     @Test
-    public void convertTest() throws FileNotFoundException {
+    public void load() throws IOException {
+        // sample.pgn has three games
+        File pgnFile = new File(getClass().getResource("/pgn/sample.pgn").getFile());
+
+        // game 1 : 61 half moves ==> 62 FEN records
+        // game 2 : 104 half moves ==> 105 FEN records
+        // game 3 : 91 half moves ==> 92 FEN records
+        List<FENRecord> fenRecords = PGNFileParser.load(pgnFile);
+        assertEquals(259, fenRecords.size());
+
+        // test final position of each game
+        assertEquals("3r2k1/1p3p2/p7/P5Q1/6P1/8/1Pq5/R3K3 b Q - 1 31", fenRecords.get(61).getFen());
+        assertEquals(PGNResult.WHITE_WINS, fenRecords.get(61).getResult());
+
+        assertEquals("7r/6b1/7k/p6p/PpBq1p2/8/1P1Q2P1/6K1 w - - 8 53", fenRecords.get(166).getFen());
+        assertEquals(PGNResult.BLACK_WINS, fenRecords.get(166).getResult());
+
+        assertEquals("8/6R1/p4kRp/P4p1P/2rpbP2/B7/3K4/8 b - - 1 46", fenRecords.get(258).getFen());
+        assertEquals(PGNResult.WHITE_WINS, fenRecords.get(258).getResult());
+    }
+
+    @Test
+    public void toFEN() throws FileNotFoundException {
         File pgnFile = new File(getClass().getResource("/pgn/tiny.pgn").getFile());
         PGNIterator it = new PGNIterator(pgnFile);
 
@@ -21,7 +44,7 @@ public class PGNToFENConverterTest {
         assertEquals(85, game1.getMoves().size());
         assertEquals(PGNResult.WHITE_WINS, game1.getResult());
 
-        List<FENRecord> fenRecords = PGNToFENConverter.convert(game1);
+        List<FENRecord> fenRecords = PGNFileParser.toFEN(game1);
         assertEquals(86, fenRecords.size());
 
         assertEquals("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", fenRecords.get(0).getFen());
