@@ -1,6 +1,8 @@
 package com.jamesswafford.chess4j.io;
 
 import com.jamesswafford.chess4j.board.Board;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +13,8 @@ import java.util.Set;
 
 public class PGNFileParser {
 
+    private static final Logger LOGGER = LogManager.getLogger(PGNFileParser.class);
+
     public PGNFileParser() { }
 
     public static List<FENRecord> load(String pgnFile, boolean dedupe) throws IOException {
@@ -18,6 +22,7 @@ public class PGNFileParser {
     }
 
     public static List<FENRecord> load(File pgnFile, boolean dedupe) throws IOException {
+        LOGGER.info("loading records from {}", pgnFile);
         List<FENRecord> fenRecords = new ArrayList<>();
 
         Set<String> seen = new HashSet<>();
@@ -34,6 +39,7 @@ public class PGNFileParser {
                     });
         }
 
+        LOGGER.info("loaded {} FEN records", fenRecords.size());
         return fenRecords;
     }
 
