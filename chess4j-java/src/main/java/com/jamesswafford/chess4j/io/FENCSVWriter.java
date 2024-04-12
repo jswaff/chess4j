@@ -14,13 +14,13 @@ public class FENCSVWriter {
     private static final Logger LOGGER = LogManager.getLogger(FENCSVWriter.class);
 
     @SneakyThrows
-    public static void writeToCSV(List<FENRecord> fenRecords, String file) {
+    public static void writeToCSV(List<FENRecord> fenRecords, String csvFile) {
 
-        LOGGER.info("writing labeled records to {}", file);
+        LOGGER.info("writing labeled records to {}", csvFile);
 
         BufferedWriter out = null;
         try {
-            FileWriter fstream = new FileWriter(file);
+            FileWriter fstream = new FileWriter(csvFile);
             out = new BufferedWriter(fstream);
             for (FENRecord fenRecord : fenRecords) {
                 out.write(fenRecord.getEval() + "," + fenRecord.getFen() + "\n");

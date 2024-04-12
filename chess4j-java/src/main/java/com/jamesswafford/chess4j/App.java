@@ -62,6 +62,7 @@ public final class App {
         options.addOption(createOptionWithArg("book", "bookfile", "Enable opening book"));
         options.addOption(createOptionWithArg("depth", "depth", "Maximum search depth"));
         options.addOption(createOptionWithArg("epd", "epdfile", "Specify an EPD file"));
+        options.addOption(createOptionWithArg("pgn", "pgnfile", "Specify a PGN file"));
         options.addOption(createOptionWithArg("eval", "propsFile", "Use custom eval weights"));
         options.addOption(createOptionWithArg("hash", "mb", "Specify hash size in mb"));
         options.addOption(createOptionWithArg("nn", "modelfile", "Load neural net"));
@@ -143,22 +144,26 @@ public final class App {
     }
 
     private static void runInLabelMode(CommandLine commandLine) throws IOException {
-        if (!commandLine.hasOption("epd")) {
-            throw new IllegalArgumentException("label must be used in conjunction with epd");
+        if (!commandLine.hasOption("epd") && !commandLine.hasOption("pgn")) {
+            throw new IllegalArgumentException("label must be used in conjunction with epd or pgn");
         }
-        String epdFile = commandLine.getOptionValue("epd");
-
         if (!commandLine.hasOption("out")) {
             throw new IllegalArgumentException("label must be used in conjunction with out");
         }
         String outFile = commandLine.getOptionValue("out");
 
-        boolean zuri = commandLine.hasOption("zuri");
-
         int depth = 0;
         if (commandLine.hasOption("depth")) depth = Integer.parseInt(commandLine.getOptionValue("depth"));
 
-        List<FENRecord> fenRecords = EPDParser.load(epdFile, zuri);
+        List<FENRecord> fenRecords;
+        if (commandLine.hasOption("epd")) {
+            String epdFile = commandLine.getOptionValue("epd");
+            boolean zuri = commandLine.hasOption("zuri");
+            fenRecords = EPDParser.load(epdFile, zuri);
+        } else { // PGN
+            String pgnFile = commandLine.getOptionValue("pgn");
+            fenRecords = PGNFileParser.load(pgnFile, true);
+        }
         FENLabeler fenLabeler = new FENLabeler();
         fenLabeler.label(fenRecords, depth);
         FENCSVWriter.writeToCSV(fenRecords, outFile);
