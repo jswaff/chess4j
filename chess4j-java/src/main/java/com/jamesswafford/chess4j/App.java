@@ -42,14 +42,19 @@ public final class App {
         processCommandLineOptions(options, commandLine);
         warmUp();
 
-        if (commandLine.hasOption("test")) {
+        String mode = commandLine.hasOption("mode") ? commandLine.getOptionValue("mode") : "normal";
+        if ("bookbuild".equals(mode)) {
+            runInBookBuildingMode(commandLine);
+        } else if ("test".equals(mode)) {
             runInTestMode(commandLine);
-        } else if (commandLine.hasOption("label")) {
+        } else if ("label".equals(mode)) {
             runInLabelMode(commandLine);
-        } else if (commandLine.hasOption("tune")) {
+        } else if ("tune".equals(mode)) {
             runInTuningMode(commandLine);
-        } else {
+        } else if ("normal".equals(mode)) {
             repl();
+        } else {
+            LOGGER.error("unknown runtime mode {}", mode);
         }
     }
 
@@ -57,31 +62,21 @@ public final class App {
         Options options = new Options();
         options.addOption(new Option("?", "help", false, "Display help information"));
         options.addOption(new Option("native",  "Run native engine"));
-        options.addOption(new Option("zuri",  "EPD parsing should use Zuri format"));
+        options.addOption(new Option("zuri",  "EPD parser should use Zuri format"));
 
-        options.addOption(createOptionWithArg("book", "bookfile", "Enable opening book"));
+        options.addOption(createOptionWithArg("book", "bookfile", "Specify and enable opening book"));
         options.addOption(createOptionWithArg("depth", "depth", "Maximum search depth"));
         options.addOption(createOptionWithArg("epd", "epdfile", "Specify an EPD file"));
         options.addOption(createOptionWithArg("pgn", "pgnfile", "Specify a PGN file"));
         options.addOption(createOptionWithArg("eval", "propsFile", "Use custom eval weights"));
         options.addOption(createOptionWithArg("hash", "mb", "Specify hash size in mb"));
+        options.addOption(createOptionWithArg("epochs", "epochs", "Number of epochs for tuning"));
+        options.addOption(createOptionWithArg("lr", "learningRate", "Learning rate for tuning"));
+        options.addOption(createOptionWithArg("mode", "mode", "Runtime mode: normal | bookbuild | label | test | tune"));
         options.addOption(createOptionWithArg("nn", "modelfile", "Load neural net"));
         options.addOption(createOptionWithArg("out", "outfile", "Specify an output file"));
         options.addOption(createOptionWithArg("phash", "mb", "Specify pawn hash size in mb"));
         options.addOption(createOptionWithArg("time", "time", "Maximum time per search in seconds"));
-
-        // these options are mutually exclusive
-        OptionGroup group = new OptionGroup();
-        group.addOption(new Option("label", "Label records in EPD file for training"));
-        group.addOption(new Option("test", "Process test suite"));
-        group.addOption(Option.builder("tune")
-                .numberOfArgs(2)
-                //.optionalArg(true)
-                .valueSeparator(' ')
-                .argName("lr> <iterations")
-                .desc("Tune evaluation weights")
-                .build());
-        options.addOptionGroup(group);
 
         return options;
     }
@@ -126,6 +121,19 @@ public final class App {
         TTHolder.getInstance().clearTables();
     }
 
+    private static void runInBookBuildingMode(CommandLine commandLine) {
+        if (!commandLine.hasOption("book")) {
+            throw new IllegalArgumentException("bookbuild mode must be used in conjunction with book");
+        }
+        if (!commandLine.hasOption("pgn")) {
+            throw new IllegalArgumentException("bookbuild must be used in conjunction with pgn");
+        }
+        Globals.getOpeningBook().ifPresent(openingBook -> {
+            File pgnFile = new File(commandLine.getOptionValue("pgn"));
+            openingBook.addToBook(pgnFile);
+        });
+    }
+
     private static void runInTestMode(CommandLine commandLine) throws Exception {
         if (!commandLine.hasOption("epd")) {
             throw new IllegalArgumentException("label must be used in conjunction with epd");
@@ -133,10 +141,18 @@ public final class App {
         String epdFile = commandLine.getOptionValue("epd");
 
         int depth = 0;
-        if (commandLine.hasOption("depth")) depth = Integer.parseInt(commandLine.getOptionValue("depth"));
+        if (commandLine.hasOption("depth")) {
+            depth = Integer.parseInt(commandLine.getOptionValue("depth"));
+        } else {
+            LOGGER.warn("optional parameter depth not specified");
+        }
 
         int time = 10;
-        if (commandLine.hasOption("time")) time = Integer.parseInt(commandLine.getOptionValue("time"));
+        if (commandLine.hasOption("time")) {
+            time = Integer.parseInt(commandLine.getOptionValue("time"));
+        } else {
+            LOGGER.warn("optional parameter time not specified");
+        }
 
         LOGGER.info("running in test mode epd {} depth {} time {}", epdFile, depth, time);
         TestSuiteProcessor tp = new TestSuiteProcessor();
@@ -144,52 +160,48 @@ public final class App {
     }
 
     private static void runInLabelMode(CommandLine commandLine) throws IOException {
-        if (!commandLine.hasOption("epd") && !commandLine.hasOption("pgn")) {
-            throw new IllegalArgumentException("label must be used in conjunction with epd or pgn");
-        }
         if (!commandLine.hasOption("out")) {
             throw new IllegalArgumentException("label must be used in conjunction with out");
         }
         String outFile = commandLine.getOptionValue("out");
 
         int depth = 0;
-        if (commandLine.hasOption("depth")) depth = Integer.parseInt(commandLine.getOptionValue("depth"));
-
-        List<FENRecord> fenRecords;
-        if (commandLine.hasOption("epd")) {
-            String epdFile = commandLine.getOptionValue("epd");
-            boolean zuri = commandLine.hasOption("zuri");
-            fenRecords = EPDParser.load(epdFile, zuri);
-        } else { // PGN
-            String pgnFile = commandLine.getOptionValue("pgn");
-            fenRecords = PGNFileParser.load(pgnFile, true);
+        if (commandLine.hasOption("depth")) {
+            depth = Integer.parseInt(commandLine.getOptionValue("depth"));
+        } else {
+            LOGGER.warn("optional parameter depth not specified");
         }
+
+        List<FENRecord> fenRecords = getFENRecords("label", commandLine);
         FENLabeler fenLabeler = new FENLabeler();
         fenLabeler.label(fenRecords, depth);
         FENCSVWriter.writeToCSV(fenRecords, outFile);
     }
 
     private static void runInTuningMode(CommandLine commandLine) throws IOException {
-        String[] args = commandLine.getOptionValues("tune");
-        double learningRate = Double.parseDouble(args[0]);
-        int iterations = Integer.parseInt(args[1]);
-
-        if (!commandLine.hasOption("epd")) {
-            throw new IllegalArgumentException("tune must be used in conjunction with epd");
-        }
-        String epdFile = commandLine.getOptionValue("epd");
-
         if (!commandLine.hasOption("out")) {
             throw new IllegalArgumentException("tune must be used in conjunction with out");
         }
         String outFile = commandLine.getOptionValue("out");
 
-        boolean zuri = commandLine.hasOption("zuri");
+        double learningRate = 1.0;
+        if (commandLine.hasOption("lr")) {
+            learningRate = Double.parseDouble(commandLine.getOptionValue("lr"));
+        } else {
+            LOGGER.warn("optional parameter lr not specified");
+        }
 
-        List<FENRecord> fenRecords = EPDParser.load(epdFile, zuri);
+        int epochs = 100;
+        if (commandLine.hasOption("epochs")) {
+            epochs = Integer.parseInt(commandLine.getOptionValue("epochs"));
+        } else {
+            LOGGER.warn("optional parameter epochs not specified");
+        }
+
+        List<FENRecord> fenRecords = getFENRecords("tune", commandLine);
         LogisticRegressionTuner tuner = new LogisticRegressionTuner();
         Tuple2<EvalWeights, Double> optimizedWeights =
-                tuner.optimize(Globals.getEvalWeights(), fenRecords, learningRate, iterations);
+                tuner.optimize(Globals.getEvalWeights(), fenRecords, learningRate, epochs);
         EvalWeightsUtil.store(optimizedWeights._1, outFile, "Error: " + optimizedWeights._2);
     }
 
@@ -215,6 +227,22 @@ public final class App {
                 LOGGER.warn("# Caught (hopefully recoverable) exception", e);
             }
         }
+    }
+
+    private static List<FENRecord> getFENRecords(String cmd, CommandLine commandLine) throws IOException {
+        if (!commandLine.hasOption("epd") && !commandLine.hasOption("pgn")) {
+            throw new IllegalArgumentException(cmd + " must be used in conjunction with epd or pgn");
+        }
+        List<FENRecord> fenRecords;
+        if (commandLine.hasOption("epd")) {
+            String epdFile = commandLine.getOptionValue("epd");
+            boolean zuri = commandLine.hasOption("zuri");
+            fenRecords = EPDParser.load(epdFile, zuri);
+        } else { // PGN
+            String pgnFile = commandLine.getOptionValue("pgn");
+            fenRecords = PGNFileParser.load(pgnFile, true);
+        }
+        return fenRecords;
     }
 
 }

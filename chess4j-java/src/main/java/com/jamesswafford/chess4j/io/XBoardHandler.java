@@ -23,7 +23,6 @@ import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -59,9 +58,7 @@ public class XBoardHandler {
         put("analyze", XBoardHandler.this::analyze);
         put("bk", (String[] cmd) -> PrintBookMoves.printBookMoves(Globals.getBoard()));
         put("computer", XBoardHandler::noOp);
-        put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
         put("easy", (String[] cmd) -> ponderingEnabled = false);
-        put("eval", XBoardHandler.this::displayEval);
         put("exit",XBoardHandler.this::exit);
         put("force", XBoardHandler.this::force);
         put("go", XBoardHandler.this::go);
@@ -69,12 +66,9 @@ public class XBoardHandler {
         put("hint", XBoardHandler::noOp);
         put("level", XBoardHandler.this::level);
         put("memory", XBoardHandler.this::memory);
-        put("moves", XBoardHandler::showMoves);
         put("new", XBoardHandler.this::newGame);
         put("nopost", (String[] cmd) -> searchIterator.setPost(false));
         put("otim", XBoardHandler::noOp);
-        put("perft", (String[] cmd) -> Perft.executePerft(Globals.getBoard(), Integer.parseInt(cmd[1])));
-        put("pgn2book", XBoardHandler.this::pgnToBook);
         put("ping", XBoardHandler.this::ping);
         put("post", (String[] cmd) -> searchIterator.setPost(true));
         put("protover", XBoardHandler::protover);
@@ -92,6 +86,12 @@ public class XBoardHandler {
         put("usermove", XBoardHandler.this::usermove);
         put("xboard", XBoardHandler::noOp);
         put("?", XBoardHandler.this::moveNow);
+
+        // these commands not technically XBoard
+        put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
+        put("eval", XBoardHandler.this::eval);
+        put("moves", XBoardHandler.this::moves);
+        put("perft", (String[] cmd) -> Perft.executePerft(Globals.getBoard(), Integer.parseInt(cmd[1])));
     }};
 
     public XBoardHandler() {
@@ -127,7 +127,7 @@ public class XBoardHandler {
         }
     }
 
-    private void displayEval(String[] cmd) {
+    private void eval(String[] cmd) {
         LOGGER.info("HCE: {}",  Eval.eval(Globals.getEvalWeights(), Globals.getBoard()));
         Globals.getPredictor().ifPresent(predictor -> {
             LOGGER.info("NN: {}", EvalPredictor.predict(predictor, Globals.getBoard()));
@@ -199,6 +199,32 @@ public class XBoardHandler {
         }
     }
 
+    private void moves(String[] cmd) {
+        final Board board = Globals.getBoard();
+        EvalWeights weights = Globals.getEvalWeights();
+        MoveGenerator moveGen = new MagicBitboardMoveGenerator();
+        List<Move> moves = moveGen.generateLegalMoves(board);
+
+        // sort by HCE
+        moves.sort((mv1, mv2) -> {
+            Undo u1 = board.applyMove(mv1);
+            double s1 = Eval.eval(weights, board);
+            board.undoMove(u1);
+            Undo u2 = board.applyMove(mv2);
+            double s2 = Eval.eval(weights, board);
+            board.undoMove(u2);
+            return Double.compare(s1, s2);
+        });
+        moves.forEach(mv -> {
+            Undo undo = board.applyMove(mv);
+            StringBuilder mvStr = new StringBuilder("\t" + mv + " " + -Eval.eval(weights, board));
+            Globals.getPredictor().ifPresent(predictor -> mvStr.append(" ")
+                    .append(-EvalPredictor.predict(predictor, board)));
+            LOGGER.info(mvStr);
+            board.undoMove(undo);
+        });
+    }
+
     private void newGame(String[] cmd) {
         stopSearchThread();
         bookMisses = 0;
@@ -214,14 +240,6 @@ public class XBoardHandler {
 
     private static void noOp(String[] cmd) {
         LOGGER.debug("# no op: " + cmd[0]);
-    }
-
-    private void pgnToBook(String[] cmd) {
-        if (openingBook != null) {
-            openingBook.addToBook(new File(cmd[1]));
-        } else {
-            LOGGER.warn("There is no opening book.");
-        }
     }
 
     /**
@@ -352,32 +370,6 @@ public class XBoardHandler {
         } catch (ParseException e) {
             LOGGER.info("tellusererror Illegal position");
         }
-    }
-
-    private static void showMoves(String[] cmd) {
-        final Board board = Globals.getBoard();
-        EvalWeights weights = Globals.getEvalWeights();
-        MoveGenerator moveGen = new MagicBitboardMoveGenerator();
-        List<Move> moves = moveGen.generateLegalMoves(board);
-
-        // sort by HCE
-        moves.sort((mv1, mv2) -> {
-            Undo u1 = board.applyMove(mv1);
-            double s1 = Eval.eval(weights, board);
-            board.undoMove(u1);
-            Undo u2 = board.applyMove(mv2);
-            double s2 = Eval.eval(weights, board);
-            board.undoMove(u2);
-            return Double.compare(s1, s2);
-        });
-        moves.forEach(mv -> {
-            Undo undo = board.applyMove(mv);
-            StringBuilder mvStr = new StringBuilder("\t" + mv + " " + -Eval.eval(weights, board));
-            Globals.getPredictor().ifPresent(predictor -> mvStr.append(" ")
-                    .append(-EvalPredictor.predict(predictor, board)));
-            LOGGER.info(mvStr);
-            board.undoMove(undo);
-        });
     }
 
     /**
