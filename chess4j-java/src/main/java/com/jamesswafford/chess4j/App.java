@@ -66,6 +66,7 @@ public final class App {
 
         options.addOption(createOptionWithArg("book", "bookfile", "Specify and enable opening book"));
         options.addOption(createOptionWithArg("depth", "depth", "Maximum search depth"));
+        options.addOption(createOptionWithArg("csv", "csvfile", "Specify a CSV file"));
         options.addOption(createOptionWithArg("epd", "epdfile", "Specify an EPD file"));
         options.addOption(createOptionWithArg("pgn", "pgnfile", "Specify a PGN file"));
         options.addOption(createOptionWithArg("eval", "propsFile", "Use custom eval weights"));
@@ -175,7 +176,7 @@ public final class App {
         List<FENRecord> fenRecords = getFENRecords("label", commandLine);
         FENLabeler fenLabeler = new FENLabeler();
         fenLabeler.label(fenRecords, depth);
-        FENCSVWriter.writeToCSV(fenRecords, outFile);
+        FENCSVUtils.writeToCSV(fenRecords, outFile);
     }
 
     private static void runInTuningMode(CommandLine commandLine) throws IOException {
@@ -230,17 +231,20 @@ public final class App {
     }
 
     private static List<FENRecord> getFENRecords(String cmd, CommandLine commandLine) throws IOException {
-        if (!commandLine.hasOption("epd") && !commandLine.hasOption("pgn")) {
-            throw new IllegalArgumentException(cmd + " must be used in conjunction with epd or pgn");
+        if (!commandLine.hasOption("epd") && !commandLine.hasOption("pgn") && !commandLine.hasOption("csv")) {
+            throw new IllegalArgumentException(cmd + " must be used in conjunction with epd, pgn, or csv");
         }
         List<FENRecord> fenRecords;
         if (commandLine.hasOption("epd")) {
             String epdFile = commandLine.getOptionValue("epd");
             boolean zuri = commandLine.hasOption("zuri");
             fenRecords = EPDParser.load(epdFile, zuri);
-        } else { // PGN
+        } else if (commandLine.hasOption("pgn")) {
             String pgnFile = commandLine.getOptionValue("pgn");
             fenRecords = PGNFileParser.load(pgnFile, true);
+        } else { // csv
+            String csvFile = commandLine.getOptionValue("csv");
+            fenRecords = FENCSVUtils.readFromCSV(csvFile);
         }
         return fenRecords;
     }
