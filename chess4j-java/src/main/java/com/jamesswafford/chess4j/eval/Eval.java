@@ -41,16 +41,16 @@ public final class Eval implements Evaluator {
     public Eval() { }
 
     public static int eval(EvalWeights weights, Board board) {
-        return eval(weights, board, false, false);
+        return eval(weights, board, false, false, true);
     }
 
-    public static int eval(EvalWeights weights, Board board, boolean materialOnly, boolean strict) {
-        int evalScore = evalHelper(weights, board, materialOnly, strict);
+    public static int eval(EvalWeights weights, Board board, boolean materialOnly, boolean strict, boolean taper) {
+        int evalScore = evalHelper(weights, board, materialOnly, strict, taper);
         assert(verify(weights, evalScore, board, materialOnly, strict));
         return evalScore;
     }
 
-    private static int evalHelper(EvalWeights weights, Board board, boolean materialOnly, boolean strict) {
+    private static int evalHelper(EvalWeights weights, Board board, boolean materialOnly, boolean strict, boolean taper) {
         int matScore = EvalMaterial.evalMaterial(weights, board, strict);
         if (materialOnly) {
             return board.getPlayerToMove() == Color.WHITE ? matScore : -matScore;
@@ -103,7 +103,7 @@ public final class Eval implements Evaluator {
                 wKingScore._2 + bKingScore._2;
 
         // blend the middle game score and end game score, and divide by the draw factor
-        int taperedScore = EvalTaper.taper(board, mgScore, egScore) / drawFactor;
+        int taperedScore = taper ? EvalTaper.taper(board, mgScore, egScore) / drawFactor : mgScore;
 
         // return the score from the perspective of the player on move
         return board.getPlayerToMove() == Color.WHITE ? taperedScore : -taperedScore;
@@ -231,7 +231,7 @@ public final class Eval implements Evaluator {
     private static boolean verifyEvalSymmetry(EvalWeights weights, int evalScore, Board board, boolean materialOnly, boolean strict) {
         Board flipBoard = board.deepCopy();
         flipBoard.flipVertical();
-        int flipScore = evalHelper(weights, flipBoard, materialOnly, strict);
+        int flipScore = evalHelper(weights, flipBoard, materialOnly, strict, true);
         boolean retVal = flipScore == evalScore;
         flipBoard.flipVertical();
         assert(board.equals(flipBoard));

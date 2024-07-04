@@ -7,7 +7,7 @@ import com.jamesswafford.chess4j.eval.EvalWeights;
 public class Hypothesis {
 
     public static double hypothesis(Board board, EvalWeights weights) {
-        int score = Eval.eval(weights, board, false, false);
+        int score = Eval.eval(weights, board, false, false, true);
         if (board.getPlayerToMove().isBlack()) score = -score;
        return texelSigmoid(score);
     }

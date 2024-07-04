@@ -34,7 +34,7 @@ public class FENLabeler {
         //search.initialize();
         //int score = search.search(board, parameters);
         EvalWeights trainingWeights = new EvalWeights();
-        int score = Eval.eval(trainingWeights, board);
+        int score = Eval.eval(trainingWeights, board, false, false, false);
         fenRecord.setEval(score);
     }
 }
