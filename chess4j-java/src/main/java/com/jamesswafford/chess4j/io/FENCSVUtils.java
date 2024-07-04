@@ -23,12 +23,11 @@ public class FENCSVUtils {
             File file = new File(csvFile);
             in = new BufferedReader(new FileReader(file));
             String line;
-            int cnt = 0;
-            while ((line = in.readLine()) != null && ++cnt < 10) {
+            while ((line = in.readLine()) != null) {
                 String[] parts = line.split(",");
                 int evalScore = Integer.parseInt(parts[0]);
                 String fen = parts[1];
-                fenRecords.add(FENRecord.builder()/*.eval(evalScore)*/.fen(fen).build());
+                fenRecords.add(FENRecord.builder().eval(evalScore).fen(fen).build());
             }
             return fenRecords;
         } finally {
