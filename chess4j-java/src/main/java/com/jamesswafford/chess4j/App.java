@@ -173,10 +173,17 @@ public final class App {
             LOGGER.warn("optional parameter depth not specified");
         }
 
-        List<FENRecord> fenRecords = getFENRecords("label", commandLine);
-        FENLabeler fenLabeler = new FENLabeler();
-        fenLabeler.label(fenRecords, depth);
-        FENCSVUtils.writeToCSV(fenRecords, outFile);
+        // with a CSV file we're re-labeling
+        if (commandLine.hasOption("csv")) {
+            String inCSVFile = commandLine.getOptionValue("csv");
+            FENCSVUtils.relabel(inCSVFile, outFile);
+        } else {
+            // label a PGN or EPD file
+            List<FENRecord> fenRecords = getFENRecords("label", commandLine);
+            FENLabeler fenLabeler = new FENLabeler();
+            fenLabeler.label(fenRecords, depth);
+            FENCSVUtils.writeToCSV(fenRecords, outFile);
+        }
     }
 
     private static void runInTuningMode(CommandLine commandLine) throws IOException {
@@ -231,20 +238,17 @@ public final class App {
     }
 
     private static List<FENRecord> getFENRecords(String cmd, CommandLine commandLine) throws IOException {
-        if (!commandLine.hasOption("epd") && !commandLine.hasOption("pgn") && !commandLine.hasOption("csv")) {
-            throw new IllegalArgumentException(cmd + " must be used in conjunction with epd, pgn, or csv");
+        if (!commandLine.hasOption("epd") && !commandLine.hasOption("pgn")) {
+            throw new IllegalArgumentException(cmd + " must be used in conjunction with epd or pgn");
         }
         List<FENRecord> fenRecords;
         if (commandLine.hasOption("epd")) {
             String epdFile = commandLine.getOptionValue("epd");
             boolean zuri = commandLine.hasOption("zuri");
             fenRecords = EPDParser.load(epdFile, zuri);
-        } else if (commandLine.hasOption("pgn")) {
+        } else { // pgn
             String pgnFile = commandLine.getOptionValue("pgn");
             fenRecords = PGNFileParser.load(pgnFile, true);
-        } else { // csv
-            String csvFile = commandLine.getOptionValue("csv");
-            fenRecords = FENCSVUtils.readFromCSV(csvFile);
         }
         return fenRecords;
     }

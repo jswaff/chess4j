@@ -1,11 +1,11 @@
 package com.jamesswafford.chess4j.io;
 
+import com.jamesswafford.chess4j.nn.FENLabeler;
 import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class FENCSVUtils {
@@ -13,31 +13,36 @@ public class FENCSVUtils {
     private static final Logger LOGGER = LogManager.getLogger(FENCSVUtils.class);
 
     @SneakyThrows
-    public static List<FENRecord> readFromCSV(String csvFile) {
+    public static void relabel(String inCsvFile, String outCsvFile) {
 
-        LOGGER.info("reading records from {}", csvFile);
+        LOGGER.info("relabeling records from {} to {}", inCsvFile, outCsvFile);
 
-        List<FENRecord> fenRecords = new ArrayList<>();
         BufferedReader in = null;
+        BufferedWriter out = null;
+        FENLabeler fenLabeler = new FENLabeler();
         try {
-            File file = new File(csvFile);
-            in = new BufferedReader(new FileReader(file));
+            in = new BufferedReader(new FileReader(inCsvFile));
+            out = new BufferedWriter(new FileWriter(outCsvFile));
             String line;
             while ((line = in.readLine()) != null) {
                 String[] parts = line.split(",");
-                int evalScore = Integer.parseInt(parts[0]);
                 String fen = parts[1];
-                fenRecords.add(FENRecord.builder().eval(evalScore).fen(fen).build());
+                FENRecord fenRecord = FENRecord.builder().fen(fen).build();
+                fenLabeler.label(fenRecord, 0);
+                out.write(fenRecord.getEval() + "," + fenRecord.getFen() + "\n");
             }
-            return fenRecords;
         } finally {
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e) { /* ignore */ }
             }
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) { /* ignore */  }
+            }
         }
-
     }
 
     @SneakyThrows
