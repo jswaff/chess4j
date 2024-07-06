@@ -66,6 +66,7 @@ public final class App {
 
         options.addOption(createOptionWithArg("book", "bookfile", "Specify and enable opening book"));
         options.addOption(createOptionWithArg("depth", "depth", "Maximum search depth"));
+        options.addOption(createOptionWithArg("csv", "csvfile", "Specify a CSV file"));
         options.addOption(createOptionWithArg("epd", "epdfile", "Specify an EPD file"));
         options.addOption(createOptionWithArg("pgn", "pgnfile", "Specify a PGN file"));
         options.addOption(createOptionWithArg("eval", "propsFile", "Use custom eval weights"));
@@ -172,10 +173,17 @@ public final class App {
             LOGGER.warn("optional parameter depth not specified");
         }
 
-        List<FENRecord> fenRecords = getFENRecords("label", commandLine);
-        FENLabeler fenLabeler = new FENLabeler();
-        fenLabeler.label(fenRecords, depth);
-        FENCSVWriter.writeToCSV(fenRecords, outFile);
+        // with a CSV file we're re-labeling
+        if (commandLine.hasOption("csv")) {
+            String inCSVFile = commandLine.getOptionValue("csv");
+            FENCSVUtils.relabel(inCSVFile, outFile);
+        } else {
+            // label a PGN or EPD file
+            List<FENRecord> fenRecords = getFENRecords("label", commandLine);
+            FENLabeler fenLabeler = new FENLabeler();
+            fenLabeler.label(fenRecords, depth);
+            FENCSVUtils.writeToCSV(fenRecords, outFile);
+        }
     }
 
     private static void runInTuningMode(CommandLine commandLine) throws IOException {
@@ -238,7 +246,7 @@ public final class App {
             String epdFile = commandLine.getOptionValue("epd");
             boolean zuri = commandLine.hasOption("zuri");
             fenRecords = EPDParser.load(epdFile, zuri);
-        } else { // PGN
+        } else { // pgn
             String pgnFile = commandLine.getOptionValue("pgn");
             fenRecords = PGNFileParser.load(pgnFile, true);
         }

@@ -25,13 +25,16 @@ public class FENLabeler {
     public void label(List<FENRecord> fenRecords, int depth) {
         LOGGER.info("labeling {} fen records to depth {}", fenRecords.size(), depth);
         for (FENRecord fenRecord : fenRecords) {
-            Board board = new Board(fenRecord.getFen());
-            //search.initialize();
-            //int score = search.search(board, parameters);
-            EvalWeights trainingWeights = new EvalWeights();
-            int score = Eval.eval(trainingWeights, board);
-            fenRecord.setEval(score);
+            label(fenRecord, depth);
         }
     }
 
+    public void label(FENRecord fenRecord, int depth) {
+        Board board = new Board(fenRecord.getFen());
+        //search.initialize();
+        //int score = search.search(board, parameters);
+        EvalWeights trainingWeights = new EvalWeights();
+        int score = Eval.eval(trainingWeights, board, false, false);
+        fenRecord.setEval(score);
+    }
 }
