@@ -21,7 +21,7 @@ public class Prune {
                 && !(lastMove.piece()==Pawn.WHITE_PAWN && lastMove.to().rank()==Rank.RANK_7)
                 && !(lastMove.piece()==Pawn.BLACK_PAWN && lastMove.to().rank()==Rank.RANK_2))
         {
-            int evalMat = -Eval.eval(Globals.getEvalWeights(), b, true, false, false);
+            int evalMat = -Eval.eval(Globals.getEvalWeights(), b, true, false);
 
             return (depth < 2 && (evalMat + SEE.PAWN_VAL*2 <= alpha))   // futility pruning
                 || (depth < 3 && (evalMat + SEE.PAWN_VAL*5 <= alpha)) ;  // extended futility pruning
