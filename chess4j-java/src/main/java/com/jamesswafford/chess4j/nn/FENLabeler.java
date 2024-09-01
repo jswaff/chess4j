@@ -6,10 +6,13 @@ import com.jamesswafford.chess4j.eval.EvalWeights;
 import com.jamesswafford.chess4j.io.FENRecord;
 import com.jamesswafford.chess4j.search.AlphaBetaSearch;
 import com.jamesswafford.chess4j.search.Search;
+import com.jamesswafford.chess4j.search.SearchParameters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
+
+import static com.jamesswafford.chess4j.Constants.CHECKMATE;
 
 public class FENLabeler {
 
@@ -31,10 +34,9 @@ public class FENLabeler {
 
     public void label(FENRecord fenRecord, int depth) {
         Board board = new Board(fenRecord.getFen());
-        //search.initialize();
-        //int score = search.search(board, parameters);
-        EvalWeights trainingWeights = new EvalWeights();
-        int score = Eval.eval(trainingWeights, board, false, false);
+        SearchParameters parameters = new SearchParameters(depth, -CHECKMATE, CHECKMATE);
+        search.initialize();
+        int score = search.search(board, parameters);
         fenRecord.setEval(score);
     }
 }
