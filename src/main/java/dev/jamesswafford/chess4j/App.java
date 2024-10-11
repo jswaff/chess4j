@@ -19,6 +19,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+//import java.lang.foreign.Linker;
+//import java.lang.foreign.MemorySegment;
+//import java.lang.foreign.SymbolLookup;
+//import java.lang.invoke.MethodHandle;
 import java.util.List;
 
 public final class App {
@@ -41,6 +45,7 @@ public final class App {
 
         processCommandLineOptions(options, commandLine);
         warmUp();
+        nativeCodeTest();
 
         String mode = commandLine.hasOption("mode") ? commandLine.getOptionValue("mode") : "normal";
         if ("bookbuild".equals(mode)) {
@@ -121,6 +126,18 @@ public final class App {
                 new SearchParameters(3, -Constants.CHECKMATE, Constants.CHECKMATE), opts);
         TTHolder.getInstance().clearTables();
     }
+
+    private static void nativeCodeTest() {
+        System.out.println("native code test...");
+
+        String func = "print_hello";
+//        MemorySegment seg = Linker.nativeLinker().defaultLookup().find(func)
+//                .or(() -> SymbolLookup.loaderLookup().find(func))
+//                .orElseThrow();
+    }
+
+    //private static MethodHandle hello = Linker.nativeLinker().downcallHandle(
+
 
     private static void runInBookBuildingMode(CommandLine commandLine) {
         if (!commandLine.hasOption("book")) {
