@@ -92,25 +92,6 @@
 
     <build>
         <plugins>
-<!--            <plugin>-->
-<!--                <groupId>dev.blanke.maven.plugins</groupId>-->
-<!--                <artifactId>jextract-maven-plugin</artifactId>-->
-<!--                <version>1.1.0</version>-->
-<!--                <configuration>-->
-<!--                    <header>bitmap.h</header>-->
-<!--                    <headerFile>bitmap.h</headerFile>-->
-<!--                    <package>dev.jamesswafford.chess4j.native</package>-->
-<!--                </configuration>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>jextract</id>-->
-<!--                        <goals>-->
-<!--                            <goal>jextract</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -118,11 +99,6 @@
                 <configuration>
                     <source>21</source>
                     <target>21</target>
-<!--                    <compilerArgs>-->
-<!--                        <arg>&#45;&#45;enable-preview</arg>-->
-<!--                        <arg>&#45;&#45;add-modules</arg>-->
-<!--                        <arg>jdk.incubator.jextract</arg>-->
-<!--                    </compilerArgs>-->
                 </configuration>
             </plugin>
 

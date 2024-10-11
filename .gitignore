@@ -2,6 +2,7 @@ target
 logs
 *.log
 test.csv
+.mvn
 
 ### IntelliJ IDEA ###
 .idea
