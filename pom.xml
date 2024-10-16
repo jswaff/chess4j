@@ -51,12 +51,6 @@
             <groupId>ai.djl</groupId>
             <artifactId>api</artifactId>
             <version>0.30.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -99,6 +93,11 @@
                 <configuration>
                     <source>21</source>
                     <target>21</target>
+                    <compilerArgs>--enable-preview</compilerArgs>
+<!--                    <compilerArgs>-->
+<!--                       <arg>&#45;&#45;add-modules</arg>-->
+<!--                       <arg>jdk.incubator.jextract</arg>-->
+<!--                    </compilerArgs>-->
                 </configuration>
             </plugin>
 
@@ -135,6 +134,9 @@
                         <exclude>**/SQLiteBook*</exclude>
                         <exclude>**/LogisticRegressionTuner*</exclude>
                     </excludes>
+<!--                    <argLine>-->
+<!--                      &#45;&#45;add-modules jdk.incubator.jextract-->
+<!--                    </argLine>-->
                 </configuration>
             </plugin>
         </plugins>

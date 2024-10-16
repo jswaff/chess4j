@@ -19,10 +19,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-//import java.lang.foreign.Linker;
-//import java.lang.foreign.MemorySegment;
-//import java.lang.foreign.SymbolLookup;
-//import java.lang.invoke.MethodHandle;
+import java.lang.foreign.Linker;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SymbolLookup;
 import java.util.List;
 
 public final class App {
@@ -131,9 +130,9 @@ public final class App {
         System.out.println("native code test...");
 
         String func = "print_hello";
-//        MemorySegment seg = Linker.nativeLinker().defaultLookup().find(func)
-//                .or(() -> SymbolLookup.loaderLookup().find(func))
-//                .orElseThrow();
+        MemorySegment seg = Linker.nativeLinker().defaultLookup().find(func)
+                .or(() -> SymbolLookup.loaderLookup().find(func))
+                .orElseThrow();
     }
 
     //private static MethodHandle hello = Linker.nativeLinker().downcallHandle(
