@@ -168,6 +168,18 @@
                     </linkerEndOptions>
                     <linkerFinalName>libchess4j-native</linkerFinalName>
                 </configuration>
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>javah</id>-->
+<!--                        <phase>generate-sources</phase>-->
+<!--                        <configuration>-->
+<!--                            <javahOS>linux</javahOS>-->
+<!--                        </configuration>-->
+<!--                        <goals>-->
+<!--                            <goal>javah</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
             </plugin>
 
             <plugin>

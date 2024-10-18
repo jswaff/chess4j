@@ -64,7 +64,7 @@ public final class Initializer {
                 System.out.println("# Loading Prophet native library.");
                 //File libFile = copyLibraryToFile();
                 //System.load(libFile.getPath());
-                System.load("native");
+                System.load("/home/james/chess4j/target/libchess4j-native.jar");
                 System.out.println("# Prophet loaded, initializing...");
                 if (!p4Init()) {
                     attemptToUseNative = false;
