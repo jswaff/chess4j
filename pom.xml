@@ -9,6 +9,33 @@
     <version>6.0</version>
     <packaging>jar</packaging>
 
+    <properties>
+        <PROPHET_BASE_DIR>${project.basedir}/lib/prophet</PROPHET_BASE_DIR>
+        <PROPHET_INCLUDE_DIR>${PROPHET_BASE_DIR}/include</PROPHET_INCLUDE_DIR>
+        <PROPHET_LIB_DIR>${PROPHET_BASE_DIR}/install/lib</PROPHET_LIB_DIR>
+        <PROPHET_LINK>-L ${PROPHET_LIB_DIR} -lprophetlib</PROPHET_LINK>
+
+        <PROPHET_CFLAGS>-I ${PROPHET_INCLUDE_DIR}</PROPHET_CFLAGS>
+        <CHESS4j_CFLAGS>-I ${project.build.directory}/jni-headers</CHESS4j_CFLAGS>
+        <!-- include flags for javah, overridden by profile -->
+        <JAVAH_INCLUDE_FLAGS/>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>linux</id>
+            <activation>
+                <os>
+                    <family>linux</family>
+                </os>
+            </activation>
+            <properties>
+<!--                <JAVAH_INCLUDE_CFLAGS>-I ${env.JAVA_HOME}/include -I ${env.JAVA_HOME}/include/linux</JAVAH_INCLUDE_CFLAGS>-->
+                <JAVAH_INCLUDE_CFLAGS>-I /usr/lib/jvm/java-21-openjdk-amd64/include -I /usr/lib/jvm/java-21-openjdk-amd64/include/linux</JAVAH_INCLUDE_CFLAGS>
+            </properties>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -93,6 +120,53 @@
                 <configuration>
                     <source>21</source>
                     <target>21</target>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>jni</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <compilerArgs>
+                                <arg>-h</arg>
+                                <arg>${project.build.directory}/jni-headers</arg>
+                            </compilerArgs>
+                        </configuration>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <version>1.0-M1</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <javahOS>linux</javahOS>
+                    <compilerProvider>generic-classic</compilerProvider>
+                    <compilerExecutable>gcc</compilerExecutable>
+                    <compilerStartOptions>
+                        <compilerStartOption>
+                            ${PROPHET_CFLAGS} ${CHESS4j_CFLAGS} ${JAVAH_INCLUDE_CFLAGS}
+                            -fPIC -Wall -Werror -Wextra -O2
+                        </compilerStartOption>
+                    </compilerStartOptions>
+                    <sources>
+                        <source>
+                            <directory>src/main/c/native</directory>
+                            <includes>**/*.c</includes>
+                        </source>
+                    </sources>
+                    <linkerExecutable>gcc</linkerExecutable>
+                    <linkerStartOptions>
+                        <linkerStartOption>-shared</linkerStartOption>
+                    </linkerStartOptions>
+                    <linkerEndOptions>
+                        <linkerEndOption>${PROPHET_LINK}</linkerEndOption>
+                    </linkerEndOptions>
+                    <linkerFinalName>libchess4j-native</linkerFinalName>
                 </configuration>
             </plugin>
 
