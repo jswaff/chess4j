@@ -24,6 +24,8 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SymbolLookup;
 import java.util.List;
 
+//import static dev.jamesswafford.chess4j.prophet.eval_h.*;
+
 public final class App {
     private static final  Logger LOGGER = LogManager.getLogger(App.class);
 
@@ -128,11 +130,13 @@ public final class App {
 
     private static void nativeCodeTest() {
         System.out.println("native code test...");
+        System.out.println(System.getProperty("java.library.path"));
 
-        String func = "print_hello";
-        MemorySegment seg = Linker.nativeLinker().defaultLookup().find(func)
-                .or(() -> SymbolLookup.loaderLookup().find(func))
-                .orElseThrow();
+        String symbol = "printf";
+        //System.out.println("pawn val: " + pawn_val());
+//        MemorySegment seg = Linker.nativeLinker().defaultLookup().find(symbol)
+//                .or(() -> SymbolLookup.loaderLookup().find(symbol))
+//                .orElseThrow();
     }
 
     //private static MethodHandle hello = Linker.nativeLinker().downcallHandle(

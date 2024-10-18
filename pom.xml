@@ -93,11 +93,9 @@
                 <configuration>
                     <source>21</source>
                     <target>21</target>
-                    <compilerArgs>--enable-preview</compilerArgs>
-<!--                    <compilerArgs>-->
-<!--                       <arg>&#45;&#45;add-modules</arg>-->
-<!--                       <arg>jdk.incubator.jextract</arg>-->
-<!--                    </compilerArgs>-->
+                    <compilerArgs>
+                        <arg>--enable-preview</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
 
@@ -134,9 +132,6 @@
                         <exclude>**/SQLiteBook*</exclude>
                         <exclude>**/LogisticRegressionTuner*</exclude>
                     </excludes>
-<!--                    <argLine>-->
-<!--                      &#45;&#45;add-modules jdk.incubator.jextract-->
-<!--                    </argLine>-->
                 </configuration>
             </plugin>
         </plugins>
