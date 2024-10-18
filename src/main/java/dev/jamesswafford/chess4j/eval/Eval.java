@@ -209,7 +209,7 @@ public final class Eval implements Evaluator {
         Globals.setPawnHashEnabled(false);
 
         boolean retVal = verifyEvalSymmetry(weights, evalScore, board, materialOnly, strict) &&
-                //verifyNativeEvalIsEqual(evalScore, board, materialOnly) &&
+                verifyNativeEvalIsEqual(evalScore, board, materialOnly) &&
                 verifyExtractedFeatures(weights, evalScore, board, materialOnly);
 
         Globals.setPawnHashEnabled(pawnHashEnabled);

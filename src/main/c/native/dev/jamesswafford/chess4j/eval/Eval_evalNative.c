@@ -1,7 +1,7 @@
 #include <prophet/eval.h>
 #include <prophet/parameters.h>
 
-#include <com_jamesswafford_chess4j_eval_Eval.h>
+#include <dev_jamesswafford_chess4j_eval_Eval.h>
 #include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
@@ -10,11 +10,11 @@
 #include <string.h>
 
 /*
- * Class:     com_jamesswafford_chess4j_eval_Eval
+ * Class:     dev_jamesswafford_chess4j_eval_Eval
  * Method:    evalNative
- * Signature: (Lcom/jamesswafford/chess4j/board/Board;Z)I
+ * Signature: (Ldev/jamesswafford/chess4j/board/Board;Z)I
  */
-JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_eval_Eval_evalNative
+JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_eval_Eval_evalNative
   (JNIEnv* env, jclass UNUSED(clazz), jobject board_obj, jboolean material_only)
 {
     jint retval = 0;

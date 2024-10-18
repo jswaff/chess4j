@@ -2,7 +2,7 @@
 #include <prophet/parameters.h>
 #include <prophet/position/position.h>
 
-#include <com_jamesswafford_chess4j_hash_TranspositionTable.h>
+#include <dev_jamesswafford_chess4j_hash_TranspositionTable.h>
 #include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
@@ -11,11 +11,11 @@
 extern hash_table_t htbl;
 
 /*
- * Class:     com_jamesswafford_chess4j_hash_TranspositionTable
+ * Class:     dev_jamesswafford_chess4j_hash_TranspositionTable
  * Method:    probeNative
- * Signature: (Lcom/jamesswafford/chess4j/board/Board;)J
+ * Signature: (Ldev/jamesswafford/chess4j/board/Board;)J
  */
-JNIEXPORT jlong JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_probeNative
+JNIEXPORT jlong JNICALL Java_dev_jamesswafford_chess4j_hash_TranspositionTable_probeNative
   (JNIEnv *env, jobject UNUSED(htable), jobject board_obj)
 {
     jlong retval = 0;

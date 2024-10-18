@@ -2,7 +2,7 @@
 #include <prophet/parameters.h>
 
 
-#include <com_jamesswafford_chess4j_hash_TranspositionTable.h>
+#include <dev_jamesswafford_chess4j_hash_TranspositionTable.h>
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
 
@@ -10,11 +10,11 @@ extern hash_table_t htbl;
 
 
 /*
- * Class:     com_jamesswafford_chess4j_hash_TranspositionTable
+ * Class:     dev_jamesswafford_chess4j_hash_TranspositionTable
  * Method:    getNumCollisionsNative
  * Signature: ()J
  */
-JNIEXPORT jlong JNICALL Java_com_jamesswafford_chess4j_hash_TranspositionTable_getNumCollisionsNative
+JNIEXPORT jlong JNICALL Java_dev_jamesswafford_chess4j_hash_TranspositionTable_getNumCollisionsNative
   (JNIEnv *env, jobject UNUSED(htable))
 {
     /* ensure the static library is initialized */

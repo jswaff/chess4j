@@ -23,7 +23,7 @@ int Piece_register(JNIEnv* env)
 
     /* register Piece class */
     tempClassID = (*env)->FindClass(env, 
-        "com/jamesswafford/chess4j/pieces/Piece");
+        "dev/jamesswafford/chess4j/pieces/Piece");
     if (NULL == tempClassID)
         return 1;
 
@@ -42,7 +42,7 @@ int Piece_register(JNIEnv* env)
 
     /* register Bishop class */
     tempClassID = (*env)->FindClass(env, 
-        "com/jamesswafford/chess4j/pieces/Bishop");
+        "dev/jamesswafford/chess4j/pieces/Bishop");
     if (NULL == tempClassID)
         return 1;
 
@@ -56,7 +56,7 @@ int Piece_register(JNIEnv* env)
 
     /* register King class */
     tempClassID = (*env)->FindClass(env, 
-        "com/jamesswafford/chess4j/pieces/King");
+        "dev/jamesswafford/chess4j/pieces/King");
     if (NULL == tempClassID)
         return 1;
 
@@ -70,7 +70,7 @@ int Piece_register(JNIEnv* env)
 
     /* register Knight class */
     tempClassID = (*env)->FindClass(env, 
-        "com/jamesswafford/chess4j/pieces/Knight");
+        "dev/jamesswafford/chess4j/pieces/Knight");
     if (NULL == tempClassID)
         return 1;
 
@@ -84,7 +84,7 @@ int Piece_register(JNIEnv* env)
 
     /* register Pawn class */
     tempClassID = (*env)->FindClass(env, 
-        "com/jamesswafford/chess4j/pieces/Pawn");
+        "dev/jamesswafford/chess4j/pieces/Pawn");
     if (NULL == tempClassID)
         return 1;
 
@@ -98,7 +98,7 @@ int Piece_register(JNIEnv* env)
 
     /* register Queen class */
     tempClassID = (*env)->FindClass(env, 
-        "com/jamesswafford/chess4j/pieces/Queen");
+        "dev/jamesswafford/chess4j/pieces/Queen");
     if (NULL == tempClassID)
         return 1;
 
@@ -112,7 +112,7 @@ int Piece_register(JNIEnv* env)
 
     /* register Rook class */
     tempClassID = (*env)->FindClass(env, 
-        "com/jamesswafford/chess4j/pieces/Rook");
+        "dev/jamesswafford/chess4j/pieces/Rook");
     if (NULL == tempClassID)
         return 1;
 

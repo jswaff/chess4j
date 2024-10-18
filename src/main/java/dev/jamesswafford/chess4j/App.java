@@ -41,6 +41,8 @@ public final class App {
 
         processCommandLineOptions(options, commandLine);
         warmUp();
+        Initializer.attemptToUseNative = true;
+        Initializer.init(); // TODO: testing
 
         String mode = commandLine.hasOption("mode") ? commandLine.getOptionValue("mode") : "normal";
         if ("bookbuild".equals(mode)) {

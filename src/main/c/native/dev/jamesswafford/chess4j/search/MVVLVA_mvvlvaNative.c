@@ -1,17 +1,17 @@
 #include <prophet/search.h>
 #include <prophet/parameters.h>
 
-#include <com_jamesswafford_chess4j_search_MVVLVA.h>
+#include <dev_jamesswafford_chess4j_search_MVVLVA.h>
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
 
 /*
- * Class:     com_jamesswafford_chess4j_search_MVVLVA
+ * Class:     dev_jamesswafford_chess4j_search_MVVLVA
  * Method:    mvvlvaNative
  * Signature: (J)I
  */
 JNIEXPORT jint 
-JNICALL Java_com_jamesswafford_chess4j_search_MVVLVA_mvvlvaNative
+JNICALL Java_dev_jamesswafford_chess4j_search_MVVLVA_mvvlvaNative
   (JNIEnv *env, jclass UNUSED(clazz), jlong mv)
 {
     jint retval = 0;

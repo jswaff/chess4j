@@ -1,7 +1,7 @@
 #include <prophet/hash.h>
 #include <prophet/parameters.h>
 
-#include <com_jamesswafford_chess4j_hash_TranspositionTable.h>
+#include <dev_jamesswafford_chess4j_hash_TranspositionTable.h>
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
 
@@ -9,11 +9,11 @@ extern hash_table_t phtbl;
 
 
 /*
- * Class:     com_jamesswafford_chess4j_hash_PawnTranspositionTable
+ * Class:     dev_jamesswafford_chess4j_hash_PawnTranspositionTable
  * Method:    clearNative
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_com_jamesswafford_chess4j_hash_PawnTranspositionTable_clearNative
+JNIEXPORT void JNICALL Java_dev_jamesswafford_chess4j_hash_PawnTranspositionTable_clearNative
   (JNIEnv *env, jobject UNUSED(phtable))
 {
 
