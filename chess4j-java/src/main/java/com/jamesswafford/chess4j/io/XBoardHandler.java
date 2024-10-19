@@ -11,16 +11,18 @@ import com.jamesswafford.chess4j.eval.EvalWeights;
 import com.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import com.jamesswafford.chess4j.exceptions.ParseException;
 import com.jamesswafford.chess4j.hash.TTHolder;
+import com.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
+import com.jamesswafford.chess4j.movegen.MoveGenerator;
+import com.jamesswafford.chess4j.nn.EvalPredictor;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
-import com.jamesswafford.chess4j.tuner.*;
 import com.jamesswafford.chess4j.utils.*;
 
-import io.vavr.Tuple2;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -32,14 +34,17 @@ public class XBoardHandler {
 
     private static final  Logger LOGGER = LogManager.getLogger(XBoardHandler.class);
 
+    @Setter
     private OpeningBook openingBook;
-    private TunerDatasource tunerDatasource;
     private int bookMisses;
+    @Setter
     private SearchIterator searchIterator;
     private CompletableFuture<List<Move>> searchFuture;
     private Color engineColor;
     private boolean analysisMode = false;
+    @Getter
     private boolean forceMode = true;
+    @Getter
     private boolean ponderingEnabled = false;
     private boolean ponderMode = false;
     private boolean ponderMiss = false;
@@ -53,12 +58,8 @@ public class XBoardHandler {
         put("analyze", XBoardHandler.this::analyze);
         put("bk", (String[] cmd) -> PrintBookMoves.printBookMoves(Globals.getBoard()));
         put("computer", XBoardHandler::noOp);
-        put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
         put("easy", (String[] cmd) -> ponderingEnabled = false);
-        put("eval", (String[] cmd) -> LOGGER.info("eval: {}",  Eval.eval(Globals.getEvalWeights(), Globals.getBoard())));
-        put("eval2props", XBoardHandler.this::writeEvalProperties);
         put("exit",XBoardHandler.this::exit);
-        put("fen2tuner", XBoardHandler.this::fenToTunerDS);
         put("force", XBoardHandler.this::force);
         put("go", XBoardHandler.this::go);
         put("hard", (String[] cmd) -> ponderingEnabled = true);
@@ -68,9 +69,6 @@ public class XBoardHandler {
         put("new", XBoardHandler.this::newGame);
         put("nopost", (String[] cmd) -> searchIterator.setPost(false));
         put("otim", XBoardHandler::noOp);
-        put("perft", (String[] cmd) -> Perft.executePerft(Globals.getBoard(), Integer.parseInt(cmd[1])));
-        put("pgn2book", XBoardHandler.this::pgnToBook);
-        put("pgn2tuner", XBoardHandler.this::pgnToTunerDS);
         put("ping", XBoardHandler.this::ping);
         put("post", (String[] cmd) -> searchIterator.setPost(true));
         put("protover", XBoardHandler::protover);
@@ -84,39 +82,21 @@ public class XBoardHandler {
         put("setboard", XBoardHandler.this::setboard);
         put("st", XBoardHandler.this::st);
         put("time", XBoardHandler.this::time);
-        put("tune", XBoardHandler.this::tuneEvalWeights);
         put("undo", XBoardHandler.this::undo);
         put("usermove", XBoardHandler.this::usermove);
         put("xboard", XBoardHandler::noOp);
         put("?", XBoardHandler.this::moveNow);
+
+        // these commands not technically XBoard
+        put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
+        put("eval", XBoardHandler.this::eval);
+        put("moves", XBoardHandler.this::moves);
+        put("perft", (String[] cmd) -> Perft.executePerft(Globals.getBoard(), Integer.parseInt(cmd[1])));
     }};
 
     public XBoardHandler() {
         Globals.getOpeningBook().ifPresent(openingBook1 -> this.openingBook = openingBook1);
-        Globals.getTunerDatasource().ifPresent(tunerDatasource1 -> this.tunerDatasource = tunerDatasource1);
         searchIterator = new SearchIteratorImpl();
-    }
-
-    public Color getEngineColor() {
-        return engineColor;
-    }
-
-    public boolean isForceMode() {
-        return forceMode;
-    }
-
-    public boolean isPonderingEnabled() { return ponderingEnabled; }
-
-    public void setOpeningBook(OpeningBook openingBook) {
-        this.openingBook = openingBook;
-    }
-
-    public void setTunerDatasource(TunerDatasource tunerDatasource) {
-        this.tunerDatasource = tunerDatasource;
-    }
-
-    public void setSearchIterator(SearchIterator searchIterator) {
-        this.searchIterator = searchIterator;
     }
 
     public void parseAndDispatch(String command) throws IllegalMoveException, ParseException {
@@ -147,18 +127,16 @@ public class XBoardHandler {
         }
     }
 
+    private void eval(String[] cmd) {
+        LOGGER.info("HCE: {}",  Eval.eval(Globals.getEvalWeights(), Globals.getBoard()));
+        Globals.getPredictor().ifPresent(predictor -> {
+            LOGGER.info("NN: {}", EvalPredictor.predict(predictor, Globals.getBoard()));
+        });
+    }
+
     private void exit(String[] cmd) {
         analysisMode = false;
         searchIterator.setSkipTimeChecks(false);
-    }
-
-    private void fenToTunerDS(String[] cmd) {
-        if (tunerDatasource != null) {
-            FenToTuner fenToTuner = new FenToTuner(tunerDatasource);
-            fenToTuner.addFile(new File(cmd[1]), false);
-        } else {
-            LOGGER.warn("There is no tuner datasource.");
-        }
     }
 
     private void force(String[] cmd) {
@@ -221,6 +199,32 @@ public class XBoardHandler {
         }
     }
 
+    private void moves(String[] cmd) {
+        final Board board = Globals.getBoard();
+        EvalWeights weights = Globals.getEvalWeights();
+        MoveGenerator moveGen = new MagicBitboardMoveGenerator();
+        List<Move> moves = moveGen.generateLegalMoves(board);
+
+        // sort by HCE
+        moves.sort((mv1, mv2) -> {
+            Undo u1 = board.applyMove(mv1);
+            double s1 = Eval.eval(weights, board);
+            board.undoMove(u1);
+            Undo u2 = board.applyMove(mv2);
+            double s2 = Eval.eval(weights, board);
+            board.undoMove(u2);
+            return Double.compare(s1, s2);
+        });
+        moves.forEach(mv -> {
+            Undo undo = board.applyMove(mv);
+            StringBuilder mvStr = new StringBuilder("\t" + mv + " " + -Eval.eval(weights, board));
+            Globals.getPredictor().ifPresent(predictor -> mvStr.append(" ")
+                    .append(-EvalPredictor.predict(predictor, board)));
+            LOGGER.info(mvStr);
+            board.undoMove(undo);
+        });
+    }
+
     private void newGame(String[] cmd) {
         stopSearchThread();
         bookMisses = 0;
@@ -236,23 +240,6 @@ public class XBoardHandler {
 
     private static void noOp(String[] cmd) {
         LOGGER.debug("# no op: " + cmd[0]);
-    }
-
-    private void pgnToBook(String[] cmd) {
-        if (openingBook != null) {
-            openingBook.addToBook(new File(cmd[1]));
-        } else {
-            LOGGER.warn("There is no opening book.");
-        }
-    }
-
-    private void pgnToTunerDS(String[] cmd) {
-        if (tunerDatasource != null) {
-            PGNToTuner pgnToTuner = new PGNToTuner(tunerDatasource);
-            pgnToTuner.addFile(new File(cmd[1]));
-        } else {
-            LOGGER.warn("There is no tuner datasource.");
-        }
     }
 
     /**
@@ -294,9 +281,9 @@ public class XBoardHandler {
     }
 
     /**
-    * Retract a move.  Undoes the last two moves and continues playing the same color.
-    * Xboard sends this command only when the user is on move.
-    */
+     * Retract a move.  Undoes the last two moves and continues playing the same color.
+     * Xboard sends this command only when the user is on move.
+     */
     private void remove(String[] cmd) {
         synchronized (XBoardHandler.this) {
             if (ponderMode) {
@@ -344,7 +331,7 @@ public class XBoardHandler {
             sb.append(undo.getMove().toString()).append(" ");
         }
 
-        LOGGER.info("# game moves: " + sb.toString());
+        LOGGER.info("# game moves: " + sb);
 
         // don't call book learning unless we started from the initial position
         if (openingBook != null && !setBoard) {
@@ -393,7 +380,7 @@ public class XBoardHandler {
         int seconds = Integer.parseInt(cmd[1]);
         LOGGER.debug("# setting search time to {} seconds per move", seconds);
         fixedTimePerMove = true;
-        searchIterator.setMaxTime(seconds * 1000);
+        searchIterator.setMaxTime(seconds * 1000L);
         searchIterator.setEarlyExitOk(false);
     }
 
@@ -409,26 +396,6 @@ public class XBoardHandler {
         } else {
             searchIterator.setMaxTime(TimeUtils.getSearchTime(centis * 10, incrementMs));
         }
-    }
-
-    private void tuneEvalWeights(String[] cmd) {
-        Globals.getEvalWeights().reset();
-        double learningRate = Double.parseDouble(cmd[1]);
-        int maxIterations = Integer.parseInt(cmd[2]);
-        Globals.getTunerDatasource().ifPresentOrElse(tunerDatasource1 -> {
-            List<GameRecord> dataSet = tunerDatasource1.getGameRecords();
-            LogisticRegressionTuner tuner = new LogisticRegressionTuner();
-            Tuple2<EvalWeights, Double> optimizedWeights = tuner.optimize(Globals.getEvalWeights(), dataSet,
-                    learningRate, maxIterations);
-            EvalWeightsUtil.store(optimizedWeights._1, "eval-tuned.properties", "Error: " + optimizedWeights._2);
-            Globals.setEvalWeights(optimizedWeights._1);
-        }, () -> LOGGER.info("no tuner datasource"));
-    }
-
-    private void writeEvalProperties(String[] cmd) {
-        String propsFile = cmd[1];
-        LOGGER.info("writing eval to properties file {}", propsFile);
-        EvalWeightsUtil.store(Globals.getEvalWeights(), propsFile, null);
     }
 
     /**

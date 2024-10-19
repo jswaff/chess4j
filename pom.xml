@@ -7,37 +7,13 @@
 
     <groupId>com.jamesswafford.chess4j</groupId>
     <artifactId>chess4j-parent</artifactId>
+    <version>6.0</version>
     <packaging>pom</packaging>
-    <version>5.1</version>
 
     <modules>
         <module>chess4j-native</module>
         <module>chess4j-java</module>
     </modules>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-                <version>2.17.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>1.18.24</version>
-            </dependency>
-            <dependency>
-                <groupId>io.vavr</groupId>
-                <artifactId>vavr</artifactId>
-                <version>0.10.4</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ejml</groupId>
-                <artifactId>ejml-all</artifactId>
-                <version>0.41</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
 </project>

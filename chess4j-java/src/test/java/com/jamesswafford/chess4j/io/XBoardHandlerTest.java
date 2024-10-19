@@ -9,7 +9,6 @@ import com.jamesswafford.chess4j.book.OpeningBook;
 import com.jamesswafford.chess4j.hash.TTHolder;
 import com.jamesswafford.chess4j.search.SearchIterator;
 import com.jamesswafford.chess4j.search.SearchIteratorImpl;
-import com.jamesswafford.chess4j.tuner.TunerDatasource;
 import com.jamesswafford.chess4j.utils.GameResult;
 import com.jamesswafford.chess4j.utils.GameStatus;
 import com.jamesswafford.chess4j.utils.GameStatusChecker;
@@ -19,7 +18,6 @@ import org.awaitility.Awaitility;
 import org.awaitility.Duration;
 import org.junit.*;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +34,6 @@ public class XBoardHandlerTest {
 
     XBoardHandler xboardHandler;
     OpeningBook openingBook;
-    TunerDatasource tunerDatasource;
     SearchIterator searchIterator;
 
     private static Logger inputParserLogger;
@@ -57,8 +54,6 @@ public class XBoardHandlerTest {
         xboardHandler = new XBoardHandler();
         openingBook = mock(OpeningBook.class);
         xboardHandler.setOpeningBook(openingBook);
-        tunerDatasource = mock(TunerDatasource.class);
-        xboardHandler.setTunerDatasource(tunerDatasource);
         searchIterator = mock(SearchIterator.class);
         xboardHandler.setSearchIterator(searchIterator);
 
@@ -196,12 +191,6 @@ public class XBoardHandlerTest {
     }
 
     @Test
-    public void pgn2bookCmd() {
-        xboardHandler.parseAndDispatch("pgn2book foo.pgn");
-        verify(openingBook).addToBook(new File("foo.pgn"));
-    }
-
-    @Test
     public void pingCmd() {
         xboardHandler.parseAndDispatch("ping 1337");
 
@@ -223,7 +212,7 @@ public class XBoardHandlerTest {
 
         // ensure we sent some 'feature' lines, ending with 'done'
         List<String> featureStatements = testAppender.getNonDebugMessages();
-        assertTrue(featureStatements.size() > 0);
+        assertFalse(featureStatements.isEmpty());
         assertEquals("feature done=1", featureStatements.get(featureStatements.size()-1));
     }
 

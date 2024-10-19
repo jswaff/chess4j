@@ -8,9 +8,9 @@ import com.jamesswafford.chess4j.board.squares.Rank;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.pieces.Piece;
 
-public final class FenBuilder {
+public final class FENBuilder {
 
-    private FenBuilder() { }
+    private FENBuilder() { }
 
     public static String createFen(Board b, boolean includeMoveFields) {
 
@@ -29,7 +29,7 @@ public final class FenBuilder {
                         sb.append(emptyCnt);
                         emptyCnt = 0;
                     }
-                    sb.append(p.toString());
+                    sb.append(p);
                 } else {
                     emptyCnt++;
                 }
@@ -43,7 +43,7 @@ public final class FenBuilder {
         }
 
         // player
-        sb.append(" " + (b.getPlayerToMove()==Color.WHITE ? "w":"b"));
+        sb.append(" ").append(b.getPlayerToMove() == Color.WHITE ? "w" : "b");
 
         // castling rights
         sb.append(" ");
@@ -70,14 +70,14 @@ public final class FenBuilder {
         // ep square
         sb.append(" ");
         if (b.getEPSquare() != null) {
-            sb.append(b.getEPSquare().toString());
+            sb.append(b.getEPSquare());
         } else {
             sb.append("-");
         }
 
         if (includeMoveFields) {
             // half move clock
-            sb.append(" " + b.getFiftyCounter());
+            sb.append(" ").append(b.getFiftyCounter());
 
             // full move counter
             sb.append(" ");

@@ -1,5 +1,7 @@
 package com.jamesswafford.chess4j.eval;
 
+import com.jamesswafford.chess4j.Globals;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.jamesswafford.chess4j.board.Board;
@@ -17,6 +19,10 @@ public class EvalTest {
 
     EvalWeights weights = new EvalWeights();
 
+    @BeforeClass
+    public static void setup() {
+        Globals.setPawnHashEnabled(false);
+    }
     @Test
     public void testStartPosIs0() {
         int eval = eval(weights, new Board());
@@ -144,10 +150,11 @@ public class EvalTest {
 
     private void testCaseSymmetry(String fen) {
         Board board = new Board(fen);
-        int eval = eval(weights, board);
+        EvalWeights myWeights = new EvalWeights();
+        int eval1 = eval(myWeights, board);
         board.flipVertical();
-        int eval2 = eval(weights, board);
-        assertEquals(eval, eval2);
+        int eval2 = eval(myWeights, board);
+        assertEquals(eval1, eval2);
     }
 
 }

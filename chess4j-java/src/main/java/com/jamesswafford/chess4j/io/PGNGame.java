@@ -1,5 +1,7 @@
 package com.jamesswafford.chess4j.io;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +10,7 @@ public class PGNGame {
 
     private final List<PGNTag> tags = new ArrayList<>();
     private final List<MoveWithNAG> moves = new ArrayList<>();
+    @Getter
     private final PGNResult result;
 
     public PGNGame(List<PGNTag> tags, List<MoveWithNAG> moves, PGNResult result) {
@@ -22,10 +25,6 @@ public class PGNGame {
 
     public List<MoveWithNAG> getMoves() {
         return Collections.unmodifiableList(moves);
-    }
-
-    public PGNResult getResult() {
-        return result;
     }
 
     @Override

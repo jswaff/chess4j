@@ -4,7 +4,7 @@ import com.jamesswafford.chess4j.board.*;
 import com.jamesswafford.chess4j.board.squares.File;
 import com.jamesswafford.chess4j.board.squares.Square;
 import com.jamesswafford.chess4j.init.Initializer;
-import com.jamesswafford.chess4j.io.FenBuilder;
+import com.jamesswafford.chess4j.io.FENBuilder;
 import com.jamesswafford.chess4j.pieces.Pawn;
 import com.jamesswafford.chess4j.pieces.Piece;
 import com.jamesswafford.chess4j.utils.BoardUtils;
@@ -218,7 +218,7 @@ public final class MagicBitboardMoveGenerator implements MoveGenerator {
 
     private static boolean moveGensAreEqual(List<Move> javaMoves, Board board, boolean caps, boolean noncaps) {
         if (Initializer.nativeCodeInitialized()) {
-            String fen = FenBuilder.createFen(board, false);
+            String fen = FENBuilder.createFen(board, false);
             List<Long> nativeMoves = new ArrayList<>();
             try {
                 int nMoves = genPseudoLegalMovesNative(fen, nativeMoves, caps, noncaps);

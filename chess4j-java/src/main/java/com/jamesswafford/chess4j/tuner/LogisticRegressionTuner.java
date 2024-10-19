@@ -2,6 +2,7 @@ package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.Globals;
 import com.jamesswafford.chess4j.eval.EvalWeights;
+import com.jamesswafford.chess4j.io.FENRecord;
 import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,29 +19,25 @@ public class LogisticRegressionTuner {
     private static final Logger LOGGER = LogManager.getLogger(LogisticRegressionTuner.class);
 
 
-    public Tuple2<EvalWeights, Double> optimize(EvalWeights initialWeights, List<GameRecord> dataSet,
+    public Tuple2<EvalWeights, Double> optimize(EvalWeights initialWeights, List<FENRecord> dataSet,
                                                 double learningRate, int maxIterations) {
+
+        LOGGER.info("tuning eval weights.  learningRate: {} maxIterations: {}", learningRate, maxIterations);
 
         // disable pawn hash
         boolean pawnHashEnabled = Globals.isPawnHashEnabled();
         Globals.setPawnHashEnabled(false);
 
-        // if we have enough data, divide data set up into training and test sets in an 80/20 split
         Collections.shuffle(dataSet);
-        List<GameRecord> trainingSet;
-        List<GameRecord> testSet;
-        if (dataSet.size() >= 100) {
-            int m = dataSet.size() * 4 / 5;
-            trainingSet = new ArrayList<>(dataSet.subList(0, m));
-            testSet = dataSet.subList(m, dataSet.size());
-        } else {
-            trainingSet = new ArrayList<>(dataSet);
-            testSet = new ArrayList<>(dataSet);
-        }
-        LOGGER.info("data set size: {} training: {}, test: {}", dataSet.size(), trainingSet.size(), testSet.size());
+
+        // divide data set up into training and test sets in an 80/20 split
+        int m = dataSet.size() * 4 / 5;
+        List<FENRecord> trainingSet = new ArrayList<>(dataSet.subList(0, m));
+        List<FENRecord> testSet = dataSet.subList(m, dataSet.size());
+        LOGGER.info("data set size: {} training: {} test: {}", dataSet.size(), trainingSet.size(), testSet.size());
 
         double initialError = cost(testSet, initialWeights);
-        LOGGER.info("initial error using test set: {}", initialError);
+        LOGGER.info(String.format("initial error: %.4f", initialError));
 
         long start = System.currentTimeMillis();
         EvalWeights weights = trainWithGradientDescent(trainingSet, testSet, initialWeights, learningRate, maxIterations);
@@ -48,7 +45,7 @@ public class LogisticRegressionTuner {
         LOGGER.info("training complete in {} seconds", (end-start)/1000);
 
         double finalError = cost(testSet, weights);
-        LOGGER.info("final error using test set: {}", finalError);
+        LOGGER.info(String.format("final error: %.4f", finalError));
 
         // restore the pawn hash setting
         Globals.setPawnHashEnabled(pawnHashEnabled);
@@ -56,8 +53,8 @@ public class LogisticRegressionTuner {
         return new Tuple2<>(weights, finalError);
     }
 
-    private EvalWeights trainWithGradientDescent(List<GameRecord> trainingSet, List<GameRecord> testSet,
-                                                 EvalWeights initialWeights,  double learningRate, int maxIterations) {
+    private EvalWeights trainWithGradientDescent(List<FENRecord> trainingSet, List<FENRecord> testSet,
+                                                 EvalWeights initialWeights, double learningRate, int maxIterations) {
 
         EvalWeights bestWeights = new EvalWeights(initialWeights);
         int n = bestWeights.vals.length;
@@ -65,7 +62,7 @@ public class LogisticRegressionTuner {
 
         // reduce the learning rate to 10% over the run
         //double lrDelta = (learningRate / maxIterations) * 0.9;
-
+        LOGGER.info("Epoch       Train        Test");
         for (int it=0; it<maxIterations; it++) {
 
             // load a batch and set up the X (features) matrix and Y (outcome) vector
@@ -82,11 +79,11 @@ public class LogisticRegressionTuner {
                 }
             }
 
-            // display the error and store the weights every 10 iterations
+            // display the error and store the weights every 100 iterations
             if ((it+1) % 100 == 0) {
                 double trainingError = cost(trainingSet, bestWeights);
                 double testError = cost(testSet, bestWeights);
-                LOGGER.info(trainingError + "," + testError);
+                LOGGER.info(String.format("%5d%12.4f%12.4f", (it+1),trainingError, testError));
             }
 
             //learningRate -= lrDelta;

@@ -1,15 +1,14 @@
 package com.jamesswafford.chess4j.tuner;
 
 import com.jamesswafford.chess4j.eval.EvalWeights;
+import com.jamesswafford.chess4j.io.EPDParser;
+import com.jamesswafford.chess4j.io.FENRecord;
 import com.jamesswafford.chess4j.io.PGNResult;
 import io.vavr.Tuple2;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,25 +19,14 @@ public class LogisticRegressionTunerTest {
 
     LogisticRegressionTuner tuner = new LogisticRegressionTuner();
 
-    private final static String testDB = "tunertest.db";
     private final static String testEpd = "/samplefen1000.epd";
 
-    static SQLiteTunerDatasource tunerDatasource;
-    static Connection conn;
+    private static List<FENRecord> fenRecords;
 
     @BeforeClass
     public static void setUp() throws Exception {
-        Class.forName("org.sqlite.JDBC");
-        conn = DriverManager.getConnection("jdbc:sqlite:" + testDB);
-
-        tunerDatasource = new SQLiteTunerDatasource(conn);
-        tunerDatasource.initializeDatasource();
-    }
-
-    @AfterClass
-    public static void tearDown() throws Exception {
-        conn.close();
-        new File(testDB).delete();
+        File epdFile = new File(LogisticRegressionTunerTest.class.getResource(testEpd).getFile());
+        fenRecords = EPDParser.load(epdFile, true);
     }
 
     @Test
@@ -48,9 +36,10 @@ public class LogisticRegressionTunerTest {
         Arrays.fill(weights.vals, 0);
         weights.vals[EvalWeights.QUEEN_VAL_IND] = 100;
 
+        FENRecord kqk = FENRecord.builder().fen("3k4/3Q4/3K4/8/8/8/8/8 w - -").result(PGNResult.WHITE_WINS).build();
         Tuple2<EvalWeights, Double> tunedWeights = tuner.optimize(
                 weights,
-                List.of(new GameRecord("3k4/3Q4/3K4/8/8/8/8/8 w - -", PGNResult.WHITE_WINS)),
+                Arrays.asList(kqk, kqk),
                 100.0,
                 1);
 
@@ -61,19 +50,11 @@ public class LogisticRegressionTunerTest {
     public void optimize() {
 
         // get a list of game records
-        populateTunerDatasource(testEpd);
-        assertEquals(1000, tunerDatasource.getTotalPositionsCount());
-        List<GameRecord> gameRecords = tunerDatasource.getGameRecords();
+        assertEquals(1000, fenRecords.size());
 
         EvalWeights weights = new EvalWeights();
 
-        tuner.optimize(weights, gameRecords, 100.0, 3);
-    }
-
-    private void populateTunerDatasource(String epd) {
-        File epdFile = new File(SQLiteTunerDatasourceTest.class.getResource(epd).getFile());
-        FenToTuner fenToTuner = new FenToTuner(tunerDatasource);
-        fenToTuner.addFile(epdFile, true);
+        tuner.optimize(weights, fenRecords, 100.0, 3);
     }
 
 }
