@@ -65,7 +65,7 @@
 
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.13.0</version>
                 <configuration>
                     <release>11</release>
                 </configuration> 
@@ -74,7 +74,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>native-maven-plugin</artifactId>
-                <version>1.0-alpha-11</version>
+                <version>1.0-M1</version>
                 <extensions>true</extensions>
                 <configuration>
                     <javahOS>linux</javahOS>
