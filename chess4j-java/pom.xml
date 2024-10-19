@@ -5,7 +5,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>chess4j-java</artifactId>
+    <artifactId>chess4j</artifactId>
     <packaging>jar</packaging>
 
     <parent>
@@ -135,7 +135,7 @@
                             <mainClass>com.jamesswafford.chess4j.App</mainClass>
                         </transformer>
                     </transformers>
-                    <finalName>chess4j-${project.version}</finalName>
+                    <finalName>${project.artifactId}-${project.version}-uber</finalName>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>
             </plugin>
