@@ -4,9 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.jamesswafford.chess4j</groupId>
+
     <artifactId>chess4j-java</artifactId>
-    <version>6.0</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -20,22 +19,26 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
+            <version>2.17.2</version>
         </dependency>
 
         <dependency>
             <groupId>commons-cli</groupId>
             <artifactId>commons-cli</artifactId>
+            <version>1.6.0</version>
         </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>io.vavr</groupId>
             <artifactId>vavr</artifactId>
+            <version>0.10.4</version>
         </dependency>
 
         <dependency>
@@ -47,16 +50,19 @@
         <dependency>
             <groupId>org.ejml</groupId>
             <artifactId>ejml-all</artifactId>
+            <version>0.41</version>
         </dependency>
 
         <dependency>
             <groupId>ai.djl</groupId>
             <artifactId>api</artifactId>
+            <version>0.27.0</version>
         </dependency>
 
         <dependency>
             <groupId>ai.djl.pytorch</groupId>
             <artifactId>pytorch-engine</artifactId>
+            <version>0.27.0</version>
         </dependency>
 
         <dependency>
@@ -91,6 +97,22 @@
                 <configuration>
                     <release>11</release>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>jni</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <forceJavacCompilerUse>true</forceJavacCompilerUse>
+                            <compilerArgs>
+                                <arg>-h</arg>
+                                <arg>${project.build.directory}/jni-headers</arg>
+                            </compilerArgs>
+                        </configuration>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -111,7 +133,7 @@
                             <mainClass>com.jamesswafford.chess4j.App</mainClass>
                         </transformer>
                     </transformers>
-                    <finalName>${project.artifactId}-${project.version}-uber</finalName>
+                    <finalName>chess4j-${project.version}</finalName>
                 </configuration>
             </plugin>
 
