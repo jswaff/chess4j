@@ -1,6 +1,6 @@
 #include <prophet/parameters.h>
 
-#include <com_jamesswafford_chess4j_search_AlphaBetaSearch.h>
+#include <dev_jamesswafford_chess4j_search_AlphaBetaSearch.h>
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
 
@@ -8,11 +8,11 @@
 jobject g_pv_callback = NULL;
 
 /*
- * Class:     com_jamesswafford_chess4j_search_AlphaBetaSearch
+ * Class:     dev_jamesswafford_chess4j_search_AlphaBetaSearch
  * Method:    setPvCallBackNative
  * Signature: (Ljava/util/function/Consumer;)V
  */
-JNIEXPORT void JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_setPvCallBackNative
+JNIEXPORT void JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_setPvCallBackNative
   (JNIEnv *env, jobject UNUSED(search_obj), jobject pv_callback)
 {
 

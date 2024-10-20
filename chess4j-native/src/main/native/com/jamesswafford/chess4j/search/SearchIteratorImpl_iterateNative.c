@@ -2,7 +2,7 @@
 #include <prophet/search.h>
 #include <prophet/parameters.h>
 
-#include <com_jamesswafford_chess4j_search_SearchIteratorImpl.h>
+#include <dev_jamesswafford_chess4j_search_SearchIteratorImpl.h>
 #include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../../../../java/util/ArrayList.h"
@@ -20,12 +20,12 @@ move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
 undo_t undos[MAX_HALF_MOVES_PER_GAME];
 
 /*
- * Class:     com_jamesswafford_chess4j_search_SearchIteratorImpl
+ * Class:     dev_jamesswafford_chess4j_search_SearchIteratorImpl
  * Method:    iterateNative
- * Signature: (Lcom/jamesswafford/chess4j/board/Board;ILjava/util/List;)V
+ * Signature: (Ldev/jamesswafford/chess4j/board/Board;ILjava/util/List;)V
  */
 JNIEXPORT void 
-JNICALL Java_com_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
+JNICALL Java_dev_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
   (JNIEnv *env, jobject UNUSED(iterator_obj), jobject board_obj, jint max_depth, jobject pv_moves)
 {
 

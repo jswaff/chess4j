@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 
-#include <com_jamesswafford_chess4j_init_Initializer.h>
+#include <dev_jamesswafford_chess4j_init_Initializer.h>
 
 #include "../../../../java/lang/IllegalStateException.h"
 #include "../../../../java/lang/Long.h"
@@ -16,11 +16,11 @@ extern int init();
 volatile bool p4_initialized = false;
 
 /*
- * Class:     com_jamesswafford_chess4j_init_Initializer
+ * Class:     dev_jamesswafford_chess4j_init_Initializer
  * Method:    p4Init
  * Signature: ()Z
  */
-JNIEXPORT jboolean JNICALL Java_com_jamesswafford_chess4j_init_Initializer_p4Init
+JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_init_Initializer_p4Init
   (JNIEnv* env, jclass UNUSED(clazz))
 {
     logging_enabled = false;

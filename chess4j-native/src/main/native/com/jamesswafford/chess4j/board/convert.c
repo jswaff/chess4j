@@ -28,7 +28,7 @@ int convert(JNIEnv *env, jobject board_obj, position_t* pos)
 
     /* set the player */
     jmethodID Board_getPlayerToMove = (*env)->GetMethodID(
-        env, class_Board, "getPlayerToMove", "()Lcom/jamesswafford/chess4j/board/Color;");
+        env, class_Board, "getPlayerToMove", "()Ldev/jamesswafford/chess4j/board/Color;");
     jobject player_obj = (*env)->CallObjectMethod(env, board_obj, Board_getPlayerToMove);
     jclass class_Color = (*env)->GetObjectClass(env, player_obj);
     jmethodID Color_isWhite = (*env)->GetMethodID(env, class_Color, "isWhite", "()Z");
@@ -37,7 +37,7 @@ int convert(JNIEnv *env, jobject board_obj, position_t* pos)
 
     /* set the EP square */
     jmethodID Board_getEPSquare = (*env)->GetMethodID(
-        env, class_Board, "getEPSquare", "()Lcom/jamesswafford/chess4j/board/squares/Square;");
+        env, class_Board, "getEPSquare", "()Ldev/jamesswafford/chess4j/board/squares/Square;");
     jobject ep_sq_obj = (*env)->CallObjectMethod(env, board_obj, Board_getEPSquare);
     if (ep_sq_obj == NULL)
     {
@@ -83,7 +83,7 @@ int convert(JNIEnv *env, jobject board_obj, position_t* pos)
 
     /* add the pieces */
     jmethodID Board_getPiece = (*env)->GetMethodID(
-        env, class_Board, "getPiece", "(I)Lcom/jamesswafford/chess4j/pieces/Piece;");
+        env, class_Board, "getPiece", "(I)Ldev/jamesswafford/chess4j/pieces/Piece;");
     for (int i=0;i<64;i++)
     {
         jobject piece_obj = (*env)->CallObjectMethod(env, board_obj, Board_getPiece, i);

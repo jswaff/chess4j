@@ -1,18 +1,18 @@
 #include <prophet/search.h>
 #include <prophet/parameters.h>
 
-#include <com_jamesswafford_chess4j_search_SEE.h>
+#include <dev_jamesswafford_chess4j_search_SEE.h>
 #include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
 
 /*
- * Class:     com_jamesswafford_chess4j_search_SEE
+ * Class:     dev_jamesswafford_chess4j_search_SEE
  * Method:    seeNative
- * Signature: (Lcom/jamesswafford/chess4j/board/Board;J)I
+ * Signature: (Ldev/jamesswafford/chess4j/board/Board;J)I
  */
 JNIEXPORT jint 
-JNICALL Java_com_jamesswafford_chess4j_search_SEE_seeNative
+JNICALL Java_dev_jamesswafford_chess4j_search_SEE_seeNative
   (JNIEnv *env, jclass UNUSED(clazz), jobject board_obj, jlong mv)
 {
     jint retval = 0;

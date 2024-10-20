@@ -3,7 +3,7 @@
 #include <prophet/parameters.h>
 #include <prophet/util/p4time.h>
 
-#include <com_jamesswafford_chess4j_search_AlphaBetaSearch.h>
+#include <dev_jamesswafford_chess4j_search_AlphaBetaSearch.h>
 #include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../io/PrintLine.h"
@@ -36,11 +36,11 @@ static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
 
 
 /*
- * Class:     com_jamesswafford_chess4j_search_AlphaBetaSearch
+ * Class:     dev_jamesswafford_chess4j_search_AlphaBetaSearch
  * Method:    searchNative
- * Signature: (Lcom/jamesswafford/chess4j/board/Board;Ljava/util/List;IIILcom/jamesswafford/chess4j/search/SearchStats;JJ)I
+ * Signature: (Ldev/jamesswafford/chess4j/board/Board;Ljava/util/List;IIILdev/jamesswafford/chess4j/search/SearchStats;JJ)I
  */
-JNIEXPORT jint JNICALL Java_com_jamesswafford_chess4j_search_AlphaBetaSearch_searchNative
+JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_searchNative
   (JNIEnv *env, jobject search_obj, jobject board_obj, jobject parent_pv, jint depth, 
     jint alpha, jint beta, jobject search_stats, jlong start_time, jlong stop_time)
 {
