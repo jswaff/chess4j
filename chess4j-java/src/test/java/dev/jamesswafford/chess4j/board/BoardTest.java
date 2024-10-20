@@ -17,6 +17,14 @@ import org.junit.Test;
 import dev.jamesswafford.chess4j.exceptions.IllegalMoveException;
 import dev.jamesswafford.chess4j.exceptions.ParseException;
 
+import static dev.jamesswafford.chess4j.board.CastlingRights.*;
+import static dev.jamesswafford.chess4j.pieces.Bishop.*;
+import static dev.jamesswafford.chess4j.pieces.King.*;
+import static dev.jamesswafford.chess4j.pieces.Knight.*;
+import static dev.jamesswafford.chess4j.pieces.Pawn.*;
+import static dev.jamesswafford.chess4j.pieces.Queen.*;
+import static dev.jamesswafford.chess4j.pieces.Rook.*;
+
 import static org.junit.Assert.*;
 
 public class BoardTest {
@@ -25,16 +33,16 @@ public class BoardTest {
     public void testReset() {
         Board board = new Board();
 
-        Assert.assertEquals(Rook.WHITE_ROOK, board.getPiece(Square.A1));
-        Assert.assertEquals(Knight.WHITE_KNIGHT, board.getPiece(Square.B1));
-        Assert.assertEquals(Bishop.WHITE_BISHOP, board.getPiece(Square.C1));
-        Assert.assertEquals(Queen.WHITE_QUEEN, board.getPiece(Square.D1));
-        Assert.assertEquals(King.WHITE_KING, board.getPiece(Square.E1));
-        Assert.assertEquals(Bishop.WHITE_BISHOP, board.getPiece(Square.F1));
-        Assert.assertEquals(Knight.WHITE_KNIGHT, board.getPiece(Square.G1));
-        Assert.assertEquals(Rook.WHITE_ROOK, board.getPiece(Square.H1));
+        Assert.assertEquals(WHITE_ROOK, board.getPiece(Square.A1));
+        Assert.assertEquals(WHITE_KNIGHT, board.getPiece(Square.B1));
+        Assert.assertEquals(WHITE_BISHOP, board.getPiece(Square.C1));
+        Assert.assertEquals(WHITE_QUEEN, board.getPiece(Square.D1));
+        Assert.assertEquals(WHITE_KING, board.getPiece(Square.E1));
+        Assert.assertEquals(WHITE_BISHOP, board.getPiece(Square.F1));
+        Assert.assertEquals(WHITE_KNIGHT, board.getPiece(Square.G1));
+        Assert.assertEquals(WHITE_ROOK, board.getPiece(Square.H1));
         for (Square sq : Square.rankSquares(Rank.RANK_2)) {
-            Assert.assertEquals(Pawn.WHITE_PAWN, board.getPiece(sq));
+            Assert.assertEquals(WHITE_PAWN, board.getPiece(sq));
         }
         for (Square sq : Square.rankSquares(Rank.RANK_3)) {
             assertNull(board.getPiece(sq));
@@ -49,21 +57,21 @@ public class BoardTest {
             assertNull(board.getPiece(sq));
         }
         for (Square sq : Square.rankSquares(Rank.RANK_7)) {
-            Assert.assertEquals(Pawn.BLACK_PAWN,board.getPiece(sq));
+            Assert.assertEquals(BLACK_PAWN,board.getPiece(sq));
         }
-        Assert.assertEquals(Rook.BLACK_ROOK, board.getPiece(Square.A8));
-        Assert.assertEquals(Knight.BLACK_KNIGHT, board.getPiece(Square.B8));
-        Assert.assertEquals(Bishop.BLACK_BISHOP, board.getPiece(Square.C8));
-        Assert.assertEquals(Queen.BLACK_QUEEN, board.getPiece(Square.D8));
-        Assert.assertEquals(King.BLACK_KING, board.getPiece(Square.E8));
-        Assert.assertEquals(Bishop.BLACK_BISHOP, board.getPiece(Square.F8));
-        Assert.assertEquals(Knight.BLACK_KNIGHT, board.getPiece(Square.G8));
-        Assert.assertEquals(Rook.BLACK_ROOK, board.getPiece(Square.H8));
+        Assert.assertEquals(BLACK_ROOK, board.getPiece(Square.A8));
+        Assert.assertEquals(BLACK_KNIGHT, board.getPiece(Square.B8));
+        Assert.assertEquals(BLACK_BISHOP, board.getPiece(Square.C8));
+        Assert.assertEquals(BLACK_QUEEN, board.getPiece(Square.D8));
+        Assert.assertEquals(BLACK_KING, board.getPiece(Square.E8));
+        Assert.assertEquals(BLACK_BISHOP, board.getPiece(Square.F8));
+        Assert.assertEquals(BLACK_KNIGHT, board.getPiece(Square.G8));
+        Assert.assertEquals(BLACK_ROOK, board.getPiece(Square.H8));
 
-        assertTrue(board.hasCastlingRight(CastlingRights.WHITE_KINGSIDE));
-        assertTrue(board.hasCastlingRight(CastlingRights.WHITE_QUEENSIDE));
-        assertTrue(board.hasCastlingRight(CastlingRights.BLACK_KINGSIDE));
-        assertTrue(board.hasCastlingRight(CastlingRights.BLACK_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_QUEENSIDE));
 
         assertEquals(Color.WHITE, board.getPlayerToMove());
         assertNull(board.getEPSquare());
@@ -79,11 +87,11 @@ public class BoardTest {
 
         Board board = new Board("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2");
 
-        Assert.assertEquals(Knight.WHITE_KNIGHT,  board.getPiece(Square.F3));
-        assertTrue(board.hasCastlingRight(CastlingRights.BLACK_KINGSIDE));
-        assertTrue(board.hasCastlingRight(CastlingRights.BLACK_QUEENSIDE));
-        assertTrue(board.hasCastlingRight(CastlingRights.WHITE_KINGSIDE));
-        assertTrue(board.hasCastlingRight(CastlingRights.WHITE_QUEENSIDE));
+        Assert.assertEquals(WHITE_KNIGHT,  board.getPiece(Square.F3));
+        assertTrue(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
         assertEquals(3, board.getMoveCounter());
         assertEquals(1, board.getFiftyCounter());
         assertNull(board.getEPSquare());
@@ -94,11 +102,11 @@ public class BoardTest {
 
         Board board = new Board("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQ -");
 
-        Assert.assertEquals(Knight.WHITE_KNIGHT, board.getPiece(Square.F3));
-        assertFalse(board.hasCastlingRight(CastlingRights.BLACK_KINGSIDE));
-        assertFalse(board.hasCastlingRight(CastlingRights.BLACK_QUEENSIDE));
-        assertTrue(board.hasCastlingRight(CastlingRights.WHITE_KINGSIDE));
-        assertTrue(board.hasCastlingRight(CastlingRights.WHITE_QUEENSIDE));
+        Assert.assertEquals(WHITE_KNIGHT, board.getPiece(Square.F3));
+        assertFalse(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertFalse(board.hasCastlingRight(BLACK_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
         assertEquals(1, board.getMoveCounter());
         assertEquals(0, board.getFiftyCounter());
         assertNull(board.getEPSquare());
@@ -109,11 +117,11 @@ public class BoardTest {
 
         Board board = new Board("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2");
 
-        Assert.assertEquals(Pawn.BLACK_PAWN, board.getPiece(Square.C5));
-        assertTrue(board.hasCastlingRight(CastlingRights.BLACK_KINGSIDE));
-        assertTrue(board.hasCastlingRight(CastlingRights.BLACK_QUEENSIDE));
-        assertTrue(board.hasCastlingRight(CastlingRights.WHITE_KINGSIDE));
-        assertTrue(board.hasCastlingRight(CastlingRights.WHITE_QUEENSIDE));
+        Assert.assertEquals(BLACK_PAWN, board.getPiece(Square.C5));
+        assertTrue(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
         assertEquals(2, board.getMoveCounter());
         assertEquals(0, board.getFiftyCounter());
         Assert.assertEquals(Square.C6, board.getEPSquare());
@@ -130,7 +138,7 @@ public class BoardTest {
         Assert.assertEquals(Square.G1, board.getKingSquare(Color.WHITE));
         Assert.assertEquals(Square.E8, board.getKingSquare(Color.BLACK));
 
-        board.applyMove(new Move(King.BLACK_KING, Square.E8, Square.D8));
+        board.applyMove(new Move(BLACK_KING, Square.E8, Square.D8));
         Assert.assertEquals(Square.G1, board.getKingSquare(Color.WHITE));
         Assert.assertEquals(Square.D8, board.getKingSquare(Color.BLACK));
     }
@@ -140,68 +148,68 @@ public class BoardTest {
         Board b = new Board();
         Board b2 = b.deepCopy();
 
-        Move m = new Move(Pawn.WHITE_PAWN, Square.E2, Square.E4);
+        Move m = new Move(WHITE_PAWN, Square.E2, Square.E4);
         b.applyMove(m);
         b2.setPos("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
         assertEquals(b2, b);
 
-        b.applyMove(new Move(Pawn.BLACK_PAWN, Square.C7, Square.C5));
+        b.applyMove(new Move(BLACK_PAWN, Square.C7, Square.C5));
         b2.setPos("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2");
         assertEquals(b2, b);
 
-        b.applyMove(new Move(Knight.WHITE_KNIGHT, Square.G1, Square.F3));
+        b.applyMove(new Move(WHITE_KNIGHT, Square.G1, Square.F3));
         b2.setPos("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2");
         assertEquals(b2, b);
 
-        b.applyMove(new Move(Queen.BLACK_QUEEN, Square.D8, Square.A5));
+        b.applyMove(new Move(BLACK_QUEEN, Square.D8, Square.A5));
         b2.setPos("rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3");
         assertEquals(b2, b);
 
-        b.applyMove(new Move(Bishop.WHITE_BISHOP, Square.F1, Square.E2));
+        b.applyMove(new Move(WHITE_BISHOP, Square.F1, Square.E2));
         b2.setPos("rnb1kbnr/pp1ppppp/8/q1p5/4P3/5N2/PPPPBPPP/RNBQK2R b KQkq - 3 3");
         assertEquals(b2, b);
 
-        b.applyMove(new Move(Queen.BLACK_QUEEN, Square.A5, Square.D2, Bishop.WHITE_BISHOP));
+        b.applyMove(new Move(BLACK_QUEEN, Square.A5, Square.D2, WHITE_BISHOP));
         b2.setPos("rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPqBPPP/RNBQK2R w KQkq - 0 4");
         assertEquals(b2, b);
 
-        b.applyMove(new Move(Knight.WHITE_KNIGHT, Square.B1, Square.D2, Queen.BLACK_QUEEN));
+        b.applyMove(new Move(WHITE_KNIGHT, Square.B1, Square.D2, BLACK_QUEEN));
         b2.setPos("rnb1kbnr/pp1ppppp/8/2p5/4P3/5N2/PPPNBPPP/R1BQK2R b KQkq - 0 4");
         assertEquals(b2, b);
 
-        b.applyMove(new Move(Pawn.BLACK_PAWN, Square.C5, Square.C4));
+        b.applyMove(new Move(BLACK_PAWN, Square.C5, Square.C4));
         b2.setPos("rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQK2R w KQkq - 0 5");
         assertEquals(b2, b);
 
-        b.applyMove(new Move(King.WHITE_KING, Square.E1, Square.G1,true));
+        b.applyMove(new Move(WHITE_KING, Square.E1, Square.G1,true));
         b2.setPos("rnb1kbnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 b kq - 0 5");
         assertEquals(b2, b);
 
-        b.applyMove(new Move(King.BLACK_KING, Square.E8, Square.D8));
+        b.applyMove(new Move(BLACK_KING, Square.E8, Square.D8));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/2p1P3/5N2/PPPNBPPP/R1BQ1RK1 w - - 1 6");
         assertEquals(b2, b);
 
-        b.applyMove(new Move(Pawn.WHITE_PAWN, Square.B2, Square.B4));
+        b.applyMove(new Move(WHITE_PAWN, Square.B2, Square.B4));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/1Pp1P3/5N2/P1PNBPPP/R1BQ1RK1 b - b3 0 6");
         assertEquals(b2, b);
 
-        b.applyMove(new Move(Pawn.BLACK_PAWN, Square.C4, Square.B3, Pawn.WHITE_PAWN,true));
+        b.applyMove(new Move(BLACK_PAWN, Square.C4, Square.B3, WHITE_PAWN,true));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQ1RK1 w - - 0 7");
         assertEquals(b2, b);
 
-        b.applyMove(new Move(Rook.WHITE_ROOK, Square.F1, Square.E1));
+        b.applyMove(new Move(WHITE_ROOK, Square.F1, Square.E1));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/1p3N2/P1PNBPPP/R1BQR1K1 b - - 1 7");
         assertEquals(b2, b);
 
-        b.applyMove(new Move(Pawn.BLACK_PAWN, Square.B3, Square.B2));
+        b.applyMove(new Move(BLACK_PAWN, Square.B3, Square.B2));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR1K1 w - - 0 8");
         assertEquals(b2, b);
 
-        b.applyMove(new Move(King.WHITE_KING, Square.G1, Square.H1));
+        b.applyMove(new Move(WHITE_KING, Square.G1, Square.H1));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/PpPNBPPP/R1BQR2K b - - 1 8");
         assertEquals(b2, b);
 
-        b.applyMove(new Move(Pawn.BLACK_PAWN, Square.B2, Square.A1, Rook.WHITE_ROOK, Knight.BLACK_KNIGHT));
+        b.applyMove(new Move(BLACK_PAWN, Square.B2, Square.A1, WHITE_ROOK, BLACK_KNIGHT));
         b2.setPos("rnbk1bnr/pp1ppppp/8/8/4P3/5N2/P1PNBPPP/n1BQR2K w - - 0 9");
         assertEquals(b2, b);
     }
@@ -210,31 +218,31 @@ public class BoardTest {
     public void testApplyMoveSequence_castling() {
         Board board = new Board("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
 
-        assertTrue(board.hasCastlingRight(CastlingRights.WHITE_KINGSIDE));
-        assertTrue(board.hasCastlingRight(CastlingRights.WHITE_QUEENSIDE));
-        assertTrue(board.hasCastlingRight(CastlingRights.BLACK_KINGSIDE));
-        assertTrue(board.hasCastlingRight(CastlingRights.BLACK_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_QUEENSIDE));
 
         // queenside black rook takes white rook removed qside castling options
-        board.applyMove(new Move(Rook.BLACK_ROOK, Square.A8, Square.A1, Rook.WHITE_ROOK));
-        assertTrue(board.hasCastlingRight(CastlingRights.WHITE_KINGSIDE));
-        assertFalse(board.hasCastlingRight(CastlingRights.WHITE_QUEENSIDE));
-        assertTrue(board.hasCastlingRight(CastlingRights.BLACK_KINGSIDE));
-        assertFalse(board.hasCastlingRight(CastlingRights.BLACK_QUEENSIDE));
+        board.applyMove(new Move(BLACK_ROOK, Square.A8, Square.A1, WHITE_ROOK));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertFalse(board.hasCastlingRight(WHITE_QUEENSIDE));
+        assertTrue(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertFalse(board.hasCastlingRight(BLACK_QUEENSIDE));
 
         // moving the black king removes bk castling option
-        board.applyMove(new Move(King.BLACK_KING, Square.E8, Square.E7));
-        assertTrue(board.hasCastlingRight(CastlingRights.WHITE_KINGSIDE));
-        assertFalse(board.hasCastlingRight(CastlingRights.WHITE_QUEENSIDE));
-        assertFalse(board.hasCastlingRight(CastlingRights.BLACK_KINGSIDE));
-        assertFalse(board.hasCastlingRight(CastlingRights.BLACK_QUEENSIDE));
+        board.applyMove(new Move(BLACK_KING, Square.E8, Square.E7));
+        assertTrue(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertFalse(board.hasCastlingRight(WHITE_QUEENSIDE));
+        assertFalse(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertFalse(board.hasCastlingRight(BLACK_QUEENSIDE));
 
         // moving the wk rook removes the wk castling option
-        board.applyMove(new Move(Rook.WHITE_ROOK, Square.H1, Square.H7));
-        assertFalse(board.hasCastlingRight(CastlingRights.WHITE_KINGSIDE));
-        assertFalse(board.hasCastlingRight(CastlingRights.WHITE_QUEENSIDE));
-        assertFalse(board.hasCastlingRight(CastlingRights.BLACK_KINGSIDE));
-        assertFalse(board.hasCastlingRight(CastlingRights.BLACK_QUEENSIDE));
+        board.applyMove(new Move(WHITE_ROOK, Square.H1, Square.H7));
+        assertFalse(board.hasCastlingRight(WHITE_KINGSIDE));
+        assertFalse(board.hasCastlingRight(WHITE_QUEENSIDE));
+        assertFalse(board.hasCastlingRight(BLACK_KINGSIDE));
+        assertFalse(board.hasCastlingRight(BLACK_QUEENSIDE));
     }
 
     @Test
