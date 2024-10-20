@@ -1,4 +1,4 @@
 [submodule "lib/prophet"]
 	path = lib/prophet
 	url = git@github.com:jswaff/prophet.git
-	branch = development
+	branch = master
