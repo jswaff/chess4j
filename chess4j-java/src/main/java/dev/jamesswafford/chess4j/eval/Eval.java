@@ -18,6 +18,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static dev.jamesswafford.chess4j.eval.MaterialType.*;
+
 public final class Eval implements Evaluator {
 
     private static final  Logger LOGGER = LogManager.getLogger(Evaluator.class);
@@ -26,8 +28,8 @@ public final class Eval implements Evaluator {
     private static final Set<MaterialType> factor8Draws = new HashSet<>();
 
     static {
-        immediateDraws.addAll(Arrays.asList(MaterialType.KK, MaterialType.KKN, MaterialType.KKNN, MaterialType.KKB, MaterialType.KNK, MaterialType.KNKN, MaterialType.KNNK, MaterialType.KNKB, MaterialType.KBK, MaterialType.KBKN, MaterialType.KBKB));
-        factor8Draws.addAll(Arrays.asList(MaterialType.KPKN, MaterialType.KPKB, MaterialType.KNKP, MaterialType.KBKP));
+        immediateDraws.addAll(Arrays.asList(KK, KKN, KKNN, KKB, KNK, KNKN, KNNK, KNKB, KBK, KBKN, KBKB));
+        factor8Draws.addAll(Arrays.asList(KPKN, KPKB, KNKP, KBKP));
     }
 
     static {
@@ -274,6 +276,4 @@ public final class Eval implements Evaluator {
 
         return true;
     }
-
-
 }
