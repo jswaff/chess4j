@@ -1,0 +1,239 @@
+package dev.jamesswafford.chess4j.eval;
+
+import dev.jamesswafford.chess4j.board.Board;
+import dev.jamesswafford.chess4j.board.squares.Square;
+import io.vavr.Tuple2;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.Arrays;
+
+import static org.junit.Assert.*;
+
+public class EvalKingTest {
+
+    private final EvalWeights weights = new EvalWeights();
+
+    private final double testEpsilon = 0.000001;
+
+
+    @Test
+    public void testEvalKing_middleGame() {
+
+        // as odd as this position is, it has all material on the board.
+        // therefore, there should be no scaling of king safety.
+        Board board = new Board("rnbq1rk1/pppppppp/bn6/8/BN6/5P2/PPPPP1PP/RNBQ1RK1 w - - 0 1");
+
+        Tuple2<Integer, Integer> score = EvalKing.evalKing(weights, board, Square.G1);
+        Assert.assertEquals(weights.vals[EvalWeights.KING_PST_MG_IND + Square.G1.value()] + EvalKing.evalKingSafety(weights, board, true),
+                (int)score._1);
+        assertEquals(weights.vals[EvalWeights.KING_PST_EG_IND + Square.G1.value()], (int)score._2);
+    }
+
+    @Test
+    public void testEvalKingSafety_middleFiles() {
+
+        // initial position then e3... no penalty
+        Board board = new Board("rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
+
+        Assert.assertEquals(0, EvalKing.evalKingSafety(weights, board, true));
+        Assert.assertEquals(0, EvalKing.evalKingSafety(weights, board, false));
+
+        // open file for both
+        board.setPos("rnbqkbnr/pppp1ppp/8/8/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
+
+        Assert.assertEquals(weights.vals[EvalWeights.KING_SAFETY_MIDDLE_OPEN_FILE_IND],
+                EvalKing.evalKingSafety(weights, board, true));
+
+        Assert.assertEquals(weights.vals[EvalWeights.KING_SAFETY_MIDDLE_OPEN_FILE_IND],
+                EvalKing.evalKingSafety(weights, board, false));
+
+        // remove both queens.  open e file.  put black on D8
+        // white should be penalized but black is not
+        board.setPos("rnbk1bnr/pppp1ppp/8/8/8/8/PPPP1PPP/RNB1KBNR b KQ - 0 1");
+
+        Assert.assertEquals(weights.vals[EvalWeights.KING_SAFETY_MIDDLE_OPEN_FILE_IND],
+                EvalKing.evalKingSafety(weights, board, true));
+        Assert.assertEquals(0, EvalKing.evalKingSafety(weights, board, false));
+    }
+
+    @Test
+    public void testEvalKingSafety_kingSide() {
+
+        Board board = new Board("rnbq1rk1/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1RK1 w - - 0 1");
+
+        Assert.assertEquals(0, EvalKing.evalKingSafety(weights, board, true));
+        Assert.assertEquals(0, EvalKing.evalKingSafety(weights, board, false));
+
+        // white pawn on F3
+        board.setPos("rnbq1rk1/pppppppp/8/8/8/5P2/PPPPP1PP/RNBQ1RK1 w - - 0 1");
+
+        Assert.assertEquals(weights.vals[EvalWeights.KING_SAFETY_PAWN_ONE_AWAY_IND],
+                EvalKing.evalKingSafety(weights, board, true));
+        Assert.assertEquals(0, EvalKing.evalKingSafety(weights, board, false));
+
+        // white pawn on G4
+        board.setPos("rnbq1rk1/pppppppp/8/8/6P1/8/PPPPPP1P/RNBQ1RK1 w - - 0 1");
+
+        Assert.assertEquals(weights.vals[EvalWeights.KING_SAFETY_PAWN_TWO_AWAY_IND],
+                EvalKing.evalKingSafety(weights, board, true));
+        Assert.assertEquals(0, EvalKing.evalKingSafety(weights, board, false));
+    }
+
+    @Test
+    public void testEvalKingSafety_queenSide() {
+
+        // pawn on C3
+        Board board = new Board("1krq1bnr/pppppppp/8/8/8/2P5/PP1PPPPP/1KRQ1BNR w - - 0 1");
+
+        Assert.assertEquals(weights.vals[EvalWeights.KING_SAFETY_PAWN_ONE_AWAY_IND],
+                EvalKing.evalKingSafety(weights, board, true));
+        Assert.assertEquals(0, EvalKing.evalKingSafety(weights, board, false));
+
+        // white pawn on B4
+        board.setPos("1krq1bnr/pppppppp/8/8/1P6/8/P1PPPPPP/1KRQ1BNR w - - 0 1");
+
+        Assert.assertEquals(weights.vals[EvalWeights.KING_SAFETY_PAWN_TWO_AWAY_IND],
+                EvalKing.evalKingSafety(weights, board, true));
+        Assert.assertEquals(0, EvalKing.evalKingSafety(weights, board, false));
+
+        // black pawn on A4
+        board.setPos("1krq1bnr/1ppppppp/8/8/p7/8/PPPPPPPP/1KRQ1BNR b - - 0 1");
+
+        Assert.assertEquals(0, EvalKing.evalKingSafety(weights, board, true));
+        Assert.assertEquals(weights.vals[EvalWeights.KING_SAFETY_WING_PAWN_FAR_AWAY_IND],
+                EvalKing.evalKingSafety(weights, board, false));
+    }
+
+    @Test
+    public void testExtractKingFeatures_middleGame() {
+
+        Board board = new Board("rnbq1rk1/pppppppp/bn6/8/BN6/5P2/PPPPP1PP/RNBQ1RK1 w - - 0 1");
+
+        double[] features = new double[weights.vals.length];
+        EvalKing.extractKingFeatures(features, board, Square.G1, 1.0);
+        assertEquals(1, features[EvalWeights.KING_PST_MG_IND + Square.G1.value()], testEpsilon);
+    }
+
+    @Test
+    public void testExtractKingFeatures_endGame() {
+
+        Board board = new Board("8/p3k3/8/8/8/8/4K3/8 w - - 0 1");
+
+        double[] features = new double[weights.vals.length];
+        EvalKing.extractKingFeatures(features, board, Square.E2, 0.0);
+        assertEquals(1, features[EvalWeights.KING_PST_EG_IND + Square.E2.value()], testEpsilon);
+
+        // test the symmetry
+        double[] features2 = new double[weights.vals.length];
+        EvalKing.extractKingFeatures(features2, board, Square.E7, 0.0);
+        assertEquals(-1, features2[EvalWeights.KING_PST_EG_IND + Square.E2.value()], testEpsilon);
+    }
+
+    @Test
+    public void testExtractKingSafetyFeatures_middleFiles() {
+
+        // initial position then e3... no penalty
+        Board board = new Board("rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
+
+        double[] features = new double[weights.vals.length];
+        EvalKing.extractKingSafetyFeatures(features, board, true, 1.0);
+        for (double feature : features) assertEquals(0, feature, testEpsilon);
+
+        EvalKing.extractKingSafetyFeatures(features, board, false, 1.0);
+        for (double feature : features) assertEquals(0, feature, testEpsilon);
+
+        // open file for both
+        board.setPos("rnbqkbnr/pppp1ppp/8/8/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
+
+        EvalKing.extractKingSafetyFeatures(features, board, true, 1.0);
+        assertEquals(1, features[EvalWeights.KING_SAFETY_MIDDLE_OPEN_FILE_IND], testEpsilon);
+
+        Arrays.fill(features, 0);
+        EvalKing.extractKingSafetyFeatures(features, board, false, 1.0);
+        assertEquals(-1, features[EvalWeights.KING_SAFETY_MIDDLE_OPEN_FILE_IND], testEpsilon);
+
+        // remove both queens.  open e file.  put black on D8
+        // white should be penalized but black is not
+        board.setPos("rnbk1bnr/pppp1ppp/8/8/8/8/PPPP1PPP/RNB1KBNR b KQ - 0 1");
+
+        Arrays.fill(features, 0);
+        EvalKing.extractKingSafetyFeatures(features, board, true, 1.0);
+        assertEquals(1, features[EvalWeights.KING_SAFETY_MIDDLE_OPEN_FILE_IND], testEpsilon);
+
+        Arrays.fill(features, 0);
+        EvalKing.extractKingSafetyFeatures(features, board, false, 1.0);
+        assertEquals(0, features[EvalWeights.KING_SAFETY_MIDDLE_OPEN_FILE_IND], testEpsilon);
+    }
+
+    @Test
+    public void testExtractKingSafetyFeatures_kingSide() {
+
+        Board board = new Board("rnbq1rk1/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1RK1 w - - 0 1");
+
+        double[] features = new double[weights.vals.length];
+        EvalKing.extractKingSafetyFeatures(features, board, true, 1.0);
+        for (double feature : features) assertEquals(0, feature, testEpsilon);
+
+        EvalKing.extractKingSafetyFeatures(features, board, false, 1.0);
+        for (double feature : features) assertEquals(0, feature, testEpsilon);
+
+        // white pawn on F3
+        board.setPos("rnbq1rk1/pppppppp/8/8/8/5P2/PPPPP1PP/RNBQ1RK1 w - - 0 1");
+
+        EvalKing.extractKingSafetyFeatures(features, board, true, 1.0);
+        assertEquals(1, features[EvalWeights.KING_SAFETY_PAWN_ONE_AWAY_IND], testEpsilon);
+
+        Arrays.fill(features, 0);
+        EvalKing.extractKingSafetyFeatures(features, board, false, 1.0);
+        for (double feature : features) assertEquals(0, feature, testEpsilon);
+
+        // white pawn on G4
+        board.setPos("rnbq1rk1/pppppppp/8/8/6P1/8/PPPPPP1P/RNBQ1RK1 w - - 0 1");
+
+        Arrays.fill(features, 0);
+        EvalKing.extractKingSafetyFeatures(features, board, true, 1.0);
+        assertEquals(1, features[EvalWeights.KING_SAFETY_PAWN_TWO_AWAY_IND], testEpsilon);
+
+        Arrays.fill(features, 0);
+        EvalKing.extractKingSafetyFeatures(features, board, false, 1.0);
+        for (double feature : features) assertEquals(0, feature, testEpsilon);
+    }
+
+    @Test
+    public void testExtractKingSafetyFeatures_queenSide() {
+
+        // pawn on C3
+        Board board = new Board("1krq1bnr/pppppppp/8/8/8/2P5/PP1PPPPP/1KRQ1BNR w - - 0 1");
+
+        double[] features = new double[weights.vals.length];
+        EvalKing.extractKingSafetyFeatures(features, board, true, 1.0);
+        assertEquals(1, features[EvalWeights.KING_SAFETY_PAWN_ONE_AWAY_IND], testEpsilon);
+
+        Arrays.fill(features, 0);
+        EvalKing.extractKingSafetyFeatures(features, board, false, 1.0);
+        for (double feature : features) assertEquals(0, feature, testEpsilon);
+
+        // white pawn on B4
+        board.setPos("1krq1bnr/pppppppp/8/8/1P6/8/P1PPPPPP/1KRQ1BNR w - - 0 1");
+
+        Arrays.fill(features, 0);
+        EvalKing.extractKingSafetyFeatures(features, board, true, 1.0);
+        assertEquals(1, features[EvalWeights.KING_SAFETY_PAWN_TWO_AWAY_IND], testEpsilon);
+
+        Arrays.fill(features, 0);
+        EvalKing.extractKingSafetyFeatures(features, board, false, 1.0);
+        for (double feature : features) assertEquals(0, feature, testEpsilon);
+
+        // black pawn on A4
+        board.setPos("1krq1bnr/1ppppppp/8/8/p7/8/PPPPPPPP/1KRQ1BNR b - - 0 1");
+
+        Arrays.fill(features, 0);
+        EvalKing.extractKingSafetyFeatures(features, board, true, 1.0);
+        for (double feature : features) assertEquals(0, feature, testEpsilon);
+
+        EvalKing.extractKingSafetyFeatures(features, board, false, 1.0);
+        assertEquals(-1, features[EvalWeights.KING_SAFETY_WING_PAWN_FAR_AWAY_IND], testEpsilon);
+    }
+
+}
