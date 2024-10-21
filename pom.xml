@@ -5,7 +5,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.jamesswafford.chess4j</groupId>
+    <groupId>dev.jamesswafford.chess4j</groupId>
     <artifactId>chess4j-parent</artifactId>
     <version>6.0</version>
     <packaging>pom</packaging>
