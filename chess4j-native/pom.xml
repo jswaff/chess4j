@@ -9,7 +9,7 @@
     <packaging>so</packaging>
 
     <parent>
-        <groupId>com.jamesswafford.chess4j</groupId>
+        <groupId>dev.jamesswafford.chess4j</groupId>
         <artifactId>chess4j-parent</artifactId>
         <version>6.0</version>
     </parent>
