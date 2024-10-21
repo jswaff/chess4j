@@ -13,6 +13,7 @@ import lombok.Getter;
 import java.util.*;
 
 import static dev.jamesswafford.chess4j.board.CastlingRights.*;
+import static dev.jamesswafford.chess4j.board.squares.Square.*;
 import static dev.jamesswafford.chess4j.pieces.Bishop.*;
 import static dev.jamesswafford.chess4j.pieces.King.*;
 import static dev.jamesswafford.chess4j.pieces.Knight.*;
@@ -232,7 +233,7 @@ public final class Board {
     }
 
     public void flipVertical() {
-        List<Square> squares = Square.allSquares();
+        List<Square> squares = allSquares();
         Map<Square,Piece> myPieceMap = new HashMap<>();
 
         Square myWhiteKingSq = whiteKingSquare;
@@ -345,23 +346,6 @@ public final class Board {
         } else {
             throw new IllegalArgumentException("unknown castling right: " + cr);
         }
-    }
-
-    // convenience functions
-    public boolean hasWKCastlingRight() {
-        return castlingRights.isWhiteKingside();
-    }
-
-    public boolean hasWQCastlingRight() {
-        return castlingRights.isWhiteQueenside();
-    }
-
-    public boolean hasBKCastlingRight() {
-        return castlingRights.isBlackKingside();
-    }
-
-    public boolean hasBQCastlingRight() {
-        return castlingRights.isBlackQueenside();
     }
 
     @Override
@@ -478,21 +462,21 @@ public final class Board {
                 addPiece(undo.getMove().captured(),undo.getMove().to());
             }
         } else if (undo.getMove().isCastle()) {
-            if (undo.getMove().from() == Square.E1) {
-                if (undo.getMove().to() == Square.G1) {
-                    removePiece(Square.F1);
-                    addPiece(WHITE_ROOK, Square.H1);
+            if (undo.getMove().from() == E1) {
+                if (undo.getMove().to() == G1) {
+                    removePiece(F1);
+                    addPiece(WHITE_ROOK, H1);
                 } else {
-                    removePiece(Square.D1);
-                    addPiece(WHITE_ROOK, Square.A1);
+                    removePiece(D1);
+                    addPiece(WHITE_ROOK, A1);
                 }
             } else {
-                if (undo.getMove().to() == Square.G8) {
-                    removePiece(Square.F8);
-                    addPiece(BLACK_ROOK, Square.H8);
+                if (undo.getMove().to() == G8) {
+                    removePiece(F8);
+                    addPiece(BLACK_ROOK, H8);
                 } else {
-                    removePiece(Square.D8);
-                    addPiece(BLACK_ROOK, Square.A8);
+                    removePiece(D8);
+                    addPiece(BLACK_ROOK, A8);
                 }
             }
         }
@@ -593,39 +577,39 @@ public final class Board {
             }
         } else if (p==WHITE_KING) {
             whiteKingSquare = m.to();
-            if (m.from() == Square.E1) {
-                if (m.to() == Square.G1) {
+            if (m.from() == E1) {
+                if (m.to() == G1) {
                     assert(m.isCastle());
                     fiftyCounter = 0;
-                    removePiece(Square.H1);
-                    addPiece(WHITE_ROOK, Square.F1);
-                } else if (m.to() == Square.C1) {
+                    removePiece(H1);
+                    addPiece(WHITE_ROOK, F1);
+                } else if (m.to() == C1) {
                     assert(m.isCastle());
                     fiftyCounter = 0;
-                    removePiece(Square.A1);
-                    addPiece(WHITE_ROOK, Square.D1);
+                    removePiece(A1);
+                    addPiece(WHITE_ROOK, D1);
                 }
             }
         } else if (p== BLACK_KING) {
             blackKingSquare = m.to();
-            if (m.from() == Square.E8) {
-                if (m.to() == Square.G8) {
+            if (m.from() == E8) {
+                if (m.to() == G8) {
                     assert(m.isCastle());
                     fiftyCounter = 0;
-                    removePiece(Square.H8);
-                    addPiece(BLACK_ROOK, Square.F8);
-                } else if (m.to() == Square.C8) {
+                    removePiece(H8);
+                    addPiece(BLACK_ROOK, F8);
+                } else if (m.to() == C8) {
                     assert(m.isCastle());
                     fiftyCounter = 0;
-                    removePiece(Square.A8);
-                    addPiece(BLACK_ROOK, Square.D8);
+                    removePiece(A8);
+                    addPiece(BLACK_ROOK, D8);
                 }
             }
         }
     }
 
     private void clearBoard() {
-        List<Square> squares = Square.allSquares();
+        List<Square> squares = allSquares();
         for (Square sq : squares) {
             if (getPiece(sq) != null) {
                 removePiece(sq);
@@ -785,22 +769,22 @@ public final class Board {
     }
 
     private void removeRookCastlingAvailability(Square sq) {
-        if (sq == Square.A1) {
+        if (sq == A1) {
             if (castlingRights.isWhiteQueenside()) {
                 zobristKey ^= Zobrist.getCastlingKey(WHITE_QUEENSIDE);
                 castlingRights.removeWhiteQueenside();
             }
-        } else if (sq == Square.H1) {
+        } else if (sq == H1) {
             if (castlingRights.isWhiteKingside()) {
                 zobristKey ^= Zobrist.getCastlingKey(WHITE_KINGSIDE);
                 castlingRights.removeWhiteKingside();
             }
-        } else if (sq == Square.A8) {
+        } else if (sq == A8) {
             if (castlingRights.isBlackQueenside()) {
                 zobristKey ^= Zobrist.getCastlingKey(BLACK_QUEENSIDE);
                 castlingRights.removeBlackQueenside();
             }
-        } else if (sq == Square.H8) {
+        } else if (sq == H8) {
             if (castlingRights.isBlackKingside()) {
                 zobristKey ^= Zobrist.getCastlingKey(BLACK_KINGSIDE);
                 castlingRights.removeBlackKingside();
@@ -1029,20 +1013,20 @@ public final class Board {
 
         // assert castling rights make sense
         if (hasCastlingRight(BLACK_QUEENSIDE)) {
-            assert(getPiece(Square.E8)==BLACK_KING);
-            assert(getPiece(Square.A8)==BLACK_ROOK);
+            assert(getPiece(E8)==BLACK_KING);
+            assert(getPiece(A8)==BLACK_ROOK);
         }
         if (hasCastlingRight(BLACK_KINGSIDE)) {
-            assert(getPiece(Square.E8)==BLACK_KING);
-            assert(getPiece(Square.H8)==BLACK_ROOK);
+            assert(getPiece(E8)==BLACK_KING);
+            assert(getPiece(H8)==BLACK_ROOK);
         }
         if (hasCastlingRight(WHITE_QUEENSIDE)) {
-            assert(getPiece(Square.E1)==WHITE_KING);
-            assert(getPiece(Square.A1)==WHITE_ROOK);
+            assert(getPiece(E1)==WHITE_KING);
+            assert(getPiece(A1)==WHITE_ROOK);
         }
         if (hasCastlingRight(WHITE_KINGSIDE)) {
-            assert(getPiece(Square.E1)==WHITE_KING);
-            assert(getPiece(Square.H1)==WHITE_ROOK);
+            assert(getPiece(E1)==WHITE_KING);
+            assert(getPiece(H1)==WHITE_ROOK);
         }
 
         assert(zobristKey==Zobrist.calculateBoardKey(this));
