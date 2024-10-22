@@ -125,3 +125,4 @@ Currently the main focus of development is to implement a neural network.
 
 You can see the combined Prophet / chess4j backlog here: https://trello.com/b/dhcOEaCO/chess4j-board .
 
+Read about the latest development efforts at https://jamesswafford.dev/ .
