@@ -4,7 +4,7 @@ an XBoard compatible Java based chess engine
 
 ## Introduction 
 
-chess4j is a chess program written using Java technologies. It is not meant to be super competitive, but just a test bed of sorts for various interests. Those interests include experimenting with different JVM based languages, parallel and distributed computing, and machine learning.
+chess4j is a chess program written using Java technologies. It is a test bed of sorts for various interests. Those interests include experimenting with different JVM based languages, parallel and distributed computing, and machine learning.
 
 ## Installing
 
@@ -12,7 +12,7 @@ To play chess4j, you'll need a Java 11 or later JRE and Winboard or Xboard.
 
 To see if you have a JRE installed, open a command prompt and type 'java -version'.  If you need to download a JRE you can download one from the Oracle website:
 
-https://www.oracle.com/java/technologies/javase-downloads.html
+https://www.oracle.com/java/technologies/downloads/
 
 See http://www.gnu.org/software/xboard for details on installing Winboard or Xboard.
 
@@ -34,14 +34,14 @@ Clone the repository and go into the chess4j/chess4j-java directory.
 
 Once this process is complete you should see the build artifact in the target directory, e.g. chess4j-java-5.1-uber.jar.  Verify everything is working:
 
-```java -jar chess4j-java-5.1-uber.jar -suite=../src/test/resources/suites/wac2.epd```
+```java -jar chess4j-6.0-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd```
 
 You should see the program search for about 10 seconds and display the result.  
 
 
 ### With the Prophet Engine
 
-This option is slighly more complex.  In addition to the other prerequisites, you'll also need a working C/C++ toolchain.  I always use gcc / g++.  Others may work but have not been tested.  You'll also need 'make' and a copy of  Google Test from https://github.com/google/googletest .  Finally, set an environment variable GTEST_DIR to point to the 'googletest' project (we don't need the googlemock stuff).
+This option is slightly more complex.  In addition to the other prerequisites, you'll also need a working C/C++ toolchain.  I always use gcc / g++.  Others may work but have not been tested.  You'll also need 'make' and 'cmake'.
 
 Once you have the prerequisites, clone the chess4j repository.  Since Prophet4 is a separate project, you'll need to do a recursive clone, e.g.
 
@@ -57,7 +57,7 @@ You now have the option to run with or without the native (Prophet) code enabled
 
 Verify everything is working:
 
-```java -jar chess4j-java-5.1-uber.jar -suite=../src/test/resources/suites/wac2.epd -native```
+```java -jar chess4j-6.0-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd -native```
 
 (Note the '-native' argument.)  
 
@@ -68,7 +68,7 @@ You should see the program search for about 10 seconds and display the result.
 
 chess4j has a small opening book but it is not enabled by default.  If you would like to enable the opening book, you can do it with a command line parameter:
 
-```-book=book.db```
+```-book book.db```
 
 
 ## Memory Usage
@@ -81,7 +81,7 @@ You can specify the maximum memory allocated to each table via command line para
 (I do this when running test suites but that's about it.)  
 
 ```
--hash=256 -phash=256
+-hash 256 -phash 256
 ``` 
 
 The above arguments would allocate 256 MB to each table.  
@@ -91,16 +91,21 @@ Winboard / XBoard has an option to specify the maximum memory usage, and chess4j
 
 ## Running Test Suites
 
-You can run EPD formatted test suites with chess4j using the 'suite' command line argument.  The default time per problem is 10 seconds, but that can also be changed with the 'time' argument.
+You can run EPD formatted test suites with chess4j by putting it in test mode.  The default time per problem is 10 seconds, but that can also be changed with the 'time' argument.
 
 ```
-java -jar chess4j-java-5.1-uber.jar -suite=wac.epd -time=30
+java -jar chess4j-6.0-uber.jar -mode test -epd wac.epd -time 30
 ```
 
 The command above would start chess4j to process the Win At Chess (WAC) test suite, giving it 30 seconds per problem.  (A few test suites can be found in the test/resources folder.)
 
 
 ## Changelog
+
+6.0
+* neural network mode! (consider this a preview - not ready for prime time yet)
+* cleaned up command line parameters
+* lots of code refactoring and dependency updates
 
 5.1
 * Passed pawn by rank (was a single value)
