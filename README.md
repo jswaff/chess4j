@@ -121,7 +121,7 @@ The command above would start chess4j to process the Win At Chess (WAC) test sui
 
 ## Roadmap
 
-There may be another minor release or two on the 5.x line, but the main focus of development going forward is to implement a neural network.
+Currently the main focus of development is to implement a neural network.
 
 You can see the combined Prophet / chess4j backlog here: https://trello.com/b/dhcOEaCO/chess4j-board .
 
