@@ -1,8 +1,14 @@
 package dev.jamesswafford.chess4j.init;
 
+import dev.jamesswafford.chess4j.App;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.*;
 
 public final class Initializer {
+
+    private static final Logger LOGGER = LogManager.getLogger(Initializer.class);
 
     public static boolean attemptToUseNative = false;
     private static boolean nativeCodeInitialized = false;
@@ -58,18 +64,18 @@ public final class Initializer {
             // which OS are we running on?
 
             String os = System.getProperty("os.name");
-            System.out.println("# Detected OS: " + os);
+            LOGGER.info("# Detected OS: " + os);
 
             if ("Linux".equals(os)) {
                 System.out.println("# Loading Prophet native library.");
                 File libFile = copyLibraryToFile();
                 System.load(libFile.getPath());
-                System.out.println("# Prophet loaded, initializing...");
+                LOGGER.info("# Prophet loaded, initializing...");
                 if (!p4Init()) {
                     attemptToUseNative = false;
                     throw new IllegalStateException("Could not initialize p4!");
                 }
-                System.out.println("# Prophet initialized.");
+                LOGGER.info("# Prophet initialized.");
             }
 
             nativeCodeInitialized = true;
