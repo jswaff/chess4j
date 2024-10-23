@@ -8,9 +8,7 @@ chess4j is a chess program written using Java technologies. It is a test bed of 
 
 ## Installing
 
-To play chess4j, you'll need a Java 11 or later JRE and Winboard or Xboard.
-
-To see if you have a JRE installed, open a command prompt and type 'java -version'.  If you need to download a JRE you can download one from the Oracle website:
+To play chess4j, you'll need a Java 11 or later JRE and Winboard or Xboard.  To see if you have a JRE installed, open a command prompt and type 'java -version'.  If you need to download a JRE you can download one from the Oracle website:
 
 https://www.oracle.com/java/technologies/downloads/
 
