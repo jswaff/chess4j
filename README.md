@@ -20,7 +20,7 @@ Once those prerequisites are met you can download the latest release and extract
 
 chess4j can be built with or without <a href="https://github.com/jswaff/prophet" target="_blank">Prophet</a> bundled as a static library.  The benefit of bundling Prophet is simply speed.  When Prophet is bundled and activated (using the '-native' command line argument), chess4j will leverage Prophet when "thinking."  Since Prophet is written in C and is native, it will execute about 2-3 times faster.  It doesn't move any faster, but it will "see further" and therefore play stronger moves.  Otherwise, the algorithms are the same.  Just keep in mind that native code is platform dependent.  Currently the only platform supported for bundling Prophet is Linux.
 
-Whether you want to bundle Prophet or not, you will need a Java 11 (or better) SDK and Maven.  You will probably also need to ensure the JAVA_HOME environment variable is properly set.
+Whether you want to bundle Prophet or not, you will need a Java 11 (or better) JDK and Maven.  You will probably also need to ensure the JAVA_HOME environment variable is properly set.
 
 
 ### Without the Prophet Engine
