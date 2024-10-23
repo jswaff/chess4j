@@ -16,7 +16,7 @@ https://www.oracle.com/java/technologies/downloads/
 
 See http://www.gnu.org/software/xboard for details on installing Winboard or Xboard.
 
-Once those prerequisites are met you can download the latest release and extract the zipfile.  Once you extract the zipfile, open the 'chess4j.bat' file (or chess4j.sh on Linux) and modify the path to match the location you just unzipped to.
+Once those prerequisites are met you can download the latest release and extract the zipfile.  Once you extract the zipfile, open the 'chess4j-wb.bat' file (or chess4j-xb.sh on Linux) and modify the path to match the location you just unzipped to.
 
 ## Building from Source
 
@@ -32,7 +32,7 @@ Clone the repository and go into the chess4j/chess4j-java directory.
  
  ```mvn clean install```  
 
-Once this process is complete you should see the build artifact in the target directory, e.g. chess4j-java-5.1-uber.jar.  Verify everything is working:
+Once this process is complete you should see the build artifact in the target directory, e.g. chess4j-java-6.0.jar.  Verify everything is working:
 
 ```java -jar chess4j-6.0-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd```
 
