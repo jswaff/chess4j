@@ -18,8 +18,7 @@ JNIEXPORT void JNICALL Java_dev_jamesswafford_chess4j_hash_PawnTranspositionTabl
 {
 
     /* ensure the static library is initialized */
-    if (!p4_initialized) 
-    {
+    if (!p4_initialized) {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return;
     }

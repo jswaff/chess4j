@@ -4,7 +4,6 @@
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
 
-
 extern bool volatile skip_time_checks;
 
 /*
@@ -16,9 +15,8 @@ JNIEXPORT void JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_ski
   (JNIEnv *env, jobject UNUSED(iterator_obj), jboolean java_skip_time_checks)
 {
     /* ensure the static library is initialized */
-    if (!p4_initialized) 
-    {
-        (*env)->ThrowNew(env, IllegalStateException, "Prophet4 not initialized!");
+    if (!p4_initialized) {
+        (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return;
     }
 

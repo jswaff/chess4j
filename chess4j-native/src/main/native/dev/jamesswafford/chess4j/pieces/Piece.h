@@ -1,7 +1,6 @@
 #ifndef PIECE_HEADER_GUARD
 #define PIECE_HEADER_GUARD
 
-
 #include <jni.h>
 
 /* make this header C++ friendly */

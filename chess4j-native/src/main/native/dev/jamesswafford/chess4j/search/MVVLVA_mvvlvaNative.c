@@ -16,12 +16,10 @@ JNICALL Java_dev_jamesswafford_chess4j_search_MVVLVA_mvvlvaNative
 {
     jint retval = 0;
 
-    if (!p4_initialized) 
-    {
-        (*env)->ThrowNew(env, IllegalStateException, "Prophet4 not initialized!");
+    if (!p4_initialized) {
+        (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return 0;
     }
-
 
     int32_t native_score = mvvlva((move_t)mv);
     retval = (jint) native_score;

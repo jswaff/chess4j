@@ -30,16 +30,14 @@ JNICALL Java_dev_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
 {
 
     /* ensure the static library is initialized */
-    if (!p4_initialized) 
-    {
+    if (!p4_initialized) {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return;
     }
 
     /* set the position */
     position_t c4j_pos;
-    if (0 != convert(env, board_obj, &c4j_pos))
-    {
+    if (0 != convert(env, board_obj, &c4j_pos)) {
         (*env)->ThrowNew(env, IllegalStateException, "An error was encountered while converting a position.");
         return;
     }
@@ -60,8 +58,7 @@ JNICALL Java_dev_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
     move_line_t pv = iterate(&opts, &ctx);
 
     /* copy the PV to the Java list */
-    for (int i=0; i < pv.n; i++)
-    {
+    for (int i=0; i < pv.n; i++) {
         /* create Long value representing this move */
         jobject lval = (*env)->CallStaticObjectMethod(
             env, Long, Long_valueOf, (jlong)(pv.mv[i]));

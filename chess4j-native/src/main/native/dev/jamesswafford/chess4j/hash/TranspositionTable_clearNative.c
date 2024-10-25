@@ -7,7 +7,6 @@
 
 extern hash_table_t htbl;
 
-
 /*
  * Class:     dev_jamesswafford_chess4j_hash_TranspositionTable
  * Method:    clearNative
@@ -18,9 +17,8 @@ JNIEXPORT void JNICALL Java_dev_jamesswafford_chess4j_hash_TranspositionTable_cl
 {
 
     /* ensure the static library is initialized */
-    if (!p4_initialized) 
-    {
-        (*env)->ThrowNew(env, IllegalStateException, "Prophet4 not initialized!");
+    if (!p4_initialized) {
+        (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return;
     }
     

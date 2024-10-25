@@ -26,32 +26,27 @@ JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_init_Initializer_p4Ini
     logging_enabled = false;
     init();
 
-    if (0 != IllegalStateException_register(env))
-    {
+    if (0 != IllegalStateException_register(env)) {
         /* well this is bad */
         return false;
     }
 
-    if (0 != Long_register(env))
-    {
+    if (0 != Long_register(env)) {
         (*env)->ThrowNew(env, IllegalStateException, "Long not initialized!");
         return false;
     }
 
-    if (0 != ArrayList_register(env))
-    {
+    if (0 != ArrayList_register(env)) {
         (*env)->ThrowNew(env, IllegalStateException, "ArrayList not initialized!");
         return false;
     }
 
-    if (0 != PrintLine_register(env))
-    {
+    if (0 != PrintLine_register(env)) {
         (*env)->ThrowNew(env, IllegalStateException, "PrintLine not initialized!");
         return false;
     }
 
-    if (0 != Piece_register(env))
-    {
+    if (0 != Piece_register(env)) {
         (*env)->ThrowNew(env, IllegalStateException, "Piece not initialized!");
         return false;
     }

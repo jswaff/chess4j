@@ -7,7 +7,6 @@
 
 extern hash_table_t phtbl;
 
-
 /*
  * Class:     dev_jamesswafford_chess4j_hash_PawnTranspositionTable
  * Method:    getNumHitsNative
@@ -17,8 +16,7 @@ JNIEXPORT jlong JNICALL Java_dev_jamesswafford_chess4j_hash_PawnTranspositionTab
   (JNIEnv *env, jobject UNUSED(phtable))
 {
     /* ensure the static library is initialized */
-    if (!p4_initialized) 
-    {
+    if (!p4_initialized) {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return 0;
     }
