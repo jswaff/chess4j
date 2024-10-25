@@ -1,5 +1,4 @@
-#ifndef LONG_HEADER_GUARD
-#define LONG_HEADER_GUARD
+#pragma once
 
 #include <jni.h>
 
@@ -18,6 +17,3 @@ extern jmethodID Long_longValue;
 #ifdef __cplusplus
 }
 #endif /*__cplusplus*/
-
-
-#endif

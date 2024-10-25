@@ -1,5 +1,4 @@
-#ifndef PIECE_HEADER_GUARD
-#define PIECE_HEADER_GUARD
+#pragma once
 
 #include <jni.h>
 
@@ -24,6 +23,3 @@ extern jclass Rook;
 #ifdef __cplusplus
 }
 #endif /*__cplusplus*/
-
-
-#endif
