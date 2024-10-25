@@ -1,15 +1,15 @@
-#include <prophet/const.h>
-#include <prophet/movegen.h>
-#include <prophet/parameters.h>
+#include "dev_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator.h"
 
-#include <dev_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator.h>
 #include "../init/p4_init.h"
 #include "../../../../java/util/ArrayList.h"
 #include "../../../../java/lang/IllegalStateException.h"
 #include "../../../../java/lang/Long.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <prophet/const.h>
+#include <prophet/movegen.h>
+#include <prophet/parameters.h>
+
+#include <stdio.h>
 
 /*
  * Class:     dev_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator

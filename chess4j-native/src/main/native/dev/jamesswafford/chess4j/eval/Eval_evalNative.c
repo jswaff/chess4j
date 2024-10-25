@@ -1,13 +1,13 @@
-#include <prophet/eval.h>
-#include <prophet/parameters.h>
-
 #include <dev_jamesswafford_chess4j_eval_Eval.h>
+
 #include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <prophet/eval.h>
+#include <prophet/parameters.h>
+
+#include <stdbool.h>
 
 /*
  * Class:     dev_jamesswafford_chess4j_eval_Eval

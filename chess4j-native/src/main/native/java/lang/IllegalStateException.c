@@ -1,6 +1,6 @@
-#include <stdbool.h>
-
 #include "IllegalStateException.h"
+
+#include <stdbool.h>
 
 jclass IllegalStateException;
 

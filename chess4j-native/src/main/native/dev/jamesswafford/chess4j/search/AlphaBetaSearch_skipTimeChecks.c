@@ -1,8 +1,11 @@
-#include <prophet/parameters.h>
+#include "dev_jamesswafford_chess4j_search_AlphaBetaSearch.h"
 
-#include <dev_jamesswafford_chess4j_search_AlphaBetaSearch.h>
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
+
+#include <prophet/parameters.h>
+
+#include <stdbool.h>
 
 extern bool volatile skip_time_checks;
 

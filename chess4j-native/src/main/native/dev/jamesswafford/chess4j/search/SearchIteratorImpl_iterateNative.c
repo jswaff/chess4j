@@ -1,17 +1,14 @@
-#include <prophet/const.h>
-#include <prophet/search.h>
-#include <prophet/parameters.h>
+#include "dev_jamesswafford_chess4j_search_SearchIteratorImpl.h"
 
-#include <dev_jamesswafford_chess4j_search_SearchIteratorImpl.h>
 #include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../../../../java/util/ArrayList.h"
 #include "../../../../java/lang/IllegalStateException.h"
 #include "../../../../java/lang/Long.h"
 
-#include <stdlib.h>
-#include <string.h>
-
+#include <prophet/const.h>
+#include <prophet/search.h>
+#include <prophet/parameters.h>
 
 /* move stack */
 move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
@@ -28,7 +25,6 @@ JNIEXPORT void
 JNICALL Java_dev_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
   (JNIEnv *env, jobject UNUSED(iterator_obj), jobject board_obj, jint max_depth, jobject pv_moves)
 {
-
     /* ensure the static library is initialized */
     if (!p4_initialized) {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");

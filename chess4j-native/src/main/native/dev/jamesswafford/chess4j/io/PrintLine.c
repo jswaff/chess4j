@@ -1,5 +1,6 @@
-#include <stdbool.h>
 #include "PrintLine.h"
+
+#include <stdbool.h>
 
 jclass PrintLine = NULL;
 jmethodID PrintLine_printNativeLine = NULL;

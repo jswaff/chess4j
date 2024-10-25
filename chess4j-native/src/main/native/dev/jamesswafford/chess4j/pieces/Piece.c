@@ -1,5 +1,6 @@
-#include <stdbool.h>
 #include "Piece.h"
+
+#include <stdbool.h>
 
 jclass Piece = NULL;
 jclass Bishop = NULL;

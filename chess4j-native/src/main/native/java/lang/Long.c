@@ -1,5 +1,6 @@
-#include <stdbool.h>
 #include "Long.h"
+
+#include <stdbool.h>
 
 jclass Long = NULL;
 jmethodID Long_valueOf = NULL;

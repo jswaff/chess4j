@@ -1,5 +1,6 @@
-#include <stdbool.h>
 #include "ArrayList.h"
+
+#include <stdbool.h>
 
 jclass ArrayList = NULL;
 jmethodID ArrayList_init = NULL;

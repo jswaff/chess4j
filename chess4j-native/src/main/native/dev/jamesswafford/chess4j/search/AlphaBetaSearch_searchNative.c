@@ -1,15 +1,15 @@
-#include <prophet/const.h>
-#include <prophet/search.h>
-#include <prophet/parameters.h>
-#include <prophet/util/p4time.h>
+#include "dev_jamesswafford_chess4j_search_AlphaBetaSearch.h"
 
-#include <dev_jamesswafford_chess4j_search_AlphaBetaSearch.h>
 #include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../io/PrintLine.h"
 #include "../../../../java/lang/IllegalStateException.h"
 #include "../../../../java/lang/Long.h"
 #include "../../../../java/util/ArrayList.h"
+
+#include <prophet/const.h>
+#include <prophet/search.h>
+#include <prophet/parameters.h>
 
 #include <stdlib.h>
 #include <string.h>
