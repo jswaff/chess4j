@@ -1,5 +1,6 @@
 #include "dev_jamesswafford_chess4j_search_SearchIteratorImpl.h"
 
+#include "../../../../parameters.h"
 #include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../../../../java/util/ArrayList.h"
@@ -8,7 +9,6 @@
 
 #include <prophet/const.h>
 #include <prophet/search.h>
-#include <prophet/parameters.h>
 
 /* move stack */
 move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];

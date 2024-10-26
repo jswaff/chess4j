@@ -1,5 +1,6 @@
 #include "dev_jamesswafford_chess4j_search_AlphaBetaSearch.h"
 
+#include "../../../../parameters.h"
 #include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../io/PrintLine.h"
@@ -9,7 +10,6 @@
 
 #include <prophet/const.h>
 #include <prophet/search.h>
-#include <prophet/parameters.h>
 
 #include <stdlib.h>
 #include <string.h>

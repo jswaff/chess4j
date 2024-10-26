@@ -1,12 +1,11 @@
 #include "dev_jamesswafford_chess4j_init_Initializer.h"
 
+#include "../../../../parameters.h"
 #include "../io/PrintLine.h"
 #include "../pieces/Piece.h"
 #include "../../../../java/lang/IllegalStateException.h"
 #include "../../../../java/lang/Long.h"
 #include "../../../../java/util/ArrayList.h"
-
-#include <prophet/parameters.h>
 
 #include <stdbool.h>
 

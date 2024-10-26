@@ -1,10 +1,10 @@
 #include "dev_jamesswafford_chess4j_search_MVVLVA.h"
 
+#include "../../../../parameters.h"
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
 
 #include <prophet/search.h>
-#include <prophet/parameters.h>
 
 /*
  * Class:     dev_jamesswafford_chess4j_search_MVVLVA

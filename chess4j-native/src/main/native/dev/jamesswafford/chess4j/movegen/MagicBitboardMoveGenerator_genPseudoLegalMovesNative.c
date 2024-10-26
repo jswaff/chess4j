@@ -1,5 +1,6 @@
 #include "dev_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator.h"
 
+#include "../../../../parameters.h"
 #include "../init/p4_init.h"
 #include "../../../../java/util/ArrayList.h"
 #include "../../../../java/lang/IllegalStateException.h"
@@ -7,7 +8,6 @@
 
 #include <prophet/const.h>
 #include <prophet/movegen.h>
-#include <prophet/parameters.h>
 
 #include <stdio.h>
 

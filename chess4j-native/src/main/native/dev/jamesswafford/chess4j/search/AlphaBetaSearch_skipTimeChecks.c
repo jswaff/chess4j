@@ -1,9 +1,8 @@
 #include "dev_jamesswafford_chess4j_search_AlphaBetaSearch.h"
 
+#include "../../../../parameters.h"
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
-
-#include <prophet/parameters.h>
 
 #include <stdbool.h>
 
