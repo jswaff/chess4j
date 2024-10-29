@@ -4,7 +4,7 @@
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
 
-#include <prophet/position/move.h>
+#include <prophet/move.h>
 #include <prophet/search.h>
 
 #include <memory.h>

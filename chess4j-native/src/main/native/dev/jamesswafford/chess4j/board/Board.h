@@ -1,7 +1,7 @@
 #pragma once
 
 #include <jni.h>
-#include <prophet/position/position.h>
+#include <prophet/position.h>
 
 /* make this header C++ friendly */
 #ifdef __cplusplus

@@ -6,7 +6,7 @@
 #include "../../../../java/lang/IllegalStateException.h"
 
 #include <prophet/hash.h>
-#include <prophet/position/position.h>
+#include <prophet/position.h>
 
 extern hash_table_t phtbl;
 
