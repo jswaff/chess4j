@@ -123,7 +123,7 @@ public class EPDParserTest {
         assertFalse(b.hasCastlingRight(WHITE_KINGSIDE));
         assertFalse(b.hasCastlingRight(WHITE_QUEENSIDE));
         assertEquals(0, b.getMoveCounter());
-        assertNull(b.getEPSquare());
+        assertNull(b.getEpSquare());
 
         assertEquals(2, ops.size());
 

@@ -8,6 +8,7 @@ import dev.jamesswafford.chess4j.pieces.King;
 import dev.jamesswafford.chess4j.pieces.Piece;
 import dev.jamesswafford.chess4j.utils.BlankRemover;
 import dev.jamesswafford.chess4j.utils.PieceFactory;
+import lombok.Getter;
 
 import java.util.*;
 
@@ -36,16 +37,26 @@ public final class Board {
     private final Map<Square,Piece> pieceMap = new HashMap<>();
     private final Map<Piece,Integer> pieceCountsMap = new HashMap<>();
     private final MyCastlingRights castlingRights = new MyCastlingRights();
+    @Getter
     private Color playerToMove;
+    @Getter
     private Square epSquare;
+    @Getter
     private int moveCounter;
+    @Getter
     private int fiftyCounter;
     private Square whiteKingSquare, blackKingSquare;
+    @Getter
     private long whitePawns, blackPawns;
+    @Getter
     private long whiteKnights, blackKnights;
+    @Getter
     private long whiteBishops, blackBishops;
+    @Getter
     private long whiteRooks, blackRooks;
+    @Getter
     private long whiteQueens, blackQueens;
+    @Getter
     private long whitePieces, blackPieces;
     private long zobristKey;
     private long pawnKey;
@@ -303,44 +314,8 @@ public final class Board {
         assert(verify());
     }
 
-    public long getBlackBishops() {
-        return blackBishops;
-    }
-
-    public long getBlackKnights() {
-        return blackKnights;
-    }
-
-    public long getBlackPawns() {
-        return blackPawns;
-    }
-
-    public long getBlackPieces() {
-        return blackPieces;
-    }
-
-    public long getBlackQueens() {
-        return blackQueens;
-    }
-
-    public long getBlackRooks() {
-        return blackRooks;
-    }
-
-    public Square getEPSquare() {
-        return epSquare;
-    }
-
-    public int getFiftyCounter() {
-        return fiftyCounter;
-    }
-
     public Square getKingSquare(Color player) {
         return player.isWhite() ? getWhiteKingSquare() : getBlackKingSquare();
-    }
-
-    public int getMoveCounter() {
-        return moveCounter;
     }
 
     public int getNumPieces(Piece p) {
@@ -358,34 +333,6 @@ public final class Board {
 
     public Piece getPiece(int sqVal) {
         return getPiece(Square.valueOf(sqVal));
-    }
-
-    public Color getPlayerToMove() {
-        return playerToMove;
-    }
-
-    public long getWhiteBishops() {
-        return whiteBishops;
-    }
-
-    public long getWhiteKnights() {
-        return whiteKnights;
-    }
-
-    public long getWhitePawns() {
-        return whitePawns;
-    }
-
-    public long getWhitePieces() {
-        return whitePieces;
-    }
-
-    public long getWhiteQueens() {
-        return whiteQueens;
-    }
-
-    public long getWhiteRooks() {
-        return whiteRooks;
     }
 
     public long getZobristKey() {

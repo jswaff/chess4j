@@ -214,13 +214,13 @@ public class BoardUtils {
 
             if (board.getPlayerToMove()==Color.WHITE) {
                 if (m.isEpCapture()) {
-                    return m.to() == board.getEPSquare() && board.getPiece(m.to().south().get()) == BLACK_PAWN;
+                    return m.to() == board.getEpSquare() && board.getPiece(m.to().south().get()) == BLACK_PAWN;
                 } else {
                     return board.getPiece(m.to()) == m.captured();
                 }
             } else {
                 if (m.isEpCapture()) {
-                    return m.to() == board.getEPSquare() && board.getPiece(m.to().north().get()) == WHITE_PAWN;
+                    return m.to() == board.getEpSquare() && board.getPiece(m.to().north().get()) == WHITE_PAWN;
                 } else {
                     return board.getPiece(m.to()) == m.captured();
                 }

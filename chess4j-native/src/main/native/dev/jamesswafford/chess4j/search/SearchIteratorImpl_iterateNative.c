@@ -1,17 +1,14 @@
-#include <prophet/const.h>
-#include <prophet/search.h>
-#include <prophet/parameters.h>
+#include "dev_jamesswafford_chess4j_search_SearchIteratorImpl.h"
 
-#include <dev_jamesswafford_chess4j_search_SearchIteratorImpl.h>
+#include "../../../../parameters.h"
 #include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../../../../java/util/ArrayList.h"
 #include "../../../../java/lang/IllegalStateException.h"
 #include "../../../../java/lang/Long.h"
 
-#include <stdlib.h>
-#include <string.h>
-
+#include <prophet/const.h>
+#include <prophet/search.h>
 
 /* move stack */
 move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
@@ -28,18 +25,15 @@ JNIEXPORT void
 JNICALL Java_dev_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
   (JNIEnv *env, jobject UNUSED(iterator_obj), jobject board_obj, jint max_depth, jobject pv_moves)
 {
-
     /* ensure the static library is initialized */
-    if (!p4_initialized) 
-    {
+    if (!p4_initialized) {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return;
     }
 
     /* set the position */
     position_t c4j_pos;
-    if (0 != convert(env, board_obj, &c4j_pos))
-    {
+    if (0 != convert(env, board_obj, &c4j_pos)) {
         (*env)->ThrowNew(env, IllegalStateException, "An error was encountered while converting a position.");
         return;
     }
@@ -60,8 +54,7 @@ JNICALL Java_dev_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
     move_line_t pv = iterate(&opts, &ctx);
 
     /* copy the PV to the Java list */
-    for (int i=0; i < pv.n; i++)
-    {
+    for (int i=0; i < pv.n; i++) {
         /* create Long value representing this move */
         jobject lval = (*env)->CallStaticObjectMethod(
             env, Long, Long_valueOf, (jlong)(pv.mv[i]));

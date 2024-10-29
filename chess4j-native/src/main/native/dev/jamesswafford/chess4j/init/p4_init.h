@@ -1,5 +1,4 @@
-#ifndef _P4_INIT_H_
-#define _P4_INIT_H_
+#pragma once
 
 #include <stdbool.h>
 
@@ -14,5 +13,3 @@ extern volatile bool p4_initialized;
 #ifdef     __cplusplus
 }
 #endif    //__cplusplus
-
-#endif /* ! defined _P4_INIT_H_ */

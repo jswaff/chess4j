@@ -1,6 +1,4 @@
-#ifndef PRINTLINE_HEADER_GUARD
-#define PRINTLINE_HEADER_GUARD
-
+#pragma once
 
 #include <jni.h>
 
@@ -18,6 +16,3 @@ extern jmethodID PrintLine_printNativeLine;
 #ifdef __cplusplus
 }
 #endif /*__cplusplus*/
-
-
-#endif

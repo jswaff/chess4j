@@ -69,8 +69,8 @@ public final class FENBuilder {
 
         // ep square
         sb.append(" ");
-        if (b.getEPSquare() != null) {
-            sb.append(b.getEPSquare());
+        if (b.getEpSquare() != null) {
+            sb.append(b.getEpSquare());
         } else {
             sb.append("-");
         }

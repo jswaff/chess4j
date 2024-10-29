@@ -1,15 +1,15 @@
-#include <prophet/const.h>
-#include <prophet/search.h>
-#include <prophet/parameters.h>
-#include <prophet/util/p4time.h>
+#include "dev_jamesswafford_chess4j_search_AlphaBetaSearch.h"
 
-#include <dev_jamesswafford_chess4j_search_AlphaBetaSearch.h>
+#include "../../../../parameters.h"
 #include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../io/PrintLine.h"
 #include "../../../../java/lang/IllegalStateException.h"
 #include "../../../../java/lang/Long.h"
 #include "../../../../java/util/ArrayList.h"
+
+#include <prophet/const.h>
+#include <prophet/search.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -47,16 +47,14 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     jint retval = 0;
 
     /* ensure the static library is initialized */
-    if (!p4_initialized) 
-    {
+    if (!p4_initialized) {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return 0;
     }
 
     /* set the position */
     position_t c4j_pos;
-    if (0 != convert(env, board_obj, &c4j_pos))
-    {
+    if (0 != convert(env, board_obj, &c4j_pos)) {
         (*env)->ThrowNew(env, IllegalStateException, "An error was encountered while converting a position.");
         return 0;
     }
@@ -73,12 +71,10 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     search_opts.start_time = start_time;
     search_opts.stop_time = stop_time;
     search_opts.nodes_between_time_checks = 100000UL;
-    if (stop_time > 0 && stop_time - start_time < 10000)
-    {
+    if (stop_time > 0 && stop_time - start_time < 10000) {
         search_opts.nodes_between_time_checks /= 10;
     }
-    if (stop_time > 0 && stop_time - start_time < 1000)
-    {
+    if (stop_time > 0 && stop_time - start_time < 1000) {
         search_opts.nodes_between_time_checks /= 10;   
     }
 
@@ -92,19 +88,15 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     /* set the stop flag in the Java code to match the native code's.  This will 
      * prompt the iterative deepening driver to stop. */
     jclass class_AlphaBetaSearch = (*env)->GetObjectClass(env, search_obj);
-    if (stop_search)
-    {
+    if (stop_search) {
         jmethodID AlphaBetaSearch_stop = (*env)->GetMethodID(
             env, class_AlphaBetaSearch, "stop", "()V");
         (*env)->CallVoidMethod(env, search_obj, AlphaBetaSearch_stop);
-    }
-    else
-    {
+    } else {
         jmethodID AlphaBetaSearch_unstop = (*env)->GetMethodID(
             env, class_AlphaBetaSearch, "unstop", "()V");
         (*env)->CallVoidMethod(env, search_obj, AlphaBetaSearch_unstop);
     }
-
 
     /* copy the search stats to the Java structure */
     jclass class_SearchStats = (*env)->GetObjectClass(env, search_stats);
@@ -146,8 +138,7 @@ static void pv_callback(move_line_t* pv, int32_t depth, int32_t score,
 {
     /* update the parent pv */
     (*g_env)->CallBooleanMethod(g_env, *g_parent_pv, ArrayList_clear);
-    for (int i=0; i < pv->n; i++)
-    {
+    for (int i=0; i < pv->n; i++) {
         /* create Long value representing this move */
         jobject lval = (*g_env)->CallStaticObjectMethod(
             g_env, Long, Long_valueOf, (jlong)(pv->mv[i]));

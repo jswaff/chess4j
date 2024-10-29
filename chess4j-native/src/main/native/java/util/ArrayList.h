@@ -1,6 +1,4 @@
-#ifndef ARRAYLIST_HEADER_GUARD
-#define ARRAYLIST_HEADER_GUARD
-
+#pragma once
 
 #include <jni.h>
 
@@ -22,6 +20,3 @@ extern jmethodID ArrayList_size;
 #ifdef __cplusplus
 }
 #endif /*__cplusplus*/
-
-
-#endif

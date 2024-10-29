@@ -1,5 +1,4 @@
-#ifndef ILLEGAL_STATE_EXCEPTION_HEADER_GUARD
-#define ILLEGAL_STATE_EXCEPTION_HEADER_GUARD
+#pragma once
 
 #include <jni.h>
 
@@ -16,6 +15,3 @@ extern jclass IllegalStateException;
 #ifdef __cplusplus
 }
 #endif /*__cplusplus*/
-
-
-#endif

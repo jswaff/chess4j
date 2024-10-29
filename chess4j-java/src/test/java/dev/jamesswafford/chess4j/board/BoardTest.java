@@ -73,7 +73,7 @@ public class BoardTest {
         assertTrue(board.hasCastlingRight(BLACK_QUEENSIDE));
 
         assertEquals(Color.WHITE, board.getPlayerToMove());
-        assertNull(board.getEPSquare());
+        assertNull(board.getEpSquare());
         assertEquals(0, board.getFiftyCounter());
         assertEquals(0, board.getMoveCounter());
 
@@ -93,7 +93,7 @@ public class BoardTest {
         assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
         assertEquals(3, board.getMoveCounter());
         assertEquals(1, board.getFiftyCounter());
-        assertNull(board.getEPSquare());
+        assertNull(board.getEpSquare());
     }
 
     @Test
@@ -108,7 +108,7 @@ public class BoardTest {
         assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
         assertEquals(1, board.getMoveCounter());
         assertEquals(0, board.getFiftyCounter());
-        assertNull(board.getEPSquare());
+        assertNull(board.getEpSquare());
     }
 
     @Test
@@ -123,7 +123,7 @@ public class BoardTest {
         assertTrue(board.hasCastlingRight(WHITE_QUEENSIDE));
         assertEquals(2, board.getMoveCounter());
         assertEquals(0, board.getFiftyCounter());
-        assertEquals(C6, board.getEPSquare());
+        assertEquals(C6, board.getEpSquare());
     }
 
     @Test

@@ -1,10 +1,11 @@
-#include <prophet/search.h>
-#include <prophet/parameters.h>
+#include "dev_jamesswafford_chess4j_search_SEE.h"
 
-#include <dev_jamesswafford_chess4j_search_SEE.h>
+#include "../../../../parameters.h"
 #include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
+
+#include <prophet/search.h>
 
 /*
  * Class:     dev_jamesswafford_chess4j_search_SEE
@@ -17,17 +18,14 @@ JNICALL Java_dev_jamesswafford_chess4j_search_SEE_seeNative
 {
     jint retval = 0;
 
-    if (!p4_initialized) 
-    {
-        (*env)->ThrowNew(env, IllegalStateException, "Prophet4 not initialized!");
+    if (!p4_initialized) {
+        (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return 0;
     }
 
-
     /* set the position */
     position_t c4j_pos;
-    if (0 != convert(env, board_obj, &c4j_pos))
-    {
+    if (0 != convert(env, board_obj, &c4j_pos)) {
         (*env)->ThrowNew(env, IllegalStateException, 
             "An error was encountered while converting a position.");
         return 0;

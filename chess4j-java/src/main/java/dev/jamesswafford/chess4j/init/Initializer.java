@@ -1,6 +1,5 @@
 package dev.jamesswafford.chess4j.init;
 
-import dev.jamesswafford.chess4j.App;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
