@@ -38,7 +38,7 @@ public class DrawBoard {
                         }
                     } else if (r.equals(Rank.RANK_5)) {
                         boardBuffer.append("\t");
-                        boardBuffer.append(board.getEPSquare()==null?"no ep":("ep=" + board.getEPSquare()));
+                        boardBuffer.append(board.getEpSquare()==null?"no ep":("ep=" + board.getEpSquare()));
                     } else if (r.equals(Rank.RANK_4)) {
                         boardBuffer.append("\tfifty=").append(board.getFiftyCounter());
                     } else if (r.equals(Rank.RANK_3)) {

@@ -92,8 +92,8 @@ public final class Zobrist {
                 .map(castlingMap::get)
                 .reduce(key, (x,y) -> x ^ y);
 
-        if (b.getEPSquare() != null) {
-            key ^= epMap.get(b.getEPSquare());
+        if (b.getEpSquare() != null) {
+            key ^= epMap.get(b.getEpSquare());
         }
 
         key ^= playerMap.get(b.getPlayerToMove());

@@ -115,16 +115,16 @@ public final class MagicBitboardMoveGenerator implements MoveGenerator {
         if (board.getPlayerToMove()==Color.WHITE) {
             if (caps) {
                 long targets = board.getBlackPieces();
-                if (board.getEPSquare() != null) targets |= Bitboard.squares[board.getEPSquare().value()];
+                if (board.getEpSquare() != null) targets |= Bitboard.squares[board.getEpSquare().value()];
 
                 // attacks west
                 pmap = ((board.getWhitePawns() & ~Bitboard.files[FILE_A.getValue()]) >> 9) & targets;
                 while (pmap != 0) {
                     int toSqVal = Bitboard.msb(pmap);
                     Square toSq = Square.valueOf(toSqVal);
-                    Piece captured = toSq==board.getEPSquare() ? BLACK_PAWN : board.getPiece(toSq);
+                    Piece captured = toSq==board.getEpSquare() ? BLACK_PAWN : board.getPiece(toSq);
                     addPawnMove(moves,WHITE_PAWN,toSq.southEast().get(),toSq,captured,
-                            toSq==board.getEPSquare());
+                            toSq==board.getEpSquare());
                     pmap ^= Bitboard.squares[toSqVal];
                 }
 
@@ -133,8 +133,8 @@ public final class MagicBitboardMoveGenerator implements MoveGenerator {
                 while (pmap != 0) {
                     int toSqVal = Bitboard.msb(pmap);
                     Square toSq = Square.valueOf(toSqVal);
-                    Piece captured = toSq==board.getEPSquare() ? BLACK_PAWN : board.getPiece(toSq);
-                    addPawnMove(moves,WHITE_PAWN,toSq.southWest().get(),toSq,captured,toSq==board.getEPSquare());
+                    Piece captured = toSq==board.getEpSquare() ? BLACK_PAWN : board.getPiece(toSq);
+                    addPawnMove(moves,WHITE_PAWN,toSq.southWest().get(),toSq,captured,toSq==board.getEpSquare());
                     pmap ^= Bitboard.squares[toSqVal];
                 }
 
@@ -164,15 +164,15 @@ public final class MagicBitboardMoveGenerator implements MoveGenerator {
         } else {
             if (caps) {
                 long targets = board.getWhitePieces();
-                if (board.getEPSquare() != null) targets |= Bitboard.squares[board.getEPSquare().value()];
+                if (board.getEpSquare() != null) targets |= Bitboard.squares[board.getEpSquare().value()];
 
                 // attacks west
                 pmap = ((board.getBlackPawns() & ~Bitboard.files[FILE_A.getValue()]) << 7) & targets;
                 while (pmap != 0) {
                     int toSqVal = Bitboard.lsb(pmap);
                     Square toSq = Square.valueOf(toSqVal);
-                    Piece captured = toSq==board.getEPSquare() ? WHITE_PAWN : board.getPiece(toSq);
-                    addPawnMove(moves,BLACK_PAWN,toSq.northEast().get(),toSq,captured,toSq==board.getEPSquare());
+                    Piece captured = toSq==board.getEpSquare() ? WHITE_PAWN : board.getPiece(toSq);
+                    addPawnMove(moves,BLACK_PAWN,toSq.northEast().get(),toSq,captured,toSq==board.getEpSquare());
                     pmap ^= Bitboard.squares[toSqVal];
                 }
 
@@ -181,8 +181,8 @@ public final class MagicBitboardMoveGenerator implements MoveGenerator {
                 while (pmap != 0) {
                     int toSqVal = Bitboard.lsb(pmap);
                     Square toSq = Square.valueOf(toSqVal);
-                    Piece captured = toSq==board.getEPSquare() ? WHITE_PAWN : board.getPiece(toSq);
-                    addPawnMove(moves,BLACK_PAWN,toSq.northWest().get(),toSq,captured,toSq==board.getEPSquare());
+                    Piece captured = toSq==board.getEpSquare() ? WHITE_PAWN : board.getPiece(toSq);
+                    addPawnMove(moves,BLACK_PAWN,toSq.northWest().get(),toSq,captured,toSq==board.getEpSquare());
                     pmap ^= Bitboard.squares[toSqVal];
                 }
 

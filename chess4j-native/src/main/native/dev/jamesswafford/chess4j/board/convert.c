@@ -36,7 +36,7 @@ int convert(JNIEnv *env, jobject board_obj, position_t* pos)
 
     /* set the EP square */
     jmethodID Board_getEPSquare = (*env)->GetMethodID(
-        env, class_Board, "getEPSquare", "()Ldev/jamesswafford/chess4j/board/squares/Square;");
+        env, class_Board, "getEpSquare", "()Ldev/jamesswafford/chess4j/board/squares/Square;");
     jobject ep_sq_obj = (*env)->CallObjectMethod(env, board_obj, Board_getEPSquare);
     if (ep_sq_obj == NULL) {
         pos->ep_sq = NO_SQUARE;

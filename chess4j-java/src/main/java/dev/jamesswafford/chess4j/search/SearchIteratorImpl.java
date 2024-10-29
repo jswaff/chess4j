@@ -12,6 +12,7 @@ import dev.jamesswafford.chess4j.io.PrintLine;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
 import dev.jamesswafford.chess4j.utils.MoveUtils;
+import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,7 +37,9 @@ public class SearchIteratorImpl implements SearchIterator {
     private boolean earlyExitOk = true;
     private boolean skipTimeChecks = false;
 
+    @Setter
     private MoveGenerator moveGenerator;
+    @Setter
     private Search search;
 
     public SearchIteratorImpl() {
@@ -68,14 +71,6 @@ public class SearchIteratorImpl implements SearchIterator {
     @Override
     public void setEarlyExitOk(boolean earlyExitOk) {
         this.earlyExitOk = earlyExitOk;
-    }
-
-    public void setMoveGenerator(MoveGenerator moveGenerator) {
-        this.moveGenerator = moveGenerator;
-    }
-
-    public void setSearch(Search search) {
-        this.search = search;
     }
 
     @Override
@@ -170,7 +165,7 @@ public class SearchIteratorImpl implements SearchIterator {
             // the search may or may not have a PV.  If it does, we can use it since the
             // last iteration's PV was tried first
             List<Move> searchPV = search.getPv();
-            if (searchPV.size() > 0) {
+            if (!searchPV.isEmpty()) {
                 pv = new ArrayList<>(searchPV);
             }
 
@@ -216,7 +211,7 @@ public class SearchIteratorImpl implements SearchIterator {
             printSearchSummary(depth, startTime, search.getSearchStats());
         }
 
-        assert(pv.size() > 0);
+        assert(!pv.isEmpty());
         assert(MoveUtils.isLineValid(pv, board));
 
         // if we are running with assertions enabled and the native library is loaded, verify equality
@@ -331,7 +326,7 @@ public class SearchIteratorImpl implements SearchIterator {
         );
 
         // effective branching factor metrics
-        StringBuilder sb = new StringBuilder("");
+        StringBuilder sb = new StringBuilder();
         double totalEbf = 0.0;
         int numEbfs = 0;
         for (int i=2;i<=Math.min(lastDepth, 12);i++) {
@@ -339,11 +334,11 @@ public class SearchIteratorImpl implements SearchIterator {
                 double ebf = stats.nodesByIteration.get(i) / Double.valueOf(stats.nodesByIteration.get(i - 1));
                 totalEbf += ebf;
                 ++numEbfs;
-                sb.append(", i" + i + ": " + df.format(ebf));
+                sb.append(", i").append(i).append(": ").append(df.format(ebf));
             }
         }
         double avgEbf = totalEbf / numEbfs;
-        LOGGER.info("# ebf avg: " + df.format(avgEbf) + sb.toString());
+        LOGGER.info("# ebf avg: " + df.format(avgEbf) + sb);
     }
 
     private native void iterateNative(Board board, int maxDepth, List<Long> pv);
