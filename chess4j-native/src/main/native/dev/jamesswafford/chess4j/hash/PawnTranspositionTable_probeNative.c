@@ -7,6 +7,8 @@
 #include <prophet/hash.h>
 #include <prophet/position.h>
 
+#include <stdint.h>
+
 extern hash_table_t phtbl;
 
 /*

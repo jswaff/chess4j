@@ -44,8 +44,6 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         }
     }
 
-    private native void clearNative();
-
     @Override
     public long getNumCollisions() {
         if (Initializer.nativeCodeInitialized()) {
@@ -70,24 +68,8 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         return numProbes;
     }
 
-    public PawnTranspositionTableEntry probe(long pawnKey) {
-
-        numProbes++;
-        PawnTranspositionTableEntry te = table[getTableIndex(pawnKey)];
-
-        if (te != null) {
-            // compare full signature to avoid collisions
-            if (te.getZobristKey() != pawnKey) {
-                numCollisions++;
-                return null;
-            } else {
-                numHits++;
-            }
-        }
-
-        return te;
-    }
-
+    // when native code is enabled, probe in the native layer so that the native and Java searches
+    // produce equivalent results.
     public PawnTranspositionTableEntry probe(Board board) {
         if (Initializer.nativeCodeInitialized()) {
             String fen = FENBuilder.createFen(board, false);
@@ -98,28 +80,34 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         }
     }
 
-    private native long probeNative(String fen);
+    private PawnTranspositionTableEntry probe(long pawnKey) {
+        numProbes++;
+        PawnTranspositionTableEntry entry = table[getTableIndex(pawnKey)];
 
-    public void store(long pawnKey, int mgscore, int egscore) {
-        PawnTranspositionTableEntry te = new PawnTranspositionTableEntry(pawnKey, mgscore, egscore);
-        table[getTableIndex(pawnKey)] = te;
+        if (entry != null) {
+            // compare full signature to avoid collisions
+            if (entry.getZobristKey() != pawnKey) {
+                numCollisions++;
+                return null;
+            } else {
+                numHits++;
+            }
+        }
+
+        return entry;
     }
 
-    /*
-     * This is a convenience method, wrapping the previous "store".  It also serves as a hook into the native
-     * code.  The only time this method would be used when native code is enabled is when assertions are on,
-     * to verify search equality.
-     */
+    // when native code is enabled, store in the native layer so that the native and Java searches
+    // produce equivalent results.
     public void store(Board board, int mgscore, int egscore) {
+        PawnTranspositionTableEntry entry = new PawnTranspositionTableEntry(board.getPawnKey(), mgscore, egscore);
         if (Initializer.nativeCodeInitialized()) {
-            PawnTranspositionTableEntry entry = new PawnTranspositionTableEntry(board.getPawnKey(), mgscore, egscore);
-            storeNative(board, entry.getVal());
+            String fen = FENBuilder.createFen(board, false);
+            storeNative(fen, entry.getVal());
         } else {
-            store(board.getPawnKey(), mgscore, egscore);
+            table[getTableIndex(board.getPawnKey())] = entry;
         }
     }
-
-    private native void storeNative(Board board, long val);
 
     @Override
     protected void createTable(long sizeBytes) {
@@ -147,6 +135,8 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         return PawnTranspositionTableEntry.sizeOf();
     }
 
+    private native void clearNative();
+
     private native long getNumCollisionsNative();
 
     private native long getNumHitsNative();
@@ -154,5 +144,9 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     private native long getNumProbesNative();
 
     private native void resizeNative(long sizeBytes);
+
+    private native long probeNative(String fen);
+
+    private native void storeNative(String fen, long val);
 
 }

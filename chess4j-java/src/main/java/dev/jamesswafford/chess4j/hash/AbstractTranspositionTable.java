@@ -1,5 +1,8 @@
 package dev.jamesswafford.chess4j.hash;
 
+import lombok.Getter;
+
+@Getter
 public abstract class AbstractTranspositionTable {
 
     protected long numProbes;
@@ -18,18 +21,6 @@ public abstract class AbstractTranspositionTable {
 
     protected int getTableIndex(long zobristKey) {
         return (int)(zobristKey & 0x7FFFFFFF) % tableCapacity();
-    }
-
-    public long getNumCollisions() {
-        return numCollisions;
-    }
-
-    public long getNumHits() {
-        return numHits;
-    }
-
-    public long getNumProbes() {
-        return numProbes;
     }
 
     protected abstract void createTable(long maxBytes);
