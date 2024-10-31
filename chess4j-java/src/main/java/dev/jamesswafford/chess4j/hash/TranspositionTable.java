@@ -86,6 +86,17 @@ public class TranspositionTable extends AbstractTranspositionTable {
         return score >= getCheckMateBound();
     }
 
+    public TranspositionTableEntry probe(Board board) {
+        if (Initializer.nativeCodeInitialized()) {
+            String fen = FENBuilder.createFen(board, false);
+            long nativeVal = probeNative(fen);
+            return nativeVal==0 ? null : new TranspositionTableEntry(board.getZobristKey(), nativeVal);
+        } else {
+            return probe(board.getZobristKey());
+        }
+    }
+
+    // TODO: make this private
     public TranspositionTableEntry probe(long zobristKey) {
         numProbes++;
         TranspositionTableEntry te = table[getTableIndex(zobristKey)];
@@ -103,29 +114,6 @@ public class TranspositionTable extends AbstractTranspositionTable {
         return te;
     }
 
-    public TranspositionTableEntry probe(Board board) {
-        if (Initializer.nativeCodeInitialized()) {
-            String fen = FENBuilder.createFen(board, false);
-            long nativeVal = probeNative(fen);
-            return nativeVal==0 ? null : new TranspositionTableEntry(board.getZobristKey(), nativeVal);
-        } else {
-            return probe(board.getZobristKey());
-        }
-    }
-
-    /**
-     * Store an entry in the transposition table, Gerbil style.  Meaning, for now I'm skirting around
-     * dealing with the headache that is storing mate scores by storing them as bounds only.
-     */
-    public void store(long zobristKey, TranspositionTableEntryType entryType, int score, int depth, Move move) {
-        table[getTableIndex(zobristKey)] = buildHashTableEntry(zobristKey, entryType, score, depth, move);
-    }
-
-    /*
-     * This is a convenience method, wrapping the previous "store".  It also serves as a hook into the native
-     * code.  The only time this method would be used when native code is enabled is when assertions are on,
-     * to verify search equality.
-     */
     public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move) {
         if (Initializer.nativeCodeInitialized()) {
             TranspositionTableEntry entry = buildHashTableEntry(board.getZobristKey(), entryType, score, depth, move);
@@ -134,6 +122,11 @@ public class TranspositionTable extends AbstractTranspositionTable {
         } else {
             store(board.getZobristKey(), entryType, score, depth, move);
         }
+    }
+
+    // TODO: make this private
+    public void store(long zobristKey, TranspositionTableEntryType entryType, int score, int depth, Move move) {
+        table[getTableIndex(zobristKey)] = buildHashTableEntry(zobristKey, entryType, score, depth, move);
     }
 
     private TranspositionTableEntry buildHashTableEntry(long zobristKey, TranspositionTableEntryType entryType,

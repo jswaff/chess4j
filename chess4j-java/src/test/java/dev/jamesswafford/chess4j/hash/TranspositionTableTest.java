@@ -43,31 +43,28 @@ public class TranspositionTableTest {
     public void storeAndProbeWithNegativeScore() {
         ttable.clear();
         board.resetBoard();
-        long key = Zobrist.calculateBoardKey(board);
         // shouldn't be anything
-        assertNull(ttable.probe(key));
+        assertNull(ttable.probe(board));
 
         // now store and reload
         Move m = new Move(WHITE_PAWN, E2, E4);
-        ttable.store(key, LOWER_BOUND, -100, 3, m);
-        TranspositionTableEntry tte = ttable.probe(key);
+        ttable.store(board, LOWER_BOUND, -100, 3, m);
+        TranspositionTableEntry tte = ttable.probe(board);
         assertEquals( LOWER_BOUND, tte.getType());
         assertEquals(-100, tte.getScore());
         assertEquals(3, tte.getDepth());
         assertEquals(m, tte.getMove());
 
-        TranspositionTableEntry lbe = new TranspositionTableEntry(key,  LOWER_BOUND,-100,3, m);
+        TranspositionTableEntry lbe = new TranspositionTableEntry(board.getZobristKey(),  LOWER_BOUND,-100,3, m);
         assertEquals(tte, lbe);
 
         // now make move and reprobe
         Undo u = board.applyMove(m);
-        key = Zobrist.calculateBoardKey(board);
-        assertNull(ttable.probe(key));
+        assertNull(ttable.probe(board));
 
         // finally undo move and reprobe again
         board.undoMove(u);
-        key = Zobrist.calculateBoardKey(board);
-        tte = ttable.probe(key);
+        tte = ttable.probe(board);
         assertEquals(lbe, tte);
     }
 
@@ -80,11 +77,10 @@ public class TranspositionTableTest {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("expected capture"));
 
-        long key = Zobrist.calculateBoardKey(board);
-        assertNull(ttable.probe(key));
+        assertNull(ttable.probe(board));
 
-        ttable.store(key, EXACT_SCORE,100,3,capture);
-        Move capture2 = ttable.probe(key).getMove();
+        ttable.store(board, EXACT_SCORE,100,3,capture);
+        Move capture2 = ttable.probe(board).getMove();
         assertNotNull(capture2.captured());
         assertEquals(capture, capture2);
     }
