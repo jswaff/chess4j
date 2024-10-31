@@ -96,8 +96,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
         }
     }
 
-    // TODO: make this private
-    public TranspositionTableEntry probe(long zobristKey) {
+    private TranspositionTableEntry probe(long zobristKey) {
         numProbes++;
         TranspositionTableEntry te = table[getTableIndex(zobristKey)];
 
@@ -120,13 +119,9 @@ public class TranspositionTable extends AbstractTranspositionTable {
             String fen = FENBuilder.createFen(board, false);
             storeNative(fen, entry.getVal());
         } else {
-            store(board.getZobristKey(), entryType, score, depth, move);
+            long key = board.getZobristKey();
+            table[getTableIndex(key)] = buildHashTableEntry(key, entryType, score, depth, move);
         }
-    }
-
-    // TODO: make this private
-    public void store(long zobristKey, TranspositionTableEntryType entryType, int score, int depth, Move move) {
-        table[getTableIndex(zobristKey)] = buildHashTableEntry(zobristKey, entryType, score, depth, move);
     }
 
     private TranspositionTableEntry buildHashTableEntry(long zobristKey, TranspositionTableEntryType entryType,

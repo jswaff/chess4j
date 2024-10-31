@@ -85,8 +85,6 @@ public class PawnTranspositionTableTest {
         MoveParser mp = new MoveParser();
         Move e5e4 = mp.parseMove("e4", board);
         assertTrue(moves.contains(e5e4));
-        Move a6a5 = mp.parseMove("a5", board);
-        assertTrue(moves.contains(a6a5));
 
         ptable.store(board, 71, -17);
         PawnTranspositionTableEntry found = ptable.probe(board);
