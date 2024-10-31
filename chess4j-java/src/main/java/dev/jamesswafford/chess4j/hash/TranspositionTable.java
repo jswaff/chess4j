@@ -4,6 +4,7 @@ import dev.jamesswafford.chess4j.Constants;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.io.FENBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,8 +45,6 @@ public class TranspositionTable extends AbstractTranspositionTable {
             clearNative();
         }
     }
-
-    private native void clearNative();
 
     @Override
     public long getNumCollisions() {
@@ -105,16 +104,14 @@ public class TranspositionTable extends AbstractTranspositionTable {
     }
 
     public TranspositionTableEntry probe(Board board) {
-
         if (Initializer.nativeCodeInitialized()) {
-            long nativeVal = probeNative(board);
+            String fen = FENBuilder.createFen(board, false);
+            long nativeVal = probeNative(fen);
             return nativeVal==0 ? null : new TranspositionTableEntry(board.getZobristKey(), nativeVal);
         } else {
             return probe(board.getZobristKey());
         }
     }
-
-    private native long probeNative(Board board);
 
     /**
      * Store an entry in the transposition table, Gerbil style.  Meaning, for now I'm skirting around
@@ -132,7 +129,8 @@ public class TranspositionTable extends AbstractTranspositionTable {
     public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move) {
         if (Initializer.nativeCodeInitialized()) {
             TranspositionTableEntry entry = buildHashTableEntry(board.getZobristKey(), entryType, score, depth, move);
-            storeNative(board, entry.getVal());
+            String fen = FENBuilder.createFen(board, false);
+            storeNative(fen, entry.getVal());
         } else {
             store(board.getZobristKey(), entryType, score, depth, move);
         }
@@ -164,8 +162,6 @@ public class TranspositionTable extends AbstractTranspositionTable {
         return new TranspositionTableEntry(zobristKey, entryType, score, depth, move);
     }
 
-    private native void storeNative(Board board, long val);
-
     @Override
     protected void createTable(long sizeBytes) {
         int numEntries = (int)(sizeBytes / sizeOfEntry());
@@ -192,6 +188,8 @@ public class TranspositionTable extends AbstractTranspositionTable {
         return TranspositionTableEntry.sizeOf();
     }
 
+    private native void clearNative();
+
     private native long getNumCollisionsNative();
 
     private native long getNumHitsNative();
@@ -199,4 +197,9 @@ public class TranspositionTable extends AbstractTranspositionTable {
     private native long getNumProbesNative();
 
     private native void resizeNative(long sizeBytes);
+
+    private native long probeNative(String fen);
+
+    private native void storeNative(String fen, long val);
+
 }

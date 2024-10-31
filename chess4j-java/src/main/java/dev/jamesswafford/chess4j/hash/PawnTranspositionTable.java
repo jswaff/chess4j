@@ -97,8 +97,6 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         return entry;
     }
 
-    // when native code is enabled, store in the native layer so that the native and Java searches
-    // produce equivalent results.
     public void store(Board board, int mgscore, int egscore) {
         PawnTranspositionTableEntry entry = new PawnTranspositionTableEntry(board.getPawnKey(), mgscore, egscore);
         if (Initializer.nativeCodeInitialized()) {
