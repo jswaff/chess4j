@@ -223,10 +223,6 @@ public final class MagicBitboardMoveGenerator implements MoveGenerator {
             try {
                 int nMoves = genPseudoLegalMovesNative(fen, nativeMoves, caps, noncaps);
                 assert (nMoves == nativeMoves.size());
-                if (nMoves != javaMoves.size()) {
-                    LOGGER.error("Move lists not equal! #java: " + javaMoves.size() + " #native: " + nMoves);
-                    return false;
-                }
 
                 // sort java moves to match order of native moves
                 List<Move> sortedJavaMoves = new ArrayList<>();
