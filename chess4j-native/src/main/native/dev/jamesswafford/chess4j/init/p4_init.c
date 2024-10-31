@@ -2,7 +2,6 @@
 
 #include "../../../../parameters.h"
 #include "../io/PrintLine.h"
-#include "../pieces/Piece.h"
 #include "../../../../java/lang/IllegalStateException.h"
 #include "../../../../java/lang/Long.h"
 #include "../../../../java/util/ArrayList.h"
@@ -42,11 +41,6 @@ JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_init_Initializer_p4Ini
 
     if (0 != PrintLine_register(env)) {
         (*env)->ThrowNew(env, IllegalStateException, "PrintLine not initialized!");
-        return false;
-    }
-
-    if (0 != Piece_register(env)) {
-        (*env)->ThrowNew(env, IllegalStateException, "Piece not initialized!");
         return false;
     }
 
