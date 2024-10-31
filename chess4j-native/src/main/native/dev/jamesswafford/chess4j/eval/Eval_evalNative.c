@@ -33,11 +33,14 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_eval_Eval_evalNative
         char error_buffer[255];
         sprintf(error_buffer, "Could not set position: %s\n", fen);
         (*env)->ThrowNew(env, IllegalStateException, error_buffer);
-        return 0;
+        goto cleanup;
     }
 
     int32_t native_score = eval(&pos, (bool)material_only, false);
     retval = (jint) native_score;
+
+cleanup:
+    (*env)->ReleaseStringUTFChars(env, board_fen, fen);
 
     return retval;
 }

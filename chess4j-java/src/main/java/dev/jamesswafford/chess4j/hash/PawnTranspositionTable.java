@@ -2,6 +2,7 @@ package dev.jamesswafford.chess4j.hash;
 
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.io.FENBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -89,14 +90,15 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     public PawnTranspositionTableEntry probe(Board board) {
         if (Initializer.nativeCodeInitialized()) {
-            long nativeVal = probeNative(board);
+            String fen = FENBuilder.createFen(board, false);
+            long nativeVal = probeNative(fen);
             return nativeVal==0 ? null : new PawnTranspositionTableEntry(board.getPawnKey(), nativeVal);
         } else {
             return probe(board.getPawnKey());
         }
     }
 
-    private native long probeNative(Board board);
+    private native long probeNative(String fen);
 
     public void store(long pawnKey, int mgscore, int egscore) {
         PawnTranspositionTableEntry te = new PawnTranspositionTableEntry(pawnKey, mgscore, egscore);
