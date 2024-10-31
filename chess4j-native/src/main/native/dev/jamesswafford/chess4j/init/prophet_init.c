@@ -1,6 +1,7 @@
 #include "dev_jamesswafford_chess4j_init_Initializer.h"
 
-#include "../../../../parameters.h"
+#include "../prophet-jni.h"
+
 #include "../io/PrintLine.h"
 #include "../../../../java/lang/IllegalStateException.h"
 #include "../../../../java/lang/Long.h"
@@ -11,15 +12,15 @@
 extern bool logging_enabled;
 extern int init();
 
-volatile bool p4_initialized = false;
+volatile bool prophet_initialized = false;
 
 /*
  * Class:     dev_jamesswafford_chess4j_init_Initializer
- * Method:    p4Init
+ * Method:    prophetInit
  * Signature: ()Z
  */
-JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_init_Initializer_p4Init
-  (JNIEnv* env, jclass UNUSED(clazz))
+JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_init_Initializer_prophetInit
+  (JNIEnv *env, jclass UNUSED(clazz))
 {
     logging_enabled = false;
     init();
@@ -44,7 +45,7 @@ JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_init_Initializer_p4Ini
         return false;
     }
 
-    p4_initialized = true;
+    prophet_initialized = true;
 
     return true;
 }

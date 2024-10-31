@@ -1,7 +1,6 @@
 #include "dev_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator.h"
 
-#include "../../../../parameters.h"
-#include "../init/p4_init.h"
+#include "../prophet-jni.h"
 #include "../../../../java/util/ArrayList.h"
 #include "../../../../java/lang/IllegalStateException.h"
 #include "../../../../java/lang/Long.h"
@@ -24,7 +23,7 @@ JNICALL Java_dev_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator_genPse
     jint retval = 0;
 
     /* ensure the static library is initialized */
-    if (!p4_initialized)  {
+    if (!prophet_initialized)  {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return 0;
     }

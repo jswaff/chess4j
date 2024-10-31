@@ -70,7 +70,7 @@ public final class Initializer {
                 File libFile = copyLibraryToFile();
                 System.load(libFile.getPath());
                 LOGGER.info("# Prophet loaded, initializing...");
-                if (!p4Init()) {
+                if (!prophetInit()) {
                     attemptToUseNative = false;
                     throw new IllegalStateException("Could not initialize p4!");
                 }
@@ -81,7 +81,7 @@ public final class Initializer {
         }
     }
 
-    private static native boolean p4Init();
+    private static native boolean prophetInit();
 
     public static boolean nativeCodeInitialized() {
         return nativeCodeInitialized;

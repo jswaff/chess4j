@@ -1,7 +1,6 @@
 #include "dev_jamesswafford_chess4j_search_SearchIteratorImpl.h"
 
-#include "../../../../parameters.h"
-#include "../init/p4_init.h"
+#include "../prophet-jni.h"
 #include "../../../../java/util/ArrayList.h"
 #include "../../../../java/lang/IllegalStateException.h"
 #include "../../../../java/lang/Long.h"
@@ -24,7 +23,7 @@ JNIEXPORT void JNICALL Java_dev_jamesswafford_chess4j_search_SearchIteratorImpl_
   (JNIEnv *env, jobject UNUSED(clazz), jstring board_fen, jint max_depth, jobject pv_moves)
 {
     /* ensure the static library is initialized */
-    if (!p4_initialized) {
+    if (!prophet_initialized) {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return;
     }

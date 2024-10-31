@@ -1,7 +1,6 @@
 #include "dev_jamesswafford_chess4j_search_AlphaBetaSearch.h"
 
-#include "../../../../parameters.h"
-#include "../init/p4_init.h"
+#include "../prophet-jni.h"
 #include "../io/PrintLine.h"
 #include "../../../../java/lang/IllegalStateException.h"
 #include "../../../../java/lang/Long.h"
@@ -30,7 +29,6 @@ color_t g_ptm;
 /* flag to stop the search, or in our case as notification the search was stopped */
 extern volatile bool stop_search;
 
-
 static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
 
 /*
@@ -45,7 +43,7 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     jint retval = 0;
 
     /* ensure the static library is initialized */
-    if (!p4_initialized) {
+    if (!prophet_initialized) {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return 0;
     }

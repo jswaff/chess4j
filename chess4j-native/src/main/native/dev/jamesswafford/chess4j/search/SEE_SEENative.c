@@ -1,7 +1,6 @@
 #include "dev_jamesswafford_chess4j_search_SEE.h"
 
-#include "../../../../parameters.h"
-#include "../init/p4_init.h"
+#include "../prophet-jni.h"
 #include "../../../../java/lang/IllegalStateException.h"
 
 #include <prophet/search.h>
@@ -16,7 +15,7 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_SEE_seeNative
 {
     jint retval = 0;
 
-    if (!p4_initialized) {
+    if (!prophet_initialized) {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return 0;
     }

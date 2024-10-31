@@ -1,7 +1,6 @@
 #include "dev_jamesswafford_chess4j_search_AlphaBetaSearch.h"
 
-#include "../../../../parameters.h"
-#include "../init/p4_init.h"
+#include "../prophet-jni.h"
 #include "../../../../java/lang/IllegalStateException.h"
 
 #include <stdbool.h>
@@ -17,7 +16,7 @@ JNIEXPORT void JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_ski
   (JNIEnv *env, jobject UNUSED(iterator_obj), jboolean java_skip_time_checks)
 {
     /* ensure the static library is initialized */
-    if (!p4_initialized) {
+    if (!prophet_initialized) {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return;
     }
