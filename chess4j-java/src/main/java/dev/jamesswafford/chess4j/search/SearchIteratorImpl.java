@@ -8,6 +8,7 @@ import dev.jamesswafford.chess4j.hash.PawnTranspositionTable;
 import dev.jamesswafford.chess4j.hash.TTHolder;
 import dev.jamesswafford.chess4j.hash.TranspositionTable;
 import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.io.PrintLine;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
@@ -253,7 +254,8 @@ public class SearchIteratorImpl implements SearchIterator {
         List<Long> nativePV = new ArrayList<>();
         try {
             LOGGER.debug("# starting native iterator maxDepth: {}", maxDepth);
-            iterateNative(board, maxDepth, nativePV);
+            String fen = FENBuilder.createFen(board, false);
+            iterateNative(fen, maxDepth, nativePV);
             return MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove());
         } catch (IllegalStateException e) {
             LOGGER.error(e);
@@ -341,6 +343,6 @@ public class SearchIteratorImpl implements SearchIterator {
         LOGGER.info("# ebf avg: " + df.format(avgEbf) + sb);
     }
 
-    private native void iterateNative(Board board, int maxDepth, List<Long> pv);
+    private native void iterateNative(String fen, int maxDepth, List<Long> pv);
 
 }
