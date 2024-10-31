@@ -1,7 +1,6 @@
 #include "dev_jamesswafford_chess4j_search_SEE.h"
 
 #include "../../../../parameters.h"
-#include "../board/Board.h"
 #include "../init/p4_init.h"
 #include "../../../../java/lang/IllegalStateException.h"
 
@@ -10,11 +9,10 @@
 /*
  * Class:     dev_jamesswafford_chess4j_search_SEE
  * Method:    seeNative
- * Signature: (Ldev/jamesswafford/chess4j/board/Board;J)I
+ * Signature: (Ljava/lang/String;J)I
  */
-JNIEXPORT jint 
-JNICALL Java_dev_jamesswafford_chess4j_search_SEE_seeNative
-  (JNIEnv *env, jclass UNUSED(clazz), jobject board_obj, jlong mv)
+JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_SEE_seeNative
+  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jlong mv)
 {
     jint retval = 0;
 
@@ -23,16 +21,21 @@ JNICALL Java_dev_jamesswafford_chess4j_search_SEE_seeNative
         return 0;
     }
 
-    /* set the position */
-    position_t c4j_pos;
-    if (0 != convert(env, board_obj, &c4j_pos)) {
-        (*env)->ThrowNew(env, IllegalStateException, 
-            "An error was encountered while converting a position.");
-        return 0;
+    /* set the position according to the FEN */
+    const char* fen = (*env)->GetStringUTFChars(env, board_fen, 0);
+    position_t pos;
+    if (!set_pos(&pos, fen)) {
+        char error_buffer[255];
+        sprintf(error_buffer, "Could not set position: %s\n", fen);
+        (*env)->ThrowNew(env, IllegalStateException, error_buffer);
+        goto cleanup;
     }
 
-    int32_t native_score = see(&c4j_pos, (move_t)mv);
+    int32_t native_score = see(&pos, (move_t)mv);
     retval = (jint) native_score;
+
+cleanup:
+    (*env)->ReleaseStringUTFChars(env, board_fen, fen);
 
     return retval;
 }

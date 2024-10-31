@@ -19,8 +19,7 @@
  */
 JNIEXPORT jint 
 JNICALL Java_dev_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator_genPseudoLegalMovesNative
-  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jobject jmoves, 
-    jboolean caps, jboolean noncaps)
+  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jobject jmoves, jboolean caps, jboolean noncaps)
 {
     jint retval = 0;
 
@@ -48,8 +47,7 @@ JNICALL Java_dev_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator_genPse
     int num_moves = 0;
     for (const move_t* mp=moves; mp<endp; mp++)  {
         /* create Long value representing this move */
-        jobject lval = (*env)->CallStaticObjectMethod(
-            env, Long, Long_valueOf, (jlong)*mp);
+        jobject lval = (*env)->CallStaticObjectMethod(env, Long, Long_valueOf, (jlong)*mp);
 
         /* add to java list */
         (*env)->CallBooleanMethod(env, jmoves, ArrayList_add, lval);
