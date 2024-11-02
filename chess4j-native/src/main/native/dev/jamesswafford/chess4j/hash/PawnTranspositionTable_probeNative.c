@@ -1,7 +1,7 @@
 #include "dev_jamesswafford_chess4j_hash_PawnTranspositionTable.h"
 
 #include "../prophet-jni.h"
-#include "../../../../java/lang/IllegalStateException.h"
+#include "java/lang/IllegalStateException.h"
 
 #include <prophet/hash.h>
 #include <prophet/position.h>

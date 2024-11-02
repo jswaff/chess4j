@@ -3,9 +3,9 @@
 #include "../prophet-jni.h"
 
 #include "../io/PrintLine.h"
-#include "../../../../java/lang/IllegalStateException.h"
-#include "../../../../java/lang/Long.h"
-#include "../../../../java/util/ArrayList.h"
+#include "java/lang/IllegalStateException.h"
+#include "java/lang/Long.h"
+#include "java/util/ArrayList.h"
 
 #include <stdbool.h>
 

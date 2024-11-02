@@ -1,7 +1,7 @@
 #include "dev_jamesswafford_chess4j_search_SEE.h"
 
 #include "../prophet-jni.h"
-#include "../../../../java/lang/IllegalStateException.h"
+#include "java/lang/IllegalStateException.h"
 
 #include <prophet/search.h>
 

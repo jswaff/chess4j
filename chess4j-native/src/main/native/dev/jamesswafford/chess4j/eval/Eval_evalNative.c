@@ -1,7 +1,7 @@
 #include <dev_jamesswafford_chess4j_eval_Eval.h>
 
 #include "../prophet-jni.h"
-#include "../../../../java/lang/IllegalStateException.h"
+#include "java/lang/IllegalStateException.h"
 
 #include <prophet/eval.h>
 #include <prophet/position.h>

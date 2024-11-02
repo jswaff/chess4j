@@ -1,7 +1,7 @@
 #include "dev_jamesswafford_chess4j_search_AlphaBetaSearch.h"
 
 #include "../prophet-jni.h"
-#include "../../../../java/lang/IllegalStateException.h"
+#include "java/lang/IllegalStateException.h"
 
 jobject g_pv_callback = NULL;
 
