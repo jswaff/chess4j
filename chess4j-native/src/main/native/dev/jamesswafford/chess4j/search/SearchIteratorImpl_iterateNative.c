@@ -1,6 +1,6 @@
 #include "dev_jamesswafford_chess4j_search_SearchIteratorImpl.h"
 
-#include "../prophet-jni.h"
+#include "dev/jamesswafford/chess4j/prophet-jni.h"
 #include "java/util/ArrayList.h"
 #include "java/lang/IllegalStateException.h"
 #include "java/lang/Long.h"

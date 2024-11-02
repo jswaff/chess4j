@@ -1,7 +1,7 @@
 #include "dev_jamesswafford_chess4j_search_AlphaBetaSearch.h"
 
-#include "../prophet-jni.h"
-#include "../io/PrintLine.h"
+#include "dev/jamesswafford/chess4j/prophet-jni.h"
+#include "dev/jamesswafford/chess4j/io/PrintLine.h"
 #include "java/lang/IllegalStateException.h"
 #include "java/lang/Long.h"
 #include "java/util/ArrayList.h"
