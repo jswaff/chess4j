@@ -1,7 +1,9 @@
 package dev.jamesswafford.chess4j.hash;
 
 import io.vavr.Tuple2;
+import lombok.Getter;
 
+@Getter
 public class PawnTranspositionTableEntry {
 
     private final long zobristKey;
@@ -26,12 +28,6 @@ public class PawnTranspositionTableEntry {
         assert(egscore <= 32767);
         val |= (long)egscore + 32767;
     }
-
-    public long getZobristKey() {
-        return zobristKey;
-    }
-
-    public long getVal() { return val; }
 
     public Tuple2<Integer, Integer> getScore() {
         return new Tuple2<>(getMgscore(), getEgscore());

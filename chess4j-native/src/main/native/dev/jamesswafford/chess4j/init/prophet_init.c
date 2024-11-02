@@ -1,26 +1,26 @@
 #include "dev_jamesswafford_chess4j_init_Initializer.h"
 
-#include "../../../../parameters.h"
-#include "../io/PrintLine.h"
-#include "../pieces/Piece.h"
-#include "../../../../java/lang/IllegalStateException.h"
-#include "../../../../java/lang/Long.h"
-#include "../../../../java/util/ArrayList.h"
+#include "../prophet-jni.h"
+
+#include "dev/jamesswafford/chess4j/io/PrintLine.h"
+#include "java/lang/IllegalStateException.h"
+#include "java/lang/Long.h"
+#include "java/util/ArrayList.h"
 
 #include <stdbool.h>
 
 extern bool logging_enabled;
 extern int init();
 
-volatile bool p4_initialized = false;
+volatile bool prophet_initialized = false;
 
 /*
  * Class:     dev_jamesswafford_chess4j_init_Initializer
- * Method:    p4Init
+ * Method:    prophetInit
  * Signature: ()Z
  */
-JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_init_Initializer_p4Init
-  (JNIEnv* env, jclass UNUSED(clazz))
+JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_init_Initializer_prophetInit
+  (JNIEnv *env, jclass UNUSED(clazz))
 {
     logging_enabled = false;
     init();
@@ -45,12 +45,7 @@ JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_init_Initializer_p4Ini
         return false;
     }
 
-    if (0 != Piece_register(env)) {
-        (*env)->ThrowNew(env, IllegalStateException, "Piece not initialized!");
-        return false;
-    }
-
-    p4_initialized = true;
+    prophet_initialized = true;
 
     return true;
 }

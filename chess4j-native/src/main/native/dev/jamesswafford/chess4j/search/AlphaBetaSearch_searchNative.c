@@ -1,12 +1,10 @@
 #include "dev_jamesswafford_chess4j_search_AlphaBetaSearch.h"
 
-#include "../../../../parameters.h"
-#include "../board/Board.h"
-#include "../init/p4_init.h"
-#include "../io/PrintLine.h"
-#include "../../../../java/lang/IllegalStateException.h"
-#include "../../../../java/lang/Long.h"
-#include "../../../../java/util/ArrayList.h"
+#include "dev/jamesswafford/chess4j/prophet-jni.h"
+#include "dev/jamesswafford/chess4j/io/PrintLine.h"
+#include "java/lang/IllegalStateException.h"
+#include "java/lang/Long.h"
+#include "java/util/ArrayList.h"
 
 #include <prophet/const.h>
 #include <prophet/search.h>
@@ -31,38 +29,39 @@ color_t g_ptm;
 /* flag to stop the search, or in our case as notification the search was stopped */
 extern volatile bool stop_search;
 
-
 static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
-
 
 /*
  * Class:     dev_jamesswafford_chess4j_search_AlphaBetaSearch
  * Method:    searchNative
- * Signature: (Ldev/jamesswafford/chess4j/board/Board;Ljava/util/List;IIILdev/jamesswafford/chess4j/search/SearchStats;JJ)I
+ * Signature: (Ljava/lang/String;Ljava/util/List;IIILdev/jamesswafford/chess4j/search/SearchStats;JJ)I
  */
 JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_searchNative
-  (JNIEnv *env, jobject search_obj, jobject board_obj, jobject parent_pv, jint depth, 
-    jint alpha, jint beta, jobject search_stats, jlong start_time, jlong stop_time)
+  (JNIEnv *env, jobject search_obj, jstring board_fen, jobject parent_pv, jint depth,
+  jint alpha, jint beta, jobject search_stats, jlong start_time, jlong stop_time)
 {
     jint retval = 0;
 
     /* ensure the static library is initialized */
-    if (!p4_initialized) {
+    if (!prophet_initialized) {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return 0;
     }
 
-    /* set the position */
-    position_t c4j_pos;
-    if (0 != convert(env, board_obj, &c4j_pos)) {
-        (*env)->ThrowNew(env, IllegalStateException, "An error was encountered while converting a position.");
-        return 0;
+    /* set the position according to the FEN */
+    const char* fen = (*env)->GetStringUTFChars(env, board_fen, 0);
+    position_t pos;
+    if (!set_pos(&pos, fen)) {
+        char error_buffer[255];
+        sprintf(error_buffer, "Could not set position: %s\n", fen);
+        (*env)->ThrowNew(env, IllegalStateException, error_buffer);
+        goto cleanup;
     }
 
     /* remember some variables to use in the PV callback */
     g_env = env;
     g_parent_pv = &parent_pv;
-    g_ptm = c4j_pos.player;
+    g_ptm = pos.player;
 
     /* set up the search options */
     search_options_t search_opts;
@@ -80,7 +79,7 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
 
     /* perform the search */
     move_line_t pv;
-    int32_t native_score = search(&c4j_pos, &pv, depth, alpha, beta, moves, undos,
+    int32_t native_score = search(&pos, &pv, depth, alpha, beta, moves, undos,
         &native_stats, &search_opts);
     retval = (jint) native_score;
 
@@ -128,6 +127,10 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     /* cleanup and get out */
     g_parent_pv = 0;
     g_env = 0;
+
+
+cleanup:
+    (*env)->ReleaseStringUTFChars(env, board_fen, fen);
 
     return retval;
 }

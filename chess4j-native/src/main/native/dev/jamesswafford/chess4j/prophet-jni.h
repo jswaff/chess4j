@@ -1,9 +1,11 @@
 #pragma once
 
+#include <stdbool.h>
+
 /* make this header C++ friendly. */
 #ifdef     __cplusplus
 extern "C" {
-#endif
+#endif  
 
 #ifdef   __GNUC__
 # define UNUSED(x) UNUSED_ ## x __attribute__((__unused__))
@@ -11,7 +13,9 @@ extern "C" {
 # define UNUSED(X) UNUSED_ ## x
 #endif
 
-/* make this header C++ friendly. */
+extern volatile bool prophet_initialized;
+
+// make this header C++ friendly.
 #ifdef     __cplusplus
 }
-#endif
+#endif    //__cplusplus

@@ -31,91 +31,88 @@ public class PawnTranspositionTableTest {
     @Test
     public void storeAndProbe() {
         board.resetBoard();
-        long key = Zobrist.calculatePawnKey(board);
 
         // shouldn't be anything
-        PawnTranspositionTableEntry tte = ptable.probe(key);
-        assertNull(tte);
+        PawnTranspositionTableEntry entry = ptable.probe(board);
+        assertNull(entry);
 
         // now store and reload
-        ptable.store(key,100, 110);
-        tte = ptable.probe(key);
-        assertNotNull(tte);
+        ptable.store(board,100, 110);
+        entry = ptable.probe(board);
+        assertNotNull(entry);
 
-        PawnTranspositionTableEntry lbe = new PawnTranspositionTableEntry(key,100, 110);
-        assertEquals(lbe, tte);
+        PawnTranspositionTableEntry expected = new PawnTranspositionTableEntry(board.getPawnKey(),100, 110);
+        assertEquals(expected, entry);
 
         // now make move and reprobe
         Move m = new Move(WHITE_PAWN, E2, E4);
         Undo u = board.applyMove(m);
-        key = Zobrist.calculatePawnKey(board);
-        tte = ptable.probe(key);
-        assertNull(tte);
+        entry = ptable.probe(board);
+        assertNull(entry);
 
         // finally undo move and reprobe again
         board.undoMove(u);
-        key = Zobrist.calculatePawnKey(board);
-        tte = ptable.probe(key);
-        assertNotNull(tte);
-        assertEquals(lbe, tte);
+        entry = ptable.probe(board);
+        assertNotNull(entry);
+        assertEquals(expected, entry);
     }
 
     @Test
     public void clearTable() throws Exception {
         EPDParser.setPos(board, "3qrrk1/1pp2pp1/1p2bn1p/5N2/2P5/P1P3B1/1P4PP/2Q1RRK1 w - - bm Nxg7; id \"WAC.090\";");
 
-        long key = Zobrist.calculatePawnKey(board);
-
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
         MoveParser mp = new MoveParser();
         Move b2b4 = mp.parseMove("b2b4", board);
         assertTrue(moves.contains(b2b4));
 
-        ptable.store(key, 77, 80);
-        PawnTranspositionTableEntry pte = ptable.probe(key);
-        assertNotNull(pte);
-        assertEquals(new Tuple2<>(77, 80), pte.getScore());
-        assertEquals(key, pte.getZobristKey());
+        ptable.store(board, 77, 80);
+        PawnTranspositionTableEntry found = ptable.probe(board);
+        assertNotNull(found);
+        assertEquals(new Tuple2<>(77, 80), found.getScore());
+        assertEquals(board.getPawnKey(), found.getZobristKey());
 
         ptable.clear();
-        pte = ptable.probe(key);
-        assertNull(pte);
+        found = ptable.probe(board);
+        assertNull(found);
     }
 
     @Test
     public void overwrite() throws Exception {
         EPDParser.setPos(board, "8/k7/p7/3Qp2P/n1P5/3KP3/1q6/8 b - - bm e4+; id \"WAC.094\";");
-        long key = Zobrist.calculatePawnKey(board);
 
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
         MoveParser mp = new MoveParser();
         Move e5e4 = mp.parseMove("e4", board);
         assertTrue(moves.contains(e5e4));
-        ptable.store(key, 71, -17);
-        PawnTranspositionTableEntry tte = ptable.probe(key);
-        PawnTranspositionTableEntry lbe = new PawnTranspositionTableEntry(key,71, -17);
-        assertEquals(lbe, tte);
+
+        ptable.store(board, 71, -17);
+        PawnTranspositionTableEntry found = ptable.probe(board);
+        PawnTranspositionTableEntry entry = new PawnTranspositionTableEntry(board.getPawnKey(),71, -17);
+        assertEquals(entry, found);
 
         // overwrite
-        ptable.store(key, 59, -2);
-        tte = ptable.probe(key);
-        assertNotEquals(lbe, tte);
-        lbe = new PawnTranspositionTableEntry(key,59, -2);
-        assertEquals(lbe, tte);
+        ptable.store(board, 59, -2);
+        found = ptable.probe(board);
+        assertNotEquals(entry, found);
+        entry = new PawnTranspositionTableEntry(board.getPawnKey(),59, -2);
+        assertEquals(entry, found);
 
         // use different key to store new entry
-        long key2 = ~key;
-        tte = ptable.probe(key2);
-        assertNull(tte);
-        ptable.store(key2, 45, 3);
+        Undo u = board.applyMove(e5e4);
+        found = ptable.probe(board);
+        assertNull(found);
+        ptable.store(board, 45, 3);
 
         // now make sure we didn't overwrite lbe
-        tte = ptable.probe(key);
-        assertEquals(lbe, tte);
+        board.undoMove(u);
+        found = ptable.probe(board);
+        assertEquals(entry, found);
 
-        PawnTranspositionTableEntry lbe2 = new PawnTranspositionTableEntry(key2,45, 3);
-        tte = ptable.probe(key2);
-        assertEquals(lbe2, tte);
+        board.applyMove(e5e4);
+        PawnTranspositionTableEntry entry2 = new PawnTranspositionTableEntry(board.getPawnKey(),45, 3);
+        found = ptable.probe(board);
+        assertEquals(entry2, found);
     }
 
     @Test

@@ -2,6 +2,7 @@ package dev.jamesswafford.chess4j.hash;
 
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.io.FENBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,8 +44,6 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         }
     }
 
-    private native void clearNative();
-
     @Override
     public long getNumCollisions() {
         if (Initializer.nativeCodeInitialized()) {
@@ -69,14 +68,25 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         return numProbes;
     }
 
-    public PawnTranspositionTableEntry probe(long pawnKey) {
+    // when native code is enabled, probe in the native layer so that the native and Java searches
+    // produce equivalent results.
+    public PawnTranspositionTableEntry probe(Board board) {
+        if (Initializer.nativeCodeInitialized()) {
+            String fen = FENBuilder.createFen(board, false);
+            long nativeVal = probeNative(fen);
+            return nativeVal==0 ? null : new PawnTranspositionTableEntry(board.getPawnKey(), nativeVal);
+        } else {
+            return probe(board.getPawnKey());
+        }
+    }
 
+    private PawnTranspositionTableEntry probe(long pawnKey) {
         numProbes++;
-        PawnTranspositionTableEntry te = table[getTableIndex(pawnKey)];
+        PawnTranspositionTableEntry entry = table[getTableIndex(pawnKey)];
 
-        if (te != null) {
+        if (entry != null) {
             // compare full signature to avoid collisions
-            if (te.getZobristKey() != pawnKey) {
+            if (entry.getZobristKey() != pawnKey) {
                 numCollisions++;
                 return null;
             } else {
@@ -84,40 +94,18 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
             }
         }
 
-        return te;
+        return entry;
     }
 
-    public PawnTranspositionTableEntry probe(Board board) {
-        if (Initializer.nativeCodeInitialized()) {
-            long nativeVal = probeNative(board);
-            return nativeVal==0 ? null : new PawnTranspositionTableEntry(board.getPawnKey(), nativeVal);
-        } else {
-            return probe(board.getPawnKey());
-        }
-    }
-
-    private native long probeNative(Board board);
-
-    public void store(long pawnKey, int mgscore, int egscore) {
-        PawnTranspositionTableEntry te = new PawnTranspositionTableEntry(pawnKey, mgscore, egscore);
-        table[getTableIndex(pawnKey)] = te;
-    }
-
-    /*
-     * This is a convenience method, wrapping the previous "store".  It also serves as a hook into the native
-     * code.  The only time this method would be used when native code is enabled is when assertions are on,
-     * to verify search equality.
-     */
     public void store(Board board, int mgscore, int egscore) {
+        PawnTranspositionTableEntry entry = new PawnTranspositionTableEntry(board.getPawnKey(), mgscore, egscore);
         if (Initializer.nativeCodeInitialized()) {
-            PawnTranspositionTableEntry entry = new PawnTranspositionTableEntry(board.getPawnKey(), mgscore, egscore);
-            storeNative(board, entry.getVal());
+            String fen = FENBuilder.createFen(board, false);
+            storeNative(fen, entry.getVal());
         } else {
-            store(board.getPawnKey(), mgscore, egscore);
+            table[getTableIndex(board.getPawnKey())] = entry;
         }
     }
-
-    private native void storeNative(Board board, long val);
 
     @Override
     protected void createTable(long sizeBytes) {
@@ -145,6 +133,8 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         return PawnTranspositionTableEntry.sizeOf();
     }
 
+    private native void clearNative();
+
     private native long getNumCollisionsNative();
 
     private native long getNumHitsNative();
@@ -152,5 +142,9 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     private native long getNumProbesNative();
 
     private native void resizeNative(long sizeBytes);
+
+    private native long probeNative(String fen);
+
+    private native void storeNative(String fen, long val);
 
 }

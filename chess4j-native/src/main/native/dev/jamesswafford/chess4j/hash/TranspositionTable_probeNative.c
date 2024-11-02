@@ -1,9 +1,7 @@
 #include "dev_jamesswafford_chess4j_hash_TranspositionTable.h"
 
-#include "../../../../parameters.h"
-#include "../board/Board.h"
-#include "../init/p4_init.h"
-#include "../../../../java/lang/IllegalStateException.h"
+#include "dev/jamesswafford/chess4j/prophet-jni.h"
+#include "java/lang/IllegalStateException.h"
 
 #include <prophet/hash.h>
 #include <prophet/position.h>
@@ -13,31 +11,35 @@ extern hash_table_t htbl;
 /*
  * Class:     dev_jamesswafford_chess4j_hash_TranspositionTable
  * Method:    probeNative
- * Signature: (Ldev/jamesswafford/chess4j/board/Board;)J
+ * Signature: (Ljava/lang/String;)J
  */
 JNIEXPORT jlong JNICALL Java_dev_jamesswafford_chess4j_hash_TranspositionTable_probeNative
-  (JNIEnv *env, jobject UNUSED(htable), jobject board_obj)
+  (JNIEnv *env, jobject UNUSED(htable), jstring board_fen)
 {
     jlong retval = 0;
 
     /* ensure the static library is initialized */
-    if (!p4_initialized) {
+    if (!prophet_initialized) {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return 0;
     }
-    
-    /* set the position */
-    position_t c4j_pos;
-    if (0 != convert(env, board_obj, &c4j_pos)) {
-        (*env)->ThrowNew(env, IllegalStateException, 
-            "An error was encountered while converting a position.");
-        return 0;
+
+    /* set the position according to the FEN */
+    const char* fen = (*env)->GetStringUTFChars(env, board_fen, 0);
+    position_t pos;
+    if (!set_pos(&pos, fen)) {
+        char error_buffer[255];
+        sprintf(error_buffer, "Could not set position: %s\n", fen);
+        (*env)->ThrowNew(env, IllegalStateException, error_buffer);
+        goto cleanup;
     }
-    
+
     /* probe the table */
-    uint64_t val = probe_hash(&htbl, c4j_pos.hash_key);
+    uint64_t val = probe_hash(&htbl, pos.hash_key);
     retval = (jlong) val;
 
+cleanup:
+    (*env)->ReleaseStringUTFChars(env, board_fen, fen);
 
     return retval;
 }

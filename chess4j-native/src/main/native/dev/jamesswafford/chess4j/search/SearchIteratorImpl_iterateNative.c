@@ -1,11 +1,9 @@
 #include "dev_jamesswafford_chess4j_search_SearchIteratorImpl.h"
 
-#include "../../../../parameters.h"
-#include "../board/Board.h"
-#include "../init/p4_init.h"
-#include "../../../../java/util/ArrayList.h"
-#include "../../../../java/lang/IllegalStateException.h"
-#include "../../../../java/lang/Long.h"
+#include "dev/jamesswafford/chess4j/prophet-jni.h"
+#include "java/util/ArrayList.h"
+#include "java/lang/IllegalStateException.h"
+#include "java/lang/Long.h"
 
 #include <prophet/const.h>
 #include <prophet/search.h>
@@ -19,23 +17,25 @@ undo_t undos[MAX_HALF_MOVES_PER_GAME];
 /*
  * Class:     dev_jamesswafford_chess4j_search_SearchIteratorImpl
  * Method:    iterateNative
- * Signature: (Ldev/jamesswafford/chess4j/board/Board;ILjava/util/List;)V
+ * Signature: (Ljava/lang/String;ILjava/util/List;)V
  */
-JNIEXPORT void 
-JNICALL Java_dev_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
-  (JNIEnv *env, jobject UNUSED(iterator_obj), jobject board_obj, jint max_depth, jobject pv_moves)
+JNIEXPORT void JNICALL Java_dev_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
+  (JNIEnv *env, jobject UNUSED(clazz), jstring board_fen, jint max_depth, jobject pv_moves)
 {
     /* ensure the static library is initialized */
-    if (!p4_initialized) {
+    if (!prophet_initialized) {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return;
     }
 
-    /* set the position */
-    position_t c4j_pos;
-    if (0 != convert(env, board_obj, &c4j_pos)) {
-        (*env)->ThrowNew(env, IllegalStateException, "An error was encountered while converting a position.");
-        return;
+    /* set the position according to the FEN */
+    const char* fen = (*env)->GetStringUTFChars(env, board_fen, 0);
+    position_t pos;
+    if (!set_pos(&pos, fen)) {
+        char error_buffer[255];
+        sprintf(error_buffer, "Could not set position: %s\n", fen);
+        (*env)->ThrowNew(env, IllegalStateException, error_buffer);
+        goto cleanup;
     }
 
     /* call the search iterator */
@@ -47,7 +47,7 @@ JNICALL Java_dev_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
     opts.clear_hash_each_search = true;
 
     iterator_context_t ctx;
-    ctx.pos = &c4j_pos;
+    ctx.pos = &pos;
     ctx.move_stack = moves;
     ctx.undo_stack = undos;
 
@@ -63,5 +63,8 @@ JNICALL Java_dev_jamesswafford_chess4j_search_SearchIteratorImpl_iterateNative
         (*env)->CallBooleanMethod(env, pv_moves, ArrayList_add, lval);
         (*env)->DeleteLocalRef(env, lval);
     }
+
+cleanup:
+    (*env)->ReleaseStringUTFChars(env, board_fen, fen);
 
 }

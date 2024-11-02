@@ -8,6 +8,7 @@ import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import dev.jamesswafford.chess4j.hash.TTHolder;
 import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.io.FENBuilder;
 import io.vavr.Function3;
 import io.vavr.Function4;
 import io.vavr.Tuple2;
@@ -155,7 +156,7 @@ public final class Eval implements Evaluator {
         return actualScore.equals(hashScore);
     }
 
-    public static native int evalNative(Board board, boolean materialOnly);
+    public static native int evalNative(String fen, boolean materialOnly);
 
     @Override
     public int evaluateBoard(Board board) {
@@ -209,7 +210,7 @@ public final class Eval implements Evaluator {
         Globals.setPawnHashEnabled(false);
 
         boolean retVal = verifyEvalSymmetry(weights, evalScore, board, materialOnly, strict) &&
-                //verifyNativeEvalIsEqual(evalScore, board, materialOnly) &&
+                verifyNativeEvalIsEqual(evalScore, board, materialOnly) &&
                 verifyExtractedFeatures(weights, evalScore, board, materialOnly);
 
         Globals.setPawnHashEnabled(pawnHashEnabled);
@@ -221,9 +222,9 @@ public final class Eval implements Evaluator {
      * Helper method to test eval symmetry
      *
      * @param weights - eval terms vector
-     * @param evalScore - the score the board has been evaulated at
+     * @param evalScore - the score the board has been evaluated at
      * @param board - the chess board
-     * @param materialOnly - whether to evaulate material only
+     * @param materialOnly - whether to evaluate material only
      * @param strict - if material only, strict mode doesn't allow knight/rook adjustments or a bishop pair bonus
      *
      * @return - true if the eval is symmetric in the given position
@@ -238,12 +239,11 @@ public final class Eval implements Evaluator {
         return retVal;
     }
 
-    // this method isn't going to work unless the pawn hash is disabled in the native code
-    // alternatively, clear the pawn hash, but disable the search equality check
     private static boolean verifyNativeEvalIsEqual(int javaScore, Board board, boolean materialOnly) {
         if (Initializer.nativeCodeInitialized()) {
             try {
-                int nativeSccore = evalNative(board, materialOnly);
+                String fen = FENBuilder.createFen(board, false);
+                int nativeSccore = evalNative(fen, materialOnly);
                 if (javaScore != nativeSccore) {
                     LOGGER.error("evals not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeSccore +
                             ", materialOnly: " + materialOnly);

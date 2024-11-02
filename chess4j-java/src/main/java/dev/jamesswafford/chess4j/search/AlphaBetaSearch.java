@@ -10,6 +10,7 @@ import dev.jamesswafford.chess4j.hash.TranspositionTableEntry;
 import dev.jamesswafford.chess4j.hash.TranspositionTableEntryType;
 import dev.jamesswafford.chess4j.init.Initializer;
 import dev.jamesswafford.chess4j.io.DrawBoard;
+import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
 import dev.jamesswafford.chess4j.nn.EvalPredictor;
@@ -148,7 +149,8 @@ public class AlphaBetaSearch implements Search {
 
         try {
             assert(clearTableWrapper());
-            int nativeScore = searchNative(board, nativePV, searchParameters.getDepth(), searchParameters.getAlpha(),
+            String fen = FENBuilder.createFen(board, false);
+            int nativeScore = searchNative(fen, nativePV, searchParameters.getDepth(), searchParameters.getAlpha(),
                     searchParameters.getBeta(), nativeStats, opts.getStartTime(), opts.getStopTime());
 
             // if the search completed then verify equality with the Java implementation.
@@ -581,7 +583,7 @@ public class AlphaBetaSearch implements Search {
 
     private native void initializeNativeSearch();
 
-    private native int searchNative(Board board, List<Long> parentPV, int depth, int alpha, int beta,
+    private native int searchNative(String fen, List<Long> parentPV, int depth, int alpha, int beta,
                                     SearchStats searchStats, long startTime, long stopTime);
 
     private native void stopNative(boolean stop);

@@ -6,6 +6,7 @@ import dev.jamesswafford.chess4j.board.squares.Direction;
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.init.Initializer;
 import dev.jamesswafford.chess4j.io.DrawBoard;
+import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.movegen.AttackDetector;
 import dev.jamesswafford.chess4j.movegen.Magic;
 import dev.jamesswafford.chess4j.pieces.*;
@@ -81,8 +82,6 @@ public class SEE {
 
         return score;
     }
-
-    public static native int seeNative(Board b, long nativeMv);
 
     private static int scorePromotion(Move m) {
         return seePieceVal(m.promotion()) - PAWN_VAL;
@@ -185,7 +184,8 @@ public class SEE {
     private static boolean seesAreEqual(int javaScore, Board board, Move mv) {
         if (Initializer.nativeCodeInitialized()) {
             try {
-                int nativeScore = seeNative(board, MoveUtils.toNativeMove(mv));
+                String fen = FENBuilder.createFen(board, false);
+                int nativeScore = seeNative(fen, MoveUtils.toNativeMove(mv));
                 if (javaScore != nativeScore) {
                     LOGGER.error("sees not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                             + ", mv: " + mv);
@@ -204,5 +204,6 @@ public class SEE {
         }
     }
 
+    private static native int seeNative(String fen, long nativeMv);
 
 }

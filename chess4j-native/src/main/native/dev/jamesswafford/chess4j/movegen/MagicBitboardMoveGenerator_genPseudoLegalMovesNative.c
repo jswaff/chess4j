@@ -1,13 +1,13 @@
 #include "dev_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator.h"
 
-#include "../../../../parameters.h"
-#include "../init/p4_init.h"
-#include "../../../../java/util/ArrayList.h"
-#include "../../../../java/lang/IllegalStateException.h"
-#include "../../../../java/lang/Long.h"
+#include "dev/jamesswafford/chess4j/prophet-jni.h"
+#include "java/util/ArrayList.h"
+#include "java/lang/IllegalStateException.h"
+#include "java/lang/Long.h"
 
 #include <prophet/const.h>
 #include <prophet/movegen.h>
+#include <prophet/position.h>
 
 #include <stdio.h>
 
@@ -18,13 +18,12 @@
  */
 JNIEXPORT jint 
 JNICALL Java_dev_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator_genPseudoLegalMovesNative
-  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jobject jmoves, 
-    jboolean caps, jboolean noncaps)
+  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jobject jmoves, jboolean caps, jboolean noncaps)
 {
     jint retval = 0;
 
     /* ensure the static library is initialized */
-    if (!p4_initialized)  {
+    if (!prophet_initialized)  {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return 0;
     }
@@ -47,8 +46,7 @@ JNICALL Java_dev_jamesswafford_chess4j_movegen_MagicBitboardMoveGenerator_genPse
     int num_moves = 0;
     for (const move_t* mp=moves; mp<endp; mp++)  {
         /* create Long value representing this move */
-        jobject lval = (*env)->CallStaticObjectMethod(
-            env, Long, Long_valueOf, (jlong)*mp);
+        jobject lval = (*env)->CallStaticObjectMethod(env, Long, Long_valueOf, (jlong)*mp);
 
         /* add to java list */
         (*env)->CallBooleanMethod(env, jmoves, ArrayList_add, lval);

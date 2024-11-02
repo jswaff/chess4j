@@ -223,30 +223,20 @@ public final class MagicBitboardMoveGenerator implements MoveGenerator {
             try {
                 int nMoves = genPseudoLegalMovesNative(fen, nativeMoves, caps, noncaps);
                 assert (nMoves == nativeMoves.size());
-                if (nMoves != javaMoves.size()) {
-                    LOGGER.error("Move lists not equal! # java moves: " + javaMoves.size()
-                        + ", # native moves: " + nMoves);
-                    return false;
-                }
-                // for every java move, ensure there is exactly one corresponding native move
-                for (Move javaMove : javaMoves) {
-                    if (nativeMoves.stream()
-                            .filter(nativeMove -> javaMove.equals(fromNativeMove(nativeMove, board.getPlayerToMove())))
-                            .count() != 1L)
-                    {
-                        LOGGER.error("No native move found for java move: " + javaMove
-                            + ", fen: " + fen);
-                        return false;
-                    }
-                }
 
                 // sort java moves to match order of native moves
                 List<Move> sortedJavaMoves = new ArrayList<>();
-                for (Long nativeMove : nativeMoves) {
-                    Move matchingMove = javaMoves.stream()
-                            .filter(javaMove -> javaMove.equals(fromNativeMove(nativeMove, board.getPlayerToMove())))
-                            .findFirst().get();
-                    sortedJavaMoves.add(matchingMove);
+                for (Long nativeMoveLong : nativeMoves) {
+                    Move nativeMove = fromNativeMove(nativeMoveLong, board.getPlayerToMove());
+                    boolean foundMatch = false;
+                    for (Move javaMove : javaMoves) {
+                        if (javaMove.equals(nativeMove)) {
+                            sortedJavaMoves.add(javaMove);
+                            foundMatch = true;
+                            break;
+                        }
+                    }
+                    assert(foundMatch);
                 }
                 assert (sortedJavaMoves.size() == javaMoves.size());
                 javaMoves.clear();

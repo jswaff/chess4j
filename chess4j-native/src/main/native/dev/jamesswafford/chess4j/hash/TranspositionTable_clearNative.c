@@ -1,8 +1,7 @@
 #include "dev_jamesswafford_chess4j_hash_TranspositionTable.h"
 
-#include "../../../../parameters.h"
-#include "../init/p4_init.h"
-#include "../../../../java/lang/IllegalStateException.h"
+#include "dev/jamesswafford/chess4j/prophet-jni.h"
+#include "java/lang/IllegalStateException.h"
 
 #include <prophet/hash.h>
 
@@ -16,9 +15,8 @@ extern hash_table_t htbl;
 JNIEXPORT void JNICALL Java_dev_jamesswafford_chess4j_hash_TranspositionTable_clearNative
   (JNIEnv *env, jobject UNUSED(htable))
 {
-
     /* ensure the static library is initialized */
-    if (!p4_initialized) {
+    if (!prophet_initialized) {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return;
     }

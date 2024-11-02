@@ -1,39 +1,45 @@
 #include <dev_jamesswafford_chess4j_eval_Eval.h>
 
-#include "../../../../parameters.h"
-#include "../board/Board.h"
-#include "../init/p4_init.h"
-#include "../../../../java/lang/IllegalStateException.h"
+#include "dev/jamesswafford/chess4j/prophet-jni.h"
+#include "java/lang/IllegalStateException.h"
 
 #include <prophet/eval.h>
+#include <prophet/position.h>
 
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdint.h>
 
 /*
  * Class:     dev_jamesswafford_chess4j_eval_Eval
  * Method:    evalNative
- * Signature: (Ldev/jamesswafford/chess4j/board/Board;Z)I
+ * Signature: (Ljava/lang/String;Z)I
  */
 JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_eval_Eval_evalNative
-  (JNIEnv* env, jclass UNUSED(clazz), jobject board_obj, jboolean material_only)
+  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jboolean material_only)
 {
     jint retval = 0;
 
-    if (!p4_initialized) {
+    if (!prophet_initialized) {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
         return 0;
     }
 
-    /* set the position */
-    position_t c4j_pos;
-    if (0 != convert(env, board_obj, &c4j_pos)) {
-        (*env)->ThrowNew(env, IllegalStateException, 
-            "An error was encountered while converting a position.");
-        return 0;
+    /* set the position according to the FEN */
+    const char* fen = (*env)->GetStringUTFChars(env, board_fen, 0);
+    position_t pos;
+    if (!set_pos(&pos, fen)) {
+        char error_buffer[255];
+        sprintf(error_buffer, "Could not set position: %s\n", fen);
+        (*env)->ThrowNew(env, IllegalStateException, error_buffer);
+        goto cleanup;
     }
 
-    int32_t native_score = eval(&c4j_pos, (bool)material_only);
+    int32_t native_score = eval(&pos, (bool)material_only, false);
     retval = (jint) native_score;
+
+cleanup:
+    (*env)->ReleaseStringUTFChars(env, board_fen, fen);
 
     return retval;
 }
