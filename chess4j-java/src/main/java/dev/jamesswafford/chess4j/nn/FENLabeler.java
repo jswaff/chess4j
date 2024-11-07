@@ -39,11 +39,11 @@ public class FENLabeler {
         SearchParameters parameters = new SearchParameters(depth, -CHECKMATE, CHECKMATE);
         search.initialize();
         int score = search.search(board, parameters);
-        List<Move> pv = search.getPv();
-        for (Move pvMove : pv) {
-            board.applyMove(pvMove);
-        }
-        fenRecord.setFen(FENBuilder.createFen(board, false));
+//        List<Move> pv = search.getPv();
+//        for (Move pvMove : pv) {
+//            board.applyMove(pvMove);
+//        }
+//        fenRecord.setFen(FENBuilder.createFen(board, false));
         fenRecord.setEval(score);
     }
 }

@@ -13,9 +13,9 @@ public class FENCSVUtils {
     private static final Logger LOGGER = LogManager.getLogger(FENCSVUtils.class);
 
     @SneakyThrows
-    public static void relabel(String inCsvFile, String outCsvFile) {
+    public static void relabel(String inCsvFile, String outCsvFile, int depth) {
 
-        LOGGER.info("relabeling records from {} to {}", inCsvFile, outCsvFile);
+        LOGGER.info("relabeling records from {} to {} depth {}", inCsvFile, outCsvFile, depth);
 
         BufferedReader in = null;
         BufferedWriter out = null;
@@ -28,7 +28,7 @@ public class FENCSVUtils {
                 String[] parts = line.split(",");
                 String fen = parts[1];
                 FENRecord fenRecord = FENRecord.builder().fen(fen).build();
-                fenLabeler.label(fenRecord, 3);
+                fenLabeler.label(fenRecord, depth);
                 out.write(fenRecord.getEval() + "," + fenRecord.getFen() + "\n");
             }
         } finally {

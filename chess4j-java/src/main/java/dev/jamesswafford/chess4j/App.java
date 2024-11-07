@@ -176,7 +176,7 @@ public final class App {
         // with a CSV file we're re-labeling
         if (commandLine.hasOption("csv")) {
             String inCSVFile = commandLine.getOptionValue("csv");
-            FENCSVUtils.relabel(inCSVFile, outFile);
+            FENCSVUtils.relabel(inCSVFile, outFile, depth);
         } else {
             // label a PGN or EPD file
             List<FENRecord> fenRecords = getFENRecords("label", commandLine);
