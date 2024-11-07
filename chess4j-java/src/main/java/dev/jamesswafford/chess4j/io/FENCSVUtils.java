@@ -28,7 +28,7 @@ public class FENCSVUtils {
                 String[] parts = line.split(",");
                 String fen = parts[1];
                 FENRecord fenRecord = FENRecord.builder().fen(fen).build();
-                fenLabeler.label(fenRecord, 0);
+                fenLabeler.label(fenRecord, 3);
                 out.write(fenRecord.getEval() + "," + fenRecord.getFen() + "\n");
             }
         } finally {
