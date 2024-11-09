@@ -6,10 +6,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class PGNFileParser {
 
@@ -17,14 +14,19 @@ public class PGNFileParser {
 
     public PGNFileParser() { }
 
-    public static List<FENRecord> load(String pgnFile, boolean dedupe) throws IOException {
-        return load(new File(pgnFile), dedupe);
+    public static List<FENRecord> load(String pgnFile, boolean dedupe, double probability) throws IOException {
+        return load(new File(pgnFile), dedupe, probability);
     }
 
     public static List<FENRecord> load(File pgnFile, boolean dedupe) throws IOException {
-        LOGGER.info("loading records from {}", pgnFile);
+        return load(pgnFile, dedupe, 1.0);
+    }
+
+    public static List<FENRecord> load(File pgnFile, boolean dedupe, double probability) throws IOException {
+        LOGGER.info("loading records from: {} dedupe: {} probability: {}", pgnFile, dedupe, probability);
         List<FENRecord> fenRecords = new ArrayList<>();
 
+        Random random = new Random(System.currentTimeMillis());
         Set<String> seen = new HashSet<>();
 
         PGNIterator it = new PGNIterator(pgnFile);
@@ -33,6 +35,7 @@ public class PGNFileParser {
             List<FENRecord> gameFens = toFEN(pgnGame);
             gameFens.stream()
                     .filter(fenRecord -> !dedupe || !seen.contains(fenRecord.getFen()))
+                    .filter(fenRecord -> random.nextDouble() < probability)
                     .forEach(fenRecord -> {
                         seen.add(fenRecord.getFen());
                         fenRecords.add(fenRecord);

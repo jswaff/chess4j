@@ -248,7 +248,7 @@ public final class App {
             fenRecords = EPDParser.load(epdFile, zuri);
         } else { // pgn
             String pgnFile = commandLine.getOptionValue("pgn");
-            fenRecords = PGNFileParser.load(pgnFile, true);
+            fenRecords = PGNFileParser.load(pgnFile, true, 0.1); // get 10% of positions
         }
         return fenRecords;
     }
