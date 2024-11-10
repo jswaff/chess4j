@@ -1,6 +1,8 @@
 package dev.jamesswafford.chess4j.nn;
 
+import dev.jamesswafford.chess4j.Globals;
 import dev.jamesswafford.chess4j.board.Board;
+import dev.jamesswafford.chess4j.eval.Eval;
 import dev.jamesswafford.chess4j.io.FENRecord;
 import dev.jamesswafford.chess4j.search.AlphaBetaSearch;
 import dev.jamesswafford.chess4j.search.Search;
@@ -32,9 +34,14 @@ public class FENLabeler {
 
     public void label(FENRecord fenRecord, int depth) {
         Board board = new Board(fenRecord.getFen());
-        SearchParameters parameters = new SearchParameters(depth, -CHECKMATE, CHECKMATE);
-        search.initialize();
-        int score = search.search(board, parameters);
+        int score;
+        if (depth < 0) {
+            score = Eval.eval(Globals.getEvalWeights(), board);
+        } else {
+            SearchParameters parameters = new SearchParameters(depth, -CHECKMATE, CHECKMATE);
+            search.initialize();
+            score = search.search(board, parameters);
+        }
         fenRecord.setEval(score);
     }
 }

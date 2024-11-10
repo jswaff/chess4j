@@ -166,11 +166,11 @@ public final class App {
         }
         String outFile = commandLine.getOptionValue("out");
 
-        int depth = 0;
+        int depth = -1;
         if (commandLine.hasOption("depth")) {
             depth = Integer.parseInt(commandLine.getOptionValue("depth"));
         } else {
-            LOGGER.warn("optional parameter depth not specified");
+            LOGGER.warn("optional parameter depth not specified.  HCE will be used.");
         }
 
         // with a CSV file we're re-labeling
