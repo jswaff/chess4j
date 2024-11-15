@@ -6,19 +6,34 @@ import ai.djl.ndarray.NDManager;
 import ai.djl.ndarray.types.Shape;
 import ai.djl.translate.Translator;
 import ai.djl.translate.TranslatorContext;
+import ai.djl.util.Pair;
 import dev.jamesswafford.chess4j.board.Board;
+import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.pieces.*;
+
+import java.util.List;
+import java.util.Map;
 
 public class BoardTranslator implements Translator<Board, Float> {
 
     private static final int NUM_INPUTS = 768;
 
+    private static final Map<String,Integer> offsets = Map.of(
+            "R",  0,
+            "N", 128,
+            "B", 256,
+            "Q", 384,
+            "K", 512,
+            "P", 640
+    );
+
     @Override
     public NDList processInput(TranslatorContext translatorContext, Board board) {
         NDManager ndManager = translatorContext.getNDManager();
-        float[] ohe = transform(board);
-        NDArray oheArray = ndManager.create(ohe, new Shape(1, NUM_INPUTS));
-        return new NDList(oheArray);
+        Pair<float[],float[]> ohe = transform(board);
+        NDArray oheArray1 = ndManager.create(ohe.getKey(), new Shape(NUM_INPUTS));
+        NDArray oheArray2 = ndManager.create(ohe.getValue(), new Shape(NUM_INPUTS));
+        return new NDList(oheArray1, oheArray2);
     }
 
     @Override
@@ -27,26 +42,25 @@ public class BoardTranslator implements Translator<Board, Float> {
     }
 
 
-    private static float[] transform(Board board) {
-        float[] data = new float[NUM_INPUTS];
+    private static Pair<float[],float[]> transform(Board board) {
+        float[] data1 = new float[NUM_INPUTS];
+        float[] data2 = new float[NUM_INPUTS];
 
-        for (int i=0;i<64;i++) {
+        List<Square> squares = Square.allSquares();
+        squares.forEach(sq -> {
+            int i = sq.value();
+            int flipped_i = sq.flipVertical().value();
             Piece p = board.getPiece(i);
-            if (Rook.WHITE_ROOK.equals(p)) data[i] = 1;
-            else if (Rook.BLACK_ROOK.equals(p)) data[64+i] = 1;
-            else if (Knight.WHITE_KNIGHT.equals(p)) data[128+i] = 1;
-            else if (Knight.BLACK_KNIGHT.equals(p)) data[192+i] = 1;
-            else if (Bishop.WHITE_BISHOP.equals(p)) data[256+i] = 1;
-            else if (Bishop.BLACK_BISHOP.equals(p)) data[320+i] = 1;
-            else if (Queen.WHITE_QUEEN.equals(p)) data[384+i] = 1;
-            else if (Queen.BLACK_QUEEN.equals(p)) data[448+i] = 1;
-            else if (King.WHITE_KING.equals(p)) data[512+i] = 1;
-            else if (King.BLACK_KING.equals(p)) data[576+i] = 1;
-            else if (Pawn.WHITE_PAWN.equals(p)) data[640+i] = 1;
-            else if (Pawn.BLACK_PAWN.equals(p)) data[704+i] = 1;
-        }
+            if (p != null) {
+                int offset = offsets.get(p.toString().toUpperCase());
+                if (p.isBlack()) offset += 64;
+                data1[offset + i] = 1;
+                int flipped_offset = p.isWhite() ? offset + 64 : offset - 64;
+                data2[flipped_offset + flipped_i] = 1;
+            }
+        });
 
-        return data;
+        return new Pair<>(data1, data2);
     }
 
 }
