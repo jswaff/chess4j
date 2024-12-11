@@ -61,9 +61,9 @@ public class NeuralNetwork {
 
     public int eval(Board board) {
 
-        int ptm = board.getPlayerToMove().isWhite() ? 0 : 1;
-
         populateAccumulators(board);
+
+        int ptm = board.getPlayerToMove().isWhite() ? 0 : 1;
 
         // layer 0 features
         double[] O0 = new double[NN_SIZE * 2];
@@ -107,12 +107,12 @@ public class NeuralNetwork {
 
     private void addPiece(Board board, int sq) {
         int wKingSq = board.getKingSquare(Color.WHITE).flipVertical().value();
-        int bKingSq = board.getKingSquare(Color.BLACK).flipVertical().value();
+        int bKingSq = board.getKingSquare(Color.BLACK).value();
 
         Piece piece = board.getPiece(sq);
         int pieceColor = piece.isWhite() ? 0 : 1;
 
-        int pieceType, sq_w, sq_b;
+        int pieceType;
         if (piece.isWhite()) {
             if (piece.equals(Pawn.WHITE_PAWN)) {
                 pieceType = 0;
@@ -127,8 +127,6 @@ public class NeuralNetwork {
             } else {
                 return;
             }
-            sq_w = sq ^ 63;
-            sq_b = sq;
         } else {
             if (piece.equals(Pawn.BLACK_PAWN)) {
                 pieceType = 0;
@@ -143,15 +141,16 @@ public class NeuralNetwork {
             } else {
                 return;
             }
-            sq_b = sq ^ 63;
-            sq_w = sq;
         }
+
+        int sq_w = sq ^ 63;
+        int sq_b = sq;
 
         int index_w = (pieceType << 1) + pieceColor;
         int index_b = (pieceType << 1) + (1 - pieceColor);
 
-        int feature_w = (640 * wKingSq) + (64 + index_w) + sq_w;
-        int feature_b = (640 * bKingSq) + (64 + index_b) + sq_b;
+        int feature_w = (640 * wKingSq) + (64 * index_w) + sq_w;
+        int feature_b = (640 * bKingSq) + (64 * index_b) + sq_b;
 
         for (int o=0;o<NN_SIZE;o++) {
             accumulator[0][o] += W0[NN_SIZE * feature_w + o];
@@ -163,7 +162,8 @@ public class NeuralNetwork {
         for (int o=0;o<O.length;o++) {
             double sum = B[o];
             for (int i=0;i<I.length;i++) {
-                sum += W[o * I.length + i] * I[i];
+                //sum += W[o * I.length + i] * I[i];
+                sum += W[i * O.length + o] * I[i];
             }
 
             if (withRelu)
