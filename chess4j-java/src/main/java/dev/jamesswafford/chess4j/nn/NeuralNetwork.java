@@ -1,11 +1,11 @@
 package dev.jamesswafford.chess4j.nn;
 
 import dev.jamesswafford.chess4j.board.Board;
-import dev.jamesswafford.chess4j.board.Color;
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.pieces.*;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -15,20 +15,20 @@ public class NeuralNetwork {
     public static final int NN_SIZE_L3 = 32;
     public static final int NN_SIZE_L4 = 2;
 
-    private double[] W0;
-    private double[] B0;
-    private double[] W1;
-    private double[] B1;
-    private double[] W2;
-    private double[] B2;
-    private double[] W3;
-    private double[] B3;
+    private final double[] W0;
+    private final double[] B0;
+    private final double[] W1;
+    private final double[] B1;
+    private final double[] W2;
+    private final double[] B2;
+    private final double[] W3;
+    private final double[] B3;
 
     private double wr, mt;
     private static final double Q = 127.0 / 64.0;
 
     // Temporary - will be moved into Board
-    private double[][] accumulator;
+    private final double[][] accumulator;
 
     NeuralNetwork() {
         W0 = new double[768 * NN_SIZE_L1];
@@ -42,15 +42,13 @@ public class NeuralNetwork {
         accumulator = new double[2][NN_SIZE_L1];
     }
 
-    public void load(String networkFile) {
+    public void load(String networkFile) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(networkFile))) {
-            String name = br.readLine();
-            String author = br.readLine();
-            System.out.println("name: " + name + " author: " + author);
+            br.readLine(); // name
+            br.readLine(); // author
 
             wr = Double.parseDouble(br.readLine().split("=")[1]);
             mt = Double.parseDouble(br.readLine().split("=")[1]);
-            System.out.println("wr: " + wr + " mt: " + mt);
 
             for (int i=0;i<W0.length;i++)
                 W0[i] = Double.parseDouble(br.readLine());
@@ -68,10 +66,7 @@ public class NeuralNetwork {
                 W3[i] = Double.parseDouble(br.readLine());
             for (int i=0;i<B3.length;i++)
                 B3[i] = Double.parseDouble(br.readLine());
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        System.out.println("B0[0]: " + B0[0] + ", B0[1]: " + B0[1]);
     }
 
     public int eval(Board board) {
@@ -101,7 +96,7 @@ public class NeuralNetwork {
 
         // combination of win ratio & material
         double score = (wr * _wr) + (mt * _mt);
-        return (int)(-score * 1000);
+        return (int)(score * 1000);
     }
 
     private double clamp_pos(double val) {
@@ -170,8 +165,8 @@ public class NeuralNetwork {
         int index_w = pieceType * 2 + pieceColor;
         int index_b = pieceType * 2 + (1 - pieceColor);
 
+        int sq_w = sq ^ 56; //Square.valueOf(sq).flipVertical().value();
         int sq_b = sq;
-        int sq_w = sq ^ 56;
 
         int feature_w = (64 * index_w) + sq_w;
         int feature_b = (64 * index_b) + sq_b;
@@ -186,6 +181,7 @@ public class NeuralNetwork {
         for (int o=0;o<O.length;o++) {
             double sum = B[o];
             for (int i=0;i<I.length;i++) {
+                //sum += I[i] * W[i * O.length + o];
                 sum += W[o * I.length + i] * I[i];
             }
 

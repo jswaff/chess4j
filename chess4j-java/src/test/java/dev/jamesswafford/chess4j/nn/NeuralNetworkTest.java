@@ -8,18 +8,19 @@ import dev.jamesswafford.chess4j.eval.Eval;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 
 public class NeuralNetworkTest {
 
     @Test
-    public void test1() {
+    public void test1() throws IOException {
         String f = "/home/james/data/chess/network.txt";
         NeuralNetwork nn = new NeuralNetwork();
         nn.load(f);
 
         Board b = new Board();
-        System.out.println("score initial pos: " + nn.eval(b));
+        System.out.println("initial pos: " + nn.eval(b));
 
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(b);
         for (Move mv : moves) {
