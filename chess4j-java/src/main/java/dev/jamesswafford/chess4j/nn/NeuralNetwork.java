@@ -1,11 +1,9 @@
 package dev.jamesswafford.chess4j.nn;
 
 import dev.jamesswafford.chess4j.board.Board;
-import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.pieces.*;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -50,8 +48,10 @@ public class NeuralNetwork {
             wr = Double.parseDouble(br.readLine().split("=")[1]);
             mt = Double.parseDouble(br.readLine().split("=")[1]);
 
-            for (int i=0;i<W0.length;i++)
-                W0[i] = Double.parseDouble(br.readLine());
+            // note the transposition for W0!
+            for (int row=0;row<NN_SIZE_L1;row++)
+                for (int col=0;col<768;col++)
+                    W0[col * NN_SIZE_L1 + row] = Double.parseDouble(br.readLine());
             for (int i=0;i<B0.length;i++)
                 B0[i] = Double.parseDouble(br.readLine());
             for (int i=0;i<W1.length;i++)
@@ -69,7 +69,7 @@ public class NeuralNetwork {
         }
     }
 
-    public int eval(Board board) {
+    public double eval(Board board) {
 
         populateAccumulators(board);
 
@@ -96,7 +96,8 @@ public class NeuralNetwork {
 
         // combination of win ratio & material
         double score = (wr * _wr) + (mt * _mt);
-        return (int)(score * 1000);
+        return score;
+        //return (int)(score * 1000);
     }
 
     private double clamp_pos(double val) {
@@ -181,7 +182,6 @@ public class NeuralNetwork {
         for (int o=0;o<O.length;o++) {
             double sum = B[o];
             for (int i=0;i<I.length;i++) {
-                //sum += I[i] * W[i * O.length + o];
                 sum += W[o * I.length + i] * I[i];
             }
 
