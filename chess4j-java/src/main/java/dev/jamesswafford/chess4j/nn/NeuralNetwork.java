@@ -10,7 +10,10 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class NeuralNetwork {
-    public static final int NN_SIZE = 128;
+    public static final int NN_SIZE_L1 = 128;
+    public static final int NN_SIZE_L2 = 32;
+    public static final int NN_SIZE_L3 = 32;
+    public static final int NN_SIZE_L4 = 2;
 
     private double[] W0;
     private double[] B0;
@@ -21,23 +24,34 @@ public class NeuralNetwork {
     private double[] W3;
     private double[] B3;
 
+    private double wr, mt;
+    private static final double Q = 127.0 / 64.0;
+
     // Temporary - will be moved into Board
     private double[][] accumulator;
 
     NeuralNetwork() {
-        W0 = new double[40960 * NN_SIZE];
-        B0 = new double[NN_SIZE];
-        W1 = new double[NN_SIZE*2*32];
-        B1 = new double[32];
-        W2 = new double[32*32];
-        B2 = new double[32];
-        W3 = new double[32*1];
-        B3 = new double[1];
-        accumulator = new double[2][NN_SIZE];
+        W0 = new double[768 * NN_SIZE_L1];
+        B0 = new double[NN_SIZE_L1];
+        W1 = new double[NN_SIZE_L1 * 2 * NN_SIZE_L2];
+        B1 = new double[NN_SIZE_L2];
+        W2 = new double[NN_SIZE_L2 * NN_SIZE_L3];
+        B2 = new double[NN_SIZE_L3];
+        W3 = new double[NN_SIZE_L3 * NN_SIZE_L4];
+        B3 = new double[NN_SIZE_L4];
+        accumulator = new double[2][NN_SIZE_L1];
     }
 
     public void load(String networkFile) {
         try (BufferedReader br = new BufferedReader(new FileReader(networkFile))) {
+            String name = br.readLine();
+            String author = br.readLine();
+            System.out.println("name: " + name + " author: " + author);
+
+            wr = Double.parseDouble(br.readLine().split("=")[1]);
+            mt = Double.parseDouble(br.readLine().split("=")[1]);
+            System.out.println("wr: " + wr + " mt: " + mt);
+
             for (int i=0;i<W0.length;i++)
                 W0[i] = Double.parseDouble(br.readLine());
             for (int i=0;i<B0.length;i++)
@@ -57,6 +71,7 @@ public class NeuralNetwork {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("B0[0]: " + B0[0] + ", B0[1]: " + B0[1]);
     }
 
     public int eval(Board board) {
@@ -65,35 +80,46 @@ public class NeuralNetwork {
 
         int ptm = board.getPlayerToMove().isWhite() ? 0 : 1;
 
-        // layer 0 features
-        double[] O0 = new double[NN_SIZE * 2];
-        for (int i=0;i<NN_SIZE;i++) {
-            O0[i] = clamp(accumulator[ptm][i]);
-            O0[NN_SIZE + i] = clamp(accumulator[1-ptm][i]);
+        // layer 1 features
+        double[] L1 = new double[NN_SIZE_L1 * 2];
+        for (int o=0;o<NN_SIZE_L1;o++) {
+            L1[o] = clamp_pos(accumulator[ptm][o]);
+            L1[NN_SIZE_L1 + o] = clamp_pos(accumulator[1-ptm][o]);
         }
 
-        // layers 1-3
-        double[] O1 = new double[32];
-        double[] O2 = new double[32];
-        double[] O3 = new double[1];
+        // layers 2-4
+        double[] L2 = new double[NN_SIZE_L2];
+        double[] L3 = new double[NN_SIZE_L3];
+        double[] L4 = new double[NN_SIZE_L4];
 
-        computeLayer(B1, O0, W1, O1, true);
-        computeLayer(B2, O1, W2, O2, true);
-        computeLayer(B3, O2, W3, O3, false);
+        computeLayer(L1, W1, B1, L2, true);
+        computeLayer(L2, W2, B2, L3, true);
+        computeLayer(L3, W3, B3, L4, false);
 
-        return (int)(O3[0] * 100);
+        double _wr = L4[0];
+        double _mt = L4[1];
+
+        // combination of win ratio & material
+        double score = (wr * _wr) + (mt * _mt);
+        return (int)(-score * 1000);
     }
 
-    private double clamp(double val) {
+    private double clamp_pos(double val) {
         if (val < 0.0) return 0.0;
-        if (val > 1.0) return 1.0;
+        if (val > Q) return Q;
+        return val;
+    }
+
+    private double clamp_neg(double val) {
+        if (val < -Q) return -Q;
+        if (val > Q) return Q;
         return val;
     }
 
     private void populateAccumulators(Board board) {
 
         // initialize with bias term
-        for (int o=0;o<NN_SIZE;o++) {
+        for (int o=0;o<NN_SIZE_L1;o++) {
             accumulator[0][o] = B0[o];
             accumulator[1][o] = B0[o];
         }
@@ -106,14 +132,11 @@ public class NeuralNetwork {
     }
 
     private void addPiece(Board board, int sq) {
-        int wKingSq = board.getKingSquare(Color.WHITE).flipVertical().value();
-        int bKingSq = board.getKingSquare(Color.BLACK).value();
-
         Piece piece = board.getPiece(sq);
-        int pieceColor = piece.isWhite() ? 0 : 1;
 
-        int pieceType;
+        int pieceColor, pieceType;
         if (piece.isWhite()) {
+            pieceColor = 0;
             if (piece.equals(Pawn.WHITE_PAWN)) {
                 pieceType = 0;
             } else if (piece.equals(Knight.WHITE_KNIGHT)) {
@@ -125,9 +148,10 @@ public class NeuralNetwork {
             } else if (piece.equals(Queen.WHITE_QUEEN)) {
                 pieceType = 4;
             } else {
-                return;
+                pieceType = 5;
             }
         } else {
+            pieceColor = 1;
             if (piece.equals(Pawn.BLACK_PAWN)) {
                 pieceType = 0;
             } else if (piece.equals(Knight.BLACK_KNIGHT)) {
@@ -139,37 +163,36 @@ public class NeuralNetwork {
             } else if (piece.equals(Queen.BLACK_QUEEN)) {
                 pieceType = 4;
             } else {
-                return;
+                pieceType = 5;
             }
         }
 
-        int sq_w = sq ^ 63;
+        int index_w = pieceType * 2 + pieceColor;
+        int index_b = pieceType * 2 + (1 - pieceColor);
+
         int sq_b = sq;
+        int sq_w = sq ^ 56;
 
-        int index_w = (pieceType << 1) + pieceColor;
-        int index_b = (pieceType << 1) + (1 - pieceColor);
+        int feature_w = (64 * index_w) + sq_w;
+        int feature_b = (64 * index_b) + sq_b;
 
-        int feature_w = (640 * wKingSq) + (64 * index_w) + sq_w;
-        int feature_b = (640 * bKingSq) + (64 * index_b) + sq_b;
-
-        for (int o=0;o<NN_SIZE;o++) {
-            accumulator[0][o] += W0[NN_SIZE * feature_w + o];
-            accumulator[1][o] += W0[NN_SIZE * feature_b + o];
+        for (int o=0;o<NN_SIZE_L1;o++) {
+            accumulator[0][o] += W0[NN_SIZE_L1 * feature_w + o];
+            accumulator[1][o] += W0[NN_SIZE_L1 * feature_b + o];
         }
     }
 
-    private void computeLayer(double[] B, double[] I, double[] W, double[] O, boolean withRelu) {
+    private void computeLayer(double[] I, double[] W, double[] B, double[] O, boolean withPosClamp) {
         for (int o=0;o<O.length;o++) {
             double sum = B[o];
             for (int i=0;i<I.length;i++) {
-                //sum += W[o * I.length + i] * I[i];
-                sum += W[i * O.length + o] * I[i];
+                sum += W[o * I.length + i] * I[i];
             }
 
-            if (withRelu)
-                O[o] = clamp(sum);
+            if (withPosClamp)
+                O[o] = clamp_pos(sum);
             else
-                O[o] = sum;
+                O[o] = clamp_neg(sum);
         }
     }
 }
