@@ -491,7 +491,9 @@ public class AlphaBetaSearch implements Search {
 
         searchStats.qnodes++;
 
-        int standPat = Globals.getPredictor().map(predictor -> EvalPredictor.predict(predictor, board))
+//        int standPat = Globals.getPredictor().map(predictor -> EvalPredictor.predict(predictor, board))
+//                .orElse(evaluator.evaluateBoard(board));
+        int standPat = Globals.getNeuralNetwork().map(nn -> nn.eval(board))
                 .orElse(evaluator.evaluateBoard(board));
         if (standPat > alpha) {
             if (standPat >= beta) {

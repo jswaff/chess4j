@@ -5,6 +5,7 @@ import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Undo;
 import dev.jamesswafford.chess4j.book.OpeningBook;
 import dev.jamesswafford.chess4j.eval.EvalWeights;
+import dev.jamesswafford.chess4j.nn.NeuralNetwork;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,6 +31,9 @@ public class Globals {
     @Setter
     private static Predictor<Board, Float> predictor;
 
+    @Setter
+    private static NeuralNetwork neuralNetwork;
+
     @Getter
     @Setter
     private static boolean pawnHashEnabled = true;
@@ -40,4 +44,5 @@ public class Globals {
 
     public static Optional<Predictor<Board, Float>> getPredictor() { return Optional.ofNullable(predictor); }
 
+    public static Optional<NeuralNetwork> getNeuralNetwork() { return Optional.ofNullable(neuralNetwork); }
 }

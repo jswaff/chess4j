@@ -6,6 +6,7 @@ import dev.jamesswafford.chess4j.pieces.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 public class NeuralNetwork {
     public static final int NN_SIZE_L1 = 128;
@@ -28,7 +29,7 @@ public class NeuralNetwork {
     // Temporary - will be moved into Board
     private final double[][] accumulator;
 
-    NeuralNetwork() {
+    public NeuralNetwork() {
         W0 = new double[768 * NN_SIZE_L1];
         B0 = new double[NN_SIZE_L1];
         W1 = new double[NN_SIZE_L1 * 2 * NN_SIZE_L2];
@@ -40,7 +41,12 @@ public class NeuralNetwork {
         accumulator = new double[2][NN_SIZE_L1];
     }
 
-    public void load(String networkFile) throws IOException {
+    public NeuralNetwork(String networkFile) {
+        this();
+        load(networkFile);
+    }
+
+    public void load(String networkFile) {
         try (BufferedReader br = new BufferedReader(new FileReader(networkFile))) {
             br.readLine(); // name
             br.readLine(); // author
@@ -66,10 +72,12 @@ public class NeuralNetwork {
                 W3[i] = Double.parseDouble(br.readLine());
             for (int i=0;i<B3.length;i++)
                 B3[i] = Double.parseDouble(br.readLine());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
-    public double eval(Board board) {
+    public int eval(Board board) {
 
         populateAccumulators(board);
 
@@ -95,9 +103,11 @@ public class NeuralNetwork {
         double _mt = L4[1];
 
         // combination of win ratio & material
-        double score = (wr * _wr) + (mt * _mt);
+        double pred = (wr * _wr) + (mt * _mt);
+        int score = (int)(pred * 1000);
+
+        //return board.getPlayerToMove().isWhite() ? score : -score;
         return score;
-        //return (int)(score * 1000);
     }
 
     private double clamp_pos(double val) {

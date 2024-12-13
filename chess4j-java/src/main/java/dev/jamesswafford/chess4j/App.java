@@ -7,7 +7,7 @@ import dev.jamesswafford.chess4j.hash.TTHolder;
 import dev.jamesswafford.chess4j.init.Initializer;
 import dev.jamesswafford.chess4j.io.*;
 import dev.jamesswafford.chess4j.nn.FENLabeler;
-import dev.jamesswafford.chess4j.nn.ModelLoader;
+import dev.jamesswafford.chess4j.nn.NeuralNetwork;
 import dev.jamesswafford.chess4j.search.AlphaBetaSearch;
 import dev.jamesswafford.chess4j.search.SearchOptions;
 import dev.jamesswafford.chess4j.search.SearchParameters;
@@ -105,7 +105,7 @@ public final class App {
         if (commandLine.hasOption("hash"))
             TTHolder.getInstance().resizeMainTable(Long.parseLong(commandLine.getOptionValue("hash")) *1024*1024);
         if (commandLine.hasOption("nn"))
-            Globals.setPredictor(ModelLoader.load(commandLine.getOptionValue("nn")));
+            Globals.setNeuralNetwork(new NeuralNetwork(commandLine.getOptionValue("nn")));
         if (commandLine.hasOption("phash"))
             TTHolder.getInstance().resizePawnTable(Long.parseLong(commandLine.getOptionValue("phash")) *1024*1024);
     }

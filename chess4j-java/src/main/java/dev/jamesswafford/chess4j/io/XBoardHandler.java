@@ -129,9 +129,10 @@ public class XBoardHandler {
 
     private void eval(String[] cmd) {
         LOGGER.info("HCE: {}",  Eval.eval(Globals.getEvalWeights(), Globals.getBoard()));
-        Globals.getPredictor().ifPresent(predictor -> {
-            LOGGER.info("NN: {}", EvalPredictor.predict(predictor, Globals.getBoard()));
-        });
+        Globals.getPredictor().ifPresent(predictor ->
+                LOGGER.info("NN: {}", EvalPredictor.predict(predictor, Globals.getBoard())));
+        Globals.getNeuralNetwork().ifPresent(nn ->
+                LOGGER.info("NN: {}", nn.eval(Globals.getBoard())));
     }
 
     private void exit(String[] cmd) {
@@ -220,6 +221,7 @@ public class XBoardHandler {
             StringBuilder mvStr = new StringBuilder("\t" + mv + " " + -Eval.eval(weights, board));
             Globals.getPredictor().ifPresent(predictor -> mvStr.append(" ")
                     .append(-EvalPredictor.predict(predictor, board)));
+            Globals.getNeuralNetwork().ifPresent(nn -> mvStr.append(" ").append(-nn.eval(board)));
             LOGGER.info(mvStr);
             board.undoMove(undo);
         });
