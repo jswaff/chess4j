@@ -26,7 +26,7 @@ public class NeuralNetwork {
     private double wr, mt;
     private static final double Q = 127.0 / 64.0;
 
-    // Temporary - will be moved into Board
+    // Temporary - will be moved into separate structure
     private final double[][] accumulator;
 
     public NeuralNetwork() {
@@ -104,10 +104,7 @@ public class NeuralNetwork {
 
         // combination of win ratio & material
         double pred = (wr * _wr) + (mt * _mt);
-        int score = (int)(pred * 1000);
-
-        //return board.getPlayerToMove().isWhite() ? score : -score;
-        return score;
+        return (int)(pred * 1000);
     }
 
     private double clamp_pos(double val) {
@@ -174,13 +171,10 @@ public class NeuralNetwork {
         }
 
         int index_w = pieceType * 2 + pieceColor;
+        int feature_w = (64 * index_w) + (sq ^ 56);
+
         int index_b = pieceType * 2 + (1 - pieceColor);
-
-        int sq_w = sq ^ 56; //Square.valueOf(sq).flipVertical().value();
-        int sq_b = sq;
-
-        int feature_w = (64 * index_w) + sq_w;
-        int feature_b = (64 * index_b) + sq_b;
+        int feature_b = (64 * index_b) + sq;
 
         for (int o=0;o<NN_SIZE_L1;o++) {
             accumulator[0][o] += W0[NN_SIZE_L1 * feature_w + o];

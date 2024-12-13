@@ -74,7 +74,7 @@ public final class App {
         options.addOption(createOptionWithArg("epochs", "epochs", "Number of epochs for tuning"));
         options.addOption(createOptionWithArg("lr", "learningRate", "Learning rate for tuning"));
         options.addOption(createOptionWithArg("mode", "mode", "Runtime mode: normal | bookbuild | label | test | tune"));
-        options.addOption(createOptionWithArg("nn", "modelfile", "Load neural net"));
+        options.addOption(createOptionWithArg("nn", "weightsFile", "Load neural net"));
         options.addOption(createOptionWithArg("out", "outfile", "Specify an output file"));
         options.addOption(createOptionWithArg("phash", "mb", "Specify pawn hash size in mb"));
         options.addOption(createOptionWithArg("time", "time", "Maximum time per search in seconds"));
