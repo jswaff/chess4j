@@ -7,7 +7,7 @@ import dev.jamesswafford.chess4j.hash.TTHolder;
 import dev.jamesswafford.chess4j.init.Initializer;
 import dev.jamesswafford.chess4j.io.*;
 import dev.jamesswafford.chess4j.nn.FENLabeler;
-import dev.jamesswafford.chess4j.nn.ModelLoader;
+import dev.jamesswafford.chess4j.nn.NeuralNetwork;
 import dev.jamesswafford.chess4j.search.AlphaBetaSearch;
 import dev.jamesswafford.chess4j.search.SearchOptions;
 import dev.jamesswafford.chess4j.search.SearchParameters;
@@ -74,7 +74,7 @@ public final class App {
         options.addOption(createOptionWithArg("epochs", "epochs", "Number of epochs for tuning"));
         options.addOption(createOptionWithArg("lr", "learningRate", "Learning rate for tuning"));
         options.addOption(createOptionWithArg("mode", "mode", "Runtime mode: normal | bookbuild | label | test | tune"));
-        options.addOption(createOptionWithArg("nn", "modelfile", "Load neural net"));
+        options.addOption(createOptionWithArg("nn", "weightsFile", "Load neural net"));
         options.addOption(createOptionWithArg("out", "outfile", "Specify an output file"));
         options.addOption(createOptionWithArg("phash", "mb", "Specify pawn hash size in mb"));
         options.addOption(createOptionWithArg("time", "time", "Maximum time per search in seconds"));
@@ -105,7 +105,8 @@ public final class App {
         if (commandLine.hasOption("hash"))
             TTHolder.getInstance().resizeMainTable(Long.parseLong(commandLine.getOptionValue("hash")) *1024*1024);
         if (commandLine.hasOption("nn"))
-            Globals.setPredictor(ModelLoader.load(commandLine.getOptionValue("nn")));
+            //Globals.setPredictor(ModelLoader.load(commandLine.getOptionValue("nn")));
+            Globals.setNeuralNetwork(new NeuralNetwork(commandLine.getOptionValue("nn")));
         if (commandLine.hasOption("phash"))
             TTHolder.getInstance().resizePawnTable(Long.parseLong(commandLine.getOptionValue("phash")) *1024*1024);
     }
