@@ -105,6 +105,7 @@ public final class App {
         if (commandLine.hasOption("hash"))
             TTHolder.getInstance().resizeMainTable(Long.parseLong(commandLine.getOptionValue("hash")) *1024*1024);
         if (commandLine.hasOption("nn"))
+            //Globals.setPredictor(ModelLoader.load(commandLine.getOptionValue("nn")));
             Globals.setNeuralNetwork(new NeuralNetwork(commandLine.getOptionValue("nn")));
         if (commandLine.hasOption("phash"))
             TTHolder.getInstance().resizePawnTable(Long.parseLong(commandLine.getOptionValue("phash")) *1024*1024);
