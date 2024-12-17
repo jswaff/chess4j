@@ -13,7 +13,6 @@ import dev.jamesswafford.chess4j.io.DrawBoard;
 import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
-import dev.jamesswafford.chess4j.nn.EvalPredictor;
 import dev.jamesswafford.chess4j.utils.BoardUtils;
 import dev.jamesswafford.chess4j.utils.MoveUtils;
 import lombok.Getter;
@@ -491,8 +490,6 @@ public class AlphaBetaSearch implements Search {
 
         searchStats.qnodes++;
 
-//        int standPat = Globals.getPredictor().map(predictor -> EvalPredictor.predict(predictor, board))
-//                .orElse(evaluator.evaluateBoard(board));
         int standPat = Globals.getNeuralNetwork().map(nn -> nn.eval(board))
                 .orElse(evaluator.evaluateBoard(board));
         if (standPat > alpha) {
