@@ -12,7 +12,7 @@ public class NeuralNetwork {
     public static final int NN_SIZE_L1 = 128;
     public static final int NN_SIZE_L2 = 32;
     public static final int NN_SIZE_L3 = 32;
-    public static final int NN_SIZE_L4 = 2;
+    public static final int NN_SIZE_L4 = 1;
 
     private final double[] W0;
     private final double[] B0;
@@ -22,9 +22,6 @@ public class NeuralNetwork {
     private final double[] B2;
     private final double[] W3;
     private final double[] B3;
-
-    private double wr, mt;
-    private static final double Q = 127.0 / 64.0;
 
     // Temporary - will be moved into separate structure
     private final double[][] accumulator;
@@ -48,12 +45,6 @@ public class NeuralNetwork {
 
     public void load(String networkFile) {
         try (BufferedReader br = new BufferedReader(new FileReader(networkFile))) {
-            br.readLine(); // name
-            br.readLine(); // author
-
-            wr = Double.parseDouble(br.readLine().split("=")[1]);
-            mt = Double.parseDouble(br.readLine().split("=")[1]);
-
             // note the transposition for W0!
             for (int row=0;row<NN_SIZE_L1;row++)
                 for (int col=0;col<768;col++)
@@ -86,8 +77,8 @@ public class NeuralNetwork {
         // layer 1 features
         double[] L1 = new double[NN_SIZE_L1 * 2];
         for (int o=0;o<NN_SIZE_L1;o++) {
-            L1[o] = clamp_pos(accumulator[ptm][o]);
-            L1[NN_SIZE_L1 + o] = clamp_pos(accumulator[1-ptm][o]);
+            L1[o] = clamp(accumulator[ptm][o]);
+            L1[NN_SIZE_L1 + o] = clamp(accumulator[1-ptm][o]);
         }
 
         // layers 2-4
@@ -99,23 +90,13 @@ public class NeuralNetwork {
         computeLayer(L2, W2, B2, L3, true);
         computeLayer(L3, W3, B3, L4, false);
 
-        double _wr = L4[0];
-        double _mt = L4[1];
-
-        // combination of win ratio & material
-        double pred = (wr * _wr) + (mt * _mt);
-        return (int)(pred * 1000);
+        double pred = L4[0] * 100;
+        return (int)pred;
     }
 
-    private double clamp_pos(double val) {
+    private double clamp(double val) {
         if (val < 0.0) return 0.0;
-        if (val > Q) return Q;
-        return val;
-    }
-
-    private double clamp_neg(double val) {
-        if (val < -Q) return -Q;
-        if (val > Q) return Q;
+        if (val > 1.0) return 1.0;
         return val;
     }
 
@@ -140,41 +121,41 @@ public class NeuralNetwork {
         int pieceColor, pieceType;
         if (piece.isWhite()) {
             pieceColor = 0;
-            if (piece.equals(Pawn.WHITE_PAWN)) {
+            if (piece.equals(Rook.WHITE_ROOK)) {
                 pieceType = 0;
             } else if (piece.equals(Knight.WHITE_KNIGHT)) {
                 pieceType = 1;
             } else if (piece.equals(Bishop.WHITE_BISHOP)) {
                 pieceType = 2;
-            } else if (piece.equals(Rook.WHITE_ROOK)) {
-                pieceType = 3;
             } else if (piece.equals(Queen.WHITE_QUEEN)) {
+                pieceType = 3;
+            } else if (piece.equals(King.WHITE_KING)) {
                 pieceType = 4;
             } else {
-                pieceType = 5;
+                pieceType = 5; // pawn
             }
         } else {
             pieceColor = 1;
-            if (piece.equals(Pawn.BLACK_PAWN)) {
+            if (piece.equals(Rook.BLACK_ROOK)) {
                 pieceType = 0;
             } else if (piece.equals(Knight.BLACK_KNIGHT)) {
                 pieceType = 1;
             } else if (piece.equals(Bishop.BLACK_BISHOP)) {
                 pieceType = 2;
-            } else if (piece.equals(Rook.BLACK_ROOK)) {
-                pieceType = 3;
             } else if (piece.equals(Queen.BLACK_QUEEN)) {
+                pieceType = 3;
+            } else if (piece.equals(King.BLACK_KING)) {
                 pieceType = 4;
             } else {
-                pieceType = 5;
+                pieceType = 5; // pawn
             }
         }
 
         int index_w = pieceType * 2 + pieceColor;
-        int feature_w = (64 * index_w) + (sq ^ 56);
+        int feature_w = (64 * index_w) + sq;
 
         int index_b = pieceType * 2 + (1 - pieceColor);
-        int feature_b = (64 * index_b) + sq;
+        int feature_b = (64 * index_b) + (sq ^ 56);
 
         for (int o=0;o<NN_SIZE_L1;o++) {
             accumulator[0][o] += W0[NN_SIZE_L1 * feature_w + o];
@@ -190,9 +171,9 @@ public class NeuralNetwork {
             }
 
             if (withPosClamp)
-                O[o] = clamp_pos(sum);
+                O[o] = clamp(sum);
             else
-                O[o] = clamp_neg(sum);
+                O[o] = sum;
         }
     }
 }
