@@ -216,6 +216,10 @@ public class XBoardHandler {
             board.undoMove(u2);
             return Double.compare(s1, s2);
         });
+        StringBuilder headerStr = new StringBuilder("# Move HCE");
+        Globals.getPredictor().ifPresent(predictor -> headerStr.append(" TS"));
+        Globals.getNeuralNetwork().ifPresent(nn -> headerStr.append(" NN"));
+        LOGGER.info(headerStr);
         moves.forEach(mv -> {
             Undo undo = board.applyMove(mv);
             StringBuilder mvStr = new StringBuilder("\t" + mv + " " + -Eval.eval(weights, board));
