@@ -72,13 +72,13 @@ public class NeuralNetwork {
 
         populateAccumulators(board);
 
-        int ptm = board.getPlayerToMove().isWhite() ? 0 : 1;
-
         // layer 1 features
         double[] L1 = new double[NN_SIZE_L1 * 2];
         for (int o=0;o<NN_SIZE_L1;o++) {
-            L1[o] = clamp(accumulator[ptm][o]);
-            L1[NN_SIZE_L1 + o] = clamp(accumulator[1-ptm][o]);
+            //L1[o] = clamp(accumulator[ptm][o]);
+            //L1[NN_SIZE_L1 + o] = clamp(accumulator[1-ptm][o]);
+            L1[o] = clamp(accumulator[0][o]);
+            L1[NN_SIZE_L1 + o] = clamp(accumulator[1][o]);
         }
 
         // layers 2-4
@@ -90,8 +90,8 @@ public class NeuralNetwork {
         computeLayer(L2, W2, B2, L3, true);
         computeLayer(L3, W3, B3, L4, false);
 
-        double pred = L4[0] * 100;
-        return (int)pred;
+        int pred = (int)Math.round(L4[0] * 100);
+        return board.getPlayerToMove().isWhite() ? pred : -pred;
     }
 
     private double clamp(double val) {
