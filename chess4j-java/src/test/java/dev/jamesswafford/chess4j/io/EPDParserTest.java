@@ -28,7 +28,7 @@ public class EPDParserTest {
     @Test
     public void toGameRecord_EtherealFormat() throws IOException {
         File epdFile = new File(EPDParserTest.class.getResource(etherealEpd).getFile());
-        List<FENRecord> fenRecords = EPDParser.load(epdFile, false);
+        List<FENRecord> fenRecords = EPDParser.load(epdFile);
 
         // verify a few samples
         /*
@@ -65,7 +65,7 @@ public class EPDParserTest {
     @Test
     public void toGameRecords_ZuriFormat() throws IOException {
         File epdFile = new File(EPDParserTest.class.getResource(zuriEpd).getFile());
-        List<FENRecord> fenRecords = EPDParser.load(epdFile, true);
+        List<FENRecord> fenRecords = EPDParser.load(epdFile);
 
         // verify a few samples
         /*

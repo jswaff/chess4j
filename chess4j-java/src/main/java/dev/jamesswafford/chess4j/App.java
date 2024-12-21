@@ -62,7 +62,6 @@ public final class App {
         Options options = new Options();
         options.addOption(new Option("?", "help", false, "Display help information"));
         options.addOption(new Option("native",  "Run native engine"));
-        options.addOption(new Option("zuri",  "EPD parser should use Zuri format"));
 
         options.addOption(createOptionWithArg("book", "bookfile", "Specify and enable opening book"));
         options.addOption(createOptionWithArg("depth", "depth", "Maximum search depth"));
@@ -209,8 +208,7 @@ public final class App {
             LOGGER.warn("optional parameter epochs not specified");
         }
 
-        boolean zuri = commandLine.hasOption("zuri");
-        List<FENRecord> fenRecords = EPDParser.load(epdFile, zuri);
+        List<FENRecord> fenRecords = EPDParser.load(epdFile);
 
         LogisticRegressionTuner tuner = new LogisticRegressionTuner();
         Tuple2<EvalWeights, Double> optimizedWeights =
