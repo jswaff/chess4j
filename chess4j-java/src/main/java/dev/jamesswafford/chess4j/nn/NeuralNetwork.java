@@ -3,10 +3,7 @@ package dev.jamesswafford.chess4j.nn;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.pieces.*;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
 
 public class NeuralNetwork {
     public static final int NN_SIZE_L1 = 1536;
@@ -24,12 +21,17 @@ public class NeuralNetwork {
         B1 = new double[NN_SIZE_L2];
     }
 
-    public NeuralNetwork(String networkFile) {
+    public NeuralNetwork(File networkFile) {
         this();
         load(networkFile);
     }
 
-    public void load(String networkFile) {
+    public NeuralNetwork(String networkFile) {
+        this();
+        load(new File(networkFile));
+    }
+
+    public void load(File networkFile) {
         try (BufferedReader br = new BufferedReader(new FileReader(networkFile))) {
             // note the transposition for W0!
             for (int row=0;row<NN_SIZE_L1;row++)

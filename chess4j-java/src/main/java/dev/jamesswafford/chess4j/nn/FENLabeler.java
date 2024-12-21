@@ -10,8 +10,6 @@ import dev.jamesswafford.chess4j.search.SearchParameters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
-
 import static dev.jamesswafford.chess4j.Constants.CHECKMATE;
 
 public class FENLabeler {
@@ -23,13 +21,6 @@ public class FENLabeler {
     public FENLabeler() {
         this.search = new AlphaBetaSearch();
         search.setSkipTimeChecks(true);
-    }
-
-    public void label(List<FENRecord> fenRecords, int depth) {
-        LOGGER.info("labeling {} fen records to depth {}", fenRecords.size(), depth);
-        for (FENRecord fenRecord : fenRecords) {
-            label(fenRecord, depth);
-        }
     }
 
     public void label(FENRecord fenRecord, int depth) {
