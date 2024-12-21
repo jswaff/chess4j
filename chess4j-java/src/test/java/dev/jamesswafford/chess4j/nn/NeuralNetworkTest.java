@@ -18,8 +18,7 @@ public class NeuralNetworkTest {
 
     @Test
     public void test1() throws IOException {
-        //String f = "/home/james/data/chess/network.txt";
-        String f = "/home/james/data/chess/models/positions-hce.txt";
+        String f = "/home/james/data/chess/models/nn-003-d2.txt";
         NeuralNetwork nn = new NeuralNetwork();
         nn.load(f);
 
