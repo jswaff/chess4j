@@ -87,8 +87,6 @@ public final class Board {
     }
 
     public void addToNN_Accumulator(int ind1, int ind2, double val) {
-        assert(ind1==0 || ind1==1);
-        assert(ind2 >= 0 && ind2 < NeuralNetwork.NN_SIZE_L1);
         nn_accumulators[ind1][ind2] += val;
     }
 
@@ -327,8 +325,6 @@ public final class Board {
     }
 
     public double getNN_Accumulator(int ind1, int ind2) {
-        assert(ind1==0 || ind1==1);
-        assert(ind2 >= 0 && ind2 < NeuralNetwork.NN_SIZE_L1);
         return nn_accumulators[ind1][ind2];
     }
 
@@ -416,8 +412,6 @@ public final class Board {
     }
 
     public void setNN_Accumulator(int ind1, int ind2, double val) {
-        assert(ind1==0 || ind1==1);
-        assert(ind2 >= 0 && ind2 < NeuralNetwork.NN_SIZE_L1);
         nn_accumulators[ind1][ind2] = val;
     }
 
