@@ -9,33 +9,19 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 
 public class NeuralNetwork {
-    public static final int NN_SIZE_L1 = 128;
-    public static final int NN_SIZE_L2 = 32;
-    public static final int NN_SIZE_L3 = 32;
-    public static final int NN_SIZE_L4 = 1;
+    public static final int NN_SIZE_L1 = 1536;
+    public static final int NN_SIZE_L2 = 1;
 
     private final double[] W0;
     private final double[] B0;
     private final double[] W1;
     private final double[] B1;
-    private final double[] W2;
-    private final double[] B2;
-    private final double[] W3;
-    private final double[] B3;
-
-    // Temporary - will be moved into separate structure
-    private final double[][] accumulator;
 
     public NeuralNetwork() {
         W0 = new double[768 * NN_SIZE_L1];
         B0 = new double[NN_SIZE_L1];
         W1 = new double[NN_SIZE_L1 * 2 * NN_SIZE_L2];
         B1 = new double[NN_SIZE_L2];
-        W2 = new double[NN_SIZE_L2 * NN_SIZE_L3];
-        B2 = new double[NN_SIZE_L3];
-        W3 = new double[NN_SIZE_L3 * NN_SIZE_L4];
-        B3 = new double[NN_SIZE_L4];
-        accumulator = new double[2][NN_SIZE_L1];
     }
 
     public NeuralNetwork(String networkFile) {
@@ -55,14 +41,6 @@ public class NeuralNetwork {
                 W1[i] = Double.parseDouble(br.readLine());
             for (int i=0;i<B1.length;i++)
                 B1[i] = Double.parseDouble(br.readLine());
-            for (int i=0;i<W2.length;i++)
-                W2[i] = Double.parseDouble(br.readLine());
-            for (int i=0;i<B2.length;i++)
-                B2[i] = Double.parseDouble(br.readLine());
-            for (int i=0;i<W3.length;i++)
-                W3[i] = Double.parseDouble(br.readLine());
-            for (int i=0;i<B3.length;i++)
-                B3[i] = Double.parseDouble(br.readLine());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -70,27 +48,24 @@ public class NeuralNetwork {
 
     public int eval(Board board) {
 
+        // TODO: incremental updates
         populateAccumulators(board);
 
-        // layer 1 features
+        // set layer 1 features from accumulators
         double[] L1 = new double[NN_SIZE_L1 * 2];
         for (int o=0;o<NN_SIZE_L1;o++) {
             //L1[o] = clamp(accumulator[ptm][o]);
             //L1[NN_SIZE_L1 + o] = clamp(accumulator[1-ptm][o]);
-            L1[o] = clamp(accumulator[0][o]);
-            L1[NN_SIZE_L1 + o] = clamp(accumulator[1][o]);
+            L1[o] = clamp(board.getNN_Accumulator(0, o));
+            L1[NN_SIZE_L1 + o] = clamp(board.getNN_Accumulator(1, o));
         }
 
-        // layers 2-4
+        // calculate other layers
         double[] L2 = new double[NN_SIZE_L2];
-        double[] L3 = new double[NN_SIZE_L3];
-        double[] L4 = new double[NN_SIZE_L4];
 
-        computeLayer(L1, W1, B1, L2, true);
-        computeLayer(L2, W2, B2, L3, true);
-        computeLayer(L3, W3, B3, L4, false);
+        computeLayer(L1, W1, B1, L2, false);
 
-        int pred = (int)Math.round(L4[0] * 100);
+        int pred = (int)Math.round(L2[0] * 100);
         return board.getPlayerToMove().isWhite() ? pred : -pred;
     }
 
@@ -104,8 +79,8 @@ public class NeuralNetwork {
 
         // initialize with bias term
         for (int o=0;o<NN_SIZE_L1;o++) {
-            accumulator[0][o] = B0[o];
-            accumulator[1][o] = B0[o];
+            board.setNN_Accumulator(0, o, B0[o]);
+            board.setNN_Accumulator(1, o, B0[o]);
         }
 
         for (int sq=0;sq<64;sq++) {
@@ -158,19 +133,19 @@ public class NeuralNetwork {
         int feature_b = (64 * index_b) + (sq ^ 56);
 
         for (int o=0;o<NN_SIZE_L1;o++) {
-            accumulator[0][o] += W0[NN_SIZE_L1 * feature_w + o];
-            accumulator[1][o] += W0[NN_SIZE_L1 * feature_b + o];
+            board.addToNN_Accumulator(0, o, W0[NN_SIZE_L1 * feature_w + o]);
+            board.addToNN_Accumulator(1, o, W0[NN_SIZE_L1 * feature_b + o]);
         }
     }
 
-    private void computeLayer(double[] I, double[] W, double[] B, double[] O, boolean withPosClamp) {
+    private void computeLayer(double[] I, double[] W, double[] B, double[] O, boolean withClamp) {
         for (int o=0;o<O.length;o++) {
             double sum = B[o];
             for (int i=0;i<I.length;i++) {
                 sum += W[o * I.length + i] * I[i];
             }
 
-            if (withPosClamp)
+            if (withClamp)
                 O[o] = clamp(sum);
             else
                 O[o] = sum;

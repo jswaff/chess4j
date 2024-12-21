@@ -4,6 +4,7 @@ import dev.jamesswafford.chess4j.board.squares.Rank;
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.exceptions.ParseException;
 import dev.jamesswafford.chess4j.hash.Zobrist;
+import dev.jamesswafford.chess4j.nn.NeuralNetwork;
 import dev.jamesswafford.chess4j.pieces.King;
 import dev.jamesswafford.chess4j.pieces.Piece;
 import dev.jamesswafford.chess4j.utils.BlankRemover;
@@ -60,6 +61,7 @@ public final class Board {
     private long whitePieces, blackPieces;
     private long zobristKey;
     private long pawnKey;
+    private final double[][] nn_accumulators = new double[2][NeuralNetwork.NN_SIZE_L1];
 
     public Board() {
         this(INITIAL_POS);
@@ -82,6 +84,12 @@ public final class Board {
         pieceCountsMap.put(BLACK_PAWN, 0);
 
         setPos(fen);
+    }
+
+    public void addToNN_Accumulator(int ind1, int ind2, double val) {
+        assert(ind1==0 || ind1==1);
+        assert(ind2 >= 0 && ind2 < NeuralNetwork.NN_SIZE_L1);
+        nn_accumulators[ind1][ind2] += val;
     }
 
     public Undo applyMove(Move move) {
@@ -148,6 +156,7 @@ public final class Board {
         for (Piece p : pieceCountsMap.keySet()) {
             b.pieceCountsMap.put(p, pieceCountsMap.get(p));
         }
+        // TODO: nn_accumulators
         return b;
     }
 
@@ -238,6 +247,7 @@ public final class Board {
         if (this.fiftyCounter!=that.fiftyCounter) {
             return false;
         }
+        // TODO: nn_accumulators
 
         return true;
     }
@@ -311,7 +321,15 @@ public final class Board {
         zobristKey = Zobrist.calculateBoardKey(this);
         pawnKey = Zobrist.calculatePawnKey(this);
 
+        // TODO: rebuild accumulators (or just swap?)
+
         assert(verify());
+    }
+
+    public double getNN_Accumulator(int ind1, int ind2) {
+        assert(ind1==0 || ind1==1);
+        assert(ind2 >= 0 && ind2 < NeuralNetwork.NN_SIZE_L1);
+        return nn_accumulators[ind1][ind2];
     }
 
     public Square getKingSquare(Color player) {
@@ -354,23 +372,6 @@ public final class Board {
         }
     }
 
-    // convenience functions
-    public boolean hasWKCastlingRight() {
-        return castlingRights.isWhiteKingside();
-    }
-
-    public boolean hasWQCastlingRight() {
-        return castlingRights.isWhiteQueenside();
-    }
-
-    public boolean hasBKCastlingRight() {
-        return castlingRights.isBlackKingside();
-    }
-
-    public boolean hasBQCastlingRight() {
-        return castlingRights.isBlackQueenside();
-    }
-
     @Override
     public int hashCode() {
 
@@ -395,6 +396,7 @@ public final class Board {
 
         hash = hash * 17 + moveCounter;
         hash = hash * 13 + fiftyCounter;
+        // TODO: factor in nn_accumulators?
 
         return hash;
     }
@@ -411,6 +413,12 @@ public final class Board {
         assert(ep != null);
         epSquare = ep;
         zobristKey ^= Zobrist.getEnPassantKey(ep);
+    }
+
+    public void setNN_Accumulator(int ind1, int ind2, double val) {
+        assert(ind1==0 || ind1==1);
+        assert(ind2 >= 0 && ind2 < NeuralNetwork.NN_SIZE_L1);
+        nn_accumulators[ind1][ind2] = val;
     }
 
     // the FEN grammar can be found here:
@@ -439,6 +447,7 @@ public final class Board {
 
         zobristKey = Zobrist.calculateBoardKey(this);
         pawnKey = Zobrist.calculatePawnKey(this);
+        // TODO: build NN accumulators
 
         if (!verify()) {
             throw new ParseException("Invalid position: " + fen);
@@ -1054,6 +1063,7 @@ public final class Board {
 
         assert(zobristKey==Zobrist.calculateBoardKey(this));
         assert(pawnKey==Zobrist.calculatePawnKey(this));
+        // TODO: verify accumulators
 
         return true;
     }
