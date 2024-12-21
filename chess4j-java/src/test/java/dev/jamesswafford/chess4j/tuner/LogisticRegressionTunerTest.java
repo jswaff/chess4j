@@ -26,7 +26,7 @@ public class LogisticRegressionTunerTest {
     @BeforeClass
     public static void setUp() throws Exception {
         File epdFile = new File(LogisticRegressionTunerTest.class.getResource(testEpd).getFile());
-        fenRecords = EPDParser.load(epdFile, true);
+        fenRecords = EPDParser.load(epdFile);
     }
 
     @Test

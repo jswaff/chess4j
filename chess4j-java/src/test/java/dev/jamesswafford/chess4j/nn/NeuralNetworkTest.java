@@ -11,6 +11,7 @@ import dev.jamesswafford.chess4j.pieces.Knight;
 import dev.jamesswafford.chess4j.pieces.Pawn;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -18,9 +19,8 @@ public class NeuralNetworkTest {
 
     @Test
     public void test1() throws IOException {
-        String f = "/home/james/data/chess/models/nn-003-d2.txt";
-        NeuralNetwork nn = new NeuralNetwork();
-        nn.load(f);
+        File nnFile = new File(getClass().getResource("/nn.txt").getFile());
+        NeuralNetwork nn = new NeuralNetwork(nnFile);
 
         Board b = new Board();
         System.out.println("initial pos: " + nn.eval(b));

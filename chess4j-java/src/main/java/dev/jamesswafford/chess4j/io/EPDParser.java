@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,10 +24,10 @@ public final class EPDParser {
 
     private EPDParser() { }
 
-    public static List<FENRecord> load(String epdFile, boolean zuriFormat) throws IOException {
-        return load(new File(epdFile), zuriFormat);
+    public static List<FENRecord> load(String epdFile) throws IOException {
+        return load(new File(epdFile));
     }
-    public static List<FENRecord> load(File epdFile, boolean zuriFormat) throws IOException {
+    public static List<FENRecord> load(File epdFile) throws IOException {
         LOGGER.info("loading records from {}", epdFile);
         List<FENRecord> fenRecords = new ArrayList<>();
         FileInputStream fis = null;
@@ -37,7 +38,7 @@ public final class EPDParser {
             sc = new Scanner(fis, StandardCharsets.UTF_8);
             while (sc.hasNextLine()) {
                 String line = sc.nextLine();
-                fenRecords.add(readLine(line, zuriFormat));
+                fenRecords.add(readLine(line));
             }
             // scanner suppresses exceptions
             if (sc.ioException() != null) {
@@ -126,7 +127,7 @@ public final class EPDParser {
         return operands;
     }
 
-    private static FENRecord readLine(String epdLine, boolean zuriFormat) {
+    private static FENRecord readLine(String epdLine) {
 
         Board board = new Board();
         List<EPDOperation> epdOperations = setPos(board, epdLine);
@@ -135,37 +136,44 @@ public final class EPDParser {
             throw new EpdProcessingException("Error processing epdLine " + epdLine + ".  Expected FEN " + fen);
         }
 
-        String outcome;
-        if (zuriFormat) {
-            // the Zuri dataset uses the "c9" opcode, which is a comment, to denote the outcome
-            EPDOperation c9 = epdOperations.stream().filter(epdOperation -> "c9".equals(epdOperation.getEpdOpcode()))
-                    .findFirst()
-                    .orElseThrow(() -> new EpdProcessingException("couldn't find c9 opcode"));
+        // the Zuri dataset uses the "c9" opcode, which is a comment, to denote the outcome
+        Optional<EPDOperation> maybeC9 = epdOperations.stream()
+                .filter(epdOperation -> "c9".equals(epdOperation.getEpdOpcode()))
+                .findFirst();
 
+        String outcome = maybeC9.map(c9 -> {
             if (c9.getEpdOperands().size() != 1) {
                 throw new EpdProcessingException("Expected one operand for c9 opcode");
             }
-            outcome = c9.getEpdOperands().get(0);
-        } else {
-            // Assume format of Ethereal data.  The outcome is the operand in brackets
-            //8/2N2kp1/5b1p/1P6/3p4/4P1P1/5K1P/8 b - - 0 38 [1.0] -154
-            outcome = epdOperations.get(0).getEpdOperands().stream().filter(opCode -> {
+            return c9.getEpdOperands().get(0);
+        }).orElseGet(() -> {
+            // No C9 opcode.  Assume format of Ethereal data.  The outcome is the operand in brackets
+            // 8/2N2kp1/5b1p/1P6/3p4/4P1P1/5K1P/8 b - - 0 38 [1.0] -154
+            String _outcome = epdOperations.get(0).getEpdOperands().stream().filter(opCode -> {
                 Matcher outcomeMatcher = outcomeBracketPattern.matcher(opCode);
                 return outcomeMatcher.matches();
             }).findFirst().orElseThrow(() -> new EpdProcessingException("couldn't find outcome in epd op codes"));
-            outcome = outcome.replace("[", "");
-            outcome = outcome.replace("]", "");
-        }
+            _outcome = _outcome.replace("[", "");
+            _outcome = _outcome.replace("]", "");
+            return _outcome;
+        });
 
         PGNResult pgnResult;
-        if ("1-0".equals(outcome) || "1.0".equals(outcome)) {
-            pgnResult = PGNResult.WHITE_WINS;
-        } else if ("0-1".equals(outcome) || "0.0".equals(outcome)) {
-            pgnResult = PGNResult.BLACK_WINS;
-        } else if ("1/2-1/2".equals(outcome) || "0.5".equals(outcome)) {
-            pgnResult = PGNResult.DRAW;
-        } else {
-            throw new EpdProcessingException("Don't know how to map outcome to result: " + outcome);
+        switch (outcome) {
+            case "1-0":
+            case "1.0":
+                pgnResult = PGNResult.WHITE_WINS;
+                break;
+            case "0-1":
+            case "0.0":
+                pgnResult = PGNResult.BLACK_WINS;
+                break;
+            case "1/2-1/2":
+            case "0.5":
+                pgnResult = PGNResult.DRAW;
+                break;
+            default:
+                throw new EpdProcessingException("Don't know how to map outcome to result: " + outcome);
         }
 
         return FENRecord.builder().fen(fen).result(pgnResult).build();
