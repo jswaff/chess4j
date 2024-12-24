@@ -67,8 +67,15 @@ public class NeuralNetwork {
 
         computeLayer(L1, W1, B1, L2, false);
 
-        int pred = (int)Math.round(L2[0] * 100);
+        double y = L2[0];
+        //double y = atanh(L2[0]) * 2; // pawns
+
+        int pred = (int)Math.round(y * 100); // centi-pawns
         return board.getPlayerToMove().isWhite() ? pred : -pred;
+    }
+
+    private double atanh(double x) {
+        return 0.5 * Math.log((1 + x) / (1 - x));
     }
 
     private double clamp(double val) {
@@ -147,10 +154,12 @@ public class NeuralNetwork {
                 sum += W[o * I.length + i] * I[i];
             }
 
-            if (withClamp)
-                O[o] = clamp(sum);
-            else
+            if (withClamp) {
+                double v = clamp(sum);
+                O[o] = v; // * v;
+            } else {
                 O[o] = sum;
+            }
         }
     }
 }
