@@ -34,11 +34,11 @@ static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
 /*
  * Class:     dev_jamesswafford_chess4j_search_AlphaBetaSearch
  * Method:    searchNative
- * Signature: (Ljava/lang/String;Ljava/util/List;IIILdev/jamesswafford/chess4j/search/SearchStats;JJ)I
+ * Signature: (Ljava/lang/String;Ljava/util/List;IIILdev/jamesswafford/chess4j/search/SearchStats;JJZ)I
  */
 JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_searchNative
   (JNIEnv *env, jobject search_obj, jstring board_fen, jobject parent_pv, jint depth,
-  jint alpha, jint beta, jobject search_stats, jlong start_time, jlong stop_time)
+  jint alpha, jint beta, jobject search_stats, jlong start_time, jlong stop_time, jboolean post)
 {
     jint retval = 0;
 
@@ -66,7 +66,7 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     /* set up the search options */
     search_options_t search_opts;
     memset(&search_opts, 0, sizeof(search_options_t));
-    search_opts.pv_callback = pv_callback;
+    if (post) search_opts.pv_callback = pv_callback;
     search_opts.start_time = start_time;
     search_opts.stop_time = stop_time;
     search_opts.nodes_between_time_checks = 100000UL;

@@ -149,8 +149,9 @@ public class AlphaBetaSearch implements Search {
         try {
             assert(clearTableWrapper());
             String fen = FENBuilder.createFen(board, false);
+            boolean post = opts.getPvCallback() != null;
             int nativeScore = searchNative(fen, nativePV, searchParameters.getDepth(), searchParameters.getAlpha(),
-                    searchParameters.getBeta(), nativeStats, opts.getStartTime(), opts.getStopTime());
+                    searchParameters.getBeta(), nativeStats, opts.getStartTime(), opts.getStopTime(), post);
 
             // if the search completed then verify equality with the Java implementation.
             assert (stop || searchesAreEqual(board, undos, searchParameters, opts, nativeScore, nativePV, nativeStats));
@@ -583,7 +584,7 @@ public class AlphaBetaSearch implements Search {
     private native void initializeNativeSearch();
 
     private native int searchNative(String fen, List<Long> parentPV, int depth, int alpha, int beta,
-                                    SearchStats searchStats, long startTime, long stopTime);
+                                    SearchStats searchStats, long startTime, long stopTime, boolean post);
 
     private native void stopNative(boolean stop);
 
