@@ -9,18 +9,23 @@ import dev.jamesswafford.chess4j.eval.Eval;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import dev.jamesswafford.chess4j.pieces.Knight;
 import dev.jamesswafford.chess4j.pieces.Pawn;
+import dev.jamesswafford.chess4j.search.AlphaBetaSearch;
+import dev.jamesswafford.chess4j.search.SearchParameters;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
+
+import static dev.jamesswafford.chess4j.Constants.CHECKMATE;
 
 public class NeuralNetworkTest {
 
     @Test
-    public void test1() throws IOException {
+    public void test1() {
         File nnFile = new File(getClass().getResource("/nn.txt").getFile());
         NeuralNetwork nn = new NeuralNetwork(nnFile);
+        AlphaBetaSearch search = new AlphaBetaSearch();
+        SearchParameters parameters = new SearchParameters(3, -CHECKMATE, CHECKMATE);
 
         Board b = new Board();
         System.out.println("initial pos: " + nn.eval(b));
@@ -30,10 +35,14 @@ public class NeuralNetworkTest {
         b.applyMove(new Move(Knight.BLACK_KNIGHT, Square.G8, Square.F6));
 
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(b);
+
         for (Move mv : moves) {
             Undo u = b.applyMove(mv);
+            search.initialize();
+            int score = search.search(b, parameters);
             System.out.println(mv + " NN: " + nn.eval(b) +
-                    " HCE: " + Eval.eval(Globals.getEvalWeights(), b));
+                    " HCE: " + Eval.eval(Globals.getEvalWeights(), b) +
+                    " D3: " + score);
             b.undoMove(u);
         }
     }
