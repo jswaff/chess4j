@@ -7,7 +7,6 @@ import static dev.jamesswafford.chess4j.nn.NeuralNetwork.NN_SIZE_L1;
 import static dev.jamesswafford.chess4j.pieces.Bishop.*;
 import static dev.jamesswafford.chess4j.pieces.King.*;
 import static dev.jamesswafford.chess4j.pieces.Knight.*;
-import static dev.jamesswafford.chess4j.pieces.Pawn.*;
 import static dev.jamesswafford.chess4j.pieces.Queen.*;
 import static dev.jamesswafford.chess4j.pieces.Rook.*;
 
@@ -17,19 +16,11 @@ public class NnueAccumulators {
 
     private final static double epsilon = 0.00001;
 
-    public void add(int ind1, int ind2, double val) {
-        accumulators[ind1][ind2] += val;
-    }
-
     public double get(int ind1, int ind2) {
         return accumulators[ind1][ind2];
     }
 
-    public void set(int ind1, int ind2, double val) {
-        accumulators[ind1][ind2] = val;
-    }
-
-    private void addPiece(Board board, int sq, NeuralNetwork nn) {
+    public void addPiece(Board board, int sq, NeuralNetwork nn) {
         Piece piece = board.getPiece(sq);
 
         int pieceColor, pieceType;
@@ -72,8 +63,8 @@ public class NnueAccumulators {
         int feature_b = (64 * index_b) + (sq ^ 56);
 
         for (int o=0;o<NN_SIZE_L1;o++) {
-            add(0, o, nn.W0[NN_SIZE_L1 * feature_w + o]);
-            add(1, o, nn.W0[NN_SIZE_L1 * feature_b + o]);
+            accumulators[0][o] += nn.W0[NN_SIZE_L1 * feature_w + o];
+            accumulators[1][o] += nn.W0[NN_SIZE_L1 * feature_b + o];
         }
     }
 
@@ -81,8 +72,8 @@ public class NnueAccumulators {
 
         // initialize with bias term
         for (int o=0;o<NN_SIZE_L1;o++) {
-            set(0, o, nn.B0[o]);
-            set(1, o, nn.B0[o]);
+            accumulators[0][o] = nn.B0[o];
+            accumulators[1][o] = nn.B0[o];
         }
 
         for (int sq=0;sq<64;sq++) {
