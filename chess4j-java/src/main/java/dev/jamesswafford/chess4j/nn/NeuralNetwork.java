@@ -50,16 +50,16 @@ public class NeuralNetwork {
 
     public int eval(Board board) {
 
-        // TODO: incremental updates
-        populateAccumulators(board);
+        populateAccumulators(board, board.getNnueAccumulators()); // TODO: incremental updates
+        assert(verifyAccumulators(board));
 
         // set layer 1 features from accumulators
         double[] L1 = new double[NN_SIZE_L1 * 2];
         for (int o=0;o<NN_SIZE_L1;o++) {
             //L1[o] = clamp(accumulator[ptm][o]);
             //L1[NN_SIZE_L1 + o] = clamp(accumulator[1-ptm][o]);
-            L1[o] = clamp(board.getNN_Accumulator(0, o));
-            L1[NN_SIZE_L1 + o] = clamp(board.getNN_Accumulator(1, o));
+            L1[o] = clamp(board.getNnueAccumulators().get(0, o));
+            L1[NN_SIZE_L1 + o] = clamp(board.getNnueAccumulators().get(1, o));
         }
 
         // calculate other layers
@@ -84,22 +84,31 @@ public class NeuralNetwork {
         return val;
     }
 
-    private void populateAccumulators(Board board) {
+    private boolean verifyAccumulators(Board board) {
+        //  populate local copy of accumulators
+        NnueAccumulators accumulators = new NnueAccumulators();
+        populateAccumulators(board, accumulators);
+
+        // compare local copy to copy in Board
+        return accumulators.equalsWithinEpsilon(board.getNnueAccumulators());
+    }
+
+    private void populateAccumulators(Board board, NnueAccumulators accumulators) {
 
         // initialize with bias term
         for (int o=0;o<NN_SIZE_L1;o++) {
-            board.setNN_Accumulator(0, o, B0[o]);
-            board.setNN_Accumulator(1, o, B0[o]);
+            accumulators.set(0, o, B0[o]);
+            accumulators.set(1, o, B0[o]);
         }
 
         for (int sq=0;sq<64;sq++) {
             if (board.getPiece(sq) != null) {
-                addPiece(board, sq);
+                addPiece(board, sq, accumulators);
             }
         }
     }
 
-    private void addPiece(Board board, int sq) {
+    private void addPiece(Board board, int sq, NnueAccumulators accumulators) {
         Piece piece = board.getPiece(sq);
 
         int pieceColor, pieceType;
@@ -142,8 +151,8 @@ public class NeuralNetwork {
         int feature_b = (64 * index_b) + (sq ^ 56);
 
         for (int o=0;o<NN_SIZE_L1;o++) {
-            board.addToNN_Accumulator(0, o, W0[NN_SIZE_L1 * feature_w + o]);
-            board.addToNN_Accumulator(1, o, W0[NN_SIZE_L1 * feature_b + o]);
+            accumulators.add(0, o, W0[NN_SIZE_L1 * feature_w + o]);
+            accumulators.add(1, o, W0[NN_SIZE_L1 * feature_b + o]);
         }
     }
 

@@ -4,7 +4,7 @@ import dev.jamesswafford.chess4j.board.squares.Rank;
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.exceptions.ParseException;
 import dev.jamesswafford.chess4j.hash.Zobrist;
-import dev.jamesswafford.chess4j.nn.NeuralNetwork;
+import dev.jamesswafford.chess4j.nn.NnueAccumulators;
 import dev.jamesswafford.chess4j.pieces.King;
 import dev.jamesswafford.chess4j.pieces.Piece;
 import dev.jamesswafford.chess4j.utils.BlankRemover;
@@ -61,7 +61,8 @@ public final class Board {
     private long whitePieces, blackPieces;
     private long zobristKey;
     private long pawnKey;
-    private final double[][] nn_accumulators = new double[2][NeuralNetwork.NN_SIZE_L1];
+    @Getter
+    private final NnueAccumulators nnueAccumulators = new NnueAccumulators();
 
     public Board() {
         this(INITIAL_POS);
@@ -84,10 +85,6 @@ public final class Board {
         pieceCountsMap.put(BLACK_PAWN, 0);
 
         setPos(fen);
-    }
-
-    public void addToNN_Accumulator(int ind1, int ind2, double val) {
-        nn_accumulators[ind1][ind2] += val;
     }
 
     public Undo applyMove(Move move) {
@@ -324,10 +321,6 @@ public final class Board {
         assert(verify());
     }
 
-    public double getNN_Accumulator(int ind1, int ind2) {
-        return nn_accumulators[ind1][ind2];
-    }
-
     public Square getKingSquare(Color player) {
         return player.isWhite() ? getWhiteKingSquare() : getBlackKingSquare();
     }
@@ -409,10 +402,6 @@ public final class Board {
         assert(ep != null);
         epSquare = ep;
         zobristKey ^= Zobrist.getEnPassantKey(ep);
-    }
-
-    public void setNN_Accumulator(int ind1, int ind2, double val) {
-        nn_accumulators[ind1][ind2] = val;
     }
 
     // the FEN grammar can be found here:
