@@ -50,7 +50,6 @@ public class NeuralNetwork {
     public int eval(Board board) {
 
         board.getNnueAccumulators().populate(board, this); // TODO: incremental updates
-        assert(verifyAccumulators(board));
 
         // set layer 1 features from accumulators
         double[] L1 = new double[NN_SIZE_L1 * 2];
@@ -97,15 +96,6 @@ public class NeuralNetwork {
                 O[o] = sum;
             }
         }
-    }
-
-    private boolean verifyAccumulators(Board board) {
-        //  populate local copy of accumulators
-        NnueAccumulators accumulators = new NnueAccumulators();
-        accumulators.populate(board, this);
-
-        // compare local copy to copy in Board
-        return accumulators.equalsWithinEpsilon(board.getNnueAccumulators());
     }
 
 }
