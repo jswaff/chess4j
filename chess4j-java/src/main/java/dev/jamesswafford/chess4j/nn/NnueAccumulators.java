@@ -21,7 +21,7 @@ public class NnueAccumulators {
     }
 
     // TODO: probably some opportunity to refactor
-    public void addPiece(Board board, int sq, NeuralNetwork nn) {
+    private void addPiece(Board board, int sq, NeuralNetwork nn) {
         Piece piece = board.getPiece(sq);
 
         int pieceColor, pieceType;
@@ -128,6 +128,14 @@ public class NnueAccumulators {
         for (int sq=0;sq<64;sq++) {
             if (board.getPiece(sq) != null) {
                 addPiece(board, sq, nn);
+            }
+        }
+    }
+
+    public void copy(NnueAccumulators other) {
+        for (int i=0; i<accumulators.length;i++) {
+            for (int j=0;j<accumulators[0].length;j++) {
+                other.accumulators[i][j] = accumulators[i][j];
             }
         }
     }

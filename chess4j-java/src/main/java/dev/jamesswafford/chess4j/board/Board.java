@@ -93,14 +93,6 @@ public final class Board {
 
         Undo undo = new Undo(move, fiftyCounter, castlingRights.getValue(), epSquare, zobristKey);
 
-        // update accumulators
-        Globals.getNeuralNetwork().ifPresent(nn -> {
-            // TODO - fully update if king move (promotion?  e.p.?)
-            // otherwise, "move piece"
-            // if capture, remove captured piece
-            nnueAccumulators.populate(this, nn);
-        });
-
         swapPlayer();
         moveCounter++;
 
@@ -115,6 +107,14 @@ public final class Board {
         addPieceToDestination(move);
         removeCastlingAvailability(move);
         removePiece(move.from());
+
+        // update accumulators
+        Globals.getNeuralNetwork().ifPresent(nn -> {
+            // TODO - fully update if king move (promotion?  e.p.?)
+            // otherwise, "move piece"
+            // if capture, remove captured piece
+            nnueAccumulators.populate(this, nn);
+        });
 
         assert(verify());
 
@@ -160,7 +160,8 @@ public final class Board {
         for (Piece p : pieceCountsMap.keySet()) {
             b.pieceCountsMap.put(p, pieceCountsMap.get(p));
         }
-        Globals.getNeuralNetwork().ifPresent(nn -> nnueAccumulators.populate(this, nn));
+        b.nnueAccumulators.copy(nnueAccumulators);
+
         return b;
     }
 
@@ -327,7 +328,8 @@ public final class Board {
         zobristKey = Zobrist.calculateBoardKey(this);
         pawnKey = Zobrist.calculatePawnKey(this);
 
-        // TODO: rebuild accumulators (or just swap?)
+        // rebuild accumulators
+        Globals.getNeuralNetwork().ifPresent(nn -> nnueAccumulators.populate(this, nn));
 
         assert(verify());
     }
@@ -654,7 +656,6 @@ public final class Board {
             clearCastlingRight(cr);
         }
         fiftyCounter = 0;
-        Globals.getNeuralNetwork().ifPresent(nn -> nnueAccumulators.populate(this, nn));
 
         assert(pieceCountsMap.get(WHITE_KING)==0);
         assert(pieceCountsMap.get(BLACK_KING)==0);

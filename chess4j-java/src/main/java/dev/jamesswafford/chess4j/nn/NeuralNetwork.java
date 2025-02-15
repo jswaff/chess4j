@@ -49,7 +49,7 @@ public class NeuralNetwork {
 
     public int eval(Board board) {
 
-        board.getNnueAccumulators().populate(board, this); // TODO: incremental updates
+        //board.getNnueAccumulators().populate(board, this); // TODO: incremental updates
 
         // set layer 1 features from accumulators
         double[] L1 = new double[NN_SIZE_L1 * 2];
