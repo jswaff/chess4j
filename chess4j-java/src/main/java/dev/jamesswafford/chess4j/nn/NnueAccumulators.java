@@ -135,7 +135,7 @@ public class NnueAccumulators {
     public void copy(NnueAccumulators other) {
         for (int i=0; i<accumulators.length;i++) {
             for (int j=0;j<accumulators[0].length;j++) {
-                other.accumulators[i][j] = accumulators[i][j];
+                accumulators[i][j] = other.accumulators[i][j];
             }
         }
     }
