@@ -258,9 +258,6 @@ public final class Board {
         if (this.fiftyCounter!=that.fiftyCounter) {
             return false;
         }
-        /*if (!this.nnueAccumulators.equalsWithinEpsilon(that.nnueAccumulators)) {
-            return false;
-        }*/
 
         return true;
     }
@@ -404,7 +401,6 @@ public final class Board {
 
         hash = hash * 17 + moveCounter;
         hash = hash * 13 + fiftyCounter;
-        // TODO: factor in nn_accumulators?
 
         return hash;
     }
