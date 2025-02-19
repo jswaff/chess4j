@@ -116,8 +116,7 @@ public final class Board {
                 if (move.captured() != null) {
                     nnueAccumulators.removePiece(move.captured(), move.to().value(), nn);
                 }
-                nnueAccumulators.removePiece(move.piece(), move.from().value(), nn);
-                nnueAccumulators.addPiece(move.piece(), move.to().value(), nn);
+                nnueAccumulators.movePiece(move.piece(), move.from().value(), move.to().value(), nn);
             } else {
                 nnueAccumulators.populate(this, nn);
             }
@@ -523,8 +522,7 @@ public final class Board {
             if (!move.piece().equals(WHITE_KING) && !move.piece().equals(BLACK_KING) &&
                     !move.isEpCapture() && move.promotion()==null)
             {
-                nnueAccumulators.removePiece(move.piece(), move.to().value(), nn);
-                nnueAccumulators.addPiece(move.piece(), move.from().value(), nn);
+                nnueAccumulators.movePiece(move.piece(), move.to().value(), move.from().value(), nn);
                 if (move.captured() != null) {
                     nnueAccumulators.addPiece(move.captured(), move.to().value(), nn);
                 }

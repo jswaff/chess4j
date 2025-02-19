@@ -20,7 +20,6 @@ public class NnueAccumulators {
         return accumulators[ind1][ind2];
     }
 
-    // TODO: probably some opportunity to refactor
     public void addPiece(Piece piece, int sq, NeuralNetwork nn) {
         int pieceColor, pieceType;
 
@@ -65,6 +64,57 @@ public class NnueAccumulators {
         for (int o=0;o<NN_SIZE_L1;o++) {
             accumulators[0][o] += nn.W0[NN_SIZE_L1 * feature_w + o];
             accumulators[1][o] += nn.W0[NN_SIZE_L1 * feature_b + o];
+        }
+    }
+
+    public void movePiece(Piece piece, int fromsq, int tosq, NeuralNetwork nn) {
+        int pieceColor, pieceType;
+
+        if (piece.isWhite()) {
+            pieceColor = 0;
+            if (piece.equals(WHITE_ROOK)) {
+                pieceType = 0;
+            } else if (piece.equals(WHITE_KNIGHT)) {
+                pieceType = 1;
+            } else if (piece.equals(WHITE_BISHOP)) {
+                pieceType = 2;
+            } else if (piece.equals(WHITE_QUEEN)) {
+                pieceType = 3;
+            } else if (piece.equals(WHITE_KING)) {
+                pieceType = 4;
+            } else {
+                pieceType = 5; // pawn
+            }
+        } else {
+            pieceColor = 1;
+            if (piece.equals(BLACK_ROOK)) {
+                pieceType = 0;
+            } else if (piece.equals(BLACK_KNIGHT)) {
+                pieceType = 1;
+            } else if (piece.equals(BLACK_BISHOP)) {
+                pieceType = 2;
+            } else if (piece.equals(BLACK_QUEEN)) {
+                pieceType = 3;
+            } else if (piece.equals(BLACK_KING)) {
+                pieceType = 4;
+            } else {
+                pieceType = 5; // pawn
+            }
+        }
+
+        int index_w = pieceType * 2 + pieceColor;
+        int from_feature_w = (64 * index_w) + fromsq;
+        int to_feature_w = (64 * index_w) + tosq;
+
+        int index_b = pieceType * 2 + (1 - pieceColor);
+        int from_feature_b = (64 * index_b) + (fromsq ^ 56);
+        int to_feature_b = (64 * index_b) + (tosq ^ 56);
+
+        for (int o=0;o<NN_SIZE_L1;o++) {
+            accumulators[0][o] -= nn.W0[NN_SIZE_L1 * from_feature_w + o];
+            accumulators[1][o] -= nn.W0[NN_SIZE_L1 * from_feature_b + o];
+            accumulators[0][o] += nn.W0[NN_SIZE_L1 * to_feature_w + o];
+            accumulators[1][o] += nn.W0[NN_SIZE_L1 * to_feature_b + o];
         }
     }
 
