@@ -519,8 +519,18 @@ public final class Board {
         zobristKey = undo.getZobristKey();
 
         Globals.getNeuralNetwork().ifPresent(nn -> {
-            // TODO
-            nnueAccumulators.populate(this, nn);
+            Move move = undo.getMove();
+            if (!move.piece().equals(WHITE_KING) && !move.piece().equals(BLACK_KING) &&
+                    !move.isEpCapture() && move.promotion()==null)
+            {
+                nnueAccumulators.removePiece(move.piece(), move.to().value(), nn);
+                nnueAccumulators.addPiece(move.piece(), move.from().value(), nn);
+                if (move.captured() != null) {
+                    nnueAccumulators.addPiece(move.captured(), move.to().value(), nn);
+                }
+            } else {
+                nnueAccumulators.populate(this, nn);
+            }
         });
 
         assert(verify());
