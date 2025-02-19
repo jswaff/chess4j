@@ -2,6 +2,7 @@ package dev.jamesswafford.chess4j.nn;
 
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.pieces.*;
+import io.vavr.Tuple2;
 
 import static dev.jamesswafford.chess4j.nn.NeuralNetwork.NN_SIZE_L1;
 import static dev.jamesswafford.chess4j.pieces.Bishop.*;
@@ -21,147 +22,88 @@ public class NnueAccumulators {
     }
 
     public void addPiece(Piece piece, int sq, NeuralNetwork nn) {
-        int pieceColor, pieceType;
 
-        if (piece.isWhite()) {
-            pieceColor = 0;
-            if (piece.equals(WHITE_ROOK)) {
-                pieceType = 0;
-            } else if (piece.equals(WHITE_KNIGHT)) {
-                pieceType = 1;
-            } else if (piece.equals(WHITE_BISHOP)) {
-                pieceType = 2;
-            } else if (piece.equals(WHITE_QUEEN)) {
-                pieceType = 3;
-            } else if (piece.equals(WHITE_KING)) {
-                pieceType = 4;
-            } else {
-                pieceType = 5; // pawn
-            }
-        } else {
-            pieceColor = 1;
-            if (piece.equals(BLACK_ROOK)) {
-                pieceType = 0;
-            } else if (piece.equals(BLACK_KNIGHT)) {
-                pieceType = 1;
-            } else if (piece.equals(BLACK_BISHOP)) {
-                pieceType = 2;
-            } else if (piece.equals(BLACK_QUEEN)) {
-                pieceType = 3;
-            } else if (piece.equals(BLACK_KING)) {
-                pieceType = 4;
-            } else {
-                pieceType = 5; // pawn
-            }
-        }
+        Tuple2<Integer, Integer> ind = getIndexes(piece);
 
-        int index_w = pieceType * 2 + pieceColor;
-        int feature_w = (64 * index_w) + sq;
+        int feature_w = (64 * ind._1) + sq;
+        int feature_b = (64 * ind._2) + (sq ^ 56);
 
-        int index_b = pieceType * 2 + (1 - pieceColor);
-        int feature_b = (64 * index_b) + (sq ^ 56);
-
-        for (int o=0;o<NN_SIZE_L1;o++) {
-            accumulators[0][o] += nn.W0[NN_SIZE_L1 * feature_w + o];
-            accumulators[1][o] += nn.W0[NN_SIZE_L1 * feature_b + o];
+        for (int i=0;i<NN_SIZE_L1;i++) {
+            accumulators[0][i] += nn.W0[NN_SIZE_L1 * feature_w + i];
+            accumulators[1][i] += nn.W0[NN_SIZE_L1 * feature_b + i];
         }
     }
 
     public void movePiece(Piece piece, int fromsq, int tosq, NeuralNetwork nn) {
-        int pieceColor, pieceType;
 
-        if (piece.isWhite()) {
-            pieceColor = 0;
-            if (piece.equals(WHITE_ROOK)) {
-                pieceType = 0;
-            } else if (piece.equals(WHITE_KNIGHT)) {
-                pieceType = 1;
-            } else if (piece.equals(WHITE_BISHOP)) {
-                pieceType = 2;
-            } else if (piece.equals(WHITE_QUEEN)) {
-                pieceType = 3;
-            } else if (piece.equals(WHITE_KING)) {
-                pieceType = 4;
-            } else {
-                pieceType = 5; // pawn
-            }
-        } else {
-            pieceColor = 1;
-            if (piece.equals(BLACK_ROOK)) {
-                pieceType = 0;
-            } else if (piece.equals(BLACK_KNIGHT)) {
-                pieceType = 1;
-            } else if (piece.equals(BLACK_BISHOP)) {
-                pieceType = 2;
-            } else if (piece.equals(BLACK_QUEEN)) {
-                pieceType = 3;
-            } else if (piece.equals(BLACK_KING)) {
-                pieceType = 4;
-            } else {
-                pieceType = 5; // pawn
-            }
-        }
+        Tuple2<Integer, Integer> ind = getIndexes(piece);
 
-        int index_w = pieceType * 2 + pieceColor;
-        int from_feature_w = (64 * index_w) + fromsq;
-        int to_feature_w = (64 * index_w) + tosq;
+        int from_feature_w = (64 * ind._1) + fromsq;
+        int to_feature_w = (64 * ind._1) + tosq;
 
-        int index_b = pieceType * 2 + (1 - pieceColor);
-        int from_feature_b = (64 * index_b) + (fromsq ^ 56);
-        int to_feature_b = (64 * index_b) + (tosq ^ 56);
+        int from_feature_b = (64 * ind._2) + (fromsq ^ 56);
+        int to_feature_b = (64 * ind._2) + (tosq ^ 56);
 
-        for (int o=0;o<NN_SIZE_L1;o++) {
-            accumulators[0][o] -= nn.W0[NN_SIZE_L1 * from_feature_w + o];
-            accumulators[1][o] -= nn.W0[NN_SIZE_L1 * from_feature_b + o];
-            accumulators[0][o] += nn.W0[NN_SIZE_L1 * to_feature_w + o];
-            accumulators[1][o] += nn.W0[NN_SIZE_L1 * to_feature_b + o];
+        for (int i=0;i<NN_SIZE_L1;i++) {
+            accumulators[0][i] -= nn.W0[NN_SIZE_L1 * from_feature_w + i];
+            accumulators[0][i] += nn.W0[NN_SIZE_L1 * to_feature_w + i];
+            accumulators[1][i] -= nn.W0[NN_SIZE_L1 * from_feature_b + i];
+            accumulators[1][i] += nn.W0[NN_SIZE_L1 * to_feature_b + i];
         }
     }
 
     public void removePiece(Piece piece, int sq, NeuralNetwork nn) {
-        int pieceColor, pieceType;
 
-        if (piece.isWhite()) {
-            pieceColor = 0;
-            if (piece.equals(WHITE_ROOK)) {
-                pieceType = 0;
-            } else if (piece.equals(WHITE_KNIGHT)) {
-                pieceType = 1;
-            } else if (piece.equals(WHITE_BISHOP)) {
-                pieceType = 2;
-            } else if (piece.equals(WHITE_QUEEN)) {
-                pieceType = 3;
-            } else if (piece.equals(WHITE_KING)) {
-                pieceType = 4;
-            } else {
-                pieceType = 5; // pawn
-            }
-        } else {
-            pieceColor = 1;
-            if (piece.equals(BLACK_ROOK)) {
-                pieceType = 0;
-            } else if (piece.equals(BLACK_KNIGHT)) {
-                pieceType = 1;
-            } else if (piece.equals(BLACK_BISHOP)) {
-                pieceType = 2;
-            } else if (piece.equals(BLACK_QUEEN)) {
-                pieceType = 3;
-            } else if (piece.equals(BLACK_KING)) {
-                pieceType = 4;
-            } else {
-                pieceType = 5; // pawn
-            }
+        Tuple2<Integer, Integer> ind = getIndexes(piece);
+
+        int feature_w = (64 * ind._1) + sq;
+        int feature_b = (64 * ind._2) + (sq ^ 56);
+
+        for (int i=0;i<NN_SIZE_L1;i++) {
+            accumulators[0][i] -= nn.W0[NN_SIZE_L1 * feature_w + i];
+            accumulators[1][i] -= nn.W0[NN_SIZE_L1 * feature_b + i];
         }
+    }
+
+    private Tuple2<Integer, Integer> getIndexes(Piece piece) {
+        int pieceType = getPieceType(piece);
+        int pieceColor = piece.isWhite() ? 0 : 1;
 
         int index_w = pieceType * 2 + pieceColor;
-        int feature_w = (64 * index_w) + sq;
-
         int index_b = pieceType * 2 + (1 - pieceColor);
-        int feature_b = (64 * index_b) + (sq ^ 56);
 
-        for (int o=0;o<NN_SIZE_L1;o++) {
-            accumulators[0][o] -= nn.W0[NN_SIZE_L1 * feature_w + o];
-            accumulators[1][o] -= nn.W0[NN_SIZE_L1 * feature_b + o];
+        return new Tuple2<>(index_w, index_b);
+    }
+
+    private int getPieceType(Piece piece) {
+        if (piece.isWhite()) {
+            if (piece.equals(WHITE_ROOK)) {
+                return 0;
+            } else if (piece.equals(WHITE_KNIGHT)) {
+                return 1;
+            } else if (piece.equals(WHITE_BISHOP)) {
+                return 2;
+            } else if (piece.equals(WHITE_QUEEN)) {
+                return 3;
+            } else if (piece.equals(WHITE_KING)) {
+                return 4;
+            } else {
+                return 5; // pawn
+            }
+        } else {
+            if (piece.equals(BLACK_ROOK)) {
+                return 0;
+            } else if (piece.equals(BLACK_KNIGHT)) {
+                return 1;
+            } else if (piece.equals(BLACK_BISHOP)) {
+                return 2;
+            } else if (piece.equals(BLACK_QUEEN)) {
+                return 3;
+            } else if (piece.equals(BLACK_KING)) {
+                return 4;
+            } else {
+                return 5; // pawn
+            }
         }
     }
 
