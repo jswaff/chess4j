@@ -110,9 +110,12 @@ public final class Board {
 
         // update accumulators
         Globals.getNeuralNetwork().ifPresent(nn -> {
-            if (move.captured() == null && move.promotion() == null &&
-                    !move.piece().equals(WHITE_KING) && !move.piece().equals(BLACK_KING))
+            if (!move.piece().equals(WHITE_KING) && !move.piece().equals(BLACK_KING) &&
+                    !move.isEpCapture() && move.promotion()==null)
             {
+                if (move.captured() != null) {
+                    nnueAccumulators.removePiece(move.captured(), move.to().value(), nn);
+                }
                 nnueAccumulators.removePiece(move.piece(), move.from().value(), nn);
                 nnueAccumulators.addPiece(move.piece(), move.to().value(), nn);
             } else {
