@@ -1,10 +1,11 @@
 package dev.jamesswafford.chess4j.board;
 
+import dev.jamesswafford.chess4j.Globals;
 import dev.jamesswafford.chess4j.board.squares.Rank;
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.exceptions.ParseException;
 import dev.jamesswafford.chess4j.hash.Zobrist;
-import dev.jamesswafford.chess4j.nn.NeuralNetwork;
+import dev.jamesswafford.chess4j.nn.NnueAccumulators;
 import dev.jamesswafford.chess4j.pieces.King;
 import dev.jamesswafford.chess4j.pieces.Piece;
 import dev.jamesswafford.chess4j.utils.BlankRemover;
@@ -61,7 +62,8 @@ public final class Board {
     private long whitePieces, blackPieces;
     private long zobristKey;
     private long pawnKey;
-    private final double[][] nn_accumulators = new double[2][NeuralNetwork.NN_SIZE_L1];
+    @Getter
+    private final NnueAccumulators nnueAccumulators = new NnueAccumulators();
 
     public Board() {
         this(INITIAL_POS);
@@ -86,10 +88,6 @@ public final class Board {
         setPos(fen);
     }
 
-    public void addToNN_Accumulator(int ind1, int ind2, double val) {
-        nn_accumulators[ind1][ind2] += val;
-    }
-
     public Undo applyMove(Move move) {
         assert(verify());
 
@@ -109,6 +107,20 @@ public final class Board {
         addPieceToDestination(move);
         removeCastlingAvailability(move);
         removePiece(move.from());
+
+        // update accumulators
+        Globals.getNeuralNetwork().ifPresent(nn -> {
+            if (!move.piece().equals(WHITE_KING) && !move.piece().equals(BLACK_KING) &&
+                    !move.isEpCapture() && move.promotion()==null)
+            {
+                if (move.captured() != null) {
+                    nnueAccumulators.removePiece(move.captured(), move.to().value(), nn);
+                }
+                nnueAccumulators.movePiece(move.piece(), move.from().value(), move.to().value(), nn);
+            } else {
+                nnueAccumulators.populate(this, nn);
+            }
+        });
 
         assert(verify());
 
@@ -154,7 +166,8 @@ public final class Board {
         for (Piece p : pieceCountsMap.keySet()) {
             b.pieceCountsMap.put(p, pieceCountsMap.get(p));
         }
-        // TODO: nn_accumulators
+        b.nnueAccumulators.copy(nnueAccumulators);
+
         return b;
     }
 
@@ -245,7 +258,6 @@ public final class Board {
         if (this.fiftyCounter!=that.fiftyCounter) {
             return false;
         }
-        // TODO: nn_accumulators
 
         return true;
     }
@@ -319,13 +331,10 @@ public final class Board {
         zobristKey = Zobrist.calculateBoardKey(this);
         pawnKey = Zobrist.calculatePawnKey(this);
 
-        // TODO: rebuild accumulators (or just swap?)
+        // rebuild accumulators
+        Globals.getNeuralNetwork().ifPresent(nn -> nnueAccumulators.populate(this, nn));
 
         assert(verify());
-    }
-
-    public double getNN_Accumulator(int ind1, int ind2) {
-        return nn_accumulators[ind1][ind2];
     }
 
     public Square getKingSquare(Color player) {
@@ -392,7 +401,6 @@ public final class Board {
 
         hash = hash * 17 + moveCounter;
         hash = hash * 13 + fiftyCounter;
-        // TODO: factor in nn_accumulators?
 
         return hash;
     }
@@ -409,10 +417,6 @@ public final class Board {
         assert(ep != null);
         epSquare = ep;
         zobristKey ^= Zobrist.getEnPassantKey(ep);
-    }
-
-    public void setNN_Accumulator(int ind1, int ind2, double val) {
-        nn_accumulators[ind1][ind2] = val;
     }
 
     // the FEN grammar can be found here:
@@ -441,7 +445,7 @@ public final class Board {
 
         zobristKey = Zobrist.calculateBoardKey(this);
         pawnKey = Zobrist.calculatePawnKey(this);
-        // TODO: build NN accumulators
+        Globals.getNeuralNetwork().ifPresent(nn -> nnueAccumulators.populate(this, nn));
 
         if (!verify()) {
             throw new ParseException("Invalid position: " + fen);
@@ -508,6 +512,21 @@ public final class Board {
         }
 
         zobristKey = undo.getZobristKey();
+
+        Globals.getNeuralNetwork().ifPresent(nn -> {
+            Move move = undo.getMove();
+            if (!move.piece().equals(WHITE_KING) && !move.piece().equals(BLACK_KING) &&
+                    !move.isEpCapture() && move.promotion()==null)
+            {
+                nnueAccumulators.movePiece(move.piece(), move.to().value(), move.from().value(), nn);
+                if (move.captured() != null) {
+                    nnueAccumulators.addPiece(move.captured(), move.to().value(), nn);
+                }
+            } else {
+                nnueAccumulators.populate(this, nn);
+            }
+        });
+
         assert(verify());
     }
 
@@ -1057,7 +1076,13 @@ public final class Board {
 
         assert(zobristKey==Zobrist.calculateBoardKey(this));
         assert(pawnKey==Zobrist.calculatePawnKey(this));
-        // TODO: verify accumulators
+
+        // verify accumulators
+        Globals.getNeuralNetwork().ifPresent(nn -> {
+            NnueAccumulators accumulators = new NnueAccumulators();
+            accumulators.populate(this, nn);
+            assert(accumulators.equalsWithinEpsilon(nnueAccumulators));
+        });
 
         return true;
     }
