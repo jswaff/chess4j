@@ -110,10 +110,14 @@ public final class Board {
 
         // update accumulators
         Globals.getNeuralNetwork().ifPresent(nn -> {
-            // TODO - fully update if king move (promotion?  e.p.?)
-            // otherwise, "move piece"
-            // if capture, remove captured piece
-            nnueAccumulators.populate(this, nn);
+            if (move.captured() == null && move.promotion() == null &&
+                    !move.piece().equals(WHITE_KING) && !move.piece().equals(BLACK_KING))
+            {
+                nnueAccumulators.removePiece(move.piece(), move.from().value(), nn);
+                nnueAccumulators.addPiece(move.piece(), move.to().value(), nn);
+            } else {
+                nnueAccumulators.populate(this, nn);
+            }
         });
 
         assert(verify());

@@ -21,10 +21,9 @@ public class NnueAccumulators {
     }
 
     // TODO: probably some opportunity to refactor
-    private void addPiece(Board board, int sq, NeuralNetwork nn) {
-        Piece piece = board.getPiece(sq);
-
+    public void addPiece(Piece piece, int sq, NeuralNetwork nn) {
         int pieceColor, pieceType;
+
         if (piece.isWhite()) {
             pieceColor = 0;
             if (piece.equals(WHITE_ROOK)) {
@@ -69,10 +68,9 @@ public class NnueAccumulators {
         }
     }
 
-    public void removePiece(Board board, int sq, NeuralNetwork nn) {
-        Piece piece = board.getPiece(sq);
-
+    public void removePiece(Piece piece, int sq, NeuralNetwork nn) {
         int pieceColor, pieceType;
+
         if (piece.isWhite()) {
             pieceColor = 0;
             if (piece.equals(WHITE_ROOK)) {
@@ -126,8 +124,9 @@ public class NnueAccumulators {
         }
 
         for (int sq=0;sq<64;sq++) {
-            if (board.getPiece(sq) != null) {
-                addPiece(board, sq, nn);
+            Piece piece = board.getPiece(sq);
+            if (piece != null) {
+                addPiece(piece, sq, nn);
             }
         }
     }
