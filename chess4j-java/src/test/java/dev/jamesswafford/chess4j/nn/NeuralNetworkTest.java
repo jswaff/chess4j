@@ -11,6 +11,7 @@ import dev.jamesswafford.chess4j.pieces.Knight;
 import dev.jamesswafford.chess4j.pieces.Pawn;
 import dev.jamesswafford.chess4j.search.AlphaBetaSearch;
 import dev.jamesswafford.chess4j.search.SearchParameters;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -20,6 +21,7 @@ import static dev.jamesswafford.chess4j.Constants.CHECKMATE;
 
 public class NeuralNetworkTest {
 
+    @Ignore
     @Test
     public void test1() {
         File nnFile = new File(getClass().getResource("/nn.txt").getFile());

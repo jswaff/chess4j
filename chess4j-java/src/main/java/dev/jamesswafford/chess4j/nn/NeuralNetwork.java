@@ -8,16 +8,19 @@ public class NeuralNetwork {
     public static final int NN_SIZE_L1 = 1536;
     public static final int NN_SIZE_L2 = 1;
 
-    public final double[] W0;
-    public final double[] B0;
-    public final double[] W1;
-    public final double[] B1;
+    private static final int SCALE = 64;
+    private static final int THRESHOLD = 127;
+
+    public final int[] W0;
+    public final int[] B0;
+    public final int[] W1;
+    public final int[] B1;
 
     public NeuralNetwork() {
-        W0 = new double[768 * NN_SIZE_L1];
-        B0 = new double[NN_SIZE_L1];
-        W1 = new double[NN_SIZE_L1 * 2 * NN_SIZE_L2];
-        B1 = new double[NN_SIZE_L2];
+        W0 = new int[768 * NN_SIZE_L1];
+        B0 = new int[NN_SIZE_L1];
+        W1 = new int[NN_SIZE_L1 * 2 * NN_SIZE_L2];
+        B1 = new int[NN_SIZE_L2];
     }
 
     public NeuralNetwork(File networkFile) {
@@ -35,13 +38,13 @@ public class NeuralNetwork {
             // note the transposition for W0!
             for (int row=0;row<NN_SIZE_L1;row++)
                 for (int col=0;col<768;col++)
-                    W0[col * NN_SIZE_L1 + row] = Double.parseDouble(br.readLine());
+                    W0[col * NN_SIZE_L1 + row] = Integer.parseInt(br.readLine());
             for (int i=0;i<B0.length;i++)
-                B0[i] = Double.parseDouble(br.readLine());
+                B0[i] = Integer.parseInt(br.readLine());
             for (int i=0;i<W1.length;i++)
-                W1[i] = Double.parseDouble(br.readLine());
+                W1[i] = Integer.parseInt(br.readLine());
             for (int i=0;i<B1.length;i++)
-                B1[i] = Double.parseDouble(br.readLine());
+                B1[i] = Integer.parseInt(br.readLine());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -50,50 +53,38 @@ public class NeuralNetwork {
     public int eval(Board board) {
 
         // set layer 1 features from accumulators
-        double[] L1 = new double[NN_SIZE_L1 * 2];
+        int[] L1 = new int[NN_SIZE_L1 * 2];
         for (int o=0;o<NN_SIZE_L1;o++) {
-            //L1[o] = clamp(accumulator[ptm][o]);
-            //L1[NN_SIZE_L1 + o] = clamp(accumulator[1-ptm][o]);
-            L1[o] = clamp(board.getNnueAccumulators().get(0, o));
-            L1[NN_SIZE_L1 + o] = clamp(board.getNnueAccumulators().get(1, o));
+            L1[o] = clamp(board.getNnueAccumulators().get(0, o), 0, THRESHOLD);
+            L1[NN_SIZE_L1 + o] = clamp(board.getNnueAccumulators().get(1, o), 0, THRESHOLD);
         }
 
         // calculate other layers
-        double[] L2 = new double[NN_SIZE_L2];
+        int[] L2 = new int[NN_SIZE_L2];
 
-        computeLayer(L1, W1, B1, L2, false);
+        computeLayer(L1, W1, B1, L2, -THRESHOLD, THRESHOLD);
 
-        double y = L2[0];
-        //double y = atanh(L2[0]) * 2; // pawns
+        double y = ((float)L2[0]) / ((float)SCALE);
 
         int pred = (int)Math.round(y * 100); // centi-pawns
         return board.getPlayerToMove().isWhite() ? pred : -pred;
     }
 
-    private double atanh(double x) {
-        return 0.5 * Math.log((1 + x) / (1 - x));
-    }
-
-    private double clamp(double val) {
-        if (val < 0.0) return 0.0;
-        if (val > 1.0) return 1.0;
+    private int clamp(int val, int min, int max) {
+        if (val < min) return min;
+        if (val > max) return max;
         return val;
     }
 
-    private void computeLayer(double[] I, double[] W, double[] B, double[] O, boolean withClamp) {
+    private void computeLayer(int[] I, int[] W, int[] B, int[] O, int min, int max) {
         for (int o=0;o<O.length;o++) {
-            double sum = B[o];
+            int sum = B[o]; // * SCALE
+
             for (int i=0;i<I.length;i++) {
                 sum += W[o * I.length + i] * I[i];
             }
 
-            if (withClamp) {
-                double v = clamp(sum);
-                O[o] = v; // * v;
-            } else {
-                O[o] = sum;
-            }
+            O[o] = clamp(sum, min, max); // sum/SCALE
         }
     }
-
 }
