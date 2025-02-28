@@ -62,7 +62,7 @@ public class NeuralNetwork {
         // calculate other layers
         int[] L2 = new int[NN_SIZE_L2];
 
-        computeLayer(L1, W1, B1, L2, -THRESHOLD, THRESHOLD);
+        computeLayer(L1, W1, B1, L2);
 
         double y = ((float)L2[0]) / ((float)SCALE);
 
@@ -76,15 +76,15 @@ public class NeuralNetwork {
         return val;
     }
 
-    private void computeLayer(int[] I, int[] W, int[] B, int[] O, int min, int max) {
+    private void computeLayer(int[] I, int[] W, int[] B, int[] O) {
         for (int o=0;o<O.length;o++) {
-            int sum = B[o]; // * SCALE
+            int sum = B[o] * SCALE;
 
             for (int i=0;i<I.length;i++) {
                 sum += W[o * I.length + i] * I[i];
             }
 
-            O[o] = clamp(sum, min, max); // sum/SCALE
+            O[o] = sum;
         }
     }
 }
