@@ -64,7 +64,7 @@ public class NeuralNetwork {
 
         computeLayer(L1, W1, B1, L2);
 
-        double y = ((float)L2[0]) / SCALE / THRESHOLD;
+        double y = ((double)L2[0]) / (SCALE * SCALE);
 
         int pred = (int)Math.round(y * 100); // centi-pawns
         return board.getPlayerToMove().isWhite() ? pred : -pred;
@@ -78,7 +78,7 @@ public class NeuralNetwork {
 
     private void computeLayer(int[] I, int[] W, int[] B, int[] O) {
         for (int o=0;o<O.length;o++) {
-            int sum = B[o]; // * SCALE;
+            int sum = B[o];
 
             for (int i=0;i<I.length;i++) {
                 sum += W[o * I.length + i] * I[i];
