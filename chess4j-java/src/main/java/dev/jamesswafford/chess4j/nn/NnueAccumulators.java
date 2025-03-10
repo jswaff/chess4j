@@ -4,6 +4,8 @@ import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.pieces.*;
 import io.vavr.Tuple2;
 
+import java.util.Arrays;
+
 import static dev.jamesswafford.chess4j.nn.NeuralNetwork.NN_SIZE_L1;
 import static dev.jamesswafford.chess4j.pieces.Bishop.*;
 import static dev.jamesswafford.chess4j.pieces.King.*;
@@ -123,18 +125,25 @@ public class NnueAccumulators {
 
     public void copy(NnueAccumulators other) {
         for (int i=0; i<accumulators.length;i++) {
-            for (int j=0;j<accumulators[0].length;j++) {
-                accumulators[i][j] = other.accumulators[i][j];
-            }
+            System.arraycopy(other.accumulators[i], 0, accumulators[i], 0, accumulators[0].length);
         }
     }
 
-    public boolean equalsWithinEpsilon(NnueAccumulators that) {
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof NnueAccumulators)) return false;
+        NnueAccumulators that = (NnueAccumulators) obj;
+
         for (int i=0; i<accumulators.length;i++) {
             for (int j=0;j<accumulators[0].length;j++) {
                 if (accumulators[i][j] != that.accumulators[i][j]) return false;
             }
         }
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(accumulators);
     }
 }
