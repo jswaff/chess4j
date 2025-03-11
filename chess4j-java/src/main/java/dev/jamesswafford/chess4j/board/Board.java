@@ -1081,7 +1081,7 @@ public final class Board {
         Globals.getNeuralNetwork().ifPresent(nn -> {
             NnueAccumulators accumulators = new NnueAccumulators();
             accumulators.populate(this, nn);
-            assert(accumulators.equalsWithinEpsilon(nnueAccumulators));
+            assert(accumulators.equals(nnueAccumulators));
         });
 
         return true;
