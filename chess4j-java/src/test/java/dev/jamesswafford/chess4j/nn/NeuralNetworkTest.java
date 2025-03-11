@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 import static dev.jamesswafford.chess4j.Constants.CHECKMATE;
 
@@ -23,7 +24,9 @@ public class NeuralNetworkTest {
     @Test
     public void test1() {
         File nnFile = new File(getClass().getResource("/nn.txt").getFile());
+        Optional<NeuralNetwork> origNn = Globals.getNeuralNetwork();
         NeuralNetwork nn = new NeuralNetwork(nnFile);
+        Globals.setNeuralNetwork(nn);
         AlphaBetaSearch search = new AlphaBetaSearch();
         SearchParameters parameters = new SearchParameters(3, -CHECKMATE, CHECKMATE);
 
@@ -45,5 +48,7 @@ public class NeuralNetworkTest {
                     " D3: " + score);
             b.undoMove(u);
         }
+
+        Globals.setNeuralNetwork(origNn.orElse(null));
     }
 }
