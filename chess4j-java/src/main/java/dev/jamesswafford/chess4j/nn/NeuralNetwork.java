@@ -1,10 +1,15 @@
 package dev.jamesswafford.chess4j.nn;
 
 import dev.jamesswafford.chess4j.board.Board;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 
 public class NeuralNetwork {
+
+    private static final Logger LOGGER = LogManager.getLogger(NeuralNetwork.class);
+
     public static final int NN_SIZE_L1 = 1536;
     public static final int NN_SIZE_L2 = 1;
 
@@ -34,6 +39,8 @@ public class NeuralNetwork {
     }
 
     public void load(File networkFile) {
+        LOGGER.debug("# loading neural network from {}", networkFile);
+
         try (BufferedReader br = new BufferedReader(new FileReader(networkFile))) {
             // note the transposition for W0!
             for (int row=0;row<NN_SIZE_L1;row++)
