@@ -1,6 +1,7 @@
 package dev.jamesswafford.chess4j.nn;
 
 import dev.jamesswafford.chess4j.board.Board;
+import dev.jamesswafford.chess4j.init.Initializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,6 +21,10 @@ public class NeuralNetwork {
     public final int[] B0;
     public final int[] W1;
     public final int[] B1;
+
+    static {
+        Initializer.init();
+    }
 
     public NeuralNetwork() {
         W0 = new int[768 * NN_SIZE_L1];
@@ -54,6 +59,11 @@ public class NeuralNetwork {
                 B1[i] = Integer.parseInt(br.readLine());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+
+        if (Initializer.nativeCodeInitialized()) {
+            LOGGER.debug("# loading network into native code");
+            loadNeuralNetworkNative(this);
         }
     }
 
@@ -94,4 +104,6 @@ public class NeuralNetwork {
             O[o] = sum;
         }
     }
+
+    private static native void loadNeuralNetworkNative(NeuralNetwork neuralNetwork);
 }
