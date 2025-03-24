@@ -2,6 +2,8 @@ package dev.jamesswafford.chess4j.nn;
 
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.io.DrawBoard;
+import dev.jamesswafford.chess4j.io.FENBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -80,8 +82,8 @@ public class NeuralNetwork {
         // set layer 1 features from accumulators
         int[] L1 = new int[NN_SIZE_L1 * 2];
         for (int o=0;o<NN_SIZE_L1;o++) {
-            L1[o] = clamp(board.getNnueAccumulators().get(0, o), 0, THRESHOLD);
-            L1[NN_SIZE_L1 + o] = clamp(board.getNnueAccumulators().get(1, o), 0, THRESHOLD);
+            L1[o] = clamp(board.getNnueAccumulators().get(0, o));
+            L1[NN_SIZE_L1 + o] = clamp(board.getNnueAccumulators().get(1, o));
         }
 
         // calculate other layers
@@ -89,16 +91,24 @@ public class NeuralNetwork {
 
         computeLayer(L1, W1, B1, L2);
 
-        double y = ((double)L2[0]) / (SCALE * SCALE);
+        float y = ((float)L2[0]) / (SCALE * SCALE);
 
-        int pred = (int)Math.round(y * 100); // centi-pawns
-        return board.getPlayerToMove().isWhite() ? pred : -pred;
+        int pred = my_round(y * 100);
+        int retval = board.getPlayerToMove().isWhite() ? pred : -pred;
+
+        assert(verifyNativeEvalIsEqual(retval, board));
+
+        return retval;
     }
 
-    private int clamp(int val, int min, int max) {
-        if (val < min) return min;
-        if (val > max) return max;
-        return val;
+    private int my_round(float val) {
+        if (val > 0) return (int)(val + 0.5);
+        else return (int)(val - 0.5);
+    }
+
+    private int clamp(int val) {
+        if (val < 0) return 0;
+        return Math.min(val, NeuralNetwork.THRESHOLD);
     }
 
     private void computeLayer(int[] I, int[] W, int[] B, int[] O) {
@@ -113,5 +123,28 @@ public class NeuralNetwork {
         }
     }
 
+    private boolean verifyNativeEvalIsEqual(int javaScore, Board board) {
+        if (Initializer.nativeCodeInitialized()) {
+            try {
+                String fen = FENBuilder.createFen(board, false);
+                int nativeSccore = nnEvalNative(fen);
+                if (javaScore != nativeSccore) {
+                    DrawBoard.drawBoard(board);
+                    LOGGER.error(fen);
+                    LOGGER.error("nn evals not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeSccore);
+                    return false;
+                }
+                return true;
+            } catch (IllegalStateException e) {
+                LOGGER.error(e);
+                throw e;
+            }
+        } else {
+            return true;
+        }
+    }
+
     private native void loadNeuralNetworkNative();
+
+    private native int nnEvalNative(String fen);
 }
