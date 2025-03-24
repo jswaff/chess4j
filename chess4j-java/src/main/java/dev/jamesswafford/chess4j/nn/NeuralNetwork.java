@@ -50,13 +50,13 @@ public class NeuralNetwork {
             // note the transposition for W0!
             for (int row=0;row<NN_SIZE_L1;row++)
                 for (int col=0;col<768;col++)
-                    W0[col * NN_SIZE_L1 + row] = Integer.parseInt(br.readLine());
+                    W0[col * NN_SIZE_L1 + row] = parseInt(br.readLine());
             for (int i=0;i<B0.length;i++)
-                B0[i] = Integer.parseInt(br.readLine());
+                B0[i] = parseInt(br.readLine());
             for (int i=0;i<W1.length;i++)
-                W1[i] = Integer.parseInt(br.readLine());
+                W1[i] = parseInt(br.readLine());
             for (int i=0;i<B1.length;i++)
-                B1[i] = Integer.parseInt(br.readLine());
+                B1[i] = parseInt(br.readLine());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -65,6 +65,14 @@ public class NeuralNetwork {
             LOGGER.debug("# loading network into native code");
             loadNeuralNetworkNative();
         }
+    }
+
+    private int parseInt(String val) {
+        int ival = Integer.parseInt(val);
+        if (ival < -THRESHOLD || ival > THRESHOLD)
+            throw new IllegalStateException("Expected weights to be in range [" + -THRESHOLD +
+                    "," + THRESHOLD + "].  Read " + ival);
+        return ival;
     }
 
     public int eval(Board board) {
