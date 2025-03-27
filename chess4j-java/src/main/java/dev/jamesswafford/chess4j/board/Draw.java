@@ -18,8 +18,8 @@ import static dev.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
 public class Draw {
 
     public static boolean isDraw(Board board, List<Undo> undos) {
-        return isDrawBy50MoveRule(board) || isDrawLackOfMaterial(board) ||
-                isDrawByRep(board, undos, 1);
+        return isDrawBy50MoveRule(board) || isDrawLackOfMaterial(board) /*||
+                isDrawByRep(board, undos, 1)*/; // FIXME
     }
 
     public static boolean isDrawBy50MoveRule(Board board) {
