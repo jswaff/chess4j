@@ -22,7 +22,7 @@
         <PROPHET_RELEASE_LINK>-L ${PROPHET_RELEASE_LIB_DIR} -lprophetlib</PROPHET_RELEASE_LINK>
         <CHESS4J_CFLAGS>-I ${project.build.directory}/jni-headers</CHESS4J_CFLAGS>
 
-        <!-- include flags for javah, overriden by profile -->
+        <!-- include flags for javah, overridden by profile -->
         <JAVAH_INCLUDE_CFLAGS></JAVAH_INCLUDE_CFLAGS>
     </properties>
 
