@@ -86,11 +86,18 @@ public class NeuralNetwork {
             L1[NN_SIZE_L1 + o] = clamp(board.getNnueAccumulators().get(1, o));
         }
 
-        // calculate other layers
+        // calculate layer 2
         int[] L2 = new int[NN_SIZE_L2];
 
-        computeLayer(L1, W1, B1, L2);
+        for (int i=0;i<NN_SIZE_L2;i++) {
+            int sum = B1[i];
+            for (int j=0;j<(NN_SIZE_L1*2);j++) {
+                sum += W1[i * (NN_SIZE_L1*2) + j] * L1[j];
+            }
+            L2[i] = sum;
+        }
 
+        // translate into predicted score
         float y = ((float)L2[0]) / (SCALE * SCALE);
 
         int pred = my_round(y * 100);
@@ -101,26 +108,14 @@ public class NeuralNetwork {
         return retval;
     }
 
-    private int my_round(float val) {
-        if (val > 0) return (int)(val + 0.5);
-        else return (int)(val - 0.5);
-    }
-
     private int clamp(int val) {
         if (val < 0) return 0;
         return Math.min(val, NeuralNetwork.THRESHOLD);
     }
 
-    private void computeLayer(int[] I, int[] W, int[] B, int[] O) {
-        for (int o=0;o<O.length;o++) {
-            int sum = B[o];
-
-            for (int i=0;i<I.length;i++) {
-                sum += W[o * I.length + i] * I[i];
-            }
-
-            O[o] = sum;
-        }
+    private int my_round(float val) {
+        if (val > 0) return (int)(val + 0.5);
+        else return (int)(val - 0.5);
     }
 
     private boolean verifyNativeEvalIsEqual(int javaScore, Board board) {
