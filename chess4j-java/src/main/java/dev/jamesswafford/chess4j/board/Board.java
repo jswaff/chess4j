@@ -110,9 +110,7 @@ public final class Board {
 
         // update accumulators
         Globals.getNeuralNetwork().ifPresent(nn -> {
-            if (!move.piece().equals(WHITE_KING) && !move.piece().equals(BLACK_KING) &&
-                    !move.isEpCapture() && move.promotion()==null)
-            {
+            if (!move.isCastle() && !move.isEpCapture() && move.promotion()==null) {
                 if (move.captured() != null) {
                     nnueAccumulators.removePiece(move.captured(), move.to().value(), nn);
                 }
@@ -515,9 +513,7 @@ public final class Board {
 
         Globals.getNeuralNetwork().ifPresent(nn -> {
             Move move = undo.getMove();
-            if (!move.piece().equals(WHITE_KING) && !move.piece().equals(BLACK_KING) &&
-                    !move.isEpCapture() && move.promotion()==null)
-            {
+            if (!move.isCastle() && !move.isEpCapture() && move.promotion()==null) {
                 nnueAccumulators.movePiece(move.piece(), move.to().value(), move.from().value(), nn);
                 if (move.captured() != null) {
                     nnueAccumulators.addPiece(move.captured(), move.to().value(), nn);
