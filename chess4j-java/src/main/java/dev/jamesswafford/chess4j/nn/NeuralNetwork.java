@@ -113,6 +113,7 @@ public class NeuralNetwork {
         return Math.min(val, NeuralNetwork.THRESHOLD);
     }
 
+    // this is used for consistency with the native code
     private int my_round(float val) {
         if (val > 0) return (int)(val + 0.5);
         else return (int)(val - 0.5);
