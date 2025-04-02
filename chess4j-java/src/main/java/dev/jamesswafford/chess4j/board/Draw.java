@@ -4,10 +4,12 @@ import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.init.Initializer;
 import dev.jamesswafford.chess4j.io.DrawBoard;
 import dev.jamesswafford.chess4j.io.FENBuilder;
+import dev.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static dev.jamesswafford.chess4j.pieces.Bishop.BLACK_BISHOP;
 import static dev.jamesswafford.chess4j.pieces.Bishop.WHITE_BISHOP;
@@ -114,7 +116,15 @@ public class Draw {
         if (Initializer.nativeCodeInitialized()) {
             try {
                 String fen = FENBuilder.createFen(board, false);
-                boolean nativeRep = isDrawByRepNative(fen, undos, numPrev);
+                List<Long> nativeMoves = undos.stream()
+                        .map(u -> MoveUtils.toNativeMove(u.getMove()))
+                        .collect(Collectors.toList());
+                Board copyBoard = board.deepCopy();
+                for (int i=undos.size()-1;i>=0;i--) {
+                    copyBoard.undoMove(undos.get(i));
+                }
+                String originalFen = FENBuilder.createFen(copyBoard, false);
+                boolean nativeRep = isDrawByRepNative(fen, originalFen, nativeMoves, numPrev);
                 if (javaRep != nativeRep) {
                     LOGGER.error("Draw by rep not equal!  javaRep: " + javaRep + ", nativeRep: " + nativeRep);
                     DrawBoard.drawBoard(board);
@@ -131,5 +141,5 @@ public class Draw {
         }
     }
 
-    private static native boolean isDrawByRepNative(String fen, List<Undo> undos, int numPrev);
+    private static native boolean isDrawByRepNative(String fen, String originalFen, List<Long> undos, int numPrev);
 }
