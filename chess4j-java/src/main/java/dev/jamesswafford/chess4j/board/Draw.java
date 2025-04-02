@@ -1,6 +1,11 @@
 package dev.jamesswafford.chess4j.board;
 
 import dev.jamesswafford.chess4j.board.squares.Square;
+import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.io.DrawBoard;
+import dev.jamesswafford.chess4j.io.FENBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
@@ -16,6 +21,12 @@ import static dev.jamesswafford.chess4j.pieces.Rook.BLACK_ROOK;
 import static dev.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
 
 public class Draw {
+
+    private static final Logger LOGGER = LogManager.getLogger(Draw.class);
+
+    static {
+        Initializer.init();
+    }
 
     public static boolean isDraw(Board board, List<Undo> undos) {
         return isDrawBy50MoveRule(board) || isDrawLackOfMaterial(board) ||
@@ -92,7 +103,33 @@ public class Draw {
                 .filter(u -> u.getZobristKey() == currentZobristKey)
                 .count();
 
-        return numPrevVisits >= numPrev;
+        boolean rep = numPrevVisits >= numPrev;
+
+        assert(verifyDrawByRepIsEqual(rep, board, undos, numPrev));
+
+        return rep;
     }
 
+    private static boolean verifyDrawByRepIsEqual(boolean javaRep, Board board, List<Undo> undos, int numPrev) {
+        if (Initializer.nativeCodeInitialized()) {
+            try {
+                String fen = FENBuilder.createFen(board, false);
+                boolean nativeRep = isDrawByRepNative(fen, undos, numPrev);
+                if (javaRep != nativeRep) {
+                    LOGGER.error("Draw by rep not equal!  javaRep: " + javaRep + ", nativeRep: " + nativeRep);
+                    DrawBoard.drawBoard(board);
+                    undos.forEach(u -> LOGGER.error(u.toString()));
+                    return false;
+                }
+                return true;
+            } catch (IllegalStateException e) {
+                LOGGER.error(e);
+                throw e;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    private static native boolean isDrawByRepNative(String fen, List<Undo> undos, int numPrev);
 }

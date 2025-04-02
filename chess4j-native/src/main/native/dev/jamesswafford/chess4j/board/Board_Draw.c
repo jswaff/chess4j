@@ -1,9 +1,8 @@
-#include "dev_jamesswafford_chess4j_eval_Eval.h"
+#include "dev_jamesswafford_chess4j_board_Draw.h"
 
 #include "dev/jamesswafford/chess4j/prophet-jni.h"
 #include "java/lang/IllegalStateException.h"
 
-#include <prophet/eval.h>
 #include <prophet/position.h>
 
 #include <stdbool.h>
@@ -11,18 +10,19 @@
 #include <stdint.h>
 
 /*
- * Class:     dev_jamesswafford_chess4j_eval_Eval
- * Method:    evalNative
- * Signature: (Ljava/lang/String;Z)I
+ * Class:     dev_jamesswafford_chess4j_board_Draw
+ * Method:    isDrawByRepNative
+ * Signature: (Ljava/lang/String;Ljava/util/List;I)Z
  */
-JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_eval_Eval_evalNative
-  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jboolean material_only)
+JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_board_Draw_isDrawByRepNative
+  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jobject UNUSED(jundos), jint UNUSED(num_prev))
 {
-    jint retval = 0;
+    jboolean retval = false;
 
-    if (!prophet_initialized) {
+    /* ensure the static library is initialized */
+    if (!prophet_initialized)  {
         (*env)->ThrowNew(env, IllegalStateException, "Prophet not initialized!");
-        return 0;
+        return false;
     }
 
     /* set the position according to the FEN */
@@ -34,9 +34,6 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_eval_Eval_evalNative
         (*env)->ThrowNew(env, IllegalStateException, error_buffer);
         goto cleanup;
     }
-
-    int32_t native_score = eval(&pos, (bool)material_only, false);
-    retval = (jint) native_score;
 
 cleanup:
     (*env)->ReleaseStringUTFChars(env, board_fen, fen);
