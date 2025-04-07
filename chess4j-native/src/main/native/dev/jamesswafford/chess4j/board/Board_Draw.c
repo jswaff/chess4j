@@ -21,7 +21,7 @@ bool is_draw_rep(const position_t* pos, const undo_t* u, int prev_reps);
  * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;I)Z
  */
 JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_board_Draw_isDrawByRepNative
-  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jstring orig_board_fen, jobject UNUSED(jmoves), jint UNUSED(num_prev))
+  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jstring orig_board_fen, jobject jmoves, jint num_prev)
 {
     jboolean retval = false;
 
