@@ -8,6 +8,7 @@ import dev.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -101,9 +102,16 @@ public class Draw {
     public static boolean isDrawByRep(Board board, List<Undo> undos, int numPrev) {
         long currentZobristKey = board.getZobristKey();
 
-        long numPrevVisits = undos.stream()
-                .filter(u -> u.getZobristKey() == currentZobristKey)
-                .count();
+        // only consider the positions since the last reversible move
+        int toIndex = undos.size();
+        int fromIndex = toIndex - board.getFiftyCounter();
+        if (fromIndex < 0) fromIndex = 0;
+
+        int numPrevVisits = 0;
+        for (int i=fromIndex;i<toIndex;i++) {
+            Undo u = undos.get(i);
+            if (u.getZobristKey()==currentZobristKey) numPrevVisits++;
+        }
 
         boolean rep = numPrevVisits >= numPrev;
 
@@ -115,15 +123,15 @@ public class Draw {
     private static boolean verifyDrawByRepIsEqual(boolean javaRep, Board board, List<Undo> undos, int numPrev) {
         if (Initializer.nativeCodeInitialized()) {
             try {
-                String fen = FENBuilder.createFen(board, false);
-                List<Long> nativeMoves = undos.stream()
-                        .map(u -> MoveUtils.toNativeMove(u.getMove()))
-                        .collect(Collectors.toList());
+                String fen = FENBuilder.createFen(board, true);
                 Board copyBoard = board.deepCopy();
                 for (int i=undos.size()-1;i>=0;i--) {
                     copyBoard.undoMove(undos.get(i));
                 }
-                String originalFen = FENBuilder.createFen(copyBoard, false);
+                String originalFen = FENBuilder.createFen(copyBoard, true);
+                List<Long> nativeMoves = undos.stream()
+                        .map(u -> MoveUtils.toNativeMove(u.getMove()))
+                        .collect(Collectors.toList());
                 boolean nativeRep = isDrawByRepNative(fen, originalFen, nativeMoves, numPrev);
                 if (javaRep != nativeRep) {
                     LOGGER.error("Draw by rep not equal!  javaRep: " + javaRep + ", nativeRep: " + nativeRep);

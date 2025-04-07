@@ -11,6 +11,7 @@ import dev.jamesswafford.chess4j.pieces.Piece;
 import dev.jamesswafford.chess4j.utils.BlankRemover;
 import dev.jamesswafford.chess4j.utils.PieceFactory;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 
@@ -45,7 +46,7 @@ public final class Board {
     private Square epSquare;
     @Getter
     private int moveCounter;
-    @Getter
+    @Getter @Setter
     private int fiftyCounter;
     private Square whiteKingSquare, blackKingSquare;
     @Getter
@@ -161,9 +162,12 @@ public final class Board {
         b.moveCounter=moveCounter;
         b.zobristKey=zobristKey;
         b.pawnKey=pawnKey;
+
+        b.pieceCountsMap.clear();
         for (Piece p : pieceCountsMap.keySet()) {
             b.pieceCountsMap.put(p, pieceCountsMap.get(p));
         }
+
         b.nnueAccumulators.copy(nnueAccumulators);
 
         return b;

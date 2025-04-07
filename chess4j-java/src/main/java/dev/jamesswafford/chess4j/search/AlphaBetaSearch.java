@@ -328,6 +328,8 @@ public class AlphaBetaSearch implements Search {
             if (!first && !inCheck && nullMoveOk && depth >= 3 && !ZugzwangDetector.isZugzwang(board)) {
 
                 Square nullEp = board.clearEPSquare();
+                int null50 = board.getFiftyCounter();
+                board.setFiftyCounter(0); // consider the null move irreversible
                 board.swapPlayer();
 
                 // set the reduced depth.  For now we are using a static R=3, except near the leaves.  It's important
@@ -345,6 +347,7 @@ public class AlphaBetaSearch implements Search {
                 if (nullEp != null) {
                     board.setEP(nullEp);
                 }
+                board.setFiftyCounter(null50);
 
                 if (stop) {
                     return 0;
