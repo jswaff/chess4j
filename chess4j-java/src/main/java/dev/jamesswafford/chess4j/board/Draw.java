@@ -8,8 +8,6 @@ import dev.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -139,22 +137,17 @@ public class Draw {
             try {
                 boolean nativeRep = isDrawByRepNative(fen, originalFen, nativeMoves, numPrev);
                 if (javaRep != nativeRep) {
-                    LOGGER.error("Draw by rep not equal!  javaRep: " + javaRep + ", nativeRep: " + nativeRep);
-                    LOGGER.error("fen: " + fen);
+                    LOGGER.error("Draw by rep not equal!  javaRep: {}, nativeRep: {}", javaRep, nativeRep);
+                    LOGGER.error("fen: {}", fen);
                     DrawBoard.drawBoard(board);
                     undos.forEach(u -> LOGGER.error(u.toString()));
-                    LOGGER.error("originalFen: " + originalFen);
+                    LOGGER.error("originalFen: {}", originalFen);
                     DrawBoard.drawBoard(copyBoard);
                     return false;
                 }
                 return true;
             } catch (IllegalStateException e) {
                 LOGGER.error(e);
-                LOGGER.error("fen: " + fen);
-                DrawBoard.drawBoard(board);
-                undos.forEach(u -> LOGGER.error(u.toString()));
-                LOGGER.error("originalFen: " + originalFen);
-                DrawBoard.drawBoard(copyBoard);
                 throw e;
             }
         } else {
