@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -122,26 +123,38 @@ public class Draw {
 
     private static boolean verifyDrawByRepIsEqual(boolean javaRep, Board board, List<Undo> undos, int numPrev) {
         if (Initializer.nativeCodeInitialized()) {
+            String fen = FENBuilder.createFen(board, true);
+            Board copyBoard = board.deepCopy();
+            assert(undos.size() >= board.getFiftyCounter());
+            for (int i=0;i<board.getFiftyCounter();i++) {
+                int ind = undos.size() - 1 - i;
+                Undo u = undos.get(ind);
+                copyBoard.undoMove(u);
+            }
+            String originalFen = FENBuilder.createFen(copyBoard, true);
+            List<Long> nativeMoves = undos.stream()
+                    .map(u -> MoveUtils.toNativeMove(u.getMove()))
+                    .collect(Collectors.toList());
+
             try {
-                String fen = FENBuilder.createFen(board, true);
-                Board copyBoard = board.deepCopy();
-                for (int i=undos.size()-1;i>=0;i--) {
-                    copyBoard.undoMove(undos.get(i));
-                }
-                String originalFen = FENBuilder.createFen(copyBoard, true);
-                List<Long> nativeMoves = undos.stream()
-                        .map(u -> MoveUtils.toNativeMove(u.getMove()))
-                        .collect(Collectors.toList());
                 boolean nativeRep = isDrawByRepNative(fen, originalFen, nativeMoves, numPrev);
                 if (javaRep != nativeRep) {
                     LOGGER.error("Draw by rep not equal!  javaRep: " + javaRep + ", nativeRep: " + nativeRep);
+                    LOGGER.error("fen: " + fen);
                     DrawBoard.drawBoard(board);
                     undos.forEach(u -> LOGGER.error(u.toString()));
+                    LOGGER.error("originalFen: " + originalFen);
+                    DrawBoard.drawBoard(copyBoard);
                     return false;
                 }
                 return true;
             } catch (IllegalStateException e) {
                 LOGGER.error(e);
+                LOGGER.error("fen: " + fen);
+                DrawBoard.drawBoard(board);
+                undos.forEach(u -> LOGGER.error(u.toString()));
+                LOGGER.error("originalFen: " + originalFen);
+                DrawBoard.drawBoard(copyBoard);
                 throw e;
             }
         } else {

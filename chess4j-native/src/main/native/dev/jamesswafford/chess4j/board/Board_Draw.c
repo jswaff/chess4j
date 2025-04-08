@@ -11,9 +11,12 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
-// TODO: internal method!
+// TODO: internal methods!
 bool is_draw_rep(const position_t* pos, const undo_t* u, int prev_reps);
+bool is_legal_move(move_t mv, const position_t* pos);
+char* move_to_str(move_t mv);
 
 /*
  * Class:     dev_jamesswafford_chess4j_board_Draw
@@ -52,17 +55,37 @@ JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_board_Draw_isDrawByRep
         goto cleanup;
     }
 
-    /* undo stack */
+    /* set up the undo stack with hash keys of reversible moves */
     undo_t undos[MAX_HALF_MOVES_PER_GAME];
-    jint n_undos = (*env)->CallIntMethod(env, jmoves, ArrayList_size);
-    for (int i=0;i<n_undos;i++) {
-        jobject jmove_obj = (*env)->CallObjectMethod(env, jmoves, ArrayList_get, i);
+    memset(&undos, 0, sizeof(undo_t));
+    jint n_moves = (*env)->CallIntMethod(env, jmoves, ArrayList_size);
+    jint offset = n_moves - pos.fifty_counter;
+    int num_matches = 0;
+    for (uint32_t i=0;i<pos.fifty_counter;i++) {
+        jobject jmove_obj = (*env)->CallObjectMethod(env, jmoves, ArrayList_get, offset + i);
         jlong jmove = (*env)->CallLongMethod(env, jmove_obj, Long_longValue);
-        apply_move(&orig_pos, (move_t)jmove, &undos[i]);
+        move_t mv = (move_t)jmove;
+        /* sanity check */
+        if (!is_legal_move(mv, &orig_pos)) {
+            char error_buffer[255];
+            sprintf(error_buffer, "Illegal move %d: %s\n", i, move_to_str(mv));
+            (*env)->ThrowNew(env, IllegalStateException, error_buffer);
+            goto cleanup;
+        }
+        if (orig_pos.hash_key == pos.hash_key) num_matches++;
+        apply_move(&orig_pos, mv, &undos[pos.move_counter - pos.fifty_counter + i]);
     }
 
+    /* evaluate for repetition */
     bool rep = is_draw_rep(&pos, undos, (int)num_prev);
     retval = (jboolean)rep;
+
+    /* verify indexing into undos is correct */
+    if (rep != (num_matches >= num_prev)) {
+        char error_buffer[255];
+        sprintf(error_buffer, "Draw by rep error: rep=%d, num_matches=%d, num_prev=%d\n", rep, num_matches, num_prev);
+        (*env)->ThrowNew(env, IllegalStateException, error_buffer);
+    }
 
 cleanup:
     (*env)->ReleaseStringUTFChars(env, board_fen, fen);
