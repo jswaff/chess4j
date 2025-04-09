@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static dev.jamesswafford.chess4j.Constants.CHECKMATE;
 import static dev.jamesswafford.chess4j.hash.TranspositionTableEntryType.*;
@@ -143,32 +144,50 @@ public class AlphaBetaSearch implements Search {
     private int searchWithNativeCode(Board board, List<Undo> undos, SearchParameters searchParameters,
                                      SearchOptions opts) {
 
+        assert(clearTableWrapper());
+
         List<Long> nativePV = new ArrayList<>();
         SearchStats nativeStats = new SearchStats(searchStats);
+        String fen = FENBuilder.createFen(board, true);
+        boolean post = opts.getPvCallback() != null;
 
+        // set up FEN for last non-reversible position.  This is used for draw by rep detection.
+        Board copyBoard = board.deepCopy();
+        assert(undos.size() >= board.getFiftyCounter());
+        for (int i=0;i<board.getFiftyCounter();i++) {
+            int ind = undos.size() - 1 - i;
+            Undo u = undos.get(ind);
+            copyBoard.undoMove(u);
+        }
+        String nonReversibleFen = FENBuilder.createFen(copyBoard, true);
+
+        // set up the move path since the game began
+        List<Long> movePath = undos.stream()
+                .map(u -> MoveUtils.toNativeMove(u.getMove()))
+                .collect(Collectors.toList());
+
+        int nativeScore;
         try {
-            assert(clearTableWrapper());
-            String fen = FENBuilder.createFen(board, false);
-            boolean post = opts.getPvCallback() != null;
-            int nativeScore = searchNative(fen, nativePV, searchParameters.getDepth(), searchParameters.getAlpha(),
-                    searchParameters.getBeta(), nativeStats, opts.getStartTime(), opts.getStopTime(), post);
-
-            // if the search completed then verify equality with the Java implementation.
-            assert (stop || searchesAreEqual(board, undos, searchParameters, opts, nativeScore, nativePV, nativeStats));
-
-            // set the object's stats to the native stats
-            searchStats.set(nativeStats);
-
-            // translate the native PV into the object's PV
-            pv.clear();
-            pv.addAll(MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove()));
-
-            return nativeScore;
+            nativeScore = searchNative(fen, nativePV, searchParameters.getDepth(), searchParameters.getAlpha(),
+                    searchParameters.getBeta(), nativeStats, opts.getStartTime(), opts.getStopTime(), post,
+                    nonReversibleFen, movePath);
         } catch (IllegalStateException e) {
             DrawBoard.drawBoard(board);
             LOGGER.error(e);
             throw e;
         }
+
+        // if the search completed then verify equality with the Java implementation.
+        assert (stop || searchesAreEqual(board, undos, searchParameters, opts, nativeScore, nativePV, nativeStats));
+
+        // set the object's stats to the native stats
+        searchStats.set(nativeStats);
+
+        // translate the native PV into the object's PV
+        pv.clear();
+        pv.addAll(MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove()));
+
+        return nativeScore;
     }
 
     // wrapper so we can clear hash tables when asserts are enabled
@@ -587,7 +606,8 @@ public class AlphaBetaSearch implements Search {
     private native void initializeNativeSearch();
 
     private native int searchNative(String fen, List<Long> parentPV, int depth, int alpha, int beta,
-                                    SearchStats searchStats, long startTime, long stopTime, boolean post);
+                                    SearchStats searchStats, long startTime, long stopTime, boolean post,
+                                    String nonReversibleFen, List<Long> movePath);
 
     private native void stopNative(boolean stop);
 

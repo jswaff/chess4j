@@ -9,10 +9,10 @@
 #include <prophet/search.h>
 
 /* move stack */
-move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
+move_t native_moves[MAX_PLY * MAX_MOVES_PER_PLY];
 
 /* undo stack */
-undo_t undos[MAX_HALF_MOVES_PER_GAME];
+undo_t native_undos[MAX_HALF_MOVES_PER_GAME];
 
 /*
  * Class:     dev_jamesswafford_chess4j_search_SearchIteratorImpl
@@ -48,8 +48,8 @@ JNIEXPORT void JNICALL Java_dev_jamesswafford_chess4j_search_SearchIteratorImpl_
 
     iterator_context_t ctx;
     ctx.pos = &pos;
-    ctx.move_stack = moves;
-    ctx.undo_stack = undos;
+    ctx.move_stack = native_moves;
+    ctx.undo_stack = native_undos;
 
     move_line_t pv = iterate(&opts, &ctx);
 

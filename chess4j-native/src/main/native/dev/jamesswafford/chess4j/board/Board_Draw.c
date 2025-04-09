@@ -24,7 +24,7 @@ char* move_to_str(move_t mv);
  * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;I)Z
  */
 JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_board_Draw_isDrawByRepNative
-  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jstring orig_board_fen, jobject jmoves, jint num_prev)
+  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jstring non_reversible_board_fen, jobject jmoves, jint num_prev)
 {
     jboolean retval = false;
 
@@ -35,7 +35,7 @@ JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_board_Draw_isDrawByRep
     }
 
     const char* fen = (*env)->GetStringUTFChars(env, board_fen, 0);
-    const char* orig_fen = (*env)->GetStringUTFChars(env, orig_board_fen, 0);
+    const char* non_reversible_fen = (*env)->GetStringUTFChars(env, non_reversible_board_fen, 0);
 
     /* set the current position according to the FEN */
     position_t pos;
@@ -46,11 +46,11 @@ JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_board_Draw_isDrawByRep
         goto cleanup;
     }
 
-    /* set the original position according to the FEN */
-    position_t orig_pos;
-    if (!set_pos(&orig_pos, orig_fen)) {
+    /* set the last non-reversible position according to the FEN */
+    position_t non_reversible_pos;
+    if (!set_pos(&non_reversible_pos, non_reversible_fen)) {
         char error_buffer[255];
-        sprintf(error_buffer, "Could not set original position: %s\n", orig_fen);
+        sprintf(error_buffer, "Could not set last non-reversible position: %s\n", non_reversible_fen);
         (*env)->ThrowNew(env, IllegalStateException, error_buffer);
         goto cleanup;
     }
@@ -65,15 +65,15 @@ JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_board_Draw_isDrawByRep
         jobject jmove_obj = (*env)->CallObjectMethod(env, jmoves, ArrayList_get, offset + i);
         jlong jmove = (*env)->CallLongMethod(env, jmove_obj, Long_longValue);
         move_t mv = (move_t)jmove;
-        /* sanity check */
-        if (!is_legal_move(mv, &orig_pos)) {
+        /* sanity check - TODO: move to assert */
+        if (!is_legal_move(mv, &non_reversible_pos)) {
             char error_buffer[255];
             sprintf(error_buffer, "Illegal move %d: %s\n", i, move_to_str(mv));
             (*env)->ThrowNew(env, IllegalStateException, error_buffer);
             goto cleanup;
         }
-        if (orig_pos.hash_key == pos.hash_key) num_matches++;
-        apply_move(&orig_pos, mv, &undos[pos.move_counter - pos.fifty_counter + i]);
+        if (non_reversible_pos.hash_key == pos.hash_key) num_matches++;
+        apply_move(&non_reversible_pos, mv, &undos[pos.move_counter - pos.fifty_counter + i]);
     }
 
     /* evaluate for repetition */
@@ -89,7 +89,7 @@ JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_board_Draw_isDrawByRep
 
 cleanup:
     (*env)->ReleaseStringUTFChars(env, board_fen, fen);
-    (*env)->ReleaseStringUTFChars(env, orig_board_fen, orig_fen);
+    (*env)->ReleaseStringUTFChars(env, non_reversible_board_fen, non_reversible_fen);
 
     return retval;
 }

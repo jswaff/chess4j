@@ -7,16 +7,20 @@
 #include "java/util/ArrayList.h"
 
 #include <prophet/const.h>
+#include <prophet/position.h>
 #include <prophet/search.h>
 
 #include <stdlib.h>
 #include <string.h>
 
 /* move stack */
-extern move_t moves[MAX_PLY * MAX_MOVES_PER_PLY];
+extern move_t native_moves[MAX_PLY * MAX_MOVES_PER_PLY];
 
 /* undo stack */
-extern undo_t undos[MAX_HALF_MOVES_PER_GAME];
+extern undo_t native_undos[MAX_HALF_MOVES_PER_GAME];
+
+/* flag to stop the search, or in our case as notification the search was stopped */
+extern volatile bool stop_search;
 
 /* search stats */
 stats_t native_stats;
@@ -26,19 +30,22 @@ JNIEnv *g_env;
 jobject *g_parent_pv;
 color_t g_ptm;
 
-/* flag to stop the search, or in our case as notification the search was stopped */
-extern volatile bool stop_search;
+// TODO: internal methods!
+bool is_legal_move(move_t mv, const position_t* pos);
+char* move_to_str(move_t mv);
 
+/* forward decls */
 static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
 
 /*
  * Class:     dev_jamesswafford_chess4j_search_AlphaBetaSearch
  * Method:    searchNative
- * Signature: (Ljava/lang/String;Ljava/util/List;IIILdev/jamesswafford/chess4j/search/SearchStats;JJZ)I
+ * Signature: (Ljava/lang/String;Ljava/util/List;IIILdev/jamesswafford/chess4j/search/SearchStats;JJZLjava/lang/String;Ljava/util/List;)I
  */
 JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_searchNative
   (JNIEnv *env, jobject search_obj, jstring board_fen, jobject parent_pv, jint depth,
-  jint alpha, jint beta, jobject search_stats, jlong start_time, jlong stop_time, jboolean post)
+  jint alpha, jint beta, jobject search_stats, jlong start_time, jlong stop_time, jboolean post,
+  jstring non_reversible_board_fen, jobject move_path)
 {
     jint retval = 0;
 
@@ -48,12 +55,23 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
         return 0;
     }
 
-    /* set the position according to the FEN */
     const char* fen = (*env)->GetStringUTFChars(env, board_fen, 0);
+    const char* non_reversible_fen = (*env)->GetStringUTFChars(env, non_reversible_board_fen, 0);
+
+    /* set the position according to the FEN */
     position_t pos;
     if (!set_pos(&pos, fen)) {
         char error_buffer[255];
         sprintf(error_buffer, "Could not set position: %s\n", fen);
+        (*env)->ThrowNew(env, IllegalStateException, error_buffer);
+        goto cleanup;
+    }
+
+    /* set the last non-reversible position according to the FEN */
+    position_t non_reversible_pos;
+    if (!set_pos(&non_reversible_pos, non_reversible_fen)) {
+        char error_buffer[255];
+        sprintf(error_buffer, "Could not set last non-reversible position: %s\n", non_reversible_fen);
         (*env)->ThrowNew(env, IllegalStateException, error_buffer);
         goto cleanup;
     }
@@ -77,9 +95,27 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
         search_opts.nodes_between_time_checks /= 10;   
     }
 
+    /* set up the undo stack */
+    memset(&native_undos, 0, sizeof(undo_t));
+    jint n_moves = (*env)->CallIntMethod(env, move_path, ArrayList_size);
+    jint offset = n_moves - pos.fifty_counter;
+    for (uint32_t i=0;i<pos.fifty_counter;i++) {
+        jobject jmove_obj = (*env)->CallObjectMethod(env, move_path, ArrayList_get, offset + i);
+        jlong jmove = (*env)->CallLongMethod(env, jmove_obj, Long_longValue);
+        move_t mv = (move_t)jmove;
+        /* sanity check - TODO: move to assert */
+        if (!is_legal_move(mv, &non_reversible_pos)) {
+            char error_buffer[255];
+            sprintf(error_buffer, "Illegal move %d: %s\n", i, move_to_str(mv));
+            (*env)->ThrowNew(env, IllegalStateException, error_buffer);
+            goto cleanup;
+        }
+        apply_move(&non_reversible_pos, mv, &native_undos[pos.move_counter - pos.fifty_counter + i]);
+    }
+
     /* perform the search */
     move_line_t pv;
-    int32_t native_score = search(&pos, &pv, depth, alpha, beta, moves, undos,
+    int32_t native_score = search(&pos, &pv, depth, alpha, beta, native_moves, native_undos,
         &native_stats, &search_opts);
     retval = (jint) native_score;
 
@@ -131,6 +167,7 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
 
 cleanup:
     (*env)->ReleaseStringUTFChars(env, board_fen, fen);
+    (*env)->ReleaseStringUTFChars(env, non_reversible_board_fen, non_reversible_fen);
 
     return retval;
 }

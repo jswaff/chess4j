@@ -129,19 +129,19 @@ public class Draw {
                 Undo u = undos.get(ind);
                 copyBoard.undoMove(u);
             }
-            String originalFen = FENBuilder.createFen(copyBoard, true);
-            List<Long> nativeMoves = undos.stream()
+            String nonReversibleFen = FENBuilder.createFen(copyBoard, true);
+            List<Long> movePath = undos.stream()
                     .map(u -> MoveUtils.toNativeMove(u.getMove()))
                     .collect(Collectors.toList());
 
             try {
-                boolean nativeRep = isDrawByRepNative(fen, originalFen, nativeMoves, numPrev);
+                boolean nativeRep = isDrawByRepNative(fen, nonReversibleFen, movePath, numPrev);
                 if (javaRep != nativeRep) {
                     LOGGER.error("Draw by rep not equal!  javaRep: {}, nativeRep: {}", javaRep, nativeRep);
                     LOGGER.error("fen: {}", fen);
                     DrawBoard.drawBoard(board);
                     undos.forEach(u -> LOGGER.error(u.toString()));
-                    LOGGER.error("originalFen: {}", originalFen);
+                    LOGGER.error("originalFen: {}", nonReversibleFen);
                     DrawBoard.drawBoard(copyBoard);
                     return false;
                 }
@@ -155,5 +155,14 @@ public class Draw {
         }
     }
 
-    private static native boolean isDrawByRepNative(String fen, String originalFen, List<Long> undos, int numPrev);
+    /**
+     *
+     * @param fen - current position
+     * @param nonReversibleFen - position after last non-reversible move
+     * @param movePath - move history since the start of the game
+     * @param numPrev - threshold of previous repetitions to consider this a draw
+     * @return whether the position should be evaluated as a draw by repetition
+     */
+    private static native boolean isDrawByRepNative(String fen, String nonReversibleFen, List<Long> movePath,
+                                                    int numPrev);
 }
