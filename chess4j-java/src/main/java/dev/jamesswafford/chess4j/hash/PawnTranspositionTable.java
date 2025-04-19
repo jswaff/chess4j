@@ -12,7 +12,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     private static final Logger LOGGER = LogManager.getLogger(PawnTranspositionTable.class);
 
-    private static final long DEFAULT_SIZE_BYTES = 128 * 1024 * 1024;
+    private static final long DEFAULT_SIZE_BYTES = 8 * 1024 * 1024;
 
     static {
         Initializer.init();
