@@ -7,8 +7,8 @@ import io.vavr.Tuple2;
 import java.util.Arrays;
 
 import static dev.jamesswafford.chess4j.nn.NeuralNetwork.NN_SIZE_L1;
+import static dev.jamesswafford.chess4j.pieces.Pawn.*;
 import static dev.jamesswafford.chess4j.pieces.Bishop.*;
-import static dev.jamesswafford.chess4j.pieces.King.*;
 import static dev.jamesswafford.chess4j.pieces.Knight.*;
 import static dev.jamesswafford.chess4j.pieces.Queen.*;
 import static dev.jamesswafford.chess4j.pieces.Rook.*;
@@ -75,31 +75,32 @@ public class NnueAccumulators {
         return new Tuple2<>(index_w, index_b);
     }
 
+    //typedef enum { NO_PIECE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING } piece_t;
     private int getPieceType(Piece piece) {
         if (piece.isWhite()) {
-            if (piece.equals(WHITE_ROOK)) {
+            if (piece.equals(WHITE_PAWN)) {
                 return 0;
             } else if (piece.equals(WHITE_KNIGHT)) {
                 return 1;
             } else if (piece.equals(WHITE_BISHOP)) {
                 return 2;
-            } else if (piece.equals(WHITE_QUEEN)) {
+            } else if (piece.equals(WHITE_ROOK)) {
                 return 3;
-            } else if (piece.equals(WHITE_KING)) {
+            } else if (piece.equals(WHITE_QUEEN)) {
                 return 4;
             } else {
-                return 5; // pawn
+                return 5; // king
             }
         } else {
-            if (piece.equals(BLACK_ROOK)) {
+            if (piece.equals(BLACK_PAWN)) {
                 return 0;
             } else if (piece.equals(BLACK_KNIGHT)) {
                 return 1;
             } else if (piece.equals(BLACK_BISHOP)) {
                 return 2;
-            } else if (piece.equals(BLACK_QUEEN)) {
+            } else if (piece.equals(BLACK_ROOK)) {
                 return 3;
-            } else if (piece.equals(BLACK_KING)) {
+            } else if (piece.equals(BLACK_QUEEN)) {
                 return 4;
             } else {
                 return 5; // pawn
