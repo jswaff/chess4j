@@ -152,14 +152,20 @@ public class AlphaBetaSearch implements Search {
         boolean post = opts.getPvCallback() != null;
 
         // set up FEN for last non-reversible position.  This is used for draw by rep detection.
-        Board copyBoard = board.deepCopy();
-        assert(undos.size() >= board.getFiftyCounter());
-        for (int i=0;i<board.getFiftyCounter();i++) {
-            int ind = undos.size() - 1 - i;
-            Undo u = undos.get(ind);
-            copyBoard.undoMove(u);
+        String nonReversibleFen;
+        if (undos.size() >= board.getFiftyCounter()) {
+            Board copyBoard = board.deepCopy();
+            for (int i = 0; i < board.getFiftyCounter(); i++) {
+                int ind = undos.size() - 1 - i;
+                Undo u = undos.get(ind);
+                copyBoard.undoMove(u);
+            }
+            nonReversibleFen = FENBuilder.createFen(copyBoard, true);
+        } else {
+            // we don't have the history data to reproduce the last non-reversible position.  This could happen
+            // if we're processing an EPD file.  The consequence is that we won't reliably detect repetitions.
+            nonReversibleFen = fen;
         }
-        String nonReversibleFen = FENBuilder.createFen(copyBoard, true);
 
         // set up the move path since the game began
         List<Long> movePath = undos.stream()

@@ -98,19 +98,21 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     /* set up the undo stack */
     memset(&native_undos, 0, sizeof(undo_t));
     jint n_moves = (*env)->CallIntMethod(env, move_path, ArrayList_size);
-    jint offset = n_moves - pos.fifty_counter;
-    for (uint32_t i=0;i<pos.fifty_counter;i++) {
-        jobject jmove_obj = (*env)->CallObjectMethod(env, move_path, ArrayList_get, offset + i);
-        jlong jmove = (*env)->CallLongMethod(env, jmove_obj, Long_longValue);
-        move_t mv = (move_t)jmove;
-        /* sanity check - TODO: move to assert */
-        if (!is_legal_move(mv, &non_reversible_pos)) {
-            char error_buffer[255];
-            sprintf(error_buffer, "Illegal move %d: %s\n", i, move_to_str(mv));
-            (*env)->ThrowNew(env, IllegalStateException, error_buffer);
-            goto cleanup;
+    if ((int)n_moves >= (int)pos.fifty_counter) {
+        jint offset = n_moves - pos.fifty_counter;
+        for (uint32_t i=0;i<pos.fifty_counter;i++) {
+            jobject jmove_obj = (*env)->CallObjectMethod(env, move_path, ArrayList_get, offset + i);
+            jlong jmove = (*env)->CallLongMethod(env, jmove_obj, Long_longValue);
+            move_t mv = (move_t)jmove;
+            /* sanity check - TODO: move to assert */
+            if (!is_legal_move(mv, &non_reversible_pos)) {
+                char error_buffer[255];
+                sprintf(error_buffer, "Illegal move %d: %s\n", i, move_to_str(mv));
+                (*env)->ThrowNew(env, IllegalStateException, error_buffer);
+                goto cleanup;
+            }
+            apply_move(&non_reversible_pos, mv, &native_undos[pos.move_counter - pos.fifty_counter + i]);
         }
-        apply_move(&non_reversible_pos, mv, &native_undos[pos.move_counter - pos.fifty_counter + i]);
     }
 
     /* perform the search */
