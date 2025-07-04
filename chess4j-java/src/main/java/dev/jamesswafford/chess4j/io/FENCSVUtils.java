@@ -11,6 +11,18 @@ public class FENCSVUtils {
 
     private static final Logger LOGGER = LogManager.getLogger(FENCSVUtils.class);
 
+    /**
+     * Relabel a CSV file.
+     *
+     * The input file should have at least two fields.
+     * First field: the score (label) to be updated
+     * Last field: the FEN
+     * Any fields in between are preserved as-is.
+     *
+     * @param inCsvFile
+     * @param outCsvFile
+     * @param depth
+     */
     @SneakyThrows
     public static void relabel(String inCsvFile, String outCsvFile, int depth) {
 
@@ -23,12 +35,17 @@ public class FENCSVUtils {
             String line;
             while ((line = in.readLine()) != null) {
                 String[] parts = line.split(",");
-                String fen = parts[1];
+                String fen = parts[parts.length-1];
                 FENRecord fenRecord = FENRecord.builder().fen(fen).build();
                 fenLabeler.label(fenRecord, depth);
-                out.write(fenRecord.getEval() + "," + fenRecord.getFen() + "\n");
+                StringBuilder sb = new StringBuilder();
+                sb.append(fenRecord.getEval());
+                for (int i=1;i<parts.length-1;i++) {
+                    sb.append(",").append(parts[i]);
+                }
+                sb.append(",").append(fenRecord.getFen()).append("\n");
+                out.write(sb.toString());
             }
         }
     }
-
 }
