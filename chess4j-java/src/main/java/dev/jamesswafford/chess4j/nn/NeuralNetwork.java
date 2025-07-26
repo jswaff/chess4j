@@ -97,11 +97,14 @@ public class NeuralNetwork {
             L2[i] = sum;
         }
 
-        // translate into score
-        float wscore = ((float)L2[0]) / (SCALE * SCALE);
-        float wr = ((float)L2[1]) / (SCALE * SCALE);
+        // translate into scores
+        float wscore = ((float)L2[0]) / (SCALE * SCALE) * 100; // to centipawns
+        float wr = ((float)L2[1]) / (SCALE * SCALE) * 1000;
 
-        int y_hat = my_round(((0.5F * wscore ) + (0.5F * wr)) * 100);
+        // https://chessforallages.blogspot.com/2019/08/winning-percentage-to-centipawns.html
+        //wr = 3 * (float)Math.tan(1.5F * wr); // win ratio to pawns
+
+        int y_hat = my_round((0.5F * wscore) + (0.5F * wr));
 
         // return for player on move
         int retval = board.getPlayerToMove().isWhite() ? y_hat : -y_hat;
