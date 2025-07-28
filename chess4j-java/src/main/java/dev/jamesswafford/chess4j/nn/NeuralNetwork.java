@@ -14,7 +14,7 @@ public class NeuralNetwork {
     private static final Logger LOGGER = LogManager.getLogger(NeuralNetwork.class);
 
     public static final int NN_SIZE_L1 = 1536;
-    public static final int NN_SIZE_L2 = 1;
+    public static final int NN_SIZE_L2 = 2;
 
     private static final int SCALE = 64;
     private static final int THRESHOLD = 127;
@@ -97,11 +97,13 @@ public class NeuralNetwork {
             L2[i] = sum;
         }
 
-        // translate into predicted score
-        float y = ((float)L2[0]) / (SCALE * SCALE);
+        // translate into scores
+        float wscore = ((float)L2[0]) / (SCALE * SCALE) * 100; // to centipawns
+        float wr = ((float)L2[1]) / (SCALE * SCALE) * 1000;
+        int y_hat = my_round((0.5F * wscore) + (0.5F * wr));
 
-        int pred = my_round(y * 100);
-        int retval = board.getPlayerToMove().isWhite() ? pred : -pred;
+        // return for player on move
+        int retval = board.getPlayerToMove().isWhite() ? y_hat : -y_hat;
 
         assert(verifyNativeEvalIsEqual(retval, board));
 
