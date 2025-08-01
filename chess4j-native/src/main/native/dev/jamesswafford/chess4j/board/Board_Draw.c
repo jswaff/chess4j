@@ -6,6 +6,7 @@
 #include "java/util/ArrayList.h"
 
 #include <prophet/const.h>
+#include <prophet/movegen.h>
 #include <prophet/position.h>
 
 #include <stdbool.h>
@@ -15,7 +16,6 @@
 
 // TODO: internal methods!
 bool is_draw_rep(const position_t* pos, const undo_t* u, int prev_reps);
-bool is_legal_move(move_t mv, const position_t* pos);
 char* move_to_str(move_t mv);
 
 /*
