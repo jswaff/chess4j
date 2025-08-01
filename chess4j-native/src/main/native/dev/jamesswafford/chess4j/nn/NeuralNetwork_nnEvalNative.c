@@ -9,9 +9,6 @@
 #include <stdio.h>
 #include <stdint.h>
 
-// TODO: put in public header
-int nn_eval(const position_t* pos, const neural_network_t *nn);
-
 extern neural_network_t neural_network;
 
 /*
