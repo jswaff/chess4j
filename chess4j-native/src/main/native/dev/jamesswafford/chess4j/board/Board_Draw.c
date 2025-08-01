@@ -15,7 +15,6 @@
 #include <string.h>
 
 // TODO: internal methods!
-bool is_draw_rep(const position_t* pos, const undo_t* u, int prev_reps);
 char* move_to_str(move_t mv);
 
 /*
