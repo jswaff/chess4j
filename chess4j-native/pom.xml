@@ -19,7 +19,7 @@
         <PROPHET_INCLUDE_PATH>${PROPHET_DIR}/include</PROPHET_INCLUDE_PATH>
         <PROPHET_CFLAGS>-I ${PROPHET_INCLUDE_PATH}</PROPHET_CFLAGS>
         <PROPHET_RELEASE_LIB_DIR>${PROPHET_DIR}/install/lib</PROPHET_RELEASE_LIB_DIR>
-        <PROPHET_RELEASE_LINK>-L ${PROPHET_RELEASE_LIB_DIR} -lprophetlib</PROPHET_RELEASE_LINK>
+        <PROPHET_RELEASE_LINK>-L ${PROPHET_RELEASE_LIB_DIR} -lprophetlibd</PROPHET_RELEASE_LINK>
         <CHESS4J_CFLAGS>-I ${project.build.directory}/jni-headers</CHESS4J_CFLAGS>
 
         <!-- include flags for javah, overridden by profile -->

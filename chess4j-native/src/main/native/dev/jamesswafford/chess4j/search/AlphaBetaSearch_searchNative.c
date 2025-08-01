@@ -7,6 +7,7 @@
 #include "java/util/ArrayList.h"
 
 #include <prophet/const.h>
+#include <prophet/move.h>
 #include <prophet/movegen.h>
 #include <prophet/position.h>
 #include <prophet/search.h>
@@ -31,10 +32,6 @@ stats_t native_stats;
 JNIEnv *g_env;
 jobject *g_parent_pv;
 color_t g_ptm;
-
-#if 0
-char* move_to_str(move_t mv);
-#endif
 
 /* forward decls */
 static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
@@ -114,7 +111,7 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
                 goto cleanup;
             }
 #endif
-            assert(!is_legal_move(mv, &non_reversible_pos));
+            assert(is_legal_move(mv, &non_reversible_pos));
             apply_move(&non_reversible_pos, mv, &native_undos[pos.move_counter - pos.fifty_counter + i]);
         }
     }

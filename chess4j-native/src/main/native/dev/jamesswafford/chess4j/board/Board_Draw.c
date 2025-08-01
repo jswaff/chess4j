@@ -6,18 +6,14 @@
 #include "java/util/ArrayList.h"
 
 #include <prophet/const.h>
+#include <prophet/move.h>
 #include <prophet/movegen.h>
 #include <prophet/position.h>
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-
-#if 0
-char* move_to_str(move_t mv);
-#endif
 
 /*
  * Class:     dev_jamesswafford_chess4j_board_Draw
@@ -66,15 +62,13 @@ JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_board_Draw_isDrawByRep
         jobject jmove_obj = (*env)->CallObjectMethod(env, jmoves, ArrayList_get, offset + i);
         jlong jmove = (*env)->CallLongMethod(env, jmove_obj, Long_longValue);
         move_t mv = (move_t)jmove;
-#if 0
+        /* this could be an assert, but this method is only used for debugging anyway */
         if (!is_legal_move(mv, &non_reversible_pos)) {
             char error_buffer[255];
             sprintf(error_buffer, "Illegal move %d: %s\n", i, move_to_str(mv));
             (*env)->ThrowNew(env, IllegalStateException, error_buffer);
             goto cleanup;
         }
-#endif
-        assert(is_legal_move(mv, &non_reversible_pos));
         if (non_reversible_pos.hash_key == pos.hash_key) num_matches++;
         apply_move(&non_reversible_pos, mv, &undos[pos.move_counter - pos.fifty_counter + i]);
     }
