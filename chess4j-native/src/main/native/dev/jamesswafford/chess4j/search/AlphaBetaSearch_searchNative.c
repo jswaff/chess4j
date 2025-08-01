@@ -11,6 +11,7 @@
 #include <prophet/position.h>
 #include <prophet/search.h>
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -31,8 +32,9 @@ JNIEnv *g_env;
 jobject *g_parent_pv;
 color_t g_ptm;
 
-// TODO: internal methods!
+#if 0
 char* move_to_str(move_t mv);
+#endif
 
 /* forward decls */
 static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
@@ -104,13 +106,15 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
             jobject jmove_obj = (*env)->CallObjectMethod(env, move_path, ArrayList_get, offset + i);
             jlong jmove = (*env)->CallLongMethod(env, jmove_obj, Long_longValue);
             move_t mv = (move_t)jmove;
-            /* sanity check - TODO: move to assert */
+#if 0
             if (!is_legal_move(mv, &non_reversible_pos)) {
                 char error_buffer[255];
                 sprintf(error_buffer, "Illegal move %d: %s\n", i, move_to_str(mv));
                 (*env)->ThrowNew(env, IllegalStateException, error_buffer);
                 goto cleanup;
             }
+#endif
+            assert(!is_legal_move(mv, &non_reversible_pos));
             apply_move(&non_reversible_pos, mv, &native_undos[pos.move_counter - pos.fifty_counter + i]);
         }
     }
