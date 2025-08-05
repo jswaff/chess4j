@@ -53,16 +53,21 @@ If that worked you should see the contents of chess4j/lib/prophet populated.  No
 
 That will kick off the build process, first building Prophet, then the JNI code that is the "bridge" between the Java and C layer, and finally chess4j itself.  The final build artifact will be in the chess4j-java/target directory.
 
-You now have the option to run with or without the native (Prophet) code enabled by using the '-native' command line argument.  If you omit that argument, the native code will not be enabled.
-
 Verify everything is working:
 
 ```java -jar chess4j-6.1-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd -native```
 
-(Note the '-native' argument.)  
-
 You should see the program search for about 10 seconds and display the result.  
 
+## Native Mode
+
+*** Currently for Linux only ***
+
+Assuming you built with Prophet bundled in or are using one of the supplied platform dependent builds, you can enable native mode using a command line argument:
+
+```-native```
+
+Native mode is significantly faster than Java mode, on the order of 2-3x in most cases.
 
 ## Opening Book
 
