@@ -1,6 +1,6 @@
 # chess4j
 
-an XBoard compatible Java based chess engine
+an Xboard compatible Java based chess engine
 
 ## Introduction 
 
@@ -97,7 +97,7 @@ You can specify the maximum memory allocated to each table via command line para
 
 The above arguments would allocate 256 mb to the main table, and 128 mb to the pawn table.  
  
-Note: the XBoard protocol has a 'memory' command to specify the maximum memory usage, and chess4j does respect that.  When this command is received, chess4j will reallocate the memory for the two hash tables, dividing the memory equally between them.
+Note: the Xboard protocol has a 'memory' command to specify the maximum memory usage, and chess4j does respect that.  When this command is received, chess4j will reallocate the memory for the two hash tables, dividing the memory equally between them.
 
 ## Running Test Suites
 
