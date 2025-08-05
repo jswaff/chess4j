@@ -89,8 +89,7 @@ too high.  I will continue to investigate this, but it's likely that in a future
 
 chess4j currently employs two transposition tables.  One is used in the main search and one in the pawn evaluation.  The default sizes are 64 mb and 8 mb respectively.
  
-You can specify the maximum memory allocated to each table via command line parameters, but you would really only want to do this if you were running the program directly from the command line, and not using a Winboard compatible GUI or test harness. 
-(I do this when running test suites but that's about it.)  
+You can specify the maximum memory allocated to each table via command line parameters: 
 
 ```
 -hash 256 -phash 128
@@ -98,8 +97,7 @@ You can specify the maximum memory allocated to each table via command line para
 
 The above arguments would allocate 256 mb to the main table, and 128 mb to the pawn table.  
  
-Winboard / XBoard has an option to specify the maximum memory usage, and chess4j does respect that.  chess4j will divide the memory equally between the two tables.
-
+Note: the XBoard protocol has a 'memory' command to specify the maximum memory usage, and chess4j does respect that.  chess4j will divide the memory equally between the two tables.
 
 ## Running Test Suites
 
@@ -138,8 +136,7 @@ The command above would start chess4j to process the Win At Chess (WAC) test sui
 
 ## Roadmap
 
-The next area of focus will likely be Lazy SMP.  I also plan to investigate Java's Foreign Function & Memory (FFM) API as a potential alternative to Java Native Interface (JNI).  
-From what I've read, FFM is safer, more straightforward, and potentially more performant.  
+The next area of focus will likely be Lazy SMP.  I also plan to investigate Java's Foreign Function & Memory (FFM) API as a potential alternative to Java Native Interface (JNI).  From what I've read, FFM is safer, more straightforward, and potentially more performant.  
 
 
 You can see the combined Prophet / chess4j backlog here: https://trello.com/b/dhcOEaCO/chess4j-board .
