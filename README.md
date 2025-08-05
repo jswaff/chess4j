@@ -100,6 +100,11 @@ The command above would start chess4j to process the Win At Chess (WAC) test sui
 
 ## Changelog
 
+6.1
+* NNUE
+* fixed bug in draw by rep detection when using native engine
+* more cleanup and refactoring
+
 6.0
 * neural network mode! (alpha - not ready for prime time yet)
 * cleaned up command line parameters
