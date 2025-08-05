@@ -43,7 +43,7 @@ You should see the program search for about 10 seconds and display the result.
 
 This option is slightly more complex.  In addition to the other prerequisites, you'll also need a working C/C++ toolchain.  I always use gcc / g++.  Others may work but have not been tested.  You'll also need 'make' and 'cmake'.
 
-Once you have the prerequisites, clone the chess4j repository.  Since Prophet4 is a separate project, you'll need to do a recursive clone, e.g.
+Once you have the prerequisites, clone the chess4j repository.  Since Prophet is a separate project, you'll need to do a recursive clone, e.g.
 
 ```git clone --recurse-submodules git@github.com:jswaff/chess4j.git```
 
