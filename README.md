@@ -136,7 +136,7 @@ The command above would start chess4j to process the Win At Chess (WAC) test sui
 
 ## Roadmap
 
-The next area of focus will likely be Lazy SMP.  I also plan to investigate Java's Foreign Function & Memory (FFM) API as a potential alternative to Java Native Interface (JNI).  From what I've read, FFM is safer, more straightforward, and potentially more performant.  
+The next area of focus will likely be Lazy SMP.  I also plan to investigate Java's Foreign Function & Memory (FFM) API as a potential alternative to the Java Native Interface (JNI).  From what I've read, FFM is safer, more straightforward, and potentially more performant.  
 
 
 You can see the combined Prophet / chess4j backlog here: https://trello.com/b/dhcOEaCO/chess4j-board .
