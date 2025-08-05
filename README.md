@@ -32,12 +32,14 @@ Clone the repository and go into the chess4j/chess4j-java directory.
 
 Once this process is complete you should see the build artifact in the target directory, e.g. chess4j-java-6.0-uber.jar.  Verify everything is working:
 
-```java -jar chess4j-6.0-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd```
+```java -jar chess4j-6.1-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd```
 
 You should see the program search for about 10 seconds and display the result.  
 
 
-### With the Prophet Engine
+### With the Prophet Engine 
+
+*** Currently for Linux only ***
 
 This option is slightly more complex.  In addition to the other prerequisites, you'll also need a working C/C++ toolchain.  I always use gcc / g++.  Others may work but have not been tested.  You'll also need 'make' and 'cmake'.
 
@@ -55,7 +57,7 @@ You now have the option to run with or without the native (Prophet) code enabled
 
 Verify everything is working:
 
-```java -jar chess4j-6.0-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd -native```
+```java -jar chess4j-6.1-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd -native```
 
 (Note the '-native' argument.)  
 
@@ -92,7 +94,7 @@ Winboard / XBoard has an option to specify the maximum memory usage, and chess4j
 You can run EPD formatted test suites with chess4j by putting it in test mode.  The default time per problem is 10 seconds, but that can also be changed with the 'time' argument.
 
 ```
-java -jar chess4j-6.0-uber.jar -mode test -epd wac.epd -time 30
+java -jar chess4j-6.1-uber.jar -mode test -epd wac.epd -time 30
 ```
 
 The command above would start chess4j to process the Win At Chess (WAC) test suite, giving it 30 seconds per problem.  (A few test suites can be found in the test/resources folder.)
@@ -101,7 +103,7 @@ The command above would start chess4j to process the Win At Chess (WAC) test sui
 ## Changelog
 
 6.1
-* NNUE
+* NNUE (native mode only)
 * fixed bug in draw by rep detection when using native engine
 * more cleanup and refactoring
 
