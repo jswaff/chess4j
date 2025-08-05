@@ -87,8 +87,6 @@ too high.  I will continue to investigate this, but it's likely that in a future
 
 ## Memory Usage
 
-Normally you wouldn't need to worry about memory usage, but if you want to tweak chess4j here is some important information.
-
 chess4j currently employs two transposition tables.  One is used in the main search and one in the pawn evaluation.  The default sizes are 64 mb and 8 mb respectively.
  
 You can specify the maximum memory allocated to each table via command line parameters, but you would really only want to do this if you were running the program directly from the command line, and not using a Winboard compatible GUI or test harness. 
