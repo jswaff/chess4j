@@ -70,6 +70,15 @@ chess4j has a small opening book but it is not enabled by default.  If you would
 
 ```-book book.db```
 
+## Using a Neural Network
+
+By default, chess4j still uses a hand crafted evaluation.  You can enable a neural network based evaluation using a command line parameter:
+
+```-nn nn-24-q.txt```
+
+However, this is only recommended when running in native mode.  Using a neural network for evaluation, even with NNUE, is significantly slower
+than a traditional code based evaluator.  In native mode, AVX intrinsics partially compensate for this.  In Java, the overhead seems to be 
+too high.  I will continue to investigate this, but it's likely that in a future release I'll remove support for neural networks when not in native mode.
 
 ## Memory Usage
 
