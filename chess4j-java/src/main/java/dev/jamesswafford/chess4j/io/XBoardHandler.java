@@ -13,7 +13,6 @@ import dev.jamesswafford.chess4j.exceptions.ParseException;
 import dev.jamesswafford.chess4j.hash.TTHolder;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
-import dev.jamesswafford.chess4j.nn.EvalPredictor;
 import dev.jamesswafford.chess4j.search.SearchIterator;
 import dev.jamesswafford.chess4j.search.SearchIteratorImpl;
 import dev.jamesswafford.chess4j.utils.*;
@@ -129,8 +128,6 @@ public class XBoardHandler {
 
     private void eval(String[] cmd) {
         LOGGER.info("HCE: {}",  Eval.eval(Globals.getEvalWeights(), Globals.getBoard()));
-        Globals.getPredictor().ifPresent(predictor ->
-                LOGGER.info("TS: {}", EvalPredictor.predict(predictor, Globals.getBoard())));
         Globals.getNeuralNetwork().ifPresent(nn ->
                 LOGGER.info("NN: {}", nn.eval(Globals.getBoard())));
     }
@@ -217,14 +214,11 @@ public class XBoardHandler {
             return Double.compare(s1, s2);
         });
         StringBuilder headerStr = new StringBuilder("# Move HCE");
-        Globals.getPredictor().ifPresent(predictor -> headerStr.append(" TS"));
         Globals.getNeuralNetwork().ifPresent(nn -> headerStr.append(" NN"));
         LOGGER.info(headerStr);
         moves.forEach(mv -> {
             Undo undo = board.applyMove(mv);
             StringBuilder mvStr = new StringBuilder("\t" + mv + " " + -Eval.eval(weights, board));
-            Globals.getPredictor().ifPresent(predictor -> mvStr.append(" ")
-                    .append(-EvalPredictor.predict(predictor, board)));
             Globals.getNeuralNetwork().ifPresent(nn -> mvStr.append(" ").append(-nn.eval(board)));
             LOGGER.info(mvStr);
             board.undoMove(undo);
