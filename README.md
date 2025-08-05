@@ -30,7 +30,7 @@ Clone the repository and go into the chess4j/chess4j-java directory.
  
  ```mvn clean install```  
 
-Once this process is complete you should see the build artifact in the target directory, e.g. chess4j-java-6.0-uber.jar.  Verify everything is working:
+Once this process is complete you should see the build artifact in the target directory, e.g. chess4j-java-6.1-uber.jar.  Verify everything is working:
 
 ```java -jar chess4j-6.1-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd```
 
@@ -75,7 +75,7 @@ chess4j has a small opening book but it is not enabled by default.  If you would
 
 Normally you wouldn't need to worry about memory usage, but if you want to tweak chess4j here is some important information.
 
-chess4j currently employs two transposition tables.  One is used in the main search and one in the pawn evaluation.  The default size for each table is 128 MB.  (If you run with the -native option, the default size may be different.)
+chess4j currently employs two transposition tables.  One is used in the main search and one in the pawn evaluation.  The default sizes are 64mb and 8mb respectively.  (If you run with the -native option, the default size may be different.)
  
 You can specify the maximum memory allocated to each table via command line parameters, but you would really only want to do this if you were running the program directly from the command line, and not using a Winboard compatible GUI or test harness. 
 (I do this when running test suites but that's about it.)  
@@ -103,7 +103,7 @@ The command above would start chess4j to process the Win At Chess (WAC) test sui
 ## Changelog
 
 6.1
-* NNUE (native mode only)
+* NNUE (recommended for native mode only)
 * fixed bug in draw by rep detection when using native engine
 * more cleanup and refactoring
 
@@ -126,7 +126,9 @@ The command above would start chess4j to process the Win At Chess (WAC) test sui
 
 ## Roadmap
 
-Currently the main focus of development is to implement a neural network.
+The next area of focus will likely be Lazy SMP.  I also plan to investigate Java's Foreign Function & Memory (FFM) API as a potential alternative to Java Native Interface (JNI).  
+From what I've read, FFM is safer, more straightforward, and potentially more performant.  
+
 
 You can see the combined Prophet / chess4j backlog here: https://trello.com/b/dhcOEaCO/chess4j-board .
 
