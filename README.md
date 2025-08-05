@@ -51,7 +51,7 @@ If that worked you should see the contents of chess4j/lib/prophet populated.  No
 
 ```make```
 
-That will kick off the build process, first building Prophet, then the JNI code that is the "bridge" between the Java and C layer, and finally chess4j itself.  The final build artifact will be in the chess4j-java/target directory.
+That will kick off the build process, first building Prophet, then the JNI code that is the "bridge" between the Java and C layers, and finally chess4j itself.  The final build artifact will be in the chess4j-java/target directory.
 
 Verify everything is working:
 
