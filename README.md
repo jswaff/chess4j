@@ -30,7 +30,7 @@ Clone the repository and go into the chess4j/chess4j-java directory.
  
  ```mvn clean install```  
 
-Once this process is complete you should see the build artifact in the target directory, e.g. chess4j-6.1-uber.jar.  Verify everything is working:
+Once this process is complete you should see the build artifact in the target directory.  Verify everything is working:
 
 ```java -jar chess4j-6.1-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd```
 
