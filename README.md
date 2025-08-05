@@ -75,16 +75,16 @@ chess4j has a small opening book but it is not enabled by default.  If you would
 
 Normally you wouldn't need to worry about memory usage, but if you want to tweak chess4j here is some important information.
 
-chess4j currently employs two transposition tables.  One is used in the main search and one in the pawn evaluation.  The default sizes are 64mb and 8mb respectively.  (If you run with the -native option, the default size may be different.)
+chess4j currently employs two transposition tables.  One is used in the main search and one in the pawn evaluation.  The default sizes are 64 mb and 8 mb respectively.
  
 You can specify the maximum memory allocated to each table via command line parameters, but you would really only want to do this if you were running the program directly from the command line, and not using a Winboard compatible GUI or test harness. 
 (I do this when running test suites but that's about it.)  
 
 ```
--hash 256 -phash 256
+-hash 256 -phash 128
 ``` 
 
-The above arguments would allocate 256 MB to each table.  
+The above arguments would allocate 256 mb to the main table, and 128 mb to the pawn table.  
  
 Winboard / XBoard has an option to specify the maximum memory usage, and chess4j does respect that.  chess4j will divide the memory equally between the two tables.
 
