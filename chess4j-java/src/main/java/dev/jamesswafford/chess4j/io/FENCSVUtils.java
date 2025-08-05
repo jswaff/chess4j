@@ -6,64 +6,46 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.util.List;
 
 public class FENCSVUtils {
 
     private static final Logger LOGGER = LogManager.getLogger(FENCSVUtils.class);
 
+    /**
+     * Relabel a CSV file.
+     *
+     * The input file should have at least two fields.
+     * First field: the score (label) to be updated
+     * Last field: the FEN
+     * Any fields in between are preserved as-is.
+     *
+     * @param inCsvFile
+     * @param outCsvFile
+     * @param depth
+     */
     @SneakyThrows
-    public static void relabel(String inCsvFile, String outCsvFile) {
+    public static void relabel(String inCsvFile, String outCsvFile, int depth) {
 
-        LOGGER.info("relabeling records from {} to {}", inCsvFile, outCsvFile);
+        LOGGER.info("relabeling records from {} to {} depth {}", inCsvFile, outCsvFile, depth);
 
-        BufferedReader in = null;
-        BufferedWriter out = null;
         FENLabeler fenLabeler = new FENLabeler();
-        try {
-            in = new BufferedReader(new FileReader(inCsvFile));
-            out = new BufferedWriter(new FileWriter(outCsvFile));
+        try (BufferedReader in = new BufferedReader(new FileReader(inCsvFile));
+             BufferedWriter out = new BufferedWriter(new FileWriter(outCsvFile)))
+        {
             String line;
             while ((line = in.readLine()) != null) {
                 String[] parts = line.split(",");
-                String fen = parts[1];
+                String fen = parts[parts.length-1];
                 FENRecord fenRecord = FENRecord.builder().fen(fen).build();
-                fenLabeler.label(fenRecord, 0);
-                out.write(fenRecord.getEval() + "," + fenRecord.getFen() + "\n");
-            }
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) { /* ignore */ }
-            }
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) { /* ignore */  }
+                fenLabeler.label(fenRecord, depth);
+                StringBuilder sb = new StringBuilder();
+                sb.append(fenRecord.getEval());
+                for (int i=1;i<parts.length-1;i++) {
+                    sb.append(",").append(parts[i]);
+                }
+                sb.append(",").append(fenRecord.getFen()).append("\n");
+                out.write(sb.toString());
             }
         }
     }
-
-    @SneakyThrows
-    public static void writeToCSV(List<FENRecord> fenRecords, String csvFile) {
-
-        LOGGER.info("writing labeled records to {}", csvFile);
-
-        BufferedWriter out = null;
-        try {
-            FileWriter fstream = new FileWriter(csvFile);
-            out = new BufferedWriter(fstream);
-            for (FENRecord fenRecord : fenRecords) {
-                out.write(fenRecord.getEval() + "," + fenRecord.getFen() + "\n");
-            }
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) { /* ignore */  }
-            }
-        }
-    }
-
 }

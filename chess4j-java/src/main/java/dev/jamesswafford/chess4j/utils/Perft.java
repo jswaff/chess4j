@@ -1,6 +1,5 @@
 package dev.jamesswafford.chess4j.utils;
 
-import dev.jamesswafford.chess4j.Globals;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.board.Undo;

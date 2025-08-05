@@ -1,6 +1,6 @@
 # chess4j
 
-an XBoard compatible Java based chess engine
+an Xboard compatible Java based chess engine
 
 ## Introduction 
 
@@ -18,7 +18,7 @@ Once those prerequisites are met you can download the latest release and extract
 
 ## Building from Source
 
-chess4j can be built with or without <a href="https://github.com/jswaff/prophet" target="_blank">Prophet</a> bundled as a static library.  The benefit of bundling Prophet is simply speed.  When Prophet is bundled and activated (using the '-native' command line argument), chess4j will leverage Prophet when "thinking."  Since Prophet is written in C and is native, it will execute about 2-3 times faster.  It doesn't move any faster, but it will "see further" and therefore play stronger moves.  Otherwise, the algorithms are the same.  Just keep in mind that native code is platform dependent.  Currently the only platform supported for bundling Prophet is Linux.
+chess4j can be built with or without <a href="https://github.com/jswaff/prophet" target="_blank">Prophet</a> bundled as a static library. 
 
 Whether you want to bundle Prophet or not, you will need a Java 11 (or better) JDK and Maven.  You will probably also need to ensure the JAVA_HOME environment variable is properly set.
 
@@ -30,18 +30,20 @@ Clone the repository and go into the chess4j/chess4j-java directory.
  
  ```mvn clean install```  
 
-Once this process is complete you should see the build artifact in the target directory, e.g. chess4j-java-6.0-uber.jar.  Verify everything is working:
+Once this process is complete you should see the build artifact in the target directory.  Verify everything is working:
 
-```java -jar chess4j-6.0-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd```
+```java -jar chess4j-6.1-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd```
 
 You should see the program search for about 10 seconds and display the result.  
 
 
-### With the Prophet Engine
+### With the Prophet Engine 
+
+*** Currently for Linux only ***
 
 This option is slightly more complex.  In addition to the other prerequisites, you'll also need a working C/C++ toolchain.  I always use gcc / g++.  Others may work but have not been tested.  You'll also need 'make' and 'cmake'.
 
-Once you have the prerequisites, clone the chess4j repository.  Since Prophet4 is a separate project, you'll need to do a recursive clone, e.g.
+Once you have the prerequisites, clone the chess4j repository.  Since Prophet is a separate project, you'll need to do a recursive clone, e.g.
 
 ```git clone --recurse-submodules git@github.com:jswaff/chess4j.git```
 
@@ -49,18 +51,23 @@ If that worked you should see the contents of chess4j/lib/prophet populated.  No
 
 ```make```
 
-That will kick off the build process, first building Prophet, then the JNI code that is the "bridge" between the Java and C layer, and finally chess4j itself.  The final build artifact will be in the chess4j-java/target directory.
-
-You now have the option to run with or without the native (Prophet) code enabled by using the '-native' command line argument.  If you omit that argument, the native code will not be enabled.
+That will kick off the build process, first building Prophet, then the JNI code that is the "bridge" between the Java and C layers, and finally chess4j itself.  The final build artifact will be in the chess4j-java/target directory.
 
 Verify everything is working:
 
-```java -jar chess4j-6.0-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd -native```
-
-(Note the '-native' argument.)  
+```java -jar chess4j-6.1-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd -native```
 
 You should see the program search for about 10 seconds and display the result.  
 
+## Native Mode
+
+*** Currently for Linux only ***
+
+Assuming you built with Prophet bundled in or are using one of the supplied platform dependent builds, you can enable native mode using a command line argument:
+
+```-native```
+
+Native mode is significantly faster than Java mode, on the order of 2-3x in most cases.
 
 ## Opening Book
 
@@ -68,37 +75,47 @@ chess4j has a small opening book but it is not enabled by default.  If you would
 
 ```-book book.db```
 
+## Using a Neural Network
+
+By default, chess4j still uses a hand crafted evaluation.  You can enable a neural network based evaluation using a command line parameter:
+
+```-nn nn-24-q.txt```
+
+However, this is only recommended when running in native mode.  Using a neural network for evaluation, even with NNUE, is significantly slower
+than a traditional code based evaluator.  In native mode, AVX intrinsics partially compensate for this.  In Java, the overhead seems to be 
+too high.  I will continue to investigate this, but it's likely that in a future release I'll remove support for neural networks when not in native mode.
 
 ## Memory Usage
 
-Normally you wouldn't need to worry about memory usage, but if you want to tweak chess4j here is some important information.
-
-chess4j currently employs two transposition tables.  One is used in the main search and one in the pawn evaluation.  The default size for each table is 128 MB.  (If you run with the -native option, the default size may be different.)
+chess4j currently employs two transposition tables.  One is used in the main search and one in the pawn evaluation.  The default sizes are 64 mb and 8 mb respectively.
  
-You can specify the maximum memory allocated to each table via command line parameters, but you would really only want to do this if you were running the program directly from the command line, and not using a Winboard compatible GUI or test harness. 
-(I do this when running test suites but that's about it.)  
+You can specify the maximum memory allocated to each table via command line parameters: 
 
 ```
--hash 256 -phash 256
+-hash 256 -phash 128
 ``` 
 
-The above arguments would allocate 256 MB to each table.  
+The above arguments would allocate 256 mb to the main table, and 128 mb to the pawn table.  
  
-Winboard / XBoard has an option to specify the maximum memory usage, and chess4j does respect that.  chess4j will divide the memory equally between the two tables.
-
+Note: the Xboard protocol has a 'memory' command to specify the maximum memory usage, and chess4j does respect that.  When this command is received, chess4j will reallocate the memory for the two hash tables, dividing the memory equally between them.
 
 ## Running Test Suites
 
 You can run EPD formatted test suites with chess4j by putting it in test mode.  The default time per problem is 10 seconds, but that can also be changed with the 'time' argument.
 
 ```
-java -jar chess4j-6.0-uber.jar -mode test -epd wac.epd -time 30
+java -jar chess4j-6.1-uber.jar -mode test -epd wac.epd -time 30
 ```
 
 The command above would start chess4j to process the Win At Chess (WAC) test suite, giving it 30 seconds per problem.  (A few test suites can be found in the test/resources folder.)
 
 
 ## Changelog
+
+6.1
+* NNUE (recommended for native mode only)
+* fixed bug in draw by rep detection when using native engine
+* more cleanup and refactoring
 
 6.0
 * neural network mode! (alpha - not ready for prime time yet)
@@ -119,7 +136,8 @@ The command above would start chess4j to process the Win At Chess (WAC) test sui
 
 ## Roadmap
 
-Currently the main focus of development is to implement a neural network.
+The next area of focus will likely be Lazy SMP.  I also plan to investigate Java's Foreign Function & Memory (FFM) API as a potential alternative to the Java Native Interface (JNI).  From what I've read, FFM is safer, more straightforward, and potentially more performant.  
+
 
 You can see the combined Prophet / chess4j backlog here: https://trello.com/b/dhcOEaCO/chess4j-board .
 

@@ -1,22 +1,23 @@
-#include "dev_jamesswafford_chess4j_eval_Eval.h"
+#include "dev_jamesswafford_chess4j_nn_NeuralNetwork.h"
 
 #include "dev/jamesswafford/chess4j/prophet-jni.h"
 #include "java/lang/IllegalStateException.h"
 
-#include <prophet/eval.h>
+#include <prophet/nn.h>
 #include <prophet/position.h>
 
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 
+extern neural_network_t neural_network;
+
 /*
- * Class:     dev_jamesswafford_chess4j_eval_Eval
- * Method:    evalNative
- * Signature: (Ljava/lang/String;Z)I
+ * Class:     dev_jamesswafford_chess4j_nn_NeuralNetwork
+ * Method:    nnEvalNative
+ * Signature: (Ljava/lang/String;)I
  */
-JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_eval_Eval_evalNative
-  (JNIEnv *env, jclass UNUSED(clazz), jstring board_fen, jboolean material_only)
+JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_nn_NeuralNetwork_nnEvalNative
+  (JNIEnv *env, jobject UNUSED(obj), jstring board_fen)
 {
     jint retval = 0;
 
@@ -35,7 +36,7 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_eval_Eval_evalNative
         goto cleanup;
     }
 
-    int32_t native_score = eval(&pos, (bool)material_only, false);
+    int32_t native_score = nn_eval(&pos, &neural_network);
     retval = (jint) native_score;
 
 cleanup:

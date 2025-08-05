@@ -6,7 +6,7 @@
 #include <prophet/move.h>
 #include <prophet/search.h>
 
-#include <memory.h>
+#include <string.h>
 
 extern move_line_t last_pv;
 extern stats_t native_stats;

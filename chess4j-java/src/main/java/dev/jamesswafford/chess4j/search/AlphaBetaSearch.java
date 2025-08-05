@@ -13,7 +13,6 @@ import dev.jamesswafford.chess4j.io.DrawBoard;
 import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
-import dev.jamesswafford.chess4j.nn.EvalPredictor;
 import dev.jamesswafford.chess4j.utils.BoardUtils;
 import dev.jamesswafford.chess4j.utils.MoveUtils;
 import lombok.Getter;
@@ -24,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static dev.jamesswafford.chess4j.Constants.CHECKMATE;
 import static dev.jamesswafford.chess4j.hash.TranspositionTableEntryType.*;
@@ -144,31 +144,56 @@ public class AlphaBetaSearch implements Search {
     private int searchWithNativeCode(Board board, List<Undo> undos, SearchParameters searchParameters,
                                      SearchOptions opts) {
 
+        assert(clearTableWrapper());
+
         List<Long> nativePV = new ArrayList<>();
         SearchStats nativeStats = new SearchStats(searchStats);
+        String fen = FENBuilder.createFen(board, true);
+        boolean post = opts.getPvCallback() != null;
 
+        // set up FEN for last non-reversible position.  This is used for draw by rep detection.
+        String nonReversibleFen;
+        if (undos.size() >= board.getFiftyCounter()) {
+            Board copyBoard = board.deepCopy();
+            for (int i = 0; i < board.getFiftyCounter(); i++) {
+                int ind = undos.size() - 1 - i;
+                Undo u = undos.get(ind);
+                copyBoard.undoMove(u);
+            }
+            nonReversibleFen = FENBuilder.createFen(copyBoard, true);
+        } else {
+            // we don't have the history data to reproduce the last non-reversible position.  This could happen
+            // if we're processing an EPD file.  The consequence is that we won't reliably detect repetitions.
+            nonReversibleFen = fen;
+        }
+
+        // set up the move path since the game began
+        List<Long> movePath = undos.stream()
+                .map(u -> MoveUtils.toNativeMove(u.getMove()))
+                .collect(Collectors.toList());
+
+        int nativeScore;
         try {
-            assert(clearTableWrapper());
-            String fen = FENBuilder.createFen(board, false);
-            int nativeScore = searchNative(fen, nativePV, searchParameters.getDepth(), searchParameters.getAlpha(),
-                    searchParameters.getBeta(), nativeStats, opts.getStartTime(), opts.getStopTime());
-
-            // if the search completed then verify equality with the Java implementation.
-            assert (stop || searchesAreEqual(board, undos, searchParameters, opts, nativeScore, nativePV, nativeStats));
-
-            // set the object's stats to the native stats
-            searchStats.set(nativeStats);
-
-            // translate the native PV into the object's PV
-            pv.clear();
-            pv.addAll(MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove()));
-
-            return nativeScore;
+            nativeScore = searchNative(fen, nativePV, searchParameters.getDepth(), searchParameters.getAlpha(),
+                    searchParameters.getBeta(), nativeStats, opts.getStartTime(), opts.getStopTime(), post,
+                    nonReversibleFen, movePath);
         } catch (IllegalStateException e) {
             DrawBoard.drawBoard(board);
             LOGGER.error(e);
             throw e;
         }
+
+        // if the search completed then verify equality with the Java implementation.
+        assert (stop || searchesAreEqual(board, undos, searchParameters, opts, nativeScore, nativePV, nativeStats));
+
+        // set the object's stats to the native stats
+        searchStats.set(nativeStats);
+
+        // translate the native PV into the object's PV
+        pv.clear();
+        pv.addAll(MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove()));
+
+        return nativeScore;
     }
 
     // wrapper so we can clear hash tables when asserts are enabled
@@ -328,6 +353,8 @@ public class AlphaBetaSearch implements Search {
             if (!first && !inCheck && nullMoveOk && depth >= 3 && !ZugzwangDetector.isZugzwang(board)) {
 
                 Square nullEp = board.clearEPSquare();
+                int null50 = board.getFiftyCounter();
+                board.setFiftyCounter(0); // consider the null move irreversible
                 board.swapPlayer();
 
                 // set the reduced depth.  For now we are using a static R=3, except near the leaves.  It's important
@@ -345,6 +372,7 @@ public class AlphaBetaSearch implements Search {
                 if (nullEp != null) {
                     board.setEP(nullEp);
                 }
+                board.setFiftyCounter(null50);
 
                 if (stop) {
                     return 0;
@@ -491,8 +519,8 @@ public class AlphaBetaSearch implements Search {
 
         searchStats.qnodes++;
 
-        int standPat = Globals.getPredictor().map(predictor -> EvalPredictor.predict(predictor, board))
-                .orElse(evaluator.evaluateBoard(board));
+        int standPat = Globals.getNeuralNetwork().map(nn -> nn.eval(board))
+                .orElseGet(() -> evaluator.evaluateBoard(board));
         if (standPat > alpha) {
             if (standPat >= beta) {
                 return standPat;
@@ -584,7 +612,8 @@ public class AlphaBetaSearch implements Search {
     private native void initializeNativeSearch();
 
     private native int searchNative(String fen, List<Long> parentPV, int depth, int alpha, int beta,
-                                    SearchStats searchStats, long startTime, long stopTime);
+                                    SearchStats searchStats, long startTime, long stopTime, boolean post,
+                                    String nonReversibleFen, List<Long> movePath);
 
     private native void stopNative(boolean stop);
 

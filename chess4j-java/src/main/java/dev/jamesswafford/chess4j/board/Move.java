@@ -2,6 +2,7 @@ package dev.jamesswafford.chess4j.board;
 
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.pieces.Piece;
+import lombok.Getter;
 
 
 public class Move {
@@ -11,7 +12,10 @@ public class Move {
     private final Piece piece;
     private Piece captured;
     private Piece promotion;
-    private boolean castle,epCapture;
+    @Getter
+    private boolean castle;
+    @Getter
+    private boolean epCapture;
 
     public Move(Piece piece, Square from, Square to) {
         this.piece = piece;
@@ -65,14 +69,6 @@ public class Move {
 
     public Square to() {
         return to;
-    }
-
-    public boolean isEpCapture() {
-        return epCapture;
-    }
-
-    public boolean isCastle() {
-        return castle;
     }
 
     @Override

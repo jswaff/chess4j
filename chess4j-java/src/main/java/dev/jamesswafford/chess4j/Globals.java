@@ -1,10 +1,10 @@
 package dev.jamesswafford.chess4j;
 
-import ai.djl.inference.Predictor;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Undo;
 import dev.jamesswafford.chess4j.book.OpeningBook;
 import dev.jamesswafford.chess4j.eval.EvalWeights;
+import dev.jamesswafford.chess4j.nn.NeuralNetwork;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,7 +28,7 @@ public class Globals {
     private static OpeningBook openingBook;
 
     @Setter
-    private static Predictor<Board, Float> predictor;
+    private static NeuralNetwork neuralNetwork;
 
     @Getter
     @Setter
@@ -38,6 +38,5 @@ public class Globals {
         return Optional.ofNullable(openingBook);
     }
 
-    public static Optional<Predictor<Board, Float>> getPredictor() { return Optional.ofNullable(predictor); }
-
+    public static Optional<NeuralNetwork> getNeuralNetwork() { return Optional.ofNullable(neuralNetwork); }
 }

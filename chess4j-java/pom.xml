@@ -11,7 +11,7 @@
     <parent>
         <groupId>dev.jamesswafford.chess4j</groupId>
         <artifactId>chess4j-parent</artifactId>
-        <version>6.0</version>
+        <version>6.1</version>
     </parent>
 	
     <dependencies>
@@ -51,18 +51,6 @@
             <groupId>org.ejml</groupId>
             <artifactId>ejml-all</artifactId>
             <version>0.43.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ai.djl</groupId>
-            <artifactId>api</artifactId>
-            <version>0.30.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ai.djl.pytorch</groupId>
-            <artifactId>pytorch-engine</artifactId>
-            <version>0.30.0</version>
         </dependency>
 
         <!-- TODO: update to jupiter API -->
