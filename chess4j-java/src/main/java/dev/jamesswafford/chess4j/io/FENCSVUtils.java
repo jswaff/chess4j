@@ -35,7 +35,7 @@ public class FENCSVUtils {
             String line;
             while ((line = in.readLine()) != null) {
                 String[] parts = line.split(",");
-                String fen = parts[0]; //parts[parts.length-1];
+                String fen = parts[0];
                 FENRecord fenRecord = FENRecord.builder().fen(fen).build();
                 fenLabeler.label(fenRecord, depth);
                 StringBuilder sb = new StringBuilder(fenRecord.getFen()).append(",").append(fenRecord.getEval());
