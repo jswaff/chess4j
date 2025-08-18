@@ -131,7 +131,7 @@ public class PerfTest {
 
     private void testCase(String fen, int depth, long nodes) {
         Board board = new Board(fen);
-        long n = Perft.perft(board, depth);
+        long n = Perft.perft(board, depth, 4);
         assertEquals(nodes, n);
     }
 
