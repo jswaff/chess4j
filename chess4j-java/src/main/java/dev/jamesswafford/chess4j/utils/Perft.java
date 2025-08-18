@@ -75,13 +75,14 @@ public final class Perft {
 
     private Perft() { }
 
-    public static long perft(Board board, int depth) {
+    public static long perft(Board board, int depth, int maxProcessors) {
         if (depth <= 0) {
             return 1;
         }
 
-        int processors = Runtime.getRuntime().availableProcessors();
-        LOGGER.info("detected " + processors + " processors.");
+        int detectedProcessors = Runtime.getRuntime().availableProcessors();
+        int processors = Math.min(maxProcessors, detectedProcessors);
+        LOGGER.info("using {} of {} detected processors", processors, detectedProcessors);
         ExecutorService executor = Executors.newFixedThreadPool(processors);
         List<Future<Long>> futures = new ArrayList<>();
         List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
@@ -106,11 +107,11 @@ public final class Perft {
         return n;
     }
 
-    public static void executePerft(Board board, int depth) {
+    public static void executePerft(Board board, int depth, int maxProcessors) {
         DrawBoard.drawBoard(board);
 
         long start = System.currentTimeMillis();
-        long nodes = perft(board, depth);
+        long nodes = perft(board, depth, maxProcessors);
         long end = System.currentTimeMillis();
         if (end==start) end = start + 1; // HACK to avoid div 0
 

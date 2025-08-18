@@ -90,7 +90,7 @@ public class XBoardHandler {
         put("db", (String[] cmd) -> DrawBoard.drawBoard(Globals.getBoard()));
         put("eval", XBoardHandler.this::eval);
         put("moves", XBoardHandler.this::moves);
-        put("perft", (String[] cmd) -> Perft.executePerft(Globals.getBoard(), Integer.parseInt(cmd[1])));
+        put("perft", (String[] cmd) -> Perft.executePerft(Globals.getBoard(), Integer.parseInt(cmd[1]), Integer.parseInt(cmd[2])));
     }};
 
     public XBoardHandler() {
@@ -183,7 +183,7 @@ public class XBoardHandler {
      */
     private void memory(String[] cmd) {
         int maxMemoryMB = Integer.parseInt(cmd[1]);
-        LOGGER.debug("# received memory command, N=" + maxMemoryMB);
+        LOGGER.debug("# received memory command, N={}", maxMemoryMB);
         TTHolder.getInstance().resizeAllTables((long)maxMemoryMB * 1024 * 1024);
     }
 
@@ -239,7 +239,7 @@ public class XBoardHandler {
     }
 
     private static void noOp(String[] cmd) {
-        LOGGER.debug("# no op: " + cmd[0]);
+        LOGGER.debug("# no op: {}", cmd[0]);
     }
 
     /**
@@ -291,8 +291,8 @@ public class XBoardHandler {
                 leavePonderMode();
             }
         }
-        Globals.getBoard().undoMove(Globals.getGameUndos().remove(Globals.getGameUndos().size()-1));
-        Globals.getBoard().undoMove(Globals.getGameUndos().remove(Globals.getGameUndos().size()-1));
+        Globals.getBoard().undoMove(Globals.getGameUndos().removeLast());
+        Globals.getBoard().undoMove(Globals.getGameUndos().removeLast());
     }
 
     /**
@@ -322,7 +322,7 @@ public class XBoardHandler {
             gameResult = GameResult.ADJOURNED;
         }
 
-        LOGGER.info("# result: " + result + " - " + gameResult);
+        LOGGER.info("# result: {} - {}", result, gameResult);
 
         List<Move> gameMoves = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
@@ -331,7 +331,7 @@ public class XBoardHandler {
             sb.append(undo.getMove().toString()).append(" ");
         }
 
-        LOGGER.info("# game moves: " + sb);
+        LOGGER.info("# game moves: {}", sb);
 
         // don't call book learning unless we started from the initial position
         if (openingBook != null && !setBoard) {
@@ -406,7 +406,7 @@ public class XBoardHandler {
     private void undo(String[] cmd) {
         assert (forceMode);
         stopSearchThread();
-        Globals.getBoard().undoMove(Globals.getGameUndos().remove(Globals.getGameUndos().size()-1));
+        Globals.getBoard().undoMove(Globals.getGameUndos().removeLast());
         if (analysisMode) {
             thinkAndMakeMove(); // the "make move" part is skipped in analysis mode
         }
@@ -426,7 +426,7 @@ public class XBoardHandler {
         try {
             mv = mp.parseMove(strMove, Globals.getBoard());
         } catch (Exception e) {
-            LOGGER.info("Illegal move: " + strMove);
+            LOGGER.info("Illegal move: {}", strMove);
         }
         if (mv != null) {
             Globals.getGameUndos().add(Globals.getBoard().applyMove(mv));
@@ -477,7 +477,7 @@ public class XBoardHandler {
                     .ifPresentOrElse(bookMove -> {
                         Globals.getGameUndos().add(Globals.getBoard().applyMove(bookMove.getMove()));
                         LOGGER.debug("# book hit");
-                        LOGGER.info("move " + bookMove.getMove());
+                        LOGGER.info("move {}", bookMove.getMove());
                         endOfGameCheck();
                         playedBookMove.set(true);
                     }, () -> LOGGER.debug("# book miss {}", ++bookMisses));
@@ -502,7 +502,7 @@ public class XBoardHandler {
                                         analysisMode, forceMode, ponderMode, ponderMiss);
                                 if (!analysisMode && !forceMode && !ponderMode && !ponderMiss) {
                                     Globals.getGameUndos().add(Globals.getBoard().applyMove(pv.get(0)));
-                                    LOGGER.info("move " + pv.get(0));
+                                    LOGGER.info("move {}", pv.get(0));
                                     if (!endOfGameCheck() && ponderingEnabled && pv.size() > 1) {
                                         Move ponderMove = pv.get(1);
                                         Board ponderBoard = Globals.getBoard().deepCopy();
@@ -510,7 +510,7 @@ public class XBoardHandler {
                                         ponderUndos.add(ponderBoard.applyMove(ponderMove));
                                         // does the move we want to ponder end the game?
                                         if (getGameStatus(ponderBoard, ponderUndos) == GameStatus.INPROGRESS) {
-                                            LOGGER.info("# pondering move: " + ponderMove);
+                                            LOGGER.info("# pondering move: {}", ponderMove);
                                             enterPonderMode(ponderMove);
                                             startSearchThread(ponderBoard, ponderUndos);
                                         }
