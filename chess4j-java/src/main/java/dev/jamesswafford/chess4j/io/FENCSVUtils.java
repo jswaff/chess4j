@@ -15,9 +15,9 @@ public class FENCSVUtils {
      * Relabel a CSV file.
      *
      * The input file should have at least two fields.
-     * First field: the score (label) to be updated
-     * Last field: the FEN
-     * Any fields in between are preserved as-is.
+     * First field: the FEN
+     * Second field: the score (label) to be updated
+     * Any fields after the second field are preserved as-is.
      *
      * @param inCsvFile
      * @param outCsvFile
@@ -35,15 +35,14 @@ public class FENCSVUtils {
             String line;
             while ((line = in.readLine()) != null) {
                 String[] parts = line.split(",");
-                String fen = parts[parts.length-1];
+                String fen = parts[0];
                 FENRecord fenRecord = FENRecord.builder().fen(fen).build();
                 fenLabeler.label(fenRecord, depth);
-                StringBuilder sb = new StringBuilder();
-                sb.append(fenRecord.getEval());
-                for (int i=1;i<parts.length-1;i++) {
+                StringBuilder sb = new StringBuilder(fenRecord.getFen()).append(",").append(fenRecord.getEval());
+                for (int i=2;i<parts.length;i++) {
                     sb.append(",").append(parts[i]);
                 }
-                sb.append(",").append(fenRecord.getFen()).append("\n");
+                sb.append("\n");
                 out.write(sb.toString());
             }
         }
