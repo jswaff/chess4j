@@ -13,7 +13,7 @@ public class NeuralNetwork {
 
     private static final Logger LOGGER = LogManager.getLogger(NeuralNetwork.class);
 
-    public static final int NN_SIZE_L1 = 1536;
+    public static final int NN_SIZE_L1 = 384;
     public static final int NN_SIZE_L2 = 2;
 
     private static final int SCALE = 64;
