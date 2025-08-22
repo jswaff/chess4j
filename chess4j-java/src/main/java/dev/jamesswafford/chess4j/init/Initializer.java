@@ -1,9 +1,16 @@
 package dev.jamesswafford.chess4j.init;
 
+import dev.jamesswafford.chess4j.NativeEngineLib;
+import dev.jamesswafford.chess4j.board.Move;
+import dev.jamesswafford.chess4j.board.squares.Square;
+import dev.jamesswafford.chess4j.pieces.Pawn;
+import dev.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.lang.foreign.*;
+import java.lang.invoke.MethodHandle;
 
 public final class Initializer {
 
@@ -63,7 +70,7 @@ public final class Initializer {
             // which OS are we running on?
 
             String os = System.getProperty("os.name");
-            LOGGER.info("# Detected OS: " + os);
+            LOGGER.info("# Detected OS: {}", os);
 
             if ("Linux".equals(os)) {
                 System.out.println("# Loading Prophet native library.");
@@ -77,20 +84,18 @@ public final class Initializer {
                 LOGGER.info("# Prophet initialized.");
 
                 // load using FFM
-//                Linker linker = Linker.nativeLinker();
-//                SymbolLookup stdlib = linker.defaultLookup();
-//                try (Arena arena = Arena.ofConfined()) {
-//                    SymbolLookup lookup = SymbolLookup.libraryLookup(libFile.getPath(), arena);
-//
-//                    FunctionDescriptor get_rank_descriptor = FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_INT);
-//                    MethodHandle rankFunc = linker.downcallHandle(lookup.findOrThrow("get_rank"), get_rank_descriptor);
-//                    try {
-//                        LOGGER.info("rank 4: " + rankFunc.invoke(4));
-//                        LOGGER.info("rank 61: " + rankFunc.invoke(61));
-//                    } catch (Throwable e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                }
+                Linker linker = Linker.nativeLinker();
+                Arena arena = Arena.global();
+                SymbolLookup lookup = SymbolLookup.libraryLookup(libFile.getPath(), arena);
+
+                NativeEngineLib.mvvlva = linker.downcallHandle(lookup.findOrThrow("mvvlva"),
+                        FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_LONG));
+                Long testMove = MoveUtils.toNativeMove(new Move(Pawn.WHITE_PAWN, Square.E2, Square.E4));
+                try {
+                    LOGGER.info("mvv/lva e4: {}", NativeEngineLib.mvvlva.invoke(testMove));
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             nativeCodeInitialized = true;

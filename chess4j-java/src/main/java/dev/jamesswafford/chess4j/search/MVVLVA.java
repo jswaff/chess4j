@@ -1,5 +1,6 @@
 package dev.jamesswafford.chess4j.search;
 
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.init.Initializer;
 import dev.jamesswafford.chess4j.pieces.*;
@@ -82,7 +83,8 @@ public class MVVLVA {
     private static boolean mvvlvaAreEqual(int javaScore, Move mv) {
         if (Initializer.nativeCodeInitialized()) {
             try {
-                int nativeScore = mvvlvaNative(MoveUtils.toNativeMove(mv));
+                //int nativeScore = mvvlvaNative(MoveUtils.toNativeMove(mv));
+                int nativeScore = (int) NativeEngineLib.mvvlva.invoke(MoveUtils.toNativeMove(mv));
                 if (javaScore != nativeScore) {
                     LOGGER.error("mvvlva not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                             + ", mv: " + mv);
@@ -94,6 +96,8 @@ public class MVVLVA {
             } catch (IllegalStateException e) {
                 LOGGER.error(e);
                 throw e;
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
             }
         } else {
             return true;

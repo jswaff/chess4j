@@ -13,9 +13,8 @@
         <artifactId>chess4j-parent</artifactId>
         <version>6.2</version>
     </parent>
-	
-    <dependencies>
 
+    <dependencies>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
@@ -93,8 +92,6 @@
                             <version>1.18.38</version>
                         </path>
                     </annotationProcessorPaths>
-                    <source>24</source>
-                    <target>24</target>
                 </configuration>
                 <executions>
                     <execution>
