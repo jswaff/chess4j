@@ -78,12 +78,9 @@ public class MVVLVA {
         return 1000 + (capturedVal * 10) - moverVal;
     }
 
-    public static native int mvvlvaNative(long nativeMv);
-
     private static boolean mvvlvaAreEqual(int javaScore, Move mv) {
         if (Initializer.nativeCodeInitialized()) {
             try {
-                //int nativeScore = mvvlvaNative(MoveUtils.toNativeMove(mv));
                 int nativeScore = (int) NativeEngineLib.mvvlva.invoke(MoveUtils.toNativeMove(mv));
                 if (javaScore != nativeScore) {
                     LOGGER.error("mvvlva not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
