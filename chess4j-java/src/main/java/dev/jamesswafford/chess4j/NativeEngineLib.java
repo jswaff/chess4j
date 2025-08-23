@@ -47,15 +47,17 @@ public class NativeEngineLib {
         mh_mvvlva = linker.downcallHandle(lookup.findOrThrow("mvvlva"),
                 FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_LONG));
 
-        /*
-uint64_t get_main_hash_collisions();
-uint64_t get_main_hash_probes();
-uint64_t get_main_hash_hits();
-uint64_t get_pawn_hash_collisions();
-uint64_t get_pawn_hash_probes();
-uint64_t get_pawn_hash_hits();
-         */
+        mh_getMainHashCollisions = linker.downcallHandle(lookup.findOrThrow("get_main_hash_collisions"),
+                FunctionDescriptor.of(ValueLayout.JAVA_LONG));
         mh_getMainHashProbes = linker.downcallHandle(lookup.findOrThrow("get_main_hash_probes"),
+                FunctionDescriptor.of(ValueLayout.JAVA_LONG));
+        mh_getMainHashHits = linker.downcallHandle(lookup.findOrThrow("get_main_hash_hits"),
+                FunctionDescriptor.of(ValueLayout.JAVA_LONG));
+        mh_getPawnHashCollisions = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_collisions"),
+                FunctionDescriptor.of(ValueLayout.JAVA_LONG));
+        mh_getPawnHashProbes = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_probes"),
+                FunctionDescriptor.of(ValueLayout.JAVA_LONG));
+        mh_getPawnHashHits = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_hits"),
                 FunctionDescriptor.of(ValueLayout.JAVA_LONG));
     }
 
@@ -69,12 +71,57 @@ uint64_t get_pawn_hash_hits();
         }
     }
 
+    public static long getMainHashCollisions() {
+        Objects.requireNonNull(mh_getMainHashCollisions, "mh_getMainHashCollisions must not be null");
+        try {
+            return (long) mh_getMainHashCollisions.invoke();
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke getMainHashCollisions");
+        }
+    }
+
+    public static long getMainHashHits() {
+        Objects.requireNonNull(mh_getMainHashHits, "mh_getMainHashHits must not be null");
+        try {
+            return (long) mh_getMainHashHits.invoke();
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke getMainHashHits");
+        }
+    }
+
     public static long getMainHashProbes() {
         Objects.requireNonNull(mh_getMainHashProbes, "mh_getMainHashProbes must not be null");
         try {
             return (long) mh_getMainHashProbes.invoke();
         } catch (Throwable e) {
             throw new RuntimeException("Unable to invoke getMainHashProbes");
+        }
+    }
+
+    public static long getPawnHashCollisions() {
+        Objects.requireNonNull(mh_getPawnHashCollisions, "mh_getPawnHashCollisions must not be null");
+        try {
+            return (long) mh_getPawnHashCollisions.invoke();
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke getPawnHashCollisions");
+        }
+    }
+
+    public static long getPawnHashHits() {
+        Objects.requireNonNull(mh_getPawnHashHits, "mh_getPawnHashHits must not be null");
+        try {
+            return (long) mh_getPawnHashHits.invoke();
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke getPawnHashHits");
+        }
+    }
+
+    public static long getPawnHashProbes() {
+        Objects.requireNonNull(mh_getPawnHashProbes, "mh_getPawnHashProbes must not be null");
+        try {
+            return (long) mh_getPawnHashProbes.invoke();
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke getPawnHashProbes");
         }
     }
 

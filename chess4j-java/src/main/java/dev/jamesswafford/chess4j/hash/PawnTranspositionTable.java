@@ -1,5 +1,6 @@
 package dev.jamesswafford.chess4j.hash;
 
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.init.Initializer;
 import dev.jamesswafford.chess4j.io.FENBuilder;
@@ -47,7 +48,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     @Override
     public long getNumCollisions() {
         if (Initializer.nativeCodeInitialized()) {
-            return getNumCollisionsNative();
+            return NativeEngineLib.getPawnHashCollisions();
         }
         return numCollisions;
     }
@@ -55,7 +56,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     @Override
     public long getNumHits() {
         if (Initializer.nativeCodeInitialized()) {
-            return getNumHitsNative();
+            return NativeEngineLib.getPawnHashHits();
         }
         return numHits;
     }
@@ -63,7 +64,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     @Override
     public long getNumProbes() {
         if (Initializer.nativeCodeInitialized()) {
-            return getNumProbesNative();
+            return NativeEngineLib.getPawnHashProbes();
         }
         return numProbes;
     }
@@ -134,12 +135,6 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     }
 
     private native void clearNative();
-
-    private native long getNumCollisionsNative();
-
-    private native long getNumHitsNative();
-
-    private native long getNumProbesNative();
 
     private native void resizeNative(long sizeBytes);
 

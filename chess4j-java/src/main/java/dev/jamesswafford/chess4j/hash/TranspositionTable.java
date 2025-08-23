@@ -50,7 +50,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
     @Override
     public long getNumCollisions() {
         if (Initializer.nativeCodeInitialized()) {
-            return getNumCollisionsNative();
+            return NativeEngineLib.getMainHashCollisions();
         }
         return numCollisions;
     }
@@ -58,7 +58,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
     @Override
     public long getNumHits() {
         if (Initializer.nativeCodeInitialized()) {
-            return getNumHitsNative();
+            return NativeEngineLib.getMainHashHits();
         }
         return numHits;
     }
@@ -178,10 +178,6 @@ public class TranspositionTable extends AbstractTranspositionTable {
     }
 
     private native void clearNative();
-
-    private native long getNumCollisionsNative();
-
-    private native long getNumHitsNative();
 
     private native void resizeNative(long sizeBytes);
 
