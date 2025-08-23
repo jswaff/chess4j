@@ -1,6 +1,7 @@
 package dev.jamesswafford.chess4j.hash;
 
 import dev.jamesswafford.chess4j.Constants;
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.init.Initializer;
@@ -65,7 +66,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
     @Override
     public long getNumProbes() {
         if (Initializer.nativeCodeInitialized()) {
-            return getNumProbesNative();
+            return NativeEngineLib.getMainHashProbes();
         }
         return numProbes;
     }
@@ -181,8 +182,6 @@ public class TranspositionTable extends AbstractTranspositionTable {
     private native long getNumCollisionsNative();
 
     private native long getNumHitsNative();
-
-    private native long getNumProbesNative();
 
     private native void resizeNative(long sizeBytes);
 

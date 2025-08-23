@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.lang.foreign.*;
 
 public final class Initializer {
 
@@ -77,13 +76,7 @@ public final class Initializer {
                     throw new IllegalStateException("Could not initialize p4!");
                 }
 
-                // load using FFM
-                Linker linker = Linker.nativeLinker();
-                Arena arena = Arena.global();
-                SymbolLookup lookup = SymbolLookup.libraryLookup(libFile.getPath(), arena);
-
-                NativeEngineLib.mvvlva = linker.downcallHandle(lookup.findOrThrow("mvvlva"),
-                        FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_LONG));
+                NativeEngineLib.initializeFFM(libFile);
 
                 LOGGER.info("# Prophet initialized.");
             }
@@ -97,4 +90,5 @@ public final class Initializer {
     public static boolean nativeCodeInitialized() {
         return nativeCodeInitialized;
     }
+
 }

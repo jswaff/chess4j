@@ -79,22 +79,13 @@ public class MVVLVA {
 
     private static boolean mvvlvaAreEqual(int javaScore, Move mv) {
         if (Initializer.nativeCodeInitialized()) {
-            try {
-                int nativeScore = (int) NativeEngineLib.mvvlva.invoke(NativeEngineLib.toNativeMove(mv));
-                if (javaScore != nativeScore) {
-                    LOGGER.error("mvvlva not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
-                            + ", mv: " + mv);
-                    LOGGER.error("moving piece: " + mv.piece() + "; captured: " + mv.captured()
-                            + "; ep?: " + mv.isEpCapture());
-                    return false;
-                }
-                return true;
-            } catch (IllegalStateException e) {
-                LOGGER.error(e);
-                throw e;
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
+            int nativeScore = NativeEngineLib.mvvlva(mv);
+            if (javaScore != nativeScore) {
+                LOGGER.error("mvvlva not equal!  javaScore: {}, nativeScore: {}, mv: {}", javaScore, nativeScore, mv);
+                LOGGER.error("moving piece: {}; captured: {}; ep?: {}", mv.piece(), mv.captured(), mv.isEpCapture());
+                return false;
             }
+            return true;
         } else {
             return true;
         }

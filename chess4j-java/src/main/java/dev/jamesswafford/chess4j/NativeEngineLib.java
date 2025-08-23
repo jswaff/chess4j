@@ -5,9 +5,12 @@ import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.pieces.*;
 
+import java.io.File;
+import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static dev.jamesswafford.chess4j.pieces.Bishop.BLACK_BISHOP;
 import static dev.jamesswafford.chess4j.pieces.Bishop.WHITE_BISHOP;
@@ -26,8 +29,54 @@ public class NativeEngineLib {
 
     private NativeEngineLib() {}
 
-    public static MethodHandle mvvlva;
+    private static MethodHandle mh_mvvlva;
 
+    // hash related methods
+    private static MethodHandle mh_getMainHashCollisions;
+    private static MethodHandle mh_getMainHashHits;
+    private static MethodHandle mh_getMainHashProbes;
+    private static MethodHandle mh_getPawnHashCollisions;
+    private static MethodHandle mh_getPawnHashHits;
+    private static MethodHandle mh_getPawnHashProbes;
+
+    public static void initializeFFM(File libFile) {
+        Linker linker = Linker.nativeLinker();
+        Arena arena = Arena.global();
+        SymbolLookup lookup = SymbolLookup.libraryLookup(libFile.getPath(), arena);
+
+        mh_mvvlva = linker.downcallHandle(lookup.findOrThrow("mvvlva"),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_LONG));
+
+        /*
+uint64_t get_main_hash_collisions();
+uint64_t get_main_hash_probes();
+uint64_t get_main_hash_hits();
+uint64_t get_pawn_hash_collisions();
+uint64_t get_pawn_hash_probes();
+uint64_t get_pawn_hash_hits();
+         */
+        mh_getMainHashProbes = linker.downcallHandle(lookup.findOrThrow("get_main_hash_probes"),
+                FunctionDescriptor.of(ValueLayout.JAVA_LONG));
+    }
+
+    public static int mvvlva(Move move) {
+        Objects.requireNonNull(mh_mvvlva, "mh_mvvlva must not be null");
+        long nativeMove = NativeEngineLib.toNativeMove(move);
+        try {
+            return (int) mh_mvvlva.invoke(nativeMove);
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke mvvlva");
+        }
+    }
+
+    public static long getMainHashProbes() {
+        Objects.requireNonNull(mh_getMainHashProbes, "mh_getMainHashProbes must not be null");
+        try {
+            return (long) mh_getMainHashProbes.invoke();
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke getMainHashProbes");
+        }
+    }
 
     public static Move fromNativeMove(Long nativeMove, Color ptm) {
         Square fromSq = Square.valueOf((int)(nativeMove & 0x3F));
