@@ -1,8 +1,8 @@
 package dev.jamesswafford.chess4j.io;
 
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Color;
 import dev.jamesswafford.chess4j.board.Move;
-import dev.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,7 +22,7 @@ public class PrintLine {
 
     public static void printNativeLine(int depth, List<Long> nativeMoves, boolean whiteToMove, int score,
                                        long elapsedMS, long nodes) {
-        List<Move> convertedMoves = MoveUtils.fromNativeLine(nativeMoves, whiteToMove ? Color.WHITE : Color.BLACK);
+        List<Move> convertedMoves = NativeEngineLib.fromNativeLine(nativeMoves, whiteToMove ? Color.WHITE : Color.BLACK);
         printLine(false, convertedMoves, depth, score, elapsedMS, nodes);
     }
 

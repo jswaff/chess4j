@@ -4,7 +4,6 @@ import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.init.Initializer;
 import dev.jamesswafford.chess4j.pieces.*;
-import dev.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -81,7 +80,7 @@ public class MVVLVA {
     private static boolean mvvlvaAreEqual(int javaScore, Move mv) {
         if (Initializer.nativeCodeInitialized()) {
             try {
-                int nativeScore = (int) NativeEngineLib.mvvlva.invoke(MoveUtils.toNativeMove(mv));
+                int nativeScore = (int) NativeEngineLib.mvvlva.invoke(NativeEngineLib.toNativeMove(mv));
                 if (javaScore != nativeScore) {
                     LOGGER.error("mvvlva not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                             + ", mv: " + mv);

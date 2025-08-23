@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static dev.jamesswafford.chess4j.NativeEngineLib.fromNativeMove;
 import static dev.jamesswafford.chess4j.board.squares.File.FILE_A;
 import static dev.jamesswafford.chess4j.board.squares.File.FILE_H;
 import static dev.jamesswafford.chess4j.board.squares.Rank.*;
@@ -30,7 +31,6 @@ import static dev.jamesswafford.chess4j.pieces.Queen.BLACK_QUEEN;
 import static dev.jamesswafford.chess4j.pieces.Queen.WHITE_QUEEN;
 import static dev.jamesswafford.chess4j.pieces.Rook.BLACK_ROOK;
 import static dev.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
-import static dev.jamesswafford.chess4j.utils.MoveUtils.fromNativeMove;
 import static java.util.stream.Collectors.toList;
 
 public final class MagicBitboardMoveGenerator implements MoveGenerator {

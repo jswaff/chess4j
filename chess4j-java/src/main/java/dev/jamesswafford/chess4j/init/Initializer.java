@@ -1,16 +1,11 @@
 package dev.jamesswafford.chess4j.init;
 
 import dev.jamesswafford.chess4j.NativeEngineLib;
-import dev.jamesswafford.chess4j.board.Move;
-import dev.jamesswafford.chess4j.board.squares.Square;
-import dev.jamesswafford.chess4j.pieces.Pawn;
-import dev.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.lang.foreign.*;
-import java.lang.invoke.MethodHandle;
 
 public final class Initializer {
 
@@ -81,7 +76,6 @@ public final class Initializer {
                     attemptToUseNative = false;
                     throw new IllegalStateException("Could not initialize p4!");
                 }
-                LOGGER.info("# Prophet initialized.");
 
                 // load using FFM
                 Linker linker = Linker.nativeLinker();
@@ -90,12 +84,8 @@ public final class Initializer {
 
                 NativeEngineLib.mvvlva = linker.downcallHandle(lookup.findOrThrow("mvvlva"),
                         FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_LONG));
-                Long testMove = MoveUtils.toNativeMove(new Move(Pawn.WHITE_PAWN, Square.E2, Square.E4));
-                try {
-                    LOGGER.info("mvv/lva e4: {}", NativeEngineLib.mvvlva.invoke(testMove));
-                } catch (Throwable e) {
-                    throw new RuntimeException(e);
-                }
+
+                LOGGER.info("# Prophet initialized.");
             }
 
             nativeCodeInitialized = true;

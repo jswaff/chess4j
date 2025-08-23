@@ -1,6 +1,7 @@
 package dev.jamesswafford.chess4j.search;
 
 import dev.jamesswafford.chess4j.Constants;
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.*;
 import dev.jamesswafford.chess4j.board.squares.Direction;
 import dev.jamesswafford.chess4j.board.squares.Square;
@@ -10,7 +11,6 @@ import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.movegen.AttackDetector;
 import dev.jamesswafford.chess4j.movegen.Magic;
 import dev.jamesswafford.chess4j.pieces.*;
-import dev.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -185,7 +185,7 @@ public class SEE {
         if (Initializer.nativeCodeInitialized()) {
             try {
                 String fen = FENBuilder.createFen(board, false);
-                int nativeScore = seeNative(fen, MoveUtils.toNativeMove(mv));
+                int nativeScore = seeNative(fen, NativeEngineLib.toNativeMove(mv));
                 if (javaScore != nativeScore) {
                     LOGGER.error("sees not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
                             + ", mv: " + mv);

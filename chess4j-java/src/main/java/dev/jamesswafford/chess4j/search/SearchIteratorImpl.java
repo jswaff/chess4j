@@ -1,6 +1,7 @@
 package dev.jamesswafford.chess4j.search;
 
 import dev.jamesswafford.chess4j.Constants;
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.board.Undo;
@@ -256,7 +257,7 @@ public class SearchIteratorImpl implements SearchIterator {
             LOGGER.debug("# starting native iterator maxDepth: {}", maxDepth);
             String fen = FENBuilder.createFen(board, false);
             iterateNative(fen, maxDepth, nativePV);
-            return MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove());
+            return NativeEngineLib.fromNativeLine(nativePV, board.getPlayerToMove());
         } catch (IllegalStateException e) {
             LOGGER.error(e);
             throw e;

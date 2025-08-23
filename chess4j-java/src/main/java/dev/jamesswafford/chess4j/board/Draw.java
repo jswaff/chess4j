@@ -1,10 +1,10 @@
 package dev.jamesswafford.chess4j.board;
 
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.init.Initializer;
 import dev.jamesswafford.chess4j.io.DrawBoard;
 import dev.jamesswafford.chess4j.io.FENBuilder;
-import dev.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -131,7 +131,7 @@ public class Draw {
             }
             String nonReversibleFen = FENBuilder.createFen(copyBoard, true);
             List<Long> movePath = undos.stream()
-                    .map(u -> MoveUtils.toNativeMove(u.getMove()))
+                    .map(u -> NativeEngineLib.toNativeMove(u.getMove()))
                     .collect(Collectors.toList());
 
             try {

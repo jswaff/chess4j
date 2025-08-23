@@ -1,6 +1,7 @@
 package dev.jamesswafford.chess4j.search;
 
 import dev.jamesswafford.chess4j.Globals;
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.*;
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.eval.Eval;
@@ -14,7 +15,6 @@ import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
 import dev.jamesswafford.chess4j.utils.BoardUtils;
-import dev.jamesswafford.chess4j.utils.MoveUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
@@ -169,7 +169,7 @@ public class AlphaBetaSearch implements Search {
 
         // set up the move path since the game began
         List<Long> movePath = undos.stream()
-                .map(u -> MoveUtils.toNativeMove(u.getMove()))
+                .map(u -> NativeEngineLib.toNativeMove(u.getMove()))
                 .collect(Collectors.toList());
 
         int nativeScore;
@@ -191,7 +191,7 @@ public class AlphaBetaSearch implements Search {
 
         // translate the native PV into the object's PV
         pv.clear();
-        pv.addAll(MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove()));
+        pv.addAll(NativeEngineLib.fromNativeLine(nativePV, board.getPlayerToMove()));
 
         return nativeScore;
     }
@@ -275,7 +275,7 @@ public class AlphaBetaSearch implements Search {
             }
 
             // compare the PVs.
-            if (!pv.equals(MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove()))) {
+            if (!pv.equals(NativeEngineLib.fromNativeLine(nativePV, board.getPlayerToMove()))) {
                 LOGGER.error("pvs are not equal!"
                         + ", java stats: " + searchStats + ", native stats: " + nativeStats
                         + ", params: " + searchParameters);
