@@ -31,8 +31,6 @@ public class NativeEngineLib {
 
     private NativeEngineLib() {}
 
-    private static Arena arena;
-
     private static MethodHandle mh_eval;
     private static MethodHandle mh_mvvlva;
 
@@ -46,7 +44,8 @@ public class NativeEngineLib {
 
     public static void initializeFFM(File libFile) {
         Linker linker = Linker.nativeLinker();
-        arena = Arena.global();
+
+        Arena arena = Arena.global();
         SymbolLookup lookup = SymbolLookup.libraryLookup(libFile.getPath(), arena);
 
         mh_eval = linker.downcallHandle(lookup.findOrThrow("eval_ffm"),
@@ -72,8 +71,9 @@ public class NativeEngineLib {
     public static int eval(Board board, boolean materialOnly) {
         Objects.requireNonNull(mh_eval, "mh_eval must not be null");
         String fen = FENBuilder.createFen(board, false);
-        MemorySegment cFen = arena.allocateFrom(fen); // TODO: this may be leaky
-        try {
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment cFen = arena.allocateFrom(fen);
             return (int) mh_eval.invoke(cFen, materialOnly);
         } catch (Throwable e) {
             throw new RuntimeException("Unable to invoke eval; msg: " + e.getMessage());
