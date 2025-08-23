@@ -125,6 +125,7 @@ public class NativeEngineLib {
         }
     }
 
+    // TODO: make private
     public static Move fromNativeMove(Long nativeMove, Color ptm) {
         Square fromSq = Square.valueOf((int)(nativeMove & 0x3F));
         Square toSq = Square.valueOf((int)((nativeMove >> 6) & 0x3F));
@@ -141,6 +142,7 @@ public class NativeEngineLib {
         return converted;
     }
 
+    // TODO: make private
     public static List<Move> fromNativeLine(List<Long> nativeMoves, Color ptm) {
         List<Move> moves = new ArrayList<>();
 
@@ -153,6 +155,7 @@ public class NativeEngineLib {
         return moves;
     }
 
+    // TODO: make private
     public static Long toNativeMove(Move mv) {
         if (mv==null) return 0L;
 
