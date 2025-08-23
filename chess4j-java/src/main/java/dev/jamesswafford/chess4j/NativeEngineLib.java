@@ -1,8 +1,10 @@
 package dev.jamesswafford.chess4j;
 
+import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Color;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.board.squares.Square;
+import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.pieces.*;
 
 import java.io.File;
@@ -29,6 +31,9 @@ public class NativeEngineLib {
 
     private NativeEngineLib() {}
 
+    private static Arena arena;
+
+    private static MethodHandle mh_eval;
     private static MethodHandle mh_mvvlva;
 
     // hash related methods
@@ -41,8 +46,11 @@ public class NativeEngineLib {
 
     public static void initializeFFM(File libFile) {
         Linker linker = Linker.nativeLinker();
-        Arena arena = Arena.global();
+        arena = Arena.global();
         SymbolLookup lookup = SymbolLookup.libraryLookup(libFile.getPath(), arena);
+
+        mh_eval = linker.downcallHandle(lookup.findOrThrow("eval_ffm"),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_BOOLEAN));
 
         mh_mvvlva = linker.downcallHandle(lookup.findOrThrow("mvvlva"),
                 FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_LONG));
@@ -59,6 +67,17 @@ public class NativeEngineLib {
                 FunctionDescriptor.of(ValueLayout.JAVA_LONG));
         mh_getPawnHashHits = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_hits"),
                 FunctionDescriptor.of(ValueLayout.JAVA_LONG));
+    }
+
+    public static int eval(Board board, boolean materialOnly) {
+        Objects.requireNonNull(mh_eval, "mh_eval must not be null");
+        String fen = FENBuilder.createFen(board, false);
+        MemorySegment cFen = arena.allocateFrom(fen); // TODO: this may be leaky
+        try {
+            return (int) mh_eval.invoke(cFen, materialOnly);
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke eval; msg: " + e.getMessage());
+        }
     }
 
     public static int mvvlva(Move move) {
