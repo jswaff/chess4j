@@ -161,7 +161,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
     @Override
     protected void resizeTable(long sizeBytes) {
         if (Initializer.nativeCodeInitialized()) {
-            resizeNative(sizeBytes);
+            NativeEngineLib.resizeMainHashTable(sizeBytes);
         } else {
             createTable(sizeBytes);
         }
@@ -178,8 +178,6 @@ public class TranspositionTable extends AbstractTranspositionTable {
     }
 
     private native void clearNative();
-
-    private native void resizeNative(long sizeBytes);
 
     private native long probeNative(String fen);
 

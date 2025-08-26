@@ -38,9 +38,12 @@ public class NativeEngineLib {
     private static MethodHandle mh_getMainHashCollisions;
     private static MethodHandle mh_getMainHashHits;
     private static MethodHandle mh_getMainHashProbes;
+    private static MethodHandle mh_resizeMainHash;
+
     private static MethodHandle mh_getPawnHashCollisions;
     private static MethodHandle mh_getPawnHashHits;
     private static MethodHandle mh_getPawnHashProbes;
+    private static MethodHandle mh_resizePawnHash;
 
     public static void initializeFFM(File libFile) {
         Linker linker = Linker.nativeLinker();
@@ -60,11 +63,16 @@ public class NativeEngineLib {
                 FunctionDescriptor.of(ValueLayout.JAVA_LONG));
         mh_getMainHashHits = linker.downcallHandle(lookup.findOrThrow("get_main_hash_hits"),
                 FunctionDescriptor.of(ValueLayout.JAVA_LONG));
+        mh_resizeMainHash = linker.downcallHandle(lookup.findOrThrow("resize_main_hash_table"),
+                FunctionDescriptor.of(ValueLayout.JAVA_LONG));
+
         mh_getPawnHashCollisions = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_collisions"),
                 FunctionDescriptor.of(ValueLayout.JAVA_LONG));
         mh_getPawnHashProbes = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_probes"),
                 FunctionDescriptor.of(ValueLayout.JAVA_LONG));
         mh_getPawnHashHits = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_hits"),
+                FunctionDescriptor.of(ValueLayout.JAVA_LONG));
+        mh_resizePawnHash = linker.downcallHandle(lookup.findOrThrow("resize_pawn_hash_table"),
                 FunctionDescriptor.of(ValueLayout.JAVA_LONG));
     }
 
@@ -117,6 +125,15 @@ public class NativeEngineLib {
         }
     }
 
+    public static void resizeMainHashTable(long maxBytes) {
+        Objects.requireNonNull(mh_resizeMainHash, "mh_resizeMainHash must not be null");
+        try {
+            mh_resizeMainHash.invoke(maxBytes);
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke resizeMainHashTable");
+        }
+    }
+
     public static long getPawnHashCollisions() {
         Objects.requireNonNull(mh_getPawnHashCollisions, "mh_getPawnHashCollisions must not be null");
         try {
@@ -141,6 +158,15 @@ public class NativeEngineLib {
             return (long) mh_getPawnHashProbes.invoke();
         } catch (Throwable e) {
             throw new RuntimeException("Unable to invoke getPawnHashProbes");
+        }
+    }
+
+    public static void resizePawnHashTable(long maxBytes) {
+        Objects.requireNonNull(mh_resizePawnHash, "mh_resizePawnHash must not be null");
+        try {
+            mh_resizePawnHash.invoke(maxBytes);
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke resizePawnHashTable");
         }
     }
 
