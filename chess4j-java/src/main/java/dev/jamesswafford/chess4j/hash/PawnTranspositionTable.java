@@ -41,7 +41,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         clearStats();
         Arrays.fill(table, null);
         if (Initializer.nativeCodeInitialized()) {
-            clearNative();
+            NativeEngineLib.clearPawnHashTable();
         }
     }
 
@@ -133,8 +133,6 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     public int sizeOfEntry() {
         return PawnTranspositionTableEntry.sizeOf();
     }
-
-    private native void clearNative();
 
     private native long probeNative(String fen);
 

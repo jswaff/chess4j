@@ -43,7 +43,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
         clearStats();
         Arrays.fill(table, null);
         if (Initializer.nativeCodeInitialized()) {
-            clearNative();
+            NativeEngineLib.clearMainHashTable();
         }
     }
 
@@ -176,8 +176,6 @@ public class TranspositionTable extends AbstractTranspositionTable {
     public int sizeOfEntry() {
         return TranspositionTableEntry.sizeOf();
     }
-
-    private native void clearNative();
 
     private native long probeNative(String fen);
 
