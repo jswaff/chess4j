@@ -62,13 +62,13 @@ public class NativeEngineLib {
         Arena arena = Arena.global();
         SymbolLookup lookup = SymbolLookup.libraryLookup(libFile.getPath(), arena);
 
-        mh_eval = linker.downcallHandle(lookup.findOrThrow("eval_ffm"),
+        mh_eval = linker.downcallHandle(lookup.findOrThrow("eval_from_fen"),
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_BOOLEAN));
 
         mh_mvvlva = linker.downcallHandle(lookup.findOrThrow("mvvlva"),
                 FunctionDescriptor.of(JAVA_INT, JAVA_LONG));
 
-        mh_movegen = linker.downcallHandle(lookup.findOrThrow("generate_moves"),
+        mh_movegen = linker.downcallHandle(lookup.findOrThrow("generate_moves_from_fen"),
                 FunctionDescriptor.ofVoid(ADDRESS, ADDRESS, ADDRESS, JAVA_BOOLEAN, JAVA_BOOLEAN));
 
         mh_clearMainHashTable = linker.downcallHandle(lookup.findOrThrow("clear_main_hash_table"),
