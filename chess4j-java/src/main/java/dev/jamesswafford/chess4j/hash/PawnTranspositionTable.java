@@ -3,7 +3,6 @@ package dev.jamesswafford.chess4j.hash;
 import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.init.Initializer;
-import dev.jamesswafford.chess4j.io.FENBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -97,12 +96,12 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     }
 
     public void store(Board board, int mgscore, int egscore) {
-        PawnTranspositionTableEntry entry = new PawnTranspositionTableEntry(board.getPawnKey(), mgscore, egscore);
+        long key = board.getPawnKey();
+        PawnTranspositionTableEntry entry = new PawnTranspositionTableEntry(key, mgscore, egscore);
         if (Initializer.nativeCodeInitialized()) {
-            String fen = FENBuilder.createFen(board, false);
-            storeNative(fen, entry.getVal());
+            NativeEngineLib.storePawnHashTable(board, entry);
         } else {
-            table[getTableIndex(board.getPawnKey())] = entry;
+            table[getTableIndex(key)] = entry;
         }
     }
 
@@ -131,7 +130,5 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     public int sizeOfEntry() {
         return PawnTranspositionTableEntry.sizeOf();
     }
-
-    private native void storeNative(String fen, long val);
 
 }

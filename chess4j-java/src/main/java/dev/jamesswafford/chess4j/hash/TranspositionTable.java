@@ -5,7 +5,6 @@ import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.init.Initializer;
-import dev.jamesswafford.chess4j.io.FENBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -113,13 +112,12 @@ public class TranspositionTable extends AbstractTranspositionTable {
     }
 
     public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move) {
+        long key = board.getZobristKey();
+        TranspositionTableEntry entry = buildHashTableEntry(key, entryType, score, depth, move);
         if (Initializer.nativeCodeInitialized()) {
-            TranspositionTableEntry entry = buildHashTableEntry(board.getZobristKey(), entryType, score, depth, move);
-            String fen = FENBuilder.createFen(board, false);
-            storeNative(fen, entry.getVal());
+            NativeEngineLib.storeMainHashTable(board, entry);
         } else {
-            long key = board.getZobristKey();
-            table[getTableIndex(key)] = buildHashTableEntry(key, entryType, score, depth, move);
+            table[getTableIndex(key)] = entry;
         }
     }
 
@@ -174,7 +172,5 @@ public class TranspositionTable extends AbstractTranspositionTable {
     public int sizeOfEntry() {
         return TranspositionTableEntry.sizeOf();
     }
-
-    private native void storeNative(String fen, long val);
 
 }

@@ -40,6 +40,7 @@ public class NativeEngineLib {
     private static MethodHandle mh_clearMainHashTable;
     private static MethodHandle mh_resizeMainHashTable;
     private static MethodHandle mh_probeMainHashTable;
+    private static MethodHandle mh_storeMainHashTable;
     private static MethodHandle mh_getMainHashCollisions;
     private static MethodHandle mh_getMainHashHits;
     private static MethodHandle mh_getMainHashProbes;
@@ -47,6 +48,7 @@ public class NativeEngineLib {
     private static MethodHandle mh_clearPawnHashTable;
     private static MethodHandle mh_resizePawnHashTable;
     private static MethodHandle mh_probePawnHashTable;
+    private static MethodHandle mh_storePawnHashTable;
     private static MethodHandle mh_getPawnHashCollisions;
     private static MethodHandle mh_getPawnHashHits;
     private static MethodHandle mh_getPawnHashProbes;
@@ -69,6 +71,8 @@ public class NativeEngineLib {
                 FunctionDescriptor.ofVoid(ValueLayout.JAVA_LONG));
         mh_probeMainHashTable = linker.downcallHandle(lookup.findOrThrow("probe_main_hash_table"),
                 FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS));
+        mh_storeMainHashTable = linker.downcallHandle(lookup.findOrThrow("store_main_hash_table"),
+                FunctionDescriptor.ofVoid(ValueLayout.ADDRESS, ValueLayout.JAVA_LONG));
         mh_getMainHashCollisions = linker.downcallHandle(lookup.findOrThrow("get_main_hash_collisions"),
                 FunctionDescriptor.of(ValueLayout.JAVA_LONG));
         mh_getMainHashProbes = linker.downcallHandle(lookup.findOrThrow("get_main_hash_probes"),
@@ -82,6 +86,8 @@ public class NativeEngineLib {
                 FunctionDescriptor.ofVoid(ValueLayout.JAVA_LONG));
         mh_probePawnHashTable = linker.downcallHandle(lookup.findOrThrow("probe_pawn_hash_table"),
                 FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS));
+        mh_storePawnHashTable = linker.downcallHandle(lookup.findOrThrow("store_pawn_hash_table"),
+                FunctionDescriptor.ofVoid(ValueLayout.ADDRESS, ValueLayout.JAVA_LONG));
         mh_getPawnHashCollisions = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_collisions"),
                 FunctionDescriptor.of(ValueLayout.JAVA_LONG));
         mh_getPawnHashProbes = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_probes"),
@@ -143,6 +149,18 @@ public class NativeEngineLib {
         }
     }
 
+    public static void storeMainHashTable(Board board, TranspositionTableEntry hashEntry) {
+        Objects.requireNonNull(mh_storeMainHashTable, "mh_storeMainHashTable must not be null");
+        String fen = FENBuilder.createFen(board, false);
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment cFen = arena.allocateFrom(fen);
+            mh_storeMainHashTable.invoke(cFen, hashEntry.getVal());
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke storeMainHashTable; msg: " + e.getMessage());
+        }
+    }
+
     public static long getMainHashCollisions() {
         Objects.requireNonNull(mh_getMainHashCollisions, "mh_getMainHashCollisions must not be null");
         try {
@@ -198,6 +216,18 @@ public class NativeEngineLib {
             return val==0 ? null : new PawnTranspositionTableEntry(board.getPawnKey(), val);
         } catch (Throwable e) {
             throw new RuntimeException("Unable to invoke probePawnHashTable; msg: " + e.getMessage());
+        }
+    }
+
+    public static void storePawnHashTable(Board board, PawnTranspositionTableEntry hashEntry) {
+        Objects.requireNonNull(mh_storePawnHashTable, "mh_storePawnHashTable must not be null");
+        String fen = FENBuilder.createFen(board, false);
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment cFen = arena.allocateFrom(fen);
+            mh_storePawnHashTable.invoke(cFen, hashEntry.getVal());
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke storePawnHashTable; msg: " + e.getMessage());
         }
     }
 
