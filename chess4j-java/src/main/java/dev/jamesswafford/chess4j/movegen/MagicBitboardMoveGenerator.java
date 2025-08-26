@@ -1,10 +1,10 @@
 package dev.jamesswafford.chess4j.movegen;
 
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.*;
 import dev.jamesswafford.chess4j.board.squares.File;
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.init.Initializer;
-import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.pieces.Pawn;
 import dev.jamesswafford.chess4j.pieces.Piece;
 import dev.jamesswafford.chess4j.utils.BoardUtils;
@@ -12,9 +12,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
-import static dev.jamesswafford.chess4j.NativeEngineLib.fromNativeMove;
 import static dev.jamesswafford.chess4j.board.squares.File.FILE_A;
 import static dev.jamesswafford.chess4j.board.squares.File.FILE_H;
 import static dev.jamesswafford.chess4j.board.squares.Rank.*;
@@ -218,29 +218,46 @@ public final class MagicBitboardMoveGenerator implements MoveGenerator {
 
     private static boolean moveGensAreEqual(List<Move> javaMoves, Board board, boolean caps, boolean noncaps) {
         if (Initializer.nativeCodeInitialized()) {
-            String fen = FENBuilder.createFen(board, false);
-            List<Long> nativeMoves = new ArrayList<>();
+//            String fen = FENBuilder.createFen(board, false);
+//            List<Long> nativeMoves = new ArrayList<>();
             try {
-                int nMoves = genPseudoLegalMovesNative(fen, nativeMoves, caps, noncaps);
-                assert (nMoves == nativeMoves.size());
+//                int nMoves = genPseudoLegalMovesNative(fen, nativeMoves, caps, noncaps);
+//                assert(nMoves == nativeMoves.size());
+
+                List<Move> ffmMoves = NativeEngineLib.generatePseudoLegalMoves(board, caps, noncaps);
+                if (!new HashSet<>(ffmMoves).equals(new HashSet<>(javaMoves))) return false;
+                javaMoves.clear();
+                javaMoves.addAll(ffmMoves);
 
                 // sort java moves to match order of native moves
-                List<Move> sortedJavaMoves = new ArrayList<>();
-                for (Long nativeMoveLong : nativeMoves) {
-                    Move nativeMove = fromNativeMove(nativeMoveLong, board.getPlayerToMove());
-                    boolean foundMatch = false;
-                    for (Move javaMove : javaMoves) {
-                        if (javaMove.equals(nativeMove)) {
-                            sortedJavaMoves.add(javaMove);
-                            foundMatch = true;
-                            break;
-                        }
-                    }
-                    assert(foundMatch);
-                }
-                assert (sortedJavaMoves.size() == javaMoves.size());
-                javaMoves.clear();
-                javaMoves.addAll(sortedJavaMoves);
+//                List<Move> sortedJavaMoves = new ArrayList<>();
+//                for (Move ffmMove : ffmMoves) {
+//                    boolean foundMatch = false;
+//                    for (Move javaMove : javaMoves) {
+//                        if (javaMove.equals(ffmMove)) {
+//                            sortedJavaMoves.add(javaMove);
+//                            foundMatch = true;
+//                            break;
+//                        }
+//                    }
+//                    assert(foundMatch);
+//                }
+
+//                for (Long nativeMoveLong : nativeMoves) {
+//                    Move nativeMove = fromNativeMove(nativeMoveLong, board.getPlayerToMove());
+//                    boolean foundMatch = false;
+//                    for (Move javaMove : javaMoves) {
+//                        if (javaMove.equals(nativeMove)) {
+//                            sortedJavaMoves.add(javaMove);
+//                            foundMatch = true;
+//                            break;
+//                        }
+//                    }
+//                    assert(foundMatch);
+//                }
+//                assert (sortedJavaMoves.size() == javaMoves.size());
+//                javaMoves.clear();
+//                javaMoves.addAll(sortedJavaMoves);
 
                 return true;
             } catch (IllegalStateException e) {

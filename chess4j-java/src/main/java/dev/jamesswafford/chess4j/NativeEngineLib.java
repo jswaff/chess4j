@@ -29,12 +29,15 @@ import static dev.jamesswafford.chess4j.pieces.Queen.WHITE_QUEEN;
 import static dev.jamesswafford.chess4j.pieces.Rook.BLACK_ROOK;
 import static dev.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
 
+import static java.lang.foreign.ValueLayout.*;
+
 public class NativeEngineLib {
 
     private NativeEngineLib() {}
 
     private static MethodHandle mh_eval;
     private static MethodHandle mh_mvvlva;
+    private static MethodHandle mh_movegen;
 
     // hash related methods
     private static MethodHandle mh_clearMainHashTable;
@@ -60,40 +63,43 @@ public class NativeEngineLib {
         SymbolLookup lookup = SymbolLookup.libraryLookup(libFile.getPath(), arena);
 
         mh_eval = linker.downcallHandle(lookup.findOrThrow("eval_ffm"),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_BOOLEAN));
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_BOOLEAN));
 
         mh_mvvlva = linker.downcallHandle(lookup.findOrThrow("mvvlva"),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_LONG));
+                FunctionDescriptor.of(JAVA_INT, JAVA_LONG));
+
+        mh_movegen = linker.downcallHandle(lookup.findOrThrow("generate_moves"),
+                FunctionDescriptor.ofVoid(ADDRESS, ADDRESS, ADDRESS, JAVA_BOOLEAN, JAVA_BOOLEAN));
 
         mh_clearMainHashTable = linker.downcallHandle(lookup.findOrThrow("clear_main_hash_table"),
                 FunctionDescriptor.ofVoid());
         mh_resizeMainHashTable = linker.downcallHandle(lookup.findOrThrow("resize_main_hash_table"),
-                FunctionDescriptor.ofVoid(ValueLayout.JAVA_LONG));
+                FunctionDescriptor.ofVoid(JAVA_LONG));
         mh_probeMainHashTable = linker.downcallHandle(lookup.findOrThrow("probe_main_hash_table"),
-                FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS));
+                FunctionDescriptor.of(JAVA_LONG, ADDRESS));
         mh_storeMainHashTable = linker.downcallHandle(lookup.findOrThrow("store_main_hash_table"),
-                FunctionDescriptor.ofVoid(ValueLayout.ADDRESS, ValueLayout.JAVA_LONG));
+                FunctionDescriptor.ofVoid(ADDRESS, JAVA_LONG));
         mh_getMainHashCollisions = linker.downcallHandle(lookup.findOrThrow("get_main_hash_collisions"),
-                FunctionDescriptor.of(ValueLayout.JAVA_LONG));
+                FunctionDescriptor.of(JAVA_LONG));
         mh_getMainHashProbes = linker.downcallHandle(lookup.findOrThrow("get_main_hash_probes"),
-                FunctionDescriptor.of(ValueLayout.JAVA_LONG));
+                FunctionDescriptor.of(JAVA_LONG));
         mh_getMainHashHits = linker.downcallHandle(lookup.findOrThrow("get_main_hash_hits"),
-                FunctionDescriptor.of(ValueLayout.JAVA_LONG));
+                FunctionDescriptor.of(JAVA_LONG));
 
         mh_clearPawnHashTable = linker.downcallHandle(lookup.findOrThrow("clear_pawn_hash_table"),
                 FunctionDescriptor.ofVoid());
         mh_resizePawnHashTable = linker.downcallHandle(lookup.findOrThrow("resize_pawn_hash_table"),
-                FunctionDescriptor.ofVoid(ValueLayout.JAVA_LONG));
+                FunctionDescriptor.ofVoid(JAVA_LONG));
         mh_probePawnHashTable = linker.downcallHandle(lookup.findOrThrow("probe_pawn_hash_table"),
-                FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS));
+                FunctionDescriptor.of(JAVA_LONG, ADDRESS));
         mh_storePawnHashTable = linker.downcallHandle(lookup.findOrThrow("store_pawn_hash_table"),
-                FunctionDescriptor.ofVoid(ValueLayout.ADDRESS, ValueLayout.JAVA_LONG));
+                FunctionDescriptor.ofVoid(ADDRESS, JAVA_LONG));
         mh_getPawnHashCollisions = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_collisions"),
-                FunctionDescriptor.of(ValueLayout.JAVA_LONG));
+                FunctionDescriptor.of(JAVA_LONG));
         mh_getPawnHashProbes = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_probes"),
-                FunctionDescriptor.of(ValueLayout.JAVA_LONG));
+                FunctionDescriptor.of(JAVA_LONG));
         mh_getPawnHashHits = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_hits"),
-                FunctionDescriptor.of(ValueLayout.JAVA_LONG));
+                FunctionDescriptor.of(JAVA_LONG));
     }
 
     public static int eval(Board board, boolean materialOnly) {
@@ -115,6 +121,34 @@ public class NativeEngineLib {
             return (int) mh_mvvlva.invoke(nativeMove);
         } catch (Throwable e) {
             throw new RuntimeException("Unable to invoke mvvlva");
+        }
+    }
+
+    public static List<Move> generatePseudoLegalMoves(Board board, boolean caps, boolean noncaps) {
+        Objects.requireNonNull(mh_movegen, "mh_movegen must not be null");
+        String fen = FENBuilder.createFen(board, false);
+
+        try (Arena arena = Arena.ofConfined()) {
+            List<Move> moves = new ArrayList<>();
+            MemorySegment cFen = arena.allocateFrom(fen);
+            MemorySegment dataSegment = arena.allocate(JAVA_LONG, 250);
+            MemorySegment sizeSegment = arena.allocate(JAVA_INT);
+
+            mh_movegen.invoke(dataSegment, sizeSegment, cFen, caps, noncaps);
+            int numMoves = sizeSegment.get(JAVA_INT, 0);
+
+            // read the moves from the data segment
+            for (int i=0;i<numMoves;i++) {
+                long val = dataSegment.get(JAVA_LONG, i * JAVA_LONG.byteSize());
+                if (val != 0) {
+                    Move mv = fromNativeMove(val, board.getPlayerToMove());
+                    moves.add(mv);
+                }
+            }
+
+            return moves;
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke movegen; msg: " + e.getMessage());
         }
     }
 
