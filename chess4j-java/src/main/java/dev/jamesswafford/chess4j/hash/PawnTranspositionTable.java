@@ -73,9 +73,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     // produce equivalent results.
     public PawnTranspositionTableEntry probe(Board board) {
         if (Initializer.nativeCodeInitialized()) {
-            String fen = FENBuilder.createFen(board, false);
-            long nativeVal = probeNative(fen);
-            return nativeVal==0 ? null : new PawnTranspositionTableEntry(board.getPawnKey(), nativeVal);
+            return NativeEngineLib.probePawnHashTable(board);
         } else {
             return probe(board.getPawnKey());
         }
@@ -133,8 +131,6 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     public int sizeOfEntry() {
         return PawnTranspositionTableEntry.sizeOf();
     }
-
-    private native long probeNative(String fen);
 
     private native void storeNative(String fen, long val);
 

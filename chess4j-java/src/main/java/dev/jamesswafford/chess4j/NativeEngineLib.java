@@ -4,6 +4,8 @@ import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Color;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.board.squares.Square;
+import dev.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
+import dev.jamesswafford.chess4j.hash.TranspositionTableEntry;
 import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.pieces.*;
 
@@ -37,12 +39,14 @@ public class NativeEngineLib {
     // hash related methods
     private static MethodHandle mh_clearMainHashTable;
     private static MethodHandle mh_resizeMainHashTable;
+    private static MethodHandle mh_probeMainHashTable;
     private static MethodHandle mh_getMainHashCollisions;
     private static MethodHandle mh_getMainHashHits;
     private static MethodHandle mh_getMainHashProbes;
 
     private static MethodHandle mh_clearPawnHashTable;
     private static MethodHandle mh_resizePawnHashTable;
+    private static MethodHandle mh_probePawnHashTable;
     private static MethodHandle mh_getPawnHashCollisions;
     private static MethodHandle mh_getPawnHashHits;
     private static MethodHandle mh_getPawnHashProbes;
@@ -63,6 +67,8 @@ public class NativeEngineLib {
                 FunctionDescriptor.ofVoid());
         mh_resizeMainHashTable = linker.downcallHandle(lookup.findOrThrow("resize_main_hash_table"),
                 FunctionDescriptor.ofVoid(ValueLayout.JAVA_LONG));
+        mh_probeMainHashTable = linker.downcallHandle(lookup.findOrThrow("probe_main_hash_table"),
+                FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS));
         mh_getMainHashCollisions = linker.downcallHandle(lookup.findOrThrow("get_main_hash_collisions"),
                 FunctionDescriptor.of(ValueLayout.JAVA_LONG));
         mh_getMainHashProbes = linker.downcallHandle(lookup.findOrThrow("get_main_hash_probes"),
@@ -74,6 +80,8 @@ public class NativeEngineLib {
                 FunctionDescriptor.ofVoid());
         mh_resizePawnHashTable = linker.downcallHandle(lookup.findOrThrow("resize_pawn_hash_table"),
                 FunctionDescriptor.ofVoid(ValueLayout.JAVA_LONG));
+        mh_probePawnHashTable = linker.downcallHandle(lookup.findOrThrow("probe_pawn_hash_table"),
+                FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS));
         mh_getPawnHashCollisions = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_collisions"),
                 FunctionDescriptor.of(ValueLayout.JAVA_LONG));
         mh_getPawnHashProbes = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_probes"),
@@ -122,6 +130,19 @@ public class NativeEngineLib {
         }
     }
 
+    public static TranspositionTableEntry probeMainHashTable(Board board) {
+        Objects.requireNonNull(mh_probeMainHashTable, "mh_probeMainHashTable must not be null");
+        String fen = FENBuilder.createFen(board, false);
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment cFen = arena.allocateFrom(fen);
+            long val = (long) mh_probeMainHashTable.invoke(cFen);
+            return val==0 ? null : new TranspositionTableEntry(board.getZobristKey(), val);
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke probeMainHashTable; msg: " + e.getMessage());
+        }
+    }
+
     public static long getMainHashCollisions() {
         Objects.requireNonNull(mh_getMainHashCollisions, "mh_getMainHashCollisions must not be null");
         try {
@@ -164,6 +185,19 @@ public class NativeEngineLib {
             mh_resizePawnHashTable.invoke(maxBytes);
         } catch (Throwable e) {
             throw new RuntimeException("Unable to invoke resizePawnHashTable");
+        }
+    }
+
+    public static PawnTranspositionTableEntry probePawnHashTable(Board board) {
+        Objects.requireNonNull(mh_probePawnHashTable, "mh_probePawnHashTable must not be null");
+        String fen = FENBuilder.createFen(board, false);
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment cFen = arena.allocateFrom(fen);
+            long val = (long) mh_probePawnHashTable.invoke(cFen);
+            return val==0 ? null : new PawnTranspositionTableEntry(board.getPawnKey(), val);
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke probePawnHashTable; msg: " + e.getMessage());
         }
     }
 

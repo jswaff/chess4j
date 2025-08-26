@@ -89,9 +89,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     public TranspositionTableEntry probe(Board board) {
         if (Initializer.nativeCodeInitialized()) {
-            String fen = FENBuilder.createFen(board, false);
-            long nativeVal = probeNative(fen);
-            return nativeVal==0 ? null : new TranspositionTableEntry(board.getZobristKey(), nativeVal);
+            return NativeEngineLib.probeMainHashTable(board);
         } else {
             return probe(board.getZobristKey());
         }
@@ -176,8 +174,6 @@ public class TranspositionTable extends AbstractTranspositionTable {
     public int sizeOfEntry() {
         return TranspositionTableEntry.sizeOf();
     }
-
-    private native long probeNative(String fen);
 
     private native void storeNative(String fen, long val);
 
