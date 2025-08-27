@@ -59,6 +59,9 @@ public class NativeEngineLib {
     private static MethodHandle mh_getPawnHashHits;
     private static MethodHandle mh_getPawnHashProbes;
 
+    // search related methods
+    private static MethodHandle mh_see;
+
     public static void initializeFFM() {
         System.load("/home/james/prophet/install/lib/libprophetlib.so"); // FIXME
         SymbolLookup lookup = SymbolLookup.loaderLookup();
@@ -120,6 +123,9 @@ public class NativeEngineLib {
                 FunctionDescriptor.of(JAVA_LONG));
         mh_getPawnHashHits = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_hits"),
                 FunctionDescriptor.of(JAVA_LONG));
+
+        mh_see = linker.downcallHandle(lookup.findOrThrow("see_from_fen"),
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_LONG));
 
         initializeLibrary();
     }
@@ -349,6 +355,18 @@ public class NativeEngineLib {
             return (long) mh_getPawnHashProbes.invoke();
         } catch (Throwable e) {
             throw new RuntimeException("Unable to invoke getPawnHashProbes");
+        }
+    }
+
+    public static int see(Board board, Move move) {
+        Objects.requireNonNull(mh_see, "mh_see must not be null");
+        String fen = FENBuilder.createFen(board, false);
+        long nativeMove = NativeEngineLib.toNativeMove(move);
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment cFen = arena.allocateFrom(fen);
+            return (int) mh_see.invoke(cFen, nativeMove);
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke see; msg: " + e.getMessage());
         }
     }
 
