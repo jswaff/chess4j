@@ -61,6 +61,7 @@ public class NativeEngineLib {
 
     // search related methods
     private static MethodHandle mh_see;
+    private static MethodHandle mh_stopSearch;
 
     public static void initializeFFM() {
         System.load("/home/james/prophet/install/lib/libprophetlib.so"); // FIXME
@@ -126,6 +127,8 @@ public class NativeEngineLib {
 
         mh_see = linker.downcallHandle(lookup.findOrThrow("see_from_fen"),
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_LONG));
+        mh_stopSearch = linker.downcallHandle(lookup.findOrThrow("set_search_stop_flag"),
+                FunctionDescriptor.ofVoid(JAVA_BOOLEAN));
 
         initializeLibrary();
     }
@@ -367,6 +370,15 @@ public class NativeEngineLib {
             return (int) mh_see.invoke(cFen, nativeMove);
         } catch (Throwable e) {
             throw new RuntimeException("Unable to invoke see; msg: " + e.getMessage());
+        }
+    }
+
+    public static void stopSearch(boolean stop) {
+        Objects.requireNonNull(mh_stopSearch, "mh_stopSearch must not be null");
+        try {
+            mh_stopSearch.invoke(stop);
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke stopSearch; msg: " + e.getMessage());
         }
     }
 

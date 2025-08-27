@@ -110,7 +110,7 @@ public class AlphaBetaSearch implements Search {
     public void stop() {
         stop = true;
         if (Initializer.nativeCodeInitialized()) {
-            stopNative(true);
+            NativeEngineLib.stopSearch(true);
         }
     }
 
@@ -118,7 +118,7 @@ public class AlphaBetaSearch implements Search {
     public void unstop() {
         stop = false;
         if (Initializer.nativeCodeInitialized()) {
-            stopNative(false);
+            NativeEngineLib.stopSearch(false);
         }
     }
 
@@ -614,8 +614,6 @@ public class AlphaBetaSearch implements Search {
     private native int searchNative(String fen, List<Long> parentPV, int depth, int alpha, int beta,
                                     SearchStats searchStats, long startTime, long stopTime, boolean post,
                                     String nonReversibleFen, List<Long> movePath);
-
-    private native void stopNative(boolean stop);
 
     private native void skipTimeChecksNative(boolean skipTimeChecks);
 
