@@ -70,6 +70,7 @@ public final class Initializer {
                 System.out.println("# Loading Prophet native library.");
                 File libFile = copyLibraryToFile();
                 System.load(libFile.getPath());
+
                 LOGGER.info("# Prophet loaded, initializing...");
                 if (!prophetInit()) {
                     attemptToUseNative = false;

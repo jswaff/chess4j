@@ -35,10 +35,12 @@ public class NativeEngineLib {
 
     private NativeEngineLib() {}
 
+    private static MethodHandle mh_init;
     private static MethodHandle mh_eval;
     private static MethodHandle mh_mvvlva;
     private static MethodHandle mh_movegen;
     private static MethodHandle mh_nnEval;
+    private static MethodHandle mh_nnLoadNetwork;
 
     // hash related methods
     private static MethodHandle mh_clearMainHashTable;
@@ -57,11 +59,23 @@ public class NativeEngineLib {
     private static MethodHandle mh_getPawnHashHits;
     private static MethodHandle mh_getPawnHashProbes;
 
-    public static void initializeFFM(File libFile) {
-        Linker linker = Linker.nativeLinker();
+    public static void initializeFFM() {
+        System.load("/home/james/prophet/install/lib/libprophetlib.so"); // FIXME
+        SymbolLookup lookup = SymbolLookup.loaderLookup();
+        initializeFFM(lookup);
+    }
 
+    public static void initializeFFM(File libFile) {
         Arena arena = Arena.global();
         SymbolLookup lookup = SymbolLookup.libraryLookup(libFile.getPath(), arena);
+        initializeFFM(lookup);
+    }
+
+    private static void initializeFFM(SymbolLookup lookup) {
+        Linker linker = Linker.nativeLinker();
+
+        mh_init = linker.downcallHandle(lookup.findOrThrow("init"),
+                FunctionDescriptor.of(JAVA_INT));
 
         mh_eval = linker.downcallHandle(lookup.findOrThrow("eval_from_fen"),
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_BOOLEAN));
@@ -74,6 +88,8 @@ public class NativeEngineLib {
 
         mh_nnEval = linker.downcallHandle(lookup.findOrThrow("nn_eval_from_fen"),
                 FunctionDescriptor.of(JAVA_INT, ADDRESS));
+//        mh_nnLoadNetwork = linker.downcallHandle(lookup.findOrThrow("load_neural_network"),
+//                FunctionDescriptor.of(JAVA_INT, ADDRESS));
 
         mh_clearMainHashTable = linker.downcallHandle(lookup.findOrThrow("clear_main_hash_table"),
                 FunctionDescriptor.ofVoid());
@@ -104,6 +120,20 @@ public class NativeEngineLib {
                 FunctionDescriptor.of(JAVA_LONG));
         mh_getPawnHashHits = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_hits"),
                 FunctionDescriptor.of(JAVA_LONG));
+
+        initializeLibrary();
+    }
+
+    public static void initializeLibrary() {
+        Objects.requireNonNull(mh_init, "mh_init must not be null");
+        try {
+            int retval = (int) mh_init.invoke();
+            if (retval != 0) {
+                throw new RuntimeException("native code initialization failed! retval=" + retval);
+            }
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke init; msg: " + e.getMessage());
+        }
     }
 
     public static int eval(Board board, boolean materialOnly) {
@@ -165,6 +195,20 @@ public class NativeEngineLib {
             return (int) mh_nnEval.invoke(cFen);
         } catch (Throwable e) {
             throw new RuntimeException("Unable to invoke evalNN; msg: " + e.getMessage());
+        }
+    }
+
+    public static void loadNeuralNetwork(File networkFile) {
+        Objects.requireNonNull(mh_nnLoadNetwork, "mh_nnLoadNetwork must not be null");
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment cNetworkFile = arena.allocateFrom(networkFile.getPath());
+            int retval = (int) mh_nnLoadNetwork.invoke(cNetworkFile);
+            if (retval != 0) {
+                throw new RuntimeException("loading network into native code failed! retval=" + retval);
+            }
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke loadNeuralNetwork; msg: " + e.getMessage());
         }
     }
 
