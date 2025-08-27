@@ -126,7 +126,7 @@ public class AlphaBetaSearch implements Search {
     public void setSkipTimeChecks(boolean skipTimeChecks) {
         this.skipTimeChecks = skipTimeChecks;
         if (Initializer.nativeCodeInitialized()) {
-            skipTimeChecksNative(skipTimeChecks);
+            NativeEngineLib.skipTimeChecks(skipTimeChecks);
         }
     }
 
@@ -614,7 +614,5 @@ public class AlphaBetaSearch implements Search {
     private native int searchNative(String fen, List<Long> parentPV, int depth, int alpha, int beta,
                                     SearchStats searchStats, long startTime, long stopTime, boolean post,
                                     String nonReversibleFen, List<Long> movePath);
-
-    private native void skipTimeChecksNative(boolean skipTimeChecks);
 
 }

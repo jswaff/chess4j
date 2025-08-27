@@ -61,6 +61,7 @@ public class NativeEngineLib {
 
     // search related methods
     private static MethodHandle mh_see;
+    private static MethodHandle mh_skipTimeChecks;
     private static MethodHandle mh_stopSearch;
 
     public static void initializeFFM() {
@@ -127,6 +128,8 @@ public class NativeEngineLib {
 
         mh_see = linker.downcallHandle(lookup.findOrThrow("see_from_fen"),
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_LONG));
+        mh_skipTimeChecks = linker.downcallHandle(lookup.findOrThrow("set_skip_time_checks_flag"),
+                FunctionDescriptor.ofVoid(JAVA_BOOLEAN));
         mh_stopSearch = linker.downcallHandle(lookup.findOrThrow("set_search_stop_flag"),
                 FunctionDescriptor.ofVoid(JAVA_BOOLEAN));
 
@@ -370,6 +373,15 @@ public class NativeEngineLib {
             return (int) mh_see.invoke(cFen, nativeMove);
         } catch (Throwable e) {
             throw new RuntimeException("Unable to invoke see; msg: " + e.getMessage());
+        }
+    }
+
+    public static void skipTimeChecks(boolean skip) {
+        Objects.requireNonNull(mh_skipTimeChecks, "mh_skipTimeChecks must not be null");
+        try {
+            mh_skipTimeChecks.invoke(skip);
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke skipTimeChecks; msg: " + e.getMessage());
         }
     }
 
