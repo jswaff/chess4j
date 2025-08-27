@@ -38,6 +38,7 @@ public class NativeEngineLib {
     private static MethodHandle mh_eval;
     private static MethodHandle mh_mvvlva;
     private static MethodHandle mh_movegen;
+    private static MethodHandle mh_nnEval;
 
     // hash related methods
     private static MethodHandle mh_clearMainHashTable;
@@ -70,6 +71,9 @@ public class NativeEngineLib {
 
         mh_movegen = linker.downcallHandle(lookup.findOrThrow("generate_moves_from_fen"),
                 FunctionDescriptor.ofVoid(ADDRESS, ADDRESS, ADDRESS, JAVA_BOOLEAN, JAVA_BOOLEAN));
+
+        mh_nnEval = linker.downcallHandle(lookup.findOrThrow("nn_eval_from_fen"),
+                FunctionDescriptor.of(JAVA_INT, ADDRESS));
 
         mh_clearMainHashTable = linker.downcallHandle(lookup.findOrThrow("clear_main_hash_table"),
                 FunctionDescriptor.ofVoid());
@@ -149,6 +153,18 @@ public class NativeEngineLib {
             return moves;
         } catch (Throwable e) {
             throw new RuntimeException("Unable to invoke movegen; msg: " + e.getMessage());
+        }
+    }
+
+    public static int evalNN(Board board) {
+        Objects.requireNonNull(mh_nnEval, "mh_nnEval must not be null");
+        String fen = FENBuilder.createFen(board, false);
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment cFen = arena.allocateFrom(fen);
+            return (int) mh_nnEval.invoke(cFen);
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke evalNN; msg: " + e.getMessage());
         }
     }
 
