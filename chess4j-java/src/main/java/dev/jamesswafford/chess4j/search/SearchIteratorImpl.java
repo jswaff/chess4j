@@ -104,6 +104,11 @@ public class SearchIteratorImpl implements SearchIterator {
      */
     private List<Move> findPrincipalVariation(Board board, final List<Undo> undos) {
 
+        // TODO: if native mode is enabled, call the native iterator
+        // create iterateWithJavaCode() and iterateWithNativeCode()
+        // in iterateWithNativeCode, call iterationsAreEqual() which will check against iterateWithJavaCode()
+        // for equality (if the iterations were not terminated)
+
         List<Move> moves = moveGenerator.generateLegalMoves(board);
         LOGGER.debug("# position has {} move(s)", moves.size());
         if (earlyExitOk && moves.size()==1) {

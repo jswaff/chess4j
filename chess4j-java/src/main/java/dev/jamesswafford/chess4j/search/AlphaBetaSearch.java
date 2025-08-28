@@ -229,10 +229,9 @@ public class AlphaBetaSearch implements Search {
             long javaProbes = TTHolder.getInstance().getHashTable().getNumProbes();
             long javaHits = TTHolder.getInstance().getHashTable().getNumHits();
             if (javaProbes != nativeProbes || javaHits != nativeHits) {
-                LOGGER.error("hash stats not equal! "
-                        + "java probes: " + javaProbes + ", native probes: " + nativeProbes
-                        + ", java hits: " + javaHits + ", native hits: " + nativeHits
-                        + ", params: " + searchParameters);
+                LOGGER.error("hash stats not equal! java probes: {}, native probes: {}, " +
+                        "java hits: {}, native hits: {}, params: {}",
+                        javaProbes, nativeProbes, javaHits, nativeHits, searchParameters);
                 return false;
             }
 
@@ -240,45 +239,42 @@ public class AlphaBetaSearch implements Search {
             long javaPawnProbes = TTHolder.getInstance().getPawnHashTable().getNumProbes();
             long javaPawnHits = TTHolder.getInstance().getPawnHashTable().getNumHits();
             if (javaPawnProbes != nativePawnProbes || javaPawnHits != nativePawnHits) {
-                LOGGER.error("pawn hash stats not equal! "
-                        + "java pawn probes: " + javaPawnProbes + ", native pawn probes: " + nativePawnProbes
-                        + ", java pawn hits: " + javaPawnHits + ", native pawn hits: " + nativePawnHits
-                        + ", params: " + searchParameters);
+                LOGGER.error("pawn hash stats not equal! java pawn probes: {}, " +
+                        "native pawn probes: {}, java pawn hits: {}, native pawn hits: {}, params: {}",
+                        javaPawnProbes, nativePawnProbes, javaPawnHits, nativePawnHits, searchParameters);
                 return false;
             }
 
             // compare node counts
             if (searchStats.nodes != nativeStats.nodes || searchStats.qnodes != nativeStats.qnodes) {
-                LOGGER.error("node counts not equal!  java nodes: " + searchStats.nodes
-                        + ", native nodes:" + nativeStats.nodes
-                        + ", java qnodes: " + searchStats.qnodes
-                        + ", native qnodes: " + nativeStats.qnodes);
+                LOGGER.error("node counts not equal!  java nodes: {}, native nodes:{}, " +
+                        "java qnodes: {}, native qnodes: {}", searchStats.nodes, nativeStats.nodes,
+                        searchStats.qnodes, nativeStats.qnodes);
                 return false;
             }
 
             // compare fail highs
             if (searchStats.failHighs != nativeStats.failHighs) {
-                LOGGER.error("fail highs not equal!  java fail highs: " + searchStats.failHighs
-                        + ", native fail highs: " + nativeStats.failHighs);
+                LOGGER.error("fail highs not equal!  java fail highs: {}, native fail highs: {}",
+                        searchStats.failHighs, nativeStats.failHighs);
             }
 
             // compare fail lows
             if (searchStats.failLows != nativeStats.failLows) {
-                LOGGER.error("fail lows not equal!  java fail lows: " + searchStats.failLows
-                        + ", native fail lows: " + nativeStats.failLows);
+                LOGGER.error("fail lows not equal!  java fail lows: {}, native fail lows: {}",
+                        searchStats.failLows, nativeStats.failLows);
             }
 
             // compare draws
             if (searchStats.draws != nativeStats.draws) {
-                LOGGER.error("draws not equal!  java draws: " + searchStats.draws
-                        + ", native draws: " + nativeStats.draws);
+                LOGGER.error("draws not equal!  java draws: {}, native draws: {}",
+                        searchStats.draws, nativeStats.draws);
             }
 
             // compare the PVs.
             if (!pv.equals(NativeEngineLib.fromNativeLine(nativePV, board.getPlayerToMove()))) {
-                LOGGER.error("pvs are not equal!"
-                        + ", java stats: " + searchStats + ", native stats: " + nativeStats
-                        + ", params: " + searchParameters);
+                LOGGER.error("pvs are not equal!, java stats: {}, native stats: {}, params: {}",
+                        searchStats, nativeStats, searchParameters);
                 return false;
             }
 
