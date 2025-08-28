@@ -237,8 +237,8 @@ public class SearchIteratorImpl implements SearchIterator {
             }
 
             if (!nativePV.equals(javaPV)) {
-                LOGGER.error("PVs are not equal! javaPV: " + PrintLine.getMoveString(javaPV) +
-                        ", nativePV: " + PrintLine.getMoveString(nativePV));
+                LOGGER.error("PVs are not equal! java: {}, native: {}",
+                        PrintLine.getMoveString(javaPV), PrintLine.getMoveString(nativePV));
                 return false;
             } else {
                 LOGGER.debug("# finished - iterations produce the same PVs");
@@ -252,16 +252,17 @@ public class SearchIteratorImpl implements SearchIterator {
     }
 
     private List<Move> findPrincipalVariationNative(Board board) {
-        List<Long> nativePV = new ArrayList<>();
-        try {
-            LOGGER.debug("# starting native iterator maxDepth: {}", maxDepth);
-            String fen = FENBuilder.createFen(board, false);
-            iterateNative(fen, maxDepth, nativePV);
-            return NativeEngineLib.fromNativeLine(nativePV, board.getPlayerToMove());
-        } catch (IllegalStateException e) {
-            LOGGER.error(e);
-            throw e;
-        }
+        return NativeEngineLib.iterate(board, maxDepth);
+//        List<Long> nativePV = new ArrayList<>();
+//        try {
+//            LOGGER.debug("# starting native iterator maxDepth: {}", maxDepth);
+//            String fen = FENBuilder.createFen(board, false);
+//            iterateNative(fen, maxDepth, nativePV);
+//            return NativeEngineLib.fromNativeLine(nativePV, board.getPlayerToMove());
+//        } catch (IllegalStateException e) {
+//            LOGGER.error(e);
+//            throw e;
+//        }
     }
 
     private void printSearchSummary(int lastDepth, long startTime, SearchStats stats) {

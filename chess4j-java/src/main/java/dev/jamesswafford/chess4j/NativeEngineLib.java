@@ -60,6 +60,7 @@ public class NativeEngineLib {
     private static MethodHandle mh_getPawnHashProbes;
 
     // search related methods
+    private static MethodHandle mh_iterate;
     private static MethodHandle mh_see;
     private static MethodHandle mh_skipTimeChecks;
     private static MethodHandle mh_stopSearch;
@@ -125,6 +126,9 @@ public class NativeEngineLib {
                 FunctionDescriptor.of(JAVA_LONG));
         mh_getPawnHashHits = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_hits"),
                 FunctionDescriptor.of(JAVA_LONG));
+
+        mh_iterate = linker.downcallHandle(lookup.findOrThrow("iterate_from_fen"),
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, JAVA_INT));
 
         mh_see = linker.downcallHandle(lookup.findOrThrow("see_from_fen"),
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_LONG));
@@ -361,6 +365,37 @@ public class NativeEngineLib {
             return (long) mh_getPawnHashProbes.invoke();
         } catch (Throwable e) {
             throw new RuntimeException("Unable to invoke getPawnHashProbes");
+        }
+    }
+
+    public static List<Move> iterate(Board board, int maxDepth) {
+        Objects.requireNonNull(mh_iterate, "mh_iterate must not be null");
+        List<Move> pv = new ArrayList<>();
+        String fen = FENBuilder.createFen(board, false);
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment cFen = arena.allocateFrom(fen);
+            MemorySegment pvSegment = arena.allocate(JAVA_LONG, 250);
+            MemorySegment pvSizeSegment = arena.allocate(JAVA_INT);
+
+            int retval = (int) mh_iterate.invoke(cFen, pvSegment, pvSizeSegment, maxDepth);
+            if (retval != 0) {
+                throw new RuntimeException("error in iterate! retval=" + retval);
+            }
+            int lengthPv = pvSizeSegment.get(JAVA_INT, 0);
+
+            // read the moves from the PV segment
+            Color ptm = board.getPlayerToMove();
+            for (int i=0;i<lengthPv;i++) {
+                long val = pvSegment.get(JAVA_LONG, i * JAVA_LONG.byteSize());
+                Move mv = fromNativeMove(val, ptm);
+                pv.add(mv);
+                ptm = Color.swap(ptm);
+            }
+
+            return pv;
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke iterate; msg: " + e.getMessage());
         }
     }
 
