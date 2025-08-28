@@ -9,7 +9,6 @@ import dev.jamesswafford.chess4j.hash.PawnTranspositionTable;
 import dev.jamesswafford.chess4j.hash.TTHolder;
 import dev.jamesswafford.chess4j.hash.TranspositionTable;
 import dev.jamesswafford.chess4j.init.Initializer;
-import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.io.PrintLine;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
@@ -156,8 +155,7 @@ public class SearchIteratorImpl implements SearchIterator {
             SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
             score = search.search(board, undos, parameters, opts);
 
-            // TODO: this is a failed first attempt at aspiration windows, but I intend to revisit it after
-            // the search matures a little more.
+            // TODO: this is a failed first attempt at aspiration windows, but I intend to revisit it
             /*if ((score <= alphaBound || score >= betaBound) && !search.isStopped()) {
                 LOGGER.debug("# researching; score: " + score + ", a: " + alphaBound + ", b: " + betaBound);
                 parameters = new SearchParameters(depth, -INFINITY, INFINITY);
@@ -228,7 +226,7 @@ public class SearchIteratorImpl implements SearchIterator {
         if (Initializer.nativeCodeInitialized()) {
 
             LOGGER.debug("# checking iteration equality with native");
-            List<Move> nativePV = findPrincipalVariationNative(board);
+            List<Move> nativePV = NativeEngineLib.iterate(board, maxDepth);
 
             // if the search was stopped the comparison won't be valid
             if (search.isStopped()) {
@@ -251,20 +249,6 @@ public class SearchIteratorImpl implements SearchIterator {
         }
     }
 
-    private List<Move> findPrincipalVariationNative(Board board) {
-        return NativeEngineLib.iterate(board, maxDepth);
-//        List<Long> nativePV = new ArrayList<>();
-//        try {
-//            LOGGER.debug("# starting native iterator maxDepth: {}", maxDepth);
-//            String fen = FENBuilder.createFen(board, false);
-//            iterateNative(fen, maxDepth, nativePV);
-//            return NativeEngineLib.fromNativeLine(nativePV, board.getPlayerToMove());
-//        } catch (IllegalStateException e) {
-//            LOGGER.error(e);
-//            throw e;
-//        }
-    }
-
     private void printSearchSummary(int lastDepth, long startTime, SearchStats stats) {
         DecimalFormat df = new DecimalFormat("0.00");
         DecimalFormat df2 = new DecimalFormat("#,###,##0");
@@ -274,14 +258,14 @@ public class SearchIteratorImpl implements SearchIterator {
         double qnodePct = stats.qnodes / (totalNodes/100.0);
 
         LOGGER.info("\n");
-        LOGGER.info("# depth: " + lastDepth);
-        LOGGER.info("# nodes: " + df2.format(totalNodes) + ", interior: "
-                + df2.format(stats.nodes) + " (" + df.format(interiorPct) + "%)"
-                + ", quiescence: " + df2.format(stats.qnodes) + " (" + df.format(qnodePct) + "%)");
+        LOGGER.info("# depth: {}", lastDepth);
+        LOGGER.info("# nodes: {}, interior: {} ({}%), quiescence: {} ({}%)",
+                df2.format(totalNodes), df2.format(stats.nodes), df.format(interiorPct),
+                df2.format(stats.qnodes), df.format(qnodePct));
 
         long totalSearchTime = System.currentTimeMillis() - startTime;
-        LOGGER.info("# search time: " + totalSearchTime/1000.0 + " seconds"
-                + ", rate: " + df2.format(totalNodes / (totalSearchTime/1000.0)) + " nodes per second");
+        LOGGER.info("# search time: {} seconds, rate: {} nodes per second",
+                totalSearchTime / 1000.0, df2.format(totalNodes / (totalSearchTime / 1000.0)));
 
         TranspositionTable htbl = TTHolder.getInstance().getHashTable();
         long hashHits = htbl.getNumHits();
@@ -289,19 +273,16 @@ public class SearchIteratorImpl implements SearchIterator {
         long hashCollisions = htbl.getNumCollisions();
         double hashHitPct = hashHits / (hashProbes/100.0);
         double hashCollisionPct = hashCollisions / (hashProbes/100.0);
-        LOGGER.info("# hash probes: " + df2.format(hashProbes)
-                + ", hits: " + df2.format(hashHits) + " (" + df.format(hashHitPct) + "%)"
-                + ", collisions: " + df2.format(hashCollisions) + " (" + df.format(hashCollisionPct) + "%)");
+        LOGGER.info("# hash probes: {}, hits: {} ({}%), collisions: {} ({}%)",
+                df2.format(hashProbes), df2.format(hashHits), df.format(hashHitPct), df2.format(hashCollisions),
+                df.format(hashCollisionPct));
 
         double hashFailHighPct = stats.hashFailHighs / (hashProbes/100.0);
         double hashFailLowPct = stats.hashFailLows / (hashProbes/100.0);
         double hashExactScorePct = stats.hashExactScores / (hashProbes/100.0);
-        LOGGER.info("# hash fail highs: " + df2.format(stats.hashFailHighs)
-                + " (" + df.format(hashFailHighPct) + "%)"
-                + ", hash fail lows: " + df2.format(stats.hashFailLows)
-                + " (" + df.format(hashFailLowPct) + "%)"
-                + ", hash exact scores: " + df2.format(stats.hashExactScores)
-                + " (" + df.format(hashExactScorePct) + "%)");
+        LOGGER.info("# hash fail highs: {} ({}%), hash fail lows: {} ({}%), hash exact scores: {} ({}%)",
+                df2.format(stats.hashFailHighs), df.format(hashFailHighPct), df2.format(stats.hashFailLows),
+                df.format(hashFailLowPct), df2.format(stats.hashExactScores), df.format(hashExactScorePct));
 
         PawnTranspositionTable pawnTbl = TTHolder.getInstance().getPawnHashTable();
         long pawnHashHits = pawnTbl.getNumHits();
@@ -323,11 +304,9 @@ public class SearchIteratorImpl implements SearchIterator {
         double failHigh2ndPct = fh2 / (failHighs / 100.0);
         double failHigh3rdPct = fh3 / (failHighs / 100.0);
         double failHigh4thPct = fh4 / (failHighs / 100.0);
-        LOGGER.info("# fail high mv1: " + df2.format(fh1) + " (" + df.format(failHigh1stPct) + "%)"
-                + ", mv2: " + df2.format(fh2) + " (" + df.format(failHigh2ndPct) + "%)"
-                + ", mv3: " + df2.format(fh3) + " (" + df.format(failHigh3rdPct) + "%)"
-                + ", mv4: " + df2.format(fh4) + " (" + df.format(failHigh4thPct) + "%)"
-        );
+        LOGGER.info("# fail high mv1: {} ({}%), mv2: {} ({}%), mv3: {} ({}%), mv4: {} ({}%)",
+                df2.format(fh1), df.format(failHigh1stPct), df2.format(fh2), df.format(failHigh2ndPct),
+                df2.format(fh3), df.format(failHigh3rdPct), df2.format(fh4), df.format(failHigh4thPct));
 
         // effective branching factor metrics
         StringBuilder sb = new StringBuilder();
@@ -342,9 +321,6 @@ public class SearchIteratorImpl implements SearchIterator {
             }
         }
         double avgEbf = totalEbf / numEbfs;
-        LOGGER.info("# ebf avg: " + df.format(avgEbf) + sb);
+        LOGGER.info("# ebf avg: {}{}", df.format(avgEbf), sb);
     }
-
-    private native void iterateNative(String fen, int maxDepth, List<Long> pv);
-
 }
