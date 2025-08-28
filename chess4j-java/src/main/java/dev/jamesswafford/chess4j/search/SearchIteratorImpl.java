@@ -105,9 +105,9 @@ public class SearchIteratorImpl implements SearchIterator {
     private List<Move> findPrincipalVariation(Board board, final List<Undo> undos) {
 
         List<Move> moves = moveGenerator.generateLegalMoves(board);
-        LOGGER.debug("# position has " + moves.size() + " move(s)");
+        LOGGER.debug("# position has {} move(s)", moves.size());
         if (earlyExitOk && moves.size()==1) {
-            return Collections.singletonList(moves.get(0));
+            return Collections.singletonList(moves.getFirst());
         }
 
         // initialize the PV to ensure we have a valid move to play
