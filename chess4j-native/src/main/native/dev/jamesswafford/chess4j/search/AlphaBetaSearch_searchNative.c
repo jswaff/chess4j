@@ -17,10 +17,10 @@
 #include <string.h>
 
 /* move stack */
-extern move_t native_moves[MAX_PLY * MAX_MOVES_PER_PLY];
+move_t native_moves[MAX_PLY * MAX_MOVES_PER_PLY];
 
 /* undo stack */
-extern undo_t native_undos[MAX_HALF_MOVES_PER_GAME];
+undo_t native_undos[MAX_HALF_MOVES_PER_GAME];
 
 /* flag to stop the search, or in our case as notification the search was stopped */
 extern volatile bool stop_search;
