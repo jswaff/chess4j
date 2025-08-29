@@ -19,7 +19,7 @@ public final class MoveUtils {
 
     public static void putMoveAtTop(List<Move> moves,Move m) {
         if (moves.remove(m)) {
-            moves.add(0, m);
+            moves.addFirst(m);
         }
     }
 
@@ -64,6 +64,7 @@ public final class MoveUtils {
     }
 
     public static boolean isLineValid(List<Move> moveLine, Board board) {
+        if (moveLine.isEmpty()) return false;
         Board myBoard = board.deepCopy();
 
         for (Move move : moveLine) {

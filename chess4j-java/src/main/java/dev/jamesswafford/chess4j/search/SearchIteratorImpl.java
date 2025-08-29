@@ -104,35 +104,31 @@ public class SearchIteratorImpl implements SearchIterator {
      */
     private List<Move> findPrincipalVariation(Board board, final List<Undo> undos) {
 
-        // TODO: if native mode is enabled, call the native iterator
-        // create iterateWithJavaCode() and iterateWithNativeCode()
-        // in iterateWithNativeCode, call iterationsAreEqual() which will check against iterateWithJavaCode()
-        // for equality (if the iterations were not terminated)
-
         List<Move> moves = moveGenerator.generateLegalMoves(board);
         LOGGER.debug("# position has {} move(s)", moves.size());
+
+        // if there is only one legal move, there is no need to search
         if (earlyExitOk && moves.size()==1) {
             return Collections.singletonList(moves.getFirst());
         }
 
         // initialize the PV to ensure we have a valid move to play
         moves.sort(Comparator.comparingInt(MVVLVA::score).reversed());
-        List<Move> pv = Collections.singletonList(moves.get(0));
+        List<Move> pv = new ArrayList<>();
+        pv.add(moves.getFirst());
 
-        // create a callback to print the PV when it changes
+        // set up the search options
         long startTime = System.currentTimeMillis();
         SearchOptions opts = SearchOptions.builder().startTime(startTime).build();
-        Consumer<PvCallbackDTO> rootPvCallback = pvUpdate -> {
-            if (pvUpdate.ply == 0) {
-                PrintLine.printLine(false, pvUpdate.pv, pvUpdate.depth, pvUpdate.score, pvUpdate.elapsedMS,
-                        pvUpdate.nodes);
-            }
-        };
         if (post) {
+            Consumer<PvCallbackDTO> rootPvCallback = pvUpdate -> {
+                if (pvUpdate.ply == 0) {
+                    PrintLine.printLine(false, pvUpdate.pv, pvUpdate.depth, pvUpdate.score, pvUpdate.elapsedMS,
+                            pvUpdate.nodes);
+                }
+            };
             opts.setPvCallback(rootPvCallback);
         }
-        int depth = 0, score = 0;
-        search.initialize();
 
         if (maxTimeMs > 0) {
             opts.setStopTime(opts.getStartTime() + maxTimeMs);
@@ -146,6 +142,28 @@ public class SearchIteratorImpl implements SearchIterator {
             }
         }
 
+        // TODO: if native mode is enabled, call the native iterator
+        // in iterateWithNativeCode, call iterationsAreEqual() which will check against iterateWithJavaCode()
+        int depth = iterateWithJavaCode(pv, board, undos, opts);
+
+        if (post) {
+            printSearchSummary(depth, startTime, search.getSearchStats());
+        }
+
+        assert(MoveUtils.isLineValid(pv, board));
+
+//        // if we are running with assertions enabled and the native library is loaded, verify equality
+//        // we can only do this for fixed depth searches that have not been interrupted.
+//        assert(maxTimeMs > 0 || search.isStopped() || iterationsAreEqual(pv, board));
+
+        return pv;
+    }
+
+    private Integer iterateWithJavaCode(List<Move> pv, Board board, final List<Undo> undos, SearchOptions opts) {
+
+        // prepare to search
+        search.initialize();
+        int depth = 0, score;
         boolean stopSearching = false;
         do {
             ++depth;
@@ -171,20 +189,21 @@ public class SearchIteratorImpl implements SearchIterator {
             // last iteration's PV was tried first
             List<Move> searchPV = search.getPv();
             if (!searchPV.isEmpty()) {
-                pv = new ArrayList<>(searchPV);
+                pv.clear();
+                pv.addAll(searchPV);
             }
 
             if (search.isStopped()) {
                 break;
             }
 
-            long elapsed = System.currentTimeMillis() - startTime;
+            long elapsed = System.currentTimeMillis() - opts.getStartTime();
             if (post) {
                 PrintLine.printLine(true, pv, depth, score, elapsed, search.getSearchStats().nodes);
             }
 
             // track the number of nodes computed in this iteration
-            long nodesPrevDepth = search.getSearchStats().nodesByIteration.computeIfAbsent(depth - 1, k -> 0L);
+            long nodesPrevDepth = search.getSearchStats().nodesByIteration.computeIfAbsent(depth - 1, _ -> 0L);
             search.getSearchStats().nodesByIteration.put(depth, search.getSearchStats().nodes - nodesPrevDepth);
 
             // if this is a mate, stop here
@@ -212,18 +231,7 @@ public class SearchIteratorImpl implements SearchIterator {
 
         } while (!stopSearching);
 
-        if (post) {
-            printSearchSummary(depth, startTime, search.getSearchStats());
-        }
-
-        assert(!pv.isEmpty());
-        assert(MoveUtils.isLineValid(pv, board));
-
-        // if we are running with assertions enabled and the native library is loaded, verify equality
-        // we can only do this for fixed depth searches that have not been interrupted.
-        assert(maxTimeMs > 0 || search.isStopped() || iterationsAreEqual(pv, board));
-
-        return pv;
+        return depth;
     }
 
     private boolean iterationsAreEqual(List<Move> javaPV, Board board) {
