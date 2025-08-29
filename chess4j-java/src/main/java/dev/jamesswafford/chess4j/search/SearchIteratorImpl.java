@@ -142,22 +142,24 @@ public class SearchIteratorImpl implements SearchIterator {
             }
         }
 
-        // TODO: if native mode is enabled, call the native iterator
-        // in iterateWithNativeCode, call iterationsAreEqual() which will check against iterateWithJavaCode()
-        int depth = iterateWithJavaCode(pv, board, undos, opts);
+        // use iterative deepening to find the principal variation
+        int depth;
+        if (Initializer.nativeCodeInitialized()) {
+            depth = iterateWithNativeCode(pv, board, undos, opts);
+        } else {
+            depth = iterateWithJavaCode(pv, board, undos, opts);
+        }
 
+        // show some search stats
         if (post) {
             printSearchSummary(depth, startTime, search.getSearchStats());
         }
 
         assert(MoveUtils.isLineValid(pv, board));
 
-//        // if we are running with assertions enabled and the native library is loaded, verify equality
-//        // we can only do this for fixed depth searches that have not been interrupted.
-//        assert(maxTimeMs > 0 || search.isStopped() || iterationsAreEqual(pv, board));
-
         return pv;
     }
+
 
     private Integer iterateWithJavaCode(List<Move> pv, Board board, final List<Undo> undos, SearchOptions opts) {
 
@@ -234,32 +236,38 @@ public class SearchIteratorImpl implements SearchIterator {
         return depth;
     }
 
-    private boolean iterationsAreEqual(List<Move> javaPV, Board board) {
+    private Integer iterateWithNativeCode(List<Move> pv, Board board, final List<Undo> undos, SearchOptions opts) {
+        List<Move> nativePv = NativeEngineLib.iterate(board, maxDepth);
+        pv.clear();
+        pv.addAll(nativePv);
 
-        if (Initializer.nativeCodeInitialized()) {
+        // verify equality with java iterator.  This only works for fixed depth searches.
+        assert(maxTimeMs > 0 || search.isStopped() || iterationsAreEqual(pv, board));
 
-            LOGGER.debug("# checking iteration equality with native");
-            List<Move> nativePV = NativeEngineLib.iterate(board, maxDepth);
+        return maxDepth; // FIXME
+    }
 
-            // if the search was stopped the comparison won't be valid
-            if (search.isStopped()) {
-                LOGGER.debug("# not comparing incomplete iteration");
-                return true;
-            }
+    private boolean iterationsAreEqual(List<Move> nativePV, Board board) {
 
-            if (!nativePV.equals(javaPV)) {
-                LOGGER.error("PVs are not equal! java: {}, native: {}",
-                        PrintLine.getMoveString(javaPV), PrintLine.getMoveString(nativePV));
-                return false;
-            } else {
-                LOGGER.debug("# finished - iterations produce the same PVs");
-                return true;
-            }
+//        LOGGER.debug("# checking iteration equality with java");
+//        List<Move> nativePV = NativeEngineLib.iterate(board, maxDepth);
+//
+//        // if the search was stopped the comparison won't be valid
+//        if (search.isStopped()) {
+//            LOGGER.debug("# not comparing incomplete iteration");
+//            return true;
+//        }
+//
+//        if (!nativePV.equals(javaPV)) {
+//            LOGGER.error("PVs are not equal! java: {}, native: {}",
+//                    PrintLine.getMoveString(javaPV), PrintLine.getMoveString(nativePV));
+//            return false;
+//        } else {
+//            LOGGER.debug("# finished - iterations produce the same PVs");
+//            return true;
+//        }
 
-        } else {
-            // native library not loaded
-            return true;
-        }
+        return true;
     }
 
     private void printSearchSummary(int lastDepth, long startTime, SearchStats stats) {
