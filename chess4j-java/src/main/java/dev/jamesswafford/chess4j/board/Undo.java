@@ -10,8 +10,7 @@ public class Undo {
     private Square epSquare;
     private long zobristKey;
 
-    public Undo(Move move,int fiftyCounter,int castlingRights,
-            Square epSquare,long zobristKey) {
+    public Undo(Move move,int fiftyCounter,int castlingRights, Square epSquare,long zobristKey) {
         this.move=move;
         this.fiftyCounter=fiftyCounter;
         this.castlingRights = castlingRights;
