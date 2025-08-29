@@ -560,8 +560,7 @@ public class AlphaBetaSearch implements Search {
 
     // wrapper so we can clear hash tables when asserts are enabled
     private boolean clearTableWrapper() {
-        TTHolder.getInstance().getHashTable().clear();
-        TTHolder.getInstance().getPawnHashTable().clear();
+        TTHolder.getInstance().clearTables();
         return true;
     }
 

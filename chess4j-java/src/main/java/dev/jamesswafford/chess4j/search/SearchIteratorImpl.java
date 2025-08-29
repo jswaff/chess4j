@@ -238,7 +238,8 @@ public class SearchIteratorImpl implements SearchIterator {
 
     private Integer iterateWithNativeCode(List<Move> pv, Board board, final List<Undo> undos, SearchOptions opts) {
         List<Move> originalPV = new ArrayList<>(pv);
-        List<Move> nativePv = NativeEngineLib.iterate(board, maxDepth);
+        assert(clearTableWrapper());
+        List<Move> nativePv = NativeEngineLib.iterate(board, maxDepth); // TODO: need to replay the history
 
         // verify equality with java iterator.  This only works for fixed depth searches.
         // TODO: are those extra conditions necessary?
@@ -257,7 +258,6 @@ public class SearchIteratorImpl implements SearchIterator {
         // anytime we "cross the boundary" the hash tables need to be cleared
         TTHolder.getInstance().clearTables();
         iterateWithJavaCode(pv, board, undos, opts);
-        TTHolder.getInstance().clearTables();
 
         // if the search was stopped the comparison won't be valid
         if (search.isStopped()) {
@@ -349,4 +349,11 @@ public class SearchIteratorImpl implements SearchIterator {
         double avgEbf = totalEbf / numEbfs;
         LOGGER.info("# ebf avg: {}{}", df.format(avgEbf), sb);
     }
+
+    // wrapper so we can clear hash tables when asserts are enabled
+    private boolean clearTableWrapper() {
+        TTHolder.getInstance().clearTables();
+        return true;
+    }
+
 }

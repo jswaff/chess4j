@@ -7,7 +7,7 @@ ALL: mvn-install
 mvn-install: native-build
 	(cd chess4j-java && mvn install)
 
-native-build: prophet-test
+native-build: prophet-build
 	(cd chess4j-java && mvn generate-sources && cd ../chess4j-native && mvn package)
 
 prophet-test: prophet-build
