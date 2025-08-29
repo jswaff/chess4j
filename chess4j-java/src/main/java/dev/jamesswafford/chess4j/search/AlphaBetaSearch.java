@@ -94,11 +94,11 @@ public class AlphaBetaSearch implements Search {
 
     @Override
     public int search(Board board, List<Undo> undos, SearchParameters searchParameters, SearchOptions opts) {
-//        if (!opts.isAvoidNative() && Initializer.nativeCodeInitialized()) {
-//            return searchWithNativeCode(board, undos, searchParameters, opts);
-//        } else {
+        if (!opts.isAvoidNative() && Initializer.nativeCodeInitialized()) {
+            return searchWithNativeCode(board, undos, searchParameters, opts);
+        } else {
             return searchWithJavaCode(board, undos, searchParameters, opts);
-//        }
+        }
     }
 
     @Override
@@ -266,7 +266,7 @@ public class AlphaBetaSearch implements Search {
             undos.add(board.applyMove(move));
             // check if move was legal
             if (BoardUtils.isOpponentInCheck(board)) {
-                board.undoMove(undos.remove(undos.size()-1));
+                board.undoMove(undos.removeLast());
                 continue;
             }
 
@@ -312,7 +312,7 @@ public class AlphaBetaSearch implements Search {
             }
 
             ++numMovesSearched;
-            board.undoMove(undos.remove(undos.size()-1));
+            board.undoMove(undos.removeLast());
 
             // if the search was stopped we can't trust these results, so don't update the PV
             if (stop) {
@@ -397,12 +397,12 @@ public class AlphaBetaSearch implements Search {
             undos.add(board.applyMove(move));
             // check if move was legal
             if (BoardUtils.isOpponentInCheck(board)) {
-                board.undoMove(undos.remove(undos.size()-1));
+                board.undoMove(undos.removeLast());
                 continue;
             }
 
             int val = -quiescenceSearch(board, undos, -beta, -alpha, opts);
-            board.undoMove(undos.remove(undos.size()-1));
+            board.undoMove(undos.removeLast());
 
             // if the search was stopped just unwind back up
             if (stop) {

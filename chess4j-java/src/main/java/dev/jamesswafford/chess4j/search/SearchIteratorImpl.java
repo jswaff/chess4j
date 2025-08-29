@@ -237,13 +237,11 @@ public class SearchIteratorImpl implements SearchIterator {
     }
 
     private Integer iterateWithNativeCode(List<Move> pv, Board board, final List<Undo> undos, SearchOptions opts) {
-        List<Move> originalPV = new ArrayList<>(pv);
         assert(clearTableWrapper());
         List<Move> nativePv = NativeEngineLib.iterate(board, maxDepth); // TODO: need to replay the history
 
         // verify equality with java iterator.  This only works for fixed depth searches.
-        // TODO: are those extra conditions necessary?
-        assert(maxTimeMs > 0 || search.isStopped() || iterationsAreEqual(nativePv, originalPV, board, undos, opts));
+        assert(iterationsAreEqual(nativePv, board, undos, opts));
 
         pv.clear();
         pv.addAll(nativePv);
@@ -251,12 +249,13 @@ public class SearchIteratorImpl implements SearchIterator {
         return maxDepth; // FIXME
     }
 
-    private boolean iterationsAreEqual(List<Move> nativePV, List<Move> pv, Board board, final List<Undo> undos, SearchOptions opts) {
+    private boolean iterationsAreEqual(List<Move> nativePV, Board board, final List<Undo> undos, SearchOptions opts) {
 
         LOGGER.debug("# checking iteration equality with java");
 
         // anytime we "cross the boundary" the hash tables need to be cleared
         TTHolder.getInstance().clearTables();
+        List<Move> pv = new ArrayList<>();
         iterateWithJavaCode(pv, board, undos, opts);
 
         // if the search was stopped the comparison won't be valid
