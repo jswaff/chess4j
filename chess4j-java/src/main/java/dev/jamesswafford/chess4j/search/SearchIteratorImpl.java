@@ -246,7 +246,7 @@ public class SearchIteratorImpl implements SearchIterator {
         pv.clear();
         pv.addAll(nativePv);
 
-        return maxDepth; // FIXME
+        return maxDepth; // FIXME - may not be true when not doing fixed depth
     }
 
     private boolean iterationsAreEqual(List<Move> nativePV, Board board, final List<Undo> undos, SearchOptions opts) {

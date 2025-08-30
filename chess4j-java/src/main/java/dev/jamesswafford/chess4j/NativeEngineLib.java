@@ -133,21 +133,22 @@ public class NativeEngineLib {
 
 
         // set up iterator with callback function for printing the PV
+        mh_iterate = linker.downcallHandle(lookup.findOrThrow("iterate_from_fen"),
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
         try {
-            MethodHandle mh_pvCallback = MethodHandles.lookup().findStatic(
+            // create a method handle for the Java callback function
+            MethodHandle pvCallbackHandle = MethodHandles.lookup().findStatic(
                     NativeEngineLib.class, "pvCallback",
-                    MethodType.methodType(void.class, MemorySegment.class, int.class, int.class, int.class, long.class, long.class
-                    ));
+                    MethodType.methodType(void.class, MemorySegment.class, int.class, int.class, int.class,
+                            long.class, long.class));
 
             // create a Java description of the native function
+            // typedef void (*pv_func_t)(move_t*, int, int32_t, int32_t, uint64_t, uint64_t);
             FunctionDescriptor pvCallbackDesc = FunctionDescriptor.ofVoid(
-                    ADDRESS.withTargetLayout(JAVA_INT), JAVA_INT, JAVA_INT, JAVA_INT, JAVA_LONG, JAVA_LONG);
+                    ADDRESS.withTargetLayout(JAVA_LONG), JAVA_INT, JAVA_INT, JAVA_INT, JAVA_LONG, JAVA_LONG);
 
             // create a function pointer for pvCallback
-            pvCallbackFunc = linker.upcallStub(mh_pvCallback, pvCallbackDesc, Arena.global());
-
-            mh_iterate = linker.downcallHandle(lookup.findOrThrow("iterate_from_fen"),
-                    FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
+            pvCallbackFunc = linker.upcallStub(pvCallbackHandle, pvCallbackDesc, Arena.global());
 
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
@@ -552,19 +553,22 @@ public class NativeEngineLib {
     }
 
     private static void pvCallback(MemorySegment moves, int numMoves, int depth, int score, long elapsed, long nodes) {
-        System.out.println("pvCallback numMoves: " + numMoves);
+        MemorySegment cMoves = moves.reinterpret(numMoves * JAVA_LONG.byteSize());
         List<Move> pv = new ArrayList<>();
         // read the moves from the PV segment
 //        Color ptm = board.getPlayerToMove();
         Color ptm = Color.BLACK;
         for (int i=0;i<numMoves;i++) {
-            System.out.println("i=" + i);
-            long val = moves.get(JAVA_LONG, i * JAVA_LONG.byteSize());
-//            Move mv = fromNativeMove(val, ptm);
-//            pv.add(mv);
+            long val = cMoves.get(JAVA_LONG, i * JAVA_LONG.byteSize());
+            System.out.print(val + " ");
+            if (i>0) System.out.print(fromNativeMove(val, ptm) + " ");
+
+            //Move mv = fromNativeMove(val, ptm);
+            //pv.add(mv);
             ptm = Color.swap(ptm);
-    }
-        PrintLine.printLine(false, pv, depth, score, elapsed, nodes);
+        }
+        System.out.println();
+        //PrintLine.printLine(false, pv, depth, score, elapsed, nodes);
     }
 
 }
