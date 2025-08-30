@@ -7,11 +7,14 @@ import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import dev.jamesswafford.chess4j.hash.TranspositionTableEntry;
 import dev.jamesswafford.chess4j.io.FENBuilder;
+import dev.jamesswafford.chess4j.io.PrintLine;
 import dev.jamesswafford.chess4j.pieces.*;
 
 import java.io.File;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -61,6 +64,7 @@ public class NativeEngineLib {
 
     // search related methods
     private static MethodHandle mh_iterate;
+    private static MemorySegment pvCallbackFunc;
     private static MethodHandle mh_see;
     private static MethodHandle mh_skipTimeChecks;
     private static MethodHandle mh_stopSearch;
@@ -127,8 +131,28 @@ public class NativeEngineLib {
         mh_getPawnHashHits = linker.downcallHandle(lookup.findOrThrow("get_pawn_hash_hits"),
                 FunctionDescriptor.of(JAVA_LONG));
 
-        mh_iterate = linker.downcallHandle(lookup.findOrThrow("iterate_from_fen"),
-                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, JAVA_INT));
+
+        // set up iterator with callback function for printing the PV
+        try {
+            MethodHandle mh_pvCallback = MethodHandles.lookup().findStatic(
+                    NativeEngineLib.class, "pvCallback",
+                    MethodType.methodType(void.class, MemorySegment.class, int.class, int.class, int.class, long.class, long.class
+                    ));
+
+            // create a Java description of the native function
+            FunctionDescriptor pvCallbackDesc = FunctionDescriptor.ofVoid(
+                    ADDRESS.withTargetLayout(JAVA_INT), JAVA_INT, JAVA_INT, JAVA_INT, JAVA_LONG, JAVA_LONG);
+
+            // create a function pointer for pvCallback
+            pvCallbackFunc = linker.upcallStub(mh_pvCallback, pvCallbackDesc, Arena.global());
+
+            mh_iterate = linker.downcallHandle(lookup.findOrThrow("iterate_from_fen"),
+                    FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
+
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
 
         mh_see = linker.downcallHandle(lookup.findOrThrow("see_from_fen"),
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_LONG));
@@ -378,7 +402,7 @@ public class NativeEngineLib {
             MemorySegment pvSegment = arena.allocate(JAVA_LONG, 250);
             MemorySegment pvSizeSegment = arena.allocate(JAVA_INT);
 
-            int retval = (int) mh_iterate.invoke(cFen, pvSegment, pvSizeSegment, maxDepth);
+            int retval = (int) mh_iterate.invoke(cFen, pvSegment, pvSizeSegment, maxDepth, pvCallbackFunc);
             if (retval != 0) {
                 throw new RuntimeException("error in iterate! retval=" + retval);
             }
@@ -429,8 +453,7 @@ public class NativeEngineLib {
         }
     }
 
-    // TODO: make private
-    public static Move fromNativeMove(Long nativeMove, Color ptm) {
+    private static Move fromNativeMove(Long nativeMove, Color ptm) {
         Square fromSq = Square.valueOf((int)(nativeMove & 0x3F));
         Square toSq = Square.valueOf((int)((nativeMove >> 6) & 0x3F));
         Piece piece = fromNativePiece((int)((nativeMove >> 12) & 0x07), ptm);
@@ -526,6 +549,22 @@ public class NativeEngineLib {
             return 6;
         }
         throw new IllegalArgumentException("Invalid piece type in toNativePiece: " + piece);
+    }
+
+    private static void pvCallback(MemorySegment moves, int numMoves, int depth, int score, long elapsed, long nodes) {
+        System.out.println("pvCallback numMoves: " + numMoves);
+        List<Move> pv = new ArrayList<>();
+        // read the moves from the PV segment
+//        Color ptm = board.getPlayerToMove();
+        Color ptm = Color.BLACK;
+        for (int i=0;i<numMoves;i++) {
+            System.out.println("i=" + i);
+            long val = moves.get(JAVA_LONG, i * JAVA_LONG.byteSize());
+//            Move mv = fromNativeMove(val, ptm);
+//            pv.add(mv);
+            ptm = Color.swap(ptm);
+    }
+        PrintLine.printLine(false, pv, depth, score, elapsed, nodes);
     }
 
 }

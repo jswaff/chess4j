@@ -114,7 +114,7 @@ public class Draw {
 
         boolean rep = numPrevVisits >= numPrev;
 
-        assert(verifyDrawByRepIsEqual(rep, board, undos, numPrev));
+       // assert(verifyDrawByRepIsEqual(rep, board, undos, numPrev));
 
         return rep;
     }

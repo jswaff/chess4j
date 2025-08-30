@@ -78,6 +78,7 @@ public final class Initializer {
                 }
 
                 NativeEngineLib.initializeFFM(libFile);
+                //NativeEngineLib.initializeFFM();
 
                 LOGGER.info("# Prophet initialized.");
             }
