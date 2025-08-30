@@ -75,7 +75,7 @@ public class Move {
     public String toString() {
         String s = from.toString() + to.toString();
         if (promotion != null) {
-            s += "=" + promotion.toString();
+            s += "=" + promotion;
         }
         return s;
     }
