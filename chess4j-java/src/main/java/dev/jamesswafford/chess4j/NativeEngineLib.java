@@ -555,9 +555,10 @@ public class NativeEngineLib {
     private static void pvCallback(MemorySegment moves, int numMoves, int depth, int score, long elapsed, long nodes) {
         MemorySegment cMoves = moves.reinterpret(numMoves * JAVA_LONG.byteSize());
         List<Move> pv = new ArrayList<>();
+
         // read the moves from the PV segment
-//        Color ptm = board.getPlayerToMove();
-        Color ptm = Color.WHITE; // FIXME
+        //  Color ptm = board.getPlayerToMove();
+        Color ptm = Color.WHITE; // FIXME.  inconsequential for printing but should be initialized to ptm when iterate called
         for (int i=0;i<numMoves;i++) {
             long val = cMoves.get(JAVA_LONG, i * JAVA_LONG.byteSize());
             Move mv = fromNativeMove(val, ptm);
