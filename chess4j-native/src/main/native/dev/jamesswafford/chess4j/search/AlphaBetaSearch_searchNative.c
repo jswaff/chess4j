@@ -34,7 +34,7 @@ jobject *g_parent_pv;
 color_t g_ptm;
 
 /* forward decls */
-static void pv_callback(move_line_t*, int32_t, int32_t, uint64_t, uint64_t);
+static void pv_callback(move_t*, int, int32_t, int32_t, uint64_t, uint64_t);
 
 /*
  * Class:     dev_jamesswafford_chess4j_search_AlphaBetaSearch
@@ -176,15 +176,13 @@ cleanup:
 }
 
 
-static void pv_callback(move_line_t* pv, int32_t depth, int32_t score, 
-    uint64_t elapsed, uint64_t num_nodes)
+static void pv_callback(move_t* pv, int num_pv, int32_t depth, int32_t score, uint64_t elapsed, uint64_t num_nodes)
 {
     /* update the parent pv */
     (*g_env)->CallBooleanMethod(g_env, *g_parent_pv, ArrayList_clear);
-    for (int i=0; i < pv->n; i++) {
+    for (int i=0; i < num_pv; i++) {
         /* create Long value representing this move */
-        jobject lval = (*g_env)->CallStaticObjectMethod(
-            g_env, Long, Long_valueOf, (jlong)(pv->mv[i]));
+        jobject lval = (*g_env)->CallStaticObjectMethod(g_env, Long, Long_valueOf, (jlong)(pv[i]));
 
         /* add to java list */
         (*g_env)->CallBooleanMethod(g_env, *g_parent_pv, ArrayList_add, lval);

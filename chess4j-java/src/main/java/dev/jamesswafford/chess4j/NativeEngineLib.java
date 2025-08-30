@@ -557,18 +557,14 @@ public class NativeEngineLib {
         List<Move> pv = new ArrayList<>();
         // read the moves from the PV segment
 //        Color ptm = board.getPlayerToMove();
-        Color ptm = Color.BLACK;
+        Color ptm = Color.BLACK; // FIXME
         for (int i=0;i<numMoves;i++) {
             long val = cMoves.get(JAVA_LONG, i * JAVA_LONG.byteSize());
-            System.out.print(val + " ");
-            if (i>0) System.out.print(fromNativeMove(val, ptm) + " ");
-
-            //Move mv = fromNativeMove(val, ptm);
-            //pv.add(mv);
+            Move mv = fromNativeMove(val, ptm);
+            pv.add(mv);
             ptm = Color.swap(ptm);
         }
-        System.out.println();
-        //PrintLine.printLine(false, pv, depth, score, elapsed, nodes);
+        PrintLine.printLine(false, pv, depth, score, elapsed, nodes);
     }
 
 }
