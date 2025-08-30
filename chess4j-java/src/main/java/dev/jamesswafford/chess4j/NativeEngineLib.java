@@ -9,6 +9,7 @@ import dev.jamesswafford.chess4j.hash.TranspositionTableEntry;
 import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.io.PrintLine;
 import dev.jamesswafford.chess4j.pieces.*;
+import dev.jamesswafford.chess4j.utils.MoveUtils;
 
 import java.io.File;
 import java.lang.foreign.*;
@@ -64,6 +65,7 @@ public class NativeEngineLib {
 
     // search related methods
     private static MethodHandle mh_iterate;
+    private static Board searchBoard;
     private static MemorySegment pvCallbackFunc;
     private static MethodHandle mh_see;
     private static MethodHandle mh_skipTimeChecks;
@@ -395,6 +397,7 @@ public class NativeEngineLib {
 
     public static List<Move> iterate(Board board, int maxDepth) {
         Objects.requireNonNull(mh_iterate, "mh_iterate must not be null");
+        searchBoard = board.deepCopy();
         List<Move> pv = new ArrayList<>();
         String fen = FENBuilder.createFen(board, false);
 
@@ -553,18 +556,20 @@ public class NativeEngineLib {
     }
 
     private static void pvCallback(MemorySegment moves, int numMoves, int depth, int score, long elapsed, long nodes) {
+        assert(numMoves > 0);
         MemorySegment cMoves = moves.reinterpret(numMoves * JAVA_LONG.byteSize());
         List<Move> pv = new ArrayList<>();
 
         // read the moves from the PV segment
-        //  Color ptm = board.getPlayerToMove();
-        Color ptm = Color.WHITE; // FIXME.  inconsequential for printing but should be initialized to ptm when iterate called
+        Color ptm = searchBoard.getPlayerToMove();
         for (int i=0;i<numMoves;i++) {
             long val = cMoves.get(JAVA_LONG, i * JAVA_LONG.byteSize());
             Move mv = fromNativeMove(val, ptm);
             pv.add(mv);
             ptm = Color.swap(ptm);
         }
+
+        assert(MoveUtils.isLineValid(pv, searchBoard));
         PrintLine.printLine(false, pv, depth, score, elapsed, nodes);
     }
 
