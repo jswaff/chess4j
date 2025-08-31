@@ -31,8 +31,8 @@ public class Draw {
     }
 
     public static boolean isDraw(Board board, List<Undo> undos) {
-        return isDrawBy50MoveRule(board) || isDrawLackOfMaterial(board) ||
-                isDrawByRep(board, undos, 1);
+        return isDrawBy50MoveRule(board) || isDrawLackOfMaterial(board); // FIXME ||
+                /*isDrawByRep(board, undos, 1);*/
     }
 
     public static boolean isDrawBy50MoveRule(Board board) {

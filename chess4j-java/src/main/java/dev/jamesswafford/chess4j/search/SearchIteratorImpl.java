@@ -162,6 +162,7 @@ public class SearchIteratorImpl implements SearchIterator {
     }
 
     private Integer iterateWithJavaCode(List<Move> pv, Board board, final List<Undo> undos, SearchOptions opts) {
+        assert(clearTableWrapper());
 
         // prepare to search
         search.initialize();
@@ -254,7 +255,6 @@ public class SearchIteratorImpl implements SearchIterator {
         LOGGER.debug("# checking iteration equality with java");
 
         // anytime we "cross the boundary" the hash tables need to be cleared
-        TTHolder.getInstance().clearTables();
         List<Move> pv = new ArrayList<>();
         iterateWithJavaCode(pv, board, undos, opts);
 

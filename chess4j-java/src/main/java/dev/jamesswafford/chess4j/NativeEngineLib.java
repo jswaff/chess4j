@@ -555,6 +555,7 @@ public class NativeEngineLib {
         throw new IllegalArgumentException("Invalid piece type in toNativePiece: " + piece);
     }
 
+    // TODO: add a boolean to indicate whether the line is from the iterator
     private static void pvCallback(MemorySegment moves, int numMoves, int depth, int score, long elapsed, long nodes) {
         assert(numMoves > 0);
         MemorySegment cMoves = moves.reinterpret(numMoves * JAVA_LONG.byteSize());

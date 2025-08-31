@@ -94,11 +94,12 @@ public class AlphaBetaSearch implements Search {
 
     @Override
     public int search(Board board, List<Undo> undos, SearchParameters searchParameters, SearchOptions opts) {
-        if (!opts.isAvoidNative() && Initializer.nativeCodeInitialized()) {
-            return searchWithNativeCode(board, undos, searchParameters, opts);
-        } else {
-            return searchWithJavaCode(board, undos, searchParameters, opts);
-        }
+//        if (!opts.isAvoidNative() && Initializer.nativeCodeInitialized()) {
+//            return searchWithNativeCode(board, undos, searchParameters, opts);
+//        } else {
+        assert(clearTableWrapper()); // TODO: make sure this matches clear_hash_each_search in iterate.c!
+        return searchWithJavaCode(board, undos, searchParameters, opts);
+//        }
     }
 
     @Override
@@ -463,7 +464,8 @@ public class AlphaBetaSearch implements Search {
         }
 
         // if the search completed then verify equality with the Java implementation.
-        assert (stop || searchesAreEqual(board, undos, searchParameters, opts, nativeScore, nativePV, nativeStats));
+        // FIXME
+//        assert (stop || searchesAreEqual(board, undos, searchParameters, opts, nativeScore, nativePV, nativeStats));
 
         // set the object's stats to the native stats
         searchStats.set(nativeStats);

@@ -1,0 +1,30 @@
+return node counts and verify equality in handler
+
+should not need to clear hash on every search
+
+return full stats and compare for equality
+
+remove JNI code
+
+make from/to native move functions private
+
+remove chess4j-native module!
+
+remove any unneeded handlers (probably the getters for hashing.  also don't need mvvlva.  keep SEE.)
+
+clean up public headers
+
+re-enable draw-by-rep.  find a positions where it matters!  then replay moves to fix.
+
+timed searches
+
+verify pondering
+
+retest positions
+
+consider calling native code to convert to/from native moves
+
+---
+
+doxygen cleanup.  leave on headers only.
+

@@ -44,7 +44,7 @@ static void pv_callback(move_t*, int, int32_t, int32_t, uint64_t, uint64_t);
 JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_searchNative
   (JNIEnv *env, jobject search_obj, jstring board_fen, jobject parent_pv, jint depth,
   jint alpha, jint beta, jobject search_stats, jlong start_time, jlong stop_time, jboolean post,
-  jstring non_reversible_board_fen, jobject move_path)
+  jstring UNUSED(non_reversible_board_fen), jobject UNUSED(move_path))
 {
     jint retval = 0;
 
@@ -55,7 +55,7 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     }
 
     const char* fen = (*env)->GetStringUTFChars(env, board_fen, 0);
-    const char* non_reversible_fen = (*env)->GetStringUTFChars(env, non_reversible_board_fen, 0);
+    //const char* non_reversible_fen = (*env)->GetStringUTFChars(env, non_reversible_board_fen, 0);
 
     /* set the position according to the FEN */
     position_t pos;
@@ -67,13 +67,13 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
     }
 
     /* set the last non-reversible position according to the FEN */
-    position_t non_reversible_pos;
-    if (!set_pos(&non_reversible_pos, non_reversible_fen)) {
-        char error_buffer[255];
-        sprintf(error_buffer, "Could not set last non-reversible position: %s\n", non_reversible_fen);
-        (*env)->ThrowNew(env, IllegalStateException, error_buffer);
-        goto cleanup;
-    }
+//    position_t non_reversible_pos;
+//    if (!set_pos(&non_reversible_pos, non_reversible_fen)) {
+//        char error_buffer[255];
+//        sprintf(error_buffer, "Could not set last non-reversible position: %s\n", non_reversible_fen);
+//        (*env)->ThrowNew(env, IllegalStateException, error_buffer);
+//        goto cleanup;
+//    }
 
     /* remember some variables to use in the PV callback */
     g_env = env;
@@ -96,25 +96,25 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
 
     /* set up the undo stack */
     memset(&native_undos, 0, sizeof(undo_t));
-    jint n_moves = (*env)->CallIntMethod(env, move_path, ArrayList_size);
-    if ((int)n_moves >= (int)pos.fifty_counter) {
-        jint offset = n_moves - pos.fifty_counter;
-        for (uint32_t i=0;i<pos.fifty_counter;i++) {
-            jobject jmove_obj = (*env)->CallObjectMethod(env, move_path, ArrayList_get, offset + i);
-            jlong jmove = (*env)->CallLongMethod(env, jmove_obj, Long_longValue);
-            move_t mv = (move_t)jmove;
-#if 0
-            if (!is_legal_move(mv, &non_reversible_pos)) {
-                char error_buffer[255];
-                sprintf(error_buffer, "Illegal move %d: %s\n", i, move_to_str(mv));
-                (*env)->ThrowNew(env, IllegalStateException, error_buffer);
-                goto cleanup;
-            }
-#endif
-            assert(is_legal_move(mv, &non_reversible_pos));
-            apply_move(&non_reversible_pos, mv, &native_undos[pos.move_counter - pos.fifty_counter + i]);
-        }
-    }
+//    jint n_moves = (*env)->CallIntMethod(env, move_path, ArrayList_size);
+//    if ((int)n_moves >= (int)pos.fifty_counter) {
+//        jint offset = n_moves - pos.fifty_counter;
+//        for (uint32_t i=0;i<pos.fifty_counter;i++) {
+//            jobject jmove_obj = (*env)->CallObjectMethod(env, move_path, ArrayList_get, offset + i);
+//            jlong jmove = (*env)->CallLongMethod(env, jmove_obj, Long_longValue);
+//            move_t mv = (move_t)jmove;
+//#if 0
+//            if (!is_legal_move(mv, &non_reversible_pos)) {
+//                char error_buffer[255];
+//                sprintf(error_buffer, "Illegal move %d: %s\n", i, move_to_str(mv));
+//                (*env)->ThrowNew(env, IllegalStateException, error_buffer);
+//                goto cleanup;
+//            }
+//#endif
+//            assert(is_legal_move(mv, &non_reversible_pos));
+//            apply_move(&non_reversible_pos, mv, &native_undos[pos.move_counter - pos.fifty_counter + i]);
+//        }
+//    }
 
     /* perform the search */
     move_line_t pv;
@@ -170,7 +170,7 @@ JNIEXPORT jint JNICALL Java_dev_jamesswafford_chess4j_search_AlphaBetaSearch_sea
 
 cleanup:
     (*env)->ReleaseStringUTFChars(env, board_fen, fen);
-    (*env)->ReleaseStringUTFChars(env, non_reversible_board_fen, non_reversible_fen);
+    //(*env)->ReleaseStringUTFChars(env, non_reversible_board_fen, non_reversible_fen);
 
     return retval;
 }
