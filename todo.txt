@@ -10,9 +10,13 @@ remove chess4j-native module!
 
 remove any unneeded handlers (probably the getters for hashing.  also don't need mvvlva.  keep SEE.)
 
+clean up "print search stats"
+
 clean up public headers
 
 re-enable draw-by-rep.  find a positions where it matters!  then replay moves to fix.
+
+hash age
 
 timed searches
 

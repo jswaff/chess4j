@@ -97,7 +97,6 @@ public class AlphaBetaSearch implements Search {
 //        if (!opts.isAvoidNative() && Initializer.nativeCodeInitialized()) {
 //            return searchWithNativeCode(board, undos, searchParameters, opts);
 //        } else {
-        assert(clearTableWrapper()); // TODO: make sure this matches clear_hash_each_search in iterate.c!
         return searchWithJavaCode(board, undos, searchParameters, opts);
 //        }
     }
