@@ -239,10 +239,11 @@ public class SearchIteratorImpl implements SearchIterator {
 
     private Integer iterateWithNativeCode(List<Move> pv, Board board, final List<Undo> undos, SearchOptions opts) {
         assert(clearTableWrapper());
-        List<Move> nativePv = NativeEngineLib.iterate(board, maxDepth); // TODO: need to replay the history
+        SearchStats nativeStats = new SearchStats();
+        List<Move> nativePv = NativeEngineLib.iterate(board, maxDepth, nativeStats); // TODO: need to replay the history
 
         // verify equality with java iterator.  This only works for fixed depth searches.
-        assert(iterationsAreEqual(nativePv, board, undos, opts));
+        assert(iterationsAreEqual(nativePv, board, undos, nativeStats, opts));
 
         pv.clear();
         pv.addAll(nativePv);
@@ -250,7 +251,7 @@ public class SearchIteratorImpl implements SearchIterator {
         return maxDepth; // FIXME - may not be true when not doing fixed depth
     }
 
-    private boolean iterationsAreEqual(List<Move> nativePV, Board board, final List<Undo> undos, SearchOptions opts) {
+    private boolean iterationsAreEqual(List<Move> nativePV, Board board, final List<Undo> undos, SearchStats nativeStats, SearchOptions opts) {
 
         LOGGER.debug("# checking iteration equality with java");
 
@@ -264,6 +265,16 @@ public class SearchIteratorImpl implements SearchIterator {
             return true;
         }
 
+        // compare node counts
+        SearchStats stats = search.getSearchStats();
+        if (stats.nodes != nativeStats.nodes || stats.qnodes != nativeStats.qnodes) {
+            LOGGER.error("node counts not equal!  java nodes: {}, native nodes:{}, " +
+                            "java qnodes: {}, native qnodes: {}", stats.nodes, nativeStats.nodes,
+                    stats.qnodes, nativeStats.qnodes);
+            return false;
+        }
+
+        // compare principal variations
         if (!nativePV.equals(pv)) {
             LOGGER.error("PVs are not equal! java: {}, native: {}",
                     PrintLine.getMoveString(pv), PrintLine.getMoveString(nativePV));

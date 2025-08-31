@@ -9,6 +9,7 @@ import dev.jamesswafford.chess4j.hash.TranspositionTableEntry;
 import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.io.PrintLine;
 import dev.jamesswafford.chess4j.pieces.*;
+import dev.jamesswafford.chess4j.search.SearchStats;
 import dev.jamesswafford.chess4j.utils.MoveUtils;
 
 import java.io.File;
@@ -136,7 +137,7 @@ public class NativeEngineLib {
 
         // set up iterator with callback function for printing the PV
         mh_iterate = linker.downcallHandle(lookup.findOrThrow("iterate_from_fen"),
-                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
         try {
             // create a method handle for the Java callback function
             MethodHandle pvCallbackHandle = MethodHandles.lookup().findStatic(
@@ -395,7 +396,7 @@ public class NativeEngineLib {
         }
     }
 
-    public static List<Move> iterate(Board board, int maxDepth) {
+    public static List<Move> iterate(Board board, int maxDepth, SearchStats stats) {
         Objects.requireNonNull(mh_iterate, "mh_iterate must not be null");
         searchBoard = board.deepCopy();
         List<Move> pv = new ArrayList<>();
@@ -405,12 +406,16 @@ public class NativeEngineLib {
             MemorySegment cFen = arena.allocateFrom(fen);
             MemorySegment pvSegment = arena.allocate(JAVA_LONG, 250);
             MemorySegment pvSizeSegment = arena.allocate(JAVA_INT);
+            MemorySegment nodesSegment = arena.allocate(JAVA_LONG);
+            MemorySegment qnodesSegment = arena.allocate(JAVA_LONG);
 
-            int retval = (int) mh_iterate.invoke(cFen, pvSegment, pvSizeSegment, maxDepth, pvCallbackFunc);
+            int retval = (int) mh_iterate.invoke(cFen, pvSegment, pvSizeSegment, nodesSegment, qnodesSegment, maxDepth, pvCallbackFunc);
             if (retval != 0) {
                 throw new RuntimeException("error in iterate! retval=" + retval);
             }
             int lengthPv = pvSizeSegment.get(JAVA_INT, 0);
+            stats.nodes = nodesSegment.get(JAVA_LONG, 0);
+            stats.qnodes = qnodesSegment.get(JAVA_LONG, 0);
 
             // read the moves from the PV segment
             Color ptm = board.getPlayerToMove();
