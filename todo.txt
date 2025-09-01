@@ -1,5 +1,3 @@
-should not need to clear hash on every search
-
 return full stats and compare for equality
 
 remove JNI code

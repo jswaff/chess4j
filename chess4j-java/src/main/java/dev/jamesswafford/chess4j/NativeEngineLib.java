@@ -73,7 +73,7 @@ public class NativeEngineLib {
     private static MethodHandle mh_stopSearch;
 
     public static void initializeFFM() {
-        System.load("/home/james/prophet/install/lib/libprophetlib.so"); // FIXME
+        System.load("/home/james/chess4j/lib/prophet/install/lib/libprophetlib.so"); // FIXME
         SymbolLookup lookup = SymbolLookup.loaderLookup();
         initializeFFM(lookup);
     }
@@ -101,8 +101,8 @@ public class NativeEngineLib {
 
         mh_nnEval = linker.downcallHandle(lookup.findOrThrow("nn_eval_from_fen"),
                 FunctionDescriptor.of(JAVA_INT, ADDRESS));
-//        mh_nnLoadNetwork = linker.downcallHandle(lookup.findOrThrow("load_neural_network"),
-//                FunctionDescriptor.of(JAVA_INT, ADDRESS));
+        mh_nnLoadNetwork = linker.downcallHandle(lookup.findOrThrow("load_neural_network"),
+                FunctionDescriptor.of(JAVA_INT, ADDRESS));
 
         mh_clearMainHashTable = linker.downcallHandle(lookup.findOrThrow("clear_main_hash_table"),
                 FunctionDescriptor.ofVoid());

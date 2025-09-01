@@ -1,15 +1,11 @@
 package dev.jamesswafford.chess4j.board;
 
-import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.init.Initializer;
-import dev.jamesswafford.chess4j.io.DrawBoard;
-import dev.jamesswafford.chess4j.io.FENBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static dev.jamesswafford.chess4j.pieces.Bishop.BLACK_BISHOP;
 import static dev.jamesswafford.chess4j.pieces.Bishop.WHITE_BISHOP;
@@ -112,57 +108,7 @@ public class Draw {
             if (u.getZobristKey()==currentZobristKey) numPrevVisits++;
         }
 
-        boolean rep = numPrevVisits >= numPrev;
-
-       // assert(verifyDrawByRepIsEqual(rep, board, undos, numPrev));
-
-        return rep;
+        return numPrevVisits >= numPrev;
     }
 
-    private static boolean verifyDrawByRepIsEqual(boolean javaRep, Board board, List<Undo> undos, int numPrev) {
-        if (Initializer.nativeCodeInitialized()) {
-            String fen = FENBuilder.createFen(board, true);
-            Board copyBoard = board.deepCopy();
-            assert(undos.size() >= board.getFiftyCounter());
-            for (int i=0;i<board.getFiftyCounter();i++) {
-                int ind = undos.size() - 1 - i;
-                Undo u = undos.get(ind);
-                copyBoard.undoMove(u);
-            }
-            String nonReversibleFen = FENBuilder.createFen(copyBoard, true);
-            List<Long> movePath = undos.stream()
-                    .map(u -> NativeEngineLib.toNativeMove(u.getMove()))
-                    .collect(Collectors.toList());
-
-            try {
-                boolean nativeRep = isDrawByRepNative(fen, nonReversibleFen, movePath, numPrev);
-                if (javaRep != nativeRep) {
-                    LOGGER.error("Draw by rep not equal!  javaRep: {}, nativeRep: {}", javaRep, nativeRep);
-                    LOGGER.error("fen: {}", fen);
-                    DrawBoard.drawBoard(board);
-                    undos.forEach(u -> LOGGER.error(u.toString()));
-                    LOGGER.error("originalFen: {}", nonReversibleFen);
-                    DrawBoard.drawBoard(copyBoard);
-                    return false;
-                }
-                return true;
-            } catch (IllegalStateException e) {
-                LOGGER.error(e);
-                throw e;
-            }
-        } else {
-            return true;
-        }
-    }
-
-    /**
-     *
-     * @param fen - current position
-     * @param nonReversibleFen - position after last non-reversible move
-     * @param movePath - move history since the start of the game
-     * @param numPrev - threshold of previous repetitions to consider this a draw
-     * @return whether the position should be evaluated as a draw by repetition
-     */
-    private static native boolean isDrawByRepNative(String fen, String nonReversibleFen, List<Long> movePath,
-                                                    int numPrev);
 }

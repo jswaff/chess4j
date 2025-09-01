@@ -69,16 +69,16 @@ public final class Initializer {
             if ("Linux".equals(os)) {
                 System.out.println("# Loading Prophet native library.");
                 File libFile = copyLibraryToFile();
-                System.load(libFile.getPath());
+                //System.load(libFile.getPath());
 
                 LOGGER.info("# Prophet loaded, initializing...");
-                if (!prophetInit()) {
-                    attemptToUseNative = false;
-                    throw new IllegalStateException("Could not initialize p4!");
-                }
+                //if (!prophetInit()) {
+                //    attemptToUseNative = false;
+                //    throw new IllegalStateException("Could not initialize p4!");
+                //}
 
-                NativeEngineLib.initializeFFM(libFile);
-                //NativeEngineLib.initializeFFM();
+                //NativeEngineLib.initializeFFM(libFile);
+                NativeEngineLib.initializeFFM();
 
                 LOGGER.info("# Prophet initialized.");
             }
