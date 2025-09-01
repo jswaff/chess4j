@@ -22,7 +22,7 @@ public final class Initializer {
         File libFile = null;
 
         try {
-            is = Initializer.class.getResourceAsStream("/libchess4j-native.so");
+            is = Initializer.class.getResourceAsStream("/libchess4j-native.so"); // FIXME
             if (is == null) {
                 throw new IllegalStateException("Could not get resource.");
             }
@@ -86,8 +86,6 @@ public final class Initializer {
             nativeCodeInitialized = true;
         }
     }
-
-    private static native boolean prophetInit();
 
     public static boolean nativeCodeInitialized() {
         return nativeCodeInitialized;
