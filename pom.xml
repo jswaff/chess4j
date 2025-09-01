@@ -16,7 +16,6 @@
     </properties>
 
     <modules>
-        <module>chess4j-native</module>
         <module>chess4j-java</module>
     </modules>
 
