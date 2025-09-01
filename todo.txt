@@ -1,7 +1,5 @@
 return full stats and compare for equality
 
-remove JNI code
-
 make from/to native move functions private
 
 remove chess4j-native module!

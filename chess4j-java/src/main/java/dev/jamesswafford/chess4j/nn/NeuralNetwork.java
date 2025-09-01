@@ -66,7 +66,6 @@ public class NeuralNetwork {
 
         if (Initializer.nativeCodeInitialized()) {
             LOGGER.debug("# loading network {} into native code", networkFile.getPath());
-            loadNeuralNetworkNative();
             NativeEngineLib.loadNeuralNetwork(networkFile);
         }
     }
@@ -137,7 +136,5 @@ public class NeuralNetwork {
             return true;
         }
     }
-
-    private native void loadNeuralNetworkNative();
 
 }

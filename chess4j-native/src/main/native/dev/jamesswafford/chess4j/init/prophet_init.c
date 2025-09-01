@@ -2,7 +2,6 @@
 
 #include "../prophet-jni.h"
 
-#include "dev/jamesswafford/chess4j/io/PrintLine.h"
 #include "java/lang/IllegalStateException.h"
 #include "java/lang/Long.h"
 #include "java/util/ArrayList.h"
@@ -37,11 +36,6 @@ JNIEXPORT jboolean JNICALL Java_dev_jamesswafford_chess4j_init_Initializer_proph
 
     if (0 != ArrayList_register(env)) {
         (*env)->ThrowNew(env, IllegalStateException, "ArrayList not initialized!");
-        return false;
-    }
-
-    if (0 != PrintLine_register(env)) {
-        (*env)->ThrowNew(env, IllegalStateException, "PrintLine not initialized!");
         return false;
     }
 

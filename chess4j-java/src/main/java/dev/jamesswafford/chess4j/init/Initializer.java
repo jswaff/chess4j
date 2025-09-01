@@ -68,7 +68,7 @@ public final class Initializer {
 
             if ("Linux".equals(os)) {
                 System.out.println("# Loading Prophet native library.");
-                File libFile = copyLibraryToFile();
+                //File libFile = copyLibraryToFile();
                 //System.load(libFile.getPath());
 
                 LOGGER.info("# Prophet loaded, initializing...");
