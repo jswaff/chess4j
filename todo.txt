@@ -1,24 +1,26 @@
+clean up initialization process
+
 return full stats and compare for equality
-
-make from/to native move functions private
-
-remove any unneeded handlers (probably the getters for hashing.  also don't need mvvlva.  keep SEE.)
 
 clean up "print search stats"
 
-clean up public headers
-
 re-enable draw-by-rep.  find a positions where it matters!  then replay moves to fix.
 
-hash age
+hash age - look for "less brittle" way to hash values from chess4j
 
 timed searches
 
 verify pondering
 
+remove any unneeded handlers (probably the getters for hashing.  also don't need mvvlva.  keep SEE.)
+
+clean up public headers
+
 retest positions
 
 consider calling native code to convert to/from native moves
+
+look for any remaining TODO or FIXME statements
 
 ---
 

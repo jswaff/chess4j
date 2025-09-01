@@ -478,21 +478,7 @@ public class NativeEngineLib {
         return converted;
     }
 
-    // TODO: make private
-    public static List<Move> fromNativeLine(List<Long> nativeMoves, Color ptm) {
-        List<Move> moves = new ArrayList<>();
-
-        for (int i=0; i<nativeMoves.size(); i++) {
-            Long nativeMv = nativeMoves.get(i);
-            Color color = (i % 2) == 0 ? ptm : Color.swap(ptm);
-            moves.add(fromNativeMove(nativeMv, color));
-        }
-
-        return moves;
-    }
-
-    // TODO: make private
-    public static Long toNativeMove(Move mv) {
+    private static Long toNativeMove(Move mv) {
         if (mv==null) return 0L;
 
         long nativeMv = (long) mv.from().value() & 0x3F;
