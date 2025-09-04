@@ -17,6 +17,7 @@ import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -137,7 +138,7 @@ public class NativeEngineLib {
 
         // set up iterator with callback function for printing the PV
         mh_iterate = linker.downcallHandle(lookup.findOrThrow("iterate_from_fen"),
-                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
         try {
             // create a method handle for the Java callback function
             MethodHandle pvCallbackHandle = MethodHandles.lookup().findStatic(
@@ -396,6 +397,7 @@ public class NativeEngineLib {
         }
     }
 
+    // TODO: SearchStats should be part of a return value
     public static List<Move> iterate(Board board, int maxDepth, SearchStats stats) {
         Objects.requireNonNull(mh_iterate, "mh_iterate must not be null");
         searchBoard = board.deepCopy();
@@ -403,33 +405,40 @@ public class NativeEngineLib {
         String fen = FENBuilder.createFen(board, false);
 
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment cFen = arena.allocateFrom(fen);
+            GroupLayout statsLayout = MemoryLayout.structLayout(
+                    JAVA_LONG.withName("nodes"),
+                    JAVA_LONG.withName("qnodes"),
+                    JAVA_LONG.withName("fail_highs"),
+                    JAVA_LONG.withName("fail_lows"),
+                    JAVA_LONG.withName("draws"),
+                    JAVA_LONG.withName("hash_fail_highs"),
+                    JAVA_LONG.withName("hash_fail_lows"),
+                    JAVA_LONG.withName("hash_exact_scores")
+            );
+            MemorySegment statsSegment = arena.allocate(statsLayout);
             MemorySegment pvSegment = arena.allocate(JAVA_LONG, 250);
             MemorySegment pvSizeSegment = arena.allocate(JAVA_INT);
-            MemorySegment nodesSegment = arena.allocate(JAVA_LONG);
-            MemorySegment qnodesSegment = arena.allocate(JAVA_LONG);
+            MemorySegment cFen = arena.allocateFrom(fen);
 
-            /* TODO: pass in a structure that maps to stats_t.  return values first, callbacks last
-typedef struct {
-    uint64_t nodes;
-    uint64_t qnodes;
-    uint64_t fail_highs;
-    uint64_t fail_lows;
-    uint64_t draws;
-    uint64_t hash_fail_highs;
-    uint64_t hash_fail_lows;
-    uint64_t hash_exact_scores;
-} stats_t;
-             */
-            int retval = (int) mh_iterate.invoke(cFen, pvSegment, pvSizeSegment, nodesSegment, qnodesSegment, maxDepth, pvCallbackFunc);
+            int retval = (int) mh_iterate.invoke(statsSegment, pvSegment, pvSizeSegment, cFen, maxDepth, pvCallbackFunc);
             if (retval != 0) {
                 throw new RuntimeException("error in iterate! retval=" + retval);
             }
-            int lengthPv = pvSizeSegment.get(JAVA_INT, 0);
-            stats.nodes = nodesSegment.get(JAVA_LONG, 0);
-            stats.qnodes = qnodesSegment.get(JAVA_LONG, 0);
+
+            // copy stats
+            VarHandle nodesHandle = statsLayout.varHandle(PathElement.groupElement("nodes"));
+            VarHandle qnodesHandle = statsLayout.varHandle(PathElement.groupElement("qnodes"));
+            stats.nodes = (long) nodesHandle.get(statsSegment, 0);
+            stats.qnodes = (long) qnodesHandle.get(statsSegment, 0);
+//            stats.failHighs = statsSegment.get(JAVA_LONG, 2 * JAVA_LONG.byteSize());
+//            stats.failLows = statsSegment.get(JAVA_LONG, 3 * JAVA_LONG.byteSize());
+//            stats.draws = statsSegment.get(JAVA_LONG, 4 * JAVA_LONG.byteSize());
+//            stats.hashFailHighs = statsSegment.get(JAVA_LONG, 5 * JAVA_LONG.byteSize());
+//            stats.hashFailLows = statsSegment.get(JAVA_LONG, 6 * JAVA_LONG.byteSize());
+//            stats.hashExactScores = statsSegment.get(JAVA_LONG, 7 * JAVA_LONG.byteSize());
 
             // read the moves from the PV segment
+            int lengthPv = pvSizeSegment.get(JAVA_INT, 0);
             Color ptm = board.getPlayerToMove();
             for (int i=0;i<lengthPv;i++) {
                 long val = pvSegment.get(JAVA_LONG, i * JAVA_LONG.byteSize());
