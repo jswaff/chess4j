@@ -1,8 +1,4 @@
-move lib into chess4j-java and remove parent
-
-clean up initialization process.
-
-return full stats and compare for equality
+return full stats and compare for equality.  return structs first, callbacks last
 
 clean up "print search stats"
 
@@ -23,6 +19,10 @@ retest positions
 consider calling native code to convert to/from native moves
 
 look for any remaining TODO or FIXME statements
+
+move lib into chess4j-java and remove parent
+
+clean up initialization process.
 
 ---
 

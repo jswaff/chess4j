@@ -409,6 +409,18 @@ public class NativeEngineLib {
             MemorySegment nodesSegment = arena.allocate(JAVA_LONG);
             MemorySegment qnodesSegment = arena.allocate(JAVA_LONG);
 
+            /* TODO: pass in a structure that maps to stats_t.  return values first, callbacks last
+typedef struct {
+    uint64_t nodes;
+    uint64_t qnodes;
+    uint64_t fail_highs;
+    uint64_t fail_lows;
+    uint64_t draws;
+    uint64_t hash_fail_highs;
+    uint64_t hash_fail_lows;
+    uint64_t hash_exact_scores;
+} stats_t;
+             */
             int retval = (int) mh_iterate.invoke(cFen, pvSegment, pvSizeSegment, nodesSegment, qnodesSegment, maxDepth, pvCallbackFunc);
             if (retval != 0) {
                 throw new RuntimeException("error in iterate! retval=" + retval);

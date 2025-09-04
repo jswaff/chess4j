@@ -251,7 +251,8 @@ public class SearchIteratorImpl implements SearchIterator {
         return maxDepth; // FIXME - may not be true when not doing fixed depth
     }
 
-    private boolean iterationsAreEqual(List<Move> nativePV, Board board, final List<Undo> undos, SearchStats nativeStats, SearchOptions opts) {
+    private boolean iterationsAreEqual(List<Move> nativePV, Board board, final List<Undo> undos, SearchStats nativeStats,
+                                       SearchOptions opts) {
 
         LOGGER.debug("# checking iteration equality with java");
 
@@ -262,27 +263,36 @@ public class SearchIteratorImpl implements SearchIterator {
         // if the search was stopped the comparison won't be valid
         if (search.isStopped()) {
             LOGGER.debug("# not comparing incomplete iteration");
-            return true;
-        }
-
-        // compare node counts
-        SearchStats stats = search.getSearchStats();
-        if (stats.nodes != nativeStats.nodes || stats.qnodes != nativeStats.qnodes) {
-            LOGGER.error("node counts not equal!  java nodes: {}, native nodes:{}, " +
-                            "java qnodes: {}, native qnodes: {}", stats.nodes, nativeStats.nodes,
-                    stats.qnodes, nativeStats.qnodes);
             return false;
         }
+
+        boolean retval = true;
+        SearchStats stats = search.getSearchStats();
 
         // compare principal variations
         if (!nativePV.equals(pv)) {
             LOGGER.error("PVs are not equal! java: {}, native: {}",
                     PrintLine.getMoveString(pv), PrintLine.getMoveString(nativePV));
-            return false;
-        } else {
-            LOGGER.debug("# finished - iterations produce the same PVs");
-            return true;
+            retval = false;
         }
+
+        // TODO: score
+
+        // compare node counts
+        if (stats.nodes != nativeStats.nodes || stats.qnodes != nativeStats.qnodes) {
+            LOGGER.error("node counts not equal!  java nodes: {}, native nodes:{}, " +
+                            "java qnodes: {}, native qnodes: {}", stats.nodes, nativeStats.nodes,
+                    stats.qnodes, nativeStats.qnodes);
+            retval = false;
+        }
+
+        if (retval) {
+            LOGGER.debug("# finished - iterations are equal");
+        } else {
+            LOGGER.debug("# finished - iterations are NOT equal");
+        }
+
+        return retval;
     }
 
     private void printSearchSummary(int lastDepth, long startTime, SearchStats stats) {
