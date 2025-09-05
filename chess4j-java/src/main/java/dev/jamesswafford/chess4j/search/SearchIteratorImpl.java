@@ -145,16 +145,16 @@ public class SearchIteratorImpl implements SearchIterator {
 
         // use iterative deepening to find the principal variation
         int depth;
-        if (Initializer.nativeCodeInitialized()) {
-            depth = iterateWithNativeCode(pv, board, undos, opts);
+        SearchStats stats = new SearchStats();
+        if (Initializer.nativeCodeInitialized() && !opts.isAvoidNative()) {
+            depth = iterateWithNativeCode(pv, stats, board, undos, opts);
         } else {
             depth = iterateWithJavaCode(pv, board, undos, opts);
+            stats.set(search.getSearchStats());
         }
 
         // show some search stats
-        if (post) {
-            printSearchSummary(depth, startTime, search.getSearchStats());
-        }
+        printSearchSummary(depth, startTime, stats);
 
         assert(MoveUtils.isLineValid(pv, board));
 
@@ -237,13 +237,12 @@ public class SearchIteratorImpl implements SearchIterator {
         return depth;
     }
 
-    private Integer iterateWithNativeCode(List<Move> pv, Board board, final List<Undo> undos, SearchOptions opts) {
+    private Integer iterateWithNativeCode(List<Move> pv, SearchStats stats, Board board, final List<Undo> undos, SearchOptions opts) {
         assert(clearTableWrapper());
-        SearchStats nativeStats = new SearchStats();
-        List<Move> nativePv = NativeEngineLib.iterate(board, maxDepth, nativeStats); // TODO: need to replay the history
+        List<Move> nativePv = NativeEngineLib.iterate(stats, board, maxDepth); // TODO: need to replay the history
 
         // verify equality with java iterator.  This only works for fixed depth searches.
-        assert(iterationsAreEqual(nativePv, board, undos, nativeStats, opts));
+        assert(iterationsAreEqual(nativePv, stats, board, undos, opts));
 
         pv.clear();
         pv.addAll(nativePv);
@@ -251,7 +250,7 @@ public class SearchIteratorImpl implements SearchIterator {
         return maxDepth; // FIXME - may not be true when not doing fixed depth
     }
 
-    private boolean iterationsAreEqual(List<Move> nativePV, Board board, final List<Undo> undos, SearchStats nativeStats,
+    private boolean iterationsAreEqual(List<Move> nativePV, SearchStats nativeStats, Board board, final List<Undo> undos,
                                        SearchOptions opts) {
 
         LOGGER.debug("# checking iteration equality with java");
@@ -285,6 +284,24 @@ public class SearchIteratorImpl implements SearchIterator {
                     stats.qnodes, nativeStats.qnodes);
             retval = false;
         }
+
+        // compare fail highs
+        if (stats.failHighs != nativeStats.failHighs) {
+            LOGGER.error("# fail highs not equal!  java: {}, native: {}", stats.failHighs, nativeStats.failHighs);
+            retval = false;
+        }
+
+        // compare fail lows
+        if (stats.failLows != nativeStats.failLows) {
+            LOGGER.error("# fail lows not equal!  java: {}, native: {}", stats.failLows, nativeStats.failLows);
+            retval = false;
+        }
+
+        // compare number of draws in search
+        /*if (stats.draws != nativeStats.draws) {
+            LOGGER.error("# draws not equal!  java: {}, native: {}", stats.draws, nativeStats.draws);
+            retval = false;
+        }*/
 
         if (retval) {
             LOGGER.debug("# finished - iterations are equal");

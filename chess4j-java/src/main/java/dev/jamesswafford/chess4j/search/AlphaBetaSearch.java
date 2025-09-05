@@ -296,7 +296,7 @@ public class AlphaBetaSearch implements Search {
 
             if (val >= beta) {
                 searchStats.failHighs++;
-                searchStats.failHighByMove.computeIfPresent(numMovesSearched, (k, v) -> v + 1);
+                searchStats.failHighByMove.computeIfPresent(numMovesSearched, (_, v) -> v + 1);
                 TTHolder.getInstance().getHashTable().store(board, LOWER_BOUND, beta, depth, move);
                 if (move.captured()==null && move.promotion()==null) {
                     killerMovesStore.addKiller(ply, move);

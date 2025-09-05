@@ -397,24 +397,32 @@ public class NativeEngineLib {
         }
     }
 
-    // TODO: SearchStats should be part of a return value
-    public static List<Move> iterate(Board board, int maxDepth, SearchStats stats) {
+    public static List<Move> iterate(SearchStats stats, Board board, int maxDepth) {
         Objects.requireNonNull(mh_iterate, "mh_iterate must not be null");
         searchBoard = board.deepCopy();
         List<Move> pv = new ArrayList<>();
         String fen = FENBuilder.createFen(board, false);
 
         try (Arena arena = Arena.ofConfined()) {
-            GroupLayout statsLayout = MemoryLayout.structLayout(
+            MemoryLayout statsLayout = MemoryLayout.structLayout(
                     JAVA_LONG.withName("nodes"),
                     JAVA_LONG.withName("qnodes"),
                     JAVA_LONG.withName("fail_highs"),
                     JAVA_LONG.withName("fail_lows"),
-                    JAVA_LONG.withName("draws"),
                     JAVA_LONG.withName("hash_fail_highs"),
                     JAVA_LONG.withName("hash_fail_lows"),
-                    JAVA_LONG.withName("hash_exact_scores")
+                    JAVA_LONG.withName("hash_exact_scores"),
+                    JAVA_LONG.withName("draws")
             );
+            VarHandle nodesHandle = statsLayout.varHandle(MemoryLayout.PathElement.groupElement("nodes"));
+            VarHandle qnodesHandle = statsLayout.varHandle(MemoryLayout.PathElement.groupElement("qnodes"));
+            VarHandle failHighsHandle = statsLayout.varHandle(MemoryLayout.PathElement.groupElement("fail_highs"));
+            VarHandle failLowsHandle = statsLayout.varHandle(MemoryLayout.PathElement.groupElement("fail_lows"));
+            VarHandle hashFailHighsHandle = statsLayout.varHandle(MemoryLayout.PathElement.groupElement("hash_fail_highs"));
+            VarHandle hashFailLowsHandle = statsLayout.varHandle(MemoryLayout.PathElement.groupElement("hash_fail_lows"));
+            VarHandle hashExactScoresHandle = statsLayout.varHandle(MemoryLayout.PathElement.groupElement("hash_exact_scores"));
+            VarHandle drawsHandle = statsLayout.varHandle(MemoryLayout.PathElement.groupElement("draws"));
+
             MemorySegment statsSegment = arena.allocate(statsLayout);
             MemorySegment pvSegment = arena.allocate(JAVA_LONG, 250);
             MemorySegment pvSizeSegment = arena.allocate(JAVA_INT);
@@ -426,16 +434,14 @@ public class NativeEngineLib {
             }
 
             // copy stats
-            VarHandle nodesHandle = statsLayout.varHandle(PathElement.groupElement("nodes"));
-            VarHandle qnodesHandle = statsLayout.varHandle(PathElement.groupElement("qnodes"));
-            stats.nodes = (long) nodesHandle.get(statsSegment, 0);
-            stats.qnodes = (long) qnodesHandle.get(statsSegment, 0);
-//            stats.failHighs = statsSegment.get(JAVA_LONG, 2 * JAVA_LONG.byteSize());
-//            stats.failLows = statsSegment.get(JAVA_LONG, 3 * JAVA_LONG.byteSize());
-//            stats.draws = statsSegment.get(JAVA_LONG, 4 * JAVA_LONG.byteSize());
-//            stats.hashFailHighs = statsSegment.get(JAVA_LONG, 5 * JAVA_LONG.byteSize());
-//            stats.hashFailLows = statsSegment.get(JAVA_LONG, 6 * JAVA_LONG.byteSize());
-//            stats.hashExactScores = statsSegment.get(JAVA_LONG, 7 * JAVA_LONG.byteSize());
+            stats.nodes = (long) nodesHandle.get(statsSegment, 0L);
+            stats.qnodes = (long) qnodesHandle.get(statsSegment, 0L);
+            stats.failHighs = (long) failHighsHandle.get(statsSegment, 0L);
+            stats.failLows = (long) failLowsHandle.get(statsSegment, 0L);
+            stats.hashFailHighs = (long) hashFailHighsHandle.get(statsSegment, 0L);
+            stats.hashFailLows = (long) hashFailLowsHandle.get(statsSegment, 0L);
+            stats.hashExactScores = (long) hashExactScoresHandle.get(statsSegment, 0L);
+            stats.draws = (long) drawsHandle.get(statsSegment, 0L);
 
             // read the moves from the PV segment
             int lengthPv = pvSizeSegment.get(JAVA_INT, 0);
