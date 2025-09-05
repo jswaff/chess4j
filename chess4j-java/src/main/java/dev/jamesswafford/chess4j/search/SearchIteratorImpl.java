@@ -13,6 +13,8 @@ import dev.jamesswafford.chess4j.io.PrintLine;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
 import dev.jamesswafford.chess4j.utils.MoveUtils;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -144,24 +146,26 @@ public class SearchIteratorImpl implements SearchIterator {
         }
 
         // use iterative deepening to find the principal variation
-        int depth;
+        Tuple2<Integer, Integer> depthScore;
         SearchStats stats = new SearchStats();
         if (Initializer.nativeCodeInitialized() && !opts.isAvoidNative()) {
-            depth = iterateWithNativeCode(pv, stats, board, undos, opts);
+            depthScore = iterateWithNativeCode(pv, stats, board, undos, opts);
         } else {
-            depth = iterateWithJavaCode(pv, board, undos, opts);
+            depthScore = iterateWithJavaCode(pv, board, undos, opts);
             stats.set(search.getSearchStats());
         }
 
         // show some search stats
-        printSearchSummary(depth, startTime, stats);
+        printSearchSummary(depthScore._1, depthScore._2, startTime, stats);
 
         assert(MoveUtils.isLineValid(pv, board));
 
         return pv;
     }
 
-    private Integer iterateWithJavaCode(List<Move> pv, Board board, final List<Undo> undos, SearchOptions opts) {
+    private Tuple2<Integer,Integer> iterateWithJavaCode(List<Move> pv, Board board, final List<Undo> undos,
+                                                        SearchOptions opts)
+    {
         assert(clearTableWrapper());
 
         // prepare to search
@@ -234,30 +238,33 @@ public class SearchIteratorImpl implements SearchIterator {
 
         } while (!stopSearching);
 
-        return depth;
+        return Tuple.of(depth, score);
     }
 
-    private Integer iterateWithNativeCode(List<Move> pv, SearchStats stats, Board board, final List<Undo> undos, SearchOptions opts) {
+    private Tuple2<Integer,Integer> iterateWithNativeCode(List<Move> pv, SearchStats stats, Board board,
+                                                          final List<Undo> undos, SearchOptions opts) {
         assert(clearTableWrapper());
-        List<Move> nativePv = NativeEngineLib.iterate(stats, board, maxDepth); // TODO: need to replay the history
+        List<Move> nativePv = new ArrayList<>();
+        int nativeScore = NativeEngineLib.iterate(nativePv, stats, board, undos, maxDepth);
 
         // verify equality with java iterator.  This only works for fixed depth searches.
-        assert(iterationsAreEqual(nativePv, stats, board, undos, opts));
+        assert(iterationsAreEqual(nativePv, nativeScore, stats, board, undos, opts));
 
         pv.clear();
         pv.addAll(nativePv);
 
-        return maxDepth; // FIXME - may not be true when not doing fixed depth
+        return Tuple.of(maxDepth, nativeScore); // FIXME - may not be true when not doing fixed depth
     }
 
-    private boolean iterationsAreEqual(List<Move> nativePV, SearchStats nativeStats, Board board, final List<Undo> undos,
-                                       SearchOptions opts) {
+    private boolean iterationsAreEqual(List<Move> nativePV, Integer nativeScore, SearchStats nativeStats,
+                                       Board board, final List<Undo> undos, SearchOptions opts) {
 
         LOGGER.debug("# checking iteration equality with java");
 
         // anytime we "cross the boundary" the hash tables need to be cleared
         List<Move> pv = new ArrayList<>();
-        iterateWithJavaCode(pv, board, undos, opts);
+        Tuple2<Integer, Integer> depthScore = iterateWithJavaCode(pv, board, undos, opts);
+        int score = depthScore._2;
 
         // if the search was stopped the comparison won't be valid
         if (search.isStopped()) {
@@ -269,17 +276,21 @@ public class SearchIteratorImpl implements SearchIterator {
         SearchStats stats = search.getSearchStats();
 
         // compare principal variations
-        if (!nativePV.equals(pv)) {
-            LOGGER.error("PVs are not equal! java: {}, native: {}",
+        if (!pv.equals(nativePV)) {
+            LOGGER.error("# PVs not equal! java: {}, native: {}",
                     PrintLine.getMoveString(pv), PrintLine.getMoveString(nativePV));
             retval = false;
         }
 
-        // TODO: score
+        // compare scores
+        if (score != nativeScore) {
+            LOGGER.error("# scores not equal! java: {}, native: {}", score, nativeScore);
+            retval = false;
+        }
 
         // compare node counts
         if (stats.nodes != nativeStats.nodes || stats.qnodes != nativeStats.qnodes) {
-            LOGGER.error("node counts not equal!  java nodes: {}, native nodes:{}, " +
+            LOGGER.error("# node counts not equal!  java nodes: {}, native nodes:{}, " +
                             "java qnodes: {}, native qnodes: {}", stats.nodes, nativeStats.nodes,
                     stats.qnodes, nativeStats.qnodes);
             retval = false;
@@ -312,7 +323,7 @@ public class SearchIteratorImpl implements SearchIterator {
         return retval;
     }
 
-    private void printSearchSummary(int lastDepth, long startTime, SearchStats stats) {
+    private void printSearchSummary(int lastDepth, int lastScore, long startTime, SearchStats stats) {
         DecimalFormat df = new DecimalFormat("0.00");
         DecimalFormat df2 = new DecimalFormat("#,###,##0");
 
@@ -321,7 +332,7 @@ public class SearchIteratorImpl implements SearchIterator {
         double qnodePct = stats.qnodes / (totalNodes/100.0);
 
         LOGGER.info("\n");
-        LOGGER.info("# depth: {}", lastDepth);
+        LOGGER.info("# depth: {}, score: {}", lastDepth, lastScore);
         LOGGER.info("# nodes: {}, interior: {} ({}%), quiescence: {} ({}%)",
                 df2.format(totalNodes), df2.format(stats.nodes), df.format(interiorPct),
                 df2.format(stats.qnodes), df.format(qnodePct));

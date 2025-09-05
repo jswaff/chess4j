@@ -6,6 +6,8 @@ timed searches
 
 verify pondering
 
+review method handlers
+
 clean up public headers
 
 retest positions
@@ -13,6 +15,8 @@ retest positions
 consider calling native code to convert to/from native moves
 
 look for any remaining TODO or FIXME statements
+
+merge into dev branch!
 
 move lib into chess4j-java and remove parent
 
