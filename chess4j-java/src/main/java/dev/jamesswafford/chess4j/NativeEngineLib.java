@@ -67,7 +67,8 @@ public class NativeEngineLib {
     private static MethodHandle mh_getPawnHashProbes;
 
     // search related methods
-    private static MethodHandle mh_iterate;
+    private static MethodHandle mh_iterateFromFen;
+    private static MethodHandle mh_iterateFromMoveHistory;
     private static Board searchBoard;
     private static MemorySegment pvCallbackFunc;
     private static MethodHandle mh_see;
@@ -138,8 +139,10 @@ public class NativeEngineLib {
 
 
         // set up iterator with callback function for printing the PV
-        mh_iterate = linker.downcallHandle(lookup.findOrThrow("iterate_from_fen"),
-                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS));
+        mh_iterateFromFen = linker.downcallHandle(lookup.findOrThrow("iterate_from_fen"),
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
+        mh_iterateFromMoveHistory = linker.downcallHandle(lookup.findOrThrow("iterate_from_move_history"),
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS));
         try {
             // create a method handle for the Java callback function
             MethodHandle pvCallbackHandle = MethodHandles.lookup().findStatic(
@@ -399,9 +402,10 @@ public class NativeEngineLib {
     }
 
     public static Integer iterate(List<Move> pv, SearchStats stats, Board board, final List<Undo> undos, int maxDepth) {
-        Objects.requireNonNull(mh_iterate, "mh_iterate must not be null");
+        Objects.requireNonNull(mh_iterateFromFen, "mh_iterateFromFen must not be null");
+        Objects.requireNonNull(mh_iterateFromMoveHistory, "mh_iterateFromMoveHistory must not be null");
+
         searchBoard = board.deepCopy();
-        String fen = FENBuilder.createFen(board, false);
 
         try (Arena arena = Arena.ofConfined()) {
             MemoryLayout statsLayout = MemoryLayout.structLayout(
@@ -427,18 +431,24 @@ public class NativeEngineLib {
             MemorySegment pvSegment = arena.allocate(JAVA_LONG, 250);
             MemorySegment pvSizeSegment = arena.allocate(JAVA_INT);
             MemorySegment scoreSegment = arena.allocate(JAVA_INT);
-            MemorySegment cFen = arena.allocateFrom(fen);
 
-            // move history
-            Long[] moveHistory = undos.stream().map(u -> toNativeMove(u.getMove())).toArray(Long[]::new);
-            System.out.println("moveHistory.length: " + moveHistory.length);
-            MemorySegment moveHistorySegment = arena.allocate(JAVA_LONG, moveHistory.length);
-            for (int i=0;i<moveHistory.length;i++) {
-                moveHistorySegment.setAtIndex(JAVA_LONG, i, moveHistory[i]);
+            // do we have any move history?
+            int retval;
+            if (!undos.isEmpty()) {
+                Long[] moveHistory = undos.stream().map(u -> toNativeMove(u.getMove())).toArray(Long[]::new);
+                MemorySegment moveHistorySegment = arena.allocate(JAVA_LONG, moveHistory.length);
+                for (int i=0;i<moveHistory.length;i++) {
+                    moveHistorySegment.setAtIndex(JAVA_LONG, i, moveHistory[i]);
+                }
+                retval = (int) mh_iterateFromMoveHistory.invoke(statsSegment, pvSegment, pvSizeSegment, scoreSegment,
+                        moveHistorySegment, moveHistory.length, maxDepth, pvCallbackFunc);
+            } else { // no move history
+                String fen = FENBuilder.createFen(board, false);
+                MemorySegment cFen = arena.allocateFrom(fen);
+                retval = (int) mh_iterateFromFen.invoke(statsSegment, pvSegment, pvSizeSegment, scoreSegment, cFen,
+                        maxDepth, pvCallbackFunc);
             }
 
-            int retval = (int) mh_iterate.invoke(statsSegment, pvSegment, pvSizeSegment, scoreSegment, cFen,
-                    moveHistorySegment, moveHistory.length, maxDepth, pvCallbackFunc);
             if (retval != 0) {
                 throw new RuntimeException("error in iterate! retval=" + retval);
             }

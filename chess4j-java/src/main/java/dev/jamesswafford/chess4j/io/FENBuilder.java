@@ -12,7 +12,7 @@ public final class FENBuilder {
 
     private FENBuilder() { }
 
-    public static String createFen(Board b, boolean includeMoveFields) {
+    public static String createFen(final Board b, boolean includeMoveFields) {
 
         StringBuilder sb = new StringBuilder();
 
