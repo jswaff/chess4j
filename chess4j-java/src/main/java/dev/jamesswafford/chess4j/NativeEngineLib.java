@@ -139,7 +139,7 @@ public class NativeEngineLib {
 
         // set up iterator with callback function for printing the PV
         mh_iterate = linker.downcallHandle(lookup.findOrThrow("iterate_from_fen"),
-                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS));
         try {
             // create a method handle for the Java callback function
             MethodHandle pvCallbackHandle = MethodHandles.lookup().findStatic(
@@ -429,8 +429,16 @@ public class NativeEngineLib {
             MemorySegment scoreSegment = arena.allocate(JAVA_INT);
             MemorySegment cFen = arena.allocateFrom(fen);
 
-            int retval = (int) mh_iterate.invoke(statsSegment, pvSegment, pvSizeSegment, scoreSegment, cFen, maxDepth,
-                    pvCallbackFunc);
+            // move history
+            Long[] moveHistory = undos.stream().map(u -> toNativeMove(u.getMove())).toArray(Long[]::new);
+            System.out.println("moveHistory.length: " + moveHistory.length);
+            MemorySegment moveHistorySegment = arena.allocate(JAVA_LONG, moveHistory.length);
+            for (int i=0;i<moveHistory.length;i++) {
+                moveHistorySegment.setAtIndex(JAVA_LONG, i, moveHistory[i]);
+            }
+
+            int retval = (int) mh_iterate.invoke(statsSegment, pvSegment, pvSizeSegment, scoreSegment, cFen,
+                    moveHistorySegment, moveHistory.length, maxDepth, pvCallbackFunc);
             if (retval != 0) {
                 throw new RuntimeException("error in iterate! retval=" + retval);
             }
