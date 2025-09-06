@@ -27,8 +27,7 @@ public class Draw {
     }
 
     public static boolean isDraw(Board board, List<Undo> undos) {
-        return isDrawBy50MoveRule(board) || isDrawLackOfMaterial(board); // FIXME ||
-                /*isDrawByRep(board, undos, 1);*/
+        return isDrawBy50MoveRule(board) || isDrawLackOfMaterial(board) || isDrawByRep(board, undos, 1);
     }
 
     public static boolean isDrawBy50MoveRule(Board board) {
@@ -86,9 +85,7 @@ public class Draw {
             Square wSq = Square.valueOf(Bitboard.lsb(board.getWhiteBishops()));
             Square bSq = Square.valueOf(Bitboard.lsb(board.getBlackBishops()));
 
-            if (wSq.isLight() != bSq.isLight()) {
-                return false;
-            }
+            return wSq.isLight() == bSq.isLight();
         }
 
         return true;

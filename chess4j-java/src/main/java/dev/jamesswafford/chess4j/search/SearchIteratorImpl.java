@@ -309,10 +309,10 @@ public class SearchIteratorImpl implements SearchIterator {
         }
 
         // compare number of draws in search
-        /*if (stats.draws != nativeStats.draws) {
+        if (stats.draws != nativeStats.draws) {
             LOGGER.error("# draws not equal!  java: {}, native: {}", stats.draws, nativeStats.draws);
             retval = false;
-        }*/
+        }
 
         if (retval) {
             LOGGER.debug("# finished - iterations are equal");
