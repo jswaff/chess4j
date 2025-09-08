@@ -4,7 +4,7 @@
 ALL: mvn-install
 
 
-mvn-install: prophet-build
+mvn-install: prophet-test
 	(cd chess4j-java && mvn install)
 
 prophet-test: prophet-build
