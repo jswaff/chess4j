@@ -13,7 +13,7 @@ public interface SearchIterator {
 
     void setMaxDepth(int maxDepth);
 
-    void setMaxTime(long maxTimeMs);
+    void setMaxTime(int maxTimeMs);
 
     void setPost(boolean post);
 

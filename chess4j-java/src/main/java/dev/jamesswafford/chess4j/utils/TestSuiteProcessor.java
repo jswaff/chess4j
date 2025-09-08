@@ -69,7 +69,7 @@ public class TestSuiteProcessor {
 
         SearchIteratorImpl searchIterator = new SearchIteratorImpl();
         searchIterator.setEarlyExitOk(false);
-        searchIterator.setMaxTime(secondsPerProblem * 1000L);
+        searchIterator.setMaxTime(secondsPerProblem * 1000);
         searchIterator.setMaxDepth(maxDepth);
 
         List<Move> pv = searchIterator.findPvFuture(board, new ArrayList<>()).get();

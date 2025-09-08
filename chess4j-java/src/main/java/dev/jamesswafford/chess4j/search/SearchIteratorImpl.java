@@ -35,7 +35,7 @@ public class SearchIteratorImpl implements SearchIterator {
     }
 
     private int maxDepth = 0;
-    private long maxTimeMs = 0;
+    private int maxTimeMs = 0;
     private boolean post = true;
     private boolean earlyExitOk = true;
     private boolean skipTimeChecks = false;
@@ -56,7 +56,7 @@ public class SearchIteratorImpl implements SearchIterator {
     }
 
     @Override
-    public void setMaxTime(long maxTimeMs) {
+    public void setMaxTime(int maxTimeMs) {
         this.maxTimeMs = maxTimeMs;
     }
 
@@ -246,10 +246,11 @@ public class SearchIteratorImpl implements SearchIterator {
         assert(clearTableWrapper());
         List<Move> nativePv = new ArrayList<>();
         // earlyExitOK, maxTimeMS
-        Tuple2<Integer, Integer> nativeDepthScore = NativeEngineLib.iterate(nativePv, stats, board, undos, maxDepth);
+        Tuple2<Integer, Integer> nativeDepthScore = NativeEngineLib.iterate(nativePv, stats, board, undos,
+                earlyExitOk, maxDepth, maxTimeMs);
 
         // verify equality with java iterator.  This only works for fixed depth searches.
-        assert(iterationsAreEqual(nativePv, nativeDepthScore._2, stats, board, undos, opts));
+        assert(maxTimeMs>0 || iterationsAreEqual(nativePv, nativeDepthScore._2, stats, board, undos, opts));
 
         pv.clear();
         pv.addAll(nativePv);
@@ -270,7 +271,7 @@ public class SearchIteratorImpl implements SearchIterator {
         // if the search was stopped the comparison won't be valid
         if (search.isStopped()) {
             LOGGER.debug("# not comparing incomplete iteration");
-            return false;
+            return true;
         }
 
         boolean retval = true;

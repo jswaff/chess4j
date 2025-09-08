@@ -142,9 +142,11 @@ public class NativeEngineLib {
 
         // set up iterator with callback function for printing the PV
         mh_iterateFromFen = linker.downcallHandle(lookup.findOrThrow("iterate_from_fen"),
-                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_BOOLEAN,
+                        JAVA_INT, JAVA_INT, ADDRESS));
         mh_iterateFromMoveHistory = linker.downcallHandle(lookup.findOrThrow("iterate_from_move_history"),
-                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS));
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT,
+                        JAVA_BOOLEAN, JAVA_INT, JAVA_INT, ADDRESS));
         try {
             // create a method handle for the Java callback function
             MethodHandle pvCallbackHandle = MethodHandles.lookup().findStatic(
@@ -403,7 +405,8 @@ public class NativeEngineLib {
         }
     }
 
-    public static Tuple2<Integer,Integer> iterate(List<Move> pv, SearchStats stats, Board board, final List<Undo> undos, int maxDepth) {
+    public static Tuple2<Integer,Integer> iterate(List<Move> pv, SearchStats stats, Board board, final List<Undo> undos,
+                                                  boolean earlyExitOK, int maxDepth, int maxTimeMs) {
         Objects.requireNonNull(mh_iterateFromFen, "mh_iterateFromFen must not be null");
         Objects.requireNonNull(mh_iterateFromMoveHistory, "mh_iterateFromMoveHistory must not be null");
 
@@ -444,12 +447,12 @@ public class NativeEngineLib {
                     moveHistorySegment.setAtIndex(JAVA_LONG, i, moveHistory[i]);
                 }
                 retval = (int) mh_iterateFromMoveHistory.invoke(statsSegment, pvSegment, pvSizeSegment, depthSegment,
-                        scoreSegment, moveHistorySegment, moveHistory.length, maxDepth, pvCallbackFunc);
+                        scoreSegment, moveHistorySegment, moveHistory.length, earlyExitOK, maxDepth, maxTimeMs, pvCallbackFunc);
             } else { // no move history
                 String fen = FENBuilder.createFen(board, false);
                 MemorySegment cFen = arena.allocateFrom(fen);
                 retval = (int) mh_iterateFromFen.invoke(statsSegment, pvSegment, pvSizeSegment, depthSegment,
-                        scoreSegment, cFen, maxDepth, pvCallbackFunc);
+                        scoreSegment, cFen, earlyExitOK, maxDepth, maxTimeMs, pvCallbackFunc);
             }
 
             if (retval != 0) {
