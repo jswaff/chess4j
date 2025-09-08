@@ -46,7 +46,6 @@ public class NativeEngineLib {
 
     private static MethodHandle mh_init;
     private static MethodHandle mh_eval;
-    private static MethodHandle mh_mvvlva;
     private static MethodHandle mh_movegen;
     private static MethodHandle mh_nnEval;
     private static MethodHandle mh_nnLoadNetwork;
@@ -98,16 +97,16 @@ public class NativeEngineLib {
         mh_eval = linker.downcallHandle(lookup.findOrThrow("eval_from_fen"),
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_BOOLEAN));
 
-        mh_mvvlva = linker.downcallHandle(lookup.findOrThrow("mvvlva"),
-                FunctionDescriptor.of(JAVA_INT, JAVA_LONG));
-
-        mh_movegen = linker.downcallHandle(lookup.findOrThrow("generate_moves_from_fen"),
-                FunctionDescriptor.ofVoid(ADDRESS, ADDRESS, ADDRESS, JAVA_BOOLEAN, JAVA_BOOLEAN));
-
         mh_nnEval = linker.downcallHandle(lookup.findOrThrow("nn_eval_from_fen"),
                 FunctionDescriptor.of(JAVA_INT, ADDRESS));
         mh_nnLoadNetwork = linker.downcallHandle(lookup.findOrThrow("load_neural_network"),
                 FunctionDescriptor.of(JAVA_INT, ADDRESS));
+
+        mh_see = linker.downcallHandle(lookup.findOrThrow("see_from_fen"),
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_LONG));
+
+        mh_movegen = linker.downcallHandle(lookup.findOrThrow("generate_moves_from_fen"),
+                FunctionDescriptor.ofVoid(ADDRESS, ADDRESS, ADDRESS, JAVA_BOOLEAN, JAVA_BOOLEAN));
 
         mh_clearMainHashTable = linker.downcallHandle(lookup.findOrThrow("clear_main_hash_table"),
                 FunctionDescriptor.ofVoid());
@@ -166,9 +165,6 @@ public class NativeEngineLib {
             throw new RuntimeException(e);
         }
 
-
-        mh_see = linker.downcallHandle(lookup.findOrThrow("see_from_fen"),
-                FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_LONG));
         mh_skipTimeChecks = linker.downcallHandle(lookup.findOrThrow("set_skip_time_checks_flag"),
                 FunctionDescriptor.ofVoid(JAVA_BOOLEAN));
         mh_stopSearch = linker.downcallHandle(lookup.findOrThrow("set_search_stop_flag"),
@@ -201,13 +197,41 @@ public class NativeEngineLib {
         }
     }
 
-    public static int mvvlva(Move move) {
-        Objects.requireNonNull(mh_mvvlva, "mh_mvvlva must not be null");
-        long nativeMove = NativeEngineLib.toNativeMove(move);
-        try {
-            return (int) mh_mvvlva.invoke(nativeMove);
+    public static int evalNN(Board board) {
+        Objects.requireNonNull(mh_nnEval, "mh_nnEval must not be null");
+        String fen = FENBuilder.createFen(board, false);
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment cFen = arena.allocateFrom(fen);
+            return (int) mh_nnEval.invoke(cFen);
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke mvvlva");
+            throw new RuntimeException("Unable to invoke evalNN; msg: " + e.getMessage());
+        }
+    }
+
+    public static void loadNeuralNetwork(File networkFile) {
+        Objects.requireNonNull(mh_nnLoadNetwork, "mh_nnLoadNetwork must not be null");
+
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment cNetworkFile = arena.allocateFrom(networkFile.getPath());
+            int retval = (int) mh_nnLoadNetwork.invoke(cNetworkFile);
+            if (retval != 0) {
+                throw new RuntimeException("loading network into native code failed! retval=" + retval);
+            }
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke loadNeuralNetwork; msg: " + e.getMessage());
+        }
+    }
+
+    public static int see(Board board, Move move) {
+        Objects.requireNonNull(mh_see, "mh_see must not be null");
+        String fen = FENBuilder.createFen(board, false);
+        long nativeMove = NativeEngineLib.toNativeMove(move);
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment cFen = arena.allocateFrom(fen);
+            return (int) mh_see.invoke(cFen, nativeMove);
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to invoke see; msg: " + e.getMessage());
         }
     }
 
@@ -236,32 +260,6 @@ public class NativeEngineLib {
             return moves;
         } catch (Throwable e) {
             throw new RuntimeException("Unable to invoke movegen; msg: " + e.getMessage());
-        }
-    }
-
-    public static int evalNN(Board board) {
-        Objects.requireNonNull(mh_nnEval, "mh_nnEval must not be null");
-        String fen = FENBuilder.createFen(board, false);
-
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment cFen = arena.allocateFrom(fen);
-            return (int) mh_nnEval.invoke(cFen);
-        } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke evalNN; msg: " + e.getMessage());
-        }
-    }
-
-    public static void loadNeuralNetwork(File networkFile) {
-        Objects.requireNonNull(mh_nnLoadNetwork, "mh_nnLoadNetwork must not be null");
-
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment cNetworkFile = arena.allocateFrom(networkFile.getPath());
-            int retval = (int) mh_nnLoadNetwork.invoke(cNetworkFile);
-            if (retval != 0) {
-                throw new RuntimeException("loading network into native code failed! retval=" + retval);
-            }
-        } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke loadNeuralNetwork; msg: " + e.getMessage());
         }
     }
 
@@ -486,18 +484,6 @@ public class NativeEngineLib {
             return Tuple.of(depth, score);
         } catch (Throwable e) {
             throw new RuntimeException("Unable to invoke iterate; msg: " + e.getMessage());
-        }
-    }
-
-    public static int see(Board board, Move move) {
-        Objects.requireNonNull(mh_see, "mh_see must not be null");
-        String fen = FENBuilder.createFen(board, false);
-        long nativeMove = NativeEngineLib.toNativeMove(move);
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment cFen = arena.allocateFrom(fen);
-            return (int) mh_see.invoke(cFen, nativeMove);
-        } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke see; msg: " + e.getMessage());
         }
     }
 

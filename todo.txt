@@ -1,7 +1,3 @@
-timed searches
-
-verify pondering
-
 review method handlers
 
 clean up public headers

@@ -1,6 +1,5 @@
 package dev.jamesswafford.chess4j.search;
 
-import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.init.Initializer;
 import dev.jamesswafford.chess4j.pieces.*;
@@ -58,9 +57,6 @@ public class MVVLVA {
             score += scoreCapture(m);
         }
 
-        // if we are running with assertions enabled and the native library is loaded, verify equality
-        assert(mvvlvaAreEqual(score, m));
-
         return score;
     }
 
@@ -75,20 +71,6 @@ public class MVVLVA {
         assert(!m.isEpCapture() || capturedVal==1);
         int moverVal = pieceMap.get(m.piece().getClass());
         return 1000 + (capturedVal * 10) - moverVal;
-    }
-
-    private static boolean mvvlvaAreEqual(int javaScore, Move mv) {
-        if (Initializer.nativeCodeInitialized()) {
-            int nativeScore = NativeEngineLib.mvvlva(mv);
-            if (javaScore != nativeScore) {
-                LOGGER.error("mvvlva not equal!  javaScore: {}, nativeScore: {}, mv: {}", javaScore, nativeScore, mv);
-                LOGGER.error("moving piece: {}; captured: {}; ep?: {}", mv.piece(), mv.captured(), mv.isEpCapture());
-                return false;
-            }
-            return true;
-        } else {
-            return true;
-        }
     }
 
 }
