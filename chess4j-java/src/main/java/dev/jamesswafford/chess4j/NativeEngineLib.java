@@ -12,6 +12,8 @@ import dev.jamesswafford.chess4j.io.PrintLine;
 import dev.jamesswafford.chess4j.pieces.*;
 import dev.jamesswafford.chess4j.search.SearchStats;
 import dev.jamesswafford.chess4j.utils.MoveUtils;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 
 import java.io.File;
 import java.lang.foreign.*;
@@ -140,9 +142,9 @@ public class NativeEngineLib {
 
         // set up iterator with callback function for printing the PV
         mh_iterateFromFen = linker.downcallHandle(lookup.findOrThrow("iterate_from_fen"),
-                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, ADDRESS));
         mh_iterateFromMoveHistory = linker.downcallHandle(lookup.findOrThrow("iterate_from_move_history"),
-                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS));
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS));
         try {
             // create a method handle for the Java callback function
             MethodHandle pvCallbackHandle = MethodHandles.lookup().findStatic(
@@ -401,7 +403,7 @@ public class NativeEngineLib {
         }
     }
 
-    public static Integer iterate(List<Move> pv, SearchStats stats, Board board, final List<Undo> undos, int maxDepth) {
+    public static Tuple2<Integer,Integer> iterate(List<Move> pv, SearchStats stats, Board board, final List<Undo> undos, int maxDepth) {
         Objects.requireNonNull(mh_iterateFromFen, "mh_iterateFromFen must not be null");
         Objects.requireNonNull(mh_iterateFromMoveHistory, "mh_iterateFromMoveHistory must not be null");
 
@@ -430,6 +432,7 @@ public class NativeEngineLib {
             MemorySegment statsSegment = arena.allocate(statsLayout);
             MemorySegment pvSegment = arena.allocate(JAVA_LONG, 250);
             MemorySegment pvSizeSegment = arena.allocate(JAVA_INT);
+            MemorySegment depthSegment = arena.allocate(JAVA_INT);
             MemorySegment scoreSegment = arena.allocate(JAVA_INT);
 
             // do we have any move history?
@@ -440,13 +443,13 @@ public class NativeEngineLib {
                 for (int i=0;i<moveHistory.length;i++) {
                     moveHistorySegment.setAtIndex(JAVA_LONG, i, moveHistory[i]);
                 }
-                retval = (int) mh_iterateFromMoveHistory.invoke(statsSegment, pvSegment, pvSizeSegment, scoreSegment,
-                        moveHistorySegment, moveHistory.length, maxDepth, pvCallbackFunc);
+                retval = (int) mh_iterateFromMoveHistory.invoke(statsSegment, pvSegment, pvSizeSegment, depthSegment,
+                        scoreSegment, moveHistorySegment, moveHistory.length, maxDepth, pvCallbackFunc);
             } else { // no move history
                 String fen = FENBuilder.createFen(board, false);
                 MemorySegment cFen = arena.allocateFrom(fen);
-                retval = (int) mh_iterateFromFen.invoke(statsSegment, pvSegment, pvSizeSegment, scoreSegment, cFen,
-                        maxDepth, pvCallbackFunc);
+                retval = (int) mh_iterateFromFen.invoke(statsSegment, pvSegment, pvSizeSegment, depthSegment,
+                        scoreSegment, cFen, maxDepth, pvCallbackFunc);
             }
 
             if (retval != 0) {
@@ -474,7 +477,10 @@ public class NativeEngineLib {
                 ptm = Color.swap(ptm);
             }
 
-            return scoreSegment.get(JAVA_INT, 0);
+            int depth = depthSegment.get(JAVA_INT, 0);
+            int score = scoreSegment.get(JAVA_INT, 0);
+
+            return Tuple.of(depth, score);
         } catch (Throwable e) {
             throw new RuntimeException("Unable to invoke iterate; msg: " + e.getMessage());
         }

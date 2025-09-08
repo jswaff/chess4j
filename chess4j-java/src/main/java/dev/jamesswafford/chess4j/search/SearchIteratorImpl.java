@@ -226,7 +226,7 @@ public class SearchIteratorImpl implements SearchIterator {
             }
 
             // if we've hit the system defined max iterations, stop here
-            if (maxDepth >= Constants.MAX_ITERATIONS) {
+            if (depth >= Constants.MAX_ITERATIONS) {
                 stopSearching = true;
             }
 
@@ -245,15 +245,16 @@ public class SearchIteratorImpl implements SearchIterator {
                                                           final List<Undo> undos, SearchOptions opts) {
         assert(clearTableWrapper());
         List<Move> nativePv = new ArrayList<>();
-        int nativeScore = NativeEngineLib.iterate(nativePv, stats, board, undos, maxDepth);
+        // earlyExitOK, maxTimeMS
+        Tuple2<Integer, Integer> nativeDepthScore = NativeEngineLib.iterate(nativePv, stats, board, undos, maxDepth);
 
         // verify equality with java iterator.  This only works for fixed depth searches.
-        assert(iterationsAreEqual(nativePv, nativeScore, stats, board, undos, opts));
+        assert(iterationsAreEqual(nativePv, nativeDepthScore._2, stats, board, undos, opts));
 
         pv.clear();
         pv.addAll(nativePv);
 
-        return Tuple.of(maxDepth, nativeScore); // FIXME - may not be true when not doing fixed depth
+        return nativeDepthScore;
     }
 
     private boolean iterationsAreEqual(List<Move> nativePV, Integer nativeScore, SearchStats nativeStats,
