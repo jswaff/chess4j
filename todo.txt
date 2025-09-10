@@ -1,9 +1,3 @@
-clean up public headers
-
-retest positions
-
-consider calling native code to convert to/from native moves
-
 hash age - look for "less brittle" way to hash values from chess4j
 
 look for any remaining TODO or FIXME statements

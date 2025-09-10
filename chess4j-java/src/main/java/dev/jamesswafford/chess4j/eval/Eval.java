@@ -205,7 +205,6 @@ public final class Eval implements Evaluator {
 
     private static boolean verify(EvalWeights weights, int evalScore, Board board, boolean materialOnly, boolean strict) {
 
-        // disable the hash to keep the stats from being inflated, which will cause equality checks to fail
         boolean pawnHashEnabled = Globals.isPawnHashEnabled();
         Globals.setPawnHashEnabled(false);
 
@@ -243,7 +242,7 @@ public final class Eval implements Evaluator {
         if (Initializer.nativeCodeInitialized()) {
             int nativeSccore = NativeEngineLib.eval(board, materialOnly);
             if (javaScore != nativeSccore) {
-                LOGGER.error("evals not equal!  javaScore: {}, nativeScore: {}, materialOnly: {}",
+                LOGGER.error("evals not equal!  java: {}, native: {}, materialOnly: {}",
                         javaScore, nativeSccore, materialOnly);
                 return false;
             }
