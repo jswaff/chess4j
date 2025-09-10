@@ -11,7 +11,7 @@ prophet-test: prophet-build
 	(cd lib/prophet/build && ./prophet_test)
 
 prophet-build:
-	(cd lib/prophet && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make -j8 install)
+	(cd lib/prophet && mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release .. && make -j8 install)
 
 clean: prophet-clean
 
