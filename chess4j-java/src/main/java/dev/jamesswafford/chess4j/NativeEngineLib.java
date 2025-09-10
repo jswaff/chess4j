@@ -480,6 +480,7 @@ public class NativeEngineLib {
 
             int depth = depthSegment.get(JAVA_INT, 0);
             int score = scoreSegment.get(JAVA_INT, 0);
+            //System.out.println("*** depth: " + depth + " score: " + score);
 
             return Tuple.of(depth, score);
         } catch (Throwable e) {

@@ -170,7 +170,7 @@ public class SearchIteratorImpl implements SearchIterator {
 
         // prepare to search
         search.initialize();
-        int depth = 0, score;
+        int depth = 0, score = 0;
         boolean stopSearching = false;
         do {
             ++depth;
@@ -183,7 +183,7 @@ public class SearchIteratorImpl implements SearchIterator {
             }*/
 
             SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
-            score = search.search(board, undos, parameters, opts);
+            int itScore = search.search(board, undos, parameters, opts);
 
             // TODO: this is a failed first attempt at aspiration windows, but I intend to revisit it
             /*if ((score <= alphaBound || score >= betaBound) && !search.isStopped()) {
@@ -204,6 +204,7 @@ public class SearchIteratorImpl implements SearchIterator {
                 break;
             }
 
+            score = itScore;
             long elapsed = System.currentTimeMillis() - opts.getStartTime();
             if (post) {
                 PrintLine.printLine(true, pv, depth, score, elapsed, search.getSearchStats().nodes);
