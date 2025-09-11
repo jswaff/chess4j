@@ -43,10 +43,9 @@ public class PawnTranspositionTableEntry {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof PawnTranspositionTableEntry)) {
+        if (!(obj instanceof PawnTranspositionTableEntry that)) {
             return false;
         }
-        PawnTranspositionTableEntry that = (PawnTranspositionTableEntry)obj;
 
         return (this.zobristKey == that.zobristKey) && (this.val == that.val);
     }

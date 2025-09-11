@@ -1,5 +1,3 @@
-hash age - look for "less brittle" way to hash values from chess4j
-
 look for any remaining TODO or FIXME statements
 
 merge into dev branch!
