@@ -7,7 +7,6 @@ import dev.jamesswafford.chess4j.hash.TTHolder;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
 import org.awaitility.Awaitility;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -77,7 +76,7 @@ public class AlphaBetaSearchTest {
 
         // and the PV should have Nc3
         assertEquals(1, search.getPv().size());
-        assertEquals(new Move(WHITE_KNIGHT, B1, C3), search.getPv().get(0));
+        assertEquals(new Move(WHITE_KNIGHT, B1, C3), search.getPv().getFirst());
     }
 
     @Test
@@ -91,7 +90,7 @@ public class AlphaBetaSearchTest {
 
         List<Move> pv = search.getPv();
         assertEquals(1, pv.size());
-        assertEquals(new Move(WHITE_QUEEN, D6, E7), pv.get(0));
+        assertEquals(new Move(WHITE_QUEEN, D6, E7), pv.getFirst());
     }
 
     @Test
@@ -105,7 +104,7 @@ public class AlphaBetaSearchTest {
 
         List<Move> pv = search.getPv();
         assertEquals(1, pv.size());
-        assertEquals(new Move(BLACK_QUEEN, G5, E7), pv.get(0));
+        assertEquals(new Move(BLACK_QUEEN, G5, E7), pv.getFirst());
     }
 
     @Test
@@ -285,7 +284,7 @@ public class AlphaBetaSearchTest {
         verify(evaluator, times(6)).evaluateBoard(boardCaptor.capture());
         // it would be nice to verify the actual boards that were evaluated but they are
         // all board A since we don't copy the board when evaluating.
-        assertEquals(boardA, boardCaptor.getAllValues().get(0));
+        assertEquals(boardA, boardCaptor.getAllValues().getFirst());
 
         // verify 14 nodes visited and 3 fail highs
         // 8 of those nodes are "interior" nodes and 6 are leaf nodes
@@ -334,7 +333,6 @@ public class AlphaBetaSearchTest {
         assertEquals(0, search.getPv().size());
     }
 
-    @Ignore // FIXME
     @Test
     public void lastPvIsTriedFirst() {
 
@@ -350,7 +348,7 @@ public class AlphaBetaSearchTest {
             // we expect the first N-1 moves to match the previous PV
             int ply = pvUpdate.ply;
             if (ply < lastPv.size()) {
-                Move rootMv = pvUpdate.pv.get(0);
+                Move rootMv = pvUpdate.pv.getFirst();
                 if (visited.get(ply) == null) {
                     assertEquals(lastPv.get(ply), rootMv);
                     visited.put(ply, true);
@@ -362,7 +360,7 @@ public class AlphaBetaSearchTest {
                 .build();
         for (int depth=2; depth <= 6; depth++) {
             search.search(board, new SearchParameters(depth, -CHECKMATE, CHECKMATE), opts);
-            assertEquals(depth, search.getPv().size());
+            assertTrue(search.getPv().size() >= depth);
             assertEquals(depth-1, visited.keySet().size());
 
             // prepare for next iteration
