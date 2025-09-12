@@ -126,7 +126,7 @@ public class SearchIteratorImpl implements SearchIterator {
         if (post) {
             Consumer<PvCallbackDTO> rootPvCallback = pvUpdate -> {
                 if (pvUpdate.ply == 0) {
-                    PrintLine.printLine(false, pvUpdate.pv, pvUpdate.depth, pvUpdate.score, pvUpdate.elapsedMS,
+                    PrintLine.printLine(pvUpdate.pv, pvUpdate.depth, false, pvUpdate.score, pvUpdate.elapsedMS,
                             pvUpdate.nodes);
                 }
             };
@@ -207,7 +207,7 @@ public class SearchIteratorImpl implements SearchIterator {
             score = itScore;
             long elapsed = System.currentTimeMillis() - opts.getStartTime();
             if (post) {
-                PrintLine.printLine(true, pv, depth, score, elapsed, search.getSearchStats().nodes);
+                PrintLine.printLine(pv, depth, true, score, elapsed, search.getSearchStats().nodes);
             }
 
             // track the number of nodes computed in this iteration
