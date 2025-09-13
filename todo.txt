@@ -1,5 +1,3 @@
-add "final for depth" boolean to PV callback
-
 merge into dev branch!
 
 move lib into chess4j-java and remove parent

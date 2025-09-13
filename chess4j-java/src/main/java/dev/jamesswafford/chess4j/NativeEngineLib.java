@@ -150,13 +150,12 @@ public class NativeEngineLib {
             // create a method handle for the Java callback function
             MethodHandle pvCallbackHandle = MethodHandles.lookup().findStatic(
                     NativeEngineLib.class, "pvCallback",
-                    MethodType.methodType(void.class, MemorySegment.class, int.class, int.class, int.class,
-                            long.class, long.class));
+                    MethodType.methodType(void.class, MemorySegment.class, int.class, int.class, boolean.class,
+                            int.class, long.class, long.class));
 
             // create a Java description of the native function
-            // typedef void (*pv_func_t)(move_t*, int, int32_t, int32_t, uint64_t, uint64_t);
             FunctionDescriptor pvCallbackDesc = FunctionDescriptor.ofVoid(
-                    ADDRESS.withTargetLayout(JAVA_LONG), JAVA_INT, JAVA_INT, JAVA_INT, JAVA_LONG, JAVA_LONG);
+                    ADDRESS.withTargetLayout(JAVA_LONG), JAVA_INT, JAVA_INT, JAVA_BOOLEAN, JAVA_INT, JAVA_LONG, JAVA_LONG);
 
             // create a function pointer for pvCallback
             pvCallbackFunc = linker.upcallStub(pvCallbackHandle, pvCallbackDesc, Arena.global());
@@ -590,8 +589,7 @@ public class NativeEngineLib {
         throw new IllegalArgumentException("Invalid piece type in toNativePiece: " + piece);
     }
 
-    // TODO: add a boolean to indicate whether the line is the final for that depth.
-    private static void pvCallback(MemorySegment moves, int numMoves, int depth, int score, long elapsed, long nodes) {
+    private static void pvCallback(MemorySegment moves, int numMoves, int depth, boolean finalForDepth, int score, long elapsed, long nodes) {
         assert(numMoves > 0);
         MemorySegment cMoves = moves.reinterpret(numMoves * JAVA_LONG.byteSize());
         List<Move> pv = new ArrayList<>();
@@ -606,7 +604,7 @@ public class NativeEngineLib {
         }
 
         assert(MoveUtils.isLineValid(pv, searchBoard));
-        PrintLine.printLine(pv, depth, false, score, elapsed, nodes);
+        PrintLine.printLine(pv, depth, finalForDepth, score, elapsed, nodes);
     }
 
 }
