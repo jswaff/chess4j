@@ -1,5 +1,6 @@
 package dev.jamesswafford.chess4j.init;
 
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,7 +22,7 @@ public final class Initializer {
         File libFile = null;
 
         try {
-            is = Initializer.class.getResourceAsStream("/libchess4j-native.so");
+            is = Initializer.class.getResourceAsStream("/libchess4j-native.so"); // FIXME
             if (is == null) {
                 throw new IllegalStateException("Could not get resource.");
             }
@@ -63,43 +64,31 @@ public final class Initializer {
             // which OS are we running on?
 
             String os = System.getProperty("os.name");
-            LOGGER.info("# Detected OS: " + os);
+            LOGGER.info("# Detected OS: {}", os);
 
             if ("Linux".equals(os)) {
                 System.out.println("# Loading Prophet native library.");
-                File libFile = copyLibraryToFile();
-                System.load(libFile.getPath());
-                LOGGER.info("# Prophet loaded, initializing...");
-                if (!prophetInit()) {
-                    attemptToUseNative = false;
-                    throw new IllegalStateException("Could not initialize p4!");
-                }
-                LOGGER.info("# Prophet initialized.");
+                //File libFile = copyLibraryToFile();
+                //System.load(libFile.getPath());
 
-                // load using FFM
-//                Linker linker = Linker.nativeLinker();
-//                SymbolLookup stdlib = linker.defaultLookup();
-//                try (Arena arena = Arena.ofConfined()) {
-//                    SymbolLookup lookup = SymbolLookup.libraryLookup(libFile.getPath(), arena);
-//
-//                    FunctionDescriptor get_rank_descriptor = FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_INT);
-//                    MethodHandle rankFunc = linker.downcallHandle(lookup.findOrThrow("get_rank"), get_rank_descriptor);
-//                    try {
-//                        LOGGER.info("rank 4: " + rankFunc.invoke(4));
-//                        LOGGER.info("rank 61: " + rankFunc.invoke(61));
-//                    } catch (Throwable e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                }
+                LOGGER.info("# Prophet loaded, initializing...");
+                //if (!prophetInit()) {
+                //    attemptToUseNative = false;
+                //    throw new IllegalStateException("Could not initialize p4!");
+                //}
+
+                //NativeEngineLib.initializeFFM(libFile);
+                NativeEngineLib.initializeFFM();
+
+                LOGGER.info("# Prophet initialized.");
             }
 
             nativeCodeInitialized = true;
         }
     }
 
-    private static native boolean prophetInit();
-
     public static boolean nativeCodeInitialized() {
         return nativeCodeInitialized;
     }
+
 }

@@ -10,8 +10,12 @@
     <version>6.2</version>
     <packaging>pom</packaging>
 
+    <properties>
+        <maven.compiler.source>24</maven.compiler.source>
+        <maven.compiler.target>24</maven.compiler.target>
+    </properties>
+
     <modules>
-        <module>chess4j-native</module>
         <module>chess4j-java</module>
     </modules>
 

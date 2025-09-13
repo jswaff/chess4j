@@ -3,10 +3,12 @@ package dev.jamesswafford.chess4j.hash;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.pieces.*;
+import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public class TranspositionTableEntry {
 
     private final long zobristKey;
@@ -93,12 +95,6 @@ public class TranspositionTableEntry {
         return TranspositionTableEntryType.values[(int)(val & 3)];
     }
 
-    public long getZobristKey() {
-        return zobristKey;
-    }
-
-    public long getVal() { return val; }
-
     public int getScore() {
         return (int)((val >> 10) & 0xFFFF) - 32767;
     }
@@ -135,10 +131,9 @@ public class TranspositionTableEntry {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof TranspositionTableEntry)) {
+        if (!(obj instanceof TranspositionTableEntry that)) {
             return false;
         }
-        TranspositionTableEntry that = (TranspositionTableEntry)obj;
 
         return (this.zobristKey == that.zobristKey) && (this.val == that.val);
     }

@@ -1,8 +1,8 @@
 package dev.jamesswafford.chess4j.hash;
 
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.init.Initializer;
-import dev.jamesswafford.chess4j.io.FENBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,14 +40,14 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
         clearStats();
         Arrays.fill(table, null);
         if (Initializer.nativeCodeInitialized()) {
-            clearNative();
+            NativeEngineLib.clearPawnHashTable();
         }
     }
 
     @Override
     public long getNumCollisions() {
         if (Initializer.nativeCodeInitialized()) {
-            return getNumCollisionsNative();
+            return NativeEngineLib.getPawnHashCollisions();
         }
         return numCollisions;
     }
@@ -55,7 +55,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     @Override
     public long getNumHits() {
         if (Initializer.nativeCodeInitialized()) {
-            return getNumHitsNative();
+            return NativeEngineLib.getPawnHashHits();
         }
         return numHits;
     }
@@ -63,7 +63,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     @Override
     public long getNumProbes() {
         if (Initializer.nativeCodeInitialized()) {
-            return getNumProbesNative();
+            return NativeEngineLib.getPawnHashProbes();
         }
         return numProbes;
     }
@@ -72,9 +72,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     // produce equivalent results.
     public PawnTranspositionTableEntry probe(Board board) {
         if (Initializer.nativeCodeInitialized()) {
-            String fen = FENBuilder.createFen(board, false);
-            long nativeVal = probeNative(fen);
-            return nativeVal==0 ? null : new PawnTranspositionTableEntry(board.getPawnKey(), nativeVal);
+            return NativeEngineLib.probePawnHashTable(board);
         } else {
             return probe(board.getPawnKey());
         }
@@ -98,12 +96,12 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     }
 
     public void store(Board board, int mgscore, int egscore) {
-        PawnTranspositionTableEntry entry = new PawnTranspositionTableEntry(board.getPawnKey(), mgscore, egscore);
+        long key = board.getPawnKey();
+        PawnTranspositionTableEntry entry = new PawnTranspositionTableEntry(key, mgscore, egscore);
         if (Initializer.nativeCodeInitialized()) {
-            String fen = FENBuilder.createFen(board, false);
-            storeNative(fen, entry.getVal());
+            NativeEngineLib.storePawnHashTable(board, entry);
         } else {
-            table[getTableIndex(board.getPawnKey())] = entry;
+            table[getTableIndex(key)] = entry;
         }
     }
 
@@ -117,7 +115,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     @Override
     protected void resizeTable(long sizeBytes) {
         if (Initializer.nativeCodeInitialized()) {
-            resizeNative(sizeBytes);
+            NativeEngineLib.resizePawnHashTable(sizeBytes);
         } else {
             createTable(sizeBytes);
         }
@@ -132,19 +130,5 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     public int sizeOfEntry() {
         return PawnTranspositionTableEntry.sizeOf();
     }
-
-    private native void clearNative();
-
-    private native long getNumCollisionsNative();
-
-    private native long getNumHitsNative();
-
-    private native long getNumProbesNative();
-
-    private native void resizeNative(long sizeBytes);
-
-    private native long probeNative(String fen);
-
-    private native void storeNative(String fen, long val);
 
 }

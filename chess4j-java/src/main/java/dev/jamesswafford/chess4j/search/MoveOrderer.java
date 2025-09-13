@@ -4,6 +4,7 @@ import dev.jamesswafford.chess4j.Constants;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
+import lombok.Getter;
 
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +33,7 @@ public class MoveOrderer {
     private int badCapturesIndex;
     private int numBadCaptures;
 
+    @Getter
     private MoveOrderStage nextMoveOrderStage = MoveOrderStage.PV;
 
     public MoveOrderer(Board board, MoveGenerator moveGenerator, Move pvMove, Move hashMove, Move killer1,
@@ -47,10 +49,6 @@ public class MoveOrderer {
         this.generateNonCaptures = generateNonCaptures;
         this.playBadCaptures = playBadCaptures;
         this.specialMovesPlayed = new HashSet<>();
-    }
-
-    public MoveOrderStage getNextMoveOrderStage() {
-        return nextMoveOrderStage;
     }
 
     public Move selectNextMove() {

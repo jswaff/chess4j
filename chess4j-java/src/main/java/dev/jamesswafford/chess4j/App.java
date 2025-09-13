@@ -42,18 +42,13 @@ public final class App {
         warmUp();
 
         String mode = commandLine.hasOption("mode") ? commandLine.getOptionValue("mode") : "normal";
-        if ("bookbuild".equals(mode)) {
-            runInBookBuildingMode(commandLine);
-        } else if ("test".equals(mode)) {
-            runInTestMode(commandLine);
-        } else if ("label".equals(mode)) {
-            runInLabelMode(commandLine);
-        } else if ("tune".equals(mode)) {
-            runInTuningMode(commandLine);
-        } else if ("normal".equals(mode)) {
-            repl();
-        } else {
-            LOGGER.error("unknown runtime mode {}", mode);
+        switch (mode) {
+            case "bookbuild" -> runInBookBuildingMode(commandLine);
+            case "test" -> runInTestMode(commandLine);
+            case "label" -> runInLabelMode(commandLine);
+            case "tune" -> runInTuningMode(commandLine);
+            case "normal" -> repl();
+            case null, default -> LOGGER.error("unknown runtime mode {}", mode);
         }
     }
 

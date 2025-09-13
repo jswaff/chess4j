@@ -1,10 +1,10 @@
 package dev.jamesswafford.chess4j.hash;
 
 import dev.jamesswafford.chess4j.Constants;
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.init.Initializer;
-import dev.jamesswafford.chess4j.io.FENBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,14 +42,14 @@ public class TranspositionTable extends AbstractTranspositionTable {
         clearStats();
         Arrays.fill(table, null);
         if (Initializer.nativeCodeInitialized()) {
-            clearNative();
+            NativeEngineLib.clearMainHashTable();
         }
     }
 
     @Override
     public long getNumCollisions() {
         if (Initializer.nativeCodeInitialized()) {
-            return getNumCollisionsNative();
+            return NativeEngineLib.getMainHashCollisions();
         }
         return numCollisions;
     }
@@ -57,7 +57,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
     @Override
     public long getNumHits() {
         if (Initializer.nativeCodeInitialized()) {
-            return getNumHitsNative();
+            return NativeEngineLib.getMainHashHits();
         }
         return numHits;
     }
@@ -65,7 +65,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
     @Override
     public long getNumProbes() {
         if (Initializer.nativeCodeInitialized()) {
-            return getNumProbesNative();
+            return NativeEngineLib.getMainHashProbes();
         }
         return numProbes;
     }
@@ -88,9 +88,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     public TranspositionTableEntry probe(Board board) {
         if (Initializer.nativeCodeInitialized()) {
-            String fen = FENBuilder.createFen(board, false);
-            long nativeVal = probeNative(fen);
-            return nativeVal==0 ? null : new TranspositionTableEntry(board.getZobristKey(), nativeVal);
+            return NativeEngineLib.probeMainHashTable(board);
         } else {
             return probe(board.getZobristKey());
         }
@@ -114,13 +112,12 @@ public class TranspositionTable extends AbstractTranspositionTable {
     }
 
     public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move) {
+        long key = board.getZobristKey();
+        TranspositionTableEntry entry = buildHashTableEntry(key, entryType, score, depth, move);
         if (Initializer.nativeCodeInitialized()) {
-            TranspositionTableEntry entry = buildHashTableEntry(board.getZobristKey(), entryType, score, depth, move);
-            String fen = FENBuilder.createFen(board, false);
-            storeNative(fen, entry.getVal());
+            NativeEngineLib.storeMainHashTable(board, entry);
         } else {
-            long key = board.getZobristKey();
-            table[getTableIndex(key)] = buildHashTableEntry(key, entryType, score, depth, move);
+            table[getTableIndex(key)] = entry;
         }
     }
 
@@ -160,7 +157,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
     @Override
     protected void resizeTable(long sizeBytes) {
         if (Initializer.nativeCodeInitialized()) {
-            resizeNative(sizeBytes);
+            NativeEngineLib.resizeMainHashTable(sizeBytes);
         } else {
             createTable(sizeBytes);
         }
@@ -175,19 +172,5 @@ public class TranspositionTable extends AbstractTranspositionTable {
     public int sizeOfEntry() {
         return TranspositionTableEntry.sizeOf();
     }
-
-    private native void clearNative();
-
-    private native long getNumCollisionsNative();
-
-    private native long getNumHitsNative();
-
-    private native long getNumProbesNative();
-
-    private native void resizeNative(long sizeBytes);
-
-    private native long probeNative(String fen);
-
-    private native void storeNative(String fen, long val);
 
 }

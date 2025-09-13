@@ -4,17 +4,14 @@
 ALL: mvn-install
 
 
-mvn-install: native-build
+mvn-install: prophet-test
 	(cd chess4j-java && mvn install)
-
-native-build: prophet-test
-	(cd chess4j-java && mvn generate-sources && cd ../chess4j-native && mvn package)
 
 prophet-test: prophet-build
 	(cd lib/prophet/build && ./prophet_test)
 
 prophet-build:
-	(cd lib/prophet && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make -j8 install)
+	(cd lib/prophet && mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release .. && make -j8 install)
 
 clean: prophet-clean
 

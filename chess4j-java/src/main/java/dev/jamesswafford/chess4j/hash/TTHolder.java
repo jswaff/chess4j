@@ -1,5 +1,8 @@
 package dev.jamesswafford.chess4j.hash;
 
+import lombok.Getter;
+
+@Getter
 public class TTHolder {
 
     private static final TTHolder ttHolder = new TTHolder();
@@ -12,14 +15,6 @@ public class TTHolder {
     private TTHolder() {
         hashTable = new TranspositionTable();
         pawnHashTable = new PawnTranspositionTable();
-    }
-
-    public TranspositionTable getHashTable() {
-        return hashTable;
-    }
-
-    public PawnTranspositionTable getPawnHashTable() {
-        return pawnHashTable;
     }
 
     public void clearTables() {

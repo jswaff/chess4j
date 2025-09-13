@@ -1,5 +1,6 @@
 package dev.jamesswafford.chess4j.nn;
 
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.init.Initializer;
 import dev.jamesswafford.chess4j.io.DrawBoard;
@@ -64,8 +65,8 @@ public class NeuralNetwork {
         }
 
         if (Initializer.nativeCodeInitialized()) {
-            LOGGER.debug("# loading network into native code");
-            loadNeuralNetworkNative();
+            LOGGER.debug("# loading network {} into native code", networkFile.getPath());
+            NativeEngineLib.loadNeuralNetwork(networkFile);
         }
     }
 
@@ -123,26 +124,17 @@ public class NeuralNetwork {
 
     private boolean verifyNativeEvalIsEqual(int javaScore, Board board) {
         if (Initializer.nativeCodeInitialized()) {
-            try {
-                String fen = FENBuilder.createFen(board, false);
-                int nativeSccore = nnEvalNative(fen);
-                if (javaScore != nativeSccore) {
-                    DrawBoard.drawBoard(board);
-                    LOGGER.error(fen);
-                    LOGGER.error("nn evals not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeSccore);
-                    return false;
-                }
-                return true;
-            } catch (IllegalStateException e) {
-                LOGGER.error(e);
-                throw e;
+            int nativeScore = NativeEngineLib.evalNN(board);
+            if (javaScore != nativeScore) {
+                DrawBoard.drawBoard(board);
+                LOGGER.error("nn eval not equal!  java: {}, native: {} fen {}",
+                        javaScore, nativeScore, FENBuilder.createFen(board, false));
+                return false;
             }
+            return true;
         } else {
             return true;
         }
     }
 
-    private native void loadNeuralNetworkNative();
-
-    private native int nnEvalNative(String fen);
 }

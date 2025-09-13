@@ -1,6 +1,7 @@
 package dev.jamesswafford.chess4j.eval;
 
 import dev.jamesswafford.chess4j.Globals;
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Bitboard;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Color;
@@ -8,7 +9,6 @@ import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import dev.jamesswafford.chess4j.hash.TTHolder;
 import dev.jamesswafford.chess4j.init.Initializer;
-import dev.jamesswafford.chess4j.io.FENBuilder;
 import io.vavr.Function3;
 import io.vavr.Function4;
 import io.vavr.Tuple2;
@@ -205,7 +205,6 @@ public final class Eval implements Evaluator {
 
     private static boolean verify(EvalWeights weights, int evalScore, Board board, boolean materialOnly, boolean strict) {
 
-        // disable the hash to keep the stats from being inflated, which will cause equality checks to fail
         boolean pawnHashEnabled = Globals.isPawnHashEnabled();
         Globals.setPawnHashEnabled(false);
 
@@ -241,19 +240,13 @@ public final class Eval implements Evaluator {
 
     private static boolean verifyNativeEvalIsEqual(int javaScore, Board board, boolean materialOnly) {
         if (Initializer.nativeCodeInitialized()) {
-            try {
-                String fen = FENBuilder.createFen(board, false);
-                int nativeSccore = evalNative(fen, materialOnly);
-                if (javaScore != nativeSccore) {
-                    LOGGER.error("evals not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeSccore +
-                            ", materialOnly: " + materialOnly);
-                    return false;
-                }
-                return true;
-            } catch (IllegalStateException e) {
-                LOGGER.error(e);
-                throw e;
+            int nativeSccore = NativeEngineLib.eval(board, materialOnly);
+            if (javaScore != nativeSccore) {
+                LOGGER.error("evals not equal!  java: {}, native: {}, materialOnly: {}",
+                        javaScore, nativeSccore, materialOnly);
+                return false;
             }
+            return true;
         } else {
             return true;
         }

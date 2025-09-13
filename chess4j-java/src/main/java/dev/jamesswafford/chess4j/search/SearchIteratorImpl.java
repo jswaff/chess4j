@@ -1,6 +1,7 @@
 package dev.jamesswafford.chess4j.search;
 
 import dev.jamesswafford.chess4j.Constants;
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.board.Undo;
@@ -8,11 +9,12 @@ import dev.jamesswafford.chess4j.hash.PawnTranspositionTable;
 import dev.jamesswafford.chess4j.hash.TTHolder;
 import dev.jamesswafford.chess4j.hash.TranspositionTable;
 import dev.jamesswafford.chess4j.init.Initializer;
-import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.io.PrintLine;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
 import dev.jamesswafford.chess4j.utils.MoveUtils;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,7 +35,7 @@ public class SearchIteratorImpl implements SearchIterator {
     }
 
     private int maxDepth = 0;
-    private long maxTimeMs = 0;
+    private int maxTimeMs = 0;
     private boolean post = true;
     private boolean earlyExitOk = true;
     private boolean skipTimeChecks = false;
@@ -54,7 +56,7 @@ public class SearchIteratorImpl implements SearchIterator {
     }
 
     @Override
-    public void setMaxTime(long maxTimeMs) {
+    public void setMaxTime(int maxTimeMs) {
         this.maxTimeMs = maxTimeMs;
     }
 
@@ -105,29 +107,31 @@ public class SearchIteratorImpl implements SearchIterator {
     private List<Move> findPrincipalVariation(Board board, final List<Undo> undos) {
 
         List<Move> moves = moveGenerator.generateLegalMoves(board);
-        LOGGER.debug("# position has " + moves.size() + " move(s)");
+        assert(!moves.isEmpty());
+        LOGGER.debug("# position has {} move(s)", moves.size());
+
+        // if there is only one legal move, there is no need to search
         if (earlyExitOk && moves.size()==1) {
-            return Collections.singletonList(moves.get(0));
+            return List.of(moves.getFirst());
         }
 
         // initialize the PV to ensure we have a valid move to play
         moves.sort(Comparator.comparingInt(MVVLVA::score).reversed());
-        List<Move> pv = Collections.singletonList(moves.get(0));
+        List<Move> pv = new ArrayList<>();
+        pv.add(moves.getFirst());
 
-        // create a callback to print the PV when it changes
+        // set up the search options
         long startTime = System.currentTimeMillis();
         SearchOptions opts = SearchOptions.builder().startTime(startTime).build();
-        Consumer<PvCallbackDTO> rootPvCallback = pvUpdate -> {
-            if (pvUpdate.ply == 0) {
-                PrintLine.printLine(false, pvUpdate.pv, pvUpdate.depth, pvUpdate.score, pvUpdate.elapsedMS,
-                        pvUpdate.nodes);
-            }
-        };
         if (post) {
+            Consumer<PvCallbackDTO> rootPvCallback = pvUpdate -> {
+                if (pvUpdate.ply == 0) {
+                    PrintLine.printLine(pvUpdate.pv, pvUpdate.depth, false, pvUpdate.score, pvUpdate.elapsedMS,
+                            pvUpdate.nodes);
+                }
+            };
             opts.setPvCallback(rootPvCallback);
         }
-        int depth = 0, score = 0;
-        search.initialize();
 
         if (maxTimeMs > 0) {
             opts.setStopTime(opts.getStartTime() + maxTimeMs);
@@ -141,6 +145,32 @@ public class SearchIteratorImpl implements SearchIterator {
             }
         }
 
+        // use iterative deepening to find the principal variation
+        Tuple2<Integer, Integer> depthScore;
+        SearchStats stats = new SearchStats();
+        if (Initializer.nativeCodeInitialized() && !opts.isAvoidNative()) {
+            depthScore = iterateWithNativeCode(pv, stats, board, undos, opts);
+        } else {
+            depthScore = iterateWithJavaCode(pv, board, undos, opts);
+            stats.set(search.getSearchStats());
+        }
+
+        // show some search stats
+        printSearchSummary(depthScore._1, depthScore._2, startTime, stats);
+
+        assert(MoveUtils.isLineValid(pv, board));
+
+        return pv;
+    }
+
+    private Tuple2<Integer,Integer> iterateWithJavaCode(List<Move> pv, Board board, final List<Undo> undos,
+                                                        SearchOptions opts)
+    {
+        assert(clearTableWrapper());
+
+        // prepare to search
+        search.initialize();
+        int depth = 0, score = 0;
         boolean stopSearching = false;
         do {
             ++depth;
@@ -153,10 +183,9 @@ public class SearchIteratorImpl implements SearchIterator {
             }*/
 
             SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
-            score = search.search(board, undos, parameters, opts);
+            int itScore = search.search(board, undos, parameters, opts);
 
-            // TODO: this is a failed first attempt at aspiration windows, but I intend to revisit it after
-            // the search matures a little more.
+            // TODO: this is a failed first attempt at aspiration windows, but I intend to revisit it
             /*if ((score <= alphaBound || score >= betaBound) && !search.isStopped()) {
                 LOGGER.debug("# researching; score: " + score + ", a: " + alphaBound + ", b: " + betaBound);
                 parameters = new SearchParameters(depth, -INFINITY, INFINITY);
@@ -167,20 +196,22 @@ public class SearchIteratorImpl implements SearchIterator {
             // last iteration's PV was tried first
             List<Move> searchPV = search.getPv();
             if (!searchPV.isEmpty()) {
-                pv = new ArrayList<>(searchPV);
+                pv.clear();
+                pv.addAll(searchPV);
             }
 
             if (search.isStopped()) {
                 break;
             }
 
-            long elapsed = System.currentTimeMillis() - startTime;
+            score = itScore;
+            long elapsed = System.currentTimeMillis() - opts.getStartTime();
             if (post) {
-                PrintLine.printLine(true, pv, depth, score, elapsed, search.getSearchStats().nodes);
+                PrintLine.printLine(pv, depth, true, score, elapsed, search.getSearchStats().nodes);
             }
 
             // track the number of nodes computed in this iteration
-            long nodesPrevDepth = search.getSearchStats().nodesByIteration.computeIfAbsent(depth - 1, k -> 0L);
+            long nodesPrevDepth = search.getSearchStats().nodesByIteration.computeIfAbsent(depth - 1, _ -> 0L);
             search.getSearchStats().nodesByIteration.put(depth, search.getSearchStats().nodes - nodesPrevDepth);
 
             // if this is a mate, stop here
@@ -196,7 +227,7 @@ public class SearchIteratorImpl implements SearchIterator {
             }
 
             // if we've hit the system defined max iterations, stop here
-            if (maxDepth >= Constants.MAX_ITERATIONS) {
+            if (depth >= Constants.MAX_ITERATIONS) {
                 stopSearching = true;
             }
 
@@ -208,62 +239,94 @@ public class SearchIteratorImpl implements SearchIterator {
 
         } while (!stopSearching);
 
-        if (post) {
-            printSearchSummary(depth, startTime, search.getSearchStats());
-        }
-
-        assert(!pv.isEmpty());
-        assert(MoveUtils.isLineValid(pv, board));
-
-        // if we are running with assertions enabled and the native library is loaded, verify equality
-        // we can only do this for fixed depth searches that have not been interrupted.
-        assert(maxTimeMs > 0 || search.isStopped() || iterationsAreEqual(pv, board));
-
-        return pv;
+        return Tuple.of(depth, score);
     }
 
-    private boolean iterationsAreEqual(List<Move> javaPV, Board board) {
+    private Tuple2<Integer,Integer> iterateWithNativeCode(List<Move> pv, SearchStats stats, Board board,
+                                                          final List<Undo> undos, SearchOptions opts) {
+        assert(clearTableWrapper());
+        List<Move> nativePv = new ArrayList<>();
+        // earlyExitOK, maxTimeMS
+        Tuple2<Integer, Integer> nativeDepthScore = NativeEngineLib.iterate(nativePv, stats, board, undos,
+                earlyExitOk, maxDepth, maxTimeMs);
 
-        if (Initializer.nativeCodeInitialized()) {
+        // verify equality with java iterator.  This only works for fixed depth searches.
+        assert(maxTimeMs>0 || iterationsAreEqual(nativePv, nativeDepthScore._2, stats, board, undos, opts));
 
-            LOGGER.debug("# checking iteration equality with native");
-            List<Move> nativePV = findPrincipalVariationNative(board);
+        pv.clear();
+        pv.addAll(nativePv);
 
-            // if the search was stopped the comparison won't be valid
-            if (search.isStopped()) {
-                LOGGER.debug("# not comparing incomplete iteration");
-                return true;
-            }
+        return nativeDepthScore;
+    }
 
-            if (!nativePV.equals(javaPV)) {
-                LOGGER.error("PVs are not equal! javaPV: " + PrintLine.getMoveString(javaPV) +
-                        ", nativePV: " + PrintLine.getMoveString(nativePV));
-                return false;
-            } else {
-                LOGGER.debug("# finished - iterations produce the same PVs");
-                return true;
-            }
+    private boolean iterationsAreEqual(List<Move> nativePV, Integer nativeScore, SearchStats nativeStats,
+                                       Board board, final List<Undo> undos, SearchOptions opts) {
 
-        } else {
-            // native library not loaded
+        LOGGER.debug("# checking iteration equality with java");
+
+        // anytime we "cross the boundary" the hash tables need to be cleared
+        List<Move> pv = new ArrayList<>();
+        Tuple2<Integer, Integer> depthScore = iterateWithJavaCode(pv, board, undos, opts);
+        int score = depthScore._2;
+
+        // if the search was stopped the comparison won't be valid
+        if (search.isStopped()) {
+            LOGGER.debug("# not comparing incomplete iteration");
             return true;
         }
-    }
 
-    private List<Move> findPrincipalVariationNative(Board board) {
-        List<Long> nativePV = new ArrayList<>();
-        try {
-            LOGGER.debug("# starting native iterator maxDepth: {}", maxDepth);
-            String fen = FENBuilder.createFen(board, false);
-            iterateNative(fen, maxDepth, nativePV);
-            return MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove());
-        } catch (IllegalStateException e) {
-            LOGGER.error(e);
-            throw e;
+        boolean retval = true;
+        SearchStats stats = search.getSearchStats();
+
+        // compare principal variations
+        if (!pv.equals(nativePV)) {
+            LOGGER.error("# PVs not equal! java: {}, native: {}",
+                    PrintLine.getMoveString(pv), PrintLine.getMoveString(nativePV));
+            retval = false;
         }
+
+        // compare scores
+        if (score != nativeScore) {
+            LOGGER.error("# scores not equal! java: {}, native: {}", score, nativeScore);
+            retval = false;
+        }
+
+        // compare node counts
+        if (stats.nodes != nativeStats.nodes || stats.qnodes != nativeStats.qnodes) {
+            LOGGER.error("# node counts not equal!  java nodes: {}, native nodes:{}, " +
+                            "java qnodes: {}, native qnodes: {}", stats.nodes, nativeStats.nodes,
+                    stats.qnodes, nativeStats.qnodes);
+            retval = false;
+        }
+
+        // compare fail highs
+        if (stats.failHighs != nativeStats.failHighs) {
+            LOGGER.error("# fail highs not equal!  java: {}, native: {}", stats.failHighs, nativeStats.failHighs);
+            retval = false;
+        }
+
+        // compare fail lows
+        if (stats.failLows != nativeStats.failLows) {
+            LOGGER.error("# fail lows not equal!  java: {}, native: {}", stats.failLows, nativeStats.failLows);
+            retval = false;
+        }
+
+        // compare number of draws in search
+        if (stats.draws != nativeStats.draws) {
+            LOGGER.error("# draws not equal!  java: {}, native: {}", stats.draws, nativeStats.draws);
+            retval = false;
+        }
+
+        if (retval) {
+            LOGGER.debug("# finished - iterations are equal");
+        } else {
+            LOGGER.debug("# finished - iterations are NOT equal");
+        }
+
+        return retval;
     }
 
-    private void printSearchSummary(int lastDepth, long startTime, SearchStats stats) {
+    private void printSearchSummary(int lastDepth, int lastScore, long startTime, SearchStats stats) {
         DecimalFormat df = new DecimalFormat("0.00");
         DecimalFormat df2 = new DecimalFormat("#,###,##0");
 
@@ -272,14 +335,14 @@ public class SearchIteratorImpl implements SearchIterator {
         double qnodePct = stats.qnodes / (totalNodes/100.0);
 
         LOGGER.info("\n");
-        LOGGER.info("# depth: " + lastDepth);
-        LOGGER.info("# nodes: " + df2.format(totalNodes) + ", interior: "
-                + df2.format(stats.nodes) + " (" + df.format(interiorPct) + "%)"
-                + ", quiescence: " + df2.format(stats.qnodes) + " (" + df.format(qnodePct) + "%)");
+        LOGGER.info("# depth: {}, score: {}", lastDepth, lastScore);
+        LOGGER.info("# nodes: {}, interior: {} ({}%), quiescence: {} ({}%)",
+                df2.format(totalNodes), df2.format(stats.nodes), df.format(interiorPct),
+                df2.format(stats.qnodes), df.format(qnodePct));
 
         long totalSearchTime = System.currentTimeMillis() - startTime;
-        LOGGER.info("# search time: " + totalSearchTime/1000.0 + " seconds"
-                + ", rate: " + df2.format(totalNodes / (totalSearchTime/1000.0)) + " nodes per second");
+        LOGGER.info("# search time: {} seconds, rate: {} nodes per second",
+                totalSearchTime / 1000.0, df2.format(totalNodes / (totalSearchTime / 1000.0)));
 
         TranspositionTable htbl = TTHolder.getInstance().getHashTable();
         long hashHits = htbl.getNumHits();
@@ -287,19 +350,16 @@ public class SearchIteratorImpl implements SearchIterator {
         long hashCollisions = htbl.getNumCollisions();
         double hashHitPct = hashHits / (hashProbes/100.0);
         double hashCollisionPct = hashCollisions / (hashProbes/100.0);
-        LOGGER.info("# hash probes: " + df2.format(hashProbes)
-                + ", hits: " + df2.format(hashHits) + " (" + df.format(hashHitPct) + "%)"
-                + ", collisions: " + df2.format(hashCollisions) + " (" + df.format(hashCollisionPct) + "%)");
+        LOGGER.info("# hash probes: {}, hits: {} ({}%), collisions: {} ({}%)",
+                df2.format(hashProbes), df2.format(hashHits), df.format(hashHitPct), df2.format(hashCollisions),
+                df.format(hashCollisionPct));
 
         double hashFailHighPct = stats.hashFailHighs / (hashProbes/100.0);
         double hashFailLowPct = stats.hashFailLows / (hashProbes/100.0);
         double hashExactScorePct = stats.hashExactScores / (hashProbes/100.0);
-        LOGGER.info("# hash fail highs: " + df2.format(stats.hashFailHighs)
-                + " (" + df.format(hashFailHighPct) + "%)"
-                + ", hash fail lows: " + df2.format(stats.hashFailLows)
-                + " (" + df.format(hashFailLowPct) + "%)"
-                + ", hash exact scores: " + df2.format(stats.hashExactScores)
-                + " (" + df.format(hashExactScorePct) + "%)");
+        LOGGER.info("# hash fail highs: {} ({}%), hash fail lows: {} ({}%), hash exact scores: {} ({}%)",
+                df2.format(stats.hashFailHighs), df.format(hashFailHighPct), df2.format(stats.hashFailLows),
+                df.format(hashFailLowPct), df2.format(stats.hashExactScores), df.format(hashExactScorePct));
 
         PawnTranspositionTable pawnTbl = TTHolder.getInstance().getPawnHashTable();
         long pawnHashHits = pawnTbl.getNumHits();
@@ -321,11 +381,9 @@ public class SearchIteratorImpl implements SearchIterator {
         double failHigh2ndPct = fh2 / (failHighs / 100.0);
         double failHigh3rdPct = fh3 / (failHighs / 100.0);
         double failHigh4thPct = fh4 / (failHighs / 100.0);
-        LOGGER.info("# fail high mv1: " + df2.format(fh1) + " (" + df.format(failHigh1stPct) + "%)"
-                + ", mv2: " + df2.format(fh2) + " (" + df.format(failHigh2ndPct) + "%)"
-                + ", mv3: " + df2.format(fh3) + " (" + df.format(failHigh3rdPct) + "%)"
-                + ", mv4: " + df2.format(fh4) + " (" + df.format(failHigh4thPct) + "%)"
-        );
+        LOGGER.info("# fail high mv1: {} ({}%), mv2: {} ({}%), mv3: {} ({}%), mv4: {} ({}%)",
+                df2.format(fh1), df.format(failHigh1stPct), df2.format(fh2), df.format(failHigh2ndPct),
+                df2.format(fh3), df.format(failHigh3rdPct), df2.format(fh4), df.format(failHigh4thPct));
 
         // effective branching factor metrics
         StringBuilder sb = new StringBuilder();
@@ -340,9 +398,13 @@ public class SearchIteratorImpl implements SearchIterator {
             }
         }
         double avgEbf = totalEbf / numEbfs;
-        LOGGER.info("# ebf avg: " + df.format(avgEbf) + sb);
+        LOGGER.info("# ebf avg: {}{}", df.format(avgEbf), sb);
     }
 
-    private native void iterateNative(String fen, int maxDepth, List<Long> pv);
+    // wrapper so we can clear hash tables when asserts are enabled
+    private boolean clearTableWrapper() {
+        TTHolder.getInstance().clearTables();
+        return true;
+    }
 
 }

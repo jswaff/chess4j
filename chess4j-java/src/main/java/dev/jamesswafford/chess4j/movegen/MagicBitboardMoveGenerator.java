@@ -1,10 +1,10 @@
 package dev.jamesswafford.chess4j.movegen;
 
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.*;
 import dev.jamesswafford.chess4j.board.squares.File;
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.init.Initializer;
-import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.pieces.Pawn;
 import dev.jamesswafford.chess4j.pieces.Piece;
 import dev.jamesswafford.chess4j.utils.BoardUtils;
@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static dev.jamesswafford.chess4j.board.squares.File.FILE_A;
@@ -30,7 +31,6 @@ import static dev.jamesswafford.chess4j.pieces.Queen.BLACK_QUEEN;
 import static dev.jamesswafford.chess4j.pieces.Queen.WHITE_QUEEN;
 import static dev.jamesswafford.chess4j.pieces.Rook.BLACK_ROOK;
 import static dev.jamesswafford.chess4j.pieces.Rook.WHITE_ROOK;
-import static dev.jamesswafford.chess4j.utils.MoveUtils.fromNativeMove;
 import static java.util.stream.Collectors.toList;
 
 public final class MagicBitboardMoveGenerator implements MoveGenerator {
@@ -39,6 +39,26 @@ public final class MagicBitboardMoveGenerator implements MoveGenerator {
 
     static {
         Initializer.init();
+    }
+
+    @Override
+    public List<Move> generateLegalMoves(Board board) {
+        return genLegalMoves(board);
+    }
+
+    @Override
+    public List<Move> generatePseudoLegalMoves(Board board) {
+        return genPseudoLegalMoves(board);
+    }
+
+    @Override
+    public List<Move> generatePseudoLegalCaptures(Board board) {
+        return genPseudoLegalMoves(board, true, false);
+    }
+
+    @Override
+    public List<Move> generatePseudoLegalNonCaptures(Board board) {
+        return genPseudoLegalMoves(board, false, true);
     }
 
     public static void genBishopMoves(Board board,List<Move> moves,boolean caps,boolean noncaps) {
@@ -216,44 +236,6 @@ public final class MagicBitboardMoveGenerator implements MoveGenerator {
         return genPseudoLegalMoves(board,true,true);
     }
 
-    private static boolean moveGensAreEqual(List<Move> javaMoves, Board board, boolean caps, boolean noncaps) {
-        if (Initializer.nativeCodeInitialized()) {
-            String fen = FENBuilder.createFen(board, false);
-            List<Long> nativeMoves = new ArrayList<>();
-            try {
-                int nMoves = genPseudoLegalMovesNative(fen, nativeMoves, caps, noncaps);
-                assert (nMoves == nativeMoves.size());
-
-                // sort java moves to match order of native moves
-                List<Move> sortedJavaMoves = new ArrayList<>();
-                for (Long nativeMoveLong : nativeMoves) {
-                    Move nativeMove = fromNativeMove(nativeMoveLong, board.getPlayerToMove());
-                    boolean foundMatch = false;
-                    for (Move javaMove : javaMoves) {
-                        if (javaMove.equals(nativeMove)) {
-                            sortedJavaMoves.add(javaMove);
-                            foundMatch = true;
-                            break;
-                        }
-                    }
-                    assert(foundMatch);
-                }
-                assert (sortedJavaMoves.size() == javaMoves.size());
-                javaMoves.clear();
-                javaMoves.addAll(sortedJavaMoves);
-
-                return true;
-            } catch (IllegalStateException e) {
-                LOGGER.error(e);
-                throw e;
-            }
-        } else {
-            return true;
-        }
-    }
-
-    private static native int genPseudoLegalMovesNative(String fen, List<Long> moves, boolean caps, boolean noncaps);
-
     public static List<Move> genPseudoLegalMoves(Board board, boolean caps, boolean noncaps) {
         List<Move> moves = new ArrayList<>(100);
 
@@ -264,8 +246,8 @@ public final class MagicBitboardMoveGenerator implements MoveGenerator {
         genQueenMoves(board,moves,caps,noncaps);
         genKingMoves(board,moves,caps,noncaps);
 
-        assert (moveGensAreEqual(moves, board, caps, noncaps));
-
+        // side effect: the move list is sorted to match the native code's order
+        assert(moveGensAreEqual(moves, board, caps, noncaps));
 
         return moves;
     }
@@ -378,23 +360,15 @@ public final class MagicBitboardMoveGenerator implements MoveGenerator {
         return legal;
     }
 
-    @Override
-    public List<Move> generateLegalMoves(Board board) {
-        return genLegalMoves(board);
-    }
-
-    @Override
-    public List<Move> generatePseudoLegalMoves(Board board) {
-        return genPseudoLegalMoves(board);
-    }
-
-    @Override
-    public List<Move> generatePseudoLegalCaptures(Board board) {
-        return genPseudoLegalMoves(board, true, false);
-    }
-
-    @Override
-    public List<Move> generatePseudoLegalNonCaptures(Board board) {
-        return genPseudoLegalMoves(board, false, true);
+    private static boolean moveGensAreEqual(List<Move> javaMoves, Board board, boolean caps, boolean noncaps) {
+        if (Initializer.nativeCodeInitialized()) {
+            List<Move> ffmMoves = NativeEngineLib.generatePseudoLegalMoves(board, caps, noncaps);
+            if (!new HashSet<>(ffmMoves).equals(new HashSet<>(javaMoves))) return false;
+            javaMoves.clear();
+            javaMoves.addAll(ffmMoves);
+            return true;
+        } else {
+            return true;
+        }
     }
 }

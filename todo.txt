@@ -1,0 +1,5 @@
+merge into dev branch!
+
+move lib into chess4j-java and remove parent
+
+clean up initialization process.

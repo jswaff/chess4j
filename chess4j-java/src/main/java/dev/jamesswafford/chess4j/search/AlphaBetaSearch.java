@@ -1,6 +1,7 @@
 package dev.jamesswafford.chess4j.search;
 
 import dev.jamesswafford.chess4j.Globals;
+import dev.jamesswafford.chess4j.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.*;
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.eval.Eval;
@@ -9,12 +10,9 @@ import dev.jamesswafford.chess4j.hash.TTHolder;
 import dev.jamesswafford.chess4j.hash.TranspositionTableEntry;
 import dev.jamesswafford.chess4j.hash.TranspositionTableEntryType;
 import dev.jamesswafford.chess4j.init.Initializer;
-import dev.jamesswafford.chess4j.io.DrawBoard;
-import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
 import dev.jamesswafford.chess4j.utils.BoardUtils;
-import dev.jamesswafford.chess4j.utils.MoveUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
@@ -23,7 +21,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static dev.jamesswafford.chess4j.Constants.CHECKMATE;
 import static dev.jamesswafford.chess4j.hash.TranspositionTableEntryType.*;
@@ -59,10 +56,6 @@ public class AlphaBetaSearch implements Search {
         this.evaluator = new Eval();
         this.moveGenerator = new MagicBitboardMoveGenerator();
         this.killerMovesStore = KillerMoves.getInstance();
-
-        if (Initializer.nativeCodeInitialized()) {
-            initializeNativeSearch();
-        }
     }
 
     public List<Move> getPv() { return Collections.unmodifiableList(pv); }
@@ -71,9 +64,6 @@ public class AlphaBetaSearch implements Search {
     public void initialize() {
         lastPv.clear();
         searchStats.initialize();
-        if (Initializer.nativeCodeInitialized()) {
-            initializeNativeSearch();
-        }
     }
 
     @Override
@@ -87,18 +77,14 @@ public class AlphaBetaSearch implements Search {
     }
 
     @Override
-    public int search(Board board, List<Undo> undos, SearchParameters searchParameters) {
-        return search(board, undos, searchParameters,
-                SearchOptions.builder().startTime(System.currentTimeMillis()).build());
-    }
-
-    @Override
     public int search(Board board, List<Undo> undos, SearchParameters searchParameters, SearchOptions opts) {
-        if (!opts.isAvoidNative() && Initializer.nativeCodeInitialized()) {
-            return searchWithNativeCode(board, undos, searchParameters, opts);
-        } else {
-            return searchWithJavaCode(board, undos, searchParameters, opts);
-        }
+        killerMovesStore.clear();
+        boolean inCheck = BoardUtils.isPlayerInCheck(board);
+        int score = search(board, undos, pv, true, 0, searchParameters.getDepth(),
+                searchParameters.getAlpha(), searchParameters.getBeta(), inCheck, false, opts);
+        lastPv.clear();
+        lastPv.addAll(pv);
+        return score;
     }
 
     @Override
@@ -110,7 +96,7 @@ public class AlphaBetaSearch implements Search {
     public void stop() {
         stop = true;
         if (Initializer.nativeCodeInitialized()) {
-            stopNative(true);
+            NativeEngineLib.stopSearch(true);
         }
     }
 
@@ -118,7 +104,7 @@ public class AlphaBetaSearch implements Search {
     public void unstop() {
         stop = false;
         if (Initializer.nativeCodeInitialized()) {
-            stopNative(false);
+            NativeEngineLib.stopSearch(false);
         }
     }
 
@@ -126,167 +112,7 @@ public class AlphaBetaSearch implements Search {
     public void setSkipTimeChecks(boolean skipTimeChecks) {
         this.skipTimeChecks = skipTimeChecks;
         if (Initializer.nativeCodeInitialized()) {
-            skipTimeChecksNative(skipTimeChecks);
-        }
-    }
-
-    private int searchWithJavaCode(Board board, List<Undo> undos, SearchParameters searchParameters,
-                                   SearchOptions opts) {
-        killerMovesStore.clear();
-        boolean inCheck = BoardUtils.isPlayerInCheck(board);
-        int score = search(board, undos, pv, true, 0, searchParameters.getDepth(),
-                searchParameters.getAlpha(), searchParameters.getBeta(), inCheck, false, opts);
-        lastPv.clear();
-        lastPv.addAll(pv);
-        return score;
-    }
-
-    private int searchWithNativeCode(Board board, List<Undo> undos, SearchParameters searchParameters,
-                                     SearchOptions opts) {
-
-        assert(clearTableWrapper());
-
-        List<Long> nativePV = new ArrayList<>();
-        SearchStats nativeStats = new SearchStats(searchStats);
-        String fen = FENBuilder.createFen(board, true);
-        boolean post = opts.getPvCallback() != null;
-
-        // set up FEN for last non-reversible position.  This is used for draw by rep detection.
-        String nonReversibleFen;
-        if (undos.size() >= board.getFiftyCounter()) {
-            Board copyBoard = board.deepCopy();
-            for (int i = 0; i < board.getFiftyCounter(); i++) {
-                int ind = undos.size() - 1 - i;
-                Undo u = undos.get(ind);
-                copyBoard.undoMove(u);
-            }
-            nonReversibleFen = FENBuilder.createFen(copyBoard, true);
-        } else {
-            // we don't have the history data to reproduce the last non-reversible position.  This could happen
-            // if we're processing an EPD file.  The consequence is that we won't reliably detect repetitions.
-            nonReversibleFen = fen;
-        }
-
-        // set up the move path since the game began
-        List<Long> movePath = undos.stream()
-                .map(u -> MoveUtils.toNativeMove(u.getMove()))
-                .collect(Collectors.toList());
-
-        int nativeScore;
-        try {
-            nativeScore = searchNative(fen, nativePV, searchParameters.getDepth(), searchParameters.getAlpha(),
-                    searchParameters.getBeta(), nativeStats, opts.getStartTime(), opts.getStopTime(), post,
-                    nonReversibleFen, movePath);
-        } catch (IllegalStateException e) {
-            DrawBoard.drawBoard(board);
-            LOGGER.error(e);
-            throw e;
-        }
-
-        // if the search completed then verify equality with the Java implementation.
-        assert (stop || searchesAreEqual(board, undos, searchParameters, opts, nativeScore, nativePV, nativeStats));
-
-        // set the object's stats to the native stats
-        searchStats.set(nativeStats);
-
-        // translate the native PV into the object's PV
-        pv.clear();
-        pv.addAll(MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove()));
-
-        return nativeScore;
-    }
-
-    // wrapper so we can clear hash tables when asserts are enabled
-    private boolean clearTableWrapper() {
-        TTHolder.getInstance().getHashTable().clear();
-        TTHolder.getInstance().getPawnHashTable().clear();
-        return true;
-    }
-
-    private boolean searchesAreEqual(Board board, List<Undo> undos, SearchParameters searchParameters,
-                                     SearchOptions opts, int nativeScore, List<Long> nativePV, SearchStats nativeStats)
-    {
-        LOGGER.debug("# checking search equality with java depth {}", searchParameters.getDepth());
-        try {
-            long nativeProbes = TTHolder.getInstance().getHashTable().getNumProbes();
-            long nativeHits = TTHolder.getInstance().getHashTable().getNumHits();
-
-            long nativePawnProbes = TTHolder.getInstance().getPawnHashTable().getNumProbes();
-            long nativePawnHits = TTHolder.getInstance().getPawnHashTable().getNumHits();
-
-            assert(clearTableWrapper());
-            int javaScore = searchWithJavaCode(board, undos, searchParameters, opts);
-
-            // if the search was interrupted we can't compare
-            if (stop) return true;
-
-            if (javaScore != nativeScore) {
-                LOGGER.error("scores not equal! java score: " + javaScore + ", native score: " + nativeScore);
-                return false;
-            }
-
-            // compare the hash table stats
-            long javaProbes = TTHolder.getInstance().getHashTable().getNumProbes();
-            long javaHits = TTHolder.getInstance().getHashTable().getNumHits();
-            if (javaProbes != nativeProbes || javaHits != nativeHits) {
-                LOGGER.error("hash stats not equal! "
-                        + "java probes: " + javaProbes + ", native probes: " + nativeProbes
-                        + ", java hits: " + javaHits + ", native hits: " + nativeHits
-                        + ", params: " + searchParameters);
-                return false;
-            }
-
-            // compare the pawn hash table stats
-            long javaPawnProbes = TTHolder.getInstance().getPawnHashTable().getNumProbes();
-            long javaPawnHits = TTHolder.getInstance().getPawnHashTable().getNumHits();
-            if (javaPawnProbes != nativePawnProbes || javaPawnHits != nativePawnHits) {
-                LOGGER.error("pawn hash stats not equal! "
-                        + "java pawn probes: " + javaPawnProbes + ", native pawn probes: " + nativePawnProbes
-                        + ", java pawn hits: " + javaPawnHits + ", native pawn hits: " + nativePawnHits
-                        + ", params: " + searchParameters);
-                return false;
-            }
-
-            // compare node counts
-            if (searchStats.nodes != nativeStats.nodes || searchStats.qnodes != nativeStats.qnodes) {
-                LOGGER.error("node counts not equal!  java nodes: " + searchStats.nodes
-                        + ", native nodes:" + nativeStats.nodes
-                        + ", java qnodes: " + searchStats.qnodes
-                        + ", native qnodes: " + nativeStats.qnodes);
-                return false;
-            }
-
-            // compare fail highs
-            if (searchStats.failHighs != nativeStats.failHighs) {
-                LOGGER.error("fail highs not equal!  java fail highs: " + searchStats.failHighs
-                        + ", native fail highs: " + nativeStats.failHighs);
-            }
-
-            // compare fail lows
-            if (searchStats.failLows != nativeStats.failLows) {
-                LOGGER.error("fail lows not equal!  java fail lows: " + searchStats.failLows
-                        + ", native fail lows: " + nativeStats.failLows);
-            }
-
-            // compare draws
-            if (searchStats.draws != nativeStats.draws) {
-                LOGGER.error("draws not equal!  java draws: " + searchStats.draws
-                        + ", native draws: " + nativeStats.draws);
-            }
-
-            // compare the PVs.
-            if (!pv.equals(MoveUtils.fromNativeLine(nativePV, board.getPlayerToMove()))) {
-                LOGGER.error("pvs are not equal!"
-                        + ", java stats: " + searchStats + ", native stats: " + nativeStats
-                        + ", params: " + searchParameters);
-                return false;
-            }
-
-            LOGGER.debug("# finished - searches are equivalent");
-            return true;
-        } catch (IllegalStateException e) {
-            LOGGER.error(e);
-            throw e;
+            NativeEngineLib.skipTimeChecks(skipTimeChecks);
         }
     }
 
@@ -415,7 +241,7 @@ public class AlphaBetaSearch implements Search {
             undos.add(board.applyMove(move));
             // check if move was legal
             if (BoardUtils.isOpponentInCheck(board)) {
-                board.undoMove(undos.remove(undos.size()-1));
+                board.undoMove(undos.removeLast());
                 continue;
             }
 
@@ -461,7 +287,7 @@ public class AlphaBetaSearch implements Search {
             }
 
             ++numMovesSearched;
-            board.undoMove(undos.remove(undos.size()-1));
+            board.undoMove(undos.removeLast());
 
             // if the search was stopped we can't trust these results, so don't update the PV
             if (stop) {
@@ -470,7 +296,7 @@ public class AlphaBetaSearch implements Search {
 
             if (val >= beta) {
                 searchStats.failHighs++;
-                searchStats.failHighByMove.computeIfPresent(numMovesSearched, (k, v) -> v + 1);
+                searchStats.failHighByMove.computeIfPresent(numMovesSearched, (_, v) -> v + 1);
                 TTHolder.getInstance().getHashTable().store(board, LOWER_BOUND, beta, depth, move);
                 if (move.captured()==null && move.promotion()==null) {
                     killerMovesStore.addKiller(ply, move);
@@ -507,7 +333,7 @@ public class AlphaBetaSearch implements Search {
         return alpha;
     }
 
-    public int quiescenceSearch(Board board, List<Undo> undos, int alpha, int beta, SearchOptions opts) {
+    private int quiescenceSearch(Board board, List<Undo> undos, int alpha, int beta, SearchOptions opts) {
 
         assert(alpha < beta);
 
@@ -546,12 +372,12 @@ public class AlphaBetaSearch implements Search {
             undos.add(board.applyMove(move));
             // check if move was legal
             if (BoardUtils.isOpponentInCheck(board)) {
-                board.undoMove(undos.remove(undos.size()-1));
+                board.undoMove(undos.removeLast());
                 continue;
             }
 
             int val = -quiescenceSearch(board, undos, -beta, -alpha, opts);
-            board.undoMove(undos.remove(undos.size()-1));
+            board.undoMove(undos.removeLast());
 
             // if the search was stopped just unwind back up
             if (stop) {
@@ -583,7 +409,7 @@ public class AlphaBetaSearch implements Search {
         }
 
         // ok, time check
-        opts.setNodeCountLastTimeCheck(visitedNodes); // TODO: don't use options for state?
+        opts.setNodeCountLastTimeCheck(visitedNodes);
 
         return System.currentTimeMillis() >= opts.getStopTime();
     }
@@ -608,15 +434,4 @@ public class AlphaBetaSearch implements Search {
         parentPV.add(head);
         parentPV.addAll(tail);
     }
-
-    private native void initializeNativeSearch();
-
-    private native int searchNative(String fen, List<Long> parentPV, int depth, int alpha, int beta,
-                                    SearchStats searchStats, long startTime, long stopTime, boolean post,
-                                    String nonReversibleFen, List<Long> movePath);
-
-    private native void stopNative(boolean stop);
-
-    private native void skipTimeChecksNative(boolean skipTimeChecks);
-
 }

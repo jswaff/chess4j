@@ -3,7 +3,6 @@ package dev.jamesswafford.chess4j.search;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.init.Initializer;
 import dev.jamesswafford.chess4j.pieces.*;
-import dev.jamesswafford.chess4j.utils.MoveUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,9 +57,6 @@ public class MVVLVA {
             score += scoreCapture(m);
         }
 
-        // if we are running with assertions enabled and the native library is loaded, verify equality
-        assert(mvvlvaAreEqual(score, m));
-
         return score;
     }
 
@@ -75,29 +71,6 @@ public class MVVLVA {
         assert(!m.isEpCapture() || capturedVal==1);
         int moverVal = pieceMap.get(m.piece().getClass());
         return 1000 + (capturedVal * 10) - moverVal;
-    }
-
-    public static native int mvvlvaNative(long nativeMv);
-
-    private static boolean mvvlvaAreEqual(int javaScore, Move mv) {
-        if (Initializer.nativeCodeInitialized()) {
-            try {
-                int nativeScore = mvvlvaNative(MoveUtils.toNativeMove(mv));
-                if (javaScore != nativeScore) {
-                    LOGGER.error("mvvlva not equal!  javaScore: " + javaScore + ", nativeScore: " + nativeScore
-                            + ", mv: " + mv);
-                    LOGGER.error("moving piece: " + mv.piece() + "; captured: " + mv.captured()
-                            + "; ep?: " + mv.isEpCapture());
-                    return false;
-                }
-                return true;
-            } catch (IllegalStateException e) {
-                LOGGER.error(e);
-                throw e;
-            }
-        } else {
-            return true;
-        }
     }
 
 }

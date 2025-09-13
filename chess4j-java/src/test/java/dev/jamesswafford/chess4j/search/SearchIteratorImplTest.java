@@ -80,8 +80,6 @@ public class SearchIteratorImplTest {
 
         verify(search, times(3)).getPv();
 
-        verify(search, times(4)).isStopped();
-
         verify(search, times(1))
                 .search(eq(board), eq(undos), eq(new SearchParameters(1, -CHECKMATE, CHECKMATE)), any());
 
@@ -126,8 +124,6 @@ public class SearchIteratorImplTest {
         verify(search, times(1)).initialize();
 
         verify(search, times(2)).getPv();
-
-        verify(search, times(3)).isStopped();
 
         verify(search, times(1))
                 .search(eq(board), eq(undos), eq(new SearchParameters(1, -CHECKMATE, CHECKMATE)), any());
@@ -184,7 +180,7 @@ public class SearchIteratorImplTest {
         assertEquals(1, pv.size());
 
         // ensure the highest scoring move by static analysis was selected
-        assertEquals(new Move(WHITE_PAWN, E7, E8, null, WHITE_QUEEN), pv.get(0));
+        assertEquals(new Move(WHITE_PAWN, E7, E8, null, WHITE_QUEEN), pv.getFirst());
     }
 
 }

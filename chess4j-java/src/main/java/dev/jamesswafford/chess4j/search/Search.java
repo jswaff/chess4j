@@ -18,8 +18,6 @@ public interface Search {
 
     int search(Board board, SearchParameters searchParameters, SearchOptions opts);
 
-    int search(Board board, List<Undo> undos, SearchParameters searchParameters);
-
     int search(Board board, List<Undo> undos, SearchParameters searchParameters, SearchOptions opts);
 
     boolean isStopped();

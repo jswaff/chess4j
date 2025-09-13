@@ -380,7 +380,7 @@ public class XBoardHandler {
         int seconds = Integer.parseInt(cmd[1]);
         LOGGER.debug("# setting search time to {} seconds per move", seconds);
         fixedTimePerMove = true;
-        searchIterator.setMaxTime(seconds * 1000L);
+        searchIterator.setMaxTime(seconds * 1000);
         searchIterator.setEarlyExitOk(false);
     }
 

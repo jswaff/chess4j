@@ -44,11 +44,11 @@ public class TestSuiteProcessor {
 
     private void printSummary(int numProblems, List<String> wrongProblems) {
         LOGGER.info("\n\ntest suite complete!");
-        LOGGER.info("# problems: " + numProblems);
+        LOGGER.info("# problems: {}", numProblems);
         DecimalFormat df = new DecimalFormat("0.0");
         int numCorrect = numProblems - wrongProblems.size();
         double pctCorrect = (double) numCorrect / (double) numProblems * 100;
-        LOGGER.info("# correct: " + numCorrect + " (" + df.format(pctCorrect) + "%)");
+        LOGGER.info("# correct: {} ({}%)", numCorrect, df.format(pctCorrect));
         if (!wrongProblems.isEmpty()) {
             LOGGER.info("incorrect problems:");
             for (String prob : wrongProblems) {
@@ -58,23 +58,23 @@ public class TestSuiteProcessor {
     }
 
     private boolean processProblem(String epd, int maxDepth, int secondsPerProblem) throws Exception {
-        LOGGER.info("\n\nprocessing epd: " + epd);
+        LOGGER.info("\n\nprocessing epd: {}", epd);
         Board board = new Board();
         List<EPDOperation> ops = EPDParser.setPos(board, epd);
         DrawBoard.drawBoard(board);
         List<Move> bms = getBestMoves(board, ops);
         LOGGER.info("best moves: ");
-        bms.forEach(bm -> LOGGER.info("\t" + bm));
+        bms.forEach(bm -> LOGGER.info("\t{}", bm));
         TTHolder.getInstance().clearTables();
 
         SearchIteratorImpl searchIterator = new SearchIteratorImpl();
         searchIterator.setEarlyExitOk(false);
-        searchIterator.setMaxTime(secondsPerProblem * 1000L);
+        searchIterator.setMaxTime(secondsPerProblem * 1000);
         searchIterator.setMaxDepth(maxDepth);
 
         List<Move> pv = searchIterator.findPvFuture(board, new ArrayList<>()).get();
 
-        return bms.contains(pv.get(0));
+        return bms.contains(pv.getFirst());
     }
 
     public void processTestSuite(String testSuite, int maxDepth, int secondsPerProblem) throws Exception {
@@ -94,8 +94,8 @@ public class TestSuiteProcessor {
                 correct = false;
                 wrongProblems.add(line);
             }
-            LOGGER.info("\n" + (correct?"correct":"incorrect") + " - current score: "
-                    + (numProblems-wrongProblems.size() + " / " + numProblems));
+            LOGGER.info("\n{} - current score: {}", correct ? "correct" : "incorrect",
+                    numProblems - wrongProblems.size() + " / " + numProblems);
         }
 
         printSummary(numProblems, wrongProblems);
