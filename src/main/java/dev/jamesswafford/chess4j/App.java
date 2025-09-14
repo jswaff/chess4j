@@ -30,7 +30,7 @@ public final class App {
         // send "done=0" to prevent XBoard timing out during the initialization sequence.
         LOGGER.info("done=0");
 
-        LOGGER.info("# Welcome to chess4j version 6.2-dev!\n\n");
+        LOGGER.info("# Welcome to chess4j version 6.2-dev!\n");
 
         assert(showDebugMode());
 

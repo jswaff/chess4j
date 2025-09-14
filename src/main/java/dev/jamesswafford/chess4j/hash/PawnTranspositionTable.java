@@ -108,7 +108,6 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     @Override
     protected void createTable(long sizeBytes) {
         int numEntries = (int)(sizeBytes / sizeOfEntry());
-        LOGGER.debug("# c4j pawn hash size: " + sizeBytes + " bytes ==> " + numEntries + " elements.");
         table = new PawnTranspositionTableEntry[numEntries];
     }
 

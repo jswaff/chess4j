@@ -150,7 +150,6 @@ public class TranspositionTable extends AbstractTranspositionTable {
     @Override
     protected void createTable(long sizeBytes) {
         int numEntries = (int)(sizeBytes / sizeOfEntry());
-        LOGGER.debug("# c4j hash size: " + sizeBytes + " bytes ==> " + numEntries + " elements.");
         table = new TranspositionTableEntry[numEntries];
     }
 
