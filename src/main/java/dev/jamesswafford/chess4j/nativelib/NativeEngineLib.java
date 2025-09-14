@@ -5,6 +5,7 @@ import dev.jamesswafford.chess4j.board.Color;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.board.Undo;
 import dev.jamesswafford.chess4j.board.squares.Square;
+import dev.jamesswafford.chess4j.exceptions.NativeLibraryException;
 import dev.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import dev.jamesswafford.chess4j.hash.TranspositionTableEntry;
 import dev.jamesswafford.chess4j.io.FENBuilder;
@@ -156,7 +157,7 @@ public class NativeEngineLib {
             pvCallbackFunc = linker.upcallStub(pvCallbackHandle, pvCallbackDesc, Arena.global());
 
         } catch (NoSuchMethodException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+            throw new NativeLibraryException("error creating PV callback", e);
         }
 
         mh_skipTimeChecks = linker.downcallHandle(lookup.findOrThrow("set_skip_time_checks_flag"),
@@ -172,10 +173,10 @@ public class NativeEngineLib {
         try {
             int retval = (int) mh_init.invoke();
             if (retval != 0) {
-                throw new RuntimeException("native code initialization failed! retval=" + retval);
+                throw new NativeLibraryException("initialization failed! retval=" + retval);
             }
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke init; msg: " + e.getMessage());
+            throw new NativeLibraryException("unable to invoke init", e);
         }
     }
 
@@ -187,7 +188,7 @@ public class NativeEngineLib {
             MemorySegment cFen = arena.allocateFrom(fen);
             return (int) mh_eval.invoke(cFen, materialOnly);
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke eval; msg: " + e.getMessage());
+            throw new NativeLibraryException("unable to invoke eval", e);
         }
     }
 
@@ -199,7 +200,7 @@ public class NativeEngineLib {
             MemorySegment cFen = arena.allocateFrom(fen);
             return (int) mh_nnEval.invoke(cFen);
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke evalNN; msg: " + e.getMessage());
+            throw new NativeLibraryException("unable to invoke evalNN", e);
         }
     }
 
@@ -210,10 +211,10 @@ public class NativeEngineLib {
             MemorySegment cNetworkFile = arena.allocateFrom(networkFile.getPath());
             int retval = (int) mh_nnLoadNetwork.invoke(cNetworkFile);
             if (retval != 0) {
-                throw new RuntimeException("loading network into native code failed! retval=" + retval);
+                throw new NativeLibraryException("loading network failed! retval=" + retval);
             }
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke loadNeuralNetwork; msg: " + e.getMessage());
+            throw new NativeLibraryException("unable to invoke loadNeuralNetwork", e);
         }
     }
 
@@ -225,7 +226,7 @@ public class NativeEngineLib {
             MemorySegment cFen = arena.allocateFrom(fen);
             return (int) mh_see.invoke(cFen, nativeMove);
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke see; msg: " + e.getMessage());
+            throw new NativeLibraryException("unable to invoke see", e);
         }
     }
 
@@ -253,7 +254,7 @@ public class NativeEngineLib {
 
             return moves;
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke movegen; msg: " + e.getMessage());
+            throw new NativeLibraryException("unable to invoke movegen", e);
         }
     }
 
@@ -262,7 +263,7 @@ public class NativeEngineLib {
         try {
             mh_clearMainHashTable.invoke();
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke clearMainHashTable");
+            throw new NativeLibraryException("unable to invoke clearMainHashTable", e);
         }
     }
 
@@ -271,7 +272,7 @@ public class NativeEngineLib {
         try {
             mh_resizeMainHashTable.invoke(maxBytes);
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke resizeMainHashTable");
+            throw new NativeLibraryException("unable to invoke resizeMainHashTable", e);
         }
     }
 
@@ -284,7 +285,7 @@ public class NativeEngineLib {
             long val = (long) mh_probeMainHashTable.invoke(cFen);
             return val==0 ? null : new TranspositionTableEntry(board.getZobristKey(), val);
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke probeMainHashTable; msg: " + e.getMessage());
+            throw new NativeLibraryException("unable to invoke probeMainHashTable", e);
         }
     }
 
@@ -296,7 +297,7 @@ public class NativeEngineLib {
             MemorySegment cFen = arena.allocateFrom(fen);
             mh_storeMainHashTable.invoke(cFen, hashEntry.getVal());
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke storeMainHashTable; msg: " + e.getMessage());
+            throw new NativeLibraryException("unable to invoke storeMainHashTable", e);
         }
     }
 
@@ -305,7 +306,7 @@ public class NativeEngineLib {
         try {
             return (long) mh_getMainHashCollisions.invoke();
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke getMainHashCollisions");
+            throw new NativeLibraryException("unable to invoke getMainHashCollisions", e);
         }
     }
 
@@ -314,7 +315,7 @@ public class NativeEngineLib {
         try {
             return (long) mh_getMainHashHits.invoke();
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke getMainHashHits");
+            throw new NativeLibraryException("unable to invoke getMainHashHits", e);
         }
     }
 
@@ -323,7 +324,7 @@ public class NativeEngineLib {
         try {
             return (long) mh_getMainHashProbes.invoke();
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke getMainHashProbes");
+            throw new NativeLibraryException("unable to invoke getMainHashProbes", e);
         }
     }
 
@@ -332,7 +333,7 @@ public class NativeEngineLib {
         try {
             mh_clearPawnHashTable.invoke();
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke clearPawnHashTable");
+            throw new NativeLibraryException("unable to invoke clearPawnHashTable", e);
         }
     }
 
@@ -341,7 +342,7 @@ public class NativeEngineLib {
         try {
             mh_resizePawnHashTable.invoke(maxBytes);
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke resizePawnHashTable");
+            throw new NativeLibraryException("unable to invoke resizePawnHashTable", e);
         }
     }
 
@@ -354,7 +355,7 @@ public class NativeEngineLib {
             long val = (long) mh_probePawnHashTable.invoke(cFen);
             return val==0 ? null : new PawnTranspositionTableEntry(board.getPawnKey(), val);
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke probePawnHashTable; msg: " + e.getMessage());
+            throw new NativeLibraryException("unable to invoke probePawnHashTable", e);
         }
     }
 
@@ -366,7 +367,7 @@ public class NativeEngineLib {
             MemorySegment cFen = arena.allocateFrom(fen);
             mh_storePawnHashTable.invoke(cFen, hashEntry.getVal());
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke storePawnHashTable; msg: " + e.getMessage());
+            throw new NativeLibraryException("unable to invoke storePawnHashTable", e);
         }
     }
 
@@ -375,7 +376,7 @@ public class NativeEngineLib {
         try {
             return (long) mh_getPawnHashCollisions.invoke();
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke getPawnHashCollisions");
+            throw new NativeLibraryException("unable to invoke getPawnHashCollisions", e);
         }
     }
 
@@ -384,7 +385,7 @@ public class NativeEngineLib {
         try {
             return (long) mh_getPawnHashHits.invoke();
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke getPawnHashHits");
+            throw new NativeLibraryException("unable to invoke getPawnHashHits", e);
         }
     }
 
@@ -393,7 +394,7 @@ public class NativeEngineLib {
         try {
             return (long) mh_getPawnHashProbes.invoke();
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke getPawnHashProbes");
+            throw new NativeLibraryException("unable to invoke getPawnHashProbes", e);
         }
     }
 
@@ -448,7 +449,7 @@ public class NativeEngineLib {
             }
 
             if (retval != 0) {
-                throw new RuntimeException("error in iterate! retval=" + retval);
+                throw new NativeLibraryException("error in iterate! retval=" + retval);
             }
 
             // copy stats
@@ -474,11 +475,10 @@ public class NativeEngineLib {
 
             int depth = depthSegment.get(JAVA_INT, 0);
             int score = scoreSegment.get(JAVA_INT, 0);
-            //System.out.println("*** depth: " + depth + " score: " + score);
 
             return Tuple.of(depth, score);
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke iterate; msg: " + e.getMessage());
+            throw new NativeLibraryException("unable to invoke iterate", e);
         }
     }
 
@@ -487,7 +487,7 @@ public class NativeEngineLib {
         try {
             mh_skipTimeChecks.invoke(skip);
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke skipTimeChecks; msg: " + e.getMessage());
+            throw new NativeLibraryException("unable to invoke skipTimeChecks", e);
         }
     }
 
@@ -496,7 +496,7 @@ public class NativeEngineLib {
         try {
             mh_stopSearch.invoke(stop);
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to invoke stopSearch; msg: " + e.getMessage());
+            throw new NativeLibraryException("unable to invoke stopSearch", e);
         }
     }
 
@@ -542,49 +542,30 @@ public class NativeEngineLib {
         boolean isWhite = pieceColor.isWhite();
 
         switch (pieceType) {
-            case 0 -> {
-                return null;
-            }
-            case 1 -> {
-                return isWhite ? WHITE_PAWN : BLACK_PAWN;
-            }
-            case 2 -> {
-                return isWhite ? WHITE_KNIGHT : BLACK_KNIGHT;
-            }
-            case 3 -> {
-                return isWhite ? WHITE_BISHOP : BLACK_BISHOP;
-            }
-            case 4 -> {
-                return isWhite ? WHITE_ROOK : BLACK_ROOK;
-            }
-            case 5 -> {
-                return isWhite ? WHITE_QUEEN : BLACK_QUEEN;
-            }
-            case 6 -> {
-                return isWhite ? WHITE_KING : BLACK_KING;
-            }
+            case 0 -> { return null; }
+            case 1 -> { return isWhite ? WHITE_PAWN : BLACK_PAWN; }
+            case 2 -> { return isWhite ? WHITE_KNIGHT : BLACK_KNIGHT; }
+            case 3 -> { return isWhite ? WHITE_BISHOP : BLACK_BISHOP; }
+            case 4 -> { return isWhite ? WHITE_ROOK : BLACK_ROOK; }
+            case 5 -> { return isWhite ? WHITE_QUEEN : BLACK_QUEEN; }
+            case 6 -> { return isWhite ? WHITE_KING : BLACK_KING; }
             default -> throw new IllegalArgumentException("Don't know how to translate native piece: " + pieceType);
         }
     }
 
     private static long toNativePiece(Piece piece) {
-        if (piece.getClass() == Pawn.class) {
-            return 1;
-        } else if (piece.getClass() == Knight.class) {
-            return 2;
-        } else if (piece.getClass() == Bishop.class) {
-            return 3;
-        } else if (piece.getClass() == Rook.class) {
-            return 4;
-        } else if (piece.getClass() == Queen.class) {
-            return 5;
-        } else if (piece.getClass() == King.class) {
-            return 6;
-        }
+        if (piece.getClass() == Pawn.class) return 1;
+        else if (piece.getClass() == Knight.class) return 2;
+        else if (piece.getClass() == Bishop.class) return 3;
+        else if (piece.getClass() == Rook.class) return 4;
+        else if (piece.getClass() == Queen.class) return 5;
+        else if (piece.getClass() == King.class) return 6;
         throw new IllegalArgumentException("Invalid piece type in toNativePiece: " + piece);
     }
 
-    private static void pvCallback(MemorySegment moves, int numMoves, int depth, boolean finalForDepth, int score, long elapsed, long nodes) {
+    private static void pvCallback(MemorySegment moves, int numMoves, int depth, boolean finalForDepth, int score,
+                                   long elapsed, long nodes)
+    {
         assert(numMoves > 0);
         MemorySegment cMoves = moves.reinterpret(numMoves * JAVA_LONG.byteSize());
         List<Move> pv = new ArrayList<>();

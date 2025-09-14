@@ -36,7 +36,6 @@ public final class NativeLibraryLoader {
                 os.write(buffer, 0, length);
             }
 
-            System.load(libFile.getPath());
             return libFile;
         } finally {
             if (is != null) {
