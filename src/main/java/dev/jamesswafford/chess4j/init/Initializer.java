@@ -22,7 +22,7 @@ public final class Initializer {
         File libFile = null;
 
         try {
-            is = Initializer.class.getResourceAsStream("/libchess4j-native.so"); // FIXME
+            is = Initializer.class.getResourceAsStream("/libprophetlib.so");
             if (is == null) {
                 throw new IllegalStateException("Could not get resource.");
             }
@@ -43,14 +43,12 @@ public final class Initializer {
             if (is != null) {
                 try {
                     is.close();
-                } catch (IOException ignored) {
-                }
+                } catch (IOException ignored) { }
             }
             if (os != null) {
                 try {
                     os.close();
-                } catch (IOException ignored) {
-                }
+                } catch (IOException ignored) { }
             }
             if (libFile != null) {
                 libFile.deleteOnExit();
@@ -61,29 +59,21 @@ public final class Initializer {
     public static synchronized void init() {
 
         if (attemptToUseNative && !nativeCodeInitialized) {
-            // which OS are we running on?
-
             String os = System.getProperty("os.name");
             LOGGER.info("# Detected OS: {}", os);
 
             if ("Linux".equals(os)) {
-                System.out.println("# Loading Prophet native library.");
-                //File libFile = copyLibraryToFile();
-                //System.load(libFile.getPath());
-
-                LOGGER.info("# Prophet loaded, initializing...");
-                //if (!prophetInit()) {
-                //    attemptToUseNative = false;
-                //    throw new IllegalStateException("Could not initialize p4!");
-                //}
-
-                //NativeEngineLib.initializeFFM(libFile);
-                NativeEngineLib.initializeFFM();
-
+                File libFile = copyLibraryToFile();
+                System.load(libFile.getPath());
+                LOGGER.info("# Prophet native library loaded, initializing...");
+                NativeEngineLib.initializeFFM(libFile);
                 LOGGER.info("# Prophet initialized.");
+                nativeCodeInitialized = true;
+            } else {
+                LOGGER.warn("# Cannot load native library for {}", os);
+                attemptToUseNative = false;
             }
 
-            nativeCodeInitialized = true;
         }
     }
 

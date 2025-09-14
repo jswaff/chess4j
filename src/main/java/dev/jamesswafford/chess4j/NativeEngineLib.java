@@ -76,11 +76,6 @@ public class NativeEngineLib {
     private static MethodHandle mh_skipTimeChecks;
     private static MethodHandle mh_stopSearch;
 
-    public static void initializeFFM() {
-        System.load("/home/james/chess4j/lib/prophet/install/lib/libprophetlib.so"); // FIXME
-        SymbolLookup lookup = SymbolLookup.loaderLookup();
-        initializeFFM(lookup);
-    }
 
     public static void initializeFFM(File libFile) {
         Arena arena = Arena.global();

@@ -125,24 +125,20 @@
                         <exclude>**/LogisticRegressionTuner*</exclude>
                     </excludes>
                     <skipTests>false</skipTests>
-<!--&lt;!&ndash;                    <argLine>-Djava.library.path=${project.basedir}/../chess4j-native/target</argLine>&ndash;&gt;-->
-<!--                    <useSystemClassLoader>false</useSystemClassLoader>-->
-<!--                    <useManifestOnlyJar>false</useManifestOnlyJar>-->
-<!--                    <workingDirectory>${java.io.tmpdir}</workingDirectory>-->
                 </configuration>
             </plugin>
         </plugins>
 
-<!--        <resources>-->
-<!--            <resource>-->
-<!--                <directory>src/main/resources</directory>-->
-<!--            </resource>-->
-<!--            <resource>-->
-<!--                <directory>${project.basedir}/../chess4j-native/target</directory>-->
-<!--                <includes>-->
-<!--                    <include>*.so</include>-->
-<!--                </includes>-->
-<!--            </resource>-->
-<!--        </resources>-->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/native/prophet/install/lib</directory>
+                <includes>
+                    <include>*.so</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
 </project>
