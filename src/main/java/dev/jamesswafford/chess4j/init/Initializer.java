@@ -15,43 +15,36 @@ public final class Initializer {
 
     private Initializer() { }
 
-    private static File copyLibraryToFile() {
+    private static File loadNativeLibraryFromJar(String nativeLibrary) throws IOException {
 
         InputStream is = null;
         OutputStream os = null;
-        File libFile = null;
+        File libFile;
 
         try {
-            is = Initializer.class.getResourceAsStream("/libprophetlib.so");
+            is = Initializer.class.getResourceAsStream(nativeLibrary);
             if (is == null) {
-                throw new IllegalStateException("Could not get resource.");
+                throw new IllegalStateException("Prophet library not found in jar: " + nativeLibrary);
             }
 
-            libFile = File.createTempFile("lib", ".so");
-            os = new FileOutputStream(libFile);
-            byte[] buffer = new byte[16384];
-            int length;
+            libFile = File.createTempFile("lib", ".tmp");
+            libFile.deleteOnExit();
 
+            os = new FileOutputStream(libFile);
+            byte[] buffer = new byte[1024];
+            int length;
             while ((length = is.read(buffer)) > 0) {
                 os.write(buffer, 0, length);
             }
 
+            System.load(libFile.getPath());
             return libFile;
-        } catch (IOException e) {
-            throw new IllegalStateException("Could not load class lib", e);
         } finally {
             if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException ignored) { }
+                 is.close();
             }
             if (os != null) {
-                try {
-                    os.close();
-                } catch (IOException ignored) { }
-            }
-            if (libFile != null) {
-                libFile.deleteOnExit();
+                 os.close();
             }
         }
     }
@@ -62,16 +55,21 @@ public final class Initializer {
             String os = System.getProperty("os.name");
             LOGGER.info("# Detected OS: {}", os);
 
-            if ("Linux".equals(os)) {
-                File libFile = copyLibraryToFile();
-                System.load(libFile.getPath());
-                LOGGER.info("# Prophet native library loaded, initializing...");
-                NativeEngineLib.initializeFFM(libFile);
-                LOGGER.info("# Prophet initialized.");
-                nativeCodeInitialized = true;
-            } else {
-                LOGGER.warn("# Native library not available for {}", os);
-                attemptToUseNative = false;
+            String libFilePathInJar = null;
+            if ("Linux".equals(os)) libFilePathInJar = "/libprophetlib.so";
+
+            try {
+                if (libFilePathInJar != null) {
+                    File libFile = loadNativeLibraryFromJar(libFilePathInJar);
+                    NativeEngineLib.initializeFFM(libFile);
+                    LOGGER.info("# Prophet library initialized.");
+                    nativeCodeInitialized = true;
+                } else {
+                    LOGGER.warn("# Prophet library not available for {}", os);
+                    attemptToUseNative = false;
+                }
+            } catch (IOException e) {
+                throw new UncheckedIOException("Error initializing Prophet library", e);
             }
         }
     }
