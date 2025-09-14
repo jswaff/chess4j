@@ -1,11 +1,11 @@
 package dev.jamesswafford.chess4j.search;
 
 import dev.jamesswafford.chess4j.Constants;
-import dev.jamesswafford.chess4j.NativeEngineLib;
+import dev.jamesswafford.chess4j.nativelib.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.*;
 import dev.jamesswafford.chess4j.board.squares.Direction;
 import dev.jamesswafford.chess4j.board.squares.Square;
-import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.nativelib.NativeLibraryLoader;
 import dev.jamesswafford.chess4j.io.DrawBoard;
 import dev.jamesswafford.chess4j.movegen.AttackDetector;
 import dev.jamesswafford.chess4j.movegen.Magic;
@@ -61,7 +61,7 @@ public class SEE {
     }
 
     static {
-        Initializer.init();
+        NativeLibraryLoader.init();
     }
 
     public static int see(Board b, Move m) {
@@ -181,7 +181,7 @@ public class SEE {
     }
 
     private static boolean seesAreEqual(int javaScore, Board board, Move mv) {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             int nativeScore = NativeEngineLib.see(board, mv);
             if (javaScore != nativeScore) {
                 LOGGER.error("see not equal!  java: {}, native: {}, mv: {}", javaScore, nativeScore, mv);

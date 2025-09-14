@@ -1,19 +1,18 @@
-package dev.jamesswafford.chess4j.init;
+package dev.jamesswafford.chess4j.nativelib;
 
-import dev.jamesswafford.chess4j.NativeEngineLib;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 
-public final class Initializer {
+public final class NativeLibraryLoader {
 
-    private static final Logger LOGGER = LogManager.getLogger(Initializer.class);
+    private static final Logger LOGGER = LogManager.getLogger(NativeLibraryLoader.class);
 
     public static boolean attemptToUseNative = false;
     private static boolean nativeCodeInitialized = false;
 
-    private Initializer() { }
+    private NativeLibraryLoader() { }
 
     private static File loadNativeLibraryFromJar(String nativeLibrary) throws IOException {
 
@@ -22,7 +21,7 @@ public final class Initializer {
         File libFile;
 
         try {
-            is = Initializer.class.getResourceAsStream(nativeLibrary);
+            is = NativeLibraryLoader.class.getResourceAsStream(nativeLibrary);
             if (is == null) {
                 throw new IllegalStateException("Prophet library not found in jar: " + nativeLibrary);
             }

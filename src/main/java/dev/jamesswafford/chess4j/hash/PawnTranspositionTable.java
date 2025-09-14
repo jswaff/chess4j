@@ -1,8 +1,8 @@
 package dev.jamesswafford.chess4j.hash;
 
-import dev.jamesswafford.chess4j.NativeEngineLib;
+import dev.jamesswafford.chess4j.nativelib.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Board;
-import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.nativelib.NativeLibraryLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,13 +15,13 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     private static final long DEFAULT_SIZE_BYTES = 8 * 1024 * 1024;
 
     static {
-        Initializer.init();
+        NativeLibraryLoader.init();
     }
 
     private PawnTranspositionTableEntry[] table;
 
     public static long getDefaultSizeBytes() {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             return 0;
         }
         return DEFAULT_SIZE_BYTES;
@@ -39,14 +39,14 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     public void clear() {
         clearStats();
         Arrays.fill(table, null);
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             NativeEngineLib.clearPawnHashTable();
         }
     }
 
     @Override
     public long getNumCollisions() {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             return NativeEngineLib.getPawnHashCollisions();
         }
         return numCollisions;
@@ -54,7 +54,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     @Override
     public long getNumHits() {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             return NativeEngineLib.getPawnHashHits();
         }
         return numHits;
@@ -62,7 +62,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     @Override
     public long getNumProbes() {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             return NativeEngineLib.getPawnHashProbes();
         }
         return numProbes;
@@ -71,7 +71,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     // when native code is enabled, probe in the native layer so that the native and Java searches
     // produce equivalent results.
     public PawnTranspositionTableEntry probe(Board board) {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             return NativeEngineLib.probePawnHashTable(board);
         } else {
             return probe(board.getPawnKey());
@@ -98,7 +98,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
     public void store(Board board, int mgscore, int egscore) {
         long key = board.getPawnKey();
         PawnTranspositionTableEntry entry = new PawnTranspositionTableEntry(key, mgscore, egscore);
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             NativeEngineLib.storePawnHashTable(board, entry);
         } else {
             table[getTableIndex(key)] = entry;
@@ -114,7 +114,7 @@ public class PawnTranspositionTable extends AbstractTranspositionTable {
 
     @Override
     protected void resizeTable(long sizeBytes) {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             NativeEngineLib.resizePawnHashTable(sizeBytes);
         } else {
             createTable(sizeBytes);

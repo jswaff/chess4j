@@ -1,4 +1,4 @@
-package dev.jamesswafford.chess4j;
+package dev.jamesswafford.chess4j.nativelib;
 
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Color;

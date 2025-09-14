@@ -1,7 +1,7 @@
 package dev.jamesswafford.chess4j.search;
 
 import dev.jamesswafford.chess4j.board.Move;
-import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.nativelib.NativeLibraryLoader;
 import dev.jamesswafford.chess4j.pieces.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,7 +14,7 @@ public class MVVLVA {
     private static final Logger LOGGER = LogManager.getLogger(MVVLVA.class);
 
     static {
-        Initializer.init();
+        NativeLibraryLoader.init();
     }
 
     private static final Map<Class<?>,Integer> pieceMap;

@@ -1,14 +1,14 @@
 package dev.jamesswafford.chess4j.search;
 
 import dev.jamesswafford.chess4j.Constants;
-import dev.jamesswafford.chess4j.NativeEngineLib;
+import dev.jamesswafford.chess4j.nativelib.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.board.Undo;
 import dev.jamesswafford.chess4j.hash.PawnTranspositionTable;
 import dev.jamesswafford.chess4j.hash.TTHolder;
 import dev.jamesswafford.chess4j.hash.TranspositionTable;
-import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.nativelib.NativeLibraryLoader;
 import dev.jamesswafford.chess4j.io.PrintLine;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
@@ -31,7 +31,7 @@ public class SearchIteratorImpl implements SearchIterator {
     private static final  Logger LOGGER = LogManager.getLogger(SearchIteratorImpl.class);
 
     static {
-        Initializer.init();
+        NativeLibraryLoader.init();
     }
 
     private int maxDepth = 0;
@@ -148,7 +148,7 @@ public class SearchIteratorImpl implements SearchIterator {
         // use iterative deepening to find the principal variation
         Tuple2<Integer, Integer> depthScore;
         SearchStats stats = new SearchStats();
-        if (Initializer.nativeCodeInitialized() && !opts.isAvoidNative()) {
+        if (NativeLibraryLoader.nativeCodeInitialized() && !opts.isAvoidNative()) {
             depthScore = iterateWithNativeCode(pv, stats, board, undos, opts);
         } else {
             depthScore = iterateWithJavaCode(pv, board, undos, opts);

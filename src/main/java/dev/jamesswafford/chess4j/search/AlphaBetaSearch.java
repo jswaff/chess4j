@@ -1,7 +1,7 @@
 package dev.jamesswafford.chess4j.search;
 
 import dev.jamesswafford.chess4j.Globals;
-import dev.jamesswafford.chess4j.NativeEngineLib;
+import dev.jamesswafford.chess4j.nativelib.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.*;
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.eval.Eval;
@@ -9,7 +9,7 @@ import dev.jamesswafford.chess4j.eval.Evaluator;
 import dev.jamesswafford.chess4j.hash.TTHolder;
 import dev.jamesswafford.chess4j.hash.TranspositionTableEntry;
 import dev.jamesswafford.chess4j.hash.TranspositionTableEntryType;
-import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.nativelib.NativeLibraryLoader;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
 import dev.jamesswafford.chess4j.utils.BoardUtils;
@@ -30,7 +30,7 @@ public class AlphaBetaSearch implements Search {
     private static final  Logger LOGGER = LogManager.getLogger(AlphaBetaSearch.class);
 
     static {
-        Initializer.init();
+        NativeLibraryLoader.init();
     }
 
     private final List<Move> pv;
@@ -95,7 +95,7 @@ public class AlphaBetaSearch implements Search {
     @Override
     public void stop() {
         stop = true;
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             NativeEngineLib.stopSearch(true);
         }
     }
@@ -103,7 +103,7 @@ public class AlphaBetaSearch implements Search {
     @Override
     public void unstop() {
         stop = false;
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             NativeEngineLib.stopSearch(false);
         }
     }
@@ -111,7 +111,7 @@ public class AlphaBetaSearch implements Search {
     @Override
     public void setSkipTimeChecks(boolean skipTimeChecks) {
         this.skipTimeChecks = skipTimeChecks;
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             NativeEngineLib.skipTimeChecks(skipTimeChecks);
         }
     }

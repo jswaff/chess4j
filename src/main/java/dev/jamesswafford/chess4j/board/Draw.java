@@ -1,7 +1,7 @@
 package dev.jamesswafford.chess4j.board;
 
 import dev.jamesswafford.chess4j.board.squares.Square;
-import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.nativelib.NativeLibraryLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,7 +23,7 @@ public class Draw {
     private static final Logger LOGGER = LogManager.getLogger(Draw.class);
 
     static {
-        Initializer.init();
+        NativeLibraryLoader.init();
     }
 
     public static boolean isDraw(Board board, List<Undo> undos) {

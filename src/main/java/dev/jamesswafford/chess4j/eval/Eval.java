@@ -1,14 +1,14 @@
 package dev.jamesswafford.chess4j.eval;
 
 import dev.jamesswafford.chess4j.Globals;
-import dev.jamesswafford.chess4j.NativeEngineLib;
+import dev.jamesswafford.chess4j.nativelib.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Bitboard;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Color;
 import dev.jamesswafford.chess4j.board.squares.Square;
 import dev.jamesswafford.chess4j.hash.PawnTranspositionTableEntry;
 import dev.jamesswafford.chess4j.hash.TTHolder;
-import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.nativelib.NativeLibraryLoader;
 import io.vavr.Function3;
 import io.vavr.Function4;
 import io.vavr.Tuple2;
@@ -36,7 +36,7 @@ public final class Eval implements Evaluator {
     }
 
     static {
-        Initializer.init();
+        NativeLibraryLoader.init();
     }
 
     public Eval() { }
@@ -239,7 +239,7 @@ public final class Eval implements Evaluator {
     }
 
     private static boolean verifyNativeEvalIsEqual(int javaScore, Board board, boolean materialOnly) {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             int nativeSccore = NativeEngineLib.eval(board, materialOnly);
             if (javaScore != nativeSccore) {
                 LOGGER.error("evals not equal!  java: {}, native: {}, materialOnly: {}",

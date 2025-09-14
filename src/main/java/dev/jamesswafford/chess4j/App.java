@@ -4,7 +4,7 @@ import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.book.SQLiteBook;
 import dev.jamesswafford.chess4j.eval.EvalWeights;
 import dev.jamesswafford.chess4j.hash.TTHolder;
-import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.nativelib.NativeLibraryLoader;
 import dev.jamesswafford.chess4j.io.*;
 import dev.jamesswafford.chess4j.nn.NeuralNetwork;
 import dev.jamesswafford.chess4j.search.AlphaBetaSearch;
@@ -90,7 +90,7 @@ public final class App {
 
     private static void processCommandLineOptions(Options options, CommandLine commandLine) {
         if (commandLine.hasOption("?")) printHelp(options);
-        if (commandLine.hasOption("native")) Initializer.attemptToUseNative = true;
+        if (commandLine.hasOption("native")) NativeLibraryLoader.attemptToUseNative = true;
         if (commandLine.hasOption("book"))
             Globals.setOpeningBook(SQLiteBook.openOrInitialize(commandLine.getOptionValue("book")));
         if (commandLine.hasOption("eval"))

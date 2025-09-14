@@ -1,10 +1,10 @@
 package dev.jamesswafford.chess4j.movegen;
 
-import dev.jamesswafford.chess4j.NativeEngineLib;
+import dev.jamesswafford.chess4j.nativelib.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.*;
 import dev.jamesswafford.chess4j.board.squares.File;
 import dev.jamesswafford.chess4j.board.squares.Square;
-import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.nativelib.NativeLibraryLoader;
 import dev.jamesswafford.chess4j.pieces.Pawn;
 import dev.jamesswafford.chess4j.pieces.Piece;
 import dev.jamesswafford.chess4j.utils.BoardUtils;
@@ -38,7 +38,7 @@ public final class MagicBitboardMoveGenerator implements MoveGenerator {
     private static final  Logger LOGGER = LogManager.getLogger(MagicBitboardMoveGenerator.class);
 
     static {
-        Initializer.init();
+        NativeLibraryLoader.init();
     }
 
     @Override
@@ -361,7 +361,7 @@ public final class MagicBitboardMoveGenerator implements MoveGenerator {
     }
 
     private static boolean moveGensAreEqual(List<Move> javaMoves, Board board, boolean caps, boolean noncaps) {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             List<Move> ffmMoves = NativeEngineLib.generatePseudoLegalMoves(board, caps, noncaps);
             if (!new HashSet<>(ffmMoves).equals(new HashSet<>(javaMoves))) return false;
             javaMoves.clear();

@@ -1,8 +1,8 @@
 package dev.jamesswafford.chess4j.nn;
 
-import dev.jamesswafford.chess4j.NativeEngineLib;
+import dev.jamesswafford.chess4j.nativelib.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Board;
-import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.nativelib.NativeLibraryLoader;
 import dev.jamesswafford.chess4j.io.DrawBoard;
 import dev.jamesswafford.chess4j.io.FENBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -26,7 +26,7 @@ public class NeuralNetwork {
     public final int[] B1;
 
     static {
-        Initializer.init();
+        NativeLibraryLoader.init();
     }
 
     public NeuralNetwork() {
@@ -64,7 +64,7 @@ public class NeuralNetwork {
             throw new UncheckedIOException(e);
         }
 
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             LOGGER.debug("# loading network {} into native code", networkFile.getPath());
             NativeEngineLib.loadNeuralNetwork(networkFile);
         }
@@ -123,7 +123,7 @@ public class NeuralNetwork {
     }
 
     private boolean verifyNativeEvalIsEqual(int javaScore, Board board) {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             int nativeScore = NativeEngineLib.evalNN(board);
             if (javaScore != nativeScore) {
                 DrawBoard.drawBoard(board);

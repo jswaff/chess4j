@@ -1,10 +1,10 @@
 package dev.jamesswafford.chess4j.hash;
 
 import dev.jamesswafford.chess4j.Constants;
-import dev.jamesswafford.chess4j.NativeEngineLib;
+import dev.jamesswafford.chess4j.nativelib.NativeEngineLib;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Move;
-import dev.jamesswafford.chess4j.init.Initializer;
+import dev.jamesswafford.chess4j.nativelib.NativeLibraryLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,13 +17,13 @@ public class TranspositionTable extends AbstractTranspositionTable {
     private static final long DEFAULT_SIZE_BYTES = 64 * 1024 * 1024;
 
     static {
-        Initializer.init();
+        NativeLibraryLoader.init();
     }
 
     private TranspositionTableEntry[] table;
 
     public static long getDefaultSizeBytes() {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             return 0;
         }
         return DEFAULT_SIZE_BYTES;
@@ -41,14 +41,14 @@ public class TranspositionTable extends AbstractTranspositionTable {
     public void clear() {
         clearStats();
         Arrays.fill(table, null);
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             NativeEngineLib.clearMainHashTable();
         }
     }
 
     @Override
     public long getNumCollisions() {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             return NativeEngineLib.getMainHashCollisions();
         }
         return numCollisions;
@@ -56,7 +56,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     @Override
     public long getNumHits() {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             return NativeEngineLib.getMainHashHits();
         }
         return numHits;
@@ -64,7 +64,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     @Override
     public long getNumProbes() {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             return NativeEngineLib.getMainHashProbes();
         }
         return numProbes;
@@ -87,7 +87,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
     }
 
     public TranspositionTableEntry probe(Board board) {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             return NativeEngineLib.probeMainHashTable(board);
         } else {
             return probe(board.getZobristKey());
@@ -114,7 +114,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
     public void store(Board board, TranspositionTableEntryType entryType, int score, int depth, Move move) {
         long key = board.getZobristKey();
         TranspositionTableEntry entry = buildHashTableEntry(key, entryType, score, depth, move);
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             NativeEngineLib.storeMainHashTable(board, entry);
         } else {
             table[getTableIndex(key)] = entry;
@@ -156,7 +156,7 @@ public class TranspositionTable extends AbstractTranspositionTable {
 
     @Override
     protected void resizeTable(long sizeBytes) {
-        if (Initializer.nativeCodeInitialized()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             NativeEngineLib.resizeMainHashTable(sizeBytes);
         } else {
             createTable(sizeBytes);
