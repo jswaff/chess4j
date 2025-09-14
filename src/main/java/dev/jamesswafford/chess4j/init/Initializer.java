@@ -70,10 +70,9 @@ public final class Initializer {
                 LOGGER.info("# Prophet initialized.");
                 nativeCodeInitialized = true;
             } else {
-                LOGGER.warn("# Cannot load native library for {}", os);
+                LOGGER.warn("# Native library not available for {}", os);
                 attemptToUseNative = false;
             }
-
         }
     }
 
