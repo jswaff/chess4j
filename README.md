@@ -56,7 +56,7 @@ Note: the Xboard protocol has a 'memory' command to specify the maximum memory u
 You can run EPD formatted test suites with chess4j by putting it in test mode.  The default time per problem is 10 seconds, but that can also be changed with the 'time' argument.
 
 ```
-java -jar chess4j-6.1-uber.jar -mode test -epd wac.epd -time 30
+java -jar chess4j-6.2-uber.jar -mode test -epd wac.epd -time 30
 ```
 
 The command above would start chess4j to process the Win At Chess (WAC) test suite, giving it 30 seconds per problem.  (A few test suites can be found in the test/resources folder.)
@@ -65,7 +65,7 @@ The command above would start chess4j to process the Win At Chess (WAC) test sui
 ## Changelog
 
 6.2
-* replaced JNI integration with newer Foreign Function and Memory API (FMM).
+* replaced JNI integration with newer Foreign Function and Memory API (FMM)
 * Removed native code submodule
 
 6.1
@@ -92,8 +92,7 @@ The command above would start chess4j to process the Win At Chess (WAC) test sui
 
 ## Roadmap
 
-The next area of focus will likely be Lazy SMP.  I also plan to investigate Java's Foreign Function & Memory (FFM) API as a potential alternative to the Java Native Interface (JNI).  From what I've read, FFM is safer, more straightforward, and potentially more performant.  
-
+The next area of focus will be evaluate Java's Vector API.  Lazy SMP is also on the horizon. 
 
 You can see the combined Prophet / chess4j backlog here: https://trello.com/b/dhcOEaCO/chess4j-board .
 
