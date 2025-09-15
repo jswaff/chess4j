@@ -128,17 +128,5 @@
                 </configuration>
             </plugin>
         </plugins>
-
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>${project.basedir}/native/prophet/install/lib</directory>
-                <includes>
-                    <include>*.so</include>
-                </includes>
-            </resource>
-        </resources>
     </build>
 </project>

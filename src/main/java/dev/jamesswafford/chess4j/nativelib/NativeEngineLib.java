@@ -22,6 +22,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.VarHandle;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -78,9 +79,9 @@ public class NativeEngineLib {
     private static MethodHandle mh_stopSearch;
 
 
-    public static void initializeFFM(File libFile) {
+    public static void initializeFFM(Path libFilePath) {
         Arena arena = Arena.global();
-        SymbolLookup lookup = SymbolLookup.libraryLookup(libFile.getPath(), arena);
+        SymbolLookup lookup = SymbolLookup.libraryLookup(libFilePath, arena);
         initializeFFM(lookup);
     }
 
