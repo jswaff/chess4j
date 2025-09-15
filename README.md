@@ -20,7 +20,7 @@ Once those prerequisites are met you can download the latest release and extract
 
 You will need a Java 24 (or better) JDK and Maven.
 
-Clone the repository and go into the chess4j/chess4j-java directory.
+Clone the repository and go into the chess4j directory.
  
  ```mvn clean install```  
 
