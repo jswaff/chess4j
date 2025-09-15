@@ -8,7 +8,7 @@ chess4j is a chess program written using Java technologies. It is a test bed of 
 
 ## Installing
 
-To play chess4j, you'll need a Java 11 or later JRE and Winboard or Xboard.  To see if you have a JRE installed, open a command prompt and type 'java -version'.  If you need to download a JRE you can download one from the Oracle website:
+To play chess4j, you'll need a Java 24 or later JRE and Winboard or Xboard.  To see if you have a JRE installed, open a command prompt and type 'java -version'.  If you need to download a JRE you can download one from the Oracle website:
 
 https://www.oracle.com/java/technologies/downloads/
 
@@ -18,13 +18,7 @@ Once those prerequisites are met you can download the latest release and extract
 
 ## Building from Source
 
-chess4j can be built with or without <a href="https://github.com/jswaff/prophet" target="_blank">Prophet</a> bundled as a static library. 
-
-Whether you want to bundle Prophet or not, you will need a Java 11 (or better) JDK and Maven.  You will probably also need to ensure the JAVA_HOME environment variable is properly set.
-
-
-### Without the Prophet Engine
-
+You will need a Java 24 (or better) JDK and Maven.
 
 Clone the repository and go into the chess4j/chess4j-java directory.
  
@@ -32,58 +26,16 @@ Clone the repository and go into the chess4j/chess4j-java directory.
 
 Once this process is complete you should see the build artifact in the target directory.  Verify everything is working:
 
-```java -jar chess4j-6.1-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd```
+```java -jar chess4j-6.2-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd```
 
 You should see the program search for about 10 seconds and display the result.  
 
-
-### With the Prophet Engine 
-
-*** Currently for Linux only ***
-
-This option is slightly more complex.  In addition to the other prerequisites, you'll also need a working C/C++ toolchain.  I always use gcc / g++.  Others may work but have not been tested.  You'll also need 'make' and 'cmake'.
-
-Once you have the prerequisites, clone the chess4j repository.  Since Prophet is a separate project, you'll need to do a recursive clone, e.g.
-
-```git clone --recurse-submodules git@github.com:jswaff/chess4j.git```
-
-If that worked you should see the contents of chess4j/lib/prophet populated.  Now, just go into the top level 'chess4j' directory and execute:
-
-```make```
-
-That will kick off the build process, first building Prophet, then the JNI code that is the "bridge" between the Java and C layers, and finally chess4j itself.  The final build artifact will be in the chess4j-java/target directory.
-
-Verify everything is working:
-
-```java -jar chess4j-6.1-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd -native```
-
-You should see the program search for about 10 seconds and display the result.  
-
-## Native Mode
-
-*** Currently for Linux only ***
-
-Assuming you built with Prophet bundled in or are using one of the supplied platform dependent builds, you can enable native mode using a command line argument:
-
-```-native```
-
-Native mode is significantly faster than Java mode, on the order of 2-3x in most cases.
 
 ## Opening Book
 
 chess4j has a small opening book but it is not enabled by default.  If you would like to enable the opening book, you can do it with a command line parameter:
 
 ```-book book.db```
-
-## Using a Neural Network
-
-By default, chess4j still uses a hand crafted evaluation.  You can enable a neural network based evaluation using a command line parameter:
-
-```-nn nn-24-q.txt```
-
-However, this is only recommended when running in native mode.  Using a neural network for evaluation, even with NNUE, is significantly slower
-than a traditional code based evaluator.  In native mode, AVX intrinsics partially compensate for this.  In Java, the overhead seems to be 
-too high.  I will continue to investigate this, but it's likely that in a future release I'll remove support for neural networks when not in native mode.
 
 ## Memory Usage
 
@@ -111,6 +63,10 @@ The command above would start chess4j to process the Win At Chess (WAC) test sui
 
 
 ## Changelog
+
+6.2
+* replaced JNI integration with newer Foreign Function and Memory API (FMM).
+* Removed native code submodule
 
 6.1
 * NNUE (recommended for native mode only)
