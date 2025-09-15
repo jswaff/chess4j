@@ -1,0 +1,29 @@
+package dev.jamesswafford.chess4j.io;
+
+import dev.jamesswafford.chess4j.board.Move;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.List;
+
+public class PrintLine {
+    private static final  Logger LOGGER = LogManager.getLogger(PrintLine.class);
+
+    public static void printLine(List<Move> moves, int depth, boolean finalForDepth, int score, long elapsedMs,
+                                 long nodes) {
+        long timeInCentis = elapsedMs / 10;
+        String line = getMoveString(moves);
+        String output = String.format("%2d%s %5d %5d %7d %s", depth, finalForDepth?".":" ", score, timeInCentis, nodes,
+                line);
+        LOGGER.info(output);
+    }
+
+    public static String getMoveString(List<Move> moves) {
+        StringBuilder s = new StringBuilder();
+        for (Move m : moves) {
+            s.append(m.toString()).append(" ");
+        }
+        return s.toString();
+    }
+
+}
