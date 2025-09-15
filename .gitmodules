@@ -1,4 +1,0 @@
-[submodule "native/prophet"]
-	path = native/prophet
-	url = git@github.com:jswaff/prophet.git
-	branch = development

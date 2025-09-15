@@ -1,9 +1,12 @@
 package dev.jamesswafford.chess4j.nativelib;
 
+import dev.jamesswafford.chess4j.exceptions.NativeLibraryException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public final class NativeLibraryLoader {
 
@@ -14,60 +17,27 @@ public final class NativeLibraryLoader {
 
     private NativeLibraryLoader() { }
 
-    private static File loadNativeLibraryFromJar(String nativeLibrary) throws IOException {
-
-        InputStream is = null;
-        OutputStream os = null;
-        File libFile;
-
-        try {
-            is = NativeLibraryLoader.class.getResourceAsStream(nativeLibrary);
-            if (is == null) {
-                throw new IllegalStateException("Prophet library not found in jar: " + nativeLibrary);
-            }
-
-            libFile = File.createTempFile("lib", ".tmp");
-            libFile.deleteOnExit();
-
-            os = new FileOutputStream(libFile);
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = is.read(buffer)) > 0) {
-                os.write(buffer, 0, length);
-            }
-
-            return libFile;
-        } finally {
-            if (is != null) {
-                 is.close();
-            }
-            if (os != null) {
-                 os.close();
-            }
-        }
-    }
-
     public static synchronized void init() {
 
         if (attemptToUseNative && !nativeCodeInitialized) {
             String os = System.getProperty("os.name");
             LOGGER.info("# Detected OS: {}", os);
 
-            String libFilePathInJar = null;
-            if ("Linux".equals(os)) libFilePathInJar = "/libprophetlib.so";
+            String libFileName = null;
+            if ("Linux".equalsIgnoreCase(os)) libFileName = "libprophetlib.so";
+
+            if (libFileName==null) {
+                throw new NativeLibraryException("Native library not available for " + os);
+            }
 
             try {
-                if (libFilePathInJar != null) {
-                    File libFile = loadNativeLibraryFromJar(libFilePathInJar);
-                    NativeEngineLib.initializeFFM(libFile);
-                    LOGGER.info("# Prophet library initialized.");
-                    nativeCodeInitialized = true;
-                } else {
-                    LOGGER.warn("# Prophet library not available for {}", os);
-                    attemptToUseNative = false;
-                }
-            } catch (IOException e) {
-                throw new UncheckedIOException("Error initializing Prophet library", e);
+                Path jarPath = Paths.get(NativeLibraryLoader.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+                Path jarDirectory = jarPath.getParent();
+                Path libFilePath = jarDirectory.resolve(libFileName);
+                NativeEngineLib.initializeFFM(libFilePath);
+                nativeCodeInitialized = true;
+            } catch (URISyntaxException e) {
+                throw new NativeLibraryException("Error initializing Prophet library", e);
             }
         }
     }
