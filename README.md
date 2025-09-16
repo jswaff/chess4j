@@ -39,11 +39,9 @@ chess4j has a small opening book but it is not enabled by default.  If you would
 
 ## Using a Neural Network
 
-By default, chess4j still uses a hand crafted evaluation. You can enable a neural network based evaluation using a command line parameter:
+By default, chess4j still uses a handcrafted evaluation. You can enable a neural network based evaluation using a command line parameter:
 
 ```-nn nn-32-q.txt```
-
-However, this is not currently recommended. Using a neural network for evaluation, even with NNUE, is significantly slower than a traditional code based evaluator.  Currently, the overhead seems to be too high without the use of intrinsics.  I plan to investigate Java's Vector API to see if it can help here.
 
 ## Changelog
 
