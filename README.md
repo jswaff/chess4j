@@ -2,10 +2,6 @@
 
 an Xboard compatible Java based chess engine
 
-## Introduction 
-
-chess4j is a chess program written using Java technologies. It is a test bed of sorts for various interests. Those interests include experimenting with different JVM based languages, parallel and distributed computing, and machine learning.
-
 ## Installing
 
 To play chess4j, you'll need a Java 24 or later JRE and Winboard or Xboard.  To see if you have a JRE installed, open a command prompt and type 'java -version'.  If you need to download a JRE you can download one from the Oracle website:
@@ -14,7 +10,7 @@ https://www.oracle.com/java/technologies/downloads/
 
 See http://www.gnu.org/software/xboard for details on installing Winboard or Xboard.
 
-Once those prerequisites are met you can download the latest release and extract the zipfile.  Once you extract the zipfile, open the 'chess4j-wb.bat' file (or 'chess4j-xb.sh' on Linux) and modify the path to match the location you just unzipped to.
+Once those prerequisites are met you can download the latest release and extract the zipfile.  Once you extract the zipfile, open the 'chess4j.bat' file (or 'chess4j.sh' on Linux) and modify the path to match the location you just unzipped to.
 
 ## Building from Source
 
