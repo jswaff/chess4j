@@ -42,7 +42,7 @@ By default, chess4j still uses a handcrafted evaluation. You can enable a neural
 ## Changelog
 
 6.2
-* replaced JNI integration with newer Foreign Function and Memory API (FMM)
+* replaced JNI integration with newer Foreign Function and Memory API (FFM)
 * Removed native code submodule
 * Native mode is no longer publicly supported
 
