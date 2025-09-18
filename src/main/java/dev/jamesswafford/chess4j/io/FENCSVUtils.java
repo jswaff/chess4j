@@ -13,15 +13,14 @@ public class FENCSVUtils {
 
     /**
      * Relabel a CSV file.
-     *
      * The input file should have at least two fields.
      * First field: the FEN
      * Second field: the score (label) to be updated
      * Any fields after the second field are preserved as-is.
      *
-     * @param inCsvFile
-     * @param outCsvFile
-     * @param depth
+     * @param inCsvFile the input file
+     * @param outCsvFile the file to write to
+     * @param depth depth of search to use for labeling
      */
     @SneakyThrows
     public static void relabel(String inCsvFile, String outCsvFile, int depth) {
