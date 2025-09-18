@@ -8,7 +8,6 @@ import dev.jamesswafford.chess4j.nativelib.NativeLibraryLoader;
 import dev.jamesswafford.chess4j.io.*;
 import dev.jamesswafford.chess4j.nn.NeuralNetwork;
 import dev.jamesswafford.chess4j.search.AlphaBetaSearch;
-import dev.jamesswafford.chess4j.search.SearchOptions;
 import dev.jamesswafford.chess4j.search.SearchParameters;
 import dev.jamesswafford.chess4j.tuner.LogisticRegressionTuner;
 import dev.jamesswafford.chess4j.utils.TestSuiteProcessor;
@@ -109,9 +108,8 @@ public final class App {
     }
 
     private static void warmUp() {
-        SearchOptions opts = SearchOptions.builder().avoidNative(true).build();
         new AlphaBetaSearch().search(new Board(),
-                new SearchParameters(3, -Constants.CHECKMATE, Constants.CHECKMATE), opts);
+                new SearchParameters(3, -Constants.CHECKMATE, Constants.CHECKMATE));
         TTHolder.getInstance().clearTables();
     }
 

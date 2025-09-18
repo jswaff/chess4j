@@ -148,7 +148,7 @@ public class SearchIteratorImpl implements SearchIterator {
         // use iterative deepening to find the principal variation
         Tuple2<Integer, Integer> depthScore;
         SearchStats stats = new SearchStats();
-        if (NativeLibraryLoader.nativeCodeInitialized() && !opts.isAvoidNative()) {
+        if (NativeLibraryLoader.nativeCodeInitialized()) {
             depthScore = iterateWithNativeCode(pv, stats, board, undos, opts);
         } else {
             depthScore = iterateWithJavaCode(pv, board, undos, opts);

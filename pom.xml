@@ -8,7 +8,7 @@
     <groupId>dev.jamesswafford</groupId>
     <artifactId>chess4j</artifactId>
     <packaging>jar</packaging>
-    <version>6.3-dev</version>
+    <version>6.3</version>
 
     <dependencies>
         <dependency>

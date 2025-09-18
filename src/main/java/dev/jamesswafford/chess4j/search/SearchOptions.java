@@ -14,7 +14,6 @@ public class SearchOptions {
     private long stopTime;
     private long nodesBetweenTimeChecks;
     private long nodeCountLastTimeCheck;
-    private boolean avoidNative;
     private boolean avoidResearches;
 
 }
