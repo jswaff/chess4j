@@ -5,10 +5,13 @@ import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.nativelib.NativeLibraryLoader;
 import dev.jamesswafford.chess4j.io.DrawBoard;
 import dev.jamesswafford.chess4j.io.FENBuilder;
+import jdk.incubator.vector.ShortVector;
+import jdk.incubator.vector.VectorSpecies;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.util.Arrays;
 
 public class NeuralNetwork {
 
@@ -20,20 +23,20 @@ public class NeuralNetwork {
     private static final int SCALE = 64;
     private static final int THRESHOLD = 127;
 
-    public final int[] W0;
-    public final int[] B0;
-    public final int[] W1;
-    public final int[] B1;
+    public final short[] W0;
+    public final short[] B0;
+    public final byte[] W1;
+    public final byte[] B1;
 
     static {
         NativeLibraryLoader.init();
     }
 
     public NeuralNetwork() {
-        W0 = new int[768 * NN_SIZE_L1];
-        B0 = new int[NN_SIZE_L1];
-        W1 = new int[NN_SIZE_L1 * 2 * NN_SIZE_L2];
-        B1 = new int[NN_SIZE_L2];
+        W0 = new short[768 * NN_SIZE_L1];
+        B0 = new short[NN_SIZE_L1];
+        W1 = new byte[NN_SIZE_L1 * 2 * NN_SIZE_L2];
+        B1 = new byte[NN_SIZE_L2];
     }
 
     public NeuralNetwork(File networkFile) {
@@ -53,13 +56,13 @@ public class NeuralNetwork {
             // note the transposition for W0!
             for (int row=0;row<NN_SIZE_L1;row++)
                 for (int col=0;col<768;col++)
-                    W0[col * NN_SIZE_L1 + row] = parseInt(br.readLine());
+                    W0[col * NN_SIZE_L1 + row] = (short)parseInt(br.readLine());
             for (int i=0;i<B0.length;i++)
-                B0[i] = parseInt(br.readLine());
+                B0[i] = (short)parseInt(br.readLine());
             for (int i=0;i<W1.length;i++)
-                W1[i] = parseInt(br.readLine());
+                W1[i] = (byte)parseInt(br.readLine());
             for (int i=0;i<B1.length;i++)
-                B1[i] = parseInt(br.readLine());
+                B1[i] = (byte)parseInt(br.readLine());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -81,10 +84,10 @@ public class NeuralNetwork {
     public int eval(Board board) {
 
         // set layer 1 features from accumulators
-        int[] L1 = new int[NN_SIZE_L1 * 2];
+        byte[] L1 = new byte[NN_SIZE_L1 * 2];
         for (int o=0;o<NN_SIZE_L1;o++) {
-            L1[o] = clamp(board.getNnueAccumulators().get(0, o));
-            L1[NN_SIZE_L1 + o] = clamp(board.getNnueAccumulators().get(1, o));
+            L1[o] = (byte)clamp(board.getNnueAccumulators().get(0, o));
+            L1[NN_SIZE_L1 + o] = (byte)clamp(board.getNnueAccumulators().get(1, o));
         }
 
         // calculate layer 2
@@ -97,6 +100,24 @@ public class NeuralNetwork {
             }
             L2[i] = sum;
         }
+
+        ////////////////////////////////////////
+        int[] L2_1 = new int[NN_SIZE_L2];
+//
+//        VectorSpecies<Short> species = ShortVector.SPECIES_256;
+//        ShortVector one = ShortVector.broadcast(species, 1);
+//        assert(one.length()==16);
+//
+//        for (int i=0;i<NN_SIZE_L2;i++) {
+//            ShortVector sum0 = ShortVector.zero(species);
+//            for (int j=0;j<(NN_SIZE_L1*2);j++) {
+//                // load 256 bits (32 bytes) starting at L1[j]
+//    //            ShortVector inp = ShortVector.fromArray(species, L1, j);
+//            }
+//        }
+
+//        assert(Arrays.equals(L2, L2_1));
+        ////////////////////////////////////////
 
         // translate into scores
         float wscore = ((float)L2[0]) / (SCALE * SCALE) * 100; // to centipawns
