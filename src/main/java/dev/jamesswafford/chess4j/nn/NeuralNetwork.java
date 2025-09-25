@@ -128,16 +128,16 @@ public class NeuralNetwork {
 
         for (int i=0;i<NN_SIZE_L2;i++) {
             ShortVector vector256 = ShortVector.zero(species256);
-//            for (int j=0;j<(NN_SIZE_L1*2);j++) {
-//                // load 256 bits (32 bytes) starting at L1[j]
-//    //            ShortVector inp = ShortVector.fromArray(species, L1, j);
-//            }
+            for (int j=0;j<(NN_SIZE_L1*2);j++) {
+                // load 256 bits (32 bytes) starting at L1[j]
+                //ShortVector inp = ShortVector.fromArray(species256, L1, j);
+            }
 
             L2_1[i] = vector256.reduceLanes(VectorOperators.ADD) + B1[i];
         }
 
 
-//        assert(Arrays.equals(L2, L2_1));
+        assert(Arrays.equals(L2, L2_1));
         ////////////////////////////////////////
 
         // translate into scores
