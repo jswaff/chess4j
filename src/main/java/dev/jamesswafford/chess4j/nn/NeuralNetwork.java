@@ -5,8 +5,7 @@ import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.nativelib.NativeLibraryLoader;
 import dev.jamesswafford.chess4j.io.DrawBoard;
 import dev.jamesswafford.chess4j.io.FENBuilder;
-import jdk.incubator.vector.ShortVector;
-import jdk.incubator.vector.VectorSpecies;
+import jdk.incubator.vector.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -102,19 +101,41 @@ public class NeuralNetwork {
         }
 
         ////////////////////////////////////////
+/*
+    const __m256i one = _mm256_set1_epi16(1);
+    for (int i=0;i<NN_SIZE_L2;i++) {
+        __m256i sum0 = _mm256_setzero_si256();
+        for (int j=0;j<NN_SIZE_L1*2;j+=32) {
+            const __m256i inp = _mm256_loadu_si256((__m256i*) &L1[j]);
+            const __m256i wei = _mm256_loadu_si256((__m256i*) &nn->W1[i * (NN_SIZE_L1*2) + j]);
+            const __m256i dot = _mm256_madd_epi16(_mm256_maddubs_epi16(inp, wei), one);
+            sum0 = _mm256_add_epi32(sum0, dot);
+        }
+
+        const __m128i sum128lo = _mm256_castsi256_si128(sum0);
+        const __m128i sum128hi = _mm256_extracti128_si256(sum0, 1);
+        __m128i sum128 = _mm_add_epi32(sum128lo, sum128hi);
+        sum128 = _mm_add_epi32(sum128, _mm_shuffle_epi32(sum128, _MM_PERM_ABCD));
+        sum128 = _mm_add_epi32(sum128, _mm_shuffle_epi32(sum128, _MM_PERM_CDAB));
+        L2[i] = _mm_cvtsi128_si32(sum128) + nn->B1[i];
+    }
+ */
         int[] L2_1 = new int[NN_SIZE_L2];
-//
-//        VectorSpecies<Short> species = ShortVector.SPECIES_256;
-//        ShortVector one = ShortVector.broadcast(species, 1);
+
+        VectorSpecies<Short> species256 = ShortVector.SPECIES_256;
+//        ShortVector one = ShortVector.broadcast(species256, 1);
 //        assert(one.length()==16);
-//
-//        for (int i=0;i<NN_SIZE_L2;i++) {
-//            ShortVector sum0 = ShortVector.zero(species);
+
+        for (int i=0;i<NN_SIZE_L2;i++) {
+            ShortVector vector256 = ShortVector.zero(species256);
 //            for (int j=0;j<(NN_SIZE_L1*2);j++) {
 //                // load 256 bits (32 bytes) starting at L1[j]
 //    //            ShortVector inp = ShortVector.fromArray(species, L1, j);
 //            }
-//        }
+
+            L2_1[i] = vector256.reduceLanes(VectorOperators.ADD) + B1[i];
+        }
+
 
 //        assert(Arrays.equals(L2, L2_1));
         ////////////////////////////////////////
