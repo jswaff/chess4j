@@ -49,6 +49,7 @@ public class FENLabeler {
                 fenRecord.setFen(pvFen);
                 // TODO: try a fixed node search
                 parameters = new SearchParameters(3, -CHECKMATE, CHECKMATE);
+                search.initialize();
                 score = search.search(board, parameters);
             }
         }
