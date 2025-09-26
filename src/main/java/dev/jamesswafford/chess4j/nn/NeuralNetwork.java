@@ -9,7 +9,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.util.Arrays;
 
 public class NeuralNetwork {
 
@@ -98,20 +97,17 @@ public class NeuralNetwork {
             L2[i] = sum;
         }
 
-//        VectorSpecies<Short> SHORT_SPEC = ShortVector.SPECIES_256;
 //        VectorSpecies<Integer> INT_SPEC = IntVector.SPECIES_256;
 //        for (int i=0;i<NN_SIZE_L2;i++) {
 //            IntVector sum32 = IntVector.zero(INT_SPEC);
-//            for (int j=0;j<(NN_SIZE_L1*2);j+=SHORT_SPEC.length()) {
-//                ShortVector inp = ShortVector.fromArray(SHORT_SPEC, L1, j);
-//                ShortVector wei = ShortVector.fromArray(SHORT_SPEC, W1, i * (NN_SIZE_L1 * 2) + j);
-//                ShortVector dot = inp.mul(wei);
-//                sum32 = sum32.add(dot.convert(VectorOperators.S2I, 0))
-//                        .add(dot.convert(VectorOperators.S2I, 1));
+//            for (int j=0;j<(NN_SIZE_L1*2);j+=INT_SPEC.length()) {
+//                IntVector inp = IntVector.fromArray(INT_SPEC, L1, j);
+//                IntVector wei = IntVector.fromArray(INT_SPEC, W1, i * (NN_SIZE_L1 * 2) + j);
+//                IntVector dot = inp.mul(wei);
+//                sum32 = sum32.add(dot);
 //            }
 //            L2[i] = sum32.reduceLanes(VectorOperators.ADD) + B1[i];
 //        }
-//        assert(verifyL2(L1, L2));
 
         // translate into scores
         float wscore = ((float)L2[0]) / (SCALE * SCALE) * 100; // to centipawns
@@ -135,19 +131,6 @@ public class NeuralNetwork {
     private int my_round(float val) {
         if (val > 0) return (int)(val + 0.5);
         else return (int)(val - 0.5);
-    }
-
-    private boolean verifyL2(int[] L1, int[] L2) {
-        int[] slow_L2 = new int[NN_SIZE_L2];
-        for (int i=0;i<NN_SIZE_L2;i++) {
-            int sum = B1[i];
-            for (int j=0;j<(NN_SIZE_L1*2);j++) {
-                sum += W1[i * (NN_SIZE_L1*2) + j] * L1[j];
-            }
-            slow_L2[i] = sum;
-        }
-
-        return Arrays.equals(L2, slow_L2);
     }
 
     private boolean verifyNativeEvalIsEqual(int javaScore, Board board) {
