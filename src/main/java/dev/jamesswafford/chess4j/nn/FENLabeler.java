@@ -47,7 +47,6 @@ public class FENLabeler {
                 }
                 String pvFen = FENBuilder.createFen(board, false);
                 fenRecord.setFen(pvFen);
-                // TODO: try a fixed node search
                 parameters = new SearchParameters(3, -CHECKMATE, CHECKMATE);
                 search.initialize();
                 score = search.search(board, parameters);
