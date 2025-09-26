@@ -15,9 +15,9 @@ import static dev.jamesswafford.chess4j.pieces.Rook.*;
 
 public class NnueAccumulators {
 
-    private final short[][] accumulators = new short[2][NN_SIZE_L1];
+    private final int[][] accumulators = new int[2][NN_SIZE_L1];
 
-    public short get(int ind1, int ind2) {
+    public int get(int ind1, int ind2) {
         return accumulators[ind1][ind2];
     }
 

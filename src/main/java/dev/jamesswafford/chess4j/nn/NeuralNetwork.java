@@ -22,20 +22,20 @@ public class NeuralNetwork {
     private static final int SCALE = 64;
     private static final int THRESHOLD = 127;
 
-    public final short[] W0;
-    public final short[] B0;
-    public final byte[] W1;
-    public final byte[] B1;
+    public final int[] W0;
+    public final int[] B0;
+    public final int[] W1;
+    public final int[] B1;
 
     static {
         NativeLibraryLoader.init();
     }
 
     public NeuralNetwork() {
-        W0 = new short[768 * NN_SIZE_L1];
-        B0 = new short[NN_SIZE_L1];
-        W1 = new byte[NN_SIZE_L1 * 2 * NN_SIZE_L2];
-        B1 = new byte[NN_SIZE_L2];
+        W0 = new int[768 * NN_SIZE_L1];
+        B0 = new int[NN_SIZE_L1];
+        W1 = new int[NN_SIZE_L1 * 2 * NN_SIZE_L2];
+        B1 = new int[NN_SIZE_L2];
     }
 
     public NeuralNetwork(File networkFile) {
@@ -55,13 +55,13 @@ public class NeuralNetwork {
             // note the transposition for W0!
             for (int row=0;row<NN_SIZE_L1;row++)
                 for (int col=0;col<768;col++)
-                    W0[col * NN_SIZE_L1 + row] = (short)parseInt(br.readLine());
+                    W0[col * NN_SIZE_L1 + row] = parseInt(br.readLine());
             for (int i=0;i<B0.length;i++)
-                B0[i] = (short)parseInt(br.readLine());
+                B0[i] = parseInt(br.readLine());
             for (int i=0;i<W1.length;i++)
-                W1[i] = (byte)parseInt(br.readLine());
+                W1[i] = parseInt(br.readLine());
             for (int i=0;i<B1.length;i++)
-                B1[i] = (byte)parseInt(br.readLine());
+                B1[i] = parseInt(br.readLine());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -83,10 +83,10 @@ public class NeuralNetwork {
     public int eval(Board board) {
 
         // set layer 1 features from accumulators
-        byte[] L1 = new byte[NN_SIZE_L1 * 2];
+        int[] L1 = new int[NN_SIZE_L1 * 2];
         for (int o=0;o<NN_SIZE_L1;o++) {
-            L1[o] = (byte)clamp(board.getNnueAccumulators().get(0, o));
-            L1[NN_SIZE_L1 + o] = (byte)clamp(board.getNnueAccumulators().get(1, o));
+            L1[o] = clamp(board.getNnueAccumulators().get(0, o));
+            L1[NN_SIZE_L1 + o] = clamp(board.getNnueAccumulators().get(1, o));
         }
 
         // calculate layer 2
@@ -103,32 +103,15 @@ public class NeuralNetwork {
         ////////////////////////////////////////
         int[] L2_1 = new int[NN_SIZE_L2];
 
-        VectorSpecies<Byte> BYTE_SPEC = ByteVector.SPECIES_256;
-        VectorSpecies<Short> SHORT_SPEC = ShortVector.SPECIES_256;
         VectorSpecies<Integer> INT_SPEC = IntVector.SPECIES_256;
-
         for (int i=0;i<NN_SIZE_L2;i++) {
             IntVector sum32 = IntVector.zero(INT_SPEC);
-            for (int j=0;j<(NN_SIZE_L1*2);j+=BYTE_SPEC.length()) {
-                // sum += W1[i * (NN_SIZE_L1*2) + j] * L1[j];
-                ByteVector inp = ByteVector.fromArray(BYTE_SPEC, L1, j);
-                ByteVector wei = ByteVector.fromArray(BYTE_SPEC, W1, i * (NN_SIZE_L1 * 2) + j);
-
-                // multiply into 16 bit vector
-                ShortVector inpLo = inp.convert(VectorOperators.B2S, 0).reinterpretAsShorts();
-                ShortVector inpHi = inp.convert(VectorOperators.B2S, 1).reinterpretAsShorts();
-                ShortVector weiLo = wei.convert(VectorOperators.B2S, 0).reinterpretAsShorts();
-                ShortVector weiHi = wei.convert(VectorOperators.B2S, 1).reinterpretAsShorts();
-                ShortVector dotLo = inpLo.mul(weiLo);
-                ShortVector dotHi = inpHi.mul(weiHi);
-
-                // add the lanes up
-                sum32 = sum32.add(dotLo.convert(VectorOperators.S2I, 0));
-                sum32 = sum32.add(dotLo.convert(VectorOperators.S2I, 1));
-                sum32 = sum32.add(dotHi.convert(VectorOperators.S2I, 0));
-                sum32 = sum32.add(dotHi.convert(VectorOperators.S2I, 1));
+            for (int j=0;j<(NN_SIZE_L1*2);j+=INT_SPEC.length()) {
+                IntVector inp = IntVector.fromArray(INT_SPEC, L1, j);
+                IntVector wei = IntVector.fromArray(INT_SPEC, W1, i * (NN_SIZE_L1 * 2) + j);
+                IntVector dot = inp.mul(wei);
+                sum32 = sum32.add(dot);
             }
-
             L2_1[i] = sum32.reduceLanes(VectorOperators.ADD) + B1[i];
         }
 
@@ -136,8 +119,8 @@ public class NeuralNetwork {
         ////////////////////////////////////////
 
         // translate into scores
-        float wscore = ((float)L2[0]) / (SCALE * SCALE) * 100; // to centipawns
-        float wr = ((float)L2[1]) / (SCALE * SCALE) * 1000;
+        float wscore = ((float)L2_1[0]) / (SCALE * SCALE) * 100; // to centipawns
+        float wr = ((float)L2_1[1]) / (SCALE * SCALE) * 1000;
         int y_hat = my_round((0.5F * wscore) + (0.5F * wr));
 
         // return for player on move
