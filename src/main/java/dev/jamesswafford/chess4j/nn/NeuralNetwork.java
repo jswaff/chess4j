@@ -91,18 +91,6 @@ public class NeuralNetwork {
 
         // calculate layer 2
         int[] L2 = new int[NN_SIZE_L2];
-
-        for (int i=0;i<NN_SIZE_L2;i++) {
-            int sum = B1[i];
-            for (int j=0;j<(NN_SIZE_L1*2);j++) {
-                sum += W1[i * (NN_SIZE_L1*2) + j] * L1[j];
-            }
-            L2[i] = sum;
-        }
-
-        ////////////////////////////////////////
-        int[] L2_1 = new int[NN_SIZE_L2];
-
         VectorSpecies<Integer> INT_SPEC = IntVector.SPECIES_256;
         for (int i=0;i<NN_SIZE_L2;i++) {
             IntVector sum32 = IntVector.zero(INT_SPEC);
@@ -112,15 +100,13 @@ public class NeuralNetwork {
                 IntVector dot = inp.mul(wei);
                 sum32 = sum32.add(dot);
             }
-            L2_1[i] = sum32.reduceLanes(VectorOperators.ADD) + B1[i];
+            L2[i] = sum32.reduceLanes(VectorOperators.ADD) + B1[i];
         }
-
-        assert(Arrays.equals(L2, L2_1));
-        ////////////////////////////////////////
+        assert(verifyL2(L1, L2));
 
         // translate into scores
-        float wscore = ((float)L2_1[0]) / (SCALE * SCALE) * 100; // to centipawns
-        float wr = ((float)L2_1[1]) / (SCALE * SCALE) * 1000;
+        float wscore = ((float)L2[0]) / (SCALE * SCALE) * 100; // to centipawns
+        float wr = ((float)L2[1]) / (SCALE * SCALE) * 1000;
         int y_hat = my_round((0.5F * wscore) + (0.5F * wr));
 
         // return for player on move
@@ -140,6 +126,19 @@ public class NeuralNetwork {
     private int my_round(float val) {
         if (val > 0) return (int)(val + 0.5);
         else return (int)(val - 0.5);
+    }
+
+    private boolean verifyL2(int[] L1, int[] L2) {
+        int[] slow_L2 = new int[NN_SIZE_L2];
+        for (int i=0;i<NN_SIZE_L2;i++) {
+            int sum = B1[i];
+            for (int j=0;j<(NN_SIZE_L1*2);j++) {
+                sum += W1[i * (NN_SIZE_L1*2) + j] * L1[j];
+            }
+            slow_L2[i] = sum;
+        }
+
+        return Arrays.equals(L2, slow_L2);
     }
 
     private boolean verifyNativeEvalIsEqual(int javaScore, Board board) {
