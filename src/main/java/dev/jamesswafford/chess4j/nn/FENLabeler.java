@@ -39,17 +39,17 @@ public class FENLabeler {
             search.initialize();
             score = search.search(board, parameters);
 
-//            List<Move> pv = search.getPv();
-//            if (pv.size() >= depth) { // if it hasn't been truncated, perhaps by a hash hit
-//                for (Move pvMove : pv) {
-//                    board.applyMove(pvMove);
-//                }
-//                String pvFen = FENBuilder.createFen(board, false);
-//                fenRecord.setFen(pvFen);
+            List<Move> pv = search.getPv();
+            if (pv.size() >= depth) { // if it hasn't been truncated, perhaps by a hash hit
+                for (Move pvMove : pv) {
+                    board.applyMove(pvMove);
+                }
+                String pvFen = FENBuilder.createFen(board, false);
+                fenRecord.setFen(pvFen);
 //                parameters = new SearchParameters(3, -CHECKMATE, CHECKMATE);
 //                search.initialize();
 //                score = search.search(board, parameters);
-//            }
+            }
         }
 
         fenRecord.setEval(score);
