@@ -15,6 +15,8 @@ public interface SearchIterator {
 
     void setMaxTime(int maxTimeMs);
 
+    void setMaxNodes(long maxNodes);
+
     void setPost(boolean post);
 
     void setSkipTimeChecks(boolean skipTimeChecks);

@@ -124,8 +124,10 @@ public class AlphaBetaSearch implements Search {
         assert(alpha < beta);
         assert(inCheck == BoardUtils.isPlayerInCheck(board));
 
-        // time check
-        if (!skipTimeChecks && stopSearchOnTime(opts)) {
+        // exit if the allotted time has expired or we've hit our node limit
+        if ((!skipTimeChecks && stopSearchOnTime(opts)) ||
+                (opts.getNodeLimit()>0 && searchStats.nodes >= opts.getNodeLimit()))
+        {
             stop = true;
             return 0;
         }

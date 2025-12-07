@@ -36,6 +36,7 @@ public class SearchIteratorImpl implements SearchIterator {
 
     private int maxDepth = 0;
     private int maxTimeMs = 0;
+    private long maxNodes = 0;
     private boolean post = true;
     private boolean earlyExitOk = true;
     private boolean skipTimeChecks = false;
@@ -59,6 +60,9 @@ public class SearchIteratorImpl implements SearchIterator {
     public void setMaxTime(int maxTimeMs) {
         this.maxTimeMs = maxTimeMs;
     }
+
+    @Override
+    public void setMaxNodes(long maxNodes) { this.maxNodes = maxNodes; }
 
     @Override
     public void setPost(boolean post) {
@@ -143,6 +147,10 @@ public class SearchIteratorImpl implements SearchIterator {
             if (maxTimeMs < 1000) {
                 opts.setNodesBetweenTimeChecks(opts.getNodesBetweenTimeChecks() / 10);
             }
+        }
+
+        if (maxNodes > 0) {
+            opts.setNodeLimit(maxNodes);
         }
 
         // use iterative deepening to find the principal variation
