@@ -4,6 +4,7 @@ import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.board.Undo;
 import dev.jamesswafford.chess4j.movegen.MoveGenerator;
+import io.vavr.Tuple2;
 import org.awaitility.Awaitility;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +46,7 @@ public class SearchIteratorImplTest {
         when(moveGenerator.generateLegalMoves(board)).thenReturn(Collections.singletonList(e2e4));
 
         // when the iterator is invoked, it should immediately return the one move without any search
-        List<Move> pv = searchIterator.findPvFuture(board, new ArrayList<>()).get();
+        List<Move> pv = searchIterator.findPvFuture(board, new ArrayList<>()).get()._1;
         assertEquals(pv, Collections.singletonList(e2e4));
     }
 
@@ -69,7 +70,7 @@ public class SearchIteratorImplTest {
         when(search.getPv()).thenReturn(expectedPV);
 
         // when the iterator is invoked
-        List<Move> pv = searchIterator.findPvFuture(board, undos).get();
+        List<Move> pv = searchIterator.findPvFuture(board, undos).get()._1;
 
         // then the PV will be the PV returned from the last search
         assertEquals(expectedPV, pv);
@@ -116,7 +117,7 @@ public class SearchIteratorImplTest {
         when(search.getPv()).thenReturn(expectedPV);
 
         // when the iterator is invoked
-        List<Move> pv = searchIterator.findPvFuture(board, undos).get();
+        List<Move> pv = searchIterator.findPvFuture(board, undos).get()._1;
 
         // then the PV will be the PV returned from the last search
         assertEquals(expectedPV, pv);
@@ -143,7 +144,7 @@ public class SearchIteratorImplTest {
         searchIterator.setMaxDepth(0);
         searchIterator.setMaxTime(0);
 
-        CompletableFuture<List<Move>> future = searchIterator.findPvFuture(new Board(), new ArrayList<>());
+        var future = searchIterator.findPvFuture(new Board(), new ArrayList<>());
 
         searchIterator.stop();
 
@@ -159,7 +160,7 @@ public class SearchIteratorImplTest {
         searchIterator.setMaxDepth(0); // no limit
         searchIterator.setMaxTime(2000);
 
-        CompletableFuture<List<Move>> future = searchIterator.findPvFuture(new Board(), new ArrayList<>());
+        var future = searchIterator.findPvFuture(new Board(), new ArrayList<>());
 
         Awaitility.await()
                 .atMost(5, TimeUnit.SECONDS)
@@ -174,13 +175,13 @@ public class SearchIteratorImplTest {
 
         Board board = new Board("8/4Pk1p/6p1/1r6/8/5N2/2B2PPP/b5K1 w - -");
 
-        CompletableFuture<List<Move>> future = searchIterator.findPvFuture(board, new ArrayList<>());
+        CompletableFuture<Tuple2<List<Move>, Integer>> future = searchIterator.findPvFuture(board, new ArrayList<>());
 
-        List<Move> pv = future.join();
-        assertEquals(1, pv.size());
+        var pv = future.join();
+        assertEquals(1, pv._1.size());
 
         // ensure the highest scoring move by static analysis was selected
-        assertEquals(new Move(WHITE_PAWN, E7, E8, null, WHITE_QUEEN), pv.getFirst());
+        assertEquals(new Move(WHITE_PAWN, E7, E8, null, WHITE_QUEEN), pv._1.getFirst());
     }
 
 }

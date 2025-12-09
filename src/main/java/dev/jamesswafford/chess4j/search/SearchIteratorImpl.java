@@ -81,7 +81,7 @@ public class SearchIteratorImpl implements SearchIterator {
     }
 
     @Override
-    public CompletableFuture<List<Move>> findPvFuture(final Board board, final List<Undo> undos) {
+    public CompletableFuture<Tuple2<List<Move>, Integer>> findPvFuture(final Board board, final List<Undo> undos) {
         return CompletableFuture.supplyAsync(() -> findPrincipalVariation(
                 board.deepCopy(),
                 new ArrayList<>(undos)));
@@ -106,9 +106,9 @@ public class SearchIteratorImpl implements SearchIterator {
      * Iterate over the given position and return the principal variation.
      * The returned line (PV) is guaranteed to have at least one move.
      *
-     * @return - principal variation
+     * @return - tuple containing the principal variation and score
      */
-    private List<Move> findPrincipalVariation(Board board, final List<Undo> undos) {
+    private Tuple2<List<Move>, Integer> findPrincipalVariation(Board board, final List<Undo> undos) {
 
         List<Move> moves = moveGenerator.generateLegalMoves(board);
         assert(!moves.isEmpty());
@@ -116,7 +116,7 @@ public class SearchIteratorImpl implements SearchIterator {
 
         // if there is only one legal move, there is no need to search
         if (earlyExitOk && moves.size()==1) {
-            return List.of(moves.getFirst());
+            return new Tuple2<>(List.of(moves.getFirst()), 0);
         }
 
         // initialize the PV to ensure we have a valid move to play
@@ -168,7 +168,7 @@ public class SearchIteratorImpl implements SearchIterator {
 
         assert(MoveUtils.isLineValid(pv, board));
 
-        return pv;
+        return new Tuple2<>(pv, depthScore._2);
     }
 
     private Tuple2<Integer,Integer> iterateWithJavaCode(List<Move> pv, Board board, final List<Undo> undos,
@@ -256,7 +256,7 @@ public class SearchIteratorImpl implements SearchIterator {
         List<Move> nativePv = new ArrayList<>();
         // earlyExitOK, maxTimeMS
         Tuple2<Integer, Integer> nativeDepthScore = NativeEngineLib.iterate(nativePv, stats, board, undos,
-                earlyExitOk, maxDepth, maxTimeMs);
+                earlyExitOk, maxDepth, maxTimeMs); // TODO: maxNodes
 
         // verify equality with java iterator.  This only works for fixed depth searches.
         assert(maxTimeMs>0 || iterationsAreEqual(nativePv, nativeDepthScore._2, stats, board, undos, opts));

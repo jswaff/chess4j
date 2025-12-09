@@ -9,6 +9,7 @@ import dev.jamesswafford.chess4j.hash.TTHolder;
 import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.io.FENRecord;
 import dev.jamesswafford.chess4j.search.*;
+import io.vavr.Tuple2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,13 +43,13 @@ public class FENLabeler {
             TTHolder.getInstance().clearTables();
             searchIterator.setMaxDepth(depth);
             searchIterator.setMaxNodes(0);
-            List<Move> pv;
+            Tuple2<List<Move>, Integer> pv;
             try {
                 pv = searchIterator.findPvFuture(board, new ArrayList<>()).get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new LabelingException(e);
             }
-            for (Move pvMove : pv) {
+            for (Move pvMove : pv._1) {
                 board.applyMove(pvMove);
             }
             String pvFen = FENBuilder.createFen(board, false);
@@ -62,14 +63,14 @@ public class FENLabeler {
         } else {
             searchIterator.setMaxDepth(0);
             searchIterator.setMaxNodes(nodeLimit);
-            List<Move> pv;
+            Tuple2<List<Move>, Integer> pv;
             try {
                 pv = searchIterator.findPvFuture(board, new ArrayList<>()).get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new LabelingException(e);
             }
 
-            score = 0; // FIXME
+            score = pv._2;
         }
 
         fenRecord.setEval(score);

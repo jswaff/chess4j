@@ -10,6 +10,7 @@ import dev.jamesswafford.chess4j.io.EPDOperation;
 import dev.jamesswafford.chess4j.io.EPDParser;
 import dev.jamesswafford.chess4j.io.MoveParser;
 import dev.jamesswafford.chess4j.search.SearchIteratorImpl;
+import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -72,9 +73,9 @@ public class TestSuiteProcessor {
         searchIterator.setMaxTime(secondsPerProblem * 1000);
         searchIterator.setMaxDepth(maxDepth);
 
-        List<Move> pv = searchIterator.findPvFuture(board, new ArrayList<>()).get();
+        Tuple2<List<Move>, Integer> pv = searchIterator.findPvFuture(board, new ArrayList<>()).get();
 
-        return bms.contains(pv.getFirst());
+        return bms.contains(pv._1.getFirst());
     }
 
     public void processTestSuite(String testSuite, int maxDepth, int secondsPerProblem) throws Exception {
