@@ -126,7 +126,7 @@ public class AlphaBetaSearch implements Search {
 
         // exit if the allotted time has expired or we've hit our node limit
         if ((!skipTimeChecks && stopSearchOnTime(opts)) ||
-                (opts.getNodeLimit()>0 && searchStats.nodes >= opts.getNodeLimit()))
+                (opts.getNodeLimit()>0 && searchStats.nodes + searchStats.qnodes >= opts.getNodeLimit()))
         {
             stop = true;
             return 0;
@@ -340,7 +340,9 @@ public class AlphaBetaSearch implements Search {
         assert(alpha < beta);
 
         // time check
-        if (!skipTimeChecks && stopSearchOnTime(opts)) {
+        if ((!skipTimeChecks && stopSearchOnTime(opts)) ||
+                (opts.getNodeLimit()>0 && searchStats.nodes + searchStats.qnodes >= opts.getNodeLimit()))
+        {
             stop = true;
             return 0;
         }

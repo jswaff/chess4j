@@ -58,6 +58,7 @@ public final class App {
 
         options.addOption(createOptionWithArg("book", "bookfile", "Specify and enable opening book"));
         options.addOption(createOptionWithArg("depth", "depth", "Maximum search depth"));
+        options.addOption(createOptionWithArg("nodes", "nodes", "Node limit for search"));
         options.addOption(createOptionWithArg("csv", "csvfile", "Specify a CSV file"));
         options.addOption(createOptionWithArg("epd", "epdfile", "Specify an EPD file"));
         options.addOption(createOptionWithArg("pgn", "pgnfile", "Specify a PGN file"));
