@@ -36,7 +36,7 @@ public class FENLabeler {
         SearchIterator searchIterator = new SearchIteratorImpl();
         searchIterator.setEarlyExitOk(false);
         searchIterator.setSkipTimeChecks(true);
-        //searchIterator.setPost(false);
+        searchIterator.setPost(false);
 
         Board board = new Board(fenRecord.getFen());
 
