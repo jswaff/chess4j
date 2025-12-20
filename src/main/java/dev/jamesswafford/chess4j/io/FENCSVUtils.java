@@ -1,5 +1,6 @@
 package dev.jamesswafford.chess4j.io;
 
+import dev.jamesswafford.chess4j.exceptions.LabelingException;
 import dev.jamesswafford.chess4j.nn.FENLabeler;
 import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
@@ -36,14 +37,16 @@ public class FENCSVUtils {
             while ((line = in.readLine()) != null) {
                 String[] parts = line.split(",");
                 String fen = parts[0];
-                FENRecord fenRecord = FENRecord.builder().fen(fen).build();
-                fenLabeler.label(fenRecord, depth, nodeLimit);
-                StringBuilder sb = new StringBuilder(fenRecord.getFen()).append(",").append(fenRecord.getEval());
-                for (int i=2;i<parts.length;i++) {
-                    sb.append(",").append(parts[i]);
-                }
-                sb.append("\n");
-                out.write(sb.toString());
+                try {
+                    FENRecord fenRecord = FENRecord.builder().fen(fen).build();
+                    fenLabeler.label(fenRecord, depth, nodeLimit);
+                    StringBuilder sb = new StringBuilder(fenRecord.getFen()).append(",").append(fenRecord.getEval());
+                    for (int i = 2; i < parts.length; i++) {
+                        sb.append(",").append(parts[i]);
+                    }
+                    sb.append("\n");
+                    out.write(sb.toString());
+                } catch (LabelingException e) { /* skip this line */ }
             }
         }
     }

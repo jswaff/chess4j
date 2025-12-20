@@ -1,6 +1,5 @@
 package dev.jamesswafford.chess4j.nn;
 
-import dev.jamesswafford.chess4j.Constants;
 import dev.jamesswafford.chess4j.Globals;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Move;
