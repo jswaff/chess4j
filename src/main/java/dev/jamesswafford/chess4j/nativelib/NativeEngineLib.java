@@ -73,6 +73,7 @@ public class NativeEngineLib {
     private static MethodHandle mh_iterateFromFen;
     private static MethodHandle mh_iterateFromMoveHistory;
     private static Board searchBoard;
+    private static boolean post;
     private static MemorySegment pvCallbackFunc;
     private static MethodHandle mh_see;
     private static MethodHandle mh_skipTimeChecks;
@@ -400,11 +401,12 @@ public class NativeEngineLib {
     }
 
     public static Tuple2<Integer,Integer> iterate(List<Move> pv, SearchStats stats, Board board, final List<Undo> undos,
-                                                  boolean earlyExitOK, int maxDepth, int maxTimeMs, long maxNodes) {
+                                                  boolean earlyExitOK, boolean post, int maxDepth, int maxTimeMs, long maxNodes) {
         Objects.requireNonNull(mh_iterateFromFen, "mh_iterateFromFen must not be null");
         Objects.requireNonNull(mh_iterateFromMoveHistory, "mh_iterateFromMoveHistory must not be null");
 
         searchBoard = board.deepCopy();
+        NativeEngineLib.post = post;
 
         try (Arena arena = Arena.ofConfined()) {
             MemoryLayout statsLayout = MemoryLayout.structLayout(
@@ -582,7 +584,9 @@ public class NativeEngineLib {
         }
 
         assert(MoveUtils.isLineValid(pv, searchBoard));
-        PrintLine.printLine(pv, depth, finalForDepth, score, elapsed, nodes);
+        if (post) {
+            PrintLine.printLine(pv, depth, finalForDepth, score, elapsed, nodes);
+        }
     }
 
 }

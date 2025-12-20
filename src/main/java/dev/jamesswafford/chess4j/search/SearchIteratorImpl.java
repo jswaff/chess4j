@@ -256,7 +256,7 @@ public class SearchIteratorImpl implements SearchIterator {
         List<Move> nativePv = new ArrayList<>();
         // earlyExitOK, maxTimeMS
         Tuple2<Integer, Integer> nativeDepthScore = NativeEngineLib.iterate(nativePv, stats, board, undos,
-                earlyExitOk, maxDepth, maxTimeMs, maxNodes);
+                earlyExitOk, post, maxDepth, maxTimeMs, maxNodes);
 
         // verify equality with java iterator.  This only works for fixed depth searches.
         assert(maxTimeMs>0 || iterationsAreEqual(nativePv, nativeDepthScore._2, stats, board, undos, opts));
