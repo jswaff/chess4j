@@ -42,7 +42,6 @@ public class FENLabeler {
         // find a quiet position
         if (depth > 0) {
             TTHolder.getInstance().clearTables();
-            LOGGER.debug("# searching fen {} to depth {}", fenRecord.getFen(), depth);
             searchIterator.setMaxDepth(depth);
             searchIterator.setMaxNodes(0);
             Tuple2<List<Move>, Integer> pv;
@@ -55,7 +54,6 @@ public class FENLabeler {
                 board.applyMove(pvMove);
             }
             String pvFen = FENBuilder.createFen(board, false);
-            LOGGER.debug("# pvFen: {}", pvFen);
             fenRecord.setFen(pvFen);
         }
 
@@ -64,7 +62,6 @@ public class FENLabeler {
         if (nodeLimit == 0) {
             score = Eval.eval(Globals.getEvalWeights(), board);
         } else {
-            LOGGER.debug("# searching with nodeLimit {}", nodeLimit);
             searchIterator.setMaxDepth(0);
             searchIterator.setMaxNodes(nodeLimit);
             Tuple2<List<Move>, Integer> pv;

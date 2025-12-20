@@ -112,7 +112,7 @@ public class SearchIteratorImpl implements SearchIterator {
 
         List<Move> moves = moveGenerator.generateLegalMoves(board);
         assert(!moves.isEmpty());
-        LOGGER.debug("# position has {} move(s)", moves.size());
+        if (post) LOGGER.debug("# position has {} move(s)", moves.size());
 
         // if there is only one legal move, there is no need to search
         if (earlyExitOk && moves.size()==1) {
@@ -164,7 +164,9 @@ public class SearchIteratorImpl implements SearchIterator {
         }
 
         // show some search stats
-        printSearchSummary(depthScore._1, depthScore._2, startTime, stats);
+        if (post) {
+            printSearchSummary(depthScore._1, depthScore._2, startTime, stats);
+        }
 
         assert(MoveUtils.isLineValid(pv, board));
 
@@ -224,13 +226,13 @@ public class SearchIteratorImpl implements SearchIterator {
 
             // if this is a mate, stop here
             if (Math.abs(score) > CHECKMATE-500) {
-                LOGGER.debug("# stopping iterative search because mate found");
+                if (post) LOGGER.debug("# stopping iterative search because mate found");
                 stopSearching = true;
             }
 
             // if we've hit the user defined max search depth, stop here
             if (maxDepth > 0 && depth >= maxDepth) {
-                LOGGER.debug("# stopping iterative search on depth");
+                if (post) LOGGER.debug("# stopping iterative search on depth");
                 stopSearching = true;
             }
 
@@ -241,7 +243,7 @@ public class SearchIteratorImpl implements SearchIterator {
 
             // if we've used more than half our time, don't start a new iteration
             if (earlyExitOk && !skipTimeChecks && (elapsed > maxTimeMs / 2)) {
-                LOGGER.debug(" # stopping iterative search because half time expired.");
+                if (post) LOGGER.debug(" # stopping iterative search because half time expired.");
                 stopSearching = true;
             }
 
