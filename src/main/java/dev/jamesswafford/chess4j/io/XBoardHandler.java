@@ -501,10 +501,10 @@ public class XBoardHandler {
                                 LOGGER.debug("# analysis: {}, force: {}, ponder: {}, ponderMiss: {}",
                                         analysisMode, forceMode, ponderMode, ponderMiss);
                                 if (!analysisMode && !forceMode && !ponderMode && !ponderMiss) {
-                                    Globals.getGameUndos().add(Globals.getBoard().applyMove(pv.get(0)));
-                                    LOGGER.info("move {}", pv.get(0));
-                                    if (!endOfGameCheck() && ponderingEnabled && pv.size() > 1) {
-                                        Move ponderMove = pv.get(1);
+                                    Globals.getGameUndos().add(Globals.getBoard().applyMove(pv._1.get(0)));
+                                    LOGGER.info("move {}", pv._1.get(0));
+                                    if (!endOfGameCheck() && ponderingEnabled && pv._1.size() > 1) {
+                                        Move ponderMove = pv._1.get(1);
                                         Board ponderBoard = Globals.getBoard().deepCopy();
                                         List<Undo> ponderUndos = new ArrayList<>(Globals.getGameUndos());
                                         ponderUndos.add(ponderBoard.applyMove(ponderMove));
@@ -519,7 +519,7 @@ public class XBoardHandler {
                                     leavePonderMode();
                                 }
                             }
-                            return pv;
+                            return pv._1;
                         });
     }
 

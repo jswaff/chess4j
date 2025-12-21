@@ -58,6 +58,7 @@ public final class App {
 
         options.addOption(createOptionWithArg("book", "bookfile", "Specify and enable opening book"));
         options.addOption(createOptionWithArg("depth", "depth", "Maximum search depth"));
+        options.addOption(createOptionWithArg("nodes", "nodes", "Node limit for search"));
         options.addOption(createOptionWithArg("csv", "csvfile", "Specify a CSV file"));
         options.addOption(createOptionWithArg("epd", "epdfile", "Specify an EPD file"));
         options.addOption(createOptionWithArg("pgn", "pgnfile", "Specify a PGN file"));
@@ -162,14 +163,18 @@ public final class App {
         }
         String outFile = commandLine.getOptionValue("out");
 
-        int depth = -1;
-        if (commandLine.hasOption("depth")) {
-            depth = Integer.parseInt(commandLine.getOptionValue("depth"));
-        } else {
-            LOGGER.warn("optional parameter depth not specified.  HCE will be used.");
+        if (!commandLine.hasOption("depth")) {
+            throw new IllegalArgumentException("label mode requires a depth parameter");
         }
+        int depth = Integer.parseInt(commandLine.getOptionValue("depth"));
 
-        FENCSVUtils.relabel(inFile, outFile, depth);
+        if (!commandLine.hasOption("nodes")) {
+            throw new IllegalArgumentException("label mode requires a nodes parameter");
+        }
+        long nodeLimit = Long.parseLong(commandLine.getOptionValue("nodes"));
+
+
+        FENCSVUtils.relabel(inFile, outFile, depth, nodeLimit);
     }
 
     private static void runInTuningMode(CommandLine commandLine) throws IOException {

@@ -4,52 +4,74 @@ import dev.jamesswafford.chess4j.Globals;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.eval.Eval;
+import dev.jamesswafford.chess4j.exceptions.LabelingException;
 import dev.jamesswafford.chess4j.hash.TTHolder;
 import dev.jamesswafford.chess4j.io.FENBuilder;
 import dev.jamesswafford.chess4j.io.FENRecord;
-import dev.jamesswafford.chess4j.search.AlphaBetaSearch;
-import dev.jamesswafford.chess4j.search.Search;
-import dev.jamesswafford.chess4j.search.SearchParameters;
+import dev.jamesswafford.chess4j.search.*;
+import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import static dev.jamesswafford.chess4j.Constants.CHECKMATE;
+import java.util.concurrent.ExecutionException;
 
 public class FENLabeler {
 
     private static final Logger LOGGER = LogManager.getLogger(FENLabeler.class);
 
-    private final Search search;
+    /**
+     * Label CSV records.
+     * There are two steps to the labeling process.  The first is to find a quiet position.  This is done by
+     * performing an iterative search and following the PV to the terminal position.  Once that is complete,
+     * a second search is performed using the nodeLimit parameter.
+     *
+     * @param fenRecord - starting position
+     * @param depth - depth to search to find a quiet position
+     * @param nodeLimit - node limit to search from the quiet position
+     */
+    public void label(FENRecord fenRecord, int depth, long nodeLimit) {
+        SearchIterator searchIterator = new SearchIteratorImpl();
+        searchIterator.setEarlyExitOk(false);
+        searchIterator.setSkipTimeChecks(true);
+        searchIterator.setPost(false);
 
-    public FENLabeler() {
-        this.search = new AlphaBetaSearch();
-        search.setSkipTimeChecks(true);
-    }
-
-    public void label(FENRecord fenRecord, int depth) {
         Board board = new Board(fenRecord.getFen());
+
+        // find a quiet position
+        if (depth > 0) {
+            TTHolder.getInstance().clearTables();
+            searchIterator.setMaxDepth(depth);
+            searchIterator.setMaxNodes(0);
+            Tuple2<List<Move>, Integer> pv;
+            try {
+                pv = searchIterator.findPvFuture(board, new ArrayList<>()).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new LabelingException(e);
+            }
+            for (Move pvMove : pv._1) {
+                board.applyMove(pvMove);
+            }
+            String pvFen = FENBuilder.createFen(board, false);
+            fenRecord.setFen(pvFen);
+        }
+
+        // score the position
         int score;
-        if (depth < 0) {
+        if (nodeLimit == 0) {
             score = Eval.eval(Globals.getEvalWeights(), board);
         } else {
-            SearchParameters parameters = new SearchParameters(depth, -CHECKMATE, CHECKMATE);
-            TTHolder.getInstance().clearTables();
-            search.initialize();
-            score = search.search(board, parameters);
-
-            List<Move> pv = search.getPv();
-            if (pv.size() >= depth) { // if it hasn't been truncated, perhaps by a hash hit
-                for (Move pvMove : pv) {
-                    board.applyMove(pvMove);
-                }
-                String pvFen = FENBuilder.createFen(board, false);
-                fenRecord.setFen(pvFen);
-//                parameters = new SearchParameters(3, -CHECKMATE, CHECKMATE);
-//                search.initialize();
-//                score = search.search(board, parameters);
+            searchIterator.setMaxDepth(0);
+            searchIterator.setMaxNodes(nodeLimit);
+            Tuple2<List<Move>, Integer> pv;
+            try {
+                pv = searchIterator.findPvFuture(board, new ArrayList<>()).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new LabelingException(e);
             }
+
+            score = pv._2;
         }
 
         fenRecord.setEval(score);

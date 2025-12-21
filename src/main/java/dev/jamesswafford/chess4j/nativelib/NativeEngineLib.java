@@ -73,6 +73,7 @@ public class NativeEngineLib {
     private static MethodHandle mh_iterateFromFen;
     private static MethodHandle mh_iterateFromMoveHistory;
     private static Board searchBoard;
+    private static boolean post;
     private static MemorySegment pvCallbackFunc;
     private static MethodHandle mh_see;
     private static MethodHandle mh_skipTimeChecks;
@@ -139,10 +140,10 @@ public class NativeEngineLib {
         // set up iterator with callback function for printing the PV
         mh_iterateFromFen = linker.downcallHandle(lookup.findOrThrow("iterate_from_fen"),
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_BOOLEAN,
-                        JAVA_INT, JAVA_INT, ADDRESS));
+                        JAVA_INT, JAVA_INT, JAVA_LONG, ADDRESS));
         mh_iterateFromMoveHistory = linker.downcallHandle(lookup.findOrThrow("iterate_from_move_history"),
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT,
-                        JAVA_BOOLEAN, JAVA_INT, JAVA_INT, ADDRESS));
+                        JAVA_BOOLEAN, JAVA_INT, JAVA_INT, JAVA_LONG, ADDRESS));
         try {
             // create a method handle for the Java callback function
             MethodHandle pvCallbackHandle = MethodHandles.lookup().findStatic(
@@ -400,11 +401,12 @@ public class NativeEngineLib {
     }
 
     public static Tuple2<Integer,Integer> iterate(List<Move> pv, SearchStats stats, Board board, final List<Undo> undos,
-                                                  boolean earlyExitOK, int maxDepth, int maxTimeMs) {
+                                                  boolean earlyExitOK, boolean post, int maxDepth, int maxTimeMs, long maxNodes) {
         Objects.requireNonNull(mh_iterateFromFen, "mh_iterateFromFen must not be null");
         Objects.requireNonNull(mh_iterateFromMoveHistory, "mh_iterateFromMoveHistory must not be null");
 
         searchBoard = board.deepCopy();
+        NativeEngineLib.post = post;
 
         try (Arena arena = Arena.ofConfined()) {
             MemoryLayout statsLayout = MemoryLayout.structLayout(
@@ -441,12 +443,13 @@ public class NativeEngineLib {
                     moveHistorySegment.setAtIndex(JAVA_LONG, i, moveHistory[i]);
                 }
                 retval = (int) mh_iterateFromMoveHistory.invoke(statsSegment, pvSegment, pvSizeSegment, depthSegment,
-                        scoreSegment, moveHistorySegment, moveHistory.length, earlyExitOK, maxDepth, maxTimeMs, pvCallbackFunc);
+                        scoreSegment, moveHistorySegment, moveHistory.length, earlyExitOK, maxDepth, maxTimeMs,
+                        maxNodes, pvCallbackFunc);
             } else { // no move history
                 String fen = FENBuilder.createFen(board, false);
                 MemorySegment cFen = arena.allocateFrom(fen);
                 retval = (int) mh_iterateFromFen.invoke(statsSegment, pvSegment, pvSizeSegment, depthSegment,
-                        scoreSegment, cFen, earlyExitOK, maxDepth, maxTimeMs, pvCallbackFunc);
+                        scoreSegment, cFen, earlyExitOK, maxDepth, maxTimeMs, maxNodes, pvCallbackFunc);
             }
 
             if (retval != 0) {
@@ -581,7 +584,9 @@ public class NativeEngineLib {
         }
 
         assert(MoveUtils.isLineValid(pv, searchBoard));
-        PrintLine.printLine(pv, depth, finalForDepth, score, elapsed, nodes);
+        if (post) {
+            PrintLine.printLine(pv, depth, finalForDepth, score, elapsed, nodes);
+        }
     }
 
 }
