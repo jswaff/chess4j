@@ -18,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.List;
+import java.util.Properties;
 
 public final class App {
     private static final  Logger LOGGER = LogManager.getLogger(App.class);
@@ -29,7 +30,7 @@ public final class App {
         // send "done=0" to prevent XBoard timing out during the initialization sequence.
         LOGGER.info("done=0");
 
-        LOGGER.info("# Welcome to chess4j version 6.3-dev!\n");
+        LOGGER.info("# Welcome to chess4j version {}!\n", projectVersion());
 
         assert(showDebugMode());
 
@@ -81,6 +82,25 @@ public final class App {
                 .argName(argName)
                 .desc(description)
                 .build();
+    }
+
+    private static String projectVersion() {
+        String implementationVersion = App.class.getPackage().getImplementationVersion();
+        if (implementationVersion != null) {
+            return implementationVersion;
+        }
+
+        try (InputStream in = App.class.getResourceAsStream("/META-INF/maven/dev.jamesswafford/chess4j/pom.properties")) {
+            if (in != null) {
+                Properties properties = new Properties();
+                properties.load(in);
+                return properties.getProperty("version", "unknown");
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Unable to read project version from Maven metadata.", e);
+        }
+
+        return "unknown";
     }
 
     private static void printHelp(Options options) {
