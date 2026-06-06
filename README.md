@@ -75,8 +75,6 @@ By default, chess4j still uses a handcrafted evaluation. You can enable a neural
 
 ## Roadmap
 
-The next area of focus will be to evaluate Java's Vector API.  Lazy SMP is also on the horizon. 
-
 You can see the combined Prophet / chess4j backlog here: https://trello.com/b/dhcOEaCO/chess4j-board .
 
 Read about the latest development efforts at https://jamesswafford.dev/ .
