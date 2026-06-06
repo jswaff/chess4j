@@ -22,9 +22,9 @@ Clone the repository and go into the chess4j directory.
 
 Once this process is complete you should see the build artifact in the target directory.  Verify everything is working:
 
-```java -jar chess4j-6.2-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd```
+```java -jar chess4j-6.3-uber.jar -mode test -epd ../src/test/resources/suites/wac2.epd```
 
-You should see the program search for about 10 seconds and display the result.  
+You should see the program search for about 10 seconds and display the result.
 
 
 ## Opening Book
@@ -37,9 +37,14 @@ chess4j has a small opening book but it is not enabled by default.  If you would
 
 By default, chess4j still uses a handcrafted evaluation. You can enable a neural network based evaluation using a command line parameter:
 
-```-nn nn-32-q.txt```
+```-nn nn-52-q.txt```
 
 ## Changelog
+6.3
+* improved neural network
+* implemented XBoard nodeLimit
+* light cleanup
+
 
 6.2
 * replaced JNI integration with newer Foreign Function and Memory API (FFM)
