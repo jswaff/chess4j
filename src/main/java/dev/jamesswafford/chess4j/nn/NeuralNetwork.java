@@ -89,7 +89,6 @@ public class NeuralNetwork {
 
         // calculate layer 2
         int[] L2 = new int[NN_SIZE_L2];
-
         for (int i=0;i<NN_SIZE_L2;i++) {
             int sum = B1[i];
             for (int j=0;j<(NN_SIZE_L1*2);j++) {
@@ -97,6 +96,18 @@ public class NeuralNetwork {
             }
             L2[i] = sum;
         }
+
+//        VectorSpecies<Integer> INT_SPEC = IntVector.SPECIES_256;
+//        for (int i=0;i<NN_SIZE_L2;i++) {
+//            IntVector sum32 = IntVector.zero(INT_SPEC);
+//            for (int j=0;j<(NN_SIZE_L1*2);j+=INT_SPEC.length()) {
+//                IntVector inp = IntVector.fromArray(INT_SPEC, L1, j);
+//                IntVector wei = IntVector.fromArray(INT_SPEC, W1, i * (NN_SIZE_L1 * 2) + j);
+//                IntVector dot = inp.mul(wei);
+//                sum32 = sum32.add(dot);
+//            }
+//            L2[i] = sum32.reduceLanes(VectorOperators.ADD) + B1[i];
+//        }
 
         // translate into scores
         float wscore = ((float)L2[0]) / (SCALE * SCALE) * 100; // to centipawns

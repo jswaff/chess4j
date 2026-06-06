@@ -1,5 +1,6 @@
 package dev.jamesswafford.chess4j.io;
 
+import dev.jamesswafford.chess4j.Constants;
 import dev.jamesswafford.chess4j.Globals;
 import dev.jamesswafford.chess4j.board.Board;
 import dev.jamesswafford.chess4j.board.Color;
@@ -12,6 +13,7 @@ import dev.jamesswafford.chess4j.search.SearchIteratorImpl;
 import dev.jamesswafford.chess4j.utils.GameResult;
 import dev.jamesswafford.chess4j.utils.GameStatus;
 import dev.jamesswafford.chess4j.utils.GameStatusChecker;
+import io.vavr.Tuple2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.awaitility.Awaitility;
@@ -108,7 +110,7 @@ public class XBoardHandlerTest {
     public void goCmd() {
         Move move = new Move(WHITE_PAWN, E2, E4);
         when(searchIterator.findPvFuture(new Board(), new ArrayList<>()))
-                .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(move)));
+                .thenReturn(CompletableFuture.completedFuture(new Tuple2<>(Collections.singletonList(move), 0)));
 
         xboardHandler.parseAndDispatch("new");
         xboardHandler.parseAndDispatch("go");
@@ -140,7 +142,7 @@ public class XBoardHandlerTest {
 
         Move move = new Move(BLACK_QUEEN, D8, H4);
         when(searchIterator.findPvFuture(Globals.getBoard().deepCopy(), new ArrayList<>()))
-                .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(move)));
+                .thenReturn(CompletableFuture.completedFuture(new Tuple2<>(Collections.singletonList(move), Constants.CHECKMATE)));
 
         xboardHandler.parseAndDispatch("go");
         assertEquals(GameStatus.CHECKMATED,

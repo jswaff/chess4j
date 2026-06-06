@@ -8,7 +8,6 @@ import dev.jamesswafford.chess4j.nativelib.NativeLibraryLoader;
 import dev.jamesswafford.chess4j.io.*;
 import dev.jamesswafford.chess4j.nn.NeuralNetwork;
 import dev.jamesswafford.chess4j.search.AlphaBetaSearch;
-import dev.jamesswafford.chess4j.search.SearchOptions;
 import dev.jamesswafford.chess4j.search.SearchParameters;
 import dev.jamesswafford.chess4j.tuner.LogisticRegressionTuner;
 import dev.jamesswafford.chess4j.utils.TestSuiteProcessor;
@@ -19,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.List;
+import java.util.Properties;
 
 public final class App {
     private static final  Logger LOGGER = LogManager.getLogger(App.class);
@@ -30,7 +30,7 @@ public final class App {
         // send "done=0" to prevent XBoard timing out during the initialization sequence.
         LOGGER.info("done=0");
 
-        LOGGER.info("# Welcome to chess4j version 6.2!\n");
+        LOGGER.info("# Welcome to chess4j version {}!\n", projectVersion());
 
         assert(showDebugMode());
 
@@ -59,6 +59,7 @@ public final class App {
 
         options.addOption(createOptionWithArg("book", "bookfile", "Specify and enable opening book"));
         options.addOption(createOptionWithArg("depth", "depth", "Maximum search depth"));
+        options.addOption(createOptionWithArg("nodes", "nodes", "Node limit for search"));
         options.addOption(createOptionWithArg("csv", "csvfile", "Specify a CSV file"));
         options.addOption(createOptionWithArg("epd", "epdfile", "Specify an EPD file"));
         options.addOption(createOptionWithArg("pgn", "pgnfile", "Specify a PGN file"));
@@ -81,6 +82,25 @@ public final class App {
                 .argName(argName)
                 .desc(description)
                 .build();
+    }
+
+    private static String projectVersion() {
+        String implementationVersion = App.class.getPackage().getImplementationVersion();
+        if (implementationVersion != null) {
+            return implementationVersion;
+        }
+
+        try (InputStream in = App.class.getResourceAsStream("/META-INF/maven/dev.jamesswafford/chess4j/pom.properties")) {
+            if (in != null) {
+                Properties properties = new Properties();
+                properties.load(in);
+                return properties.getProperty("version", "unknown");
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Unable to read project version from Maven metadata.", e);
+        }
+
+        return "unknown";
     }
 
     private static void printHelp(Options options) {
@@ -109,9 +129,8 @@ public final class App {
     }
 
     private static void warmUp() {
-        SearchOptions opts = SearchOptions.builder().avoidNative(true).build();
         new AlphaBetaSearch().search(new Board(),
-                new SearchParameters(3, -Constants.CHECKMATE, Constants.CHECKMATE), opts);
+                new SearchParameters(3, -Constants.CHECKMATE, Constants.CHECKMATE));
         TTHolder.getInstance().clearTables();
     }
 
@@ -164,14 +183,18 @@ public final class App {
         }
         String outFile = commandLine.getOptionValue("out");
 
-        int depth = -1;
-        if (commandLine.hasOption("depth")) {
-            depth = Integer.parseInt(commandLine.getOptionValue("depth"));
-        } else {
-            LOGGER.warn("optional parameter depth not specified.  HCE will be used.");
+        if (!commandLine.hasOption("depth")) {
+            throw new IllegalArgumentException("label mode requires a depth parameter");
         }
+        int depth = Integer.parseInt(commandLine.getOptionValue("depth"));
 
-        FENCSVUtils.relabel(inFile, outFile, depth);
+        if (!commandLine.hasOption("nodes")) {
+            throw new IllegalArgumentException("label mode requires a nodes parameter");
+        }
+        long nodeLimit = Long.parseLong(commandLine.getOptionValue("nodes"));
+
+
+        FENCSVUtils.relabel(inFile, outFile, depth, nodeLimit);
     }
 
     private static void runInTuningMode(CommandLine commandLine) throws IOException {

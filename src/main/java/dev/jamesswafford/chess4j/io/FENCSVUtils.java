@@ -1,5 +1,6 @@
 package dev.jamesswafford.chess4j.io;
 
+import dev.jamesswafford.chess4j.exceptions.LabelingException;
 import dev.jamesswafford.chess4j.nn.FENLabeler;
 import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
@@ -13,20 +14,20 @@ public class FENCSVUtils {
 
     /**
      * Relabel a CSV file.
-     *
      * The input file should have at least two fields.
      * First field: the FEN
      * Second field: the score (label) to be updated
      * Any fields after the second field are preserved as-is.
      *
-     * @param inCsvFile
-     * @param outCsvFile
-     * @param depth
+     * @param inCsvFile the input file
+     * @param outCsvFile the file to write to
+     * @param depth depth of search to use for finding a quiet position
+     * @param nodeLimit the number of nodes to search to score the quiet position
      */
     @SneakyThrows
-    public static void relabel(String inCsvFile, String outCsvFile, int depth) {
+    public static void relabel(String inCsvFile, String outCsvFile, int depth, long nodeLimit) {
 
-        LOGGER.info("relabeling records from {} to {} depth {}", inCsvFile, outCsvFile, depth);
+        LOGGER.info("relabeling records from {} to {} depth {} nodeLimit {}", inCsvFile, outCsvFile, depth, nodeLimit);
 
         FENLabeler fenLabeler = new FENLabeler();
         try (BufferedReader in = new BufferedReader(new FileReader(inCsvFile));
@@ -36,14 +37,16 @@ public class FENCSVUtils {
             while ((line = in.readLine()) != null) {
                 String[] parts = line.split(",");
                 String fen = parts[0];
-                FENRecord fenRecord = FENRecord.builder().fen(fen).build();
-                fenLabeler.label(fenRecord, depth);
-                StringBuilder sb = new StringBuilder(fenRecord.getFen()).append(",").append(fenRecord.getEval());
-                for (int i=2;i<parts.length;i++) {
-                    sb.append(",").append(parts[i]);
-                }
-                sb.append("\n");
-                out.write(sb.toString());
+                try {
+                    FENRecord fenRecord = FENRecord.builder().fen(fen).build();
+                    fenLabeler.label(fenRecord, depth, nodeLimit);
+                    StringBuilder sb = new StringBuilder(fenRecord.getFen()).append(",").append(fenRecord.getEval());
+                    for (int i = 2; i < parts.length; i++) {
+                        sb.append(",").append(parts[i]);
+                    }
+                    sb.append("\n");
+                    out.write(sb.toString());
+                } catch (LabelingException e) { /* skip this line */ }
             }
         }
     }
