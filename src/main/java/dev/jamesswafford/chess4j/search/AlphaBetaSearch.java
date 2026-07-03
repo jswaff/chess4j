@@ -222,9 +222,10 @@ public class AlphaBetaSearch implements Search {
                 pvMove, hashMove, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply),
                 true, true);
 
-        Move bestMove = null;
         boolean canFutilityPrune = !inCheck && depth < 3 && beta < (CHECKMATE - 500);
         int material = canFutilityPrune ? Eval.eval(Globals.getEvalWeights(), board, true, false) : 0;
+
+        Move bestMove = null;
         Move move;
         while ((move = moveOrderer.selectNextMove()) != null) {
             assert(BoardUtils.isPseudoLegalMove(board, move));
