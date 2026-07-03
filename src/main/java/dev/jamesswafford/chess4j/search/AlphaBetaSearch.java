@@ -223,16 +223,17 @@ public class AlphaBetaSearch implements Search {
                 true, true);
 
         Move bestMove = null;
+        boolean canFutilityPrune = !inCheck && depth < 3 && beta < (CHECKMATE - 500);
+        int material = canFutilityPrune ? Eval.eval(Globals.getEvalWeights(), board, true, false) : 0;
         Move move;
         while ((move = moveOrderer.selectNextMove()) != null) {
             assert(BoardUtils.isPseudoLegalMove(board, move));
 
             // futility pruning.  if the move appears unlikely to help, just skip it.
-            if (numMovesSearched > 0 && !inCheck && depth < 3 && alpha > (-CHECKMATE + 500) && beta < (CHECKMATE - 500) &&
+            if (numMovesSearched > 0 && canFutilityPrune && alpha > (-CHECKMATE + 500) &&
                     move.promotion()==null && !move.equals(killerMovesStore.getKiller1(ply)) &&
                     !move.equals(killerMovesStore.getKiller2(ply)))
             {
-                int material = Eval.eval(Globals.getEvalWeights(), board, true, false);
                 int materialGain = move.captured()==null ? 0 : SEE.seePieceVal(move.captured());
                 int futilityMargin = depth==1 ? (SEE.PAWN_VAL * 2) : SEE.ROOK_VAL;
                 if (material + materialGain + futilityMargin <= alpha) {
