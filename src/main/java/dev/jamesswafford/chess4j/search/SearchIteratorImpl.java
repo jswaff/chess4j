@@ -29,6 +29,7 @@ import static dev.jamesswafford.chess4j.Constants.CHECKMATE;
 public class SearchIteratorImpl implements SearchIterator {
 
     private static final  Logger LOGGER = LogManager.getLogger(SearchIteratorImpl.class);
+    private static final int ASPIRATION_WINDOW = SEE.PAWN_VAL / 3;
 
     static {
         NativeLibraryLoader.init();
@@ -185,22 +186,37 @@ public class SearchIteratorImpl implements SearchIterator {
         do {
             ++depth;
 
-            int alphaBound = -CHECKMATE;
-            int betaBound = CHECKMATE;
-            /*if (depth > 2) {
-                alphaBound = score - EvalMaterial.PAWN_VAL / 3;
-                betaBound = score + EvalMaterial.PAWN_VAL / 3;
-            }*/
+            boolean useAspirationWindow = depth > 2;
+            int alphaBound = useAspirationWindow ? Math.max(-CHECKMATE, score - ASPIRATION_WINDOW) : -CHECKMATE;
+            int betaBound = useAspirationWindow ? Math.min(CHECKMATE, score + ASPIRATION_WINDOW) : CHECKMATE;
+            int window = ASPIRATION_WINDOW;
 
-            SearchParameters parameters = new SearchParameters(depth, alphaBound, betaBound);
-            int itScore = search.search(board, undos, parameters, opts);
+            int itScore = search.search(board, undos,
+                    new SearchParameters(depth, alphaBound, betaBound), opts);
 
-            // TODO: this is a failed first attempt at aspiration windows, but I intend to revisit it
-            /*if ((score <= alphaBound || score >= betaBound) && !search.isStopped()) {
-                LOGGER.debug("# researching; score: " + score + ", a: " + alphaBound + ", b: " + betaBound);
-                parameters = new SearchParameters(depth, -INFINITY, INFINITY);
-                score = search.search(board, undos, parameters, opts);
-            }*/
+            // A failed aspiration search returns only a bound. Widen the failed side
+            // exponentially until the score fits inside the window.
+            while (useAspirationWindow && !search.isStopped()
+                    && (itScore <= alphaBound || itScore >= betaBound)) {
+                int oldAlpha = alphaBound;
+                int oldBeta = betaBound;
+                window = Math.min(CHECKMATE, window * 2);
+                if (itScore <= alphaBound) {
+                    alphaBound = Math.max(-CHECKMATE, alphaBound - window);
+                } else {
+                    betaBound = Math.min(CHECKMATE, betaBound + window);
+                }
+
+                // A legal root position cannot score beyond the mate bounds. This guard
+                // nevertheless guarantees termination if a Search implementation does.
+                if (alphaBound == oldAlpha && betaBound == oldBeta) {
+                    break;
+                }
+
+                LOGGER.debug("# aspiration retry; score: {}, a: {}, b: {}", itScore, alphaBound, betaBound);
+                itScore = search.search(board, undos,
+                        new SearchParameters(depth, alphaBound, betaBound), opts);
+            }
 
             // the search may or may not have a PV.  If it does, we can use it since the
             // last iteration's PV was tried first

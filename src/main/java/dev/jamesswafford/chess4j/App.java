@@ -21,6 +21,11 @@ import java.util.List;
 import java.util.Properties;
 
 public final class App {
+    static {
+        System.setProperty("chess4j.instance",
+                System.getProperty("chess4j.instance", Long.toString(ProcessHandle.current().pid())));
+    }
+
     private static final  Logger LOGGER = LogManager.getLogger(App.class);
 
     private App() { }

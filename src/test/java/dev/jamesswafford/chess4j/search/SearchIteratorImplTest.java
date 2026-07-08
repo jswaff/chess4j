@@ -88,7 +88,59 @@ public class SearchIteratorImplTest {
                 .search(eq(board), eq(undos), eq(new SearchParameters(2, -CHECKMATE, CHECKMATE)), any());
 
         verify(search, times(1))
-                .search(eq(board), eq(undos), eq(new SearchParameters(3, -CHECKMATE, CHECKMATE)), any());
+                .search(eq(board), eq(undos), eq(new SearchParameters(3, -33, 33)), any());
+    }
+
+    @Test
+    public void aspirationWindowWidensExponentiallyAfterFailHigh() throws Exception {
+        Search search = mock(Search.class);
+        when(search.getSearchStats()).thenReturn(new SearchStats());
+        when(search.getPv()).thenReturn(List.of(new Move(WHITE_PAWN, E2, E4)));
+        when(search.search(any(), any(), eq(new SearchParameters(1, -CHECKMATE, CHECKMATE)), any()))
+                .thenReturn(100);
+        when(search.search(any(), any(), eq(new SearchParameters(2, -CHECKMATE, CHECKMATE)), any()))
+                .thenReturn(100);
+        when(search.search(any(), any(), eq(new SearchParameters(3, 67, 133)), any()))
+                .thenReturn(133);
+        when(search.search(any(), any(), eq(new SearchParameters(3, 67, 199)), any()))
+                .thenReturn(150);
+
+        searchIterator.setSearch(search);
+        searchIterator.setEarlyExitOk(false);
+        searchIterator.setMaxDepth(3);
+        searchIterator.setPost(false);
+
+        Tuple2<List<Move>, Integer> result = searchIterator.findPvFuture(new Board(), new ArrayList<>()).get();
+
+        assertEquals(Integer.valueOf(150), result._2);
+        verify(search).search(any(), any(), eq(new SearchParameters(3, 67, 133)), any());
+        verify(search).search(any(), any(), eq(new SearchParameters(3, 67, 199)), any());
+    }
+
+    @Test
+    public void aspirationWindowWidensExponentiallyAfterFailLow() throws Exception {
+        Search search = mock(Search.class);
+        when(search.getSearchStats()).thenReturn(new SearchStats());
+        when(search.getPv()).thenReturn(List.of(new Move(WHITE_PAWN, E2, E4)));
+        when(search.search(any(), any(), eq(new SearchParameters(1, -CHECKMATE, CHECKMATE)), any()))
+                .thenReturn(100);
+        when(search.search(any(), any(), eq(new SearchParameters(2, -CHECKMATE, CHECKMATE)), any()))
+                .thenReturn(100);
+        when(search.search(any(), any(), eq(new SearchParameters(3, 67, 133)), any()))
+                .thenReturn(67);
+        when(search.search(any(), any(), eq(new SearchParameters(3, 1, 133)), any()))
+                .thenReturn(50);
+
+        searchIterator.setSearch(search);
+        searchIterator.setEarlyExitOk(false);
+        searchIterator.setMaxDepth(3);
+        searchIterator.setPost(false);
+
+        Tuple2<List<Move>, Integer> result = searchIterator.findPvFuture(new Board(), new ArrayList<>()).get();
+
+        assertEquals(Integer.valueOf(50), result._2);
+        verify(search).search(any(), any(), eq(new SearchParameters(3, 67, 133)), any());
+        verify(search).search(any(), any(), eq(new SearchParameters(3, 1, 133)), any());
     }
 
 
