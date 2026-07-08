@@ -191,8 +191,7 @@ public class SearchIteratorImpl implements SearchIterator {
             int betaBound = useAspirationWindow ? Math.min(CHECKMATE, score + ASPIRATION_WINDOW) : CHECKMATE;
             int window = ASPIRATION_WINDOW;
 
-            int itScore = search.search(board, undos,
-                    new SearchParameters(depth, alphaBound, betaBound), opts);
+            int itScore = search.search(board, undos, new SearchParameters(depth, alphaBound, betaBound), opts);
 
             // A failed aspiration search returns only a bound. Widen the failed side
             // exponentially until the score fits inside the window.
@@ -214,8 +213,7 @@ public class SearchIteratorImpl implements SearchIterator {
                 }
 
                 LOGGER.debug("# aspiration retry; score: {}, a: {}, b: {}", itScore, alphaBound, betaBound);
-                itScore = search.search(board, undos,
-                        new SearchParameters(depth, alphaBound, betaBound), opts);
+                itScore = search.search(board, undos, new SearchParameters(depth, alphaBound, betaBound), opts);
             }
 
             // the search may or may not have a PV.  If it does, we can use it since the
