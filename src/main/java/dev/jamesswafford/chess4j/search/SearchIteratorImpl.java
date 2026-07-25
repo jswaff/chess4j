@@ -186,7 +186,7 @@ public class SearchIteratorImpl implements SearchIterator {
         do {
             ++depth;
 
-            boolean useAspirationWindow = depth > 2;
+            boolean useAspirationWindow = depth > 1;
             int alphaBound = useAspirationWindow ? Math.max(-CHECKMATE, score - ASPIRATION_WINDOW) : -CHECKMATE;
             int betaBound = useAspirationWindow ? Math.min(CHECKMATE, score + ASPIRATION_WINDOW) : CHECKMATE;
             int window = ASPIRATION_WINDOW;

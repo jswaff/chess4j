@@ -85,7 +85,7 @@ public class SearchIteratorImplTest {
                 .search(eq(board), eq(undos), eq(new SearchParameters(1, -CHECKMATE, CHECKMATE)), any());
 
         verify(search, times(1))
-                .search(eq(board), eq(undos), eq(new SearchParameters(2, -CHECKMATE, CHECKMATE)), any());
+                .search(eq(board), eq(undos), eq(new SearchParameters(2, -33, 33)), any());
 
         verify(search, times(1))
                 .search(eq(board), eq(undos), eq(new SearchParameters(3, -33, 33)), any());
@@ -98,7 +98,7 @@ public class SearchIteratorImplTest {
         when(search.getPv()).thenReturn(List.of(new Move(WHITE_PAWN, E2, E4)));
         when(search.search(any(), any(), eq(new SearchParameters(1, -CHECKMATE, CHECKMATE)), any()))
                 .thenReturn(100);
-        when(search.search(any(), any(), eq(new SearchParameters(2, -CHECKMATE, CHECKMATE)), any()))
+        when(search.search(any(), any(), eq(new SearchParameters(2, 67, 133)), any()))
                 .thenReturn(100);
         when(search.search(any(), any(), eq(new SearchParameters(3, 67, 133)), any()))
                 .thenReturn(133);
@@ -124,7 +124,7 @@ public class SearchIteratorImplTest {
         when(search.getPv()).thenReturn(List.of(new Move(WHITE_PAWN, E2, E4)));
         when(search.search(any(), any(), eq(new SearchParameters(1, -CHECKMATE, CHECKMATE)), any()))
                 .thenReturn(100);
-        when(search.search(any(), any(), eq(new SearchParameters(2, -CHECKMATE, CHECKMATE)), any()))
+        when(search.search(any(), any(), eq(new SearchParameters(2, 67, 133)), any()))
                 .thenReturn(100);
         when(search.search(any(), any(), eq(new SearchParameters(3, 67, 133)), any()))
                 .thenReturn(67);
@@ -176,13 +176,13 @@ public class SearchIteratorImplTest {
 
         verify(search, times(1)).initialize();
 
-        verify(search, times(2)).getPv();
+        verify(search, times(3)).getPv();
 
         verify(search, times(1))
                 .search(eq(board), eq(undos), eq(new SearchParameters(1, -CHECKMATE, CHECKMATE)), any());
 
         verify(search, times(1))
-                .search(eq(board), eq(undos), eq(new SearchParameters(2, -CHECKMATE, CHECKMATE)), any());
+                .search(eq(board), eq(undos), eq(new SearchParameters(2, -33, 33)), any());
 
         verify(search, times(0))
                 .search(eq(board), eq(undos), eq(new SearchParameters(3, -CHECKMATE, CHECKMATE)), any());
