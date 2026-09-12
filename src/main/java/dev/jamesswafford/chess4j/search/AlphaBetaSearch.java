@@ -351,6 +351,29 @@ public class AlphaBetaSearch implements Search {
 
         searchStats.qnodes++;
 
+        // probe the hash table.  Any entry found is at least as deep as the search we'd otherwise do here, since
+        // quiescence search is effectively depth 0.  We only read from the table -- an entry is never stored from
+        // qsearch, since we don't do a full-width move search here.
+        TranspositionTableEntry tte = TTHolder.getInstance().getHashTable().probe(board);
+        if (tte != null) {
+            if (tte.getType() == LOWER_BOUND) {
+                if (tte.getScore() >= beta) {
+                    searchStats.failHighs++;
+                    searchStats.hashFailHighs++;
+                    return tte.getScore();
+                }
+            } else if (tte.getType() == UPPER_BOUND) {
+                if (tte.getScore() <= alpha) {
+                    searchStats.failLows++;
+                    searchStats.hashFailLows++;
+                    return tte.getScore();
+                }
+            } else if (tte.getType() == EXACT_SCORE) {
+                searchStats.hashExactScores++;
+                return tte.getScore();
+            }
+        }
+
         int standPat = Globals.getNeuralNetwork().map(nn -> nn.eval(board))
                 .orElseGet(() -> evaluator.evaluateBoard(board));
         if (standPat > alpha) {
