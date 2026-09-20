@@ -33,6 +33,10 @@ public class AlphaBetaSearch implements Search {
         NativeLibraryLoader.init();
     }
 
+    // the quiescence search is limited to (root depth * factor) plies, but never fewer than this many, so that
+    // even the shallowest iterations can resolve a capture and its recapture.
+    private static final int MIN_QUIESCENCE_DEPTH = 2;
+
     private final List<Move> pv;
     private final List<Move> lastPv;
     @Getter
@@ -46,6 +50,13 @@ public class AlphaBetaSearch implements Search {
     private MoveGenerator moveGenerator;
     @Setter
     private KillerMovesStore killerMovesStore;
+
+    // how many plies of quiescence search are allowed per ply of depth at the root
+    @Setter
+    private int quiescenceDepthFactor = 1;
+
+    // the ply limit for the quiescence search, derived from the depth of the search in progress
+    private int maxQuiescenceDepth;
 
     public AlphaBetaSearch() {
         this.pv = new ArrayList<>();
@@ -79,6 +90,7 @@ public class AlphaBetaSearch implements Search {
     @Override
     public int search(Board board, List<Undo> undos, SearchParameters searchParameters, SearchOptions opts) {
         killerMovesStore.clear();
+        maxQuiescenceDepth = Math.max(MIN_QUIESCENCE_DEPTH, searchParameters.getDepth() * quiescenceDepthFactor);
         boolean inCheck = BoardUtils.isPlayerInCheck(board);
         int score = search(board, undos, pv, true, 0, searchParameters.getDepth(),
                 searchParameters.getAlpha(), searchParameters.getBeta(), inCheck, false, opts);
@@ -134,7 +146,7 @@ public class AlphaBetaSearch implements Search {
 
         // base case
         if (depth == 0) {
-            return quiescenceSearch(board, undos, alpha, beta, opts);
+            return quiescenceSearch(board, undos, alpha, beta, 0, opts);
         }
 
         // this is an interior node
@@ -337,7 +349,7 @@ public class AlphaBetaSearch implements Search {
         return alpha;
     }
 
-    private int quiescenceSearch(Board board, List<Undo> undos, int alpha, int beta, SearchOptions opts) {
+    private int quiescenceSearch(Board board, List<Undo> undos, int alpha, int beta, int qply, SearchOptions opts) {
 
         assert(alpha < beta);
 
@@ -361,6 +373,13 @@ public class AlphaBetaSearch implements Search {
             alpha = standPat;
         }
 
+        // long capture sequences are rare, and playing them out to the bitter end is disproportionately expensive
+        // in the shallow iterations, so the quiescence search is bounded relative to the depth of the search being
+        // performed.  Once the limit is reached the static evaluation stands in for the remaining captures.
+        if (qply >= maxQuiescenceDepth) {
+            return alpha;
+        }
+
         MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator,
                 null, null, null, null, false, false);
         Move move;
@@ -382,7 +401,7 @@ public class AlphaBetaSearch implements Search {
                 continue;
             }
 
-            int val = -quiescenceSearch(board, undos, -beta, -alpha, opts);
+            int val = -quiescenceSearch(board, undos, -beta, -alpha, qply+1, opts);
             board.undoMove(undos.removeLast());
 
             // if the search was stopped just unwind back up
