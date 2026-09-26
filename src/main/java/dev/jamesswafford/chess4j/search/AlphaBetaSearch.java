@@ -51,10 +51,6 @@ public class AlphaBetaSearch implements Search {
     @Setter
     private KillerMovesStore killerMovesStore;
 
-    // how many plies of quiescence search are allowed per ply of depth at the root
-    @Setter
-    private int quiescenceDepthFactor = 1;
-
     // the ply limit for the quiescence search, derived from the depth of the search in progress
     private int maxQuiescenceDepth;
 
@@ -90,7 +86,7 @@ public class AlphaBetaSearch implements Search {
     @Override
     public int search(Board board, List<Undo> undos, SearchParameters searchParameters, SearchOptions opts) {
         killerMovesStore.clear();
-        maxQuiescenceDepth = Math.max(MIN_QUIESCENCE_DEPTH, searchParameters.getDepth() * quiescenceDepthFactor);
+        maxQuiescenceDepth = Math.max(MIN_QUIESCENCE_DEPTH, searchParameters.getDepth());
         boolean inCheck = BoardUtils.isPlayerInCheck(board);
         int score = search(board, undos, pv, true, 0, searchParameters.getDepth(),
                 searchParameters.getAlpha(), searchParameters.getBeta(), inCheck, false, opts);
