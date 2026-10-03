@@ -372,9 +372,9 @@ public class AlphaBetaSearch implements Search {
         // long capture sequences are rare, and playing them out to the bitter end is disproportionately expensive
         // in the shallow iterations, so the quiescence search is bounded relative to the depth of the search being
         // performed.  Once the limit is reached the static evaluation stands in for the remaining captures.
-        if (qply >= maxQuiescenceDepth) {
-            return alpha;
-        }
+        //if (qply >= maxQuiescenceDepth) {
+        //    return alpha;
+        //}
 
         MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator,
                 null, null, null, null, false, false);
