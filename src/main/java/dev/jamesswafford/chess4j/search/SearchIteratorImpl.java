@@ -409,6 +409,11 @@ public class SearchIteratorImpl implements SearchIterator {
                 df2.format(fh1), df.format(failHigh1stPct), df2.format(fh2), df.format(failHigh2ndPct),
                 df2.format(fh3), df.format(failHigh3rdPct), df2.format(fh4), df.format(failHigh4thPct));
 
+        // null move metrics
+        double nullMvFailHighPct = stats.nullMvFailHighs / (stats.nullMvAttempts / 100.0);
+        LOGGER.info("# null move attempts: {}, fail highs: {} ({}%)",
+                df2.format(stats.nullMvAttempts), df2.format(stats.nullMvFailHighs), df.format(nullMvFailHighPct));
+
         // effective branching factor metrics
         StringBuilder sb = new StringBuilder();
         double totalEbf = 0.0;

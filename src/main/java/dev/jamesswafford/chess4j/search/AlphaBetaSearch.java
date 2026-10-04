@@ -185,8 +185,10 @@ public class AlphaBetaSearch implements Search {
             // doing nothing."  This isn't entirely sound, but on the whole is a huge time saver.  We avoid the null
             // move when in check, and during zugzwang positions where making a move is actually harmful.
             // Since we are only trying to determine if the position will fail high or not, we search with a
-            // minimal search window.
-            if (!first && !inCheck && nullMoveOk && depth >= 3 && !ZugzwangDetector.isZugzwang(board)) {
+            // minimal search window.  If we're not already at or above beta on material, the null move is
+            // unlikely to fail high, so don't waste the effort.
+            if (!first && !inCheck && nullMoveOk && depth >= 3 && !ZugzwangDetector.isZugzwang(board) &&
+                    Eval.eval(Globals.getEvalWeights(), board, true, false) >= beta) {
 
                 Square nullEp = board.clearEPSquare();
                 int null50 = board.getFiftyCounter();
@@ -201,6 +203,7 @@ public class AlphaBetaSearch implements Search {
                     nullDepth = 1;
                 }
 
+                searchStats.nullMvAttempts++;
                 int nullScore = -search(board, undos, new ArrayList<>(), false, ply+1, nullDepth, -beta,
                         -beta+1,false, false, opts);
 
