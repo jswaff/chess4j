@@ -1,6 +1,7 @@
 package dev.jamesswafford.chess4j.search;
 
 import dev.jamesswafford.chess4j.board.Board;
+import dev.jamesswafford.chess4j.board.Color;
 import dev.jamesswafford.chess4j.board.Move;
 import dev.jamesswafford.chess4j.io.MoveParser;
 import dev.jamesswafford.chess4j.movegen.MagicBitboardMoveGenerator;
@@ -272,6 +273,40 @@ public class MoveOrdererTest {
         }
 
         assertEquals(moves2, moves);
+    }
+
+    @Test
+    public void nonCapturesPlayedInHistoryOrder() {
+        Board board = new Board();
+
+        List<Move> moves = MagicBitboardMoveGenerator.genLegalMoves(board);
+        assertEquals(20, moves.size());
+
+        // reward two moves from the end of the list, and penalize the first move
+        Move best = moves.get(19);
+        Move secondBest = moves.get(18);
+        Move worst = moves.getFirst();
+        HistoryStore history = History.getInstance();
+        history.clear();
+        history.addCutoff(Color.WHITE, best, 6);
+        history.addCutoff(Color.WHITE, secondBest, 3);
+        history.addFailure(Color.WHITE, worst, 3);
+
+        MoveOrderer mo = new MoveOrderer(board, moveGenerator, null, null, null,
+                null, history, true, true);
+        List<Move> moves2 = new ArrayList<>();
+        for (int i=0;i<20;i++) {
+            moves2.add(mo.selectNextMove());
+        }
+        assertNull(mo.selectNextMove());
+
+        // the rewarded moves come first and the penalized move comes last
+        assertEquals(best, moves2.get(0));
+        assertEquals(secondBest, moves2.get(1));
+        assertEquals(worst, moves2.get(19));
+        assertEquals(new HashSet<>(moves), new HashSet<>(moves2));
+
+        history.clear();
     }
 
     @Test

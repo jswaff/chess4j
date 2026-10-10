@@ -22,11 +22,13 @@ public class MoveOrderer {
     private final boolean generateNonCaptures;
     private final boolean playBadCaptures;
     private final Set<Move> specialMovesPlayed;
+    private final HistoryStore historyStore;
 
     private Move[] captures;
     private int capturesIndex;
     private Integer[] captureMvvLvaScores;
     private Move[] noncaptures;
+    private int[] noncaptureHistoryScores;
     private int noncapturesIndex;
     private Move[] badcaptures;
     private Integer[] badCaptureSeeScores;
@@ -39,6 +41,12 @@ public class MoveOrderer {
     public MoveOrderer(Board board, MoveGenerator moveGenerator, Move pvMove, Move hashMove, Move killer1,
                        Move killer2, boolean generateNonCaptures, boolean playBadCaptures)
     {
+        this(board, moveGenerator, pvMove, hashMove, killer1, killer2, null, generateNonCaptures, playBadCaptures);
+    }
+
+    public MoveOrderer(Board board, MoveGenerator moveGenerator, Move pvMove, Move hashMove, Move killer1,
+                       Move killer2, HistoryStore historyStore, boolean generateNonCaptures, boolean playBadCaptures)
+    {
         this.board = board;
         this.moveGenerator = moveGenerator;
 
@@ -49,6 +57,7 @@ public class MoveOrderer {
         this.generateNonCaptures = generateNonCaptures;
         this.playBadCaptures = playBadCaptures;
         this.specialMovesPlayed = new HashSet<>();
+        this.historyStore = historyStore;
     }
 
     public Move selectNextMove() {
@@ -154,10 +163,13 @@ public class MoveOrderer {
                 nextMoveOrderStage = MoveOrderStage.NONCAPS;
                 List<Move> myNoncaps = moveGenerator.generatePseudoLegalNonCaptures(board);
                 noncaptures = myNoncaps.toArray(new Move[0]);
+                noncaptureHistoryScores = new int[noncaptures.length];
                 // avoid playing special moves again
                 for (int i = 0; i < noncaptures.length; i++) {
                     if (specialMovesPlayed.contains(noncaptures[i])) {
                         noncaptures[i] = null;
+                    } else if (historyStore != null) {
+                        noncaptureHistoryScores[i] = historyStore.getScore(board.getPlayerToMove(), noncaptures[i]);
                     }
                 }
 
@@ -165,10 +177,12 @@ public class MoveOrderer {
             }
 
             if (nextMoveOrderStage == MoveOrderStage.NONCAPS) {
-                int ind = getIndexOfFirstNonCapture(noncapturesIndex);
+                int ind = getIndexOfBestNonCaptureByHistory(noncapturesIndex);
                 if (ind != -1) {
-                    noncapturesIndex = ind + 1;
-                    return noncaptures[ind];
+                    // put the best move at the top of the list
+                    swap(noncaptures, noncapturesIndex, ind);
+                    swapScores(noncaptureHistoryScores, noncapturesIndex, ind);
+                    return noncaptures[noncapturesIndex++];
                 }
                 nextMoveOrderStage = MoveOrderStage.BAD_CAPTURES;
             }
@@ -188,24 +202,35 @@ public class MoveOrderer {
         return null;
     }
 
-    private int getIndexOfFirstNonCapture(int startIndex) {
-        int index = -1;
+    // returns the index of the non-capture with the highest history score.  Ties go to the earlier move, so with no
+    // history information the moves are played in generation order.
+    private int getIndexOfBestNonCaptureByHistory(int startIndex) {
+        int bestIndex = -1;
+        int bestScore = Integer.MIN_VALUE;
 
         for (int i=startIndex;i<noncaptures.length;i++) {
             Move m = noncaptures[i];
             if (m != null) {
                 assert(m.captured()==null);
                 assert(m.promotion()==null);
-                index = i;
-                break;
+                if (noncaptureHistoryScores[i] > bestScore) {
+                    bestIndex = i;
+                    bestScore = noncaptureHistoryScores[i];
+                }
             }
         }
 
-        return index;
+        return bestIndex;
     }
 
     private void swapScores(Integer[] arr, int ind1, int ind2) {
         Integer tmp = arr[ind1];
+        arr[ind1] = arr[ind2];
+        arr[ind2] = tmp;
+    }
+
+    private void swapScores(int[] arr, int ind1, int ind2) {
+        int tmp = arr[ind1];
         arr[ind1] = arr[ind2];
         arr[ind2] = tmp;
     }

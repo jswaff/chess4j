@@ -50,6 +50,8 @@ public class AlphaBetaSearch implements Search {
     private MoveGenerator moveGenerator;
     @Setter
     private KillerMovesStore killerMovesStore;
+    @Setter
+    private HistoryStore historyStore;
 
     // the ply limit for the quiescence search, derived from the depth of the search in progress
     private int maxQuiescenceDepth;
@@ -63,6 +65,7 @@ public class AlphaBetaSearch implements Search {
         this.evaluator = new Eval();
         this.moveGenerator = new MagicBitboardMoveGenerator();
         this.killerMovesStore = KillerMoves.getInstance();
+        this.historyStore = History.getInstance();
     }
 
     public List<Move> getPv() { return Collections.unmodifiableList(pv); }
@@ -71,6 +74,7 @@ public class AlphaBetaSearch implements Search {
     public void initialize() {
         lastPv.clear();
         searchStats.initialize();
+        historyStore.clear();
     }
 
     @Override
@@ -227,9 +231,12 @@ public class AlphaBetaSearch implements Search {
         Move pvMove = first && lastPv.size() > ply ? lastPv.get(ply) : null;
         Move hashMove = tte == null ? null : tte.getMove();
         MoveOrderer moveOrderer = new MoveOrderer(board, moveGenerator,
-                pvMove, hashMove, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply),
+                pvMove, hashMove, killerMovesStore.getKiller1(ply), killerMovesStore.getKiller2(ply), historyStore,
                 true, true);
 
+        // quiet moves searched so far that didn't cause a cutoff, to be penalized in the history table if a later
+        // quiet move does
+        List<Move> quietMovesSearched = new ArrayList<>();
         boolean canFutilityPrune = !inCheck && depth < 3 && beta < (CHECKMATE - 500);
         int material = canFutilityPrune ? Eval.eval(Globals.getEvalWeights(), board, true, false) : 0;
 
@@ -312,8 +319,15 @@ public class AlphaBetaSearch implements Search {
                 TTHolder.getInstance().getHashTable().store(board, LOWER_BOUND, beta, depth, move);
                 if (move.captured()==null && move.promotion()==null) {
                     killerMovesStore.addKiller(ply, move);
+                    historyStore.addCutoff(board.getPlayerToMove(), move, depth);
+                    for (Move quietMove : quietMovesSearched) {
+                        historyStore.addFailure(board.getPlayerToMove(), quietMove, depth);
+                    }
                 }
                 return val;
+            }
+            if (move.captured()==null && move.promotion()==null) {
+                quietMovesSearched.add(move);
             }
             if (val > alpha) {
                 alpha = val;
