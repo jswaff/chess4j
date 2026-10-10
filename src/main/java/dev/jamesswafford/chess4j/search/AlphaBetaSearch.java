@@ -193,14 +193,16 @@ public class AlphaBetaSearch implements Search {
                 board.setFiftyCounter(0); // consider the null move irreversible
                 board.swapPlayer();
 
-                // set the reduced depth.  For now we are using a static R=3, except near the leaves.  It's important
-                // to ensure there is at least one ply of full width depth remaining, since we aren't doing anything
-                // with checks in the qsearch.
-                int nullDepth = depth - 4; // R = 3
+                // set the reduced depth.  The reduction starts at R=3 and grows by one ply for every 6 plies of
+                // remaining depth, except near the leaves.  It's important to ensure there is at least one ply of
+                // full width depth remaining, since we aren't doing anything with checks in the qsearch.
+                int R = 3 + depth / 6;
+                int nullDepth = depth - 1 - R;
                 if (nullDepth < 1) {
                     nullDepth = 1;
                 }
 
+                searchStats.nullMvAttempts++;
                 int nullScore = -search(board, undos, new ArrayList<>(), false, ply+1, nullDepth, -beta,
                         -beta+1,false, false, opts);
 

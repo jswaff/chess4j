@@ -15,7 +15,7 @@ public class SearchStats {
     public long failHighs, failLows, draws;
     public Map<Integer,Long> failHighByMove = new HashMap<>();
     public long hashFailHighs, hashFailLows, hashExactScores;
-    public long nullMvFailHighs;
+    public long nullMvAttempts, nullMvFailHighs;
 
     public SearchStats() {
         initialize();
@@ -37,6 +37,7 @@ public class SearchStats {
         hashFailHighs = 0;
         hashFailLows = 0;
         hashExactScores = 0;
+        nullMvAttempts = 0;
         nullMvFailHighs = 0;
     }
 
@@ -53,6 +54,7 @@ public class SearchStats {
         this.hashFailHighs = searchStats.hashFailHighs;
         this.hashFailLows = searchStats.hashFailLows;
         this.hashExactScores = searchStats.hashExactScores;
+        this.nullMvAttempts = searchStats.nullMvAttempts;
         this.nullMvFailHighs = searchStats.nullMvFailHighs;
     }
 
